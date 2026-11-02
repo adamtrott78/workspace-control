@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: ab616b27d0cf0939d7dc0a227fdc188656e8c749
+- Remote checkpoint: f8057d2925a329b773b312b62e897e4830e9d54c
 - Remote verified: true
 
 ### research-engine
@@ -43,28 +43,20 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-OPERATOR-ONLY V3 VERIFIER-STACK REFRESH + ROOT RESUME: Research GPU containment repair is now proven durable by diagnose receipt 6572100953: legacy workspace-ci-controller@research-engine-gpu.service inactive/dead + UnitFileState=disabled, active_project_units=[], active_count=0, pending_count=0, reset_pending=[], recovery_state_conflict=false. The latest root activation failed only because the installed v3 reconciler still used base-manifest-only verify_installed() and rejected the already-accepted live controller override; provisioner never started and reconciler is failed/inactive. Exact corrected head ab616b27d0cf0939d7dc0a227fdc188656e8c749 passed Workspace Control Validation 41410555713 SUCCESS. From one exact clean checkout of that validated head, run scripts/lambda_ci_v3_repair_research_gpu_and_resume_roots_v1.py once as root with --expected-head=ab616b27d0cf0939d7dc0a227fdc188656e8c749. The wrapper re-proves Research GPU containment, transactionally refreshes only lambda_ci_v3_reconciler.py + lambda_ci_v3_root_activation.py with exact root-owned ACTIVE override receipts, self-verifies the installed reconciler against immutable manifest + controller/helper/reconciler override attestations, creates a NEW ACTIVATE_V3_ROOT_SERVICES authority, invokes the installed activator, then post-attests Research GPU inactive+disabled and both v3 roots active/running. It never mutates the accepted controller override, any v3 class controller, workflow/route/scale-set state, Research CPU, PADataset, or workspace-control v2. After return, independently attest live state through Workspace Shell before any PADataset canary.
+ROOT RECOVERY COMPLETE; PREPARE PADATASET CPU CANARY. Live authority cbada5b8-4a9d-4a61-bae2-1cfc621a0960 completed V3_ROOT_SERVICES_ACTIVATION=PASS. Independent Workspace Shell evidence after activation: workspace-ci-v3-reconciler.service ActiveState=active/SubState=exited with V3_INSTALLED_GENERATION_VERIFY=PASS (healthy Type=oneshot/RemainAfterExit semantics); workspace-ci-v3-provisioner.service active/running; workspace-control-control-small-v1 class controller inactive/dead. Fresh post-activation Research GPU diagnose receipt 6572239135 proves legacy research-engine GPU controller inactive/dead + disabled, active_project_units=[], active_count=0, pending_count=0, reset_pending=[], recovery_state_conflict=false. The wrapper's final ERROR was a false-negative health predicate that incorrectly required the reconciler oneshot to be running; exact fix f8057d2925a329b773b312b62e897e4830e9d54c passed Workspace Control Validation 41411117818 SUCCESS and also invokes the verifier updater with python -B to prevent sudo-owned repository __pycache__ cleanup residue. Do NOT rerun root activation. Next: prepare padataset-cpu-public-v1 canary against accepted controller source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa, preserving separate fresh ACTIVATE_ONE_V3_CANARY authority and requiring the exact generated owner-only migration workflow blob on PADataset main before any live canary transaction.
 
 ## Remaining work
 
-- Execute scripts/lambda_ci_v3_repair_research_gpu_and_resume_roots_v1.py once as root from exact clean checkout ab616b27d0cf0939d7dc0a227fdc188656e8c749. It idempotently re-proves Research GPU containment, refreshes only the verifier stack under exact override receipts, creates a fresh ACTIVATE_V3_ROOT_SERVICES authority, and invokes the installed v3 root activator.
-- After the wrapper returns, independently attest legacy Research GPU inactive+disabled, v3 reconciler/provisioner active/running, accepted controller/helper/reconciler effective generation valid, all v3 class controllers inactive, no transient/resource claims, and no Research execution units.
-- Complete Workspace Shell reboot hardening from draft PR #592 and establish narrow standing/reviewed helper authority so future exact GitRunner root operations do not require operator sudo relay.
-- Reactivate the already-installed v3 reconciler and provisioner transactionally; prove effective installed-generation/controller+helper override attestation, root services healthy, non-target class controllers inactive, no transient/resource claims, and Research GPU containment preserved.
-- Complete Workspace Shell reboot hardening from draft PR #592: persist the /run/workspace-shell-control tmpfiles rule and boot-enable only the accepted recovery-plane services with emergency disable preserved.
-- Replace repeated operator sudo/bootstrap relay with narrowly reviewed Workspace Shell standing/helper authority for exact GitRunner maintenance/reactivation/canary/cutover operations; never expose generic root shell/systemctl and do not make model reasoning itself an authority source.
-- Prepare and execute migration-order #2 padataset-cpu-public-v1 canary under a NEW separately validated one-shot ACTIVATE_ONE_V3_CANARY authority.
-- Prepare and execute migration-order #3 padataset-gpu-single-public-v1 canary under its own NEW separately validated one-shot authority.
-- After accepted active-class canaries, perform the single production generation cutover: drain/quiesce v2, retarget accepted workflows to exact v3 scale-set names, start only accepted production v3 class controllers, prove exact production serviceability/cleanup, then mark corresponding v2 controllers/scale sets DRAINING -> RETIRED.
-- Preserve old installed bytes/config/state for the rollback window and remove legacy v2 config/state only in later cleanup after retirement preconditions hold.
-- Keep research-cpu-public-v1 separately gated; keep all Research GPU-derived classes inherited-contained and NO_BY_DEFAULT absent separate containment-recovery authority.
-- Keep Research Engine PR #283 draft/proposal-only until separate default-branch producer-cutover authority.
+- Stage/review the exact generated PADataset CPU migration canary workflow `.github/workflows/workspace-ci-v3-migration-canary-padataset-cpu-public-v1.yml` in adamtrott78/PADataset; generated blob must bind the accepted controller/canary source generation.
+- Prepare and validate a padataset-cpu-public-v1 live operator using accepted controller source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa, exact canary workflow blob, repository-scoped PADataset credential group, and the existing generation-exclusion transaction/rollback protocol.
+- Only after the exact workflow is on PADataset main and the operator preflights cleanly, consume one fresh ACTIVATE_ONE_V3_CANARY authority, run the CPU canary, rollback generation exclusion to exact v2 prestate, and independently attest root/class/resource/Research-GPU state.
+- Then repeat the same separately-authorized process for padataset-gpu-single-public-v1.
+- After PADataset CPU+GPU canaries are accepted, perform controlled production v3 cutover and v2 retirement; then resume workspace-semantic-execution-migration-v1 umbrella work.
 
 ## Blockers / gates
 
-- Installed workspace-ci-v3-reconciler.service is failed because its old verify_installed() rejects the accepted controller binary override as base-manifest drift. Exact logs show managed artifact digest drift at /opt/workspace-ci/v3/controller/lambda-ci-controller-v3.
-- The validated verifier-stack live updater/root-resume wrapper at ab616b27d0cf0939d7dc0a227fdc188656e8c749 / run 41410555713 has not yet executed live. Workspace Shell privileged-helper registry remains empty, so this single root transaction is operator-only.
-- Further live v3 migration requires a fresh separately bound one-shot canary authority per class, beginning with padataset-cpu-public-v1.
+- PADataset CPU canary workflow is not currently present on adamtrott78/PADataset main; the exact owner-only migration workflow must be staged/reviewed and land on the owning default branch before live dispatch.
+- Live padataset-cpu-public-v1 still requires its own fresh exact-bound ACTIVATE_ONE_V3_CANARY authority; no authority from root activation or the accepted workspace-control canary may be reused.
 - Research CPU remains separately gated; all Research GPU-derived v3 classes remain inherited-contained and NO_BY_DEFAULT; Research Engine PR #283 remains proposal-only.
 
 ## Fresh-chat initialization
