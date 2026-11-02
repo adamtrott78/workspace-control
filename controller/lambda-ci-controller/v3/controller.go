@@ -420,14 +420,25 @@ func containsString(values []string, wanted string) bool {
 	return false
 }
 
-func (s *v3Scaler) verifyPolicyRecord(record jobRecord) error {
-	if record.ControllerPolicySHA256 != s.policy.ControllerPolicySHA256 {
-		return fmt.Errorf(
-			"durable controller-policy binding mismatch for runner_request_id=%d",
-			record.RunnerRequestID,
-		)
+func (s *v3Scaler) currentPolicyRecord(record jobRecord) (bool, error) {
+	if record.ControllerPolicySHA256 == s.policy.ControllerPolicySHA256 {
+		return true, nil
 	}
-	return nil
+	if record.terminal() {
+		s.logger.Info(
+			"Ignoring terminal durable record from prior controller-policy generation",
+			slog.Int64("runner_request_id", record.RunnerRequestID),
+			slog.String("record_controller_policy_sha256", record.ControllerPolicySHA256),
+			slog.String("current_controller_policy_sha256", s.policy.ControllerPolicySHA256),
+			slog.String("state", record.State),
+		)
+		return false, nil
+	}
+	return false, fmt.Errorf(
+		"durable controller-policy binding mismatch for nonterminal runner_request_id=%d state=%s",
+		record.RunnerRequestID,
+		record.State,
+	)
 }
 
 func (s *v3Scaler) outstandingAcquired(records []jobRecord) int {
@@ -480,10 +491,11 @@ func (s *v3Scaler) processAvailable(
 			return fmt.Errorf("read controller ledger: %w", err)
 		}
 		if ok {
-			if err := s.verifyPolicyRecord(existing); err != nil {
+			current, err := s.currentPolicyRecord(existing)
+			if err != nil {
 				return err
 			}
-			if existing.State != "ADMITTED" {
+			if !current || existing.State != "ADMITTED" {
 				continue
 			}
 			requestIDs = append(requestIDs, job.RunnerRequestID)
@@ -677,8 +689,12 @@ func (s *v3Scaler) processAssigned(
 			continue
 		}
 
-		if err := s.verifyPolicyRecord(record); err != nil {
+		current, err := s.currentPolicyRecord(record)
+		if err != nil {
 			return err
+		}
+		if !current {
+			continue
 		}
 		if !record.terminal() && record.State == "ADMITTED" {
 			record.State = "ACQUIRED"
@@ -702,8 +718,12 @@ func (s *v3Scaler) processLifecycle(
 	}
 	byRunner := make(map[string]jobRecord, len(records))
 	for _, record := range records {
-		if err := s.verifyPolicyRecord(record); err != nil {
+		current, err := s.currentPolicyRecord(record)
+		if err != nil {
 			return err
+		}
+		if !current {
+			continue
 		}
 		byRunner[record.RunnerName] = record
 	}
@@ -968,8 +988,12 @@ func (s *v3Scaler) generateAndLaunch(ctx context.Context, record *jobRecord) err
 func (s *v3Scaler) progressReserved(ctx context.Context, records []jobRecord) error {
 	for i := range records {
 		record := records[i]
-		if err := s.verifyPolicyRecord(record); err != nil {
+		current, err := s.currentPolicyRecord(record)
+		if err != nil {
 			return err
+		}
+		if !current {
+			continue
 		}
 		if err := s.recoverOne(ctx, &record); err != nil {
 			return err
