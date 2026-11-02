@@ -280,7 +280,7 @@
     },
     {
       "id": "semantic_core_and_extension_contract",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-control",
       "selected_executor": null,
       "selected_surface": null,
@@ -296,8 +296,20 @@
         "authority firewall invariants",
         "unseen-workflow extension fixture"
       ],
-      "validation": [],
-      "resume_condition": "A new domain can be added without kernel change and without manufacturing authority."
+      "validation": [
+        {
+          "check": "Previously unseen workflow/domain extension proof",
+          "result": "PASS",
+          "evidence": [
+            "PR #590 exact head 8c0a0d4847a645a6ef8641ae7a10211367cbec4d passed Workspace Control Validation run 41524244560 SUCCESS.",
+            "The synthetic media_localization extension was absent from the core example extension set when the core was authored.",
+            "The extension validates using the existing generic extension metadata and workflow projection contracts with no core type/dispatch branch.",
+            "Its project/source-of-truth boundary remains external and rebuildable, authority_refs are empty, and deterministic tests reject attempts to create Permission or otherwise widen authority.",
+            "Unknown extensions remain UNSUPPORTED_EXTENSION_FAIL_CLOSED."
+          ]
+        }
+      ],
+      "resume_condition": "Open-world extension proof is satisfied for one previously unmodeled synthetic workflow. Complete remaining core acceptance tests and incorporate benchmark/independent-review evidence before architecture freeze."
     },
     {
       "id": "executor_resource_router_design",
@@ -714,6 +726,44 @@
         "Defines evaluator-only seed/oracle/nonce and public pre-run commitment.",
         "Strong claims remain blocked until evaluator secrets are stored outside worker-readable GitHub state."
       ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-extension-media-localization.v0.1.json",
+      "state": "VALIDATED_UNSEEN_EXTENSION_FIXTURE",
+      "role": "previously unmodeled open-world extension and generic workflow projection",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned extension fixture",
+      "review_requirement": "none for structural proof; broader architecture freeze still requires benchmark + independent review",
+      "evidence": [
+        "Not present in core example_extensions.",
+        "Validated with no core-kernel branch, no closed domain enum addition, and no authority widening at Validation 41524244560."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/extension_contract_v1.py",
+      "state": "VALIDATED_EXTENSION_CONTRACT_CHECKER",
+      "role": "deterministic structural/authority validator for versioned semantic extensions",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned validator revision",
+      "review_requirement": "core contract review before freeze",
+      "evidence": [
+        "Requires generic extension metadata and workflow fields.",
+        "Rejects permission creation, prohibition removal, review satisfaction, authority widening, and executable fallback guessing."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/unseen_extension_media_localization_v1.json",
+      "state": "VALIDATED_OPEN_WORLD_PROOF",
+      "role": "S4 open-world generalization acceptance evidence",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "new versioned unseen-extension proof if core contract changes",
+      "review_requirement": "rerun after incompatible core revision",
+      "evidence": [
+        "Exact head 8c0a0d4847a645a6ef8641ae7a10211367cbec4d / Workspace Control Validation 41524244560 SUCCESS."
+      ]
     }
   ],
   "validation": [
@@ -810,10 +860,19 @@
         "Changed-task validation, fixture/evaluator regression tests, taxonomy tests, unit regression, pinned Lambda controller validation, and full integration contracts all passed.",
         "No A-E model arm result is claimed from this implementation checkpoint."
       ]
+    },
+    {
+      "check": "Unseen workflow extension architecture-freeze gate",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head 8c0a0d4847a645a6ef8641ae7a10211367cbec4d passed Workspace Control Validation run 41524244560 SUCCESS.",
+        "One previously unmodeled domain/workflow extension was added without core-kernel modification, closed domain enum expansion, authority leakage, or fallback guessing.",
+        "This clears the unseen-extension proof gate only; the resumable-reasoning benchmark and independent architecture review remain architecture-freeze blockers."
+      ]
     }
   ],
   "blockers": [
-    "Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.",
+    "Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is now validated.",
     "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.",
     "Scored resumable-reasoning arms require oracle-unexposed clean model sessions. This authoring chat has read evaluator-only oracle truth and cannot be counted as a scored arm; the current connected-tool surface does not provide a programmatic clean ChatGPT-session spawn primitive.",
     "Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated."
@@ -826,14 +885,13 @@
     "Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.",
     "Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.",
     "Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.",
-    "Prove at least one previously unseen workflow/domain extension can be added without core-kernel changes, closed domain enums, or authority leakage.",
     "Freeze and implement the smallest stable semantic core, versioned domain/workflow extension contract, durable ReasoningProcess, executor/provider/model/surface/harness capability model, resource/quota router, task-tree/lease/CAS semantics, and evidence-based escalation policy.",
     "Design the human-in-the-loop orchestration surface so launching/resuming many temporary Instant workers is trivial for the operator while all real scheduling/ownership/recovery state remains durable and machine-managed; browser/tab mechanics are a transport concern, not the durable scheduler.",
     "Migrate representative workflows incrementally across: automated research/evaluate/iterate loops; systems engineering and coding; data science/ML experiments; PADataset/research-engine; paper drafting/evidence/citation pipelines; slide/presentation creation; tutoring and homework/assignment generation for MTH602/EAS501/CIS560; generic document/artifact production; GitRunner/Lambda operations; Workspace Shell maintenance; and future workflows not known today.",
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "Validate an evaluator-only runtime storage boundary for benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py so oracle/seed/nonce material cannot be read by scored workers. Then run the non-claim-bearing protocol_screening stage from benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json across A-E and P0-P3 using clean oracle-unexposed sessions. If screening exposes any fixture/packet/harness defect, revise and re-screen; otherwise freeze the protocol and execute at least three independent replicates for the declared paired comparisons. This control chat remains ineligible as a scored worker for fixtures whose oracle it has seen or generated.",
+  "next_safe_action": "The unseen-workflow extension gate is now cleared. Continue the resumable-reasoning benchmark by validating an evaluator-only runtime storage boundary for hidden-ephemeral oracle/seed/nonce material, then execute the non-claim-bearing A-E × P0-P3 protocol-screening runset in clean oracle-unexposed sessions. Separately obtain an independent architecture review before freeze. This control chat must not be counted as a scored reasoning arm for fixtures whose oracle it has seen or generated.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
   "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
