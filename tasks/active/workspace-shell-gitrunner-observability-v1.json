@@ -6,7 +6,7 @@
   "goal": "Widen Workspace Shell only enough to diagnose GitRunner/control-plane incidents without operator terminal relay: add exact read-only systemd inspection for selected Workspace CI controller/maintenance/v3 units and design a sanitized read-only maintenance-receipt interface, while preserving the existing ban on generic shell, generic systemctl, GitHub credentials, maintenance-socket mutation authority, sibling-project execution authority, and privileged helper widening.",
   "execution_topology": "remote_only",
   "workflow": null,
-  "current_stage": "repository_implementation_and_validation",
+  "current_stage": "fresh_chat_schema_acceptance_and_gitrunner_incident_diagnosis",
   "acceptance_criteria": [
     "Workspace Shell can read systemd state for an exact allowlist of Workspace CI controller/maintenance/v3 units needed to diagnose GitRunner serviceability.",
     "Unit inspection remains read-only fixed-property systemctl show; no restart/start/stop/enable verbs are introduced.",
@@ -34,7 +34,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-gitrunner-observability-v1",
-        "checkpoint_sha": "24726e194af7d1dbe379b8c49c5eaf94a39ab606",
+        "checkpoint_sha": "1ca44e019fed66a55f2b9985d9d04397ba37b668",
         "verified": true
       },
       "local": null,
@@ -55,7 +55,7 @@
   "stages": [
     {
       "id": "repository_implementation_and_validation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github+heartbeat",
@@ -91,18 +91,43 @@
         }
       ],
       "resume_condition": "Exact-head validation green and live-update procedure is bounded/reviewed."
+    },
+    {
+      "id": "fresh_chat_schema_acceptance_and_gitrunner_incident_diagnosis",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "workspace-shell+github+heartbeat",
+      "inputs": [
+        "live Workspace Shell observability update at PR #591 head 1ca44e019fed66a55f2b9985d9d04397ba37b668",
+        "legacy queued Lambda validation run 41378944347",
+        "maintenance diagnose comment 6567987093",
+        "maintenance restart comment 6567995530"
+      ],
+      "outputs": [
+        "bounded legacy controller journal evidence",
+        "maintenance controller journal evidence",
+        "maintenance diagnose/restart receipts",
+        "exact GitRunner root cause and bounded repair recommendation/evidence"
+      ],
+      "validation": [],
+      "resume_condition": "Fresh ChatGPT tool schema exposes unit_logs_redacted and maintenance_receipt and the queued legacy-lane failure is diagnosed from direct host/controller evidence."
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Run exact-head hosted validation for the transactional updater candidate.",
-    "Retarget PR #591 back to workspace-shell-mcp-v1-current-main after validation.",
-    "Apply one exact reviewed updater command on Lambda because the currently installed Workspace Shell cannot self-widen its root-owned runtime/config.",
-    "After live update, inspect the legacy workspace-control controller and maintenance units directly through Workspace Shell.",
-    "Use the new maintenance receipt/log visibility to finish the GitRunner incident diagnosis.",
-    "Keep GitRunner v3 activation/canary authority separate."
+  "blockers": [
+    "The current ChatGPT conversation cached the pre-update MCP input schema, so it cannot call the newly added unit_logs_redacted or maintenance_receipt operations even though the live server's local MCP tool-schema smoke passed. A fresh chat is required for schema rediscovery.",
+    "No additional GitRunner canary/cutover authority is implied by this observability task."
   ],
-  "next_safe_action": "Run full hosted validation on the final updater candidate. If green, retarget PR #591 back to the accepted Workspace Shell branch and invoke the updater manually on Lambda with the exact validated head; no plugin recreation or recommissioning.",
+  "remaining_work": [
+    "Fresh-chat MCP schema rediscovery for unit_logs_redacted and maintenance_receipt.",
+    "Read bounded legacy workspace-control controller journal and maintenance controller journal directly through Workspace Shell.",
+    "Read maintenance receipts for comments 6567987093 and 6567995530.",
+    "Determine why the legacy controller is ACTIVE/RUNNING while run 41378944347 remains queued with no runner assignment.",
+    "Record exact root cause and bounded repair/serviceability evidence on GitRunner PR #572.",
+    "Keep any GitRunner mutation/canary authority in the GitRunner task; observability remains diagnostic.",
+    "After diagnosis, hand control back to umbrella semantic-execution task rather than treating this incident as the whole program."
+  ],
+  "next_safe_action": "Start a fresh ChatGPT conversation with GitHub + Heartbeat + Workspace Shell. Recover this task plus the GitRunner task and umbrella semantic-execution task. Use task_id workspace-shell-mcp-v1 for live Workspace Shell inspect calls, then immediately read unit_logs_redacted for the legacy workspace-control controller and maintenance controller and maintenance_receipt for comments 6567987093 and 6567995530. Persist the exact diagnosis to PR #572 / GitRunner task. Do not stop after incident repair: return to umbrella task workspace-semantic-execution-migration-v1 and continue its next_safe_action.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
   "checkpoints": [
@@ -160,9 +185,31 @@
     },
     {
       "check": "Hosted exact-head validation",
-      "result": "NOT_RUN",
+      "result": "PASS",
       "evidence": [
-        "Final transactional updater candidate retargeted to main for full hosted validation; result pending."
+        "Workspace Control Validation run 41384504196 completed SUCCESS on exact PR #591 head 1ca44e019fed66a55f2b9985d9d04397ba37b668."
+      ]
+    },
+    {
+      "check": "Live updater execution",
+      "result": "PASS",
+      "evidence": [
+        "Operator executed the exact transactional updater at head 1ca44e019fed66a55f2b9985d9d04397ba37b668.",
+        "Reported PASS markers: BROKER_POLICY_DIGEST_BINDING, PREFLIGHT, LOCAL_MTLS_HEALTH, LOCAL_MCP_INITIALIZE, LOCAL_MCP_TOOL_SCHEMA, TUNNEL_READY, SERVICES_ACTIVE_BOOT_DISABLED, WORKSPACE_SHELL_GITRUNNER_OBSERVABILITY_UPDATE.",
+        "Accepted execution source 01a95b61410e2f427b9885a19e6a0b9c5ee60a38 was preserved; update receipt written under /var/lib/workspace-shell/updates/1ca44e019fed66a55f2b9985d9d04397ba37b668/."
+      ]
+    },
+    {
+      "check": "Live diagnostic smoke",
+      "result": "PASS",
+      "evidence": [
+        "workspace-ci-controller@workspace-control-cpu.service is ACTIVE/RUNNING, PID 911517.",
+        "workspace-ci-maintenance-controller.service is ACTIVE/RUNNING.",
+        "workspace-ci-maintenance.service is ACTIVE/RUNNING.",
+        "workspace-ci-v3-provisioner.service is ACTIVE/RUNNING.",
+        "workspace-ci-v3-reconciler.service is ACTIVE/EXITED.",
+        "workspace-ci-v3-controller@workspace-control-control-small-v1.service is INACTIVE/DEAD.",
+        "GitHub Actions run 41378944347 remains QUEUED with no runner assignment."
       ]
     }
   ]
