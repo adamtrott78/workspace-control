@@ -698,6 +698,48 @@ func TestCanceledReservationUsesFreshProvisionIdentity(t *testing.T) {
 	}
 }
 
+func TestTerminalRecordFromPriorPolicyGenerationIsInert(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	policy := testPolicy()
+	job := verifiedJob{
+		RunnerRequestID: 1801,
+		WorkflowRunID:   10801,
+		WorkflowPath:    ".github/workflows/control.yml",
+		WorkflowBlobSHA: strings.Repeat("c", 40),
+	}
+	record, err := newJobRecord(policy, job, "COMPLETED", time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	record.ControllerPolicySHA256 = strings.Repeat("e", 64)
+	if err := ledger.Put(record); err != nil {
+		t.Fatal(err)
+	}
+	scaler := testScaler(
+		&fakeVerifier{trusted: true},
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
+	}); err != nil {
+		t.Fatalf("terminal prior-generation history must be inert: %v", err)
+	}
+	if len(events) != 0 {
+		t.Fatalf("terminal prior-generation history mutated capacity: %#v", events)
+	}
+	current, ok, err := ledger.Get(record.RunnerRequestID)
+	if err != nil || !ok {
+		t.Fatalf("terminal history disappeared: ok=%v err=%v", ok, err)
+	}
+	if current.ControllerPolicySHA256 != record.ControllerPolicySHA256 || current.State != "COMPLETED" {
+		t.Fatalf("terminal history was rewritten: %#v", current)
+	}
+}
+
 func TestControllerPolicyDigestDriftIsFatalBeforeMutation(t *testing.T) {
 	events := []string{}
 	ledger := newMemoryLedger()
