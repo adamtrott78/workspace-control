@@ -34,7 +34,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-gitrunner-observability-v1",
-        "checkpoint_sha": "951b6987e590f9452eefaec15ba20b39e8af5bf3",
+        "checkpoint_sha": "3d7c4cebf24f31a8002009cce17e8be1a02419a0",
         "verified": true
       },
       "local": null,
@@ -157,7 +157,7 @@
       "check": "Hosted exact-head validation",
       "result": "NOT_RUN",
       "evidence": [
-        "Pending full validation for exact head 951b6987e590f9452eefaec15ba20b39e8af5bf3."
+        "Pending full validation for expanded diagnostics after checkpoint 3d7c4cebf24f31a8002009cce17e8be1a02419a0."
       ]
     }
   ]
