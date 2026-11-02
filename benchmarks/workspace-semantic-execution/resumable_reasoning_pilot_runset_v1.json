@@ -5,9 +5,10 @@
   "benchmark_id": "workspace-resumable-reasoning-v1",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frozen_implementation_checkpoint": {
-    "commit_sha": "6da70bc638a6c5decbe4ed2e4943257e9d447e55",
-    "validation_run": 41518944500,
-    "validation": "SUCCESS"
+    "commit_sha": "4ec300254c328a1b6e0fce62fe62cd6f11d7a855",
+    "validation_run": 41519306708,
+    "validation": "SUCCESS",
+    "note": "Includes durable semantic checkpoint/context serialization, wait/wake semantics, generation fencing, objective validation, decomposition/escalation discipline, and regression coverage."
   },
   "frozen_artifacts": {
     "public_fixture": {
@@ -24,11 +25,11 @@
     },
     "harness": {
       "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
-      "blob_sha": "fbac091ca35d1defc8804ac1c7638f5da0cf8516"
+      "blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2"
     },
     "regression_tests": {
       "path": "tests/test_workspace_semantic_execution_resumable_reasoning.py",
-      "blob_sha": "587053ddccb9d039d99d36b43176d6d5bfb51161"
+      "blob_sha": "68df34b1a4d51e8d6d9cd566f1e797359541aa70"
     }
   },
   "run_state": {
