@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Bounded second live v3 class canary: PADataset CPU only.
+# Bounded PADataset GPU v3 canary retry after accepted runtime containment refresh.
 # Operator checkout may advance for orchestration fixes, but canary generation,
 # controller override binding, migration helper, and workflow blob remain pinned
 # to the already-accepted controller source generation below.
@@ -9,6 +9,8 @@ set -euo pipefail
 BASE_SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"
 CONTROLLER_SOURCE_HEAD="3e8a231483413ba3a16d405ba61b55d0ab9ff3aa"
 MIGRATION_HELPER_SOURCE_HEAD="2af7c8bba198b5b0e58ede6f8d34d0b64c8ed0af"
+EXPECTED_RUNTIME_SOURCE_HEAD="e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15"
+EXPECTED_RUNTIME_SHA256="86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da"
 TARGET_CLASS="padataset-gpu-single-public-v1"
 TARGET_SCALE_SET="lambda-padataset-gpu-single-public"
 WORKFLOW_PATH=".github/workflows/workspace-ci-v3-migration-canary-padataset-gpu-single-public-v1.yml"
@@ -25,7 +27,7 @@ ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"
 SOURCE_HEAD="$CONTROLLER_SOURCE_HEAD"
 test -z "$(git -C "$ROOT" status --porcelain --untracked-files=no)"
-TMP="$(mktemp -d /tmp/workspace-ci-v3-first-canary.XXXXXX)"
+TMP="$(mktemp -d /tmp/workspace-ci-v3-padataset-gpu-canary.XXXXXX)"
 SOURCE_TREE="$TMP/source"
 TX_HELPER="$TMP/lambda_ci_v3_migration_transaction.py"
 EXPECTED_TX_HELPER_BLOB="d859cbcc4f8d2d25a76495e2159def2d6ac0c850"
@@ -181,7 +183,65 @@ sudo env PYTHONDONTWRITEBYTECODE=1 /usr/bin/python3 \
   --manifest /etc/workspace-ci/v3/install-manifest.json
 echo "LIVE_EFFECTIVE_GENERATION_VERIFY=PASS"
 
-for class_id in   workspace-control-control-small-v1   padataset-gpu-single-public-v1   padataset-gpu-single-public-v1   research-cpu-public-v1   research-gpu-single-public-v1   research-gpu-single-runtime-v1   research-model-single-offline-v1   research-model-dual-offline-v1   research-model-dual-public-v1
+# GPU attempt #2 is valid only against the exact reviewed runtime refresh that
+# corrected the GPU forbidden-path containment defect.  Bind both the active
+# override and its transactional update receipt before any canary authority is
+# created.
+echo "GPU_RUNTIME_REFRESH_BINDING_CHECK=BEGIN"
+sudo env \
+  EXPECTED_RUNTIME_SOURCE_HEAD="$EXPECTED_RUNTIME_SOURCE_HEAD" \
+  EXPECTED_RUNTIME_SHA256="$EXPECTED_RUNTIME_SHA256" \
+  /usr/bin/python3 - <<'PY'
+import hashlib
+import json
+import os
+import pathlib
+
+runtime_source = os.environ["EXPECTED_RUNTIME_SOURCE_HEAD"]
+runtime_sha = os.environ["EXPECTED_RUNTIME_SHA256"]
+runtime_path = pathlib.Path("/opt/workspace-ci/v3/provisioner/lambda_ci_runtime.py")
+override_path = pathlib.Path("/var/lib/workspace-ci/v3/runtime-refresh/active.json")
+update_path = pathlib.Path(
+    "/var/lib/workspace-ci/v3/migration/"
+    f"runtime-live-update-{runtime_source}/receipt.json"
+)
+
+runtime_override = json.loads(override_path.read_text())
+assert runtime_override["schema_version"] == 1
+assert runtime_override["mode"] == "V3_RUNTIME_OVERRIDE"
+assert runtime_override["phase"] == "ACTIVE"
+assert runtime_override["runtime_source_head"] == runtime_source
+assert runtime_override["runtime_sha256"] == runtime_sha
+assert runtime_override["non_runtime_generation_equivalent"] is True
+assert hashlib.sha256(runtime_path.read_bytes()).hexdigest() == runtime_sha
+
+update = json.loads(update_path.read_text())
+assert update["schema_version"] == 1
+assert update["mode"] == "V3_RUNTIME_LIVE_UPDATE"
+assert update["phase"] == "ACTIVE"
+assert update["source_head"] == runtime_source
+assert update["runtime_override"]["runtime_source_head"] == runtime_source
+assert update["runtime_override"]["runtime_sha256"] == runtime_sha
+assert update["provisioner_restarted"] is True
+assert update["reconciler_restarted"] is False
+assert update["class_controller_mutated"] is False
+assert update["workflow_mutated"] is False
+assert update["scale_set_mutated"] is False
+assert update["legacy_v2_mutated"] is False
+assert update["research_gpu_containment_preserved"] is True
+print("GPU_RUNTIME_REFRESH_BINDING=PASS")
+PY
+
+for class_id in \
+  workspace-control-control-small-v1 \
+  padataset-cpu-public-v1 \
+  padataset-gpu-single-public-v1 \
+  research-cpu-public-v1 \
+  research-gpu-single-public-v1 \
+  research-gpu-single-runtime-v1 \
+  research-model-single-offline-v1 \
+  research-model-dual-offline-v1 \
+  research-model-dual-public-v1
 do
   require_inactive "workspace-ci-v3-controller@${class_id}.service"
   require_not_enabled "workspace-ci-v3-controller@${class_id}.service"
