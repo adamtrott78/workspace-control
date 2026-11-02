@@ -14,41 +14,41 @@
     {
       "project_id": "workspace-control",
       "repository": "adamtrott78/workspace-control",
-      "source_checkpoint": "f48f46618b560d91950fae1927048e14e29a59ab",
+      "source_checkpoint": "3bee43a810d739cb199c5091024b8d91115aa5d6",
       "route_id": "control-validation",
       "workflow_path": ".github/workflows/lambda-ci-workspace-control-validation.yml",
-      "workflow_blob_sha": "524e01916e1a826efd1edb4792023973d7b3c73c",
+      "workflow_blob_sha": "7e361db3a8ead667c047e9dc3fe12908c10eb96a",
       "top_level_job_count": 1,
       "top_level_job_key": "control-validation",
-      "current_scale_set_name": "lambda-workspace-control",
+      "current_scale_set_name": "lambda-workspace-control-control-small",
       "target_scale_set_name": "lambda-workspace-control-control-small",
-      "evidence_status": "VERIFIED_FROM_EXACT_GITHUB_FILE_AT_SOURCE_CHECKPOINT"
+      "evidence_status": "VERIFIED_FROM_ACCEPTED_V3_PRODUCTION_CUTOVER"
     },
     {
       "project_id": "padataset",
       "repository": "adamtrott78/PADataset",
-      "source_checkpoint": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+      "source_checkpoint": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
       "route_id": "cpu-ci",
       "workflow_path": ".github/workflows/lambda-ci-cpu.yml",
-      "workflow_blob_sha": "5e6a1d4a47ecdfa8b40d3bea23fa8739cc12cd9e",
+      "workflow_blob_sha": "f63eeaba0126c8241d3130449f12790b915c9495",
       "top_level_job_count": 1,
       "top_level_job_key": "padataset-cpu",
-      "current_scale_set_name": "lambda-padataset",
+      "current_scale_set_name": "lambda-padataset-cpu-public",
       "target_scale_set_name": "lambda-padataset-cpu-public",
-      "evidence_status": "VERIFIED_FROM_EXACT_GITHUB_FILE_AT_SOURCE_CHECKPOINT"
+      "evidence_status": "VERIFIED_FROM_ACCEPTED_V3_PRODUCTION_CUTOVER"
     },
     {
       "project_id": "padataset",
       "repository": "adamtrott78/PADataset",
-      "source_checkpoint": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+      "source_checkpoint": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
       "route_id": "gpu-ci",
       "workflow_path": ".github/workflows/lambda-ci-gpu.yml",
-      "workflow_blob_sha": "3e0c79dc1b8bed7b1480cc745c478c190a3c7da4",
+      "workflow_blob_sha": "1ff52d3940a05a67d94bc21eeb31fd19b7e6d042",
       "top_level_job_count": 1,
       "top_level_job_key": "padataset-gpu",
-      "current_scale_set_name": "lambda-padataset-gpu",
+      "current_scale_set_name": "lambda-padataset-gpu-single-public",
       "target_scale_set_name": "lambda-padataset-gpu-single-public",
-      "evidence_status": "VERIFIED_FROM_EXACT_GITHUB_FILE_AT_SOURCE_CHECKPOINT"
+      "evidence_status": "VERIFIED_FROM_ACCEPTED_V3_PRODUCTION_CUTOVER"
     },
     {
       "project_id": "research-engine",
