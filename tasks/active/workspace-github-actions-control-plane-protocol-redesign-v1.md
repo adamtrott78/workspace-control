@@ -24,7 +24,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 - Intent: mutate
 - Remote branch: github-actions-control-plane-protocol-redesign-v1
-- Remote checkpoint: f8057d2925a329b773b312b62e897e4830e9d54c
+- Remote checkpoint: 97cb93f3b46adea0a710717caeb84ef7999f6fcd
 - Remote verified: true
 
 ### research-engine
@@ -43,20 +43,20 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-ROOT RECOVERY COMPLETE; PREPARE PADATASET CPU CANARY. Live authority cbada5b8-4a9d-4a61-bae2-1cfc621a0960 completed V3_ROOT_SERVICES_ACTIVATION=PASS. Independent Workspace Shell evidence after activation: workspace-ci-v3-reconciler.service ActiveState=active/SubState=exited with V3_INSTALLED_GENERATION_VERIFY=PASS (healthy Type=oneshot/RemainAfterExit semantics); workspace-ci-v3-provisioner.service active/running; workspace-control-control-small-v1 class controller inactive/dead. Fresh post-activation Research GPU diagnose receipt 6572239135 proves legacy research-engine GPU controller inactive/dead + disabled, active_project_units=[], active_count=0, pending_count=0, reset_pending=[], recovery_state_conflict=false. The wrapper's final ERROR was a false-negative health predicate that incorrectly required the reconciler oneshot to be running; exact fix f8057d2925a329b773b312b62e897e4830e9d54c passed Workspace Control Validation 41411117818 SUCCESS and also invokes the verifier updater with python -B to prevent sudo-owned repository __pycache__ cleanup residue. Do NOT rerun root activation. Next: prepare padataset-cpu-public-v1 canary against accepted controller source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa, preserving separate fresh ACTIVATE_ONE_V3_CANARY authority and requiring the exact generated owner-only migration workflow blob on PADataset main before any live canary transaction.
+PADATASET CPU CANARY STAGED; DEFAULT-BRANCH PLACEMENT IS THE NEXT AUTHORITY GATE. Root recovery is accepted and must not be repeated. Exact PADataset CPU migration workflow is staged as draft PR adamtrott78/PADataset#3, head dfc739e1ed275cf4bff3a5f3038ff1089b3bd739, single changed file `.github/workflows/workspace-ci-v3-migration-canary-padataset-cpu-public-v1.yml`, exact generated blob f42c165ef6dc658f026976984c87d2eb28f5cd17. The workflow is workflow_dispatch-only, owner-gated to adamtrott78, performs no checkout/candidate execution, and invokes only the immutable root-installed canary probe for padataset-cpu-public-v1. Dedicated live operator scripts/lambda_ci_v3_padataset_cpu_canary_live.sh at head 97cb93f3b46adea0a710717caeb84ef7999f6fcd passed Workspace Control Validation 41411615725 SUCCESS. It deliberately separates mutable operator HEAD from accepted controller/canary generation 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa, binds transaction helper blob 0c02ca17cf267f1c3986bfee75ebfc6172ca592a, requires exact PADataset main workflow blob f42c165e..., uses repository-scoped ci-gh-padataset credentials, verifies effective installed generation before mutation, and creates a fresh ACTIVATE_ONE_V3_CANARY authority only after all preflights. Do not dispatch or consume canary authority until PR #3 exact workflow blob is on PADataset main. Landing that exact proposal onto the owning default branch is the next operator/authority decision.
 
 ## Remaining work
 
-- Stage/review the exact generated PADataset CPU migration canary workflow `.github/workflows/workspace-ci-v3-migration-canary-padataset-cpu-public-v1.yml` in adamtrott78/PADataset; generated blob must bind the accepted controller/canary source generation.
-- Prepare and validate a padataset-cpu-public-v1 live operator using accepted controller source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa, exact canary workflow blob, repository-scoped PADataset credential group, and the existing generation-exclusion transaction/rollback protocol.
-- Only after the exact workflow is on PADataset main and the operator preflights cleanly, consume one fresh ACTIVATE_ONE_V3_CANARY authority, run the CPU canary, rollback generation exclusion to exact v2 prestate, and independently attest root/class/resource/Research-GPU state.
-- Then repeat the same separately-authorized process for padataset-gpu-single-public-v1.
-- After PADataset CPU+GPU canaries are accepted, perform controlled production v3 cutover and v2 retirement; then resume workspace-semantic-execution-migration-v1 umbrella work.
+- Land only the exact PADataset PR #3 workflow blob f42c165ef6dc658f026976984c87d2eb28f5cd17 on PADataset main through an authorized repository decision; do not alter the workflow while landing it.
+- After main attests that exact blob, run the validated PADataset CPU live operator from an exact clean checkout of the then-current validated workspace-control task head. The operator binds canary generation/controller provenance to accepted source 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa, creates a fresh one-shot ACTIVATE_ONE_V3_CANARY authority only after preflight, runs/observes the canary, and rolls generation exclusion back to exact v2 prestate.
+- Independently attest root services, all v3 class inactivity, zero resource/transient residue, exact v2 restoration, and Research GPU containment after the CPU canary.
+- Then stage/authorize/execute padataset-gpu-single-public-v1 under a separate fresh authority.
+- After PADataset CPU+GPU acceptance, execute controlled production v3 cutover and v2 retirement, then resume workspace-semantic-execution-migration-v1 umbrella work.
 
 ## Blockers / gates
 
-- PADataset CPU canary workflow is not currently present on adamtrott78/PADataset main; the exact owner-only migration workflow must be staged/reviewed and land on the owning default branch before live dispatch.
-- Live padataset-cpu-public-v1 still requires its own fresh exact-bound ACTIVATE_ONE_V3_CANARY authority; no authority from root activation or the accepted workspace-control canary may be reused.
+- adamtrott78/PADataset main does not yet contain the exact padataset-cpu-public-v1 migration workflow. Draft PR #3 stages the exact generated blob f42c165ef6dc658f026976984c87d2eb28f5cd17; default-branch placement is a repository-authority gate and has not been inferred or performed.
+- After exact default-branch placement, live padataset-cpu-public-v1 still requires one fresh ACTIVATE_ONE_V3_CANARY authority created by the validated operator; no prior root/canary authority may be reused.
 - Research CPU remains separately gated; all Research GPU-derived v3 classes remain inherited-contained and NO_BY_DEFAULT; Research Engine PR #283 remains proposal-only.
 
 ## Fresh-chat initialization
