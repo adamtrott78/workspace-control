@@ -493,6 +493,27 @@
         "Where does LOCAL_MODEL -> INSTANT improve quality enough to justify hosted usage?",
         "Where does INSTANT -> FRONTIER remain necessary after local/Instant decomposition?",
         "Can local executors handle privacy-sensitive or high-volume work while preserving provenance and authority boundaries?"
+      ],
+      "candidate_local_models": [
+        {
+          "id": "kimi-k3.1-pro-quantized",
+          "provider": "Moonshot AI",
+          "model_family": "Kimi K3.1 Pro",
+          "status": "WAITING_FOR_WEIGHTS_AND_VIABLE_QUANTIZATION",
+          "upstream_weights_release_target": "2026-11-04",
+          "upstream_class": "3T-class open-weight model",
+          "evaluation_trigger": "A credible quantized release with reproducible runtime instructions appears and fits an available local/hosted-local hardware profile.",
+          "required_preflight": [
+            "record exact upstream model/weight revision and license",
+            "record quantizer, format, bit-width, calibration method, and quantization source revision",
+            "verify runtime compatibility and exact hardware requirement",
+            "run integrity/smoke inference before scored tasks",
+            "measure quality degradation against upstream API or full-precision reference where practical",
+            "bind all scored results to exact quantized artifact hashes"
+          ],
+          "benchmark_plan": "Run the same taxonomy-stratified P0-P3 fixtures and durable-state protocols used for other executor tiers; do not substitute model-specific showcase benchmarks for the common suite.",
+          "note": "Quantized variants are separate executor artifacts and must not be treated as equivalent to upstream K3.1 Pro without measured validation."
+        }
       ]
     }
   }
