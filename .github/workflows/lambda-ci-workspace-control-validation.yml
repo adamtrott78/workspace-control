@@ -16,8 +16,8 @@ jobs:
       github.actor == 'adamtrott78' &&
       github.event.comment.author_association == 'OWNER' &&
       startsWith(github.event.comment.body, '/workspace-control-validate ')
-    runs-on: lambda-workspace-control-control-small
-    timeout-minutes: 20
+    runs-on: lambda-workspace-control
+    timeout-minutes: 10
 
     steps:
       - name: Verify exact same-repository PR head
@@ -119,17 +119,9 @@ jobs:
         run: |
           set -Eeuo pipefail
           python3 -m unittest discover -s tests -v
-          go_archive="$RUNNER_TEMP/go1.26.3.linux-amd64.tar.gz"
-          curl -fsSL --retry 3 -o "$go_archive" \
-            "https://go.dev/dl/go1.26.3.linux-amd64.tar.gz"
-          printf '%s  %s\n' \
-            '2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556' \
-            "$go_archive" | sha256sum -c -
-          tar -C "$RUNNER_TEMP" -xzf "$go_archive"
-          [[ "$("$RUNNER_TEMP/go/bin/go" env GOVERSION)" == "go1.26.3" ]]
           (
             cd controller/lambda-ci-controller
-            "$RUNNER_TEMP/go/bin/go" test -mod=mod ./...
+            go test -mod=mod ./...
           )
 
       - name: Write pilot receipt
