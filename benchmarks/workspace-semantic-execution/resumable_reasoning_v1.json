@@ -222,12 +222,12 @@
     "disposable_branches_only": true
   },
   "next_implementation_steps": [
-    "Keep the frozen research_iterate P2 fixture as the first clean-session end-to-end pilot, but treat it as harness/treatment calibration rather than a general capability-boundary result.",
-    "Add matched P0 easy-control, P1 horizon-heavy/decomposable, and P3 mixed long+hard fixtures so TOO_LARGE and INTRINSICALLY_DIFFICULT are empirically separable.",
-    "For each causal comparison, hold fixture instance, validator, tools, initial information, and resource envelope fixed while changing only the intended treatment factor.",
-    "Start model-reasoning comparisons with at least three independent trials per arm/fixture; increase replication for reliability claims and report success rate/pass@1 plus an all-k reliability statistic.",
-    "Prefer fresh hidden/ephemeral evaluators for strong capability claims; no scored worker may see evaluator oracle state.",
-    "After taxonomy-calibrated research fixtures, add architecture_diagnosis, artifact_revision, software_debug_repair, and an unseen-workflow extension fixture before architecture-freeze conclusions."
+    "Validate the complete P0-P3 static fixture matrix and staged matrix runset at exact PR head.",
+    "Run one clean oracle-unexposed protocol-screening execution per A-E arm/fixture; these screening results are non-claim-bearing and exist to catch protocol defects.",
+    "Freeze the protocol after screening, then execute at least three independent clean replicates for the selected paired causal comparisons.",
+    "Use P1 as the primary TOO_LARGE/decomposition fixture, P2 as the primary short/coupled intrinsic-reasoning fixture, and P3 to test decompose-first-then-escalate behavior.",
+    "Do not claim workspace-wide executor equivalence from the synthetic research_iterate matrix; add architecture_diagnosis, artifact_revision, software_debug_repair, and unseen-extension suites.",
+    "Strengthen evaluator isolation to hidden-ephemeral or externally blinded evaluation before strong frontier-equivalence claims."
   ],
   "implementation_checkpoint": {
     "checkpoint_sha": "4ec300254c328a1b6e0fce62fe62cd6f11d7a855",
@@ -241,7 +241,19 @@
     "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_runset_v1.json",
-    "tests/test_workspace_semantic_execution_resumable_reasoning.py"
+    "tests/test_workspace_semantic_execution_resumable_reasoning.py",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_oracle_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_oracle_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.taxonomy.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_oracle_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.taxonomy.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
+    "tests/test_workspace_semantic_execution_fixture_matrix.py"
   ],
   "pilot_constraints": {
     "authoring_session_contaminated": true,
@@ -264,5 +276,20 @@
     "S3_authority_safety": "Hard authority/provenance gates independent of model tier.",
     "S4_open_world_generalization": "Unseen-workflow extension proof and architecture-freeze gate.",
     "S5_resource_routing": "Quality-adjusted efficiency; evaluated only after S1 quality and S3 safety gates."
+  },
+  "fixture_matrix": {
+    "status": "P0_P3_STATIC_MATRIX_IMPLEMENTED_NOT_SCORED",
+    "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
+    "phenotypes": [
+      "P0_easy_control",
+      "P1_horizon_heavy_decomposable",
+      "P2_reasoning_heavy_coupled",
+      "P3_mixed_long_hard"
+    ],
+    "design_rule": "Use matched research_iterate fixtures first so horizon/load and reasoning coupling vary without changing domain, worker interface, or evaluator class.",
+    "screening_rule": "Run one non-claim-bearing clean screening execution per arm/fixture before replicated scoring; any protocol change requires re-screening.",
+    "scored_rule": "After a frozen screening pass, use at least three independent clean replicates for each selected arm/fixture causal comparison.",
+    "current_claim_ceiling": "Fixture design and harness compatibility only until clean oracle-unexposed model runs exist."
   }
 }
