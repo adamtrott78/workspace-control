@@ -423,14 +423,9 @@ for svc in "${SERVICES[@]}"; do
   sudo systemctl disable "$svc" >/dev/null 2>&1 || true
 done
 
-sudo tee /opt/workspace-shell/bin/workspace-shell-disable >/dev/null <<'DISABLE'
-#!/usr/bin/env bash
-set -euo pipefail
-systemctl disable --now workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
-echo "WORKSPACE_SHELL_DISABLED=PASS"
-DISABLE
-sudo chmod 0755 /opt/workspace-shell/bin/workspace-shell-disable
-sudo chown root:root /opt/workspace-shell/bin/workspace-shell-disable
+sudo install -o root -g root -m 0755 \
+  "$ROOT/plugins/workspace-shell/install/workspace-shell-disable.sh" \
+  /opt/workspace-shell/bin/workspace-shell-disable
 
 echo "=== START LOCAL CONTROL PLANE ==="
 sudo systemctl start workspace-shell-job-launcher.service
