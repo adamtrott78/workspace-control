@@ -24,7 +24,7 @@ Widen Workspace Shell only enough to diagnose GitRunner/control-plane incidents 
 
 - Intent: mutate
 - Remote branch: workspace-shell-gitrunner-observability-v1
-- Remote checkpoint: c1ced4f1681b068b9bf4bf8bde5edc9efd6f25a4
+- Remote checkpoint: 2b4526a10978a0025ea2264370551e3fd6e36910
 - Remote verified: true
 
 ## Next safe action
