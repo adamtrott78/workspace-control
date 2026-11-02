@@ -530,13 +530,19 @@ class authorized for live activation
 
 The GitRunner task's current `next_safe_action` states that live GitRunner mutation is paused until Workspace Shell ChatGPT acceptance completes, then calls for a fresh one-class canary/one-shot authority for `padataset-cpu-public-v1`.
 
-However, the `workspace-shell-mcp-v1` capsule currently visible on `main` is an older in-progress state and does not by itself prove that this dependency is durably reconciled.
+That dependency has now been reconciled from durable GitHub evidence:
 
-Therefore:
+- PR #573 comment `6565110368` records **WORKSPACE SHELL V1 — LIVE CHATGPT ACCEPTANCE COMPLETE**;
+- durable Workspace Shell head: `44b4e4f2020450c81cec56e86b711cdee7e651d9`;
+- accepted installed execution/authority SHA: `01a95b61410e2f427b9885a19e6a0b9c5ee60a38`;
+- Workspace Control Validation run `41359338969`: SUCCESS;
+- current live `runtime_inventory` through the Workspace Shell connector returns normally with the expected mTLS/runtime socket structure.
 
-> Before any new live GitRunner mutation, reconcile the exact accepted Workspace Shell execution/source state, validation evidence, task state, and authority into the controller migration's current durable checkpoint.
+The older `workspace-shell-mcp-v1` capsule still visible on `main` is therefore stale relative to the accepted PR-head state. This must be treated as a source-precedence example rather than evidence that acceptance is incomplete.
 
-No live PADataset canary authority may be inferred from chat history or from this inventory.
+**Important authority boundary:** satisfying the Workspace Shell dependency does **not** authorize the next GitRunner canary. The controller task explicitly requires fresh exact one-class canary/one-shot authority for `padataset-cpu-public-v1`; Workspace Shell task authority must not be reused.
+
+No live PADataset canary authority may be inferred from this inventory.
 
 ### 4.7 Integration with the new architecture
 
