@@ -42,7 +42,7 @@
       "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
       "remote": {
         "branch": "github-actions-control-plane-protocol-redesign-v1",
-        "checkpoint_sha": "6456847b0b4b1268ed6f5bd4d0b847ebde1a21e5",
+        "checkpoint_sha": "626c9c7c81c50878b9b3bcce5932bc08c086313f",
         "verified": true
       },
       "local": null,
@@ -364,6 +364,19 @@
         "Production workflow targets legacy lambda-workspace-control lane, not v3 control-small class.",
         "Run is now stale relative to later PR #590 heads and must not be treated as a clean post-recovery validation probe."
       ]
+    },
+    {
+      "id": "legacy-workspace-control-reset-stale-attempt",
+      "kind": "incident_checkpoint",
+      "identity": "maintenance-comment-6569249619",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact reset-stale command targeted quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d.",
+        "Maintenance receipt status FAILED_CLOSED before any scale-set mutation.",
+        "Failure: quarantine observed_at timestamp is invalid; live quarantine timestamp 2026-11-01T22:20:58.365802851Z contains Go/RFC3339 nanosecond precision not accepted by deployed Python parser.",
+        "No old scale set deleted, no new scale set created, no READY_FOR_SINGLE_RETRY authority emitted, automatic_workflow_triggered=false.",
+        "Repository fix truncates only fractional precision to microseconds while preserving wall-clock second/timezone and adds regression coverage."
+      ]
     }
   ],
   "blockers": [
@@ -374,7 +387,7 @@
     "All Research GPU-derived runner classes remain inherited-contained and NO_BY_DEFAULT.",
     "Research Engine PR #283 remains draft/proposal-only; no default-branch producer cutover is authorized."
   ],
-  "next_safe_action": "P0 INFRASTRUCTURE PRIORITY: complete the v3 active-fleet migration and retire the legacy v2 control plane. First resolve only the minimum legacy workspace-control quarantine/stale-assignment state needed to drain the old scale set safely; do not invest in broad v2 rehabilitation. Then execute the remaining accepted-class canaries in frozen order (padataset-cpu-public-v1, then padataset-gpu-single-public-v1; research-cpu-public-v1 only under separate authority; Research GPU-derived classes remain NO_BY_DEFAULT). After all active-class canaries pass, perform the single production generation cutover defined by architecture/lambda-ci-v3-migration-plan.v1.json: quiesce/drain v2, retarget accepted workflows to v3 scale-set names, start accepted v3 controllers, run exact production validations, prove zero assigned/running jobs and clean ledgers, then mark legacy controllers/scale sets DRAINING -> RETIRED. Preserve rollback bytes/state for the defined rollback window; remove legacy config/state only in later cleanup.",
+  "next_safe_action": "Validate and deploy the narrow maintenance-controller RFC3339 nanosecond parser fix without broad v2 rehabilitation. Because live Workspace Shell diagnostics are available but root helper/trust stores are still empty/fail-closed, establish a one-time stable reviewed-helper bootstrap/update authority behind the existing workspace_shell_run_reviewed_helper schema; do not add new MCP operations. Then install/restart only the exact maintenance-controller bytes, re-run reset-stale for quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, prove READY_FOR_SINGLE_RETRY and zero-state, and continue the v3 migration.",
   "artifacts": [
     {
       "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
@@ -766,16 +779,15 @@
     }
   ],
   "remaining_work": [
-    "Resolve only the current legacy workspace-control assignment-divergence quarantine/stale assigned job sufficiently to reach a safe drain state; do not broaden v2 repair work.",
+    "Pass full repository validation for the RFC3339 nanosecond maintenance timestamp fix and freeze its exact source/blob.",
+    "Establish the smallest durable Workspace Shell reviewed-helper bootstrap/update path needed to install exact root-owned GitRunner maintenance/cutover helpers without future plugin schema changes; preserve empty-by-default generic authority and never expose generic bash/systemctl.",
+    "Install only the validated maintenance-controller fix on Lambda, restart only the maintenance controller if required, and prove service health.",
+    "Re-run reset-stale against quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d; require fresh scale-set ID, two zero-state observations, and READY_FOR_SINGLE_RETRY with automatic_workflow_triggered=false.",
     "Contain/cancel stale run 41378944347 through the correct scheduler/control-plane mechanism and separately prove legacy Lambda-side runner/JIT/reservation/process cleanup and old scale-set assigned/running counts zero.",
     "Prepare and execute migration-order #2 padataset-cpu-public-v1 canary under a NEW separately validated one-shot ACTIVATE_ONE_V3_CANARY authority.",
     "Prepare and execute migration-order #3 padataset-gpu-single-public-v1 canary under its own NEW separately validated one-shot authority.",
-    "Keep research-cpu-public-v1 inactive unless separately authorized; keep all Research GPU-derived classes NO_BY_DEFAULT until separate containment-recovery authority.",
-    "After all active-class canaries pass, execute the single active-fleet production generation cutover: stop/drain v2, retarget accepted workflows to exact v3 scale-set names, enable/start accepted v3 classes, validate production serviceability, and prove clean ledgers/resources.",
-    "Only after accepted v3 production proof, mark corresponding legacy controllers/scale sets DRAINING then RETIRED and preserve old installed bytes/config/state for the rollback window.",
-    "Delete/retire legacy scale sets only after their per-scale-set preconditions hold; remove legacy controller config/state only in a later cleanup task.",
-    "Keep Research Engine PR #283 proposal-only until separate default-branch producer cutover authority.",
-    "Use Workspace Shell as the preferred bounded troubleshooting/terminal transport; widen only by reviewed exact diagnostic/helper capabilities when concretely required."
+    "After active-class canaries pass, execute the single production generation cutover and retire v2 under the migration plan.",
+    "Keep research-cpu-public-v1 separately gated and all Research GPU-derived classes NO_BY_DEFAULT."
   ],
   "last_executor": "chatgpt",
   "last_surface": "github+lambda",
