@@ -84,6 +84,42 @@ class PadatasetGpuCanaryOperatorTests(unittest.TestCase):
         self.assertIn('-u "$target_unit"', self.text)
 
 
+    def test_all_nine_v3_classes_are_preflighted_exactly_once(self):
+        start = self.text.index("for class_id in")
+        end = self.text.index('echo "LIVE_PREFLIGHT_ROOT_AND_CLASS_STATE=PASS"')
+        loop = self.text[start:end]
+        expected = [
+            "workspace-control-control-small-v1",
+            "padataset-cpu-public-v1",
+            "padataset-gpu-single-public-v1",
+            "research-cpu-public-v1",
+            "research-gpu-single-public-v1",
+            "research-gpu-single-runtime-v1",
+            "research-model-single-offline-v1",
+            "research-model-dual-offline-v1",
+            "research-model-dual-public-v1",
+        ]
+        for class_id in expected:
+            self.assertEqual(loop.count(class_id), 1, class_id)
+
+    def test_gpu_retry_is_bound_to_exact_runtime_refresh_before_authority(self):
+        self.assertIn(
+            'EXPECTED_RUNTIME_SOURCE_HEAD="e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15"',
+            self.text,
+        )
+        self.assertIn(
+            'EXPECTED_RUNTIME_SHA256="86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da"',
+            self.text,
+        )
+        self.assertIn("/var/lib/workspace-ci/v3/runtime-refresh/active.json", self.text)
+        self.assertIn("runtime-live-update-{runtime_source}/receipt.json", self.text)
+        self.assertIn('runtime_override["mode"] == "V3_RUNTIME_OVERRIDE"', self.text)
+        self.assertIn('update["mode"] == "V3_RUNTIME_LIVE_UPDATE"', self.text)
+        binding = self.text.index("GPU_RUNTIME_REFRESH_BINDING=PASS")
+        authority = self.text.index("CANARY_AUTHORITY_CREATED=PASS")
+        self.assertLess(binding, authority)
+
+
     def test_effective_generation_preflight_runs_before_class_mutation(self):
         verify = self.text.index('LIVE_EFFECTIVE_GENERATION_VERIFY=PASS')
         apply = self.text.index('--apply-canary')
