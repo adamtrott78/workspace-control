@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "benchmark": "INSTANT_MULTI_WORKER_SCALE_V1",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+  "shared_branch": "instant-multi-worker-scale-v1-20261101",
+  "state_version": 0,
+  "worker_count": 4,
+  "invariant": "each action has at most one owner; every completion preserves all peer state; workers choose lexicographically smallest PENDING action",
+  "actions": {
+    "A": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_scale_a.py",
+          "tests/test_instant_scale_a.py"
+        ],
+        "function": "normalize_worker_slot(value) -> int",
+        "contract": [
+          "value must be an exact Python int; bool is rejected",
+          "allowed range is 1 through 4 inclusive",
+          "valid values are returned unchanged",
+          "all other inputs raise ValueError",
+          "tests use unittest, not pytest"
+        ]
+      }
+    },
+    "B": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_scale_b.py",
+          "tests/test_instant_scale_b.py"
+        ],
+        "function": "normalize_retry_count(value) -> int",
+        "contract": [
+          "value must be an exact Python int; bool is rejected",
+          "allowed range is 0 through 3 inclusive",
+          "valid values are returned unchanged",
+          "all other inputs raise ValueError",
+          "tests use unittest, not pytest"
+        ]
+      }
+    },
+    "C": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_scale_c.py",
+          "tests/test_instant_scale_c.py"
+        ],
+        "function": "normalize_priority(value) -> str",
+        "contract": [
+          "value must be a str exactly equal to one of: LOW, MEDIUM, HIGH",
+          "return the valid value unchanged",
+          "lowercase/mixed-case variants and all non-strings raise ValueError",
+          "tests use unittest, not pytest"
+        ]
+      }
+    },
+    "D": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_scale_d.py",
+          "tests/test_instant_scale_d.py"
+        ],
+        "function": "normalize_result(value) -> str",
+        "contract": [
+          "value must be a str exactly equal to one of: PASS, FAIL, PENDING",
+          "return the valid value unchanged",
+          "lowercase/mixed-case variants and all non-strings raise ValueError",
+          "tests use unittest, not pytest"
+        ]
+      }
+    },
+    "E": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_scale_e.py",
+          "tests/test_instant_scale_e.py"
+        ],
+        "function": "normalize_epoch(value) -> int",
+        "contract": [
+          "value must be an exact Python int; bool is rejected",
+          "allowed range is 0 through 9 inclusive",
+          "valid values are returned unchanged",
+          "all other inputs raise ValueError",
+          "tests use unittest, not pytest"
+        ]
+      }
+    },
+    "F": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_scale_f.py",
+          "tests/test_instant_scale_f.py"
+        ],
+        "function": "normalize_mode(value) -> str",
+        "contract": [
+          "value must be a str exactly equal to one of: READ, WRITE",
+          "return the valid value unchanged",
+          "lowercase/mixed-case variants and all non-strings raise ValueError",
+          "tests use unittest, not pytest"
+        ]
+      }
+    },
+    "G": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_scale_g.py",
+          "tests/test_instant_scale_g.py"
+        ],
+        "function": "normalize_batch_size(value) -> int",
+        "contract": [
+          "value must be an exact Python int; bool is rejected",
+          "allowed range is 1 through 16 inclusive",
+          "valid values are returned unchanged",
+          "all other inputs raise ValueError",
+          "tests use unittest, not pytest"
+        ]
+      }
+    },
+    "H": {
+      "state": "PENDING",
+      "owner": null,
+      "execution_branch": null,
+      "pr": null,
+      "validated_head": null,
+      "validation_run": null,
+      "task": {
+        "files": [
+          "scripts/instant_scale_h.py",
+          "tests/test_instant_scale_h.py"
+        ],
+        "function": "normalize_decision(value) -> str",
+        "contract": [
+          "value must be a str exactly equal to one of: EXECUTE, DECOMPOSE, ESCALATE",
+          "return the valid value unchanged",
+          "lowercase/mixed-case variants and all non-strings raise ValueError",
+          "tests use unittest, not pytest"
+        ]
+      }
+    }
+  },
+  "protocols": {
+    "selection": "lexicographically smallest PENDING action",
+    "claim": "reread exact shared branch; prepare candidate preserving all peer state; set selected action CLAIMED by caller; increment state_version; exact-head update_ref expected_sha with force=false",
+    "claim_conflict": "reread shared state and recompute selection; never overwrite peer state",
+    "execution": "create per-action execution branch from frozen base_main_sha; modify exactly the two files named by the action; draft PR; automatic Workspace Control Validation",
+    "completion": "after exact-head validation success, reread shared branch; preserve all peer state; set owned action COMPLETE with branch/PR/head/run; increment state_version; exact-head CAS",
+    "completion_conflict": "reread shared state, preserve valid peer transitions, retry own completion",
+    "worker_loop": "after successful completion, immediately attempt next eligible action; yield only for async validation, retryable tool/read barrier, no eligible work, or terminal failure",
+    "max_claim_cas_attempts_per_action": 3,
+    "max_completion_cas_attempts_per_action": 3,
+    "max_code_repair_iterations_per_action": 3
+  },
+  "safety": {
+    "modify_main": false,
+    "merge_pr": false,
+    "manual_workflow_dispatch": false,
+    "workspace_shell": false,
+    "privileged_execution": false,
+    "authoritative_task_state": false
+  },
+  "claim_history": [],
+  "completion_history": []
+}
