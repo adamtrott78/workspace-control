@@ -206,15 +206,19 @@ class MaintenanceControllerTests(unittest.TestCase):
                 "quarantine observed_at",
             )
 
-    def test_replacement_run_gate_blocks_new_nonterminal_pilot_runs(self):
+    def test_replacement_run_gate_blocks_only_live_runner_demand(self):
         command = reset_command()
         cutoff = "2026-10-27T01:00:00Z"
 
         class Client:
-            def __init__(self, runs):
+            def __init__(self, runs, jobs=None):
                 self.runs = runs
+                self.jobs = jobs or {}
 
-            def get_json(self, _path):
+            def get_json(self, path):
+                if "/actions/runs/" in path and "/jobs" in path:
+                    run_id = int(path.split("/actions/runs/", 1)[1].split("/", 1)[0])
+                    return {"jobs": self.jobs.get(run_id, [])}
                 return {"workflow_runs": self.runs}
 
         controller.assert_no_replacement_runs(
@@ -233,6 +237,38 @@ class MaintenanceControllerTests(unittest.TestCase):
             cutoff,
         )
 
+        # A maintenance comment triggers the same issue_comment workflow, but
+        # its job-level condition is false and GitHub finalizes it as skipped.
+        # That self-trigger must not block reset-stale.
+        controller.assert_no_replacement_runs(
+            Client(
+                [
+                    {
+                        "id": 2,
+                        "status": "in_progress",
+                        "created_at": "2026-10-27T01:00:01Z",
+                        "updated_at": "2026-10-27T01:00:01Z",
+                        "run_attempt": 1,
+                    }
+                ],
+                {
+                    2: [
+                        {
+                            "name": (
+                                "wc-admission-v1|workload=control-validation|"
+                                "pr=${{ github.event.issue.number }}|"
+                                "request=${{ github.event.comment.body }}"
+                            ),
+                            "status": "completed",
+                            "conclusion": "skipped",
+                        }
+                    ]
+                },
+            ),
+            command,
+            cutoff,
+        )
+
         with self.assertRaisesRegex(
             controller.MaintenanceControllerError,
             "replacement pilot workflow run",
@@ -241,13 +277,26 @@ class MaintenanceControllerTests(unittest.TestCase):
                 Client(
                     [
                         {
-                            "id": 2,
+                            "id": 3,
                             "status": "queued",
                             "created_at": "2026-10-27T01:00:01Z",
                             "updated_at": "2026-10-27T01:00:01Z",
                             "run_attempt": 1,
                         }
-                    ]
+                    ],
+                    {
+                        3: [
+                            {
+                                "name": (
+                                    "wc-admission-v1|workload=control-validation|"
+                                    "pr=590|request=/workspace-control-validate "
+                                    "cbc71b51b28c96b7b08b92a5e8e17b8566803d73"
+                                ),
+                                "status": "queued",
+                                "conclusion": None,
+                            }
+                        ]
+                    },
                 ),
                 command,
                 cutoff,
@@ -261,16 +310,58 @@ class MaintenanceControllerTests(unittest.TestCase):
                 Client(
                     [
                         {
-                            "id": 3,
+                            "id": 4,
                             "status": "in_progress",
                             "created_at": "2026-10-27T00:58:00Z",
                             "updated_at": "2026-10-27T01:00:05Z",
                             "run_attempt": 2,
                         }
-                    ]
+                    ],
+                    {
+                        4: [
+                            {
+                                "name": (
+                                    "wc-admission-v1|workload=control-validation|"
+                                    "pr=590|request=/workspace-control-validate "
+                                    "cbc71b51b28c96b7b08b92a5e8e17b8566803d73"
+                                ),
+                                "status": "in_progress",
+                                "conclusion": None,
+                            }
+                        ]
+                    },
                 ),
                 command,
                 cutoff,
+            )
+
+    def test_replacement_run_gate_fails_closed_when_jobs_cannot_be_classified(self):
+        command = reset_command()
+
+        class Client:
+            def get_json(self, path):
+                if "/actions/runs/" in path and "/jobs" in path:
+                    return {"jobs": []}
+                return {
+                    "workflow_runs": [
+                        {
+                            "id": 5,
+                            "status": "in_progress",
+                            "created_at": "2026-10-27T01:00:01Z",
+                            "updated_at": "2026-10-27T01:00:01Z",
+                            "run_attempt": 1,
+                        }
+                    ]
+                }
+
+        with self.assertRaisesRegex(
+            controller.MaintenanceControllerError,
+            "no classifiable job",
+        ):
+            controller.assert_no_replacement_runs(
+                Client(),
+                command,
+                "2026-10-27T01:00:00Z",
             )
 
     def test_p1_reset_is_limited_to_workspace_control_cpu(self):
