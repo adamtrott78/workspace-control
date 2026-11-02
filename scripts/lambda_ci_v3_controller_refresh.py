@@ -97,8 +97,16 @@ def compare_manifests_for_controller_only_refresh(
     candidate: dict[str, Any],
     *,
     controller_destination: str = str(CONTROLLER_BINARY),
+    effective_sha256: dict[str, str] | None = None,
 ) -> None:
-    """Require candidate generation drift to be exactly the controller binary."""
+    """Require candidate drift to be exactly the controller versus effective live state.
+
+    The base manifest remains the structural authority, but byte equality for
+    non-controller artifacts must be checked against the already-verified
+    effective installed generation.  This permits independently authorized
+    runtime/reconciler/helper overrides without allowing the controller refresh
+    to introduce any additional non-controller change.
+    """
 
     for field in (
         "catalog_generation_sha256",
@@ -117,12 +125,22 @@ def compare_manifests_for_controller_only_refresh(
     if controller_destination not in base_entries:
         raise ControllerRefreshError("base manifest does not manage controller binary")
 
+    if effective_sha256 is not None and set(effective_sha256) != set(base_entries):
+        raise ControllerRefreshError(
+            "effective installed digest set does not match managed destination set"
+        )
+
     for destination in sorted(base_entries):
         if destination == controller_destination:
             continue
         left = base_entries[destination]
         right = candidate_entries[destination]
-        if left.get("sha256") != right.get("sha256"):
+        expected_sha = (
+            effective_sha256[destination]
+            if effective_sha256 is not None
+            else left.get("sha256")
+        )
+        if expected_sha != right.get("sha256"):
             raise ControllerRefreshError(
                 f"non-controller artifact drift: {destination}"
             )
@@ -130,6 +148,22 @@ def compare_manifests_for_controller_only_refresh(
             raise ControllerRefreshError(
                 f"non-controller mode drift: {destination}"
             )
+
+
+def _effective_managed_sha256(
+    manifest: dict[str, Any],
+) -> dict[str, str]:
+    """Snapshot exact bytes of the reconciler-verified effective generation."""
+
+    result: dict[str, str] = {}
+    for destination in sorted(_entry_map(manifest)):
+        path = pathlib.Path(destination)
+        if path.is_symlink() or not path.is_file():
+            raise ControllerRefreshError(
+                f"effective managed artifact is not a regular file: {destination}"
+            )
+        result[destination] = _sha256(path.read_bytes())
+    return result
 
 
 def assert_migration_history_rolled_back(
@@ -348,6 +382,7 @@ def _stage_candidate(
     expected_head: str,
     go_bin: str,
     base_manifest: dict[str, Any],
+    effective_sha256: dict[str, str],
 ) -> tuple[bytes, dict[str, Any]]:
     reconciler._git_exact_head(repo_root, expected_head)
     installed_overlay = _load(reconciler.V3_CONFIG_ROOT / "deployment-overlay.json")
@@ -368,7 +403,11 @@ def _stage_candidate(
             source_head=expected_head,
         )
         candidate = result["manifest"]
-        compare_manifests_for_controller_only_refresh(base_manifest, candidate)
+        compare_manifests_for_controller_only_refresh(
+            base_manifest,
+            candidate,
+            effective_sha256=effective_sha256,
+        )
         return bytes(binary), candidate
 
 
@@ -414,11 +453,13 @@ def apply_refresh(
         base_controller_entry=base_controller,
         base_manifest_sha256=base_sha,
     )
+    effective_sha256 = _effective_managed_sha256(base)
     binary, candidate = _stage_candidate(
         repo_root,
         expected_head=expected_source_head,
         go_bin=go_bin,
         base_manifest=base,
+        effective_sha256=effective_sha256,
     )
     new_sha = _sha256(binary)
 
