@@ -53,6 +53,10 @@ RECONCILER_SCRIPT = V3_RECONCILER_ROOT / "lambda_ci_v3_reconciler.py"
 RECONCILER_OVERRIDE_ACTIVE_RECEIPT = (
     V3_RUNTIME_STATE_ROOT / "reconciler-refresh" / "active.json"
 )
+V3_RUNTIME_SCRIPT = V3_PROVISIONER_ROOT / "lambda_ci_runtime.py"
+RUNTIME_OVERRIDE_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT / "runtime-refresh" / "active.json"
+)
 
 MANAGED_SYSTEMD = {
     "workspace-ci-v3-provisioner.service":
@@ -514,6 +518,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
     controller_destination = str(V3_CONTROLLER_BINARY)
     helper_destination = str(ROOT_ACTIVATION_HELPER)
     reconciler_destination = str(RECONCILER_SCRIPT)
+    runtime_destination = str(V3_RUNTIME_SCRIPT)
     special: dict[str, dict[str, Any]] = {}
 
     for entry in manifest.get("entries", []):
@@ -529,6 +534,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             controller_destination,
             helper_destination,
             reconciler_destination,
+            runtime_destination,
         }:
             special[destination] = entry
             continue
@@ -621,6 +627,36 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         _require_source_head(
             active_reconciler.get("reconciler_source_head"),
             "active reconciler override",
+        )
+
+    runtime_entry = special.get(runtime_destination)
+    if runtime_entry is None:
+        raise ReconcileError("shared runtime script absent from install manifest")
+    actual_runtime_sha = _sha256(V3_RUNTIME_SCRIPT.read_bytes())
+    if actual_runtime_sha != runtime_entry.get("sha256"):
+        active_runtime = _load_override_receipt(
+            RUNTIME_OVERRIDE_ACTIVE_RECEIPT,
+            "active runtime override",
+        )
+        required_runtime = {
+            "mode": "V3_RUNTIME_OVERRIDE",
+            "phase": "ACTIVE",
+            "base_source_head": base_source_head,
+            "base_install_manifest_sha256": base_manifest_sha,
+            "base_runtime_sha256": runtime_entry.get("sha256"),
+            "runtime_sha256": actual_runtime_sha,
+            "runtime_mode": str(runtime_entry.get("mode")),
+            "root_policy_sha256": root_policy_sha,
+            "non_runtime_generation_equivalent": True,
+        }
+        for key, expected in required_runtime.items():
+            if active_runtime.get(key) != expected:
+                raise ReconcileError(
+                    f"active runtime override binding mismatch: {key}"
+                )
+        _require_source_head(
+            active_runtime.get("runtime_source_head"),
+            "active runtime override",
         )
 
 

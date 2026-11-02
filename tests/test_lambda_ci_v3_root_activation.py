@@ -273,6 +273,88 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
                 "d" * 40,
             )
 
+    def test_runtime_override_is_bound_to_base_manifest_and_digest(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            controller = root / "lambda-ci-controller-v3"
+            controller.write_bytes(b"base-controller")
+            controller.chmod(0o755)
+            reconciler_script = root / "lambda_ci_v3_reconciler.py"
+            reconciler_script.write_bytes(b"base-reconciler")
+            reconciler_script.chmod(0o755)
+            runtime_script = root / "lambda_ci_runtime.py"
+            runtime_script.write_bytes(b"candidate-runtime")
+            runtime_script.chmod(0o644)
+            manifest = root / "install-manifest.json"
+            payload = {
+                "schema_version": 1,
+                "mode": "V3_SUBSTRATE_INSTALL_INACTIVE",
+                "source_head": "a" * 40,
+                "root_policy_sha256": "b" * 64,
+                "runner_class_count": 9,
+                "entries": [
+                    {
+                        "destination": str(controller),
+                        "sha256": activation._sha256(b"base-controller"),
+                        "mode": "0755",
+                    },
+                    {
+                        "destination": str(reconciler_script),
+                        "sha256": activation._sha256(b"base-reconciler"),
+                        "mode": "0755",
+                    },
+                    {
+                        "destination": str(runtime_script),
+                        "sha256": activation._sha256(b"base-runtime"),
+                        "mode": "0644",
+                    },
+                ],
+            }
+            manifest.write_bytes(activation._canonical(payload))
+            receipt = root / "runtime-active.json"
+            receipt.write_bytes(
+                activation._canonical(
+                    {
+                        "schema_version": 1,
+                        "mode": "V3_RUNTIME_OVERRIDE",
+                        "phase": "ACTIVE",
+                        "base_source_head": "a" * 40,
+                        "runtime_source_head": "d" * 40,
+                        "base_install_manifest_sha256": activation._sha256(
+                            manifest.read_bytes()
+                        ),
+                        "base_runtime_sha256": activation._sha256(b"base-runtime"),
+                        "runtime_sha256": activation._sha256(b"candidate-runtime"),
+                        "runtime_mode": "0644",
+                        "runtime_git_blob": "e" * 40,
+                        "root_policy_sha256": "b" * 64,
+                        "non_runtime_generation_equivalent": True,
+                    }
+                )
+            )
+            receipt.chmod(0o600)
+
+            old_controller = activation.reconciler.V3_CONTROLLER_BINARY
+            old_reconciler = activation.RECONCILER_SCRIPT
+            old_runtime = activation.V3_RUNTIME_SCRIPT
+            old_runtime_receipt = activation.RUNTIME_OVERRIDE_ACTIVE_RECEIPT
+            try:
+                activation.reconciler.V3_CONTROLLER_BINARY = controller
+                activation.RECONCILER_SCRIPT = reconciler_script
+                activation.V3_RUNTIME_SCRIPT = runtime_script
+                activation.RUNTIME_OVERRIDE_ACTIVE_RECEIPT = receipt
+                result = activation.verify_effective_installed_generation(manifest)
+            finally:
+                activation.reconciler.V3_CONTROLLER_BINARY = old_controller
+                activation.RECONCILER_SCRIPT = old_reconciler
+                activation.V3_RUNTIME_SCRIPT = old_runtime
+                activation.RUNTIME_OVERRIDE_ACTIVE_RECEIPT = old_runtime_receipt
+
+            self.assertEqual(
+                result["runtime_override"]["runtime_source_head"],
+                "d" * 40,
+            )
+
     def test_root_activation_helper_drift_without_active_receipt_is_rejected(self):
         with tempfile.TemporaryDirectory() as raw:
             root = pathlib.Path(raw)

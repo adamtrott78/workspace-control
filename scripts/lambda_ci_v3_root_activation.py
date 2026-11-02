@@ -57,6 +57,12 @@ RECONCILER_SCRIPT = pathlib.Path(
 RECONCILER_OVERRIDE_ACTIVE_RECEIPT = (
     V3_STATE_ROOT / "reconciler-refresh" / "active.json"
 )
+V3_RUNTIME_SCRIPT = pathlib.Path(
+    "/opt/workspace-ci/v3/provisioner/lambda_ci_runtime.py"
+)
+RUNTIME_OVERRIDE_ACTIVE_RECEIPT = (
+    V3_STATE_ROOT / "runtime-refresh" / "active.json"
+)
 MIGRATION_ROOT = V3_STATE_ROOT / "migration"
 AUTHORITY_CONSUMPTION_ROOT = V3_STATE_ROOT / "migration-authority"
 V3_PROVISIONER_STATE = V3_STATE_ROOT / "provisioner"
@@ -169,9 +175,11 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
 
     controller_destination = str(reconciler.V3_CONTROLLER_BINARY)
     helper_destination = str(ROOT_ACTIVATION_HELPER)
+    runtime_destination = str(V3_RUNTIME_SCRIPT)
     controller_entry = None
     helper_entry = None
     reconciler_entry = None
+    runtime_entry = None
     for entry in manifest.get("entries", []):
         destination = str(entry.get("destination", ""))
         path = pathlib.Path(destination)
@@ -188,6 +196,9 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
             continue
         if destination == str(RECONCILER_SCRIPT):
             reconciler_entry = entry
+            continue
+        if destination == runtime_destination:
+            runtime_entry = entry
             continue
         if _sha256(path.read_bytes()) != entry.get("sha256"):
             raise RootActivationError(f"managed artifact digest drift: {path}")
@@ -287,6 +298,38 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
         ):
             raise RootActivationError("active reconciler override source head invalid")
         effective["reconciler_override"] = active_reconciler
+
+    if runtime_entry is None:
+        raise RootActivationError("shared runtime script absent from install manifest")
+    actual_runtime_sha = _sha256(V3_RUNTIME_SCRIPT.read_bytes())
+    if actual_runtime_sha != runtime_entry.get("sha256"):
+        active_runtime = _load_override_receipt(
+            RUNTIME_OVERRIDE_ACTIVE_RECEIPT,
+            "active runtime override",
+        )
+        required_runtime = {
+            "mode": "V3_RUNTIME_OVERRIDE",
+            "phase": "ACTIVE",
+            "base_source_head": manifest.get("source_head"),
+            "base_install_manifest_sha256": _sha256(manifest_raw),
+            "base_runtime_sha256": runtime_entry.get("sha256"),
+            "runtime_sha256": actual_runtime_sha,
+            "runtime_mode": str(runtime_entry.get("mode")),
+            "root_policy_sha256": manifest.get("root_policy_sha256"),
+            "non_runtime_generation_equivalent": True,
+        }
+        for key, expected in required_runtime.items():
+            if active_runtime.get(key) != expected:
+                raise RootActivationError(
+                    f"active runtime override binding mismatch: {key}"
+                )
+        runtime_source_head = active_runtime.get("runtime_source_head")
+        if (
+            not isinstance(runtime_source_head, str)
+            or re.fullmatch(r"[0-9a-f]{40}", runtime_source_head) is None
+        ):
+            raise RootActivationError("active runtime override source head invalid")
+        effective["runtime_override"] = active_runtime
 
     return effective or None
 
