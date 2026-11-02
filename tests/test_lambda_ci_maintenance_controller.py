@@ -7,6 +7,7 @@ from unittest import mock
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
+LIVE_UPDATE = SCRIPTS / "lambda_ci_maintenance_controller_live_update_v1.py"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
@@ -128,6 +129,37 @@ class MaintenanceControllerTests(unittest.TestCase):
             command["quarantine_receipt_id"],
         )
         self.assertEqual(requiesce["reset_generation"], generation)
+
+    def test_live_update_is_single_file_transactional_and_fail_closed(self):
+        text = LIVE_UPDATE.read_text(encoding="utf-8")
+        compile(text, str(LIVE_UPDATE), "exec")
+
+        self.assertIn(
+            'EXPECTED_OLD_GIT_BLOB = "4b5ec97754c83e4b01103dea9c2f84112b3d6110"',
+            text,
+        )
+        self.assertIn(
+            'EXPECTED_CANDIDATE_GIT_BLOB = "f994992cb3e4713c1e0a165c18de459fa44dac74"',
+            text,
+        )
+        self.assertIn(
+            '"/opt/workspace-ci/maintenance-controller/lambda_ci_maintenance_controller.py"',
+            text,
+        )
+        self.assertIn('SERVICE = "workspace-ci-maintenance-controller.service"', text)
+        self.assertIn('"status": "ROLLED_BACK"', text)
+        self.assertIn("maintenance controller PID changed during stability window", text)
+
+        # The hotfix is not a migration transaction and must not operate on
+        # project controllers, v3 services, scale sets, credentials, or
+        # quarantine/retry state.
+        self.assertNotIn("workspace-ci-controller@", text)
+        self.assertNotIn("workspace-ci-v3-", text)
+        self.assertNotIn("--scale-set-maintenance", text)
+        self.assertNotIn("quarantine.json", text)
+        self.assertNotIn("ready-for-single-retry.json", text)
+        self.assertNotIn("github-read-token", text)
+        self.assertNotIn("runner-token", text)
 
     def test_github_time_parser_accepts_go_rfc3339_nanoseconds(self):
         observed = controller._parse_github_time(
