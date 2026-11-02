@@ -233,6 +233,60 @@ class ProductionCutoverTests(unittest.TestCase):
             "PRESENT",
         )
 
+    def test_prior_generation_terminal_controller_ledger_is_allowed(self):
+        state_root = self.base / "controller-state"
+        class_root = (
+            state_root
+            / "workspace-control-control-small-v1"
+        )
+        class_root.mkdir(parents=True)
+        (class_root / "124723948506.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "controller_policy_sha256": "e" * 64,
+                    "runner_request_id": 124723948506,
+                    "state": "COMPLETED",
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n"
+        )
+        production._assert_controller_ledgers_terminal(
+            state_root,
+            self.base_compiled["root_projection"],
+        )
+
+    def test_nonterminal_prior_generation_controller_ledger_blocks_cutover(self):
+        state_root = self.base / "controller-state"
+        class_root = (
+            state_root
+            / "workspace-control-control-small-v1"
+        )
+        class_root.mkdir(parents=True)
+        (class_root / "124723948506.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "controller_policy_sha256": "e" * 64,
+                    "runner_request_id": 124723948506,
+                    "state": "ACQUIRED",
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n"
+        )
+        with self.assertRaisesRegex(
+            production.CutoverError,
+            "nonterminal controller ledger blocks production cutover",
+        ):
+            production._assert_controller_ledgers_terminal(
+                state_root,
+                self.base_compiled["root_projection"],
+            )
+
     def test_duplicate_or_missing_runs_on_fails_closed(self):
         spec = production.ROUTES["padataset:cpu-ci"]
         with self.assertRaisesRegex(
