@@ -988,11 +988,11 @@ func (s *v3Scaler) generateAndLaunch(ctx context.Context, record *jobRecord) err
 func (s *v3Scaler) progressReserved(ctx context.Context, records []jobRecord) error {
 	for i := range records {
 		record := records[i]
-		current, err := s.currentPolicyRecord(record)
+		samePolicy, err := s.currentPolicyRecord(record)
 		if err != nil {
 			return err
 		}
-		if !current {
+		if !samePolicy {
 			continue
 		}
 		if err := s.recoverOne(ctx, &record); err != nil {
