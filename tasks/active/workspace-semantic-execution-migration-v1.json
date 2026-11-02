@@ -590,7 +590,6 @@
     "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash."
   ],
   "remaining_work": [
-    "Track the GitRunner v3 migration/retirement task as the current P0 infrastructure dependency only; consume its durable receipts/state but do not let it redefine the umbrella architecture.",
     "Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.",
     "Consolidate already completed Instant capability evidence: multi-leaf queue endurance/resume, stateless durable recovery, concurrent exact-head CAS claiming/completion, lease expiry/recovery fencing, and multi-worker scaling with eight validated actions.",
     "Implement and run the resumable-reasoning benchmark pilot comparing frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators plus usage/context/effectiveness metrics.",
