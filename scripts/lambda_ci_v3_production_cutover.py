@@ -1164,6 +1164,7 @@ def commit(
     repo_root: pathlib.Path,
     receipt_path: pathlib.Path,
     validation_confirmation: pathlib.Path,
+    provisioner_state_root: pathlib.Path = PROVISIONER_STATE,
 ) -> None:
     receipt = _load(receipt_path)
     if receipt.get("phase") != "V3_PRODUCTION_ACTIVE":
@@ -1183,6 +1184,14 @@ def commit(
     )
     if any(systemd.active(unit) for unit in migration.v2_controller_units(registry)):
         raise CutoverError("v2 controller active at production commit")
+    migration._assert_generation_drained(
+        systemd,
+        registry=registry,
+        root_policy=installed_root,
+        require_legacy_empty=True,
+        require_v3_empty=True,
+        state_root=provisioner_state_root,
+    )
 
     frozen = pathlib.Path(receipt["frozen_generation_dir"])
     manifest = _load(frozen / "manifest.json")
@@ -1452,6 +1461,7 @@ def main() -> int:
             repo_root=repo_root,
             receipt_path=args.receipt,
             validation_confirmation=args.validation_confirmation,
+            provisioner_state_root=PROVISIONER_STATE,
         )
         print("V3_PRODUCTION_COMMIT=PASS")
         return 0
