@@ -209,6 +209,9 @@ def render(args):
         "bwrap_path": "/usr/bin/bwrap",
         "systemd_run_path": "/usr/bin/systemd-run",
         "systemctl_path": "/usr/bin/systemctl",
+        "journalctl_path": "/usr/bin/journalctl",
+        "allowed_units": list(ALLOWED_UNITS),
+        "maintenance_controller_receipt_root": "/var/lib/workspace-ci/maintenance-controller/receipts",
         "policy_version_sha": authority_sha,
     }
 
