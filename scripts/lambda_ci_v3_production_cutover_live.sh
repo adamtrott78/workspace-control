@@ -879,7 +879,7 @@ run_validation() {
   echo "PRODUCTION_VALIDATION_RUN_ID route=$route_key run_id=$run_id"
 
   conclusion=""
-  for _ in $(seq 1 150); do
+  for _ in $(seq 1 300); do
     read -r status conclusion <<EOF
 $(gh api --method GET "repos/$repo/actions/runs/$run_id" --jq '[.status, (.conclusion // "pending")] | @tsv')
 EOF
