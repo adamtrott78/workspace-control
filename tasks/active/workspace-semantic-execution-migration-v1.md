@@ -98,18 +98,12 @@ TEMPORARY P0 INFRASTRUCTURE GATE, NOT THE OVERALL PROJECT: first allow workspace
 
 @GitHub
 
-@Workspace Shell
-
-@Heartbeat
-
 https://github.com/adamtrott78/workspace-control
-
-YOU ARE THE CONTINUING EXECUTOR. DO THE WORK YOURSELF IN THIS CHAT. DO NOT RETURN ANOTHER HANDOFF OR REVIEWER PROMPT.
 
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-semantic-execution-migration-v1.json
 
 Start from the normal workspace-control root route.
-Recover exact durable GitHub/runtime state before acting; do not rely on conversational memory where repository/runtime evidence exists.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Follow the capsule's next_safe_action and preserve all authority boundaries.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
