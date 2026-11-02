@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: e09c7f5485914b0345ffb459512461fede94875d
+- Remote checkpoint: 0fd8a2b37bbd1987008a61a5e346718658a12137
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,10 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-TEMPORARY P0 INFRASTRUCTURE GATE, NOT THE OVERALL PROJECT: first allow workspace-github-actions-control-plane-protocol-redesign-v1 / PR #572 to recover v3 root services after the power outage, finish PADataset CPU/GPU active-class canaries, perform the controlled production v3 cutover, and retire v2. Do not let that incident consume or replace this umbrella program. Once v3 is canonical and the Workspace Shell recovery/standing-authority gaps are closed enough for normal operation, immediately resume the semantic-execution program at the empirical executor/reasoning evidence stage: consolidate the already completed Instant capability benchmarks, run the resumable-reasoning quality benchmark against frontier control arms, perform independent architecture review, prove an unseen workflow/domain extension, freeze the smallest open-world semantic core + ReasoningProcess + executor/resource/quota router, then incrementally migrate representative research, engineering, data-science, paper, slide, tutoring/homework, document/artifact, GitRunner, Workspace Shell, and future workflow families. Optimize for the same end-to-end functionality with minimal scarce frontier-model allowance, not for a research-only loop.
+Resume the resumable_reasoning_benchmark now that the GitRunner v3 production/retirement dependency is cleared. Consolidate the existing Instant durable-worker evidence into the benchmark harness, select representative hard long-horizon research/architecture fixtures with objective validators, and run at least the persistent Instant, stateless-resume Instant, decomposition/critic Instant, hybrid-escalation, and frontier-control arms. Measure validated outcome quality, retries/decomposition, context/usage, elapsed work quanta, and escalation reason. The decision boundary must distinguish TOO_LARGE (decompose/retry cheap) from INTRINSICALLY_DIFFICULT (escalate). Do not freeze the semantic execution architecture until the benchmark, independent architecture review, and unseen-workflow extension proof are complete.
 
 ## Remaining work
 
-- Track the GitRunner v3 migration/retirement task as the current P0 infrastructure dependency only; consume its durable receipts/state but do not let it redefine the umbrella architecture.
 - Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.
 - Consolidate already completed Instant capability evidence: multi-leaf queue endurance/resume, stateless durable recovery, concurrent exact-head CAS claiming/completion, lease expiry/recovery fencing, and multi-worker scaling with eight validated actions.
 - Implement and run the resumable-reasoning benchmark pilot comparing frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators plus usage/context/effectiveness metrics.
@@ -89,10 +88,8 @@ TEMPORARY P0 INFRASTRUCTURE GATE, NOT THE OVERALL PROJECT: first allow workspace
 
 ## Blockers / gates
 
-- Current implementation freeze is intentionally blocked until the GitRunner v3 substrate is canonical enough that new orchestration is not built atop legacy v2 reliability debt.
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
-- Live GitRunner migration actions remain authority-owned by workspace-github-actions-control-plane-protocol-redesign-v1 and require fresh class-specific authority; this umbrella task cannot manufacture that authority.
 
 ## Fresh-chat initialization
 
