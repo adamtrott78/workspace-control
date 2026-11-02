@@ -3,7 +3,7 @@
   "benchmark": "INSTANT_WORKER_SESSION_IDENTITY_V1",
   "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
   "shared_branch": "instant-worker-session-identity-v1-20261101",
-  "state_version": 1,
+  "state_version": 2,
   "invariant": "worker slot ownership is bound to a unique session_id; a chat may act for a slot only when its locally retained session_id matches durable slot.session_id",
   "worker_slots": {
     "W1": {
@@ -25,9 +25,9 @@
   },
   "actions": {
     "A": {
-      "state": "PENDING",
-      "owner_worker": null,
-      "owner_session_id": null
+      "state": "CLAIMED",
+      "owner_worker": "W1",
+      "owner_session_id": "bb41978c05f0ff80807313a8ba31af34"
     },
     "B": {
       "state": "PENDING",
@@ -69,5 +69,12 @@
       "expected_shared_head": "2154cf9127a4afd54b09f0aa39410524193bbd99"
     }
   ],
-  "claim_history": []
+  "claim_history": [
+    {
+      "worker_id": "W1",
+      "session_id": "bb41978c05f0ff80807313a8ba31af34",
+      "action": "A",
+      "expected_shared_head": "2f10cb3bc3e5739bb8b6a74a3c2f672afd7c2adb"
+    }
+  ]
 }
