@@ -301,8 +301,9 @@ def _retarget_workflow(
                 "          [[ \"$(\"$RUNNER_TEMP/go/bin/go\" env GOVERSION)\" == \"go1.26.3\" ]]\n"
                 "          (\n"
                 "            cd controller/lambda-ci-controller\n"
-                "            \"$RUNNER_TEMP/go/bin/go\" test -mod=mod ./v3 \\\n"
-                "              -run '^(TestProductionV3SourceDoesNotReadDisplayOrCandidateAuthority|TestTerminalRecordFromPriorPolicyGenerationIsInert|TestControllerPolicyDigestDriftIsFatalBeforeMutation)            )
+                "            \"$RUNNER_TEMP/go/bin/go\" test -mod=mod ./v3 -run '^(TestProductionV3SourceDoesNotReadDisplayOrCandidateAuthority|TestTerminalRecordFromPriorPolicyGenerationIsInert|TestControllerPolicyDigestDriftIsFatalBeforeMutation)$' -count=1 -timeout=90s\n"
+                "          )\n"
+            )
             rendered = rendered.replace(old_go, pinned_go, 1)
     if rendered == text:
         raise CutoverError("workflow retarget produced no byte change")
