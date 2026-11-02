@@ -57,6 +57,26 @@ V3_RUNTIME_SCRIPT = V3_PROVISIONER_ROOT / "lambda_ci_runtime.py"
 RUNTIME_OVERRIDE_ACTIVE_RECEIPT = (
     V3_RUNTIME_STATE_ROOT / "runtime-refresh" / "active.json"
 )
+PRODUCTION_CUTOVER_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT / "production-cutover" / "active.json"
+)
+PRODUCTION_ACCEPTED_CLASS_IDS = (
+    "workspace-control-control-small-v1",
+    "padataset-cpu-public-v1",
+    "padataset-gpu-single-public-v1",
+)
+PRODUCTION_OVERRIDE_DESTINATIONS = {
+    str(V3_CONFIG_ROOT / "deployment-overlay.json"),
+    *{
+        str(V3_CONFIG_ROOT / "controllers" / f"{class_id}.json")
+        for class_id in PRODUCTION_ACCEPTED_CLASS_IDS
+    },
+}
+PRODUCTION_ROUTE_KEYS = {
+    "workspace-control:control-validation",
+    "padataset:cpu-ci",
+    "padataset:gpu-ci",
+}
 
 MANAGED_SYSTEMD = {
     "workspace-ci-v3-provisioner.service":
@@ -104,6 +124,80 @@ def _require_source_head(value: Any, label: str) -> str:
     if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{40}", value) is None:
         raise ReconcileError(f"{label} source head invalid")
     return value
+
+
+def _production_cutover_overrides(
+    manifest_raw: bytes,
+    manifest: dict[str, Any],
+) -> dict[str, str]:
+    if not PRODUCTION_CUTOVER_ACTIVE_RECEIPT.is_file():
+        return {}
+    active = _load_override_receipt(
+        PRODUCTION_CUTOVER_ACTIVE_RECEIPT,
+        "active production cutover override",
+    )
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PRODUCTION_CUTOVER_OVERRIDE",
+        "phase": "ACTIVE",
+        "base_source_head": manifest.get("source_head"),
+        "base_install_manifest_sha256": _sha256(manifest_raw),
+        "root_policy_sha256": manifest.get("root_policy_sha256"),
+        "accepted_runner_class_ids": list(PRODUCTION_ACCEPTED_CLASS_IDS),
+        "research_gpu_containment_preserved": True,
+        "non_selected_classes_inactive": True,
+    }
+    for key, expected in required.items():
+        if active.get(key) != expected:
+            raise ReconcileError(
+                f"active production cutover override binding mismatch: {key}"
+            )
+    generation = active.get("production_generation_sha256")
+    if not isinstance(generation, str) or re.fullmatch(r"[0-9a-f]{64}", generation) is None:
+        raise ReconcileError("active production cutover generation invalid")
+    bindings = active.get("workflow_bindings")
+    if not isinstance(bindings, dict) or set(bindings) != PRODUCTION_ROUTE_KEYS:
+        raise ReconcileError("active production cutover workflow bindings invalid")
+    for route_key, binding in bindings.items():
+        if not isinstance(binding, dict):
+            raise ReconcileError(
+                f"active production cutover workflow binding invalid: {route_key}"
+            )
+        required_binding = {
+            "repository",
+            "path",
+            "old_blob_sha",
+            "new_blob_sha",
+            "target_scale_set_name",
+        }
+        if set(binding) != required_binding:
+            raise ReconcileError(
+                f"active production cutover workflow binding keys drift: {route_key}"
+            )
+        for field in ("old_blob_sha", "new_blob_sha"):
+            value = binding.get(field)
+            if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{40}", value) is None:
+                raise ReconcileError(
+                    f"active production cutover workflow binding {field} invalid: {route_key}"
+                )
+        if binding["old_blob_sha"] == binding["new_blob_sha"]:
+            raise ReconcileError(
+                f"active production cutover workflow binding did not change: {route_key}"
+            )
+        for field in ("repository", "path", "target_scale_set_name"):
+            if not isinstance(binding.get(field), str) or not binding[field]:
+                raise ReconcileError(
+                    f"active production cutover workflow binding {field} invalid: {route_key}"
+                )
+    overrides = active.get("managed_artifact_overrides")
+    if not isinstance(overrides, dict) or set(overrides) != PRODUCTION_OVERRIDE_DESTINATIONS:
+        raise ReconcileError("active production cutover managed override set invalid")
+    for destination, digest in overrides.items():
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise ReconcileError(
+                f"active production cutover digest invalid: {destination}"
+            )
+    return dict(overrides)
 
 
 SYSUSER_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]{0,30}$")
@@ -520,6 +614,8 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
     reconciler_destination = str(RECONCILER_SCRIPT)
     runtime_destination = str(V3_RUNTIME_SCRIPT)
     special: dict[str, dict[str, Any]] = {}
+    production_overrides = _production_cutover_overrides(manifest_raw, manifest)
+    production_overrides_seen: set[str] = set()
 
     for entry in manifest.get("entries", []):
         if not isinstance(entry, dict):
@@ -538,8 +634,22 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         }:
             special[destination] = entry
             continue
-        if _sha256(path.read_bytes()) != entry.get("sha256"):
-            raise ReconcileError(f"managed artifact digest drift: {path}")
+        actual_sha = _sha256(path.read_bytes())
+        if actual_sha != entry.get("sha256"):
+            expected_override = production_overrides.get(destination)
+            if expected_override != actual_sha:
+                raise ReconcileError(f"managed artifact digest drift: {path}")
+            production_overrides_seen.add(destination)
+        elif destination in production_overrides:
+            raise ReconcileError(
+                f"active production cutover override claims unchanged artifact: {path}"
+            )
+
+    if production_overrides_seen != set(production_overrides):
+        missing = sorted(set(production_overrides) - production_overrides_seen)
+        raise ReconcileError(
+            f"active production cutover override artifacts were not observed: {missing}"
+        )
 
     base_manifest_sha = _sha256(manifest_raw)
     root_policy_sha = manifest.get("root_policy_sha256")
