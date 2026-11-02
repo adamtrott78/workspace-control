@@ -188,6 +188,10 @@ class MaintenanceControllerTests(unittest.TestCase):
             'GO_SHA256 = "2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556"',
             text,
         )
+        self.assertLess(
+            text.index("go_bin = provision_go_toolchain(build_dir)"),
+            text.index("installed_revision = go_vcs_revision(INSTALLED_CONTROLLER, go_bin)"),
+        )
         self.assertIn(
             '"controller/lambda-ci-controller/main.go",',
             text,
