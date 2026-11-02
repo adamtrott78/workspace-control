@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 124edbf30587be8f64e579a053eb2beef8288f5a
+- Remote checkpoint: 2d9dd4c43373ba55b1042e634e2cb0b4720f8af9
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY SESSION LAUNCH GATE: open a fresh Temporary Chat (or otherwise Memory-disabled chat) in ChatGPT Instant with GitHub available, and send only the canonical navigation message for assigned run-state benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-001.json. The durable bootstrap/run state contains all instructions; do not paste oracle, logs, SHAs, or prior chat context. This control chat cannot instantiate a separate clean ChatGPT session itself. Once the worker writes WAITING_EXTERNAL or TERMINAL_CANDIDATE to GitHub, this control chat can resume autonomously from durable state and service the evaluator transition. Strong claim-bearing replicated runs remain blocked on a proven evaluator-only runtime store.
+USER-ONLY CLEAN SESSION RETRY: open a brand-new Temporary Chat in ChatGPT Instant (do not branch from this conversation or reuse the contaminated worker chat), make GitHub available, and send only the canonical navigation message for assigned run-state benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json. The predecessor screen-001 is durably preserved as a successful fail-closed contamination test. Once screen-002 writes WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can continue directly from GitHub.
 
 ## Remaining work
 
-- Launch screening-v1-P0-B-001 in a fresh Temporary/Memory-off ChatGPT Instant chat with GitHub only; allow that worker to mutate only its assigned run-state file, and service its WAITING_EXTERNAL / TERMINAL_CANDIDATE transitions from this control chat.
+- Launch screening-v1-P0-B-002 in a truly fresh Temporary/Memory-off ChatGPT Instant chat with GitHub only; do not branch from an existing benchmark/control chat. Service its WAITING_EXTERNAL / TERMINAL_CANDIDATE transitions from this control chat.
 - After the first P0×Instant-persistent transport smoke completes cleanly, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
