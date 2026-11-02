@@ -16,7 +16,7 @@
     },
     {
       "path": "controller/lambda-ci-controller/go.mod",
-      "git_blob_sha": "c0a743bec472b0ab0996679a9d86dc409db79104"
+      "git_blob_sha": "c6eac3f02843fbe5d384594b7ff1e60806a1ba14"
     },
     {
       "path": "scripts/lambda_ci_admission.py",

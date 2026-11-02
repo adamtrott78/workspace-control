@@ -1,0 +1,369 @@
+{
+  "schema_version": 1,
+  "catalog_id": "lambda-ci-executor-action-catalog-v1",
+  "status": "MODEL_ONLY_NOT_LIVE",
+  "generation_source": "architecture/lambda-ci-runner-class-catalog.v1.json",
+  "rules": [
+    "executors select an action_id and typed arguments; they do not supply a raw command string",
+    "builder validates arguments before mutating GitHub",
+    "builder reads current PR head when candidate_sha is omitted by a higher-level convenience API",
+    "builder renders exactly one canonical slash-command representation",
+    "rendered command is consumed by trusted workflow ingress only; infrastructure controller/root never parse it",
+    "unknown action_id or argument is rejected locally",
+    "legacy self-hosted workflow commands not in this catalog are unsupported"
+  ],
+  "parameter_schemas": {
+    "candidate-sha-v1": {
+      "type": "object",
+      "additional_properties": false,
+      "required": [
+        "candidate_sha"
+      ],
+      "properties": {
+        "candidate_sha": {
+          "type": "lower_hex_40"
+        }
+      }
+    },
+    "candidate-sha-reasoner-probe-v1": {
+      "type": "object",
+      "additional_properties": false,
+      "required": [
+        "candidate_sha",
+        "candidate_id"
+      ],
+      "properties": {
+        "candidate_sha": {
+          "type": "lower_hex_40"
+        },
+        "candidate_id": {
+          "type": "enum",
+          "values": [
+            "qwen35-9b-q6-resource",
+            "qwythos-9b-v2-q6-resource"
+          ]
+        }
+      }
+    },
+    "maintenance-diagnose-v2": {
+      "type": "object",
+      "additional_properties": false,
+      "required": [
+        "runner_class_id"
+      ],
+      "properties": {
+        "runner_class_id": {
+          "type": "catalog_runner_class_id"
+        }
+      }
+    },
+    "maintenance-host-attest-v2": {
+      "type": "object",
+      "additional_properties": false,
+      "required": [
+        "runner_class_id"
+      ],
+      "properties": {
+        "runner_class_id": {
+          "type": "catalog_runner_class_id"
+        }
+      }
+    },
+    "maintenance-restart-v2": {
+      "type": "object",
+      "additional_properties": false,
+      "required": [
+        "runner_class_id"
+      ],
+      "properties": {
+        "runner_class_id": {
+          "type": "catalog_runner_class_id"
+        }
+      }
+    },
+    "maintenance-reset-stale-v2": {
+      "type": "object",
+      "additional_properties": false,
+      "required": [
+        "runner_class_id",
+        "quarantine_receipt_id"
+      ],
+      "properties": {
+        "runner_class_id": {
+          "type": "catalog_runner_class_id"
+        },
+        "quarantine_receipt_id": {
+          "type": "uuid"
+        }
+      }
+    }
+  },
+  "execution_actions": {
+    "research_engine.cpu_test": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "cpu-test",
+      "command": "/lambda-ci-p5",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-p5 <candidate_sha>"
+    },
+    "research_engine.gpu_small": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "gpu-small",
+      "command": "/lambda-ci-p5-gpu",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-p5-gpu <candidate_sha>"
+    },
+    "research_engine.model_eval_single_gpu": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-single-gpu",
+      "command": "/lambda-ci-qwen35-pilot",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-qwen35-pilot <candidate_sha>"
+    },
+    "research_engine.model_eval_dual_gpu": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-dual-gpu",
+      "command": "/lambda-ci-qwen35-dual-pilot",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-qwen35-dual-pilot <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave1": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave1",
+      "command": "/lambda-ci-local-extract-wave1",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave1 <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave2": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave2",
+      "command": "/lambda-ci-local-extract-wave2",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave2 <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave3": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave3",
+      "command": "/lambda-ci-local-extract-wave3",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave3 <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave4": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave4",
+      "command": "/lambda-ci-local-extract-wave4",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave4 <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave5": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave5",
+      "command": "/lambda-ci-local-extract-wave5",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave5 <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave6": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave6",
+      "command": "/lambda-ci-local-extract-wave6",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave6 <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_reranker_v1": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-reranker-v1",
+      "command": "/lambda-ci-local-extract-reranker-bakeoff",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-reranker-bakeoff <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_oracle_query_v1": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-oracle-query-v1",
+      "command": "/lambda-ci-local-extract-oracle-query",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-oracle-query <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave7_intents": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave7-intents",
+      "command": "/lambda-ci-local-extract-wave7-intents",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave7-intents <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave7a2": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave7a2",
+      "command": "/lambda-ci-local-extract-wave7a2",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave7a2 <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_wave7a3": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-wave7a3",
+      "command": "/lambda-ci-local-extract-wave7a3",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-wave7a3 <candidate_sha>"
+    },
+    "research_engine.model_eval_local_extract_amr_graph_v1": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-local-extract-amr-graph-v1",
+      "command": "/lambda-ci-local-extract-amr-graph-certificate-validation",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-local-extract-amr-graph-certificate-validation <candidate_sha>"
+    },
+    "research_engine.model_eval_obligation_validity": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-obligation-validity",
+      "command": "/local-extract-obligation-validity-microbenchmark",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/local-extract-obligation-validity-microbenchmark <candidate_sha>"
+    },
+    "research_engine.cpu_validation_exact_provenance": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "cpu-validation-exact-provenance",
+      "command": "/validate-exact-provenance-binding",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/validate-exact-provenance-binding <candidate_sha>"
+    },
+    "research_engine.model_eval_exact_provenance_binding": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "model-eval-exact-provenance-binding",
+      "command": "/local-extract-exact-provenance-binding-microbenchmark",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/local-extract-exact-provenance-binding-microbenchmark <candidate_sha>"
+    },
+    "research_engine.gpu_experiment_public": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/research-engine",
+      "route_id": "gpu-experiment-public",
+      "command": "/lambda-reasoner-probe",
+      "parameter_schema_id": "candidate-sha-reasoner-probe-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-reasoner-probe <candidate_sha> <candidate_id>"
+    },
+    "padataset.cpu_ci": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/PADataset",
+      "route_id": "cpu-ci",
+      "command": "/lambda-ci-cpu",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-cpu <candidate_sha>"
+    },
+    "padataset.gpu_ci": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/PADataset",
+      "route_id": "gpu-ci",
+      "command": "/lambda-ci-gpu",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/lambda-ci-gpu <candidate_sha>"
+    },
+    "workspace_control.control_validation": {
+      "kind": "EXECUTION_TRIGGER",
+      "repository": "adamtrott78/workspace-control",
+      "route_id": "control-validation",
+      "command": "/workspace-control-validate",
+      "parameter_schema_id": "candidate-sha-v1",
+      "target": "open same-repository pull request",
+      "root_authority_effect": "NONE; root capacity class is fixed by trusted workflow -> runner-class compilation",
+      "rendered_form": "/workspace-control-validate <candidate_sha>"
+    }
+  },
+  "maintenance_actions": {
+    "maintenance.diagnose": {
+      "kind": "MAINTENANCE",
+      "command": "/workspace-ci-maintain diagnose",
+      "parameter_schema_id": "maintenance-diagnose-v2",
+      "root_operation": "DIAGNOSE_RUNNER_CLASS",
+      "authority": "READ_ONLY"
+    },
+    "maintenance.host_attest": {
+      "kind": "MAINTENANCE",
+      "command": "/workspace-ci-maintain host-attest",
+      "parameter_schema_id": "maintenance-host-attest-v2",
+      "root_operation": "HOST_ATTEST_RUNNER_CLASS",
+      "authority": "READ_ONLY"
+    },
+    "maintenance.restart_controller": {
+      "kind": "MAINTENANCE",
+      "command": "/workspace-ci-maintain restart",
+      "parameter_schema_id": "maintenance-restart-v2",
+      "root_operation": "RESTART_RUNNER_CLASS_CONTROLLER",
+      "authority": "CONTROLLER_LIFECYCLE_ONLY"
+    },
+    "maintenance.reset_stale": {
+      "kind": "MAINTENANCE",
+      "command": "/workspace-ci-maintain reset-stale",
+      "parameter_schema_id": "maintenance-reset-stale-v2",
+      "root_operation": "RESET_STALE_RUNNER_CLASS",
+      "authority": "RECOVERY_RECEIPT_REQUIRED"
+    }
+  },
+  "unsupported_legacy_actions": [
+    "research-engine lambda-ci-p2b-noop legacy label path",
+    "research-engine lambda-ci-p3-cpu legacy label path",
+    "research-engine lambda-ci-p4-gpu legacy label path",
+    "workspace-control host-attest as optional /workspace-control-validate qualifier"
+  ]
+}

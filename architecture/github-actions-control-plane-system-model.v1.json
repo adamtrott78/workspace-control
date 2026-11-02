@@ -1,0 +1,1433 @@
+{
+  "schema_version": 1,
+  "model_id": "github-actions-control-plane-system-model-v1",
+  "status": "INITIAL_INVENTORY_COMPLETE_LIVE_MIGRATION_PAUSED",
+  "authority": "workspace-control",
+  "source_checkpoints": {
+    "workspace_control_main": "f48f46618b560d91950fae1927048e14e29a59ab",
+    "research_engine_main": "94edb809f4c295902911f8cc4b3652a9121ac715",
+    "padataset_main": "35e6f451fe36f039b5f6461f7469f0eed1e79e43"
+  },
+  "registered_projects": [
+    "research-engine",
+    "padataset",
+    "workspace-control"
+  ],
+  "controller_topology": {
+    "github_facing_controllers": [
+      {
+        "controller_id": "research-engine-cpu",
+        "type": "runner_scale_set_lane_controller",
+        "service": "workspace-ci-controller@research-engine-cpu.service",
+        "binary": "/opt/workspace-ci/controller/lambda-ci-controller",
+        "project_id": "research-engine",
+        "lane": "cpu",
+        "scale_set_name": "lambda-research-engine",
+        "runner_prefix": "lambda-research-engine-",
+        "github_facing": true,
+        "root_privileged": false,
+        "root_service": "workspace-ci-provisioner.service"
+      },
+      {
+        "controller_id": "research-engine-gpu",
+        "type": "runner_scale_set_lane_controller",
+        "service": "workspace-ci-controller@research-engine-gpu.service",
+        "binary": "/opt/workspace-ci/controller/lambda-ci-controller",
+        "project_id": "research-engine",
+        "lane": "gpu",
+        "scale_set_name": "lambda-research-engine-gpu",
+        "runner_prefix": "lambda-research-engine-gpu-",
+        "github_facing": true,
+        "root_privileged": false,
+        "root_service": "workspace-ci-provisioner.service"
+      },
+      {
+        "controller_id": "padataset-cpu",
+        "type": "runner_scale_set_lane_controller",
+        "service": "workspace-ci-controller@padataset-cpu.service",
+        "binary": "/opt/workspace-ci/controller/lambda-ci-controller",
+        "project_id": "padataset",
+        "lane": "cpu",
+        "scale_set_name": "lambda-padataset",
+        "runner_prefix": "lambda-padataset-",
+        "github_facing": true,
+        "root_privileged": false,
+        "root_service": "workspace-ci-provisioner.service"
+      },
+      {
+        "controller_id": "padataset-gpu",
+        "type": "runner_scale_set_lane_controller",
+        "service": "workspace-ci-controller@padataset-gpu.service",
+        "binary": "/opt/workspace-ci/controller/lambda-ci-controller",
+        "project_id": "padataset",
+        "lane": "gpu",
+        "scale_set_name": "lambda-padataset-gpu",
+        "runner_prefix": "lambda-padataset-gpu-",
+        "github_facing": true,
+        "root_privileged": false,
+        "root_service": "workspace-ci-provisioner.service"
+      },
+      {
+        "controller_id": "workspace-control-cpu",
+        "type": "runner_scale_set_lane_controller",
+        "service": "workspace-ci-controller@workspace-control-cpu.service",
+        "binary": "/opt/workspace-ci/controller/lambda-ci-controller",
+        "project_id": "workspace-control",
+        "lane": "cpu",
+        "scale_set_name": "lambda-workspace-control",
+        "runner_prefix": "lambda-workspace-control-",
+        "github_facing": true,
+        "root_privileged": false,
+        "root_service": "workspace-ci-provisioner.service"
+      },
+      {
+        "controller_id": "maintenance-controller",
+        "type": "github_issue_command_controller",
+        "service": "workspace-ci-maintenance-controller.service",
+        "binary": "/opt/workspace-ci/maintenance-controller/lambda_ci_maintenance_controller.py",
+        "github_input": "owner-authored comments on dedicated workspace-control maintenance issue",
+        "parser_model": "parse command once at ingress, then emit structured JSON to root",
+        "root_service": "workspace-ci-maintenance.service"
+      },
+      {
+        "controller_id": "project-reconcile-controller",
+        "type": "github_workflow_run_reconciliation_controller",
+        "service": "workspace-ci-reconcile-controller.service",
+        "binary": "/opt/workspace-ci/reconcile-controller/lambda_ci_reconcile_controller.py",
+        "github_input": "successful trusted workspace-control reconciliation workflow runs on main",
+        "parser_model": "no human command grammar; construct structured registry/manifests request from exact GitHub content",
+        "root_service": "workspace-ci-reconciler.service"
+      }
+    ],
+    "root_services": [
+      "workspace-ci-provisioner.service",
+      "workspace-ci-maintenance.service",
+      "workspace-ci-reconciler.service"
+    ],
+    "legacy_unit_definitions_retained_in_repository": [
+      "workspace-ci-controller.service",
+      "workspace-ci-controller-gpu.service"
+    ]
+  },
+  "registered_route_count": 23,
+  "routes": [
+    {
+      "project_id": "workspace-control",
+      "route_id": "control-validation",
+      "lane": "cpu",
+      "scale_set_name": "lambda-workspace-control",
+      "workflow_path": ".github/workflows/lambda-ci-workspace-control-validation.yml",
+      "trusted_workflow_blob_sha": "524e01916e1a826efd1edb4792023973d7b3c73c",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
+      "command": "/workspace-control-validate",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "control-small-ci-v1",
+      "execution_profile": "control-small",
+      "resource_class": "control_small_v1",
+      "gpu_count": 0,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_ONLY",
+      "cache_access_class": "NO_PERSISTENT_CACHE_AUTHORITY",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": null,
+      "runner_envelope_key": "control-small-ci-v1|-|-",
+      "workflow_job_key": "control-validation",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "padataset",
+      "route_id": "cpu-ci",
+      "lane": "cpu",
+      "scale_set_name": "lambda-padataset",
+      "workflow_path": ".github/workflows/lambda-ci-cpu.yml",
+      "trusted_workflow_blob_sha": "5e6a1d4a47ecdfa8b40d3bea23fa8739cc12cd9e",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+      "command": "/lambda-ci-cpu",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "execution_profile": "cpu-test",
+      "resource_class": "cpu_test_v1",
+      "gpu_count": 0,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_ONLY",
+      "cache_access_class": "NO_PERSISTENT_CACHE_AUTHORITY",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": null,
+      "runner_envelope_key": "cpu-public-ci-v1|-|-",
+      "workflow_job_key": "padataset-cpu",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "padataset",
+      "route_id": "gpu-ci",
+      "lane": "gpu",
+      "scale_set_name": "lambda-padataset-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-gpu.yml",
+      "trusted_workflow_blob_sha": "3e0c79dc1b8bed7b1480cc745c478c190a3c7da4",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+      "command": "/lambda-ci-gpu",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "resource_class": "gpu_small_v1",
+      "gpu_count": 1,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "EXACT_TRUSTED_OBJECTS_READONLY_OR_NONE",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": null,
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|-",
+      "workflow_job_key": "padataset-gpu",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "cpu-test",
+      "lane": "cpu",
+      "scale_set_name": "lambda-research-engine",
+      "workflow_path": ".github/workflows/lambda-ci-p5-autonomous.yml",
+      "trusted_workflow_blob_sha": "eca9f11373a591a34a2e19c0eafe31e9e171f785",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-p5",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "execution_profile": "cpu-test",
+      "resource_class": "cpu_test_v1",
+      "gpu_count": 0,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_ONLY",
+      "cache_access_class": "NO_PERSISTENT_CACHE_AUTHORITY",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": null,
+      "runner_envelope_key": "cpu-public-ci-v1|-|-",
+      "workflow_job_key": "autonomous-cpu",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "gpu-small",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-p5-gpu-autonomous.yml",
+      "trusted_workflow_blob_sha": "e02e35306ae82c4ba393631cbaa1521ca53a28b4",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-p5-gpu",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "resource_class": "gpu_small_v1",
+      "gpu_count": 1,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "EXACT_TRUSTED_OBJECTS_READONLY_OR_NONE",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "autonomous-gpu",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-single-gpu",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-qwen35-offline-pilot.yml",
+      "trusted_workflow_blob_sha": "31d77703d434b248aa50adf93568f9a13b89dc07",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-qwen35-pilot",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-single-offline-v1",
+      "execution_profile": "gpu-small",
+      "resource_class": "model_eval_single_gpu_v1",
+      "gpu_count": 1,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-single-offline-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "qwen35-offline-pilot",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-dual-gpu",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-qwen35-dual-offline-pilot.yml",
+      "trusted_workflow_blob_sha": "a961158615269797837e036fb4cc4a3358f60189",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-qwen35-dual-pilot",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-offline-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-offline-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "qwen35-dual-offline-pilot",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave1",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave1.yml",
+      "trusted_workflow_blob_sha": "a5be693f750c481db21d86d239a505083aae40aa",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave1",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave1",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave2",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave2.yml",
+      "trusted_workflow_blob_sha": "cb7fd59bcb6f857bd6148ecbc7e2eb320dc9a1fb",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave2",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave2",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave3",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave3.yml",
+      "trusted_workflow_blob_sha": "db45f163e9e8b342d78c04540f0ace10fcba5906",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave3",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave3",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave4",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave4.yml",
+      "trusted_workflow_blob_sha": "71641ec390a514c5f6f046a1cb00eed9e43f839e",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave4",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave4",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave5",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave5.yml",
+      "trusted_workflow_blob_sha": "2ef10f5b0940ff3c2238f74c0f0efbaf5bd61d6d",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave5",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave5",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave6",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave6.yml",
+      "trusted_workflow_blob_sha": "c81e7cbb31f1731ada483a9b1f9256a4e6d78312",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave6",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave6",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-reranker-v1",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-reranker-bakeoff.yml",
+      "trusted_workflow_blob_sha": "774322780331bdc98407724bc6c5ea4c91882051",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-reranker-bakeoff",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "resource_class": "gpu_small_v1",
+      "gpu_count": 1,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "EXACT_TRUSTED_OBJECTS_READONLY_OR_NONE",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "proposition-reranker-bakeoff",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-oracle-query-v1",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-oracle-query.yml",
+      "trusted_workflow_blob_sha": "9ee22449510d425381e30aa3fc330764d8cb6464",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-oracle-query",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "resource_class": "gpu_small_v1",
+      "gpu_count": 1,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "EXACT_TRUSTED_OBJECTS_READONLY_OR_NONE",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "oracle-query-diagnostic",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave7-intents",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave7-intents.yml",
+      "trusted_workflow_blob_sha": "082226c6738ef9ae6865eebcc4c22b9f92a47c19",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave7-intents",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave7-intents",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave7a2",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave7a2.yml",
+      "trusted_workflow_blob_sha": "789c572bed32e0507c5f9e63476b3ace67e0a265",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave7a2",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave7a2",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-wave7a3",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-wave7a3.yml",
+      "trusted_workflow_blob_sha": "0f12d06667c6c45e5c0ee9bc5b3d4a3ba45844b8",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-wave7a3",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "local-extract-wave7a3",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-local-extract-amr-graph-v1",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-extract-amr-graph-certificate-validation.yml",
+      "trusted_workflow_blob_sha": "4bbc0840e85f979b4bd70f5f717cb3c8b21783dc",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-ci-local-extract-amr-graph-certificate-validation",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "resource_class": "gpu_small_v1",
+      "gpu_count": 1,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "EXACT_TRUSTED_OBJECTS_READONLY_OR_NONE",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "amr-graph-certificate-validation",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-obligation-validity",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/local-extract-obligation-validity-microbenchmark.yml",
+      "trusted_workflow_blob_sha": "d5c88ea04e8640961832e4f2b28937842cdbc19d",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/local-extract-obligation-validity-microbenchmark",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "obligation-validity-precision-microbenchmark",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "cpu-validation-exact-provenance",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/exact-provenance-implementation-validation.yml",
+      "trusted_workflow_blob_sha": "ac03ea6196ae1b427e5f3c608e5ce5fb18704e1e",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/validate-exact-provenance-binding",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "execution_profile": "cpu-test",
+      "resource_class": "cpu_test_v1",
+      "gpu_count": 0,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_ONLY",
+      "cache_access_class": "NO_PERSISTENT_CACHE_AUTHORITY",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": null,
+      "runner_envelope_key": "cpu-public-ci-v1|-|-",
+      "workflow_job_key": "validate",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "model-eval-exact-provenance-binding",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/local-extract-exact-provenance-binding-microbenchmark.yml",
+      "trusted_workflow_blob_sha": "9e710caf10ba3ffda9cb614c535b2a63494f5fef",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/local-extract-exact-provenance-binding-microbenchmark",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "resource_class": "model_eval_dual_gpu_v1",
+      "gpu_count": 2,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "TRUSTED_MODEL_RUNTIME_READONLY",
+      "state_effect_class": "NON_SCIENTIFIC_MODEL_EVAL_ONLY",
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "runner_envelope_key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+      "workflow_job_key": "exact-provenance-binding-microbenchmark",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    },
+    {
+      "project_id": "research-engine",
+      "route_id": "gpu-experiment-public",
+      "lane": "gpu",
+      "scale_set_name": "lambda-research-engine-gpu",
+      "workflow_path": ".github/workflows/lambda-ci-local-reasoner-resource-probe.yml",
+      "trusted_workflow_blob_sha": "bd4fe7f65ab0ed53ff0e6ccffc5c95f5fc3d654e",
+      "trusted_workflow_current_main_verified": true,
+      "project_main_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "command": "/lambda-reasoner-probe",
+      "claim_version": "wc-admission-v1",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "resource_class": "gpu_small_v1",
+      "gpu_count": 1,
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_EXACT_TRUSTED_READONLY",
+      "cache_access_class": "EXACT_TRUSTED_OBJECTS_READONLY_OR_NONE",
+      "state_effect_class": "CI_VALIDATION_ONLY",
+      "model_id": null,
+      "runtime_id": null,
+      "runner_envelope_key": "gpu-single-public-ci-v1|-|-",
+      "workflow_job_key": "probe",
+      "target_job_display_semantics": "STATIC_HUMAN_LABEL_ONLY"
+    }
+  ],
+  "scale_sets": [
+    {
+      "scale_set_name": "lambda-workspace-control",
+      "project_id": "workspace-control",
+      "lane": "cpu",
+      "route_count": 1,
+      "distinct_runner_envelope_count": 1,
+      "homogeneous_by_current_root_launch_envelope": true,
+      "runner_envelopes": [
+        {
+          "key": "control-small-ci-v1|-|-",
+          "routes": [
+            "control-validation"
+          ],
+          "execution_contract_id": "control-small-ci-v1",
+          "execution_profile": "control-small",
+          "gpu_count": 0,
+          "model_id": null,
+          "runtime_id": null
+        }
+      ]
+    },
+    {
+      "scale_set_name": "lambda-padataset",
+      "project_id": "padataset",
+      "lane": "cpu",
+      "route_count": 1,
+      "distinct_runner_envelope_count": 1,
+      "homogeneous_by_current_root_launch_envelope": true,
+      "runner_envelopes": [
+        {
+          "key": "cpu-public-ci-v1|-|-",
+          "routes": [
+            "cpu-ci"
+          ],
+          "execution_contract_id": "cpu-public-ci-v1",
+          "execution_profile": "cpu-test",
+          "gpu_count": 0,
+          "model_id": null,
+          "runtime_id": null
+        }
+      ]
+    },
+    {
+      "scale_set_name": "lambda-padataset-gpu",
+      "project_id": "padataset",
+      "lane": "gpu",
+      "route_count": 1,
+      "distinct_runner_envelope_count": 1,
+      "homogeneous_by_current_root_launch_envelope": true,
+      "runner_envelopes": [
+        {
+          "key": "gpu-single-public-ci-v1|-|-",
+          "routes": [
+            "gpu-ci"
+          ],
+          "execution_contract_id": "gpu-single-public-ci-v1",
+          "execution_profile": "gpu-small",
+          "gpu_count": 1,
+          "model_id": null,
+          "runtime_id": null
+        }
+      ]
+    },
+    {
+      "scale_set_name": "lambda-research-engine",
+      "project_id": "research-engine",
+      "lane": "cpu",
+      "route_count": 1,
+      "distinct_runner_envelope_count": 1,
+      "homogeneous_by_current_root_launch_envelope": true,
+      "runner_envelopes": [
+        {
+          "key": "cpu-public-ci-v1|-|-",
+          "routes": [
+            "cpu-test"
+          ],
+          "execution_contract_id": "cpu-public-ci-v1",
+          "execution_profile": "cpu-test",
+          "gpu_count": 0,
+          "model_id": null,
+          "runtime_id": null
+        }
+      ]
+    },
+    {
+      "scale_set_name": "lambda-research-engine-gpu",
+      "project_id": "research-engine",
+      "lane": "gpu",
+      "route_count": 19,
+      "distinct_runner_envelope_count": 6,
+      "homogeneous_by_current_root_launch_envelope": false,
+      "runner_envelopes": [
+        {
+          "key": "gpu-single-public-ci-v1|-|qwen35-vllm-cu129-image-native-sampler-v3",
+          "routes": [
+            "gpu-small",
+            "model-eval-local-extract-reranker-v1",
+            "model-eval-local-extract-oracle-query-v1",
+            "model-eval-local-extract-amr-graph-v1"
+          ],
+          "execution_contract_id": "gpu-single-public-ci-v1",
+          "execution_profile": "gpu-small",
+          "gpu_count": 1,
+          "model_id": null,
+          "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+        },
+        {
+          "key": "model-single-offline-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+          "routes": [
+            "model-eval-single-gpu"
+          ],
+          "execution_contract_id": "model-single-offline-v1",
+          "execution_profile": "gpu-small",
+          "gpu_count": 1,
+          "model_id": "qwen3.5-4b",
+          "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+        },
+        {
+          "key": "model-dual-offline-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+          "routes": [
+            "model-eval-dual-gpu"
+          ],
+          "execution_contract_id": "model-dual-offline-v1",
+          "execution_profile": "gpu-heavy",
+          "gpu_count": 2,
+          "model_id": "qwen3.5-4b",
+          "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+        },
+        {
+          "key": "model-dual-public-v1|qwen3.5-4b|qwen35-vllm-cu129-image-native-sampler-v3",
+          "routes": [
+            "model-eval-local-extract-wave1",
+            "model-eval-local-extract-wave2",
+            "model-eval-local-extract-wave3",
+            "model-eval-local-extract-wave4",
+            "model-eval-local-extract-wave5",
+            "model-eval-local-extract-wave6",
+            "model-eval-local-extract-wave7-intents",
+            "model-eval-local-extract-wave7a2",
+            "model-eval-local-extract-wave7a3",
+            "model-eval-obligation-validity",
+            "model-eval-exact-provenance-binding"
+          ],
+          "execution_contract_id": "model-dual-public-v1",
+          "execution_profile": "gpu-heavy",
+          "gpu_count": 2,
+          "model_id": "qwen3.5-4b",
+          "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3"
+        },
+        {
+          "key": "cpu-public-ci-v1|-|-",
+          "routes": [
+            "cpu-validation-exact-provenance"
+          ],
+          "execution_contract_id": "cpu-public-ci-v1",
+          "execution_profile": "cpu-test",
+          "gpu_count": 0,
+          "model_id": null,
+          "runtime_id": null
+        },
+        {
+          "key": "gpu-single-public-ci-v1|-|-",
+          "routes": [
+            "gpu-experiment-public"
+          ],
+          "execution_contract_id": "gpu-single-public-ci-v1",
+          "execution_profile": "gpu-small",
+          "gpu_count": 1,
+          "model_id": null,
+          "runtime_id": null
+        }
+      ]
+    }
+  ],
+  "protocol_generations": {
+    "current_scale_set_execution": {
+      "generation": "wc-admission-v1",
+      "projects": [
+        "workspace-control",
+        "padataset",
+        "research-engine"
+      ],
+      "authority_transport_problem": "human issue-comment body is embedded in JobDisplayName and independently reparsed by workflow/controller/root policy",
+      "disposition": "REDESIGN_REQUIRED"
+    },
+    "maintenance": {
+      "generation": "maintenance-v1",
+      "parser_location": "unprivileged maintenance controller only",
+      "downstream_transport": "typed JSON over Unix socket",
+      "disposition": "GOOD_INTERNAL_PATTERN_WITH_EXECUTOR_BUILDER_HARDENING"
+    },
+    "reconciliation": {
+      "generation": "reconciliation-v1",
+      "parser_location": "no human command grammar",
+      "downstream_transport": "typed JSON with exact source/workflow/manifest digests over Unix socket",
+      "disposition": "GOOD_INTERNAL_PATTERN"
+    },
+    "legacy_research_engine_self_hosted_workflows": {
+      "workflows": [
+        ".github/workflows/lambda-ci-p2b-noop.yml",
+        ".github/workflows/lambda-ci-p3-cpu.yml",
+        ".github/workflows/lambda-ci-p4-gpu.yml"
+      ],
+      "status": "REPOSITORY_PRESENT_NOT_REGISTERED_IN_CURRENT_GENERIC_ROUTE_MANIFEST",
+      "disposition": "MIGRATION_CLEANUP_OR_EXPLICIT_HISTORICAL_DISABLE_REQUIRED"
+    }
+  },
+  "key_findings": [
+    {
+      "id": "F1_DISPLAY_NAME_PROTOCOL",
+      "severity": "ARCHITECTURAL",
+      "finding": "JobDisplayName is authority-bearing wire format across multiple parsers/languages.",
+      "consequence": "valid ingress syntax can be falsely rejected downstream without any authority fact changing"
+    },
+    {
+      "id": "F2_REJECTION_CRASH_COUPLING",
+      "severity": "ARCHITECTURAL",
+      "finding": "root provisioner REJECTED is converted to Go error and returned from scaler into listener.Run",
+      "consequence": "request-local policy denial can terminate the controller and cause systemd restart loops"
+    },
+    {
+      "id": "F3_HETEROGENEOUS_SCALE_SET",
+      "severity": "ARCHITECTURAL",
+      "finding": "lambda-research-engine-gpu currently contains multiple incompatible root runner envelopes, including 0-GPU, 1-GPU, and 2-GPU execution",
+      "consequence": "a JIT runner tailored to one observed job is not guaranteed to be compatible with any pending job GitHub may assign from the same scale set"
+    },
+    {
+      "id": "F4_SCALE_SIGNAL_SEMANTICS",
+      "severity": "ARCHITECTURAL",
+      "finding": "GitHub documents TotalAssignedJobs as the authoritative scale signal and individual lifecycle message arrays as non-authoritative for counting backlog",
+      "consequence": "route-specific capacity decisions cannot safely be reconstructed from per-message parsing when heterogeneous contracts share one scale set"
+    },
+    {
+      "id": "F5_HOST_ATTEST_LAYER_VIOLATION",
+      "severity": "DESIGN",
+      "finding": "host-attest was added as an option to candidate validation even though host attestation has a different authority/visibility requirement than an isolated candidate runner",
+      "consequence": "control-plane diagnostics should be a maintenance/diagnostic operation, not a qualifier on candidate execution"
+    },
+    {
+      "id": "F6_TRUSTED_WORKFLOW_PINS",
+      "severity": "CHECKED_OK",
+      "finding": "all 23 registered routes currently match their pinned trusted workflow blob on repository main",
+      "consequence": "current incident class is not caused by workflow-pin drift"
+    },
+    {
+      "id": "F7_SHARED_CONTROLLER_UID",
+      "severity": "ARCHITECTURAL_SECURITY",
+      "finding": "all registry-managed scale-set controller instances run as the same Unix UID ci-controller while root provisioner authorizes that shared SO_PEERCRED identity",
+      "consequence": "root cannot cryptographically/kernel-distinguish which runner-class controller sent a request; a compromised controller can attempt to claim another class unless local peer identity is redesigned"
+    },
+    {
+      "id": "F8_CPU_GPU_LANE_SCHEMA",
+      "severity": "ARCHITECTURAL",
+      "finding": "controller identity derivation and maintenance targeting hardcode lane in {cpu,gpu}",
+      "consequence": "the installed control model cannot represent heterogeneous execution contracts without reparsing per-job route metadata; runner_class_id must replace lane as the scheduling/capacity identity"
+    },
+    {
+      "id": "F9_COMMAND_GRAMMAR_OVERGENERALIZED",
+      "severity": "ARCHITECTURAL",
+      "finding": "22 of 23 registered execution routes use exactly command + candidate SHA; only gpu-experiment-public adds one workflow-local candidate selector that does not alter root launch authority",
+      "consequence": "a generic optional infrastructure qualifier grammar is unnecessary; host-attest was a control-plane classification error, not a missing generic argument feature"
+    },
+    {
+      "id": "F10_SINGLE_JOB_WORKFLOW_SHAPE",
+      "severity": "CHECKED_OK",
+      "finding": "all 23 registered trusted route workflows currently contain exactly one top-level job",
+      "consequence": "target policy compiler can enforce one self-hosted job per trusted route/class and remove runtime display-name correlation entirely"
+    },
+    {
+      "id": "F11_GLOBAL_ACTIVE_CONCURRENCY",
+      "severity": "ARCHITECTURAL",
+      "finding": "root provisioner stores one global _active request set but compares its length against each request project's manifest concurrency value; all three current manifests set concurrency=1",
+      "consequence": "the host is effectively globally serialized even though concurrency appears project-scoped; this accidentally prevents resource collisions but obscures the actual scheduling policy"
+    },
+    {
+      "id": "F12_LAUNCH_EQUIVALENCE_NOT_ACTIVATION_AUTHORITY",
+      "severity": "MIGRATION_AUTHORITY",
+      "finding": "routes that share one target launch envelope may originate from different legacy controller lanes with different live containment/quarantine/retry authority",
+      "consequence": "runner-class compilation may merge routes for capacity purposes, but migration must preserve route/controller activation gates independently and may not implicitly reactivate a route because its target class is otherwise active"
+    }
+  ],
+  "target_invariants": [
+    "human command text is parsed exactly once at ingress and never becomes root-policy wire format",
+    "root launch envelope is a function of a typed runner class/contract, not free-form job content",
+    "every job eligible for one scale set is safe and executable on every runner that scale set may provision",
+    "policy DENY is terminal request data and never a listener-process failure",
+    "scheduler lifecycle state, local execution state, and policy result are distinct state machines",
+    "executor APIs are generated from a versioned route catalog and cannot synthesize unsupported protocol strings",
+    "host diagnostics, project reconciliation, and candidate execution remain separate authority planes"
+  ],
+  "proposed_runner_classes": [
+    {
+      "runner_class_id": "workspace-control-control-small-v1",
+      "project_id": "workspace-control",
+      "proposed_scale_set_name": "lambda-workspace-control-control-small",
+      "execution_contract_id": "control-small-ci-v1",
+      "execution_profile": "control-small",
+      "gpu_count": 0,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "control-validation"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "padataset-cpu-public-v1",
+      "project_id": "padataset",
+      "proposed_scale_set_name": "lambda-padataset-cpu-public",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "execution_profile": "cpu-test",
+      "gpu_count": 0,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "cpu-ci"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "padataset-gpu-single-public-v1",
+      "project_id": "padataset",
+      "proposed_scale_set_name": "lambda-padataset-gpu-single-public",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "gpu_count": 1,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "gpu-ci"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-cpu-public-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-cpu-public",
+      "execution_contract_id": "cpu-public-ci-v1",
+      "execution_profile": "cpu-test",
+      "gpu_count": 0,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "cpu-test",
+        "cpu-validation-exact-provenance"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-gpu-single-public-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-gpu-single-public",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "gpu_count": 1,
+      "model_id": null,
+      "runtime_id": null,
+      "routes": [
+        "gpu-experiment-public"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-gpu-single-runtime-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-gpu-single-runtime",
+      "execution_contract_id": "gpu-single-public-ci-v1",
+      "execution_profile": "gpu-small",
+      "gpu_count": 1,
+      "model_id": null,
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "routes": [
+        "gpu-small",
+        "model-eval-local-extract-amr-graph-v1",
+        "model-eval-local-extract-oracle-query-v1",
+        "model-eval-local-extract-reranker-v1"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-model-single-offline-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-model-single-offline",
+      "execution_contract_id": "model-single-offline-v1",
+      "execution_profile": "gpu-small",
+      "gpu_count": 1,
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "routes": [
+        "model-eval-single-gpu"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-model-dual-offline-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-model-dual-offline",
+      "execution_contract_id": "model-dual-offline-v1",
+      "execution_profile": "gpu-heavy",
+      "gpu_count": 2,
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "routes": [
+        "model-eval-dual-gpu"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    },
+    {
+      "runner_class_id": "research-model-dual-public-v1",
+      "project_id": "research-engine",
+      "proposed_scale_set_name": "lambda-research-engine-model-dual-public",
+      "execution_contract_id": "model-dual-public-v1",
+      "execution_profile": "gpu-heavy",
+      "gpu_count": 2,
+      "model_id": "qwen3.5-4b",
+      "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
+      "routes": [
+        "model-eval-exact-provenance-binding",
+        "model-eval-local-extract-wave1",
+        "model-eval-local-extract-wave2",
+        "model-eval-local-extract-wave3",
+        "model-eval-local-extract-wave4",
+        "model-eval-local-extract-wave5",
+        "model-eval-local-extract-wave6",
+        "model-eval-local-extract-wave7-intents",
+        "model-eval-local-extract-wave7a2",
+        "model-eval-local-extract-wave7a3",
+        "model-eval-obligation-validity"
+      ],
+      "invariant": "every job routed to this scale set is safe and sufficient on every runner provisioned for this class"
+    }
+  ],
+  "proposed_scale_set_count": 9,
+  "proposed_migration": {
+    "principle": "scale_set_is_homogeneous_runner_class",
+    "current_scale_set_count": 5,
+    "proposed_scale_set_count": 9,
+    "route_count": 23,
+    "changes": [
+      "move research-engine cpu-validation-exact-provenance from current gpu lane to research-cpu-public-v1",
+      "split current lambda-research-engine-gpu into five GPU runner classes",
+      "keep workspace-control and PADataset logically one class per existing lane but rename by capability rather than generic cpu/gpu lane",
+      "derive controller/root launch authority from runner_class_id and root-owned class catalog, not parsed JobDisplayName"
+    ],
+    "no_live_migration_before_repository_verification": true
+  },
+  "correlation_model": {
+    "compile_time": [
+      "all 23 registered trusted workflows currently contain exactly one top-level job",
+      "catalog stores the YAML job key only to validate workflow shape during policy compilation",
+      "target compiler requires exactly one self-hosted job targeting the route runner class"
+    ],
+    "runtime": [
+      "controller does not parse JobDisplayName and does not require the YAML job key from GitHub",
+      "JobWorkflowRef + repository + WorkflowRunID + event + RequestLabels identify the trusted workflow/class context",
+      "RunnerRequestID identifies the available acquisition request",
+      "JobID/runner name from later lifecycle messages may enrich audit evidence but are not prerequisites for provisioning"
+    ],
+    "invariant": "no human-readable runtime name is an authority-bearing correlation key"
+  },
+  "failure_algebra": {
+    "request_local": [
+      "POLICY_DENIED",
+      "UNTRUSTED_WORKFLOW",
+      "AMBIGUOUS_JOB_CORRELATION",
+      "CANDIDATE_WORKFLOW_GATE_FAILED",
+      "DUPLICATE_TERMINAL"
+    ],
+    "capacity_transient": [
+      "BUSY",
+      "JIT_REGISTRATION_TRANSIENT",
+      "ROOT_SOCKET_TRANSIENT"
+    ],
+    "controller_fatal": [
+      "SCALE_SET_SESSION_INVALID",
+      "MESSAGE_TRANSPORT_CORRUPTION",
+      "DURABLE_CONTROLLER_STATE_CORRUPTION",
+      "ROOT_RESPONSE_SCHEMA_CORRUPTION"
+    ],
+    "rule": "request-local outcomes are durably recorded/cleaned and Scale returns nil so the listener acks; only controller-fatal failures may stop listener.Run"
+  },
+  "state_machines": {
+    "github_scheduler": [
+      "QUEUED",
+      "AVAILABLE",
+      "ACQUIRED_ASSIGNED",
+      "STARTED",
+      "COMPLETED_OR_CANCELED_OR_REASSIGNED"
+    ],
+    "local_runner_capacity": [
+      "ABSENT",
+      "JIT_REGISTERED",
+      "PROVISIONING",
+      "IDLE_OR_STARTING",
+      "BUSY",
+      "TERMINAL",
+      "CLEANED"
+    ],
+    "policy": [
+      "UNOBSERVED",
+      "ATTESTED",
+      "ALLOWED",
+      "DENIED"
+    ],
+    "durable_request": [
+      "MISSING",
+      "ACCEPTED",
+      "COMPLETED",
+      "FAILED",
+      "QUARANTINED"
+    ]
+  },
+  "executor_command_census": {
+    "registered_routes": 23,
+    "command_plus_candidate_sha_only": 22,
+    "routes_with_additional_workflow_local_parameter": [
+      {
+        "project_id": "research-engine",
+        "route_id": "gpu-experiment-public",
+        "command": "/lambda-reasoner-probe",
+        "parameter": "candidate_id",
+        "allowed_values": [
+          "qwen35-9b-q6-resource",
+          "qwythos-9b-v2-q6-resource"
+        ],
+        "changes_root_runner_class": false
+      }
+    ],
+    "infrastructure_optional_qualifier_required": false
+  },
+  "target_maintenance_plane": {
+    "target_identity": "runner_class_id",
+    "replaces_current_identity": "project_id + cpu|gpu lane",
+    "ingress_actions": [
+      {
+        "action": "diagnose",
+        "root_operation": "DIAGNOSE_RUNNER_CLASS",
+        "authority": "read-only"
+      },
+      {
+        "action": "restart",
+        "root_operation": "RESTART_RUNNER_CLASS_CONTROLLER",
+        "authority": "controller lifecycle only"
+      },
+      {
+        "action": "host-attest",
+        "root_operation": "HOST_ATTEST_RUNNER_CLASS",
+        "authority": "read-only host/class preflight"
+      },
+      {
+        "action": "reset-stale",
+        "root_operation": "RESET_STALE_RUNNER_CLASS",
+        "authority": "recovery receipt required"
+      }
+    ],
+    "invariant": "maintenance parses the owner command once, then root consumes typed runner-class operations; maintenance commands never enter the scale-set execution protocol"
+  },
+  "target_reconciliation_plane": {
+    "source": "successful trusted workspace-control reconciliation workflow on main",
+    "installs": [
+      "runner class catalog",
+      "class-specific controller policies",
+      "class-specific controller service environments/identities",
+      "root peer-identity -> runner-class mapping",
+      "project manifests and exact workflow pins"
+    ],
+    "invariant": "reconciliation is policy deployment; it never schedules or executes candidate work"
+  },
+  "upstream_scale_set_client": {
+    "module": "github.com/actions/scaleset",
+    "pinned_commit": "e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5",
+    "status": "PUBLIC_PREVIEW_PINNED_INTERFACE",
+    "job_available_fields": [
+      "runnerRequestId",
+      "repositoryName",
+      "ownerName",
+      "jobId",
+      "jobWorkflowRef",
+      "jobDisplayName",
+      "workflowRunId",
+      "eventName",
+      "requestLabels",
+      "queueTime",
+      "scaleSetAssignTime",
+      "runnerAssignTime",
+      "finishTime"
+    ],
+    "authoritative_scaling_signal": "statistics.TotalAssignedJobs",
+    "notes": [
+      "JobAvailable includes structured workflow/repository/event metadata at the exact deployed pin.",
+      "JobID may be empty on JobAvailable and is therefore not required for safe capacity provisioning.",
+      "Job display name is retained only as observational metadata in the target design."
+    ]
+  },
+  "target_controller_algorithm": {
+    "on_job_available": [
+      "validate repository/owner/event/JobWorkflowRef/request labels against this runner class policy",
+      "read workflow run metadata from GitHub and verify actor/triggering actor and exact run identity",
+      "fetch trusted workflow file at the run's default-branch commit and verify exact blob pin",
+      "if trusted, AcquireJobs for RunnerRequestID; otherwise record deny and do not acquire"
+    ],
+    "scaling": [
+      "desired = min(class.max_runners, statistics.TotalAssignedJobs)",
+      "reconcile desired against durable nonterminal runner-instance receipts, not against parsed job-message counts",
+      "provision homogeneous runner-class instances until current capacity reaches desired"
+    ],
+    "lifecycle": [
+      "JobStarted/JobCompleted enrich runner/job evidence and protect cleanup ordering",
+      "individual job messages never determine the desired runner count"
+    ],
+    "recovery": [
+      "load durable runner-instance ledger",
+      "query root STATUS for nonterminal runner-instance request IDs",
+      "reconcile orphaned JIT registrations by runner prefix/ledger",
+      "read current TotalAssignedJobs and converge class capacity",
+      "never require candidate SHA or route string to recover capacity"
+    ]
+  },
+  "target_supervisor_state_machine": {
+    "states": [
+      "SESSION_CONNECTING",
+      "SESSION_RUNNING",
+      "RETRY_BACKOFF",
+      "FATAL_CONFIGURATION"
+    ],
+    "transitions": [
+      {
+        "from": "SESSION_CONNECTING",
+        "event": "session established",
+        "to": "SESSION_RUNNING"
+      },
+      {
+        "from": "SESSION_RUNNING",
+        "event": "retryable GitHub/root transport failure",
+        "to": "RETRY_BACKOFF"
+      },
+      {
+        "from": "RETRY_BACKOFF",
+        "event": "bounded backoff elapsed",
+        "to": "SESSION_CONNECTING"
+      },
+      {
+        "from": "SESSION_RUNNING",
+        "event": "request-local deny/failure",
+        "to": "SESSION_RUNNING"
+      },
+      {
+        "from": "SESSION_RUNNING",
+        "event": "corrupt durable state or invalid static configuration",
+        "to": "FATAL_CONFIGURATION"
+      }
+    ],
+    "invariant": "systemd restart/start-limit is not the retry mechanism for request-local policy outcomes"
+  },
+  "target_root_capacity_state_machine": {
+    "states": [
+      "MISSING",
+      "ACCEPTED",
+      "COMPLETED",
+      "FAILED",
+      "QUARANTINED"
+    ],
+    "provision_flow": [
+      "authenticate peer UID and derive runner_class_id from root catalog",
+      "validate request schema, request_id, runner-name prefix and JIT size/base64",
+      "reject unknown peer or class quarantine without mutating runner state",
+      "claim request_id/digest durably",
+      "build launch spec exclusively from root runner-class catalog",
+      "launch one ephemeral class runner",
+      "record terminal execution/cleanup receipt",
+      "quarantine runner class only on cleanup/resource-containment failure defined by policy"
+    ],
+    "invariant": "no human command, workflow display name, route string, PR number, candidate SHA, model selector or experiment selector is parsed by root"
+  },
+  "target_protocol_generations": {
+    "runner_execution": "runner-class-capacity-v3",
+    "maintenance": "runner-class-maintenance-v2",
+    "reconciliation": "runner-class-reconciliation-v2"
+  },
+  "target_resource_allocator": {
+    "authority": "root capacity provider",
+    "resource_dimensions": [
+      "explicit host-wide active-runner ceiling",
+      "project active-runner ceiling",
+      "runner-class active-runner ceiling",
+      "exclusive GPU UUID set",
+      "systemd CPU quota",
+      "systemd memory ceiling",
+      "scratch/staging disk ceilings",
+      "future explicit scarce trusted-service or accelerator locks"
+    ],
+    "initial_migration_policy": {
+      "host_max_active_runners": 1,
+      "rationale": "preserve the current effective global serialization while replacing protocol/scheduler semantics; capacity expansion is a separate post-migration performance decision",
+      "project_max_active_runners": {
+        "workspace-control": 1,
+        "padataset": 1,
+        "research-engine": 1
+      }
+    },
+    "gpu_resources": {
+      "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea": {
+        "exclusivity": "EXCLUSIVE",
+        "current_consumers": [
+          "padataset-gpu-single-public-v1",
+          "research-gpu-single-public-v1",
+          "research-gpu-single-runtime-v1",
+          "research-model-single-offline-v1",
+          "research-model-dual-offline-v1",
+          "research-model-dual-public-v1"
+        ]
+      },
+      "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6": {
+        "exclusivity": "EXCLUSIVE",
+        "current_consumers": [
+          "research-model-dual-offline-v1",
+          "research-model-dual-public-v1"
+        ]
+      }
+    },
+    "allocation_rule": "a runner instance may be launched only after all host/project/class concurrency and exclusive-resource claims are atomically reserved by root",
+    "release_rule": "resource reservation is released only after runner terminal state plus containment cleanup verification",
+    "migration_rule": "protocol migration keeps host_max_active_runners=1; a later independently validated resource-utilization task may raise CPU/project concurrency after contention tests"
+  },
+  "migration_authority_preservation": {
+    "principles": [
+      "runner-class equivalence determines safe capacity sharing, not whether a route/controller is live",
+      "route admission enablement and controller service activation are explicit reconciliation/migration state",
+      "legacy quarantine/retry-invalidated/disabled state is never cleared by class compilation",
+      "a route originating in a contained legacy lane remains migration-disabled until exact acceptance explicitly enables it"
+    ],
+    "research_engine_gpu_legacy_lane": {
+      "current_status": "CONTAINED; do not infer recovery authority from model-only target classes",
+      "target_routes": "all routes whose current manifest lane is gpu",
+      "migration_default": "DISABLED_PENDING_EXPLICIT_CLASS/ROUTE_ACCEPTANCE",
+      "special_case": "cpu-validation-exact-provenance may share research-cpu-public-v1 capacity with cpu-test only after its own migrated route admission is explicitly enabled; class sharing must not bypass legacy containment"
+    },
+    "controller_activation": {
+      "rule": "catalog installation creates policy/identities but does not start class controllers unless the migration receipt explicitly authorizes that class",
+      "default_new_class_state": "INSTALLED_INACTIVE"
+    }
+  }
+}

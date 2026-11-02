@@ -1,0 +1,299 @@
+{
+  "schema_version": 1,
+  "plan_id": "lambda-ci-v3-side-by-side-migration-v1",
+  "status": "REPOSITORY_VERIFIED_NOT_AUTHORIZED_FOR_LIVE_EXECUTION",
+  "source_verification": {
+    "receipt": "architecture/lambda-ci-control-plane-verification-receipt.v1.json",
+    "exact_head": "06d58450bb735178b516d9966fcb099763d8b4b0",
+    "validation_run_id": 40990406861,
+    "validation_run_number": 1266,
+    "tests_passed": 616
+  },
+  "principles": [
+    "v2 remains byte-for-byte live until the v3 substrate and every active-class canary are independently accepted",
+    "v3 is installed under disjoint paths, sockets, units, state directories, controller users, scale-set names, and runner prefixes",
+    "v2 and v3 project controllers are never active concurrently during migration because they do not share one physical-resource ledger",
+    "class canaries are executed one runner class at a time with every legacy project controller quiesced and no active legacy or v3 transient runner",
+    "production cutover of the currently active fleet is one generation boundary after all active-class canaries pass",
+    "research-engine GPU-derived classes remain installed-inactive and inherited-contained until separate recovery authority explicitly consumes legacy containment",
+    "catalog installation, controller activation, route admission, and legacy retirement are separate transitions",
+    "offline model payloads execute only in a root-owned private-network broker while the Actions runner retains GitHub control-plane connectivity without GPU/model/runtime authority",
+    "live canary authorization receipts are short-lived one-shot capabilities; rollback never reopens consumed authority",
+    "v3 root services are activated only by the installed-manifest-bound one-shot root-services transaction; operators do not improvise systemctl activation"
+  ],
+  "side_by_side_paths": {
+    "root_service": "workspace-ci-v3-provisioner.service",
+    "root_socket": "/run/workspace-ci/v3/provisioner.sock",
+    "root_state_dir": "/var/lib/workspace-ci/v3/provisioner",
+    "config_root": "/etc/workspace-ci/v3",
+    "controller_service_template": "workspace-ci-v3-controller@.service",
+    "controller_binary": "/opt/workspace-ci/v3/controller/lambda-ci-controller-v3",
+    "controller_state_root": "/var/lib/workspace-ci/v3/controller/state",
+    "credential_root": "/var/lib/workspace-ci/v3/credentials",
+    "root_binary": "/opt/workspace-ci/v3/provisioner/lambda_ci_v3_provisioner.py",
+    "reconcile_root_service": "workspace-ci-v3-reconciler.service",
+    "reconcile_controller_service": "workspace-ci-v3-reconcile-controller.service",
+    "reconcile_socket": "/run/workspace-ci/v3/reconciler.sock",
+    "transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}.service",
+    "payload_helper_root": "/opt/workspace-ci/v3/payload",
+    "payload_socket_root": "/run/workspace-ci-v3-payload",
+    "payload_transient_unit_template": "workspace-ci-v3-{runner_class_id}-{request_id}-payload.service",
+    "migration_state_root": "/var/lib/workspace-ci/v3/migration",
+    "authority_consumption_root": "/var/lib/workspace-ci/v3/migration-authority",
+    "root_activation_helper": "/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py"
+  },
+  "socket_authorization": {
+    "socket_group": "workspace-ci-v3-provisioner",
+    "socket_mode": "0660",
+    "parent_owner": "root",
+    "parent_group": "root",
+    "parent_mode": "0711",
+    "root_authority": "SO_PEERCRED numeric UID -> exactly one root-owned runner_class_id",
+    "invariant": "request JSON contains no authoritative runner_class_id selector"
+  },
+  "controller_identity": {
+    "unique_unix_user_per_runner_class": true,
+    "project_credential_groups": {
+      "workspace-control": "ci-gh-workspace-control",
+      "padataset": "ci-gh-padataset",
+      "research-engine": "ci-gh-research-engine"
+    },
+    "credential_policy": "class users may share only repository-scoped GitHub observation credential groups; root launch authority remains per-UID/class",
+    "state_policy": "each class controller owns a distinct 0700 state directory; no class controller can read or mutate another class ledger"
+  },
+  "generation_exclusion": {
+    "reason": "v2 and v3 provisioners maintain independent active/resource ledgers; simultaneous project-controller operation would create a physical-resource race",
+    "migration_rule": "before any v3 controller becomes ACTIVE, stop all v2 project controllers and prove no legacy transient execution unit exists",
+    "canary_rule": "during one-class canary, only the target v3 controller may be active",
+    "rollback_rule": "stop target v3 controller, prove no v3 transient execution, then legacy v2 controllers may be resumed",
+    "final_cutover_rule": "all legacy project controllers are quiesced and drained before active v3 production controllers are started",
+    "excluded_solution": "do not add a cross-generation scheduler/lock broker solely to permit mixed-generation production operation"
+  },
+  "install_phase": {
+    "name": "V3_SUBSTRATE_INSTALL_INACTIVE",
+    "live_effect_if_eventually_authorized": [
+      "create nine class controller Unix users and three project GitHub credential groups",
+      "install v3 binaries/config/catalog/projection schemas under disjoint v3 paths",
+      "install v3 systemd unit templates and tmpfiles",
+      "start root v3 provisioner/reconciler only after exact source and config attestation",
+      "do not start any v3 class controller",
+      "do not change any workflow runs-on label",
+      "do not change any v2 controller/service/scale set",
+      "do not clear research GPU containment"
+    ],
+    "success_state": "v3 root services healthy; all target classes INSTALLED_INACTIVE; all target routes DISABLED",
+    "root_services_activation": {
+      "authority": "SEPARATE_ONE_SHOT_LIVE_AUTHORITY_REQUIRED",
+      "operation": "ACTIVATE_V3_ROOT_SERVICES",
+      "helper": "/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py",
+      "authority_binding": [
+        "exact installed source_head from /etc/workspace-ci/v3/install-manifest.json",
+        "exact SHA-256 of installed install-manifest.json",
+        "exact installed root_policy_sha256",
+        "canonical unique authorization_id",
+        "timezone-aware issued_at/expires_at with maximum lifetime 1800 seconds"
+      ],
+      "preconditions": [
+        "reconciler.verify_installed passes for every managed artifact",
+        "workspace-ci-v3-provisioner.service and workspace-ci-v3-reconciler.service are both inactive",
+        "all nine v3 class controllers are inactive",
+        "no v3 root/class unit is enabled for boot persistence",
+        "legacy workspace-ci-controller@research-engine-gpu.service is inactive so inherited Research GPU containment remains intact",
+        "no v3 transient/supervisor unit exists",
+        "v3 provisioner has no active resource claim",
+        "root-private migration and migration-authority roots are present mode 0700"
+      ],
+      "transaction_order": [
+        "atomically consume and fsync the one-shot authorization marker before any service mutation",
+        "persist PREPARED activation receipt",
+        "start workspace-ci-v3-reconciler.service transiently and require installed-generation attestation to remain active",
+        "re-prove Research GPU containment and that no v3 root/class unit is enabled for boot persistence",
+        "start workspace-ci-v3-provisioner.service transiently",
+        "verify /run/workspace-ci/v3/provisioner.sock is a root-owned Unix socket, group workspace-ci-v3-provisioner, mode 0660",
+        "re-prove Research GPU containment, every v3 class controller/transient/resource claim absent, and all v3 root/class units still disabled for boot persistence",
+        "persist ROOT_SERVICES_ACTIVE receipt"
+      ],
+      "failure_rollback": [
+        "stop workspace-ci-v3-provisioner.service if active",
+        "stop workspace-ci-v3-reconciler.service if active",
+        "persist ROLLED_BACK_AFTER_ACTIVATION_FAILURE",
+        "never delete or reopen the consumed authorization marker"
+      ],
+      "explicit_non_authority": [
+        "uses systemctl start only; never enable or restart",
+        "does not start/enable/restart any v3 class controller",
+        "does not mutate any workflow, route, scale set, v2 service, quarantine, containment, or retry receipt"
+      ]
+    }
+  },
+  "canary_strategy": {
+    "type": "MIGRATION_ONLY_TRUSTED_WORKFLOW_PER_RUNNER_CLASS",
+    "event": "workflow_dispatch or dedicated owner-only migration trigger",
+    "repository_scope": "canary lives in the owning repository because scale sets are repository-scoped",
+    "policy": "canary is compiled into a migration-only controller policy and never added to the ordinary executor action catalog",
+    "payload_rules": [
+      "do not checkout or execute candidate PR code",
+      "verify class systemd CPU/memory/task ceilings",
+      "verify expected GPU cardinality and exact visible UUID set",
+      "verify model/runtime mounts are present or absent exactly as class requires",
+      "verify payload network policy without widening it",
+      "verify project filesystem roots and forbidden paths",
+      "emit only bounded non-secret evidence",
+      "for offline classes, inspect the online runner and waiting payload broker as separate systemd/cgroup envelopes without connecting to the broker socket or executing model/candidate payload"
+    ],
+    "precondition": "all v2 project controllers stopped; no legacy/v3 transient runner active; target v3 class controller is the only active project controller",
+    "postcondition": "target v3 controller stopped after canary; no transient runner remains; v2 may be resumed if production cutover is not yet occurring"
+  },
+  "canary_order": [
+    {
+      "order": 1,
+      "runner_class_id": "workspace-control-control-small-v1",
+      "rationale": "legacy workspace-control controller is already inactive/contained; validates control-small and v3 control path without disturbing active scientific runners"
+    },
+    {
+      "order": 2,
+      "runner_class_id": "padataset-cpu-public-v1",
+      "rationale": "active production class but CPU-only; lowest physical-resource risk after workspace-control v3 proof"
+    },
+    {
+      "order": 3,
+      "runner_class_id": "padataset-gpu-single-public-v1",
+      "rationale": "validates GPU0-exclusive public class before active-fleet cutover"
+    },
+    {
+      "order": 4,
+      "runner_class_id": "research-cpu-public-v1",
+      "rationale": "may be installed/canary-tested only if route/controller activation authority is separately explicit; exact-provenance route remains admission-disabled until legacy GPU containment migration is accepted"
+    },
+    {
+      "order": 5,
+      "runner_class_id": "research-gpu-single-public-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    },
+    {
+      "order": 6,
+      "runner_class_id": "research-gpu-single-runtime-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    },
+    {
+      "order": 7,
+      "runner_class_id": "research-model-single-offline-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    },
+    {
+      "order": 8,
+      "runner_class_id": "research-model-dual-offline-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    },
+    {
+      "order": 9,
+      "runner_class_id": "research-model-dual-public-v1",
+      "allowed": "NO_BY_DEFAULT",
+      "rationale": "inherits legacy research-engine GPU containment"
+    }
+  ],
+  "active_fleet_cutover": {
+    "initial_scope": [
+      "workspace-control-control-small-v1 if explicitly accepted",
+      "padataset-cpu-public-v1",
+      "padataset-gpu-single-public-v1"
+    ],
+    "research_cpu": "keep inactive unless separately authorized; installation/equivalence does not grant activation",
+    "research_gpu_classes": "must remain inactive/contained",
+    "transaction_order": [
+      "freeze exact v3 source/catalog/deployment-overlay candidate",
+      "verify no queued/in-progress migration transaction already exists",
+      "stop all legacy v2 project controllers",
+      "prove no legacy transient runner unit remains and old scale-set assigned/running counts are zero",
+      "prove v3 root/reconciler healthy and all target controllers inactive",
+      "atomically install trusted production workflow changes that retarget only accepted routes to their exact v3 scale-set names and update exact workflow pins/projections",
+      "bind deployment overlay generation",
+      "enable only accepted production routes",
+      "start only accepted v3 class controllers",
+      "run one exact production validation per accepted class",
+      "prove TotalAssignedJobs returns to zero, runner-instance ledgers terminal/clean, no restart loop, and resource ledger empty",
+      "only then mark corresponding legacy controllers/scale sets DRAINING then RETIRED"
+    ],
+    "failure_before_v3_job": "restore workflow/policy generation, keep all v3 class controllers inactive, resume exact legacy v2 controllers",
+    "failure_after_v3_job_started": "contain target v3 class, allow/force terminal cleanup, do not resume v2 until no v3 transient runner/resource claim remains, then restore old workflow generation and resume v2",
+    "rollback_invariant": "never allow v2 and v3 project controllers to be active at the same time"
+  },
+  "workflow_cutover": {
+    "rule": "production route workflow runs-on changes from legacy scale-set name to target v3 class scale-set name only after class canary acceptance",
+    "atomic_policy_binding": "workflow blob pin/controller projection/deployment overlay must bind the exact workflow commit before target route admission becomes ENABLED",
+    "no_fallback_label": "do not encode v2/v3 fallback in runs-on; mixed-generation routing is intentionally forbidden",
+    "offline_model_producer_plan": "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json",
+    "offline_model_rule": "reviewed proposal blobs remain non-authoritative until exact bytes are on the owning default branch and the exact controller/deployment generation is bound under separate cutover/live authority"
+  },
+  "legacy_retirement": {
+    "per_scale_set_preconditions": [
+      "no queued/assigned/running jobs",
+      "no active runner registration owned by legacy prefix",
+      "target v3 route/class accepted",
+      "rollback window receipt recorded"
+    ],
+    "order": [
+      "disable legacy controller",
+      "preserve old installed bytes/config/state for rollback window",
+      "delete/retire legacy scale set only after accepted v3 production proof",
+      "remove legacy controller config/state only in later cleanup task, not cutover transaction"
+    ]
+  },
+  "research_gpu_containment": {
+    "legacy_quarantine_receipt": "a7880e15-b29c-4b2b-bccd-3a34745f9ded",
+    "legacy_retry_receipt": "3eeffae8-2bd0-4344-b89f-02afbf1a445b",
+    "retry_state": "RECOVERY_RETRY_INVALIDATED",
+    "migration_default": "target GPU-derived classes may be installed but controller_state stays INACTIVE and containment stays INHERITED_CONTAINED",
+    "forbidden": "catalog installation, v3 substrate activation, PADataset/workspace-control cutover, or class equivalence proof may not clear/consume/rewrite this authority"
+  },
+  "live_authority": "NONE",
+  "next_repository_work": [
+    "hosted producer CI is accepted at Research Engine PR #283 head 6165556086b73d2076f205f11ec7b988150f23dd via CI #642 / run 41007835081; do not reopen that gate unless the proposal head or reviewed workflow blobs change",
+    "keep offline producer workflow proposal blobs isolated from current default-branch trusted evidence until a separately authorized cutover",
+    "maintain exact repository-only v3 runtime/controller/reconciler/root-activation/canary/cutover proofs while live_authority remains NONE",
+    "after separate live authority, apply the inactive substrate, issue a separate one-shot ACTIVATE_V3_ROOT_SERVICES receipt bound to the installed manifest, and use the root activation helper before the first migration-order canary",
+    "do not advance Research GPU-derived classes until separate containment/recovery authority is explicitly bound"
+  ],
+  "repository_readiness": {
+    "workspace_control_repository_boundary": {
+      "exact_head": "01019177fcb46e5ab9864ea9b764b533dcf0be81",
+      "validation_run_number": 1337,
+      "validation_run_id": 41010515483,
+      "conclusion": "success"
+    },
+    "research_engine_offline_producer": {
+      "pull_request": 283,
+      "exact_head": "6165556086b73d2076f205f11ec7b988150f23dd",
+      "base_main": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+      "hosted_ci_run_number": 642,
+      "hosted_ci_run_id": 41007835081,
+      "hosted_ci_job_id": 123906654539,
+      "conclusion": "success",
+      "repository_steps_executed": true,
+      "exact_head_acceptance_comment": 6515645161,
+      "default_branch_cutover_authorized": false
+    },
+    "live_activation_authorized": false
+  },
+  "live_canary_authority_receipt": {
+    "schema_version": 1,
+    "authority": "workspace-control-operator",
+    "operation": "ACTIVATE_ONE_V3_CANARY",
+    "authorization_id": "canonical UUID; unique per authorization",
+    "receipt_file_policy": "root-owned mode 0600; transaction and consumption roots are precreated root:root 0700 by inactive substrate",
+    "max_lifetime_seconds": 1800,
+    "consumption_root": "/var/lib/workspace-ci/v3/migration-authority",
+    "consumption_semantics": [
+      "authorization is validated against exact source head, canary generation, target runner class, controller policy digest, and workflow blob before use",
+      "authorization must be currently valid and may live for at most 1800 seconds",
+      "authorization_id is atomically consumed with O_CREAT|O_EXCL into the root-private consumption root and fsynced before the first transaction mutation",
+      "a consumed authorization_id is permanently replay-rejected by the migration transaction",
+      "rollback never deletes or reopens a consumed authorization marker"
+    ],
+    "transaction_state_root": "/var/lib/workspace-ci/v3/migration"
+  }
+}
