@@ -34,6 +34,7 @@ INSTALLED_ACTIVATOR = Path("/opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_ac
 INSTALL_MANIFEST = Path("/etc/workspace-ci/v3/install-manifest.json")
 ROOT_POLICY = Path("/etc/workspace-ci/v3/root-policy.json")
 MIGRATION_ROOT = Path("/var/lib/workspace-ci/v3/migration")
+VERIFIER_STACK_UPDATER_REL = Path("scripts/lambda_ci_v3_verifier_stack_live_update_v1.py")
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
@@ -320,6 +321,23 @@ def main() -> int:
     print(f"EXPECTED_HEAD={args.expected_head}")
 
     repair_research_gpu_containment(args.expected_head)
+
+    updater = Path.cwd() / VERIFIER_STACK_UPDATER_REL
+    if not updater.is_file():
+        raise RecoveryError(f"verifier-stack updater missing: {updater}")
+    refresh = run(
+        [sys.executable, str(updater), "--expected-head", args.expected_head]
+    )
+    if refresh.stdout:
+        print(refresh.stdout, end="")
+    if refresh.stderr:
+        print(refresh.stderr, end="", file=sys.stderr)
+    if refresh.returncode != 0:
+        raise RecoveryError(
+            f"v3 verifier-stack live update failed rc={refresh.returncode}"
+        )
+    print("V3_VERIFIER_STACK_REFRESH=PASS")
+
     authority_path = mint_root_authority()
 
     activation = run(

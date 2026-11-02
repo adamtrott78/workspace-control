@@ -51,6 +51,12 @@ ROOT_ACTIVATION_HELPER = pathlib.Path(
 ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = (
     V3_STATE_ROOT / "root-reactivation-helper" / "active.json"
 )
+RECONCILER_SCRIPT = pathlib.Path(
+    "/opt/workspace-ci/v3/reconciler/lambda_ci_v3_reconciler.py"
+)
+RECONCILER_OVERRIDE_ACTIVE_RECEIPT = (
+    V3_STATE_ROOT / "reconciler-refresh" / "active.json"
+)
 MIGRATION_ROOT = V3_STATE_ROOT / "migration"
 AUTHORITY_CONSUMPTION_ROOT = V3_STATE_ROOT / "migration-authority"
 V3_PROVISIONER_STATE = V3_STATE_ROOT / "provisioner"
@@ -165,6 +171,7 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
     helper_destination = str(ROOT_ACTIVATION_HELPER)
     controller_entry = None
     helper_entry = None
+    reconciler_entry = None
     for entry in manifest.get("entries", []):
         destination = str(entry.get("destination", ""))
         path = pathlib.Path(destination)
@@ -178,6 +185,9 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
             continue
         if destination == helper_destination:
             helper_entry = entry
+            continue
+        if destination == str(RECONCILER_SCRIPT):
+            reconciler_entry = entry
             continue
         if _sha256(path.read_bytes()) != entry.get("sha256"):
             raise RootActivationError(f"managed artifact digest drift: {path}")
@@ -245,6 +255,38 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
                     "active root-reactivation helper override source head invalid"
                 )
             effective["root_activation_helper_override"] = active_helper
+
+    if reconciler_entry is None:
+        raise RootActivationError("reconciler script absent from install manifest")
+    actual_reconciler_sha = _sha256(RECONCILER_SCRIPT.read_bytes())
+    if actual_reconciler_sha != reconciler_entry.get("sha256"):
+        active_reconciler = _load_override_receipt(
+            RECONCILER_OVERRIDE_ACTIVE_RECEIPT,
+            "active reconciler override",
+        )
+        required_reconciler = {
+            "mode": "V3_RECONCILER_OVERRIDE",
+            "phase": "ACTIVE",
+            "base_source_head": manifest.get("source_head"),
+            "base_install_manifest_sha256": _sha256(manifest_raw),
+            "base_reconciler_sha256": reconciler_entry.get("sha256"),
+            "reconciler_sha256": actual_reconciler_sha,
+            "reconciler_mode": str(reconciler_entry.get("mode")),
+            "root_policy_sha256": manifest.get("root_policy_sha256"),
+            "non_reconciler_generation_equivalent": True,
+        }
+        for key, expected in required_reconciler.items():
+            if active_reconciler.get(key) != expected:
+                raise RootActivationError(
+                    f"active reconciler override binding mismatch: {key}"
+                )
+        reconciler_source_head = active_reconciler.get("reconciler_source_head")
+        if (
+            not isinstance(reconciler_source_head, str)
+            or re.fullmatch(r"[0-9a-f]{40}", reconciler_source_head) is None
+        ):
+            raise RootActivationError("active reconciler override source head invalid")
+        effective["reconciler_override"] = active_reconciler
 
     return effective or None
 

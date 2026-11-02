@@ -41,6 +41,18 @@ V3_PAYLOAD_ROOT = pathlib.Path("/opt/workspace-ci/v3/payload")
 V3_STATE_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/controller/state")
 V3_CREDENTIAL_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/credentials")
 V3_SOCKET_GROUP = "workspace-ci-v3-provisioner"
+V3_RUNTIME_STATE_ROOT = pathlib.Path("/var/lib/workspace-ci/v3")
+CONTROLLER_REFRESH_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT / "controller-refresh" / "active.json"
+)
+ROOT_ACTIVATION_HELPER = V3_RECONCILER_ROOT / "lambda_ci_v3_root_activation.py"
+ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT / "root-reactivation-helper" / "active.json"
+)
+RECONCILER_SCRIPT = V3_RECONCILER_ROOT / "lambda_ci_v3_reconciler.py"
+RECONCILER_OVERRIDE_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT / "reconciler-refresh" / "active.json"
+)
 
 MANAGED_SYSTEMD = {
     "workspace-ci-v3-provisioner.service":
@@ -69,6 +81,25 @@ def _canonical(value: Any) -> bytes:
 
 def _sha256(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
+
+
+def _load_override_receipt(path: pathlib.Path, label: str) -> dict[str, Any]:
+    try:
+        st = path.stat()
+    except FileNotFoundError as exc:
+        raise ReconcileError(f"{label} receipt missing") from exc
+    if st.st_uid != os.geteuid() or st.st_gid != os.getegid():
+        raise ReconcileError(f"{label} receipt ownership invalid")
+    if stat.S_IMODE(st.st_mode) != 0o600:
+        raise ReconcileError(f"{label} receipt metadata invalid")
+    value = _json(path)
+    return value
+
+
+def _require_source_head(value: Any, label: str) -> str:
+    if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{40}", value) is None:
+        raise ReconcileError(f"{label} source head invalid")
+    return value
 
 
 SYSUSER_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]{0,30}$")
@@ -472,20 +503,125 @@ def build_stage(
 
 
 def verify_installed(manifest_path: pathlib.Path) -> None:
+    """Verify immutable base generation plus exact, root-attested live overrides."""
+    manifest_raw = manifest_path.read_bytes()
     manifest = _json(manifest_path)
     if manifest.get("mode") != "V3_SUBSTRATE_INSTALL_INACTIVE":
         raise ReconcileError("installed manifest mode invalid")
     if manifest.get("runner_class_count") != 9:
         raise ReconcileError("installed manifest runner class count invalid")
+
+    controller_destination = str(V3_CONTROLLER_BINARY)
+    helper_destination = str(ROOT_ACTIVATION_HELPER)
+    reconciler_destination = str(RECONCILER_SCRIPT)
+    special: dict[str, dict[str, Any]] = {}
+
     for entry in manifest.get("entries", []):
-        path = pathlib.Path(entry["destination"])
+        if not isinstance(entry, dict):
+            raise ReconcileError("installed manifest entry invalid")
+        destination = str(entry.get("destination", ""))
+        path = pathlib.Path(destination)
         if not path.is_file():
             raise ReconcileError(f"managed artifact missing: {path}")
-        raw = path.read_bytes()
-        if _sha256(raw) != entry["sha256"]:
-            raise ReconcileError(f"managed artifact digest drift: {path}")
-        if stat.S_IMODE(path.stat().st_mode) != int(entry["mode"], 8):
+        if stat.S_IMODE(path.stat().st_mode) != int(str(entry.get("mode")), 8):
             raise ReconcileError(f"managed artifact mode drift: {path}")
+        if destination in {
+            controller_destination,
+            helper_destination,
+            reconciler_destination,
+        }:
+            special[destination] = entry
+            continue
+        if _sha256(path.read_bytes()) != entry.get("sha256"):
+            raise ReconcileError(f"managed artifact digest drift: {path}")
+
+    base_manifest_sha = _sha256(manifest_raw)
+    root_policy_sha = manifest.get("root_policy_sha256")
+    base_source_head = manifest.get("source_head")
+
+    controller_entry = special.get(controller_destination)
+    if controller_entry is None:
+        raise ReconcileError("controller binary absent from install manifest")
+    actual_controller_sha = _sha256(V3_CONTROLLER_BINARY.read_bytes())
+    if actual_controller_sha != controller_entry.get("sha256"):
+        active = _load_override_receipt(
+            CONTROLLER_REFRESH_ACTIVE_RECEIPT,
+            "active controller override",
+        )
+        required = {
+            "mode": "V3_INACTIVE_CONTROLLER_BINARY_OVERRIDE",
+            "phase": "ACTIVE",
+            "base_source_head": base_source_head,
+            "base_install_manifest_sha256": base_manifest_sha,
+            "controller_binary_sha256": actual_controller_sha,
+            "root_policy_sha256": root_policy_sha,
+            "non_controller_generation_equivalent": True,
+        }
+        for key, expected in required.items():
+            if active.get(key) != expected:
+                raise ReconcileError(
+                    f"active controller override binding mismatch: {key}"
+                )
+        _require_source_head(active.get("controller_source_head"), "active controller override")
+
+    helper_entry = special.get(helper_destination)
+    if helper_entry is not None:
+        actual_helper_sha = _sha256(ROOT_ACTIVATION_HELPER.read_bytes())
+        if actual_helper_sha != helper_entry.get("sha256"):
+            active_helper = _load_override_receipt(
+                ROOT_ACTIVATION_HELPER_ACTIVE_RECEIPT,
+                "active root-reactivation helper override",
+            )
+            required_helper = {
+                "mode": "V3_ROOT_REACTIVATION_HELPER_OVERRIDE",
+                "phase": "ACTIVE",
+                "base_source_head": base_source_head,
+                "base_install_manifest_sha256": base_manifest_sha,
+                "base_helper_sha256": helper_entry.get("sha256"),
+                "helper_sha256": actual_helper_sha,
+                "helper_mode": str(helper_entry.get("mode")),
+                "root_policy_sha256": root_policy_sha,
+                "non_helper_generation_equivalent": True,
+            }
+            for key, expected in required_helper.items():
+                if active_helper.get(key) != expected:
+                    raise ReconcileError(
+                        f"active root-reactivation helper override binding mismatch: {key}"
+                    )
+            _require_source_head(
+                active_helper.get("helper_source_head"),
+                "active root-reactivation helper override",
+            )
+
+    reconciler_entry = special.get(reconciler_destination)
+    if reconciler_entry is None:
+        raise ReconcileError("reconciler script absent from install manifest")
+    actual_reconciler_sha = _sha256(RECONCILER_SCRIPT.read_bytes())
+    if actual_reconciler_sha != reconciler_entry.get("sha256"):
+        active_reconciler = _load_override_receipt(
+            RECONCILER_OVERRIDE_ACTIVE_RECEIPT,
+            "active reconciler override",
+        )
+        required_reconciler = {
+            "mode": "V3_RECONCILER_OVERRIDE",
+            "phase": "ACTIVE",
+            "base_source_head": base_source_head,
+            "base_install_manifest_sha256": base_manifest_sha,
+            "base_reconciler_sha256": reconciler_entry.get("sha256"),
+            "reconciler_sha256": actual_reconciler_sha,
+            "reconciler_mode": str(reconciler_entry.get("mode")),
+            "root_policy_sha256": root_policy_sha,
+            "non_reconciler_generation_equivalent": True,
+        }
+        for key, expected in required_reconciler.items():
+            if active_reconciler.get(key) != expected:
+                raise ReconcileError(
+                    f"active reconciler override binding mismatch: {key}"
+                )
+        _require_source_head(
+            active_reconciler.get("reconciler_source_head"),
+            "active reconciler override",
+        )
 
 
 def _git_exact_head(repo_root: pathlib.Path, expected: str) -> None:
