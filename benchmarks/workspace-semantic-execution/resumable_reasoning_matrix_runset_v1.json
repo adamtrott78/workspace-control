@@ -121,7 +121,8 @@
       "other arms' terminal answers",
       "unbounded repository dump"
     ],
-    "worker_repository_read_rule": "Workers may read only benchmark paths explicitly named by their run packet; evaluator/oracle paths are excluded."
+    "worker_repository_read_rule": "Workers may read only benchmark paths explicitly named by their run packet; evaluator/oracle paths are excluded.",
+    "memory_rule": "Use Temporary Chat or otherwise disable Memory for every clean screening/scored worker. A worker that receives prior benchmark/control-chat memory is contaminated and must be discarded."
   },
   "state_path_template": "benchmarks/workspace-semantic-execution/runs/matrix-v1/{phenotype}/{arm}/{replicate_id}.json",
   "required_run_identity": [
@@ -166,5 +167,88 @@
     "P0-P3 matrix can establish phenotype-specific comparative behavior under the frozen harness.",
     "Broader claims require architecture_diagnosis, artifact_revision, software_debug_repair, and unseen-workflow extension suites.",
     "Stronger frontier-equivalence claims require hidden ephemeral or externally blinded evaluator isolation."
-  ]
+  ],
+  "executor_configurations": {
+    "primary_causal_controls": {
+      "A_frontier_long_horizon": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_or_temporary_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "rationale": "Primary stronger-reasoning control keeps the ChatGPT chat surface and GitHub affordance matched to Instant arms; only reasoning configuration/continuity treatment should differ."
+      },
+      "B_instant_persistent_chat": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_or_temporary_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT"
+      },
+      "C_instant_stateless_resume": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_or_temporary_chat",
+        "continuity": "fresh_chat_per_reasoning_quantum",
+        "tier": "INSTANT"
+      },
+      "D_instant_decompose_critic": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_or_temporary_chat",
+        "continuity": "fresh_or_role_isolated_instant_workers",
+        "tier": "INSTANT",
+        "roles": [
+          "decomposer",
+          "leaf_worker",
+          "independent_critic",
+          "synthesizer"
+        ]
+      },
+      "E_hybrid_escalation": {
+        "provider": "OpenAI",
+        "default_model_family": "GPT-5.6",
+        "default_chat_configuration": "Instant",
+        "escalation_model_family": "GPT-5.6 Sol",
+        "escalation_chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_or_temporary_chat",
+        "tier": "HYBRID",
+        "escalation_rule": "Only objectively evidenced INTRINSICALLY_DIFFICULT residuals may route to the matched-surface High control."
+      }
+    },
+    "supplementary_ceiling_not_primary_causal_control": {
+      "id": "A2_best_available_agentic_ceiling",
+      "provider": "OpenAI",
+      "model_family": "GPT-6 Astra",
+      "configuration": "Work",
+      "surface": "ChatGPT Work",
+      "status": "PLANNED_EXPLORATORY",
+      "rationale": "Useful as a best-available ceiling, but not the primary causal control because Work changes the execution surface and agent affordances in addition to model capability."
+    },
+    "runtime_identity_rule": "Each worker must persist the model/configuration actually reported by its surface. If it differs from the expected treatment, mark EXECUTOR_IDENTITY_MISMATCH and do not count the run."
+  }
 }
