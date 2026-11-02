@@ -10,8 +10,8 @@
     "project_root": "/srv/workspace-ci/workspace-control",
     "lanes": {
       "cpu": {
-        "scale_set_name": "lambda-workspace-control-control-small",
-        "runner_prefix": "lambda-workspace-control-control-small-"
+        "scale_set_name": "lambda-workspace-control",
+        "runner_prefix": "lambda-workspace-control-"
       },
       "gpu": {
         "scale_set_name": "lambda-workspace-control-gpu",
