@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "isolation_id": "workspace-resumable-reasoning-evaluator-isolation-v1",
+  "status": "IMPLEMENTED_PRIMITIVE_NOT_YET_BACKED_BY_SEALED_RUNTIME_STORE",
+  "purpose": "Replace repository-visible static oracle dependence for strong capability claims with fresh synthetic fixtures whose oracle, generation seed, and commitment nonce remain outside worker-readable state.",
+  "implementation": "benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py",
+  "public_worker_material": [
+    "public_fixture",
+    "public_seal",
+    "durable run state",
+    "bounded context packet"
+  ],
+  "evaluator_only_material": [
+    "evaluator_oracle",
+    "seed_hex",
+    "seal_nonce_hex"
+  ],
+  "public_seal_fields": [
+    "generator_id",
+    "fixture_id",
+    "public_fixture_sha256",
+    "oracle_commitment_sha256"
+  ],
+  "audit_model": "After scoring, an evaluator may optionally reveal the oracle and seal nonce; verify_bundle must reproduce the pre-run public commitment. Seed reveal is optional and may be retained separately for exact fixture regeneration.",
+  "runtime_storage_requirement": {
+    "required": true,
+    "rule": "Evaluator-only oracle/seed/nonce must reside in a control-owned store that scored workers cannot read. Do not place evaluator secrets in the worker branch, worker context packet, or any repository path available to the worker.",
+    "currently_available": "NOT_PROVEN",
+    "acceptable_future_surfaces": [
+      "narrow evaluator service",
+      "Workspace Shell control-owned sealed state",
+      "external blinded evaluator"
+    ],
+    "authority_rule": "The evaluator store confers no production execution authority."
+  },
+  "claim_policy": {
+    "static_repository_oracle": "pilot comparative behavior only",
+    "hidden_ephemeral_or_externally_blinded": "eligible for stronger capability claims after runtime isolation is validated",
+    "authoring_control_chat": "never a scored worker for fixtures whose oracle it generated or inspected"
+  }
+}
