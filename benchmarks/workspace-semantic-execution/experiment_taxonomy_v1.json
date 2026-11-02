@@ -243,7 +243,8 @@
       "surface",
       "harness",
       "toolset",
-      "capability_profile"
+      "capability_profile",
+      "runtime_or_host_class"
     ],
     "continuity_regime": [
       "persistent_chat",
@@ -254,7 +255,8 @@
     "resource_state": [
       "quota_pool",
       "frontier_allowance_state",
-      "deterministic_compute_budget"
+      "deterministic_compute_budget",
+      "local_compute_capacity"
     ],
     "rule": "A model name alone is not an experimental arm."
   },
@@ -295,7 +297,10 @@
       "deterministic_compute_operations",
       "frontier_invocations",
       "frontier_tokens_or_allowance_if_available",
-      "wall_clock_excluding_external_wait"
+      "wall_clock_excluding_external_wait",
+      "local_gpu_seconds",
+      "peak_local_vram_bytes",
+      "local_tokens_per_second_if_available"
     ],
     "safety": [
       "authority_violations",
@@ -438,5 +443,57 @@
       "lesson": "Public benchmark exposure can invalidate capability inference; prefer fresh/hidden/ephemeral fixtures for strong claims.",
       "url": "https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/"
     }
-  ]
+  ],
+  "executor_tier_roadmap": {
+    "current_pilot_scope": {
+      "tiers": [
+        "INSTANT",
+        "FRONTIER"
+      ],
+      "purpose": "Establish the resumable/decomposition/escalation boundary before adding more executor variables."
+    },
+    "planned_phase_2": {
+      "tiers": [
+        "DETERMINISTIC",
+        "LOCAL_MODEL",
+        "INSTANT",
+        "CHEAP_OR_FREE_HOSTED_MODEL",
+        "FRONTIER",
+        "HUMAN"
+      ],
+      "local_model_objective": "Measure whether locally hosted models can take over bounded reasoning classes at acceptable validated quality, latency, and resource cost while preserving the same durable-state and authority contracts.",
+      "comparison_rule": "Use the same P0-P3 fixtures, validators, context packets, tool affordances, and continuity regimes. Add local models as executor treatments, not as a different benchmark family.",
+      "local_executor_identity_fields": [
+        "model_family",
+        "model_version_or_checkpoint",
+        "quantization",
+        "context_window",
+        "runtime",
+        "hardware",
+        "gpu_count",
+        "vram_bytes",
+        "surface_or_harness",
+        "toolset",
+        "reasoning_mode_if_any"
+      ],
+      "local_resource_metrics": [
+        "wall_clock_latency",
+        "tokens_per_second_if_available",
+        "gpu_seconds",
+        "peak_vram_bytes",
+        "host_ram_bytes",
+        "energy_or_power_proxy_if_available",
+        "context_bytes",
+        "invocation_count",
+        "validated_quality"
+      ],
+      "routing_questions": [
+        "Which P0/P1 leaves can local models solve reliably enough to replace Instant?",
+        "Can local models perform decomposition, critique, or synthesis roles even when they cannot solve the hardest residual end-to-end?",
+        "Where does LOCAL_MODEL -> INSTANT improve quality enough to justify hosted usage?",
+        "Where does INSTANT -> FRONTIER remain necessary after local/Instant decomposition?",
+        "Can local executors handle privacy-sensitive or high-volume work while preserving provenance and authority boundaries?"
+      ]
+    }
+  }
 }
