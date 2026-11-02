@@ -3,7 +3,7 @@
   "benchmark": "INSTANT_WORKER_LEASE_RECOVERY_V1",
   "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
   "shared_branch": "instant-worker-lease-recovery-v1-20261101",
-  "state_version": 1,
+  "state_version": 2,
   "recovery_generation": 0,
   "invariant": "only the owner whose claim_generation equals recovery_generation may record completion",
   "action": {
@@ -11,10 +11,10 @@
     "state": "CLAIMED",
     "owner": "W1",
     "claim_generation": 0,
-    "execution_branch": null,
-    "pr": null,
-    "validated_head": null,
-    "validation_run": null,
+    "execution_branch": "instant-worker-lease-recovery-v1-w1-x",
+    "pr": 580,
+    "validated_head": "723363567420ccea0027cd51c9ad906601381caa",
+    "validation_run": 41366619408,
     "prior_owner": null,
     "task": {
       "files": [
@@ -29,7 +29,10 @@
         "all other inputs raise ValueError",
         "tests use unittest, not pytest"
       ]
-    }
+    },
+    "result_ready": true,
+    "completion_not_recorded": true,
+    "stale_completion_expected_head": "51f5074e89cb8ca7be10e98b6dd1d180e913e469"
   },
   "protocols": {
     "claim": "CAS shared branch with exact expected_sha and force=false; successful claimant records claim_generation equal to current recovery_generation",
