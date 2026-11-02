@@ -96,7 +96,7 @@ class FixtureMatrixTests(unittest.TestCase):
         )
         self.assertEqual(profile["decomposability"]["separability"], "MOSTLY_SEPARABLE")
         self.assertGreaterEqual(profile["horizon_load"]["dependency_width"], 6)
-        self.assertLessEqual(profile["decomposability"]["synthesis_coupling"], "LOW")
+        self.assertEqual(profile["decomposability"]["synthesis_coupling"], "LOW")
 
     def test_p3_requires_leaf_evidence_plus_coupled_residual(self):
         entry = next(x for x in MATRIX["fixtures"] if x["phenotype"].startswith("P3_"))
