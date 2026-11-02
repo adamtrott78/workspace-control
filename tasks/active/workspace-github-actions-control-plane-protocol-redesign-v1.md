@@ -43,7 +43,7 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Complete this handoff sync validation and freeze the resulting exact branch head. From a fresh clean checkout at that exact final head, run only `bash scripts/lambda_ci_v3_controller_refresh_live.sh`. The refresh must prove roots active+boot-disabled, all nine v3 class controllers non-active+boot-disabled, Research GPU legacy containment, fully rolled-back migration history, and shared reconciler verification of the effective installed generation before replacing only /opt/workspace-ci/v3/controller/lambda-ci-controller-v3. Independently verify the root-owned V3_INACTIVE_CONTROLLER_BINARY_OVERRIDE receipt and unchanged runtime/reconciler bindings. Only then retry `bash scripts/lambda_ci_v3_production_cutover_live.sh` from the same exact head with a fresh production authority.
+Complete this task/handoff sync and freeze the resulting exact branch head. From a fresh clean checkout at that exact final head, run only `bash scripts/lambda_ci_v3_controller_refresh_live.sh`. The refresh must prove roots active+boot-disabled, all nine v3 class controllers non-active+boot-disabled, Research GPU legacy containment, fully rolled-back migration history, and shared reconciler verification of the effective installed generation before replacing only /opt/workspace-ci/v3/controller/lambda-ci-controller-v3. Independently verify the root-owned V3_INACTIVE_CONTROLLER_BINARY_OVERRIDE receipt and unchanged runtime/reconciler bindings. Only then retry `bash scripts/lambda_ci_v3_production_cutover_live.sh` from the same exact head with a fresh production authority.
 
 ## Remaining work
 
@@ -56,7 +56,7 @@ Complete this handoff sync validation and freeze the resulting exact branch head
 
 ## Blockers / gates
 
-- The validated controller binary and effective-generation refresh-verifier repair still require one bounded root controller-only refresh from the final exact task-sync head. The prior refresh attempt failed in _stage_candidate before any live controller mutation and does not need rollback.
+- The validated controller binary and refresh-verifier repair still require one bounded root controller-only refresh from the final exact task-sync head. The prior refresh attempt failed before mutation and does not need rollback.
 - After that controller refresh is independently verified, production cutover attempt #2 requires a fresh one-shot CUTOVER_V3_PRODUCTION_GENERATION authority through the validated live operator; no prior production authority may be reused.
 - Research CPU remains separately gated; all Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT.
 
