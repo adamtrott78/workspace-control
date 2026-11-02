@@ -326,7 +326,7 @@ def main() -> int:
     if not updater.is_file():
         raise RecoveryError(f"verifier-stack updater missing: {updater}")
     refresh = run(
-        [sys.executable, str(updater), "--expected-head", args.expected_head],
+        [sys.executable, "-B", str(updater), "--expected-head", args.expected_head],
         cwd=repo,
     )
     if refresh.stdout:
@@ -375,7 +375,21 @@ def main() -> int:
         RECONCILER_UNIT: service_snapshot(RECONCILER_UNIT),
         PROVISIONER_UNIT: service_snapshot(PROVISIONER_UNIT),
     }
-    if any(s.get("ActiveState") != "active" or s.get("SubState") != "running" for s in post_roots.values()):
+    reconciler_state = post_roots[RECONCILER_UNIT]
+    provisioner_state = post_roots[PROVISIONER_UNIT]
+    reconciler_ok = (
+        reconciler_state.get("ActiveState") == "active"
+        and reconciler_state.get("SubState") == "exited"
+        and reconciler_state.get("ExecMainStatus") == "0"
+        and reconciler_state.get("Result") == "success"
+    )
+    provisioner_ok = (
+        provisioner_state.get("ActiveState") == "active"
+        and provisioner_state.get("SubState") == "running"
+        and provisioner_state.get("ExecMainStatus") == "0"
+        and provisioner_state.get("Result") == "success"
+    )
+    if not reconciler_ok or not provisioner_ok:
         raise RecoveryError(
             "v3 root service post-activation attestation failed: "
             + json.dumps(post_roots, sort_keys=True)

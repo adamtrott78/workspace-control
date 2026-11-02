@@ -52,6 +52,9 @@ class V3VerifierStackRefreshTests(unittest.TestCase):
         self.assertIn("repo = exact_repo(args.expected_head)",text)
         self.assertIn("updater = repo / VERIFIER_STACK_UPDATER_REL",text)
         self.assertIn("cwd=repo",text)
+        self.assertIn('[sys.executable, "-B", str(updater)',text)
+        self.assertIn('reconciler_state.get("SubState") == "exited"',text)
+        self.assertIn('provisioner_state.get("SubState") == "running"',text)
 
 
 if __name__=="__main__":
