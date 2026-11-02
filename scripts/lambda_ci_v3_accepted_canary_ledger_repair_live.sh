@@ -14,6 +14,8 @@ HELPER="$ROOT/scripts/lambda_ci_v3_accepted_canary_ledger_repair.py"
 
 test -z "$(git -C "$ROOT" status --porcelain --untracked-files=no)"
 
+echo "REPAIR_OPERATOR_BINDING=PASS head=$REPAIR_HEAD"
+
 echo "=== V3 ACCEPTED CANARY LEDGER REPAIR: BEGIN ==="
 echo "REPAIR_HEAD=$REPAIR_HEAD"
 echo "PRODUCTION_SOURCE_HEAD=$PRODUCTION_SOURCE_HEAD"
