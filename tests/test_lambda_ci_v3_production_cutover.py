@@ -152,6 +152,25 @@ class ProductionCutoverTests(unittest.TestCase):
                 ),
             )
 
+    def test_real_workspace_control_retarget_uses_bounded_v3_go_smoke(self):
+        raw = (
+            ROOT
+            / ".github/workflows/lambda-ci-workspace-control-validation.yml"
+        ).read_bytes()
+        rendered = production._retarget_workflow(
+            raw,
+            legacy_scale_set_name="lambda-workspace-control",
+            target_scale_set_name="lambda-workspace-control-control-small",
+        ).decode()
+        self.assertIn("runs-on: lambda-workspace-control-control-small", rendered)
+        self.assertIn("timeout-minutes: 10", rendered)
+        self.assertIn("go1.26.3.linux-amd64.tar.gz", rendered)
+        self.assertIn("test -mod=mod ./v3", rendered)
+        self.assertIn("TestProductionV3SourceDoesNotReadDisplayOrCandidateAuthority", rendered)
+        self.assertIn("TestTerminalRecordFromPriorPolicyGenerationIsInert", rendered)
+        self.assertIn("TestControllerPolicyDigestDriftIsFatalBeforeMutation", rendered)
+        self.assertNotIn('go\" test -mod=mod ./...\\n', rendered)
+
     def test_generation_changes_controller_workflow_pins_not_root_authority(self):
         manifest = self.result["manifest"]
         self.assertEqual(
