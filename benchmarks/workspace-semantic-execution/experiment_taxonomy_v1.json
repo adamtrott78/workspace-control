@@ -1,0 +1,442 @@
+{
+  "schema_version": 1,
+  "taxonomy_id": "workspace-semantic-execution-experiment-taxonomy-v1",
+  "status": "DESIGN_CANDIDATE_NOT_FROZEN",
+  "purpose": "Separate causal experiment questions, fixture properties, executor treatments, validator strength, and outcome metrics so resumable-reasoning results do not confound task horizon with intrinsic reasoning difficulty, domain with tool surface, or quality with orchestration mechanics.",
+  "principles": [
+    "Use a faceted taxonomy rather than a single closed hierarchy.",
+    "Treat domain/workflow family as an open-world extension tag, never a core closed enum.",
+    "Keep experiment class, fixture phenotype, executor arm, and measured outcome as separate coordinates.",
+    "Predeclare observable stressors; do not label a task INTRINSICALLY_DIFFICULT merely from author intuition.",
+    "TOO_LARGE is evidenced by decomposition reducing the work into capable leaves; INTRINSICALLY_DIFFICULT is evidenced only after reasonable decomposition leaves a residual reasoning bottleneck.",
+    "Run the same frozen fixture instance across arms whenever the causal question permits paired comparison.",
+    "Separate reasoning-quality experiments from orchestration-mechanics and authority/safety gates.",
+    "Prefer objective or state-based validators; model-judge-only results cannot support terminal capability claims.",
+    "Treat evaluator secrecy and benchmark contamination resistance as first-class fixture properties.",
+    "Do not infer execution authority from benchmark classification or model output."
+  ],
+  "experiment_question_classes": {
+    "Q0_mechanics": {
+      "question": "Can the durable worker substrate correctly claim, checkpoint, wait, wake, recover, fence stale writers, and complete validated work?",
+      "primary_outcomes": [
+        "durable_state_correctness",
+        "recovery_correctness",
+        "stale_write_rejection",
+        "validator_binding"
+      ],
+      "reasoning_quality_claim": false
+    },
+    "Q1_horizon_externalization": {
+      "question": "Holding task content and executor tier constant, does stateless durable resume preserve validated outcome quality versus persistent chat as horizon grows?",
+      "causal_factor": "continuity_regime",
+      "paired_arms": [
+        "B_instant_persistent_chat",
+        "C_instant_stateless_resume"
+      ]
+    },
+    "Q2_decomposition_effect": {
+      "question": "For work with high scope but separable structure, does explicit decomposition improve lower-tier success without increasing safety/provenance failures?",
+      "causal_factor": "decomposition_scaffold",
+      "paired_arms": [
+        "C_instant_stateless_resume",
+        "D_instant_decompose_critic"
+      ]
+    },
+    "Q3_intrinsic_reasoning_boundary": {
+      "question": "After reasonable decomposition and matched context, where does stronger integrated reasoning materially improve objective outcome quality?",
+      "causal_factor": "reasoning_tier",
+      "comparison": [
+        "lower_tier_residual",
+        "frontier_residual"
+      ],
+      "routing_target": "INTRINSICALLY_DIFFICULT"
+    },
+    "Q4_independent_critique": {
+      "question": "Does an oracle-unexposed independent critic improve terminal quality or catch invalid synthesis without excessive work quanta?",
+      "causal_factor": "critic_presence"
+    },
+    "Q5_escalation_calibration": {
+      "question": "Can a hybrid router escalate residual hard nodes while avoiding escalation for merely large/decomposable nodes?",
+      "causal_factor": "routing_policy",
+      "primary_outcomes": [
+        "escalation_precision",
+        "escalation_recall",
+        "false_escalation_rate",
+        "unsafe_under_escalation_rate",
+        "frontier_usage"
+      ]
+    },
+    "Q6_async_wait_recovery": {
+      "question": "Can external waits and interrupted ownership be handled without model polling or loss of essential state?",
+      "causal_factor": "wait_or_recovery_event",
+      "reasoning_quality_claim": false
+    },
+    "Q7_authority_provenance": {
+      "question": "Does the system preserve authority, exact provenance, and consequence boundaries under misleading or adversarial candidate actions?",
+      "causal_factor": "authority_stress",
+      "reasoning_quality_claim": false,
+      "hard_gate": true
+    },
+    "Q8_open_world_extension": {
+      "question": "Can a previously unmodeled workflow/domain be represented and executed through a versioned extension without core-kernel modification or authority leakage?",
+      "causal_factor": "unseen_extension",
+      "architecture_freeze_gate": true
+    },
+    "Q9_resource_efficiency": {
+      "question": "At matched validated quality, which routing strategy minimizes scarce frontier usage, context consumption, and execution quanta?",
+      "causal_factor": "executor_routing_strategy",
+      "analysis_rule": "Quality and safety gates must be satisfied before efficiency comparisons."
+    }
+  },
+  "fixture_axes": {
+    "domain_workflow": {
+      "type": "open_extension_tags",
+      "examples": [
+        "research",
+        "software_engineering",
+        "systems_architecture",
+        "data_science_ml",
+        "operations",
+        "tutoring_proof",
+        "document_artifact",
+        "publication",
+        "presentation",
+        "retrieval_synthesis"
+      ],
+      "core_enum": false
+    },
+    "reasoning_primitives": {
+      "type": "multi_label",
+      "values": [
+        "retrieve",
+        "hypothesize",
+        "causal_discrimination",
+        "plan",
+        "implement",
+        "debug",
+        "experiment",
+        "interpret",
+        "optimize",
+        "critique",
+        "synthesize",
+        "prove",
+        "teach",
+        "decide_under_uncertainty"
+      ]
+    },
+    "horizon_load": {
+      "fields": {
+        "human_equivalent_minutes": "positive_number_or_null",
+        "expected_reasoning_quanta": "positive_integer_or_null",
+        "context_bytes_initial": "nonnegative_integer",
+        "evidence_item_count": "nonnegative_integer",
+        "expected_tool_actions": "nonnegative_integer_or_null",
+        "dependency_depth": "nonnegative_integer",
+        "dependency_width": "nonnegative_integer",
+        "external_wait_count": "nonnegative_integer",
+        "repository_or_environment_count": "positive_integer"
+      },
+      "interpretation": "Measures size/horizon, not intrinsic reasoning difficulty."
+    },
+    "decomposability": {
+      "fields": {
+        "separability": "ATOMIC|MOSTLY_SEPARABLE|PARTIALLY_COUPLED|STRONGLY_COUPLED",
+        "independently_validatable_leaf_fraction": "0_to_1_or_null",
+        "synthesis_coupling": "LOW|MEDIUM|HIGH"
+      },
+      "interpretation": "High horizon plus high separability is a candidate TOO_LARGE phenotype; it is not evidence for frontier escalation."
+    },
+    "reasoning_stressors": {
+      "fields": {
+        "competing_hypothesis_count": "nonnegative_integer",
+        "conflicting_evidence": "NONE|LOW|MEDIUM|HIGH",
+        "causal_identification_required": "boolean",
+        "novelty": "LOW|MEDIUM|HIGH",
+        "nonlocal_constraint_count": "nonnegative_integer",
+        "proof_or_derivation_depth": "nonnegative_integer_or_null",
+        "uncertainty": "LOW|MEDIUM|HIGH",
+        "search_space": "BOUNDED_SMALL|BOUNDED_LARGE|OPEN_ENDED",
+        "distractor_density": "NONE|LOW|MEDIUM|HIGH"
+      },
+      "interpretation": "Predeclared observable stressors. Empirical difficulty is measured from outcomes rather than assigned from importance."
+    },
+    "observability_messiness": {
+      "fields": {
+        "observability": "FULL|PARTIAL|NOISY",
+        "misleading_observation_count": "nonnegative_integer",
+        "stale_evidence_possible": "boolean",
+        "specification_completeness": "HIGH|MEDIUM|LOW",
+        "environment_drift": "NONE|BOUNDED|REALISTIC",
+        "multi_objective_tradeoff": "NONE|BOUNDED|OPEN"
+      }
+    },
+    "state_continuity_stress": {
+      "type": "multi_label",
+      "values": [
+        "single_quantum",
+        "persistent_continuation",
+        "stateless_resume",
+        "external_wait",
+        "lease_recovery",
+        "concurrent_workers",
+        "critic_branch_merge"
+      ]
+    },
+    "tool_environment": {
+      "fields": {
+        "mutability": "READ_ONLY|SANDBOX_REVERSIBLE|BOUNDED_DURABLE_WRITE",
+        "environment_determinism": "DETERMINISTIC|SEEDED_STOCHASTIC|LIVE_STOCHASTIC",
+        "tool_categories": "open_extension_tags",
+        "multi_repo": "boolean",
+        "build_test_or_experiment_loop": "boolean"
+      }
+    },
+    "authority_consequence": {
+      "fields": {
+        "authority_class": "ANALYSIS_ONLY|FIXTURE_EXECUTION|SANDBOX_MUTATION|BOUNDED_REPO_MUTATION|REVIEWED_PRIVILEGED_HELPER|EXTERNAL_IRREVERSIBLE",
+        "consequence_reversibility": "NONE|FULL|BOUNDED|IRREVERSIBLE",
+        "human_review_required": "boolean"
+      },
+      "benchmark_default": "ANALYSIS_ONLY through SANDBOX_MUTATION unless separately authorized."
+    },
+    "validator": {
+      "fields": {
+        "validator_class": "EXACT_ORACLE|DETERMINISTIC_TESTS|INVARIANT_CHECKER|CONTINUOUS_SCORE|BLINDED_HUMAN_RUBRIC|MODEL_JUDGE_AUXILIARY",
+        "terminal_authority": "boolean",
+        "partial_credit": "boolean",
+        "false_positive_risk": "LOW|MEDIUM|HIGH",
+        "evaluator_isolation": "PUBLIC|HIDDEN_STATIC|HIDDEN_EPHEMERAL|BLINDED_EXTERNAL"
+      },
+      "rule": "MODEL_JUDGE_AUXILIARY alone is not sufficient terminal authority for equivalence claims."
+    },
+    "contamination_generalization": {
+      "fields": {
+        "fixture_novelty": "PUBLIC_EXISTING|PRIVATE_EXISTING|FRESH_AUTHORED|GENERATED_EPHEMERAL|UNSEEN_REAL_WORKFLOW",
+        "answer_exposure": "PUBLIC|HIDDEN|EPHEMERAL",
+        "worker_oracle_exposure": "NONE_REQUIRED",
+        "authoring_session_eligible": "boolean"
+      }
+    }
+  },
+  "empirical_labels": {
+    "LEAF_EXECUTABLE": {
+      "assignment_rule": "Bounded node succeeds or has strong prior evidence of succeeding at the selected tier with an objective validator."
+    },
+    "TOO_LARGE": {
+      "assignment_rule": "The node exceeds bounded horizon/scope but decomposition yields independently executable leaves and no residual requires stronger integrated reasoning."
+    },
+    "INTRINSICALLY_DIFFICULT": {
+      "assignment_rule": "After reasonable decomposition and matched evidence, a residual node repeatedly fails lower-tier objective validation or cannot resolve the declared reasoning bottleneck, while stronger reasoning materially improves the validated outcome."
+    },
+    "AUTHORITY_BLOCKED": {
+      "assignment_rule": "Required action lacks pre-existing authority. No model tier may convert this into an executable node."
+    },
+    "WAITING_EXTERNAL": {
+      "assignment_rule": "No useful reasoning transition exists until a referenced external result is durably available."
+    }
+  },
+  "arm_dimensions": {
+    "executor_identity": [
+      "provider",
+      "model",
+      "reasoning_effort",
+      "surface",
+      "harness",
+      "toolset",
+      "capability_profile"
+    ],
+    "continuity_regime": [
+      "persistent_chat",
+      "stateless_resume",
+      "decompose_critic",
+      "hybrid_escalation"
+    ],
+    "resource_state": [
+      "quota_pool",
+      "frontier_allowance_state",
+      "deterministic_compute_budget"
+    ],
+    "rule": "A model name alone is not an experimental arm."
+  },
+  "outcome_taxonomy": {
+    "quality": [
+      "terminal_validator_pass",
+      "normalized_validator_score",
+      "correctness",
+      "constraint_satisfaction",
+      "invalid_hypotheses_pursued"
+    ],
+    "reliability": [
+      "pass_at_1",
+      "all_k_pass_reliability",
+      "variance_across_replicates",
+      "failure_mode_distribution"
+    ],
+    "routing": [
+      "true_escalation",
+      "false_escalation",
+      "unsafe_under_escalation",
+      "decomposition_success",
+      "residual_reason"
+    ],
+    "orchestration": [
+      "resume_success",
+      "recovery_success",
+      "repeated_work",
+      "stale_write_attempts",
+      "external_wait_model_polls",
+      "manual_state_relay_count"
+    ],
+    "efficiency": [
+      "context_bytes",
+      "context_tokens_if_available",
+      "reasoning_invocations",
+      "tool_actions",
+      "deterministic_compute_operations",
+      "frontier_invocations",
+      "frontier_tokens_or_allowance_if_available",
+      "wall_clock_excluding_external_wait"
+    ],
+    "safety": [
+      "authority_violations",
+      "provenance_violations",
+      "unauthorized_mutations",
+      "irreversible_action_attempts"
+    ],
+    "generalization": [
+      "unseen_workflow_success",
+      "core_kernel_changes_required",
+      "extension_contract_changes_required"
+    ],
+    "calibration": [
+      "predicted_disposition",
+      "observed_disposition",
+      "predicted_success_probability_if_available",
+      "observed_success"
+    ]
+  },
+  "experimental_design_rules": {
+    "paired_fixture_rule": "For causal arm comparisons, use the same fixture instance, frozen inputs, tools, validator, and resource envelope except for the treatment factor.",
+    "replicate_rule": "Use repeated independent trials for stochastic model behavior; report pass@1/success rate plus an all-k reliability statistic rather than a single lucky run.",
+    "randomized_order_rule": "Randomize or interleave arm execution when practical to reduce infrastructure/model-version drift.",
+    "matched_affordance_rule": "Human or model comparisons must use materially equivalent information and tool affordances.",
+    "quality_first_rule": "Do not trade quality/safety for efficiency in aggregate scores; apply quality and hard safety gates before resource comparisons.",
+    "contamination_rule": "No scored worker may have oracle access. Public/static benchmarks cannot alone support strong capability claims when contamination is plausible.",
+    "no_cartesian_explosion_rule": "Use stratified coverage over facets and matched counterfactual fixture variants; do not attempt the full Cartesian product."
+  },
+  "benchmark_suites": {
+    "S1_reasoning_quality_boundary": {
+      "purpose": "Primary Instant-versus-frontier capability question.",
+      "included_questions": [
+        "Q1_horizon_externalization",
+        "Q2_decomposition_effect",
+        "Q3_intrinsic_reasoning_boundary",
+        "Q4_independent_critique",
+        "Q5_escalation_calibration"
+      ],
+      "terminal_claims_allowed": true
+    },
+    "S2_orchestration_mechanics": {
+      "purpose": "Durable queue, CAS, lease, recovery, wait/wake and concurrency mechanics.",
+      "included_questions": [
+        "Q0_mechanics",
+        "Q6_async_wait_recovery"
+      ],
+      "terminal_claims_allowed": false,
+      "note": "Existing PR #574-#589 evidence primarily belongs here."
+    },
+    "S3_authority_safety": {
+      "purpose": "Authority firewall, provenance, consequence and stale-writer safety.",
+      "included_questions": [
+        "Q7_authority_provenance"
+      ],
+      "hard_gate": true
+    },
+    "S4_open_world_generalization": {
+      "purpose": "Unseen workflow/domain extension proof.",
+      "included_questions": [
+        "Q8_open_world_extension"
+      ],
+      "architecture_freeze_gate": true
+    },
+    "S5_resource_routing": {
+      "purpose": "Quality-adjusted executor/resource efficiency and frontier allowance minimization.",
+      "included_questions": [
+        "Q9_resource_efficiency"
+      ],
+      "prerequisite": "S1 quality gates and S3 safety gates."
+    }
+  },
+  "pilot_coverage_strategy": {
+    "design": "stratified_matched_fixtures",
+    "core_phenotypes": [
+      {
+        "id": "P0_easy_control",
+        "horizon_load": "LOW",
+        "separability": "ATOMIC_OR_MOSTLY_SEPARABLE",
+        "reasoning_stress": "LOW",
+        "purpose": "Detect harness regressions and gross executor failures."
+      },
+      {
+        "id": "P1_horizon_heavy_decomposable",
+        "horizon_load": "HIGH",
+        "separability": "MOSTLY_SEPARABLE",
+        "reasoning_stress": "LOW_TO_MEDIUM",
+        "expected_routing_signal": "TOO_LARGE should benefit from decomposition without frontier escalation."
+      },
+      {
+        "id": "P2_reasoning_heavy_coupled",
+        "horizon_load": "LOW_TO_MEDIUM",
+        "separability": "STRONGLY_COUPLED",
+        "reasoning_stress": "HIGH",
+        "expected_routing_signal": "Candidate INTRINSICALLY_DIFFICULT residual."
+      },
+      {
+        "id": "P3_mixed_long_hard",
+        "horizon_load": "HIGH",
+        "separability": "PARTIALLY_COUPLED",
+        "reasoning_stress": "HIGH",
+        "expected_routing_signal": "Decompose first; escalate only the surviving coupled residual."
+      }
+    ],
+    "initial_family_coverage": [
+      "research_iterate",
+      "architecture_diagnosis",
+      "artifact_revision",
+      "software_debug_repair",
+      "unseen_extension_fixture"
+    ],
+    "minimum_replicates_guidance": {
+      "deterministic_mechanics": 1,
+      "model_reasoning_pilot_per_arm_fixture": 3,
+      "reliability_claims": "increase k until confidence intervals or failure-mode stability are informative; do not hard-code one universal k."
+    }
+  },
+  "references": [
+    {
+      "name": "HELM",
+      "lesson": "Taxonomize scenarios and metrics separately and make missing coverage explicit.",
+      "url": "https://crfm.stanford.edu/2022/11/17/helm"
+    },
+    {
+      "name": "METR Task-Completion Time Horizons",
+      "lesson": "Use human-equivalent task duration as one horizon/difficulty covariate, not as the only notion of difficulty.",
+      "url": "https://metr.org/time-horizons/"
+    },
+    {
+      "name": "RE-Bench",
+      "lesson": "Use realistic iterative research environments, matched affordances, quantitative scoring, and explicit time/resource budgets.",
+      "url": "https://metr.org/blog/2024-11-22-evaluating-r-d-capabilities-of-llms/"
+    },
+    {
+      "name": "tau-bench",
+      "lesson": "Measure repeated-trial reliability, not only one-shot success, and prefer terminal state validation for tool agents.",
+      "url": "https://arxiv.org/abs/2406.12045"
+    },
+    {
+      "name": "SWE-bench contamination lesson",
+      "lesson": "Public benchmark exposure can invalidate capability inference; prefer fresh/hidden/ephemeral fixtures for strong claims.",
+      "url": "https://openai.com/index/why-we-no-longer-evaluate-swe-bench-verified/"
+    }
+  ]
+}
