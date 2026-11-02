@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-executor-resource-v0.1",
+  "status": "DESIGN_CANDIDATE_NOT_FROZEN",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Define a provider/model/surface-aware executor registry and quota/resource routing model that minimizes scarce frontier allowance while preserving capability, authority, privacy, context and validation requirements.",
+  "invariants": [
+    "Executor selection never grants action authority.",
+    "Model identity alone is insufficient; execution surface/harness/toolset are part of executor identity.",
+    "Importance alone never forces a stronger reasoning tier.",
+    "TOO_LARGE and INTRINSICALLY_DIFFICULT are distinct routing outcomes.",
+    "Waiting for external events consumes no reasoning executor.",
+    "Unknown quota state does not become fabricated capacity.",
+    "A lower-cost executor may be selected only if required capabilities/context/privacy/authority constraints are satisfied.",
+    "Repeated lower-tier failures require evidence-based retry/decompose/escalate decisions rather than unlimited retry.",
+    "Usage accounting is durable and attributable to program/workstream/process/action.",
+    "Provider-specific quota mechanics are adapter data, not hard-coded scheduler semantics."
+  ],
+  "executor_identity": {
+    "required_components": [
+      "executor_id",
+      "provider_id",
+      "model_id",
+      "surface_id",
+      "harness_id",
+      "toolset_id",
+      "capability_profile_id",
+      "usage_pool_ids"
+    ],
+    "rationale": "The same nominal model can behave materially differently through different harnesses, context managers, tools, permission surfaces and orchestration loops."
+  },
+  "provider": {
+    "fields": [
+      "provider_id",
+      "name",
+      "adapter_version",
+      "availability",
+      "privacy_class",
+      "region_or_locality",
+      "supported_surfaces",
+      "quota_observation_method"
+    ],
+    "availability_states": [
+      "AVAILABLE",
+      "DEGRADED",
+      "UNAVAILABLE",
+      "UNKNOWN"
+    ]
+  },
+  "model": {
+    "fields": [
+      "model_id",
+      "provider_id",
+      "model_family",
+      "reasoning_ceiling",
+      "context_capacity",
+      "multimodal_support",
+      "known_constraints",
+      "version_or_alias",
+      "observed_capability_evidence"
+    ]
+  },
+  "surface": {
+    "fields": [
+      "surface_id",
+      "kind",
+      "interactive_or_machine",
+      "tool_access",
+      "state_model",
+      "context_management",
+      "supports_stateless_resume",
+      "supports_async_wait_resume",
+      "supports_programmatic_invocation",
+      "requires_human_launch"
+    ],
+    "kinds": [
+      "CHAT_UI",
+      "CLI_AGENT",
+      "API",
+      "LOCAL_RUNTIME",
+      "GITHUB_AGENT",
+      "WORKSPACE_SHELL",
+      "GITRUNNER",
+      "HUMAN"
+    ]
+  },
+  "harness": {
+    "fields": [
+      "harness_id",
+      "planning_strategy",
+      "decomposition_strategy",
+      "context_compaction",
+      "memory_strategy",
+      "tool_loop",
+      "verification_strategy",
+      "subagent_strategy",
+      "retry_strategy"
+    ]
+  },
+  "capability_profile": {
+    "dimensions": {
+      "reasoning": [
+        "NONE",
+        "LOW",
+        "MODERATE",
+        "HIGH",
+        "FRONTIER"
+      ],
+      "code": [
+        "NONE",
+        "READ",
+        "EDIT",
+        "DEBUG",
+        "ARCHITECT"
+      ],
+      "github": [
+        "NONE",
+        "READ",
+        "WRITE_BRANCH",
+        "PR",
+        "CI_OBSERVE",
+        "REVIEW"
+      ],
+      "shell": [
+        "NONE",
+        "READ_ONLY",
+        "BOUNDED_EXEC",
+        "AUTHORIZED_PRIVILEGED_HELPER"
+      ],
+      "web": [
+        "NONE",
+        "SEARCH",
+        "BROWSE"
+      ],
+      "artifact": [
+        "NONE",
+        "TEXT",
+        "DOCUMENT",
+        "PRESENTATION",
+        "SPREADSHEET",
+        "PDF",
+        "IMAGE",
+        "CODE"
+      ],
+      "multimodal": [
+        "NONE",
+        "IMAGE_READ",
+        "DOCUMENT_VISUAL_QA"
+      ],
+      "runtime": [
+        "NONE",
+        "CPU",
+        "GPU_SMALL",
+        "GPU_HEAVY"
+      ]
+    },
+    "evidence_rule": "Capabilities should be supported by benchmark/tool evidence where material. Unobserved capability may remain UNKNOWN rather than assumed."
+  },
+  "reasoning_requirement": {
+    "fields": [
+      "reasoning_requirement_id",
+      "class",
+      "integration_width",
+      "uncertainty",
+      "objective_validator_available",
+      "decomposability",
+      "prior_lower_tier_attempts",
+      "escalation_reason"
+    ],
+    "classes": [
+      "NONE",
+      "LOW",
+      "MODERATE",
+      "HIGH",
+      "HUMAN_JUDGMENT"
+    ],
+    "classification_rules": {
+      "TOO_LARGE": "Node exceeds bounded context/action envelope but can be decomposed without losing the essential integrated decision.",
+      "INTRINSICALLY_DIFFICULT": "After reasonable decomposition, the residual still requires stronger integrated reasoning or repeatedly fails objective review.",
+      "HUMAN_JUDGMENT": "Owning contract makes a substantive human choice authoritative or evidence cannot mechanically settle the decision."
+    }
+  },
+  "context_requirement": {
+    "fields": [
+      "context_requirement_id",
+      "required_semantic_refs",
+      "raw_artifact_access",
+      "maximum_packet_size_target",
+      "progressive_disclosure_allowed",
+      "conversation_history_required",
+      "privacy_class"
+    ],
+    "default_rule": "Full conversation history is false by default for resumable processes; use durable semantic state and retrieve raw evidence only as needed."
+  },
+  "usage_pool": {
+    "fields": [
+      "pool_id",
+      "provider_id",
+      "plan_or_resource",
+      "billing_class",
+      "usage_metric",
+      "reset_policy",
+      "reset_at",
+      "known_remaining",
+      "estimated_remaining",
+      "observation_confidence",
+      "exhaustion_behavior",
+      "reservation_policy",
+      "priority_policy"
+    ],
+    "billing_classes": [
+      "SUBSCRIPTION_UNMETERED",
+      "SUBSCRIPTION_ALLOWANCE",
+      "PAY_AS_YOU_GO",
+      "LOCAL_COMPUTE",
+      "HUMAN_ATTENTION"
+    ],
+    "usage_metrics": [
+      "NONE",
+      "TOKEN_WEIGHTED",
+      "COMPUTE_WEIGHTED",
+      "MESSAGE_LIMIT",
+      "TIME_WINDOW",
+      "MONTHLY_CREDIT",
+      "GPU_TIME",
+      "WALL_CLOCK"
+    ],
+    "reset_policies": [
+      "NONE",
+      "ROLLING_WINDOW",
+      "DAILY",
+      "WEEKLY",
+      "MONTHLY",
+      "PROVIDER_DEFINED",
+      "UNKNOWN"
+    ],
+    "unknown_rule": "When the system cannot observe a quota exactly, record UNKNOWN or a conservative estimate; never synthesize exact remaining allowance."
+  },
+  "usage_record": {
+    "fields": [
+      "usage_record_id",
+      "pool_id",
+      "executor_id",
+      "program_id",
+      "workstream_id",
+      "reasoning_process_id",
+      "action_or_attempt_id",
+      "started_at",
+      "ended_at",
+      "observed_usage",
+      "estimated_usage",
+      "result",
+      "validator_result"
+    ],
+    "purpose": "Measure verified progress per unit of scarce resource and calibrate future routing."
+  },
+  "routing_input": {
+    "required": [
+      "candidate_action_or_reasoning_process",
+      "authority_decision",
+      "required_capabilities",
+      "reasoning_requirement",
+      "context_requirement",
+      "resource_requirement",
+      "privacy/locality constraints",
+      "eligible executor registry snapshot",
+      "usage pool snapshot",
+      "prior attempt evidence"
+    ]
+  },
+  "routing_algorithm": [
+    "Reject routing if action authority is not ALLOW or if this is reasoning-only work whose contract forbids execution side effects.",
+    "Filter executors by exact required tool/capability/surface constraints.",
+    "Filter by context capacity and privacy/locality constraints.",
+    "Filter unavailable/exhausted resources; preserve UNKNOWN quota state explicitly.",
+    "If no executor fits because node is TOO_LARGE, return DECOMPOSE rather than stronger-model escalation.",
+    "Estimate success likelihood from benchmark evidence for the task/capability class.",
+    "Estimate scarce-resource impact across independent usage pools.",
+    "Select the lowest-scarcity eligible executor whose estimated success satisfies the task's confidence/validation policy.",
+    "After a failed attempt, classify failure as transient, implementation/tool, context/size, capability/reasoning, authority, or invalid validator.",
+    "Retry transient failures within bounded policy; repair tool/implementation failures if objectively diagnosable.",
+    "Decompose context/size failures.",
+    "Escalate capability/reasoning failures only when lower-tier evidence supports INTRINSICALLY_DIFFICULT.",
+    "Persist RoutingDecision with candidates considered, exclusions, selected executor, pool snapshot, and rationale."
+  ],
+  "routing_decision": {
+    "required_fields": [
+      "routing_decision_id",
+      "input_state_ref",
+      "authority_decision_ref",
+      "eligible_candidates",
+      "excluded_candidates_with_reasons",
+      "selected_executor_id",
+      "selected_usage_pool_ids",
+      "reasoning_class",
+      "scarcity_rationale",
+      "fallback_order",
+      "created_at"
+    ],
+    "authority": "ROUTING_ONLY"
+  },
+  "scarcity_objective": {
+    "primary": "maximize expected verified progress per unit of scarce renewable frontier allowance",
+    "secondary": [
+      "preserve correctness/safety gates",
+      "minimize unnecessary context",
+      "avoid paid API use when an included/local executor is sufficient",
+      "avoid human attention for mechanically resolvable work",
+      "protect scarce frontier pools for intrinsically difficult residuals",
+      "use deterministic compute for deterministic work"
+    ],
+    "non_objective": "Do not minimize model cost by accepting materially lower validated output quality."
+  },
+  "retry_and_escalation": {
+    "retry_categories": {
+      "TRANSIENT": "bounded retry same tier",
+      "TOOL_OR_IMPLEMENTATION": "diagnose/repair if objective failure evidence exists",
+      "CONTEXT_OR_SIZE": "decompose or reduce context",
+      "REASONING_CAPABILITY": "escalate after evidence",
+      "AUTHORITY": "stop AUTHORITY_BLOCKED",
+      "EXTERNAL_WAIT": "stop WAITING_EXTERNAL",
+      "VALIDATOR_OR_SPEC": "repair benchmark/spec rather than blame executor"
+    },
+    "anti_loop": [
+      "same unchanged reasoning node cannot be retried indefinitely",
+      "every retry records new evidence or changed premise",
+      "repeated no-progress attempts trigger decomposition or escalation",
+      "external waits never trigger reasoning retries"
+    ]
+  },
+  "initial_executor_classes": {
+    "deterministic": {
+      "examples": [
+        "Git state checks",
+        "tests",
+        "CI",
+        "statistics",
+        "dataset transforms",
+        "build/render",
+        "event observation"
+      ],
+      "scarce_frontier_impact": "NONE"
+    },
+    "instant": {
+      "role": "default low-scarcity semantic/coding worker where benchmark evidence supports the capability",
+      "state_model": "resumable disposable invocation"
+    },
+    "local_model": {
+      "role": "machine-triggerable extraction, triage, summarization, classification, retrieval/reranking, bounded reasoning where calibrated"
+    },
+    "subscription_agent": {
+      "role": "independent included allowance pool when interface/terms and capability justify use"
+    },
+    "frontier_chat": {
+      "role": "scarce high-value integrated reasoning"
+    },
+    "payg_api": {
+      "role": "last-resort or programmatic frontier fallback"
+    },
+    "human": {
+      "role": "authoritative substantive judgment or external consequence approval when required"
+    }
+  },
+  "benchmark_requirements": [
+    "Calibrate Instant success by capability class rather than one global score.",
+    "Record executor surface/harness in every benchmark result.",
+    "Measure frontier escalations and avoided frontier calls.",
+    "Measure context packet size and repeated work after resume.",
+    "Include false escalation and unsafe under-escalation metrics.",
+    "Test independent quota-pool exhaustion.",
+    "Test provider unavailable while another compatible executor is available.",
+    "Test UNKNOWN quota state.",
+    "Test same model through two surfaces as distinct executors.",
+    "Test external WAIT with zero model polling."
+  ]
+}
