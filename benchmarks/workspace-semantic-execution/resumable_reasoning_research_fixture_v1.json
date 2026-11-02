@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-iterate-retry-pooling-v1",
+  "family": "research_iterate",
+  "visibility": "worker_visible",
+  "objective": "Determine the primary mechanism causing a synthetic request-latency regression and justify the conclusion using at least two experiment/result cycles. Distinguish load-relief correlations from the causal mechanism.",
+  "starting_observations": [
+    {
+      "id": "O1",
+      "observation": "At concurrency 64, p95 latency is 412 ms and mean retries per request are 3.1."
+    },
+    {
+      "id": "O2",
+      "observation": "Halving concurrency to 32 lowers p95 latency to 286 ms.",
+      "warning": "This observation is real but may be non-discriminating."
+    },
+    {
+      "id": "O3",
+      "observation": "CPU utilization remains below 48% and queue occupancy never exceeds 62%."
+    }
+  ],
+  "candidate_hypotheses": [
+    {
+      "id": "H_queue",
+      "statement": "The regression is primarily queue-capacity saturation under concurrency."
+    },
+    {
+      "id": "H_retry_state",
+      "statement": "Retry state is incorrectly retained across pooled request lifecycles, amplifying retries and latency."
+    },
+    {
+      "id": "H_clock_bucket",
+      "statement": "Timeout timestamp quantization is causing retries to bunch into the same bucket."
+    }
+  ],
+  "experiment_catalog": [
+    {
+      "id": "E_queue_4x",
+      "intervention": "Increase queue capacity by 4x while holding concurrency and retry policy fixed.",
+      "cost": 1
+    },
+    {
+      "id": "E_disable_pool_reuse",
+      "intervention": "Disable connection-pool reuse while holding concurrency and retry policy fixed.",
+      "cost": 1
+    },
+    {
+      "id": "E_force_retry_reset",
+      "intervention": "Explicitly reset retry state at each request boundary while leaving pool reuse enabled.",
+      "cost": 1
+    },
+    {
+      "id": "E_clock_quantization",
+      "intervention": "Replace quantized timeout timestamps with monotonic high-resolution timestamps.",
+      "cost": 1
+    },
+    {
+      "id": "E_half_concurrency",
+      "intervention": "Halve concurrency from 64 to 32 without changing any other mechanism.",
+      "cost": 1
+    }
+  ],
+  "worker_contract": {
+    "minimum_experiment_cycles_before_terminal_claim": 2,
+    "must_reject_at_least_one_competing_hypothesis": true,
+    "must_address_observation": "O2",
+    "terminal_output_fields": [
+      "final_hypothesis",
+      "rejected_hypotheses",
+      "observed_results",
+      "addressed_observations",
+      "rationale"
+    ],
+    "oracle_path_is_not_worker_input": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json"
+  },
+  "authority": {
+    "execution_authority": false,
+    "production_mutation": false,
+    "external_submission": false,
+    "fixture_only": true
+  }
+}
