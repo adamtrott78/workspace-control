@@ -8,6 +8,7 @@ from unittest import mock
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 LIVE_UPDATE = SCRIPTS / "lambda_ci_maintenance_controller_live_update_v1.py"
+STALE_RECOVERY_UPDATE = SCRIPTS / "lambda_ci_stale_quarantine_recovery_live_update_v1.py"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
@@ -163,6 +164,42 @@ class MaintenanceControllerTests(unittest.TestCase):
         self.assertNotIn("ready-for-single-retry.json", text)
         self.assertNotIn("github-read-token", text)
         self.assertNotIn("runner-token", text)
+
+    def test_stale_quarantine_live_updater_is_exact_and_non_mutating_until_apply(self):
+        text = STALE_RECOVERY_UPDATE.read_text()
+        self.assertIn(
+            'EXPECTED_OLD_CONTROLLER_REVISION = "3e8a231483413ba3a16d405ba61b55d0ab9ff3aa"',
+            text,
+        )
+        self.assertIn(
+            'EXPECTED_OLD_MAINTENANCE_BLOB = "44234db6ceac33f42406731ec190f8de65ecf3f4"',
+            text,
+        )
+        self.assertIn(
+            'EXPECTED_NEW_MAINTENANCE_BLOB = "4c451faa19d785b0bbab04b93f1ab78529048ed5"',
+            text,
+        )
+        self.assertIn(
+            'EXPECTED_MAIN_BLOB = "7ef485a14ab6092ee4bea79e701e7fca6e562821"',
+            text,
+        )
+        self.assertIn(
+            '"controller/lambda-ci-controller/main.go",',
+            text,
+        )
+        self.assertIn(
+            '"controller/lambda-ci-controller/main_test.go",',
+            text,
+        )
+        self.assertIn("STALE_QUARANTINE_RECOVERY_LIVE_UPDATE=PASS", text)
+        self.assertIn("no scale-set mutation", text)
+        self.assertIn("no quarantine/retry-state mutation", text)
+        self.assertIn("no v3 service mutation", text)
+        self.assertIn("no Workspace Shell mutation", text)
+        self.assertIn("ROLLED_BACK", text)
+        self.assertNotIn("gh ", text)
+        self.assertNotIn("curl ", text)
+        self.assertNotIn("DELETE_STALE_QUARANTINED", text)
 
     def test_github_time_normalizer_truncates_go_rfc3339_nanoseconds(self):
         self.assertEqual(
