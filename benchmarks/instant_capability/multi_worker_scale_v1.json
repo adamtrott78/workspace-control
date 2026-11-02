@@ -190,7 +190,9 @@
     "worker_loop": "after successful completion, immediately attempt next eligible action; yield only for async validation, retryable tool/read barrier, no eligible work, or terminal failure",
     "max_claim_cas_attempts_per_action": 3,
     "max_completion_cas_attempts_per_action": 3,
-    "max_code_repair_iterations_per_action": 3
+    "max_code_repair_iterations_per_action": 3,
+    "worker_registration": "fresh worker atomically claims lexicographically smallest FREE worker slot by exact-head CAS before action selection; preserve all peer state; once registered, retain that worker_id for the chat",
+    "worker_registration_conflict": "reread shared state and retry next FREE worker slot; stop if no FREE slot remains"
   },
   "safety": {
     "modify_main": false,
@@ -201,5 +203,23 @@
     "authoritative_task_state": false
   },
   "claim_history": [],
-  "completion_history": []
+  "completion_history": [],
+  "worker_slots": {
+    "W1": {
+      "state": "FREE",
+      "session_owner": null
+    },
+    "W2": {
+      "state": "FREE",
+      "session_owner": null
+    },
+    "W3": {
+      "state": "FREE",
+      "session_owner": null
+    },
+    "W4": {
+      "state": "FREE",
+      "session_owner": null
+    }
+  }
 }
