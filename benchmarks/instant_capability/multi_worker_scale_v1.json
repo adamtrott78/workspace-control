@@ -3,7 +3,7 @@
   "benchmark": "INSTANT_MULTI_WORKER_SCALE_V1",
   "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
   "shared_branch": "instant-multi-worker-scale-v1-20261101",
-  "state_version": 4,
+  "state_version": 5,
   "worker_count": 4,
   "invariant": "each action has at most one owner; every completion preserves all peer state; workers choose lexicographically smallest PENDING action",
   "actions": {
@@ -227,8 +227,8 @@
       "session_owner": "W2"
     },
     "W3": {
-      "state": "FREE",
-      "session_owner": null
+      "state": "ACTIVE",
+      "session_owner": "W3"
     },
     "W4": {
       "state": "FREE",
@@ -245,6 +245,11 @@
       "worker_id": "W2",
       "event": "REGISTERED",
       "expected_shared_head": "98937a3bbc862f36c150ef144359e1b909e5b2d1"
+    },
+    {
+      "worker_id": "W3",
+      "event": "REGISTERED",
+      "expected_shared_head": "dc2d100efc1e0059edf1bed2712b78f6f4e87bd5"
     }
   ]
 }
