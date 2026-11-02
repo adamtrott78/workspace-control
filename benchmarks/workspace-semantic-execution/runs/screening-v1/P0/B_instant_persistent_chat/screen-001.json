@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P0-B-001",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P0_easy_control",
+  "arm": "B_instant_persistent_chat",
+  "replicate_id": "screen-001",
+  "fixture_id": "research-iterate-timeout-control-p0-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "daf425b2e6b11fd5ca72283609b6cd02b0ba6246",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json",
+    "fixture_blob_sha": "ee443a5f9d943c9a77568f70c91bd646f838cfd8",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "READY",
+  "owner": null,
+  "executor_identity": null,
+  "continuity_regime": "persistent_chat",
+  "started_at": null,
+  "completed_at": null,
+  "invocations": [],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "daf425b2e6b11fd5ca72283609b6cd02b0ba6246",
+      "note": "Control-created clean-worker slot; no oracle result has been published."
+    }
+  ],
+  "pending_external": null,
+  "external_results": {},
+  "established_findings": [],
+  "open_hypotheses": [],
+  "unresolved_questions": [],
+  "evidence_refs": [],
+  "candidate_actions": [],
+  "next_safe_action": "Claim this run and inspect only the listed public inputs.",
+  "terminal_submission": null,
+  "validator_results": [],
+  "metrics": {
+    "reasoning_invocations": 0,
+    "experiment_requests": 0,
+    "retries": 0,
+    "decomposition_count": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0
+  },
+  "control_evaluator": {
+    "status": "NOT_YET_NEEDED",
+    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+  }
+}
