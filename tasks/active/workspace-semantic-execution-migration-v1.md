@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: ca12ad69988d1a247ae32b7454c0ff146cbb83bc
+- Remote checkpoint: 4ec300254c328a1b6e0fce62fe62cd6f11d7a855
 - Remote verified: true
 
 ### PADataset
@@ -70,13 +70,13 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Resume the resumable_reasoning_benchmark now that the GitRunner v3 production/retirement dependency is cleared. Consolidate the existing Instant durable-worker evidence into the benchmark harness, select representative hard long-horizon research/architecture fixtures with objective validators, and run at least the persistent Instant, stateless-resume Instant, decomposition/critic Instant, hybrid-escalation, and frontier-control arms. Measure validated outcome quality, retries/decomposition, context/usage, elapsed work quanta, and escalation reason. The decision boundary must distinguish TOO_LARGE (decompose/retry cheap) from INTRINSICALLY_DIFFICULT (escalate). Do not freeze the semantic execution architecture until the benchmark, independent architecture review, and unseen-workflow extension proof are complete.
+Launch clean oracle-unexposed model sessions for `A_frontier_long_horizon`, `B_instant_persistent_chat`, `C_instant_stateless_resume`, `D_instant_decompose_critic`, and `E_hybrid_escalation` against `benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_runset_v1.json`. Each session must recover only the frozen public fixture, current durable run state, and bounded context packet; it must never receive the evaluator oracle. Persist every reasoning quantum with exact provenance, executor identity, context usage, evidence refs, next-safe-action, and `TOO_LARGE` versus `INTRINSICALLY_DIFFICULT` disposition. Score terminal outputs with the deterministic evaluator. Do not use this authoring chat as a scored arm. Architecture freeze remains blocked on the benchmark, independent architecture review, and unseen-workflow extension proof.
 
 ## Remaining work
 
 - Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.
-- Consolidate already completed Instant capability evidence: multi-leaf queue endurance/resume, stateless durable recovery, concurrent exact-head CAS claiming/completion, lease expiry/recovery fencing, and multi-worker scaling with eight validated actions.
-- Implement and run the resumable-reasoning benchmark pilot comparing frontier long-horizon, Instant persistent-chat, Instant stateless-resume, Instant decomposition/critic, and hybrid-escalation arms using objective validators plus usage/context/effectiveness metrics.
+- Execute the five frozen pilot arms in clean oracle-unexposed model sessions and persist every reasoning quantum under the runset state contract.
+- Strengthen evaluator isolation beyond process-protocol-only before making any frontier-equivalence claim; this authoring chat is evaluator-contaminated and excluded from scored arms.
 - Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.
 - Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.
 - Prove at least one previously unseen workflow/domain extension can be added without core-kernel changes, closed domain enums, or authority leakage.
@@ -90,6 +90,17 @@ Resume the resumable_reasoning_benchmark now that the GitRunner v3 production/re
 
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
+- Scored resumable-reasoning arms require oracle-unexposed clean model sessions. This authoring chat has read evaluator-only oracle truth and cannot count as a scored arm; the current connected-tool surface does not provide a programmatic clean ChatGPT-session spawn primitive.
+- Evaluator isolation is currently process-protocol-only; stronger sealed isolation is required before any frontier-equivalence claim.
+
+## Resumable-reasoning pilot implementation checkpoint
+
+- Validated implementation head: `4ec300254c328a1b6e0fce62fe62cd6f11d7a855`
+- Workspace Control Validation: run `41519306708` → SUCCESS
+- Durable mechanics ledger, public research fixture, evaluator-only oracle, state/event/evaluator harness, bounded semantic context serializer, frozen pilot runset, and regression tests are committed on PR #590.
+- Harness implementation is validated, but reasoning-quality arms A–E remain **NOT_STARTED**.
+- The authoring session is not eligible as a scored arm because it has seen evaluator-only truth.
+
 
 ## Fresh-chat initialization
 
