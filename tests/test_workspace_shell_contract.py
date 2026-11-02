@@ -290,6 +290,19 @@ class WorkspaceShellContractTests(unittest.TestCase):
             frontend_unsealed = json.loads(
                 (out / "frontend.unsealed.json").read_text()
             )
+            launcher_cfg = json.loads((out / "job-launcher.json").read_text())
+            self.assertEqual(
+                launcher_cfg["maintenance_controller_receipt_root"],
+                "/var/lib/workspace-ci/maintenance-controller/receipts",
+            )
+            self.assertEqual(
+                launcher_cfg["journalctl_path"],
+                "/usr/bin/journalctl",
+            )
+            self.assertEqual(
+                launcher_cfg["allowed_units"],
+                frontend_unsealed["allowed_units"],
+            )
             self.assertEqual(
                 frontend_unsealed["allowed_units"],
                 [
@@ -1090,6 +1103,78 @@ class WorkspaceShellContractTests(unittest.TestCase):
                     text=True,
                 ),
                 "",
+            )
+
+    def test_gitrunner_diagnostic_reads_are_exact_and_read_only(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            receipts = root / "receipts"
+            receipts.mkdir()
+            comment_id = 6567995530
+            receipt = {
+                "schema_version": 1,
+                "status": "COMPLETED",
+                "timestamp_utc": "2026-11-02T00:00:00+00:00",
+                "identity": {
+                    "comment_id": comment_id,
+                    "repository": "adamtrott78/workspace-control",
+                    "actor": "adamtrott78",
+                    "command": {"action": "restart", "project_id": "workspace-control", "lane": "cpu"},
+                    "command_sha256": "a" * 64,
+                    "maintenance_policy_generation": "workspace-ci-maintenance-v1",
+                },
+                "result": {"service_active": True},
+                "automatic_workflow_triggered": False,
+            }
+            (receipts / f"{comment_id}.json").write_text(
+                json.dumps(receipt),
+                encoding="utf-8",
+            )
+            cfg = {
+                "maintenance_controller_receipt_root": str(receipts),
+                "allowed_units": [
+                    "workspace-ci-controller@workspace-control-cpu.service",
+                ],
+                "journalctl_path": "/usr/bin/printf",
+            }
+            observed = job_launcher.inspect_maintenance_receipt(
+                cfg,
+                {"comment_id": comment_id},
+            )
+            self.assertTrue(observed["ok"])
+            self.assertEqual(observed["status"], "COMPLETED")
+            self.assertEqual(observed["identity"]["comment_id"], comment_id)
+            self.assertNotIn("token", json.dumps(observed).lower())
+
+            with self.assertRaisesRegex(
+                runtime_common.ShellRuntimeError,
+                "INVALID_COMMENT_ID",
+            ):
+                job_launcher.inspect_maintenance_receipt(
+                    cfg,
+                    {"comment_id": 0},
+                )
+
+            with self.assertRaisesRegex(
+                runtime_common.ShellRuntimeError,
+                "UNIT_NOT_AUTHORIZED",
+            ):
+                job_launcher.inspect_unit_logs(
+                    cfg,
+                    {"unit": "ssh.service", "max_lines": 20},
+                )
+
+            logs = job_launcher.inspect_unit_logs(
+                cfg,
+                {
+                    "unit": "workspace-ci-controller@workspace-control-cpu.service",
+                    "max_lines": 20,
+                },
+            )
+            self.assertTrue(logs["ok"])
+            self.assertEqual(
+                logs["unit"],
+                "workspace-ci-controller@workspace-control-cpu.service",
             )
 
     def test_launcher_duplicates_profile_grammar_and_denies_escape_shapes(self):
