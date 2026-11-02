@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Validate an evaluator-only runtime storage boundary for benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py so oracle/seed/nonce material cannot be read by scored workers. Then run the non-claim-bearing protocol_screening stage from benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json across A-E and P0-P3 using clean oracle-unexposed sessions. If screening exposes any fixture/packet/harness defect, revise and re-screen; otherwise freeze the protocol and execute at least three independent replicates for the declared paired comparisons. This control chat remains ineligible as a scored worker for fixtures whose oracle it has seen or generated.
+The unseen-workflow extension gate is now cleared. Continue the resumable-reasoning benchmark by validating an evaluator-only runtime storage boundary for hidden-ephemeral oracle/seed/nonce material, then execute the non-claim-bearing A-E × P0-P3 protocol-screening runset in clean oracle-unexposed sessions. Separately obtain an independent architecture review before freeze. This control chat must not be counted as a scored reasoning arm for fixtures whose oracle it has seen or generated.
 
 ## Remaining work
 
@@ -81,7 +81,6 @@ Validate an evaluator-only runtime storage boundary for benchmarks/workspace-sem
 - Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.
 - Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.
 - Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.
-- Prove at least one previously unseen workflow/domain extension can be added without core-kernel changes, closed domain enums, or authority leakage.
 - Freeze and implement the smallest stable semantic core, versioned domain/workflow extension contract, durable ReasoningProcess, executor/provider/model/surface/harness capability model, resource/quota router, task-tree/lease/CAS semantics, and evidence-based escalation policy.
 - Design the human-in-the-loop orchestration surface so launching/resuming many temporary Instant workers is trivial for the operator while all real scheduling/ownership/recovery state remains durable and machine-managed; browser/tab mechanics are a transport concern, not the durable scheduler.
 - Migrate representative workflows incrementally across: automated research/evaluate/iterate loops; systems engineering and coding; data science/ML experiments; PADataset/research-engine; paper drafting/evidence/citation pipelines; slide/presentation creation; tutoring and homework/assignment generation for MTH602/EAS501/CIS560; generic document/artifact production; GitRunner/Lambda operations; Workspace Shell maintenance; and future workflows not known today.
@@ -90,7 +89,7 @@ Validate an evaluator-only runtime storage boundary for benchmarks/workspace-sem
 
 ## Blockers / gates
 
-- Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark, independent review, and unseen-workflow extension proof.
+- Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is now validated.
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
 - Scored resumable-reasoning arms require oracle-unexposed clean model sessions. This authoring chat has read evaluator-only oracle truth and cannot be counted as a scored arm; the current connected-tool surface does not provide a programmatic clean ChatGPT-session spawn primitive.
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
