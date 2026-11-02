@@ -125,17 +125,23 @@ class RuntimeLiveUpdateContractTests(unittest.TestCase):
             old_rec = reconciler.RECONCILER_SCRIPT
             old_runtime = reconciler.V3_RUNTIME_SCRIPT
             old_receipt = reconciler.RUNTIME_OVERRIDE_ACTIVE_RECEIPT
+            old_production_receipt = reconciler.PRODUCTION_CUTOVER_ACTIVE_RECEIPT
             try:
                 reconciler.V3_CONTROLLER_BINARY = controller
                 reconciler.RECONCILER_SCRIPT = rec
                 reconciler.V3_RUNTIME_SCRIPT = runtime
                 reconciler.RUNTIME_OVERRIDE_ACTIVE_RECEIPT = receipt
+                # Keep this unit test hermetic. On the live Lambda host the
+                # production-cutover receipt lives under a root-only directory;
+                # verify_installed() must not accidentally inspect host state.
+                reconciler.PRODUCTION_CUTOVER_ACTIVE_RECEIPT = root / "production-cutover-active.json"
                 reconciler.verify_installed(manifest)
             finally:
                 reconciler.V3_CONTROLLER_BINARY = old_controller
                 reconciler.RECONCILER_SCRIPT = old_rec
                 reconciler.V3_RUNTIME_SCRIPT = old_runtime
                 reconciler.RUNTIME_OVERRIDE_ACTIVE_RECEIPT = old_receipt
+                reconciler.PRODUCTION_CUTOVER_ACTIVE_RECEIPT = old_production_receipt
 
 
 if __name__ == "__main__":
