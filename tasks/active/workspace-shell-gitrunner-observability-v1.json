@@ -34,7 +34,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-gitrunner-observability-v1",
-        "checkpoint_sha": "c1ced4f1681b068b9bf4bf8bde5edc9efd6f25a4",
+        "checkpoint_sha": "2b4526a10978a0025ea2264370551e3fd6e36910",
         "verified": true
       },
       "local": null,
@@ -142,6 +142,13 @@
       "result": "PASS",
       "evidence": [
         "No generic systemctl, maintenance socket access, group membership, credentials, sibling controller units, v3 activation, or GitHub cancellation authority added."
+      ]
+    },
+    {
+      "check": "Hosted exact-head validation",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Pending a main-targeted hosted validation run after task-capsule contract repair."
       ]
     }
   ]
