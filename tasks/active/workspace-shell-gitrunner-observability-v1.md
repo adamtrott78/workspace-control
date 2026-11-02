@@ -24,12 +24,12 @@ Widen Workspace Shell only enough to diagnose GitRunner/control-plane incidents 
 
 - Intent: mutate
 - Remote branch: workspace-shell-gitrunner-observability-v1
-- Remote checkpoint: bb543a9f57a20401f4c30401342c4397187a1d1d
+- Remote checkpoint: 951b6987e590f9452eefaec15ba20b39e8af5bf3
 - Remote verified: true
 
 ## Next safe action
 
-Retarget PR #591 back to accepted Workspace Shell branch for a five-file review delta. Then prepare a bounded live-update procedure for the exact validated observability head; do not self-widen root/helper trust or use this task for GitRunner mutation.
+Run exact-head full validation for the expanded read-only GitRunner diagnostic surface. Do not install live changes or add mutating recovery authority until this head passes.
 
 ## Remaining work
 
