@@ -34,7 +34,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-gitrunner-observability-v1",
-        "checkpoint_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
+        "checkpoint_sha": "c1ced4f1681b068b9bf4bf8bde5edc9efd6f25a4",
         "verified": true
       },
       "local": null,
@@ -63,11 +63,20 @@
         "operator explicit approval to widen Workspace Shell read/diagnostic authority to a bounded extent"
       ],
       "outputs": [
-        "exact read-only unit allowlist expansion",
-        "sanitized maintenance-receipt access design/implementation candidate",
-        "tests and exact-head validation"
+        "architecture/workspace-shell-mcp-authority-v2.json read_only_gitrunner_observability",
+        "plugins/workspace-shell/install/render_install.py exact allowed-unit expansion",
+        "tests/test_workspace_shell_contract.py rendered-config regression"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Repository implementation",
+          "result": "PASS",
+          "evidence": [
+            "Read-only unit allowlist expansion is limited to workspace-control legacy controller, maintenance controller/service, v3 provisioner/reconciler, and workspace-control v3 control-small controller.",
+            "No mutating systemctl operation, maintenance socket/group authority, credential access, sibling project unit, or GitHub network authority was added."
+          ]
+        }
+      ],
       "resume_condition": "Exact-head validation green and live-update procedure is bounded/reviewed."
     }
   ],
@@ -79,7 +88,7 @@
     "Run hosted validation.",
     "Only after exact-head validation, prepare bounded live update that preserves accepted Workspace Shell transport and least privilege."
   ],
-  "next_safe_action": "Implement and validate the exact read-only GitRunner/maintenance unit allowlist first. Do not add mutating controller authority or GitHub credentials.",
+  "next_safe_action": "Open a draft PR and run exact-head hosted validation. If green, design the sanitized maintenance-receipt read path as a separate read-only boundary; do not install live changes until the exact validated head is explicitly bound for Workspace Shell update.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat"
 }
