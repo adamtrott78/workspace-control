@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-iterate-retry-pooling-v1",
+  "fixture_blob_sha": "6def452e61be0e823bc5ee871ee2888bb1c9359f",
+  "taxonomy_ref": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
+  "taxonomy_status": "DESIGN_CANDIDATE_NOT_FROZEN",
+  "benchmark_suite": [
+    "S1_reasoning_quality_boundary"
+  ],
+  "supported_experiment_questions": [
+    "Q1_horizon_externalization",
+    "Q3_intrinsic_reasoning_boundary",
+    "Q5_escalation_calibration"
+  ],
+  "unsupported_or_weak_questions": {
+    "Q2_decomposition_effect": "Fixture has only a small experiment graph and does not create a strong horizon-heavy separable workload; it is not a good primary decomposition-benefit fixture.",
+    "Q4_independent_critique": "Can be exercised, but the fixture was not specifically constructed to make critic value discriminating."
+  },
+  "phenotype": {
+    "primary": "P2_reasoning_heavy_coupled",
+    "horizon_load": "LOW_TO_MEDIUM",
+    "separability": "PARTIALLY_COUPLED",
+    "reasoning_stress": "HIGH",
+    "justification": [
+      "Terminal success requires causal discrimination between competing mechanisms.",
+      "The lower-concurrency observation is intentionally real but non-discriminating.",
+      "At least two experiment/result cycles are required.",
+      "The task is not large enough to provide strong evidence about decomposition closing a horizon gap."
+    ]
+  },
+  "domain_workflow": [
+    "research",
+    "systems_diagnosis"
+  ],
+  "reasoning_primitives": [
+    "hypothesize",
+    "causal_discrimination",
+    "experiment",
+    "interpret",
+    "synthesize",
+    "decide_under_uncertainty"
+  ],
+  "horizon_load": {
+    "human_equivalent_minutes": null,
+    "human_baseline_status": "NOT_MEASURED",
+    "expected_reasoning_quanta": 3,
+    "context_bytes_initial": null,
+    "evidence_item_count": 3,
+    "expected_tool_actions": 2,
+    "dependency_depth": 2,
+    "dependency_width": 1,
+    "external_wait_count": 2,
+    "repository_or_environment_count": 1
+  },
+  "decomposability": {
+    "separability": "PARTIALLY_COUPLED",
+    "independently_validatable_leaf_fraction": null,
+    "synthesis_coupling": "HIGH"
+  },
+  "reasoning_stressors": {
+    "competing_hypothesis_count": 3,
+    "conflicting_evidence": "MEDIUM",
+    "causal_identification_required": true,
+    "novelty": "MEDIUM",
+    "nonlocal_constraint_count": 2,
+    "proof_or_derivation_depth": null,
+    "uncertainty": "MEDIUM",
+    "search_space": "BOUNDED_SMALL",
+    "distractor_density": "MEDIUM"
+  },
+  "observability_messiness": {
+    "observability": "PARTIAL",
+    "misleading_observation_count": 1,
+    "stale_evidence_possible": false,
+    "specification_completeness": "HIGH",
+    "environment_drift": "NONE",
+    "multi_objective_tradeoff": "NONE"
+  },
+  "state_continuity_stress": [
+    "persistent_continuation",
+    "stateless_resume",
+    "external_wait"
+  ],
+  "tool_environment": {
+    "mutability": "READ_ONLY",
+    "environment_determinism": "DETERMINISTIC",
+    "tool_categories": [
+      "synthetic_experiment_request",
+      "deterministic_result_publish"
+    ],
+    "multi_repo": false,
+    "build_test_or_experiment_loop": true
+  },
+  "authority_consequence": {
+    "authority_class": "FIXTURE_EXECUTION",
+    "consequence_reversibility": "FULL",
+    "human_review_required": false
+  },
+  "validator": {
+    "validator_class": "EXACT_ORACLE",
+    "terminal_authority": true,
+    "partial_credit": true,
+    "false_positive_risk": "LOW",
+    "evaluator_isolation": "HIDDEN_STATIC"
+  },
+  "contamination_generalization": {
+    "fixture_novelty": "FRESH_AUTHORED",
+    "answer_exposure": "HIDDEN",
+    "worker_oracle_exposure": "NONE_REQUIRED",
+    "authoring_session_eligible": false,
+    "note": "Current repository oracle is hidden only by process protocol. Stronger future claims should use hidden ephemeral or externally blinded evaluator state."
+  },
+  "claim_ceiling": [
+    "Useful as a first end-to-end pilot and a causal-reasoning fixture.",
+    "Insufficient by itself to establish a general Instant-versus-frontier capability boundary.",
+    "Insufficient as the primary test of TOO_LARGE/decomposition because its horizon/load is modest."
+  ]
+}
