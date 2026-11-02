@@ -46,6 +46,21 @@ class PadatasetCpuCanaryOperatorTests(unittest.TestCase):
         authority = self.text.index('CANARY_AUTHORITY_CREATED=PASS')
         self.assertLess(blob_check, authority)
 
+    def test_transient_status_query_failure_does_not_immediately_cancel(self):
+        self.assertIn('CANARY_STATUS_QUERY_FAILURE_LIMIT=6', self.text)
+        self.assertIn('CANARY_RUN_STATUS_QUERY_RETRY=PASS', self.text)
+        self.assertIn('STOP_CANARY_RUN_STATUS_QUERY_RETRY_EXHAUSTED', self.text)
+        retry = self.text.index('CANARY_RUN_STATUS_QUERY_RETRY=PASS')
+        exhausted = self.text.index('STOP_CANARY_RUN_STATUS_QUERY_RETRY_EXHAUSTED')
+        self.assertLess(retry, exhausted)
+
+    def test_queued_run_emits_controller_diagnostics_before_terminal_timeout(self):
+        self.assertIn('CANARY_QUEUED_DIAGNOSTIC_THRESHOLD=REACHED', self.text)
+        self.assertIn('CANARY_CONTROLLER_DIAGNOSTICS=BEGIN', self.text)
+        self.assertIn('systemctl show "$target_unit"', self.text)
+        self.assertIn('-u "$target_unit"', self.text)
+
+
     def test_effective_generation_preflight_runs_before_class_mutation(self):
         verify = self.text.index('LIVE_EFFECTIVE_GENERATION_VERIFY=PASS')
         apply = self.text.index('--apply-canary')

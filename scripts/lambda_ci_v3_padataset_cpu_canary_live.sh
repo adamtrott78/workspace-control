@@ -715,7 +715,33 @@ echo "CANARY_RUN_ID=$RUN_ID"
 
 CANARY_RC=124
 CANARY_CONCLUSION=""
-for _ in $(seq 1 210); do
+CANARY_STATUS=""
+CANARY_STATUS_QUERY_FAILURES=0
+CANARY_STATUS_QUERY_FAILURE_LIMIT=6
+CANARY_QUEUED_POLLS=0
+
+emit_canary_controller_diagnostics() {
+  local target_unit="workspace-ci-v3-controller@$TARGET_CLASS.service"
+  echo "CANARY_CONTROLLER_DIAGNOSTICS=BEGIN"
+  systemctl show "$target_unit" \
+    -p LoadState \
+    -p ActiveState \
+    -p SubState \
+    -p Result \
+    -p ExecMainCode \
+    -p ExecMainStatus \
+    -p NRestarts \
+    --no-pager 2>/dev/null || true
+  sudo journalctl \
+    -u "$target_unit" \
+    -n 80 \
+    --no-pager \
+    -o short-iso \
+    2>/dev/null || true
+  echo "CANARY_CONTROLLER_DIAGNOSTICS=END"
+}
+
+for poll in $(seq 1 210); do
   set +e
   CANARY_STATE="$(
     gh api --method GET \
@@ -725,13 +751,33 @@ for _ in $(seq 1 210); do
   CANARY_STATE_RC=$?
   set -e
   if [[ "$CANARY_STATE_RC" -ne 0 ]]; then
-    echo "STOP_CANARY_RUN_STATUS_QUERY_FAILED rc=$CANARY_STATE_RC run_id=$RUN_ID"
-    CANARY_RC="$CANARY_STATE_RC"
-    cancel_dispatched_canary
-    break
+    CANARY_STATUS_QUERY_FAILURES=$((CANARY_STATUS_QUERY_FAILURES + 1))
+    echo "CANARY_RUN_STATUS_QUERY_RETRY=PASS rc=$CANARY_STATE_RC run_id=$RUN_ID consecutive_failures=$CANARY_STATUS_QUERY_FAILURES limit=$CANARY_STATUS_QUERY_FAILURE_LIMIT"
+    if [[ "$CANARY_STATUS_QUERY_FAILURES" -ge "$CANARY_STATUS_QUERY_FAILURE_LIMIT" ]]; then
+      echo "STOP_CANARY_RUN_STATUS_QUERY_RETRY_EXHAUSTED rc=$CANARY_STATE_RC run_id=$RUN_ID"
+      CANARY_RC="$CANARY_STATE_RC"
+      emit_canary_controller_diagnostics
+      cancel_dispatched_canary
+      break
+    fi
+    sleep 3
+    continue
   fi
 
+  CANARY_STATUS_QUERY_FAILURES=0
   read -r CANARY_STATUS CANARY_CONCLUSION <<< "$CANARY_STATE"
+  echo "CANARY_STATUS_OBSERVED=PASS poll=$poll status=$CANARY_STATUS conclusion=${CANARY_CONCLUSION:-pending}"
+
+  if [[ "$CANARY_STATUS" == "queued" || "$CANARY_STATUS" == "waiting" || "$CANARY_STATUS" == "requested" || "$CANARY_STATUS" == "pending" ]]; then
+    CANARY_QUEUED_POLLS=$((CANARY_QUEUED_POLLS + 1))
+    if [[ "$CANARY_QUEUED_POLLS" -eq 60 ]]; then
+      echo "CANARY_QUEUED_DIAGNOSTIC_THRESHOLD=REACHED polls=$CANARY_QUEUED_POLLS"
+      emit_canary_controller_diagnostics
+    fi
+  else
+    CANARY_QUEUED_POLLS=0
+  fi
+
   if [[ "$CANARY_STATUS" == "completed" ]]; then
     if [[ "$CANARY_CONCLUSION" == "success" ]]; then
       CANARY_RC=0
@@ -745,7 +791,8 @@ for _ in $(seq 1 210); do
 done
 
 if [[ "$CANARY_RC" -eq 124 ]]; then
-  echo "STOP_CANARY_RUN_TIMEOUT run_id=$RUN_ID"
+  echo "STOP_CANARY_RUN_TIMEOUT run_id=$RUN_ID last_status=${CANARY_STATUS:-unknown}"
+  emit_canary_controller_diagnostics
   cancel_dispatched_canary
 fi
 
