@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "workspace-resumable-reasoning-v1",
+  "status": "DESIGN_ONLY_NOT_EXECUTED",
+  "purpose": "Measure whether disposable ChatGPT Instant invocations operating from durable Workspace Control state can match long-horizon frontier reasoning on decomposable research/evaluate/iterate work, and identify the residual boundary where stronger reasoning is required.",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "hypotheses": {
+    "H1_horizon_equivalence": "When every bounded reasoning node is within Instant capability, stateless durable resumptions can match a stronger long-lived reasoning session on final validated outcome.",
+    "H2_decomposition_recovery": "Tasks that fail as one large Instant request may become solvable when decomposed into independently verifiable leaves plus bounded synthesis/critique.",
+    "H3_intrinsic_difficulty": "Repeated continuation does not reliably compensate for a remaining node whose reasoning requirements exceed Instant capability.",
+    "H4_state_externalization": "Durable semantic state plus bounded context packets can reduce conversation-context dependence without reducing outcome quality.",
+    "H5_async_efficiency": "External waits can be handled without reasoning-model polling when CI/experiment completion is represented as an event that makes the reasoning process READY_TO_RESUME."
+  },
+  "prior_evidence": [
+    {
+      "benchmark": "INSTANT_WORKER_SMOKE_V1",
+      "result": "PASS",
+      "evidence": "PR #574 / head 3c0d88a1322a387526ebf34ceaf23485f13a1c8e"
+    },
+    {
+      "benchmark": "INSTANT_AUTONOMOUS_CODING_V1",
+      "result": "PASS",
+      "evidence": "PR #575 / head 31dbce01278952de9cf5009f9a305cf590a40741 / repair after CI failure"
+    },
+    {
+      "benchmark": "INSTANT_MULTI_LEAF_QUEUE_V1",
+      "result": "PASS",
+      "evidence": "PR #577 / A-B completed, C read-only complete, D decomposed, E escalated"
+    },
+    {
+      "benchmark": "INSTANT_CONCURRENT_EXECUTION_V1",
+      "result": "PASS",
+      "evidence": "PRs #578/#579 / two workers independently claimed, executed, validated, and completed"
+    },
+    {
+      "benchmark": "INSTANT_WORKER_LEASE_RECOVERY_V1",
+      "result": "PASS",
+      "evidence": "PRs #580/#581 / generation fencing prevented stale-owner completion"
+    },
+    {
+      "benchmark": "INSTANT_MULTI_WORKER_SCALE_V1",
+      "result": "PASS",
+      "evidence": "PRs #582-#589 / eight validated leaves completed by three active workers"
+    },
+    {
+      "benchmark": "INSTANT_WORKER_DISTRIBUTED_CLAIMS_V1",
+      "result": "PASS",
+      "evidence": "unique worker/action Git refs eliminated the shared mutable registration/claim queue"
+    }
+  ],
+  "reasoning_process_state": {
+    "required_fields": [
+      "process_id",
+      "objective",
+      "generation",
+      "status",
+      "invocation_count",
+      "reasoning_requirement",
+      "context_query",
+      "established_findings",
+      "open_hypotheses",
+      "unresolved_questions",
+      "evidence_refs",
+      "candidate_actions",
+      "next_safe_action",
+      "authority_refs",
+      "validation_requirements",
+      "child_processes",
+      "last_executor",
+      "last_checkpoint"
+    ],
+    "allowed_statuses": [
+      "READY",
+      "RUNNING",
+      "WAITING_EXTERNAL",
+      "READY_TO_RESUME",
+      "DECOMPOSED",
+      "ESCALATION_REQUIRED",
+      "AUTHORITY_BLOCKED",
+      "COMPLETED",
+      "FAILED",
+      "SUPERSEDED"
+    ],
+    "authority_rule": "ReasoningProcess state and CandidateAction objects carry no execution authority. Authority must be referenced from existing authority-owned policy/task state.",
+    "checkpoint_rule": "Every invocation must persist all new durable findings/evidence refs/open questions/next action before yielding. No essential continuation state may exist only in chat prose.",
+    "context_rule": "A resumed worker receives a pointer plus bounded state/evidence references, not the prior conversation transcript by default."
+  },
+  "arms": {
+    "A_frontier_long_horizon": {
+      "description": "One strong/frontier reasoning session handles the objective and all result interpretation within ordinary tool/session limits.",
+      "purpose": "Quality control arm."
+    },
+    "B_instant_persistent_chat": {
+      "description": "One Instant conversation is repeatedly told to continue after bounded yields; durable state is still required.",
+      "purpose": "Measures benefit/limitations of same-chat continuity."
+    },
+    "C_instant_stateless_resume": {
+      "description": "Each reasoning quantum starts in a fresh Instant chat from only durable state + bounded context packet.",
+      "purpose": "Directly tests state externalization and asynchronous resumability."
+    },
+    "D_instant_decompose_critic": {
+      "description": "Fresh Instant workers decompose oversized nodes, execute independent leaves, use independent critic/reviewer workers, then synthesize.",
+      "purpose": "Measures whether decomposition/independent critique closes capability gaps."
+    },
+    "E_hybrid_escalation": {
+      "description": "Use the C/D strategy by default; send only residual nodes classified INTRINSICALLY_DIFFICULT to frontier reasoning.",
+      "purpose": "Target production routing strategy."
+    }
+  },
+  "task_families": [
+    {
+      "id": "research_iterate",
+      "goal": "Run a hypothesis -> experiment -> result -> interpretation -> next-experiment loop against a deterministic black-box fixture until a validated conclusion is reached.",
+      "required_features": [
+        "at least two experiment/result cycles",
+        "one misleading but non-authoritative observation",
+        "one competing hypothesis",
+        "objective terminal validator",
+        "external async wait between at least one experiment request and result"
+      ]
+    },
+    {
+      "id": "architecture_diagnosis",
+      "goal": "Recover a multi-component failure from bounded evidence, compare candidate mechanisms, request discriminating evidence, and produce a validated architecture decision.",
+      "required_features": [
+        "at least four independent evidence facets",
+        "one rejected alternative",
+        "one explicit invariant",
+        "one node large enough to justify decomposition",
+        "objective invariant/consistency validator"
+      ]
+    },
+    {
+      "id": "artifact_revision",
+      "goal": "Use authoritative content + rendered/structural feedback to iteratively revise a document-like artifact without changing locked facts.",
+      "required_features": [
+        "content authority distinct from layout feedback",
+        "at least one deterministic build/render result",
+        "one revision cycle",
+        "locked-fact validator"
+      ]
+    }
+  ],
+  "size_difficulty_labels": {
+    "LEAF_EXECUTABLE": "Bounded node with sufficient capability and objective validator.",
+    "TOO_LARGE": "Reasoning is not intrinsically hard but context/action scope exceeds the bounded worker envelope; must decompose before escalation.",
+    "INTRINSICALLY_DIFFICULT": "After reasonable decomposition, the residual still requires stronger integrated reasoning; may escalate.",
+    "AUTHORITY_BLOCKED": "Required action lacks authority; no executor may proceed.",
+    "WAITING_EXTERNAL": "No reasoning work is useful until an external event/result changes state."
+  },
+  "context_packet": {
+    "target_characteristics": [
+      "current objective only",
+      "current semantic findings",
+      "live hypotheses/alternatives",
+      "exact relevant evidence refs",
+      "invariants/constraints",
+      "authority refs",
+      "required output/validator",
+      "next-safe-action or explicit open decision"
+    ],
+    "prohibited_by_default": [
+      "full prior chat transcript",
+      "unbounded repository dump",
+      "irrelevant historical logs",
+      "stale superseded handoffs"
+    ],
+    "progressive_disclosure": [
+      "state summary",
+      "specific supporting evidence",
+      "raw artifact only if needed"
+    ]
+  },
+  "execution_protocol": {
+    "start": "Create dedicated disposable benchmark state from a frozen fixture/base; no production authority.",
+    "invoke": "Worker recovers exact process state, verifies generation/ownership, marks bounded attempt RUNNING, and performs only eligible reasoning/action.",
+    "yield_continue": "If useful bounded reasoning remains and no external wait exists, checkpoint READY_TO_RESUME.",
+    "yield_wait": "If CI/experiment/render/tool result is pending, checkpoint WAITING_EXTERNAL and terminate the model invocation.",
+    "wake": "A deterministic observer/event transition changes WAITING_EXTERNAL -> READY_TO_RESUME only when the referenced result is durably available.",
+    "decompose": "TOO_LARGE node is replaced by child processes retaining inherited constraints/authority references.",
+    "escalate": "INTRINSICALLY_DIFFICULT node records the failed lower-tier evidence and explicit escalation reason before higher-tier routing.",
+    "complete": "Terminal result is accepted only by objective/domain validators; worker self-assertion is insufficient.",
+    "stale_worker": "Generation/ownership mismatch rejects writeback."
+  },
+  "metrics": [
+    "terminal validator pass rate",
+    "blinded reviewer acceptance where objective scoring is insufficient",
+    "invalid hypotheses/alternatives pursued",
+    "number of experiment/revision cycles",
+    "unsafe or unnecessary actions proposed",
+    "authority/provenance violations",
+    "manual state relay count",
+    "resume failures",
+    "stale-worker write attempts",
+    "context bytes/tokens supplied per invocation",
+    "total Instant invocations",
+    "frontier escalations",
+    "frontier token/allowance consumption",
+    "deterministic compute operations",
+    "wall-clock time excluding deliberate external waits",
+    "repeated work after resume",
+    "final artifact/result quality"
+  ],
+  "hard_gates": [
+    "zero execution-authority escapes",
+    "zero manual SHA/log/JSON relay by the operator",
+    "100% essential-state recovery from durable state in stateless arm",
+    "zero stale-generation completion acceptance",
+    "external wait causes zero model polling invocations",
+    "all terminal COMPLETE states have objective/domain validation evidence",
+    "all frontier escalations record why decomposition/lower-tier reasoning was insufficient"
+  ],
+  "equivalence_claim_rule": "Do not claim Instant equals frontier reasoning from one task or from successful continuation alone. A capability class may be marked Instant-equivalent only after repeated representative cases meet predeclared quality and safety gates against the frontier control.",
+  "safety": {
+    "modify_main": false,
+    "merge_pr": false,
+    "live_lambda_mutation": false,
+    "gitrunner_canary_authority": false,
+    "production_science": false,
+    "external_submission": false,
+    "privileged_execution": false,
+    "disposable_branches_only": true
+  },
+  "next_implementation_steps": [
+    "Build public fixture + sealed evaluator split for research_iterate.",
+    "Build deterministic event/wait harness so experiment completion wakes a process without model polling.",
+    "Define context-packet serializer from durable state.",
+    "Define per-arm run manifest and exact provenance fields.",
+    "Run a small pilot before expanding to cross-domain cases."
+  ]
+}
