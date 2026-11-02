@@ -56,6 +56,14 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
                 "gpu_uuid": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
             },
             "allow_production_services": False,
+            "forbidden_paths": [
+                "/home/atrott",
+                "/var/run/docker.sock",
+                "/run/docker.sock",
+                "/srv/workspace-ci/padataset",
+                "/var/lib/workspace-ci/provisioner",
+                "/run/workspace-ci",
+            ],
             "runtime_binding": {
                 "runtime_id": "qwen35-vllm-cu129-image-native-sampler-v3",
                 "canonical_path": (
@@ -182,6 +190,46 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
         self.assertIn("IPAddressDeny=10.0.0.0/8", command)
         self.assertIn("IPAddressDeny=134.88.12.0/22", command)
         self.assertIn("RuntimeMaxSec=1200s", command)
+
+    def test_gpu_systemd_command_enforces_full_root_authored_forbidden_paths(self):
+        spec = self.gpu_spec()
+        command = runtime.build_gpu_systemd_command(
+            spec,
+            pathlib.Path("/srv/workspace-ci/research-engine/jobs/p5-test/runner"),
+            pathlib.Path("/srv/workspace-ci/research-engine/staging-cache/p5-test"),
+            "134.88.12.0/22",
+            self.assignment(),
+        )
+
+        inaccessible = [
+            command[index + 1].split("=", 1)[1]
+            for index, value in enumerate(command[:-1])
+            if value == "-p"
+            and command[index + 1].startswith("InaccessiblePaths=")
+        ]
+        self.assertEqual(len(inaccessible), 1)
+        self.assertEqual(inaccessible[0].split(" "), spec["forbidden_paths"])
+        self.assertIn("/home/atrott", inaccessible[0])
+        self.assertIn("/var/run/docker.sock", inaccessible[0])
+        self.assertIn("/run/docker.sock", inaccessible[0])
+        self.assertIn("/srv/workspace-ci/padataset", inaccessible[0])
+        self.assertIn("/var/lib/workspace-ci/provisioner", inaccessible[0])
+        self.assertIn("/run/workspace-ci", inaccessible[0])
+
+    def test_gpu_systemd_command_rejects_forbidden_ancestor_of_own_root(self):
+        spec = self.gpu_spec()
+        spec["forbidden_paths"] = ["/srv/workspace-ci/research-engine"]
+        with self.assertRaisesRegex(
+            runtime.RuntimeLaunchError,
+            "overlaps a required project path",
+        ):
+            runtime.build_gpu_systemd_command(
+                spec,
+                pathlib.Path("/srv/workspace-ci/research-engine/jobs/p5-test/runner"),
+                pathlib.Path("/srv/workspace-ci/research-engine/staging-cache/p5-test"),
+                "134.88.12.0/22",
+                self.assignment(),
+            )
 
     def test_exact_uuid_order_resolves_inverted_device_minors(self):
         first_uuid = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"

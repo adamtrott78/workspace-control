@@ -1306,6 +1306,12 @@ def build_gpu_systemd_command(
     denied_devices = ",".join(str(path) for path in assignment["denied_devices"])
     support_devices = [str(path) for path in assignment["support_devices"]]
 
+    inaccessible_paths = _validated_inaccessible_paths(
+        spec,
+        runner_dir,
+        staging_dir,
+    )
+
     if offline_payload is None:
         cpu_quota_percent = int(resources["cpu_quota_percent"])
         memory_max = int(resources["memory_max_bytes"])
@@ -1350,8 +1356,7 @@ def build_gpu_systemd_command(
         "-p", f"ReadWritePaths={staging_dir}",
         "-p", f"ReadWritePaths={paths['logs']}",
         "-p", f"ReadOnlyPaths={paths['trusted_cache']}",
-        "-p", "InaccessiblePaths=/var/run/docker.sock",
-        "-p", "InaccessiblePaths=/run/docker.sock",
+        "-p", "InaccessiblePaths=" + " ".join(inaccessible_paths),
         "-p", "DevicePolicy=closed",
         "-p", "DeviceAllow=/dev/nvidiactl rw",
         "-p", f"DeviceAllow={selected_device} rw",
