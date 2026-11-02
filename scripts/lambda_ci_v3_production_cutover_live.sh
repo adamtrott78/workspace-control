@@ -12,6 +12,7 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
 ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
 OPERATOR_HEAD="$(git -C "$ROOT" rev-parse HEAD)"
+export OPERATOR_HEAD
 test -z "$(git -C "$ROOT" status --porcelain --untracked-files=no)"
 
 EXPECTED_RECONCILER_SOURCE_HEAD="559c6186b44f17d4b83cb9267d554b355cda2ef7"
@@ -440,6 +441,34 @@ if [ "$PR_HEAD" != "$OPERATOR_HEAD" ]; then
   echo "STOP_WORKSPACE_CONTROL_PR_HEAD_DRIFT actual=$PR_HEAD expected=$OPERATOR_HEAD"
   exit 1
 fi
+
+EXACT_HEAD_CI_JSON="$TMP/exact-head-ci.json"
+gh api --method GET \
+  "repos/$WC_REPO/actions/workflows/workspace-control-validation.yml/runs" \
+  -f head_sha="$OPERATOR_HEAD" \
+  -f event="pull_request" \
+  -f per_page=20 > "$EXACT_HEAD_CI_JSON"
+EXACT_HEAD_CI_RUN="$(
+  env CI_JSON="$EXACT_HEAD_CI_JSON" python3 - <<'PY'
+import json, os
+runs=json.load(open(os.environ["CI_JSON"])).get("workflow_runs", [])
+good=[
+    r for r in runs
+    if r.get("head_sha") == os.environ.get("OPERATOR_HEAD", "")
+    and r.get("status") == "completed"
+    and r.get("conclusion") == "success"
+    and r.get("path") == ".github/workflows/workspace-control-validation.yml"
+]
+if not good:
+    raise SystemExit(1)
+good.sort(key=lambda r: r["id"], reverse=True)
+print(good[0]["id"])
+PY
+)" || {
+  echo "STOP_EXACT_HEAD_WORKSPACE_CONTROL_CI_NOT_GREEN head=$OPERATOR_HEAD"
+  exit 1
+}
+echo "PRODUCTION_EXACT_HEAD_CI=PASS run_id=$EXACT_HEAD_CI_RUN head=$OPERATOR_HEAD"
 
 for repo in "$WC_REPO" "$PAD_REPO"; do
   default_branch="$(gh api --method GET "repos/$repo" --jq '.default_branch')"
