@@ -261,6 +261,9 @@ def main() -> int:
     if git_blob(maintenance_candidate) != EXPECTED_NEW_MAINTENANCE_BLOB:
         raise UpdateError("candidate maintenance-controller blob mismatch")
 
+    build_dir = Path(tempfile.mkdtemp(prefix="workspace-ci-stale-recovery-build."))
+    go_bin = provision_go_toolchain(build_dir)
+
     require_root_owned_0755(INSTALLED_CONTROLLER, "installed controller")
     require_root_owned_0755(
         INSTALLED_MAINTENANCE,
@@ -284,10 +287,8 @@ def main() -> int:
 
     run([sys.executable, "-m", "py_compile", str(maintenance_candidate)])
 
-    build_dir = Path(tempfile.mkdtemp(prefix="workspace-ci-stale-recovery-build."))
     candidate_binary = build_dir / "lambda-ci-controller"
     try:
-        go_bin = provision_go_toolchain(build_dir)
         run([go_bin, "test", "-mod=mod", "./..."], cwd=controller_dir)
         run(
             [go_bin, "build", "-mod=mod", "-o", str(candidate_binary), "."],
