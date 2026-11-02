@@ -24,20 +24,20 @@ Widen Workspace Shell only enough to diagnose GitRunner/control-plane incidents 
 
 - Intent: mutate
 - Remote branch: workspace-shell-gitrunner-observability-v1
-- Remote checkpoint: 2b4526a10978a0025ea2264370551e3fd6e36910
+- Remote checkpoint: bb543a9f57a20401f4c30401342c4397187a1d1d
 - Remote verified: true
 
 ## Next safe action
 
-Open a draft PR and run exact-head hosted validation. If green, design the sanitized maintenance-receipt read path as a separate read-only boundary; do not install live changes until the exact validated head is explicitly bound for Workspace Shell update.
+Retarget PR #591 back to accepted Workspace Shell branch for a five-file review delta. Then prepare a bounded live-update procedure for the exact validated observability head; do not self-widen root/helper trust or use this task for GitRunner mutation.
 
 ## Remaining work
 
-- Expand exact read-only unit allowlist.
-- Add regression tests proving authorized CI units are readable and unrelated units remain denied.
+- Retarget PR #591 back to workspace-shell-mcp-v1-current-main after final state-sync validation.
+- Prepare a bounded live-update procedure for the exact validated observability candidate.
+- After live update under operator boundary, inspect workspace-control legacy controller, maintenance controller/service, v3 provisioner/reconciler, and v3 control-small unit state.
 - Design/implement sanitized maintenance-receipt read without maintenance socket/group authority.
-- Run hosted validation.
-- Only after exact-head validation, prepare bounded live update that preserves accepted Workspace Shell transport and least privilege.
+- Keep GitHub Actions cancellation in a GitHub/control-plane surface rather than adding generic network credentials to Workspace Shell.
 
 ## Blockers / gates
 
