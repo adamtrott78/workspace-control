@@ -173,7 +173,7 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
         raise RootActivationError(
             "controller digest differs from base manifest without active override receipt"
         ) from exc
-    if st.st_uid != 0 or stat.S_IMODE(st.st_mode) != 0o600:
+    if st.st_uid != os.geteuid() or stat.S_IMODE(st.st_mode) != 0o600:
         raise RootActivationError("active controller override receipt metadata invalid")
 
     active = _load(receipt_path)
