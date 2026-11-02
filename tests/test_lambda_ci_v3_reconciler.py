@@ -306,5 +306,112 @@ class V3ReconcilerTests(unittest.TestCase):
         self.assertGreater(len(manifest["entries"]), 30)
 
 
+    def test_production_cutover_override_is_exact_and_fail_closed(self):
+        receipt_path = pathlib.Path(self.temp.name) / "production-cutover-active.json"
+        old_receipt = reconciler.PRODUCTION_CUTOVER_ACTIVE_RECEIPT
+        self.addCleanup(
+            lambda: setattr(
+                reconciler,
+                "PRODUCTION_CUTOVER_ACTIVE_RECEIPT",
+                old_receipt,
+            )
+        )
+        reconciler.PRODUCTION_CUTOVER_ACTIVE_RECEIPT = receipt_path
+
+        manifest = {
+            "source_head": "a" * 40,
+            "root_policy_sha256": "b" * 64,
+        }
+        manifest_raw = (
+            json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+        ).encode()
+        overrides = {
+            destination: ("c" * 64)
+            for destination in reconciler.PRODUCTION_OVERRIDE_DESTINATIONS
+        }
+        bindings = {
+            "workspace-control:control-validation": {
+                "repository": "adamtrott78/workspace-control",
+                "path": ".github/workflows/lambda-ci-workspace-control-validation.yml",
+                "old_blob_sha": "1" * 40,
+                "new_blob_sha": "2" * 40,
+                "target_scale_set_name": "lambda-workspace-control-control-small",
+            },
+            "padataset:cpu-ci": {
+                "repository": "adamtrott78/PADataset",
+                "path": ".github/workflows/lambda-ci-cpu.yml",
+                "old_blob_sha": "3" * 40,
+                "new_blob_sha": "4" * 40,
+                "target_scale_set_name": "lambda-padataset-cpu-public",
+            },
+            "padataset:gpu-ci": {
+                "repository": "adamtrott78/PADataset",
+                "path": ".github/workflows/lambda-ci-gpu.yml",
+                "old_blob_sha": "5" * 40,
+                "new_blob_sha": "6" * 40,
+                "target_scale_set_name": "lambda-padataset-gpu-single-public",
+            },
+        }
+        receipt = {
+            "schema_version": 1,
+            "mode": "V3_PRODUCTION_CUTOVER_OVERRIDE",
+            "phase": "ACTIVE",
+            "base_source_head": manifest["source_head"],
+            "base_install_manifest_sha256": reconciler._sha256(manifest_raw),
+            "root_policy_sha256": manifest["root_policy_sha256"],
+            "accepted_runner_class_ids": list(
+                reconciler.PRODUCTION_ACCEPTED_CLASS_IDS
+            ),
+            "production_generation_sha256": "d" * 64,
+            "workflow_bindings": bindings,
+            "managed_artifact_overrides": overrides,
+            "research_gpu_containment_preserved": True,
+            "non_selected_classes_inactive": True,
+        }
+        receipt_path.write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        receipt_path.chmod(0o600)
+        self.assertEqual(
+            reconciler._production_cutover_overrides(manifest_raw, manifest),
+            overrides,
+        )
+
+        bad = json.loads(json.dumps(receipt))
+        bad["accepted_runner_class_ids"] = [
+            "padataset-gpu-single-public-v1"
+        ]
+        receipt_path.write_text(
+            json.dumps(bad, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(
+            reconciler.ReconcileError,
+            "accepted_runner_class_ids",
+        ):
+            reconciler._production_cutover_overrides(manifest_raw, manifest)
+
+    def test_production_override_set_is_only_overlay_and_three_accepted_policies(self):
+        self.assertEqual(
+            reconciler.PRODUCTION_OVERRIDE_DESTINATIONS,
+            {
+                "/etc/workspace-ci/v3/deployment-overlay.json",
+                "/etc/workspace-ci/v3/controllers/workspace-control-control-small-v1.json",
+                "/etc/workspace-ci/v3/controllers/padataset-cpu-public-v1.json",
+                "/etc/workspace-ci/v3/controllers/padataset-gpu-single-public-v1.json",
+            },
+        )
+        self.assertEqual(
+            reconciler.PRODUCTION_ROUTE_KEYS,
+            {
+                "workspace-control:control-validation",
+                "padataset:cpu-ci",
+                "padataset:gpu-ci",
+            },
+        )
+
+
+
 if __name__ == "__main__":
     unittest.main()
