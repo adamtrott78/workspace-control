@@ -287,6 +287,24 @@ class WorkspaceShellContractTests(unittest.TestCase):
             self.assertIsNone(manifest["tunnel_client_cert_sha256"])
             self.assertFalse((out / "frontend.json").exists())
             self.assertTrue((out / "frontend.unsealed.json").is_file())
+            frontend_unsealed = json.loads(
+                (out / "frontend.unsealed.json").read_text()
+            )
+            self.assertEqual(
+                frontend_unsealed["allowed_units"],
+                [
+                    "workspace-shell-job-launcher.service",
+                    "workspace-shell-root-broker.service",
+                    "workspace-shell-mcp.service",
+                    "workspace-shell-tunnel.service",
+                    "workspace-ci-controller@workspace-control-cpu.service",
+                    "workspace-ci-maintenance-controller.service",
+                    "workspace-ci-maintenance.service",
+                    "workspace-ci-v3-provisioner.service",
+                    "workspace-ci-v3-reconciler.service",
+                    "workspace-ci-v3-controller@workspace-control-control-small-v1.service",
+                ],
+            )
             self.assertEqual(
                 manifest["identities"],
                 {
