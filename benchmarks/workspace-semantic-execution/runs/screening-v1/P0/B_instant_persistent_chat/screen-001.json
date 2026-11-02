@@ -9,7 +9,7 @@
   "replicate_id": "screen-001",
   "fixture_id": "research-iterate-timeout-control-p0-v1",
   "branch": "workspace-semantic-execution-migration-v1",
-  "source_checkpoint_sha": "daf425b2e6b11fd5ca72283609b6cd02b0ba6246",
+  "source_checkpoint_sha": "c066d731ab535f399d3698ca2cbf1e7cd272ac6e",
   "public_inputs": {
     "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
     "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json",
@@ -37,8 +37,23 @@
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
-      "source_checkpoint_sha": "daf425b2e6b11fd5ca72283609b6cd02b0ba6246",
+      "source_checkpoint_sha": "c066d731ab535f399d3698ca2cbf1e7cd272ac6e",
       "note": "Control-created clean-worker slot; no oracle result has been published."
+    },
+    {
+      "kind": "EXECUTOR_CONTRACT_BOUND",
+      "source_checkpoint_sha": "c066d731ab535f399d3698ca2cbf1e7cd272ac6e",
+      "expected_executor": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_or_temporary_chat",
+        "continuity": "persistent_chat"
+      }
     }
   ],
   "pending_external": null,
@@ -64,5 +79,24 @@
   "control_evaluator": {
     "status": "NOT_YET_NEEDED",
     "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+  },
+  "protocol_checkpoint_validation": {
+    "run_id": 41525886922,
+    "expected_conclusion": "success",
+    "status": "IN_PROGRESS_AT_SLOT_UPDATE"
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-001.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_or_temporary_chat",
+    "continuity": "persistent_chat"
   }
 }
