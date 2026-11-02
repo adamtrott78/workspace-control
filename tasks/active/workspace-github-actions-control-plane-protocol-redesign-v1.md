@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-github-actions-control-plane-protocol-redesign-v1
 - Title: GitHub Actions Control-Plane Protocol Redesign v1
-- Status: IN_PROGRESS
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
@@ -43,22 +43,15 @@ Replace the current parser-chained GitHub Actions runner admission path with a f
 
 ## Next safe action
 
-Execute the validated legacy retirement helper from exact implementation head 8129291a59be2b25fa837c81091a0d7d8cac3387 against committed production transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json. The helper must retire only lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after all six scale-set counters are zero and accepted target v3 scale sets are present; it must persist the root-owned rollback-window receipt before deletion. Then run its fresh-process verify-receipt mode to prove all three legacy names are absent and the exact v3 targets remain. Preserve both Research legacy scale sets and all v2 bytes/config/state. After PASS, record durable retirement evidence and resume workspace-semantic-execution-migration-v1.
+Task complete for the accepted production scope. Resume workspace-semantic-execution-migration-v1 immediately. Do not delete lambda-research-engine, lambda-research-engine-gpu, or preserved v2 controller bytes/config/state from this completed task; those require separate future Research acceptance/cleanup authority.
 
 ## Remaining work
 
-- Validate the exact-head bounded retirement implementation.
-- Retire only lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after all migration-plan per-scale-set preconditions pass.
-- Preserve lambda-research-engine and lambda-research-engine-gpu until their replacement v3 classes receive separate acceptance.
-- Preserve all v2 installed bytes/config/state through the rollback window; do not remove legacy controller config/state during scale-set retirement.
-- Record the root-owned rollback-window/retirement receipt and independently verify the three accepted legacy scale sets are absent.
-- Immediately resume workspace-semantic-execution-migration-v1 umbrella work after accepted scale-set retirement.
+None. The accepted GitRunner v3 production migration scope is complete.
 
 ## Blockers / gates
 
-- The three production-accepted legacy scale sets have not yet been physically retired.
-- Research legacy scale sets are explicitly not eligible for deletion because their replacement v3 classes are not accepted/active.
-- Legacy controller bytes/config/state must remain preserved through the rollback window and are not authorized for deletion in this transition.
+None for this completed task. Research legacy scale sets and preserved v2 controller bytes/config/state remain intentionally out of scope pending separate future authority.
 
 ## Fresh-chat initialization
 
@@ -73,3 +66,13 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
+
+
+## Completion evidence
+
+- Production generation cutover accepted with transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json.
+- Legacy retirement receipt: /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json.
+- Retired: lambda-workspace-control id=3; lambda-padataset id=2; lambda-padataset-gpu id=1.
+- Fresh-process verification proved the three legacy names absent and accepted v3 targets still present: lambda-workspace-control-control-small id=2; lambda-padataset-cpu-public id=3; lambda-padataset-gpu-single-public id=4.
+- Research legacy scale sets remain preserved; all v2 controller bytes/config/state remain preserved for later authorized cleanup.
+- Resume umbrella task workspace-semantic-execution-migration-v1.
