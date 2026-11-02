@@ -1,0 +1,85 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-shell-gitrunner-observability-v1",
+  "title": "Workspace Shell GitRunner Observability v1",
+  "status": "IN_PROGRESS",
+  "goal": "Widen Workspace Shell only enough to diagnose GitRunner/control-plane incidents without operator terminal relay: add exact read-only systemd inspection for selected Workspace CI controller/maintenance/v3 units and design a sanitized read-only maintenance-receipt interface, while preserving the existing ban on generic shell, generic systemctl, GitHub credentials, maintenance-socket mutation authority, sibling-project execution authority, and privileged helper widening.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "current_stage": "repository_implementation_and_validation",
+  "acceptance_criteria": [
+    "Workspace Shell can read systemd state for an exact allowlist of Workspace CI controller/maintenance/v3 units needed to diagnose GitRunner serviceability.",
+    "Unit inspection remains read-only fixed-property systemctl show; no restart/start/stop/enable verbs are introduced.",
+    "Workspace Shell receives no membership in workspace-ci-maintenance and no access to the maintenance mutation socket.",
+    "Maintenance receipt access, if implemented, exposes only sanitized structured receipt fields through a dedicated read-only path and never raw credentials/token files or arbitrary paths.",
+    "Queued GitHub Actions cancellation is not implemented by granting Workspace Shell generic GitHub/network credentials; cancellation remains a GitHub/control-plane concern.",
+    "Existing Workspace Shell unit allowlist, task binding, sandbox, receipt, and fail-closed behavior remain intact.",
+    "Exact-head hosted validation passes before any live install/update.",
+    "Any live update is separately bound to the exact validated head and preserves current accepted Workspace Shell services/transport/boot-disabled state."
+  ],
+  "constraints": [
+    "Do not grant generic systemctl.",
+    "Do not add arbitrary file reads.",
+    "Do not add workspace-ci-maintenance group membership to workspace-shell-mcp.",
+    "Do not expose /run/workspace-ci/maintenance/maintenance.sock to Workspace Shell.",
+    "Do not add GitHub tokens, runner tokens, SSH credentials, or general network egress to Workspace Shell.",
+    "Do not activate or migrate any GitRunner v3 class from this task.",
+    "Do not change Research GPU containment.",
+    "Do not reuse this observability task as authority for controller restart/canary/cutover."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
+      "remote": {
+        "branch": "workspace-shell-gitrunner-observability-v1",
+        "checkpoint_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-shell-gitrunner-observability-v1.json",
+        "tasks/active/workspace-shell-gitrunner-observability-v1.md",
+        "architecture/workspace-shell-mcp-authority-v2.json",
+        "plugins/workspace-shell/install/render_install.py",
+        "plugins/workspace-shell/server.js",
+        "plugins/workspace-shell/test/**",
+        "tests/test_workspace_shell_contract.py",
+        "procedures/workspace_shell_mcp*.md"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "repository_implementation_and_validation",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github+heartbeat",
+      "inputs": [
+        "Workspace Shell accepted live head 44b4e4f2020450c81cec56e86b711cdee7e651d9",
+        "GitRunner queued-run incident 41378944347",
+        "operator explicit approval to widen Workspace Shell read/diagnostic authority to a bounded extent"
+      ],
+      "outputs": [
+        "exact read-only unit allowlist expansion",
+        "sanitized maintenance-receipt access design/implementation candidate",
+        "tests and exact-head validation"
+      ],
+      "validation": [],
+      "resume_condition": "Exact-head validation green and live-update procedure is bounded/reviewed."
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Expand exact read-only unit allowlist.",
+    "Add regression tests proving authorized CI units are readable and unrelated units remain denied.",
+    "Design/implement sanitized maintenance-receipt read without maintenance socket/group authority.",
+    "Run hosted validation.",
+    "Only after exact-head validation, prepare bounded live update that preserves accepted Workspace Shell transport and least privilege."
+  ],
+  "next_safe_action": "Implement and validate the exact read-only GitRunner/maintenance unit allowlist first. Do not add mutating controller authority or GitHub credentials.",
+  "last_executor": "gpt-5.6-sol",
+  "last_surface": "github+heartbeat"
+}
