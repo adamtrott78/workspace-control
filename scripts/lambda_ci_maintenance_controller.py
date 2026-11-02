@@ -499,81 +499,6 @@ def assert_no_replacement_runs(
         "pilot workflow run pagination exceeded fail-closed bound"
     )
 
-def assert_no_nonterminal_pilot_runs(client: GitHubClient) -> None:
-    workflow_id = urllib.parse.quote(P1_PILOT_WORKFLOW_ID, safe="")
-    for page in range(1, 21):
-        payload = client.get_json(
-            f"/repos/{SOURCE_REPOSITORY}/actions/workflows/{workflow_id}/runs"
-            f"?per_page=100&page={page}"
-        )
-        runs = payload.get("workflow_runs") if isinstance(payload, dict) else None
-        if not isinstance(runs, list):
-            raise MaintenanceControllerError("pilot workflow run list is invalid")
-        for run in runs:
-            if not isinstance(run, dict):
-                raise MaintenanceControllerError("pilot workflow run entry is invalid")
-            if run.get("status") == "completed":
-                continue
-            if not _run_has_live_p1_pilot_job(client, run):
-                continue
-            raise MaintenanceControllerError(
-                "pilot workflow still has non-terminal runner demand: "
-                f"id={run.get('id')} status={run.get('status')}"
-            )
-        if len(runs) < 100:
-            return
-    raise MaintenanceControllerError(
-        "pilot workflow run pagination exceeded fail-closed bound"
-    )
-
-
-def _stale_busy_ghost_shape(stats: dict[str, Any]) -> bool:
-    expected = {
-        "totalAvailableJobs": 0,
-        "totalAcquiredJobs": 0,
-        "totalAssignedJobs": 1,
-        "totalRunningJobs": 0,
-        "totalRegisteredRunners": 0,
-        "totalBusyRunners": 1,
-        "totalIdleRunners": 0,
-    }
-    try:
-        return all(int(stats.get(key, -1)) == value for key, value in expected.items())
-    except (TypeError, ValueError):
-        return False
-
-
-def require_stale_quarantine_delete_evidence(
-    root_diag: dict[str, Any],
-    command: dict[str, Any],
-) -> None:
-    result = root_diag.get("result") if root_diag.get("status") == "COMPLETED" else root_diag
-    if not isinstance(result, dict):
-        raise MaintenanceControllerError("stale-delete root diagnosis is missing")
-    if result.get("service_active") is not False:
-        raise MaintenanceControllerError("stale-delete requires controller inactive")
-    if result.get("active_project_units") != []:
-        raise MaintenanceControllerError("stale-delete requires no active project units")
-
-    quarantine = result.get("quarantine")
-    if not isinstance(quarantine, dict):
-        raise MaintenanceControllerError("stale-delete quarantine evidence is missing")
-    expected = {
-        "receipt_id": command["quarantine_receipt_id"],
-        "status": "ASSIGNMENT_DIVERGENCE_QUARANTINED",
-        "project_id": command["project_id"],
-        "lane": command["lane"],
-        "reconstructable_jobs": 0,
-        "active_count": 0,
-        "pending_count": 0,
-    }
-    for key, value in expected.items():
-        if quarantine.get(key) != value:
-            raise MaintenanceControllerError(
-                f"stale-delete quarantine evidence mismatch: {key}"
-            )
-
-
 def require_policy_digests(
     root_receipt: dict[str, Any],
     expected: dict[str, Any],
@@ -684,41 +609,16 @@ def execute_reset(
     stats = before.get("statistics")
     if not isinstance(stats, dict):
         raise MaintenanceControllerError("old scale-set statistics unavailable")
-
-    delete_operation = "DELETE"
-    ordinary_quiescent = all(
-        int(stats.get(key, -1)) == 0
-        for key in ("totalRegisteredRunners", "totalBusyRunners", "totalRunningJobs")
-    )
-    if not ordinary_quiescent:
-        if not _stale_busy_ghost_shape(stats):
-            for key in ("totalRegisteredRunners", "totalBusyRunners", "totalRunningJobs"):
-                if int(stats.get(key, -1)) != 0:
-                    raise MaintenanceControllerError(
-                        f"old scale set not quiescent: {key}={stats.get(key)}"
-                    )
-            raise MaintenanceControllerError("old scale set is not quiescent")
-
-        # A quarantined GitHub scale set can retain one assigned+busy
-        # bookkeeping entry after its exact workflow is terminal even though
-        # there is no registered runner or running/acquired/available work.
-        # Delete that ghost only with an independent GitHub no-demand proof
-        # plus a fresh root-owned quarantine/local-execution proof.
-        assert_no_nonterminal_pilot_runs(github_client)
-        stale_diag = submit_root(
-            root_socket,
-            comment_id=comment_id,
-            command=command,
-            operation="DIAGNOSE_LANE",
-        )
-        require_policy_digests(stale_diag, policy_digests)
-        require_stale_quarantine_delete_evidence(stale_diag, command)
-        delete_operation = "DELETE_STALE_QUARANTINED"
+    for key in ("totalRegisteredRunners", "totalBusyRunners", "totalRunningJobs"):
+        if int(stats.get(key, -1)) != 0:
+            raise MaintenanceControllerError(
+                f"old scale set not quiescent: {key}={stats.get(key)}"
+            )
 
     deleted = invoke_scale_set_helper(
         controller_binary,
         env_values,
-        delete_operation,
+        "DELETE",
         old_id,
     )
     if deleted.get("status") != "DELETED" or deleted.get("scale_set_id") != old_id:
