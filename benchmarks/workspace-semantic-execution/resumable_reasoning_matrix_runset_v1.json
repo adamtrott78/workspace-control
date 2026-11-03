@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "runset_id": "workspace-resumable-reasoning-matrix-v1",
-  "status": "PUBLIC_INPUT_PROVENANCE_REFROZEN_FULL_RESCREEN_REQUIRED",
+  "status": "PROVENANCE_REFROZEN_P0_PRIMARY_SCREENING_IN_PROGRESS",
   "benchmark_id": "workspace-resumable-reasoning-v1",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frozen_inputs": {
@@ -114,9 +114,58 @@
           "defect": "taxonomy_profile.fixture_blob_sha referenced the pre-clarification fixture blob while the run/matrix bound the clarified fixture blob",
           "hard_gate": "exact public-input provenance",
           "resolution": "Correct all four taxonomy profile bindings, update the fixture-matrix profile blob SHAs, refreeze a new source checkpoint, and rerun affected screening."
+        },
+        "provenance_refrozen_p0_primary": {
+          "status": "IN_PROGRESS",
+          "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+          "active_runs": {
+            "A": {
+              "run_id": "screening-v1-P0-A-002",
+              "status": "READY_TO_RESUME",
+              "external_results": [
+                "E_restore_timeout"
+              ],
+              "continuity": "same persistent GPT-5.6 Sol High chat"
+            },
+            "B": {
+              "run_id": "screening-v1-P0-B-004",
+              "status": "READY_TO_RESUME",
+              "external_results": [
+                "E_restore_timeout"
+              ],
+              "continuity": "same persistent GPT-5.6 Sol Instant chat"
+            },
+            "C": {
+              "run_id": "screening-v1-P0-C-002",
+              "status": "READY_TO_RESUME",
+              "external_results": [
+                "E_restore_timeout"
+              ],
+              "continuity": "brand-new GPT-5.6 Sol Instant chat for quantum 1"
+            },
+            "D": {
+              "run_id": "screening-v1-P0-D-002",
+              "status": "READY_TO_RESUME",
+              "role": "leaf_worker",
+              "process_id": "screening-v1-P0-D-002-leaf-001",
+              "continuity": "brand-new GPT-5.6 Sol Instant role chat"
+            },
+            "E": {
+              "run_id": "screening-v1-P0-E-002",
+              "status": "READY_TO_RESUME",
+              "external_results": [
+                "E_restore_timeout"
+              ],
+              "continuity": "brand-new GPT-5.6 Sol Instant lower-tier chat",
+              "frontier_escalation_authorized": false
+            }
+          },
+          "control_result_commit": "f0bd5786c3127d15f1be42ea9aacf3b02016176c",
+          "control_result_validation_run": 41723477493,
+          "note": "A/B/C/E first E_restore_timeout results were durably published before control-chat interruption. D decomposer completed LEAF_EXECUTABLE and awaits leaf_worker. No replay is required."
         }
       },
-      "next_action": "After the provenance-refreeze checkpoint is validated, launch fresh replacement P0 primary A-E slots first; then P1, P2, and P3. Do not reuse or continue superseded runs."
+      "next_action": "Resume provenance-refrozen P0 primary screening from durable state: A/B same persistent chats; C fresh stateless quantum-1 chat; D fresh leaf_worker chat; E fresh lower-tier Instant chat. Service subsequent WAITING_EXTERNAL/role/terminal boundaries from control state."
     },
     {
       "id": "scored_replicates",
