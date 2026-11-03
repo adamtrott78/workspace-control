@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "FAILED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -350,6 +350,12 @@
         "leaf-shared-control"
       ],
       "note": "Horizon-heavy, mostly separable objective decomposed into six shard-local leaves and one shared-control leaf; no frontier escalation."
+    },
+    {
+      "kind": "CONTROL_PROVENANCE_INVALIDATION",
+      "generation": 0,
+      "reason": "PUBLIC_INPUT_PROVENANCE_MISMATCH",
+      "replacement_replicate": "screen-002"
     }
   ],
   "pending_external": null,
@@ -436,7 +442,7 @@
       "status": "READY"
     }
   ],
-  "next_safe_action": "Launch one brand-new role-isolated GPT-5.6 Sol Instant leaf-worker chat for exactly one READY leaf_process, using durable state only; that worker may request at most one allowed external experiment and must then stop.",
+  "next_safe_action": "Do not continue this run. It is invalidated by PUBLIC_INPUT_PROVENANCE_MISMATCH; use the provenance-refrozen replacement screen-002 slot.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -450,12 +456,15 @@
     "frontier_escalations": 0,
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
-    "authority_provenance_violations": 0,
+    "authority_provenance_violations": 1,
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "PUBLIC_INPUT_PROVENANCE_INVALIDATED",
+    "violations": [
+      "taxonomy_profile_fixture_blob_mismatch"
+    ],
+    "note": "The bound taxonomy profile referenced the pre-clarification fixture blob. This invalidates comparability even where semantic task content was unchanged."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/D_instant_decompose_critic/screen-001.json"
