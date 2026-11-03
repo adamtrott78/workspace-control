@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": "screening-v1-P0-D-001:independent_critic",
+  "status": "IN_PROGRESS",
+  "owner": "screening-v1-P0-D-001:synthesizer",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -94,7 +94,7 @@
       "critique_ref": "established_finding:C1"
     },
     "synthesizer": {
-      "status": "READY_TO_RESUME",
+      "status": "IN_PROGRESS",
       "evidence_refs": [
         "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
@@ -236,6 +236,34 @@
         "established_finding:L1",
         "established_finding:L2"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-D-001-synthesizer-g0",
+      "generation": 0,
+      "owner": "screening-v1-P0-D-001:synthesizer",
+      "role": "synthesizer",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_or_role_isolated_instant_workers",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "IN_PROGRESS",
+      "evidence_refs": [
+        "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+        "established_finding:L1",
+        "established_finding:L2",
+        "established_finding:C1"
+      ]
     }
   ],
   "events": [
@@ -368,6 +396,12 @@
       "generation": 0,
       "role": "independent_critic",
       "next_role": "synthesizer"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-001:synthesizer",
+      "role": "synthesizer"
     }
   ],
   "pending_external": null,
