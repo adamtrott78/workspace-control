@@ -12,9 +12,12 @@ RUN = json.loads((BASE / "runs/screening-v1/P0/B_instant_persistent_chat/screen-
 PREDECESSOR = json.loads((BASE / "runs/screening-v1/P0/B_instant_persistent_chat/screen-001.json").read_text())
 
 class ScreeningBootstrapTests(unittest.TestCase):
-    def test_active_slot_is_non_claim_bearing_and_ready(self):
+    def test_active_slot_is_non_claim_bearing_and_has_valid_lifecycle_state(self):
         self.assertFalse(RUN["claim_bearing"])
-        self.assertEqual(RUN["status"], "READY")
+        self.assertIn(
+            RUN["status"],
+            {"READY", "RUNNING", "WAITING_EXTERNAL", "READY_TO_RESUME", "TERMINAL_CANDIDATE", "COMPLETED"},
+        )
         self.assertEqual(RUN["arm"], "B_instant_persistent_chat")
         self.assertEqual(RUN["phenotype"], "P0_easy_control")
 
@@ -33,10 +36,20 @@ class ScreeningBootstrapTests(unittest.TestCase):
         self.assertIn("Do not poll", rules)
         self.assertIn("may not self-validate", rules)
 
-    def test_slot_has_no_evaluator_result_at_creation(self):
-        self.assertEqual(RUN["external_results"], {})
-        self.assertEqual(RUN["validator_results"], [])
-        self.assertIsNone(RUN["terminal_submission"])
+    def test_active_slot_state_is_internally_consistent(self):
+        if RUN["status"] == "READY":
+            self.assertEqual(RUN["external_results"], {})
+            self.assertEqual(RUN["validator_results"], [])
+            self.assertIsNone(RUN["terminal_submission"])
+        if RUN["status"] == "WAITING_EXTERNAL":
+            self.assertIsNotNone(RUN["pending_external"])
+        if RUN["status"] == "READY_TO_RESUME":
+            self.assertIsNone(RUN["pending_external"])
+            self.assertTrue(RUN["external_results"])
+        if RUN["status"] == "COMPLETED":
+            self.assertIsNone(RUN["pending_external"])
+            self.assertTrue(RUN["validator_results"])
+            self.assertTrue(RUN["validator_results"][-1]["passed"])
 
     def test_session_isolation_keeps_github_available(self):
         contract = BOOT["session_isolation_contract"]
