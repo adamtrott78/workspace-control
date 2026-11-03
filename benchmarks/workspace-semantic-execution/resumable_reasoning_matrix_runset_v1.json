@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "runset_id": "workspace-resumable-reasoning-matrix-v1",
-  "status": "CLARIFIED_P0_MATCHED_PERSISTENT_SCREENING_COMPLETE_REMAINING_MATRIX_PENDING",
+  "status": "P0_PRIMARY_A_E_SCREENING_COMPLETE_P1_P3_PENDING",
   "benchmark_id": "workspace-resumable-reasoning-v1",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frozen_inputs": {
@@ -57,9 +57,54 @@
           "completion_commit": "57d49bdc76a2c92092e49068a3c60c400a1ff5ae",
           "validation_run": 41564259142,
           "result": "Both runs passed research_iterate_objective_v1 with score 1.0, zero violations, 3 reasoning invocations, 2 experiment requests, 0 retries, 0 frontier escalations, 0 model polling, 0 manual state relays, and 0 authority/provenance violations."
+        },
+        "p0_primary_a_e": {
+          "status": "COMPLETE",
+          "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+          "arms": {
+            "A": {
+              "run_id": "screening-v1-P0-A-001",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 3,
+              "experiment_requests": 2,
+              "retries": 0
+            },
+            "B": {
+              "run_id": "screening-v1-P0-B-003",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 3,
+              "experiment_requests": 2,
+              "retries": 0
+            },
+            "C": {
+              "run_id": "screening-v1-P0-C-001",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 3,
+              "experiment_requests": 2,
+              "retries": 0
+            },
+            "D": {
+              "run_id": "screening-v1-P0-D-001",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 4,
+              "experiment_requests": 2,
+              "retries": 0
+            },
+            "E": {
+              "run_id": "screening-v1-P0-E-001",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 4,
+              "experiment_requests": 2,
+              "retries": 1,
+              "frontier_escalations": 0
+            }
+          },
+          "completion_commit": "7f7c9c8136cf8509de5310222bbb5a380399c4ea",
+          "validation_run": 41570296752,
+          "interpretation": "P0 primary arm mechanics are operational under the clarified protocol. This remains non-claim-bearing protocol-screening evidence only; P1-P3 primary screening remains required."
         }
       },
-      "next_action": "Instantiate and execute the remaining non-claim-bearing primary A-E screening slots across P0-P3 under this clarified protocol; do not begin claim-bearing replicates until protocol screening is complete and no further protocol changes are pending."
+      "next_action": "Execute the already-instantiated non-claim-bearing P1 primary A-E screening slots next. If P1 completes without protocol changes, proceed to P2 and P3. Any fixture/prompt/harness/protocol change requires fresh affected screening."
     },
     {
       "id": "scored_replicates",
