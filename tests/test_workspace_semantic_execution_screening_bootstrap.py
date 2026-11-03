@@ -74,6 +74,11 @@ class ScreeningBootstrapTests(unittest.TestCase):
         self.assertIn("explicit user attestation", contract["attestation_rule"].lower())
         self.assertIn("CONTAMINATED_SESSION", contract["contamination_rule"])
 
+    def test_terminal_candidate_rule_requires_raw_result_hash_mapping(self):
+        rules = "\n".join(BOOT["worker_rules"])
+        self.assertIn("observed_results MUST be an object mapping experiment_id", rules)
+        self.assertIn("raw 64-character SHA-256 hash string", rules)
+
     def test_clean_worker_connector_surface_is_bounded(self):
         rules = "\n".join(BOOT["worker_rules"])
         self.assertIn("connector other than GitHub", rules)
