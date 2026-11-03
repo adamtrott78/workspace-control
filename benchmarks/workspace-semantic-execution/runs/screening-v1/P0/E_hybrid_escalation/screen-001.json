@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -139,16 +139,28 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-E-001-exp-001",
+      "generation": 0,
+      "experiment_id": "E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-E-001-exp-001",
-    "kind": "fixture_experiment",
-    "experiment_id": "E_restore_timeout",
-    "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout",
-    "intervention": "Restore the prior 12-second client timeout while holding load and infrastructure fixed."
+  "pending_external": null,
+  "external_results": {
+    "E_restore_timeout": {
+      "request_id": "screening-v1-P0-E-001-exp-001",
+      "experiment_id": "E_restore_timeout",
+      "result": {
+        "p95_latency_ms": 5100,
+        "timeout_failure_rate": 0.01
+      },
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    }
   },
-  "external_results": {},
   "established_findings": [
     "Lower-tier routing classification: LEAF_EXECUTABLE; decomposition and High escalation are not justified by the bound P0 public evidence."
   ],
@@ -171,7 +183,7 @@
       "authority": "fixture_only_external_evaluator"
     }
   ],
-  "next_safe_action": "STOP. Await control evaluator publication of the exact E_restore_timeout result and READY_TO_RESUME state; do not poll or self-validate.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next lower-tier quantum. Re-read durable state only. Remain Instant; no High escalation is authorized. Consume only the published E_restore_timeout result, persist the next bounded state transition, then stop at the next required boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -186,11 +198,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P0-E-001-exp-001",
+    "last_experiment_id": "E_restore_timeout",
+    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and all unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/E_hybrid_escalation/screen-001.json"
