@@ -17,6 +17,7 @@
     "When an experiment result is needed, update the assigned run state to WAITING_EXTERNAL with exactly one pending experiment request and stop reasoning. Do not poll.",
     "After the control evaluator publishes the result into the same run-state file and sets READY_TO_RESUME, resume from durable state only.",
     "Never invent an experiment result. Every observed result must be copied from a control-published external_result event and retained by exact result hash.",
+    "For terminal candidates, follow the public fixture terminal_output_schema exactly. In particular, observed_results MUST be an object mapping experiment_id directly to the exact control-published result_hash string; do not embed result payload objects as values.",
     "Terminal COMPLETE requires the control evaluator to publish a passing validator result. The worker may submit a terminal candidate but may not self-validate it.",
     "Keep context bounded; persist findings/hypotheses/evidence/next action into the assigned state rather than relying on chat history.",
     "Mutate only the assigned run-state path. All other repository paths are read-only for the screening worker."
