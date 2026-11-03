@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -67,7 +67,7 @@
       },
       {
         "role": "leaf_worker",
-        "status": "WAITING_EXTERNAL"
+        "status": "READY_TO_RESUME"
       }
     ],
     "active_role": null,
@@ -183,15 +183,28 @@
       "role": "leaf_worker",
       "payload_ref": "experiment_catalog:E_restore_timeout",
       "experiment_id": "E_restore_timeout"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
+      "generation": 0,
+      "experiment_id": "E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
-    "kind": "EXPERIMENT",
-    "payload_ref": "experiment_catalog:E_restore_timeout",
-    "experiment_id": "E_restore_timeout"
+  "pending_external": null,
+  "external_results": {
+    "E_restore_timeout": {
+      "request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
+      "experiment_id": "E_restore_timeout",
+      "result": {
+        "p95_latency_ms": 5100,
+        "timeout_failure_rate": 0.01
+      },
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    }
   },
-  "external_results": {},
   "established_findings": [
     {
       "id": "D1",
@@ -242,7 +255,7 @@
       ]
     }
   ],
-  "next_safe_action": "Control evaluator publishes the E_restore_timeout result into this assigned run state; then launch a fresh clean GPT-5.6 Sol Instant leaf_worker chat to resume from durable state.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the leaf_worker role. Re-read durable state only, consume the published E_restore_timeout result, perform exactly one bounded leaf quantum, request at most one additional external experiment if needed, persist state, then stop. Do not perform critic or synthesizer roles.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -257,11 +270,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
+    "last_experiment_id": "E_restore_timeout",
+    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/D_instant_decompose_critic/screen-001.json"

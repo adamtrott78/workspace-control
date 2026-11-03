@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "WAITING_TERMINAL_VALIDATION",
+  "status": "READY_TO_RESUME",
   "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
   "executor_identity": {
     "provider": "OpenAI",
@@ -186,6 +186,16 @@
       "worker_id": "screening-v1-P0-E-001-instant-lower-tier-g1",
       "finding": "Restoring the prior 12-second client timeout reduced timeout_failure_rate to 0.01 with p95_latency_ms 5100 while the experiment contract held load and infrastructure fixed; H_timeout_config is supported.",
       "evidence_ref": "external_results:E_restore_timeout@3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CONTROL_PROTOCOL_REJECTION",
+      "generation": 1,
+      "violations": [
+        "unsupported_terminal_status:WAITING_TERMINAL_VALIDATION",
+        "minimum_experiment_cycles_not_met",
+        "terminal_submission_schema_mismatch"
+      ],
+      "public_contract_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0"
     }
   ],
   "pending_external": null,
@@ -221,7 +231,7 @@
       "authority": "external_control_validator_only"
     }
   ],
-  "next_safe_action": "External control must perform terminal validation of the persisted lower-tier diagnosis. Do not poll or self-validate.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next lower-tier quantum. Re-read durable state and the public fixture worker_contract. Remain Instant; no High escalation is authorized. Repair the premature terminal attempt using only the public protocol rejection codes: complete the required experiment cycles and, when eligible, use the exact terminal_output_schema. Persist one bounded transition and stop at the next required boundary.",
   "terminal_submission": {
     "diagnosis": "H_timeout_config",
     "conclusion": "The timeout regression is attributable to the client timeout configuration; restoring the prior 12-second timeout eliminates the ~5-second timeout failures to the observed 0.01 failure rate under the controlled experiment.",
@@ -235,7 +245,7 @@
   "metrics": {
     "reasoning_invocations": 2,
     "experiment_requests": 1,
-    "retries": 0,
+    "retries": 1,
     "decomposition_count": 0,
     "decomposition_depth": 0,
     "failed_leaves": 0,
@@ -244,14 +254,17 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 2
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-E-001-exp-001",
-    "last_experiment_id": "E_restore_timeout",
-    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and all unused experiment results remain undisclosed."
+    "status": "TERMINAL_PROTOCOL_REJECTED",
+    "violations": [
+      "unsupported_terminal_status:WAITING_TERMINAL_VALIDATION",
+      "minimum_experiment_cycles_not_met",
+      "terminal_submission_schema_mismatch"
+    ],
+    "public_contract_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0",
+    "note": "This was a public-protocol eligibility rejection, not objective oracle validation. No hidden expected answer was disclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/E_hybrid_escalation/screen-001.json"
