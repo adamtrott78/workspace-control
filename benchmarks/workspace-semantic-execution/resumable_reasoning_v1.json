@@ -281,7 +281,7 @@
     "S5_resource_routing": "Quality-adjusted efficiency; evaluated only after S1 quality and S3 safety gates."
   },
   "fixture_matrix": {
-    "status": "P0_P3_STATIC_MATRIX_IMPLEMENTED_NOT_SCORED",
+    "status": "PROTOCOL_SCHEMA_CLARIFIED_RESCREEN_REQUIRED",
     "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
     "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
     "phenotypes": [
@@ -291,9 +291,9 @@
       "P3_mixed_long_hard"
     ],
     "design_rule": "Use matched research_iterate fixtures first so horizon/load and reasoning coupling vary without changing domain, worker interface, or evaluator class.",
-    "screening_rule": "Run one non-claim-bearing clean screening execution per arm/fixture before replicated scoring; any protocol change requires re-screening.",
+    "screening_rule": "Run one non-claim-bearing clean screening execution per arm/fixture before replicated scoring. The public terminal submission schema is explicit: observed_results maps experiment_id directly to the exact control-published result_hash string. Any protocol change requires fresh screening.",
     "scored_rule": "After a frozen screening pass, use at least three independent clean replicates for each selected arm/fixture causal comparison.",
-    "current_claim_ceiling": "Fixture design and harness compatibility only until clean oracle-unexposed model runs exist."
+    "current_claim_ceiling": "Protocol/harness evidence only. The first matched P0 Instant pair exposed and recovered from an under-specified terminal-output schema; re-screen under the clarified contract is required before claiming a frozen comparable screening pass."
   },
   "evaluator_isolation_upgrade": {
     "status": "IMPLEMENTED_PRIMITIVE_RUNTIME_SEAL_NOT_YET_PROVEN",
