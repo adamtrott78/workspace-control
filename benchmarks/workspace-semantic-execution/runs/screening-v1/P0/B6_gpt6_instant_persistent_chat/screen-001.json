@@ -27,8 +27,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P0-B6-001-worker",
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-6",
@@ -89,6 +89,29 @@
         "E_double_cpu",
         "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-B6-001-inv-03",
+      "generation": 0,
+      "owner": "screening-v1-P0-B6-001-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-6 Instant is selected."
+      },
+      "context_bytes": 0,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
     }
   ],
   "events": [
@@ -148,6 +171,14 @@
       "generation": 0,
       "worker_id": "screening-v1-P0-B6-001-worker",
       "resume": true
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0,
+      "experiment_ids": [
+        "E_restore_timeout",
+        "E_double_cpu"
+      ]
     }
   ],
   "pending_external": null,
@@ -187,41 +218,56 @@
       "statement": "Restoring the 12-second timeout at fixed load/infrastructure yielded p95 latency 5100 ms and timeout failure rate 0.01, supporting the lowered client-timeout mechanism.",
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "id": "F3",
+      "statement": "Doubling CPU with the 5-second timeout retained produced p95 5000 ms and 39% timeout failures, rejecting CPU saturation as primary mechanism.",
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "status": "strongly_supported"
+      "status": "supported_primary"
     },
     {
       "id": "H_cpu",
-      "status": "unlikely_not_yet_intervention_tested"
+      "status": "rejected_primary"
     },
     {
       "id": "H_network",
-      "status": "unlikely_based_on_O2"
+      "status": "disfavored_by_low_packet_loss_and_timeout_intervention"
     }
   ],
-  "unresolved_questions": [
-    "Does doubling CPU while retaining the 5-second timeout leave the sharp timeout regression intact?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "O1",
     "O2",
-    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
-  "candidate_actions": [
-    {
-      "experiment_id": "E_double_cpu",
-      "reason": "Discriminate CPU saturation from client timeout while keeping the 5-second deadline unchanged."
-    }
-  ],
-  "next_safe_action": "Resume in the same clean GPT-6 Instant persistent chat. Re-read this run state, consume only the published E_double_cpu result, and continue one bounded reasoning quantum. The public contract now permits a terminal candidate if the worker judges the evidence sufficient; terminal completion still requires control-side objective validation.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Stop at TERMINAL_CANDIDATE; control evaluator must objectively validate the submission and publish validator result. Do not self-validate or mark COMPLETED.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu",
+      "H_network"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2"
+    ],
+    "rationale": "The nearly exact 5.0-second failure boundary (O1), despite low CPU/queue occupancy and packet loss (O2), points to a client-side deadline. Restoring the 12-second timeout at fixed load/infrastructure yielded p95 5100 ms with only 1% timeout failures. Doubling CPU while retaining the 5-second deadline yielded p95 5000 ms and 39% timeout failures. The intervention contrast identifies the lowered timeout as primary, rejects CPU saturation as primary, and disfavors network loss given negligible packet loss and the timeout-specific recovery."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
