@@ -11,6 +11,9 @@ RUNSET = json.loads((BASE / "resumable_reasoning_matrix_runset_v1.json").read_te
 RUN = json.loads(
     (BASE / "runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json").read_text()
 )
+ACTIVE = json.loads(
+    (BASE / "runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-002.json").read_text()
+)
 
 class GPT6InstantScreeningTests(unittest.TestCase):
     def test_supplementary_arm_is_registered(self):
@@ -28,6 +31,16 @@ class GPT6InstantScreeningTests(unittest.TestCase):
         self.assertTrue(RUN["validator_results"][-1]["passed"])
         self.assertEqual(RUN["validator_results"][-1]["score"], 1.0)
         self.assertEqual(RUN["validator_results"][-1]["violations"], [])
+
+    def test_clarified_re_screen_slot_is_ready_and_bound_to_validated_protocol(self):
+        self.assertEqual(ACTIVE["status"], "READY")
+        self.assertFalse(ACTIVE["claim_bearing"])
+        self.assertEqual(ACTIVE["source_checkpoint_sha"], "6b0ada4e0a9e9f29cd281d82e1fc786df8895982")
+        self.assertEqual(
+            ACTIVE["public_inputs"]["fixture_blob_sha"],
+            "b33e0afa98d0051e5f41241eead770622c2c9eb0",
+        )
+        self.assertEqual(ACTIVE["expected_executor"]["model_family"], "GPT-6")
 
     def test_slot_requires_clean_memory_off_session(self):
         expected = RUN["expected_executor"]
