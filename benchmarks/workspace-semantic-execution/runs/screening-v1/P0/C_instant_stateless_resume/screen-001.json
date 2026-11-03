@@ -29,9 +29,26 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "fresh_chat_per_reasoning_quantum",
+    "tier": "INSTANT",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+      "Memory was disabled before this conversation was opened",
+      "GPT-5.6 Sol Instant was selected for this conversation"
+    ]
+  },
   "continuity_regime": "fresh_chat_per_reasoning_quantum",
   "treatment_contract": {
     "mode": "instant_stateless_resume",
@@ -41,33 +58,134 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 0,
+    "quantum_index": 1,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": null
+    "last_quantum_chat": "quantum-0:user-attested-clean-regular-chat"
   },
-  "started_at": null,
+  "started_at": "2026-11-02T21:26:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-C-001-q0",
+      "generation": 0,
+      "owner": "chatgpt-screening-worker-screen-001-q0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_chat_per_reasoning_quantum",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+          "Memory was disabled before this conversation was opened",
+          "GPT-5.6 Sol Instant was selected for this conversation"
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:O2",
+        "experiment:E_restore_timeout"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
       "note": "Primary C_instant_stateless_resume P0_easy_control protocol-screening slot. Non-claim-bearing."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-worker-screen-001-q0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 2
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-C-001-exp-001",
+      "generation": 0,
+      "payload_ref": "E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-C-001-exp-001",
+    "kind": "fixture_experiment",
+    "payload_ref": "E_restore_timeout",
+    "experiment_id": "E_restore_timeout",
+    "intervention": "Restore the prior 12-second client timeout while holding load and infrastructure fixed."
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 0. Perform exactly one bounded reasoning quantum, persist all continuation state, then stop.",
+  "established_findings": [
+    {
+      "id": "F_O1",
+      "statement": "Requests exceeding 4.9 seconds fail almost exactly at 5.0 seconds while shorter requests complete normally.",
+      "source": "fixture:O1"
+    },
+    {
+      "id": "F_O2",
+      "statement": "CPU utilization stays below 35%, queue occupancy below 40%, and packet loss below 0.1%.",
+      "source": "fixture:O2"
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "statement": "A newly lowered client timeout is terminating otherwise healthy requests.",
+      "status": "PRIMARY_TEST"
+    },
+    {
+      "id": "H_cpu",
+      "statement": "CPU saturation is causing the requests to exceed their deadline.",
+      "status": "COMPETING"
+    },
+    {
+      "id": "H_network",
+      "statement": "Network loss is causing retransmissions and deadline failures.",
+      "status": "COMPETING"
+    }
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second client timeout eliminate the failures while load and infrastructure remain fixed?",
+    "After the first published result, which second catalog experiment best rejects a remaining competing hypothesis?"
+  ],
+  "evidence_refs": [
+    "fixture:O1",
+    "fixture:O2"
+  ],
+  "candidate_actions": [
+    {
+      "id": "E_restore_timeout",
+      "type": "experiment",
+      "reason": "Directly discriminates H_timeout_config by changing only the suspected 5-second client deadline."
+    },
+    {
+      "id": "E_double_cpu",
+      "type": "experiment",
+      "reason": "Potential second cycle to test/reject H_cpu while retaining the 5-second timeout."
+    },
+    {
+      "id": "E_network_bypass",
+      "type": "experiment",
+      "reason": "Potential second cycle to test/reject H_network while retaining the 5-second timeout."
+    }
+  ],
+  "next_safe_action": "STOP. Control evaluator must publish the exact result and result_hash for request screening-v1-P0-C-001-exp-001 into this run state and set READY_TO_RESUME. Then launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled; read durable state only and perform exactly one next reasoning quantum.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
