@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-worker-screening-v1-P0-A-001",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -60,7 +60,33 @@
   },
   "started_at": null,
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-A-001-g0-q1",
+      "generation": 0,
+      "owner": "chatgpt-screening-worker-screening-v1-P0-A-001",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "user_attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation"
+      },
+      "context_bytes": 2507,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -72,21 +98,83 @@
       "generation": 0,
       "worker_id": "chatgpt-screening-worker-screening-v1-P0-A-001",
       "identity_source": "user_attestation"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-A-001-exp-001",
+      "generation": 0,
+      "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-A-001-exp-001",
+    "kind": "experiment",
+    "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Reason one bounded primary quantum and either request exactly one discriminating experiment or checkpoint safely.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "statement": "O1 shows a sharp failure boundary at approximately 5.0 seconds: requests exceeding 4.9 seconds fail almost exactly at 5.0 seconds while shorter requests complete. This is strongly consistent with a deadline/timeout cutoff but is not yet causal proof.",
+      "evidence": [
+        "O1"
+      ]
+    },
+    {
+      "id": "F2",
+      "statement": "O2 reports CPU below 35%, queue occupancy below 40%, and packet loss below 0.1%. These observations do not support CPU saturation or network loss as the primary mechanism, but those hypotheses remain un-rejected until experiment evidence is published.",
+      "evidence": [
+        "O2"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "status": "leading",
+      "statement": "A newly lowered client timeout is terminating otherwise healthy requests."
+    },
+    {
+      "id": "H_cpu",
+      "status": "competing",
+      "statement": "CPU saturation is causing the requests to exceed their deadline."
+    },
+    {
+      "id": "H_network",
+      "status": "competing",
+      "statement": "Network loss is causing retransmissions and deadline failures."
+    }
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second client timeout eliminate the 5-second failures while load and infrastructure remain fixed?"
+  ],
+  "evidence_refs": [
+    "fixture:research-iterate-timeout-control-p0-v1#O1",
+    "fixture:research-iterate-timeout-control-p0-v1#O2"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_restore_timeout",
+      "rationale": "Directly tests the leading timeout hypothesis by restoring the prior 12-second client timeout while holding load and infrastructure fixed.",
+      "priority": 1
+    },
+    {
+      "experiment_id": "E_double_cpu",
+      "rationale": "Potential follow-up discriminator for H_cpu after the first control-published result.",
+      "priority": 2
+    },
+    {
+      "experiment_id": "E_network_bypass",
+      "rationale": "Potential follow-up discriminator for H_network after the first control-published result.",
+      "priority": 3
+    }
+  ],
+  "next_safe_action": "STOP. Await control publication of the external result matching request screening-v1-P0-A-001-exp-001; do not poll or self-validate.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
