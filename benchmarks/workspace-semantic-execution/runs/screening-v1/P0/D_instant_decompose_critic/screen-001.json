@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -106,7 +106,7 @@
     }
   },
   "started_at": "2026-11-02T21:26:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-02T22:08:00-05:00",
   "invocations": [
     {
       "invocation_id": "screening-v1-P0-D-001-decomposer-g0",
@@ -421,6 +421,21 @@
       "generation": 0,
       "role": "synthesizer",
       "next_role": "control_evaluator"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
     }
   ],
   "pending_external": null,
@@ -502,7 +517,7 @@
     "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Control evaluator validates terminal_submission. Worker must stop; do not poll or self-validate.",
+  "next_safe_action": "Screening run complete. Preserve as non-claim-bearing P0 decompose/critic protocol evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_timeout_config",
     "rejected_hypotheses": [
@@ -517,7 +532,15 @@
     ],
     "rationale": "O1 reports that requests longer than 4.9 seconds fail almost exactly at 5.0 seconds. E_restore_timeout restored the prior 12-second client timeout while holding load and infrastructure fixed; p95 latency reached 5100 ms and timeout failure rate fell to 0.01, showing requests can complete beyond the former ~5.0-second cutoff when that timeout is removed and supporting H_timeout_config. E_double_cpu kept the 5-second timeout unchanged; p95 latency remained 5000 ms and timeout failure rate remained 0.39, so added CPU did not remove the cutoff and H_cpu is rejected. H_network remains a competing hypothesis and is not claimed as experimentally rejected because no durable E_network_bypass result exists."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 4,
     "experiment_requests": 2,
@@ -530,14 +553,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 3
+    "deterministic_compute_operations": 4
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-D-001-E_double_cpu-g0",
-    "last_experiment_id": "E_double_cpu",
-    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/D_instant_decompose_critic/screen-001.json"
