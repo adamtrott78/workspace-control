@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
+  "status": "FAILED",
   "owner": "chatgpt-screening-worker",
   "executor_identity": {
     "provider": "OpenAI",
@@ -58,8 +58,21 @@
     "persistent_chat": true
   },
   "started_at": "2026-11-02T23:40:00-05:00",
-  "completed_at": null,
-  "invocations": [],
+  "completed_at": "2026-11-02T23:40:00-05:00",
+  "invocations": [
+    {
+      "generation": 0,
+      "phase": "PRIMARY",
+      "executor": {
+        "provider": "OpenAI",
+        "model": "GPT-5.6 Sol",
+        "configuration": "Instant",
+        "tier": "INSTANT"
+      },
+      "purpose": "Validate immutable public-input provenance before fixture reasoning.",
+      "outcome": "FAILED_FIXTURE_CONTRACT_PROVENANCE_MISMATCH"
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -71,20 +84,43 @@
       "generation": 0,
       "worker_id": "chatgpt-screening-worker",
       "identity_source": "user_attestation"
+    },
+    {
+      "kind": "IMMUTABLE_INPUT_PROVENANCE_MISMATCH",
+      "generation": 0,
+      "fixture_blob_sha_bound": "766a414e01197f6054e68c02f2fe856f710044b0",
+      "taxonomy_declared_fixture_blob_sha": "e40f826aa18ec7cd86f655da2ef3335c78d40a56",
+      "taxonomy_profile_blob_sha": "19cbf5db0370ed5e0029f74fc274bcd82035bf24"
+    },
+    {
+      "kind": "FAILED",
+      "generation": 0,
+      "reason": "fixture_taxonomy_blob_binding_mismatch"
     }
   ],
   "pending_external": null,
   "external_results": {},
-  "established_findings": [],
+  "established_findings": [
+    {
+      "id": "F1",
+      "finding": "Bound taxonomy profile is inconsistent with the bound fixture: taxonomy profile blob 19cbf5db0370ed5e0029f74fc274bcd82035bf24 declares fixture_blob_sha e40f826aa18ec7cd86f655da2ef3335c78d40a56, but assigned run state binds fixture_blob_sha 766a414e01197f6054e68c02f2fe856f710044b0 and the immutable fixture fetched at source_checkpoint_sha has blob SHA 766a414e01197f6054e68c02f2fe856f710044b0.",
+      "consequence": "Cannot establish that taxonomy/phenotype metadata applies to the immutable fixture bound to this run; fail closed before experiments."
+    }
+  ],
   "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
+  "unresolved_questions": [
+    "Was the taxonomy profile intended to be regenerated for fixture blob 766a414e01197f6054e68c02f2fe856f710044b0, or should the run bind the older fixture blob e40f826aa18ec7cd86f655da2ef3335c78d40a56?"
+  ],
+  "evidence_refs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json@6b0ada4e0a9e9f29cd281d82e1fc786df8895982#blob=766a414e01197f6054e68c02f2fe856f710044b0",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.taxonomy.json@6b0ada4e0a9e9f29cd281d82e1fc786df8895982#blob=19cbf5db0370ed5e0029f74fc274bcd82035bf24"
+  ],
   "candidate_actions": [],
-  "next_safe_action": "Validate immutable public-input provenance and perform one bounded PRIMARY reasoning quantum.",
+  "next_safe_action": "Control owner must reconcile the immutable fixture/taxonomy binding and create or reset a valid screening slot; this worker must not continue this FAILED run.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
+    "reasoning_invocations": 1,
     "experiment_requests": 0,
     "retries": 0,
     "decomposition_count": 0,
