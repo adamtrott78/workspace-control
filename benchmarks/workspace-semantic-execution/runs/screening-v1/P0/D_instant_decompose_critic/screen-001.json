@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
+  "status": "WAITING_EXTERNAL",
   "owner": "screening-v1-P0-D-001:leaf_worker",
   "executor_identity": {
     "provider": "OpenAI",
@@ -67,7 +67,7 @@
       },
       {
         "role": "leaf_worker",
-        "status": "RUNNING"
+        "status": "WAITING_EXTERNAL"
       }
     ],
     "active_role": "leaf_worker",
@@ -136,6 +136,31 @@
         "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
         "experiment_catalog:E_restore_timeout"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-D-001-leaf_worker-g0-resume-1",
+      "generation": 0,
+      "owner": "screening-v1-P0-D-001:leaf_worker",
+      "role": "leaf_worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_or_role_isolated_instant_workers",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "experiment_catalog:E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -196,9 +221,23 @@
       "generation": 0,
       "worker_id": "screening-v1-P0-D-001:leaf_worker",
       "role": "leaf_worker"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-D-001-E_double_cpu-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "payload_ref": "experiment_catalog:E_double_cpu",
+      "experiment_id": "E_double_cpu"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-D-001-E_double_cpu-g0",
+    "generation": 0,
+    "role": "leaf_worker",
+    "payload_ref": "experiment_catalog:E_double_cpu",
+    "experiment_id": "E_double_cpu"
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
@@ -222,38 +261,47 @@
       "id": "D2",
       "kind": "CONTRACT_REQUIREMENT",
       "finding": "A terminal claim requires at least two experiment/result cycles, rejection of at least one competing hypothesis, and addressing O1."
+    },
+    {
+      "id": "L1",
+      "kind": "EXPERIMENT_INTERPRETATION",
+      "finding": "E_restore_timeout restored the prior 12-second client timeout and produced p95_latency_ms=5100 with timeout_failure_rate=0.01. Requests can therefore complete beyond the former ~5.0-second failure boundary when that timeout is removed, supporting H_timeout_config."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "statement": "A newly lowered client timeout is terminating otherwise healthy requests."
+      "statement": "A newly lowered client timeout is terminating otherwise healthy requests.",
+      "status": "SUPPORTED_BY_E_restore_timeout"
     },
     {
       "id": "H_cpu",
-      "statement": "CPU saturation is causing the requests to exceed their deadline."
+      "statement": "CPU saturation is causing the requests to exceed their deadline.",
+      "status": "COMPETING"
     },
     {
       "id": "H_network",
-      "statement": "Network loss is causing retransmissions and deadline failures."
+      "statement": "Network loss is causing retransmissions and deadline failures.",
+      "status": "COMPETING"
     }
   ],
   "unresolved_questions": [
-    "What control-published result is returned for E_restore_timeout?"
+    "What control-published result is returned for E_double_cpu?"
   ],
   "evidence_refs": [
     "source_checkpoint_sha:6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
     "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
     "taxonomy_profile_blob_sha:5a8b07cd3b0dbd33a04bfd202fc41968b03bcf2c",
     "harness_blob_sha:ff55438e933e91dad3057167c2243f0ef4933df2",
-    "runset_blob_sha:f4ae2648694e2fb8b0d090c0c7c6f3a1dd952476"
+    "runset_blob_sha:f4ae2648694e2fb8b0d090c0c7c6f3a1dd952476",
+    "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
   ],
   "candidate_actions": [
     {
-      "id": "A_resume_leaf_worker_after_E_restore_timeout",
+      "id": "A_resume_leaf_worker_after_E_double_cpu",
       "kind": "ROLE_HANDOFF",
       "role": "leaf_worker",
-      "objective": "After control publication, interpret the exact E_restore_timeout result from durable state and choose the next catalog experiment if required.",
+      "objective": "After control publication, interpret the exact E_double_cpu result from durable state. This supplies the fixture-required second experiment/result cycle and directly tests the CPU competing hypothesis.",
       "constraints": [
         "Resume only from control-published external_result evidence in this assigned run state.",
         "Do not poll.",
@@ -261,12 +309,12 @@
       ]
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the leaf_worker role. Re-read durable state only, consume the published E_restore_timeout result, perform exactly one bounded leaf quantum, request at most one additional external experiment if needed, persist state, then stop. Do not perform critic or synthesizer roles.",
+  "next_safe_action": "Stop at WAITING_EXTERNAL. After control publishes E_double_cpu, launch a brand-new regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next permitted role/quantum; re-read durable state only and do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
@@ -276,7 +324,7 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 2
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
