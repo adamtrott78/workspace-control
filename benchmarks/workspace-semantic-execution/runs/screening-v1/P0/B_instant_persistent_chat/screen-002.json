@@ -26,12 +26,19 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
-  "continuity_regime": "persistent_chat",
-  "started_at": null,
+  "generation": 1,
+  "status": "RUNNING",
+  "owner": "ChatGPT",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": ["GitHub"],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat"
+  },
+  "started_at": "2026-11-03T01:18:00Z",
   "completed_at": null,
   "invocations": [],
   "events": [
@@ -51,6 +58,12 @@
     {
       "kind": "SESSION_ISOLATION_CONTRACT_CORRECTED",
       "note": "Temporary Chat cannot satisfy the current plugin-backed screening transport: Unpersonalized disables plugins; Personalized may use existing memory. Clean workers now require a brand-new regular chat with Memory disabled and GitHub enabled."
+    },
+    {
+      "kind": "RUN_CLAIMED",
+      "source_checkpoint_sha": "fc59d52d4591f271c03a31f0778f746728e9933f",
+      "executor_identity": "OpenAI GPT-5.6 Sol / Instant",
+      "note": "Claimed from a brand-new regular ChatGPT conversation after explicit user attestation that Memory was disabled before chat start; GitHub transport is enabled."
     }
   ],
   "pending_external": null,
@@ -60,7 +73,7 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [],
-  "next_safe_action": "Claim this run only from a brand-new regular ChatGPT chat with Memory disabled and GitHub enabled ChatGPT Instant session, then inspect only the listed public inputs.",
+  "next_safe_action": "Inspect only the listed public inputs, beginning with the screening worker bootstrap.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -86,9 +99,7 @@
     "model_family": "GPT-5.6 Sol",
     "chat_configuration": "Instant",
     "surface": "ChatGPT chat",
-    "toolset": [
-      "GitHub"
-    ],
+    "toolset": ["GitHub"],
     "memory_mode": "disabled_regular_chat",
     "continuity": "persistent_chat"
   },
@@ -96,9 +107,7 @@
     "current_slot_must_be_new_session": true,
     "required_chat_type": "brand_new_regular_chat",
     "required_memory_setting": "disabled_before_chat_start",
-    "required_plugins": [
-      "GitHub"
-    ],
+    "required_plugins": ["GitHub"],
     "invalid_modes": [
       "Unpersonalized Temporary Chat: plugins unavailable",
       "Personalized Temporary Chat: existing memory may be available",
