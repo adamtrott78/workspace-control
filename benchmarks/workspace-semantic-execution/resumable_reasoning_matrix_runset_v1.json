@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "runset_id": "workspace-resumable-reasoning-matrix-v1",
-  "status": "PROTOCOL_SCHEMA_CLARIFIED_RESCREEN_REQUIRED",
+  "status": "CLARIFIED_P0_MATCHED_PERSISTENT_SCREENING_COMPLETE_REMAINING_MATRIX_PENDING",
   "benchmark_id": "workspace-resumable-reasoning-v1",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frozen_inputs": {
@@ -48,8 +48,18 @@
         ],
         "finding": "Terminal submission shape was under-specified: observed_results had named field only, while the frozen evaluator requires experiment_id -> raw result_hash string.",
         "consequence": "Prior completed P0 runs remain valid non-claim-bearing evidence that the protocol caught and recovered from the defect, but they do not constitute a frozen comparable screening pass after the protocol clarification.",
-        "required_action": "Re-screen affected matched P0 Instant persistent-chat arms under the clarified public terminal_output_schema before expanding or scoring."
-      }
+        "required_action": "Re-screen affected matched P0 Instant persistent-chat arms under the clarified public terminal_output_schema before expanding or scoring.",
+        "clarified_p0_re_screen": {
+          "status": "COMPLETE",
+          "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+          "gpt56_run": "screening-v1-P0-B-003",
+          "gpt6_run": "screening-v1-P0-B6-002",
+          "completion_commit": "57d49bdc76a2c92092e49068a3c60c400a1ff5ae",
+          "validation_run": 41564259142,
+          "result": "Both runs passed research_iterate_objective_v1 with score 1.0, zero violations, 3 reasoning invocations, 2 experiment requests, 0 retries, 0 frontier escalations, 0 model polling, 0 manual state relays, and 0 authority/provenance violations."
+        }
+      },
+      "next_action": "Instantiate and execute the remaining non-claim-bearing primary A-E screening slots across P0-P3 under this clarified protocol; do not begin claim-bearing replicates until protocol screening is complete and no further protocol changes are pending."
     },
     {
       "id": "scored_replicates",
