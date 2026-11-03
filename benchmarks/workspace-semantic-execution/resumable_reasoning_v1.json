@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "benchmark_id": "workspace-resumable-reasoning-v1",
-  "status": "PILOT_HARNESS_IMPLEMENTED_ARMS_NOT_RUN",
+  "status": "P0_PRIMARY_SCREENING_COMPLETE_REMAINING_PHENOTYPES_PENDING",
   "purpose": "Measure whether disposable ChatGPT Instant invocations operating from durable Workspace Control state can match long-horizon frontier reasoning on decomposable research/evaluate/iterate work, and identify the residual boundary where stronger reasoning is required.",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "hypotheses": {
@@ -281,7 +281,7 @@
     "S5_resource_routing": "Quality-adjusted efficiency; evaluated only after S1 quality and S3 safety gates."
   },
   "fixture_matrix": {
-    "status": "CLARIFIED_P0_MATCHED_PERSISTENT_SCREENING_COMPLETE_REMAINING_MATRIX_PENDING",
+    "status": "P0_PRIMARY_A_E_SCREENING_COMPLETE_P1_P3_PENDING",
     "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
     "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
     "phenotypes": [
@@ -293,7 +293,7 @@
     "design_rule": "Use matched research_iterate fixtures first so horizon/load and reasoning coupling vary without changing domain, worker interface, or evaluator class.",
     "screening_rule": "Run one non-claim-bearing clean screening execution per arm/fixture before replicated scoring. The public terminal submission schema is explicit: observed_results maps experiment_id directly to the exact control-published result_hash string. Any protocol change requires fresh screening.",
     "scored_rule": "After a frozen screening pass, use at least three independent clean replicates for each selected arm/fixture causal comparison.",
-    "current_claim_ceiling": "Protocol/harness evidence only. The clarified matched P0 persistent-chat Instant screens (GPT-5.6 Sol / Instant and supplementary GPT-6 / Instant) both passed objectively with zero retries under the explicit terminal_output_schema. This remains non-claim-bearing; remaining A-E × P0-P3 screening and hidden-runtime evaluator isolation are still required before scored capability claims.",
+    "current_claim_ceiling": "Protocol/harness evidence only. Primary P0 A-E screening is complete under the clarified contract: all five primary arms passed the objective validator with score 1.0 and zero violations. P1-P3 primary screening and evaluator-only runtime isolation remain required before any scored capability claim.",
     "clarified_p0_screening": {
       "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
       "completion_commit": "57d49bdc76a2c92092e49068a3c60c400a1ff5ae",
@@ -301,6 +301,18 @@
       "gpt56": "screening-v1-P0-B-003",
       "gpt6": "screening-v1-P0-B6-002",
       "objective_result": "PASS_BOTH_SCORE_1_ZERO_VIOLATIONS"
+    },
+    "p0_primary_screening": {
+      "status": "COMPLETE",
+      "completion_commit": "7f7c9c8136cf8509de5310222bbb5a380399c4ea",
+      "validation_run": 41570296752,
+      "A": "screening-v1-P0-A-001",
+      "B": "screening-v1-P0-B-003",
+      "C": "screening-v1-P0-C-001",
+      "D": "screening-v1-P0-D-001",
+      "E": "screening-v1-P0-E-001",
+      "objective_result": "PASS_ALL_PRIMARY_ARMS_SCORE_1_ZERO_VIOLATIONS",
+      "note": "E required one public-protocol retry after a premature terminal attempt; E used zero frontier escalations."
     }
   },
   "evaluator_isolation_upgrade": {
