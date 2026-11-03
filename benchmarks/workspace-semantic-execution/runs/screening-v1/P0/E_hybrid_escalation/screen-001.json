@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
   "executor_identity": {
     "provider": "OpenAI",
@@ -177,6 +177,41 @@
       "evidence_refs": [
         "fixture:research-iterate-timeout-control-p0-v1#E_double_cpu"
       ]
+    },
+    {
+      "invocation_id": "instant-g1-q4",
+      "generation": 1,
+      "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "HYBRID",
+        "phase": "LOWER_TIER_INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "context_packet": {
+        "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+        "fixture_id": "research-iterate-timeout-control-p0-v1",
+        "consumed_external_result": "E_double_cpu",
+        "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+        "observation": {
+          "p95_latency_ms": 5000,
+          "timeout_failure_rate": 0.39
+        },
+        "minimum_experiment_cycles_satisfied": true
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "external_results:E_restore_timeout@3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external_results:E_double_cpu@cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
     }
   ],
   "events": [
@@ -242,6 +277,19 @@
       "generation": 1,
       "experiment_id": "E_double_cpu",
       "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "LOWER_TIER_INFERENCE",
+      "generation": 1,
+      "worker_id": "screening-v1-P0-E-001-instant-lower-tier-g1",
+      "finding": "Doubling available CPU while retaining the 5-second timeout yielded p95_latency_ms 5000 and timeout_failure_rate 0.39; combined with the prior timeout-restoration result and O1, H_cpu is rejected and H_timeout_config is supported as the primary mechanism.",
+      "evidence_ref": "external_results:E_double_cpu@cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 1,
+      "worker_id": "screening-v1-P0-E-001-instant-lower-tier-g1",
+      "note": "Public worker contract satisfied with two experiment/result cycles, rejection of H_cpu, and explicit treatment of O1. Await control-side validation; worker does not self-validate."
     }
   ],
   "pending_external": null,
@@ -269,10 +317,10 @@
   },
   "established_findings": [
     "Lower-tier routing classification: LEAF_EXECUTABLE; decomposition and High escalation are not justified by the bound P0 public evidence.",
-    "E_restore_timeout result supports H_timeout_config: with the prior 12-second client timeout restored under the fixture-controlled experiment, p95 latency was 5100 ms and timeout failure rate was 0.01."
+    "E_restore_timeout result supports H_timeout_config: with the prior 12-second client timeout restored under the fixture-controlled experiment, p95 latency was 5100 ms and timeout failure rate was 0.01.",
+    "E_double_cpu result rejects H_cpu as the primary mechanism: with CPU doubled and the 5-second timeout unchanged, p95 latency was 5000 ms and timeout failure rate remained 0.39."
   ],
   "open_hypotheses": [
-    "H_cpu",
     "H_network"
   ],
   "unresolved_questions": [],
@@ -280,18 +328,25 @@
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json@5a8b07cd3b0dbd33a04bfd202fc41968b03bcf2c"
   ],
-  "candidate_actions": [
-    {
-      "action": "WAIT_EXTERNAL_RESULT",
-      "purpose": "Await control publication of E_double_cpu result; do not poll.",
-      "authority": "external_control_only"
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next lower-tier quantum. Re-read durable state only, consume E_double_cpu, remain Instant with no High escalation authorized, and perform one bounded reasoning quantum. The minimum experiment-cycle requirement is now satisfied; if evidence is sufficient, persist a terminal candidate using the exact public terminal_output_schema and stop for control validation.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Stop. Await control-side validation of terminal_submission; do not poll or self-validate.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1"
+    ],
+    "rationale": "O1 shows failures clustering at the 5.0-second deadline while shorter requests complete normally. Restoring the prior 12-second client timeout under fixed load/infrastructure reduced timeout_failure_rate to 0.01 at p95_latency_ms 5100, directly supporting H_timeout_config. In the second required cycle, doubling CPU while retaining the 5-second timeout yielded p95_latency_ms 5000 and timeout_failure_rate 0.39, so additional CPU did not remove the deadline-clustered failures; this rejects H_cpu. The two published cycles are sufficient to identify the lowered client timeout as the primary mechanism."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 3,
+    "reasoning_invocations": 4,
     "experiment_requests": 2,
     "retries": 1,
     "decomposition_count": 0,
