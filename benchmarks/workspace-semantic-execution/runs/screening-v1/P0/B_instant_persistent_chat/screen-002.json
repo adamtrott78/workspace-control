@@ -27,7 +27,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -116,6 +116,32 @@
       "context_bytes": 1806,
       "outcome": "TERMINAL_CANDIDATE",
       "evidence_refs": [
+        "external_result:E_restore_timeout#3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external_result:E_double_cpu#cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-B-002-q4",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+      },
+      "context_bytes": 1072,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
         "external_result:E_restore_timeout#3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "external_result:E_double_cpu#cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
       ]
@@ -219,6 +245,22 @@
         "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
       ],
       "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-B-002"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_REPAIRED",
+      "generation": 0,
+      "repair_basis": [
+        "observed_results_not_mapping",
+        "insufficient_experiment_cycles",
+        "missing_required_discriminating_experiment:E_restore_timeout",
+        "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
+      ],
+      "repair": "observed_results converted to experiment-keyed mapping; no experiments repeated"
     }
   ],
   "pending_external": null,
@@ -298,30 +340,24 @@
     "external_result:E_double_cpu#cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Resume in the same clean GPT-5.6 Sol / Instant persistent chat. Re-read this run state and repair the terminal submission using only the published validator violation codes. Do not access evaluator-only inputs. The experiments do not need to be repeated unless the worker independently determines they are invalid.",
+  "next_safe_action": "Stop. Control evaluator must objectively validate the repaired terminal candidate; worker must not self-validate or mark COMPLETE.",
   "terminal_submission": {
     "final_hypothesis": "H_timeout_config",
     "rejected_hypotheses": [
       "H_cpu"
     ],
-    "observed_results": [
-      {
-        "experiment_id": "E_restore_timeout",
-        "result": {
-          "p95_latency_ms": 5100,
-          "timeout_failure_rate": 0.01
-        },
+    "observed_results": {
+      "E_restore_timeout": {
+        "p95_latency_ms": 5100,
+        "timeout_failure_rate": 0.01,
         "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
       },
-      {
-        "experiment_id": "E_double_cpu",
-        "result": {
-          "p95_latency_ms": 5000,
-          "timeout_failure_rate": 0.39
-        },
+      "E_double_cpu": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39,
         "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
       }
-    ],
+    },
     "addressed_observations": [
       "O1",
       "O2"
@@ -343,9 +379,9 @@
     }
   ],
   "metrics": {
-    "reasoning_invocations": 3,
+    "reasoning_invocations": 4,
     "experiment_requests": 2,
-    "retries": 0,
+    "retries": 1,
     "decomposition_count": 0,
     "frontier_escalations": 0,
     "manual_state_relay_count": 0,
@@ -355,18 +391,8 @@
     "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "TERMINAL_VALIDATED_FAIL",
-    "validator_id": "research_iterate_objective_v1",
-    "passed": false,
-    "score": 0.2,
-    "violations": [
-      "observed_results_not_mapping",
-      "insufficient_experiment_cycles",
-      "missing_required_discriminating_experiment:E_restore_timeout",
-      "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
-    ],
-    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
-    "note": "Published only validator outcome and violation codes. Hidden expected answer remains undisclosed."
+    "status": "VALIDATION_REQUESTED",
+    "note": "Repaired terminal candidate submitted using only published validator violation codes. Control evaluator owns objective validation and completion publication."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json"
