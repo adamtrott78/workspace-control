@@ -28,11 +28,23 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
+  "status": "RUNNING",
+  "owner": "gpt6-instant-screen-002-worker",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-6",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-6 Instant is selected."
+  },
   "continuity_regime": "persistent_chat",
-  "started_at": null,
+  "started_at": "2026-11-02T20:56:00-05:00",
   "completed_at": null,
   "invocations": [],
   "events": [
@@ -42,6 +54,12 @@
       "predecessor_run_id": "screening-v1-P0-B6-001",
       "predecessor_commit": "e72e183be5b969fad71c2122ff5c4e3f8bba80bb",
       "note": "Fresh re-screen slot created after protocol screening exposed an under-specified terminal observed_results shape. This slot is bound to the clarified public terminal_output_schema requiring experiment_id -> raw result_hash string."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt6-instant-screen-002-worker",
+      "identity_source": "user_attestation"
     }
   ],
   "pending_external": null,
