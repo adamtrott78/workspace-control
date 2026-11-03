@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "chatgpt-screening-worker-screening-v1-P0-A-001",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -111,6 +111,12 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-worker-screening-v1-P0-A-001",
+      "identity_source": "durable_executor_identity"
     }
   ],
   "pending_external": null,
@@ -183,7 +189,7 @@
       "priority": 3
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / High persistent chat. Re-read this run state, consume only the published E_restore_timeout result, and continue. If another experiment is needed, persist exactly one request and stop at WAITING_EXTERNAL.",
+  "next_safe_action": "Interpret only the published E_restore_timeout result, then request exactly one second discriminating experiment if needed.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
