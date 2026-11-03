@@ -28,9 +28,9 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "generation": 1,
+  "status": "WAITING_TERMINAL_VALIDATION",
+  "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -113,6 +113,39 @@
       "evidence_refs": [
         "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
       ]
+    },
+    {
+      "invocation_id": "instant-g1-q2",
+      "generation": 1,
+      "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "HYBRID",
+        "phase": "LOWER_TIER_INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "context_packet": {
+        "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+        "fixture_id": "research-iterate-timeout-control-p0-v1",
+        "consumed_external_result": "E_restore_timeout",
+        "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "observation": {
+          "p95_latency_ms": 5100,
+          "timeout_failure_rate": 0.01
+        }
+      },
+      "outcome": "WAITING_TERMINAL_VALIDATION",
+      "evidence_refs": [
+        "external_results:E_restore_timeout@3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+      ]
     }
   ],
   "events": [
@@ -146,6 +179,13 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "LOWER_TIER_INFERENCE",
+      "generation": 1,
+      "worker_id": "screening-v1-P0-E-001-instant-lower-tier-g1",
+      "finding": "Restoring the prior 12-second client timeout reduced timeout_failure_rate to 0.01 with p95_latency_ms 5100 while the experiment contract held load and infrastructure fixed; H_timeout_config is supported.",
+      "evidence_ref": "external_results:E_restore_timeout@3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
     }
   ],
   "pending_external": null,
@@ -162,32 +202,38 @@
     }
   },
   "established_findings": [
-    "Lower-tier routing classification: LEAF_EXECUTABLE; decomposition and High escalation are not justified by the bound P0 public evidence."
+    "Lower-tier routing classification: LEAF_EXECUTABLE; decomposition and High escalation are not justified by the bound P0 public evidence.",
+    "E_restore_timeout result supports H_timeout_config: with the prior 12-second client timeout restored under the fixture-controlled experiment, p95 latency was 5100 ms and timeout failure rate was 0.01."
   ],
   "open_hypotheses": [
-    "H_timeout_config",
     "H_cpu",
     "H_network"
   ],
-  "unresolved_questions": [
-    "Does restoring the prior 12-second client timeout eliminate the ~5.0-second failures while load and infrastructure remain fixed?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json@5a8b07cd3b0dbd33a04bfd202fc41968b03bcf2c"
   ],
   "candidate_actions": [
     {
-      "action": "E_restore_timeout",
-      "purpose": "Directly test H_timeout_config by restoring the prior timeout while holding load and infrastructure fixed.",
-      "authority": "fixture_only_external_evaluator"
+      "action": "TERMINAL_VALIDATE",
+      "purpose": "Validate the lower-tier diagnosis against the bound deterministic validator.",
+      "authority": "external_control_validator_only"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next lower-tier quantum. Re-read durable state only. Remain Instant; no High escalation is authorized. Consume only the published E_restore_timeout result, persist the next bounded state transition, then stop at the next required boundary.",
-  "terminal_submission": null,
+  "next_safe_action": "External control must perform terminal validation of the persisted lower-tier diagnosis. Do not poll or self-validate.",
+  "terminal_submission": {
+    "diagnosis": "H_timeout_config",
+    "conclusion": "The timeout regression is attributable to the client timeout configuration; restoring the prior 12-second timeout eliminates the ~5-second timeout failures to the observed 0.01 failure rate under the controlled experiment.",
+    "evidence_refs": [
+      "external_results:E_restore_timeout@3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    ],
+    "submitted_by": "screening-v1-P0-E-001-instant-lower-tier-g1",
+    "generation": 1
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
+    "reasoning_invocations": 2,
     "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
