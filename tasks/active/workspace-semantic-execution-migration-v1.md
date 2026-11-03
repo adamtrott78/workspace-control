@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 63179de41180c5876814ff9249fab060a02fd931
+- Remote checkpoint: c66a32421cf3ee15f9163c4e97ab7b154251c8f3
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY P0 ARM SCREENING BATCH: launch four separate clean worker chats for the READY P0 slots A/C/D/E. A uses GPT-5.6 Sol / High and a persistent chat. C uses GPT-5.6 Sol / Instant but exactly one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat in role decomposer; every later role is a separate clean chat. E starts with GPT-5.6 Sol / Instant and may not use High unless durable lower-tier evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state permits escalation. All chats require Memory disabled before launch and GitHub enabled. Report any WAITING_EXTERNAL, READY_TO_RESUME role/quantum handoff, ESCALATION request, or TERMINAL_CANDIDATE back to this control chat; it will service each run directly from GitHub.
+USER-ONLY P1 ARM SCREENING BATCH: launch five separate clean worker chats for the READY P1 primary slots A/B/C/D/E. A uses GPT-5.6 Sol / High persistent chat. B uses GPT-5.6 Sol / Instant persistent chat. C uses GPT-5.6 Sol / Instant with one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat as decomposer and every later role in a separate clean chat. E starts GPT-5.6 Sol / Instant and may use High only after durable evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state explicitly authorizes escalation. Memory must be disabled before each new chat and GitHub enabled. Report every WAITING_EXTERNAL, role/quantum handoff, escalation request, or TERMINAL_CANDIDATE back to this control chat.
 
 ## Remaining work
 
-- Execute the already-instantiated non-claim-bearing screening slots. Run P0 A/C/D/E first to validate arm-specific control/stateless/decompose-critic/hybrid mechanics, then run A-E across P1-P3 if no further protocol change is required.
+- Execute the already-instantiated non-claim-bearing P1-P3 primary screening slots. Run P1 A-E next, then P2 A-E and P3 A-E if no further protocol change is required.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
