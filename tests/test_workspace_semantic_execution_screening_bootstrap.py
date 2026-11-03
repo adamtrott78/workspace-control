@@ -38,6 +38,15 @@ class ScreeningBootstrapTests(unittest.TestCase):
         self.assertEqual(RUN["validator_results"], [])
         self.assertIsNone(RUN["terminal_submission"])
 
+    def test_session_isolation_keeps_github_available(self):
+        contract = BOOT["session_isolation_contract"]
+        self.assertEqual(contract["required_chat_type"], "brand_new_regular_chat")
+        self.assertEqual(contract["memory_setting"], "disabled_before_chat_start")
+        self.assertIn("GitHub", contract["required_plugins"])
+        invalid = "\n".join(contract["forbidden_chat_modes"])
+        self.assertIn("Unpersonalized Temporary Chat", invalid)
+        self.assertIn("Personalized Temporary Chat", invalid)
+
     def test_clean_worker_connector_surface_is_bounded(self):
         rules = "\n".join(BOOT["worker_rules"])
         self.assertIn("connector other than GitHub", rules)
