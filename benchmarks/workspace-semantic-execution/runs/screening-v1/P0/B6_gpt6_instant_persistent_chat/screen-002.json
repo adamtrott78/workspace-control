@@ -28,7 +28,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -70,6 +70,30 @@
         "O2",
         "E_restore_timeout"
       ]
+    },
+    {
+      "invocation_id": "screen-002-inv-002",
+      "generation": 0,
+      "owner": "gpt6-instant-screen-002-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-6 Instant is selected."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -99,9 +123,28 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt6-instant-screen-002-worker",
+      "resume": true
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-B6-002-exp-002",
+      "generation": 0,
+      "experiment_id": "E_double_cpu",
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json#experiment_catalog/E_double_cpu"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-B6-002-exp-002",
+    "kind": "experiment",
+    "experiment_id": "E_double_cpu",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json#experiment_catalog/E_double_cpu",
+    "intervention": "Double available CPU while keeping the 5-second timeout unchanged."
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-B6-002-exp-001",
@@ -128,41 +171,49 @@
         "O2"
       ],
       "finding": "Low CPU, queue occupancy, and packet loss weaken saturation and network-loss explanations."
+    },
+    {
+      "id": "F3",
+      "experiment_id": "E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "finding": "Restoring 12-second timeout under fixed load/infrastructure yields p95 latency 5100 ms and timeout failure rate 0.01, consistent with a 5-second client deadline causing the regression."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "assessment": "leading; awaiting intervention"
+      "assessment": "strongly supported by restored-timeout intervention"
     },
     {
       "id": "H_cpu",
-      "assessment": "less supported by O2"
+      "assessment": "competing hypothesis to test by CPU doubling at unchanged timeout"
     },
     {
       "id": "H_network",
-      "assessment": "less supported by O2"
+      "assessment": "disfavored by low packet loss in O2"
     }
   ],
   "unresolved_questions": [
-    "Does restoring the prior 12-second timeout eliminate failures under fixed load and infrastructure?"
+    "Does doubling CPU with the 5-second timeout unchanged resolve the regression?"
   ],
   "evidence_refs": [
     "O1",
-    "O2"
+    "O2",
+    "E_restore_timeout",
+    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
   ],
   "candidate_actions": [
     {
-      "experiment_id": "E_restore_timeout",
-      "reason": "Direct causal intervention on suspected timeout."
+      "experiment_id": "E_double_cpu",
+      "reason": "Discriminate CPU saturation from deadline configuration by changing CPU alone."
     }
   ],
-  "next_safe_action": "Resume in the same clean persistent worker chat. Re-read this run state, consume only the published E_restore_timeout result, and continue one bounded reasoning quantum. If another experiment is needed, persist exactly one request and stop at WAITING_EXTERNAL.",
+  "next_safe_action": "Stop. Await control-published E_double_cpu result and READY_TO_RESUME; do not poll. Then synthesize using exact result hashes.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "frontier_escalations": 0,
