@@ -19,10 +19,15 @@ class GPT6InstantScreeningTests(unittest.TestCase):
         self.assertEqual(arm["chat_configuration"], "Instant")
         self.assertEqual(arm["surface"], "ChatGPT chat")
 
-    def test_slot_is_ready_and_non_claim_bearing(self):
-        self.assertEqual(RUN["status"], "READY")
+    def test_slot_is_completed_non_claim_bearing_and_objectively_validated(self):
+        self.assertEqual(RUN["status"], "COMPLETED")
         self.assertFalse(RUN["claim_bearing"])
         self.assertEqual(RUN["arm"], "B6_gpt6_instant_persistent_chat")
+        self.assertIsNone(RUN["pending_external"])
+        self.assertTrue(RUN["validator_results"])
+        self.assertTrue(RUN["validator_results"][-1]["passed"])
+        self.assertEqual(RUN["validator_results"][-1]["score"], 1.0)
+        self.assertEqual(RUN["validator_results"][-1]["violations"], [])
 
     def test_slot_requires_clean_memory_off_session(self):
         expected = RUN["expected_executor"]
