@@ -50,6 +50,14 @@ class FixtureMatrixTests(unittest.TestCase):
             self.assertNotIn("experiment_results", serialized)
             self.assertNotEqual(entry["fixture"]["blob_sha"], entry["oracle"]["blob_sha"])
 
+    def test_all_public_fixtures_expose_exact_terminal_output_schema(self):
+        for entry in MATRIX["fixtures"]:
+            fixture = self._load(entry["fixture"]["path"])
+            schema = fixture["worker_contract"]["terminal_output_schema"]
+            self.assertIn("experiment_id", schema["observed_results"])
+            self.assertIn("result_hash", schema["observed_results"])
+            self.assertIn("raw 64-character SHA-256 hash string", schema["observed_results"])
+
     def test_every_fixture_has_a_constructive_passing_submission(self):
         for entry in MATRIX["fixtures"]:
             fixture = self._load(entry["fixture"]["path"])
