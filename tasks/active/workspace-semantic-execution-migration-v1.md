@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: e177ada29bfb5e21f514e4cf02e517ac820354b9
+- Remote checkpoint: ae85cece6b27e3e07ed95863365a1cc91ecafc40
 - Remote verified: true
 
 ### PADataset
@@ -70,12 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY MATCHED COUNTERPART LAUNCH: open a brand-new regular ChatGPT chat with Memory disabled before launch and GitHub enabled, select GPT-5.6 Sol / Instant, and run the existing primary slot benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json using the canonical navigation message plus explicit attestation. The GPT-6 B6 P0 screening run is complete and validated; do not reuse it. Once screen-002 reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can service the evaluator transition directly from GitHub.
+USER-ONLY CLARIFIED P0 RE-SCREEN: launch either fresh clarified slot in a separate brand-new regular ChatGPT chat with Memory disabled before launch and GitHub enabled. GPT-5.6 Sol / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-003.json. GPT-6 / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-002.json. Send the canonical navigation message plus explicit session/model attestation. The worker must read immutable public inputs at source checkpoint 6b0ada4e0a9e9f29cd281d82e1fc786df8895982 and follow terminal_output_schema exactly. Once a slot reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat services the evaluator transition directly from GitHub.
 
 ## Remaining work
 
-- Launch the primary GPT-5.6 Sol / Instant P0 slot screen-002 in a brand-new regular chat with Memory disabled and GitHub enabled, using the same protocol now proven by the completed GPT-6 P0 screening run.
-- After the matched GPT-5.6 P0 counterpart completes, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.
+- Re-screen the matched P0 persistent-chat Instant pair under the clarified terminal-output contract: GPT-5.6 Sol / Instant -> benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-003.json; GPT-6 / Instant -> benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-002.json. Use separate brand-new regular chats with Memory disabled and GitHub enabled.
+- After both clarified P0 re-screens complete without further protocol changes, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any further fixture/prompt/harness/protocol change requires fresh screening.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
