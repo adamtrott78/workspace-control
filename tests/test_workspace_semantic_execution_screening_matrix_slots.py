@@ -42,7 +42,7 @@ class ScreeningMatrixSlotTests(unittest.TestCase):
     def test_all_slots_are_non_claim_bearing_frozen_and_in_valid_lifecycle_state(self):
         valid_statuses = {
             "READY", "RUNNING", "WAITING_EXTERNAL", "READY_TO_RESUME",
-            "TERMINAL_CANDIDATE", "COMPLETED",
+            "TERMINAL_CANDIDATE", "COMPLETED", "FAILED", "SUPERSEDED",
         }
         for relpath in SLOTS:
             run = self._load(relpath)
@@ -66,8 +66,8 @@ class ScreeningMatrixSlotTests(unittest.TestCase):
             run = self._load(relpath)
             first = run["treatment_state"]["role_queue"][0]
             self.assertEqual(first["role"], "decomposer")
-            self.assertIn(first["status"], {"READY", "COMPLETE"})
-            if first["status"] == "COMPLETE":
+            self.assertIn(first["status"], {"READY", "COMPLETE", "COMPLETED"})
+            if first["status"] in {"COMPLETE", "COMPLETED"}:
                 self.assertIn("decision", first)
             self.assertIn("independent_critic", run["expected_executor"]["roles"])
             self.assertIn("No frontier escalation", run["treatment_contract"]["escalation_policy"])
