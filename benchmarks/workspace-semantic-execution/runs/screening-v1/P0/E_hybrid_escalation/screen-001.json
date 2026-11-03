@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
   "executor_identity": {
     "provider": "OpenAI",
@@ -74,7 +74,7 @@
     "escalation_evidence_refs": []
   },
   "started_at": "2026-11-02T21:26:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-02T22:01:00-05:00",
   "invocations": [
     {
       "invocation_id": "instant-g0-q1",
@@ -290,6 +290,21 @@
       "generation": 1,
       "worker_id": "screening-v1-P0-E-001-instant-lower-tier-g1",
       "note": "Public worker contract satisfied with two experiment/result cycles, rejection of H_cpu, and explicit treatment of O1. Await control-side validation; worker does not self-validate."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 1,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 1,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
     }
   ],
   "pending_external": null,
@@ -329,7 +344,7 @@
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json@5a8b07cd3b0dbd33a04bfd202fc41968b03bcf2c"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Await control-side validation of terminal_submission; do not poll or self-validate.",
+  "next_safe_action": "Screening run complete. Preserve as non-claim-bearing P0 protocol evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_timeout_config",
     "rejected_hypotheses": [
@@ -344,7 +359,15 @@
     ],
     "rationale": "O1 shows failures clustering at the 5.0-second deadline while shorter requests complete normally. Restoring the prior 12-second client timeout under fixed load/infrastructure reduced timeout_failure_rate to 0.01 at p95_latency_ms 5100, directly supporting H_timeout_config. In the second required cycle, doubling CPU while retaining the 5-second timeout yielded p95_latency_ms 5000 and timeout_failure_rate 0.39, so additional CPU did not remove the deadline-clustered failures; this rejects H_cpu. The two published cycles are sufficient to identify the lowered client timeout as the primary mechanism."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 4,
     "experiment_requests": 2,
@@ -357,14 +380,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 3
+    "deterministic_compute_operations": 4
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-E-001-exp-002",
-    "last_experiment_id": "E_double_cpu",
-    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/E_hybrid_escalation/screen-001.json"

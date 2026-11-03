@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 2,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -63,7 +63,7 @@
     "last_quantum_chat": "quantum-2:user-attested-clean-regular-chat"
   },
   "started_at": "2026-11-02T21:26:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-02T22:01:00-05:00",
   "invocations": [
     {
       "invocation_id": "screening-v1-P0-C-001-q0",
@@ -220,6 +220,21 @@
       "kind": "TERMINAL_CANDIDATE",
       "generation": 2,
       "worker_id": "chatgpt-screening-worker-screen-001-q2"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 2,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 2,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
     }
   ],
   "pending_external": null,
@@ -294,7 +309,7 @@
     "experiment:E_double_cpu"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Control evaluator must score the terminal candidate; worker must not self-validate or poll.",
+  "next_safe_action": "Screening run complete. Preserve as non-claim-bearing P0 protocol evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_timeout_config",
     "rejected_hypotheses": [
@@ -309,7 +324,15 @@
     ],
     "rationale": "O1 shows a sharp failure boundary at 5.0 seconds rather than generalized resource degradation. Restoring the prior 12-second client timeout reduced timeout failures to 0.01 while allowing p95 latency to reach 5100 ms, showing requests can complete beyond the former cutoff. In the second cycle, doubling CPU while retaining the 5-second timeout left p95 pinned at 5000 ms with a 0.39 timeout failure rate. Because extra CPU did not remove the cutoff while restoring the timeout did, H_timeout_config is the primary mechanism and H_cpu is rejected."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 3,
     "experiment_requests": 2,
@@ -322,14 +345,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 3
+    "deterministic_compute_operations": 4
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-C-001-exp-002",
-    "last_experiment_id": "E_double_cpu",
-    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/C_instant_stateless_resume/screen-001.json"
