@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "a1cbd6fc14e43f06167c4738907e3406ed7f56ad",
+        "checkpoint_sha": "f0bd5786c3127d15f1be42ea9aacf3b02016176c",
         "verified": true
       },
       "local": null,
@@ -420,9 +420,20 @@
             "Started P1 A/C/D screen-001 runs were invalidated; P1 B/E had already failed closed; never-launched P2/P3 screen-001 slots were superseded.",
             "Prior P0 runs remain useful non-claim-bearing mechanics/protocol-defect evidence but are superseded for frozen comparability. Fresh P0 primary A-E screening is required."
           ]
+        },
+        {
+          "check": "Control interruption recovery and first provenance-refrozen P0 external publication",
+          "result": "PASS",
+          "evidence": [
+            "Branch head recovery proved the interrupted control turn had already landed at f0bd5786c3127d15f1be42ea9aacf3b02016176c.",
+            "Workspace Control Validation 41723477493 / #1906 completed SUCCESS on that exact checkpoint.",
+            "A/B/C/E each durably contain the control-published E_restore_timeout result hash 3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368 and are READY_TO_RESUME.",
+            "D durably contains a LEAF_EXECUTABLE decomposer result and is READY_TO_RESUME at leaf_worker process screening-v1-P0-D-002-leaf-001.",
+            "No replay of the first external result is authorized or required."
+          ]
         }
       ],
-      "resume_condition": "Run the fresh provenance-refrozen P0 primary A-E replacement slots first. Only after P0 completes with no further shared protocol/public-input change should P1, P2, and P3 replacement slots be launched."
+      "resume_condition": "Resume the active provenance-refrozen P0 replacement runs from repository state: A/B same persistent chats; C fresh quantum-1 chat; D fresh leaf_worker role chat; E fresh lower-tier Instant chat. Continue servicing external, role-handoff, and terminal-validation boundaries until all five complete. Then advance to fresh P1 replacement slots."
     },
     {
       "id": "semantic_core_and_extension_contract",
@@ -1184,6 +1195,15 @@
         "Replacement-slot checkpoint a1cbd6fc14e43f06167c4738907e3406ed7f56ad passed Validation 41580711957 / #1895 SUCCESS.",
         "No prior P0/P1 result is used as frozen comparable screening evidence after this refreeze."
       ]
+    },
+    {
+      "check": "Recovered active P0 replacement screening state",
+      "result": "PASS",
+      "evidence": [
+        "Exact operational checkpoint f0bd5786c3127d15f1be42ea9aacf3b02016176c / Validation 41723477493 #1906 SUCCESS.",
+        "A/B/C/E are READY_TO_RESUME after first control-published experiment result; D is READY_TO_RESUME at leaf_worker.",
+        "This recovery is repository-grounded and does not depend on lost control-chat reasoning."
+      ]
     }
   ],
   "blockers": [
@@ -1193,7 +1213,7 @@
     "Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated."
   ],
   "remaining_work": [
-    "Execute the provenance-refrozen replacement primary screening slots: P0 A-E first, then P1 A-E, P2 A-E, and P3 A-E if no further shared protocol/public-input change is required.",
+    "Complete the active provenance-refrozen P0 replacement primary screening runs A/B/C/D/E from their durable READY_TO_RESUME states, then execute P1 A-E, P2 A-E, and P3 A-E replacement slots if no further shared protocol/public-input change is required.",
     "Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.",
     "After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.",
     "Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.",
@@ -1206,8 +1226,8 @@
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "USER-ONLY PROVENANCE-REFROZEN P0 SCREENING BATCH: launch five separate brand-new clean worker chats for the fresh P0 replacement slots A/B/C/D/E. A uses GPT-5.6 Sol / High persistent chat. B uses GPT-5.6 Sol / Instant persistent chat. C uses GPT-5.6 Sol / Instant with exactly one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat as decomposer and every later role in a separate clean chat. E starts GPT-5.6 Sol / Instant and may use High only after durable lower-tier evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state explicitly authorizes escalation. All new chats require Memory disabled before launch and GitHub enabled. Use only the replacement run-state paths bound to source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb; do not continue any superseded/failed prior slot.",
+  "next_safe_action": "CONTROL/OPERATOR RESUME FROM RECOVERED DURABLE P0 STATE. Do not replay E_restore_timeout. Current exact checkpoint f0bd5786c3127d15f1be42ea9aacf3b02016176c passed Validation 41723477493 / #1906 SUCCESS. A screening-v1-P0-A-002: READY_TO_RESUME in the SAME GPT-5.6 Sol High persistent chat after E_restore_timeout. B screening-v1-P0-B-004: READY_TO_RESUME in the SAME GPT-5.6 Sol Instant persistent chat after E_restore_timeout. C screening-v1-P0-C-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant chat for quantum 1. D screening-v1-P0-D-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for process screening-v1-P0-D-002-leaf-001. E screening-v1-P0-E-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat; no High escalation is authorized. Every new chat requires Memory disabled before launch and GitHub enabled. The control executor must re-read all five run-state files from GitHub before any mutation and service later WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE transitions directly from durable state.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
-  "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
+  "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker.\\n\\n2026-11-03 CONTROL INTERRUPTION RECOVERY: previous control chat interrupted after atomically publishing the first E_restore_timeout result to provenance-refrozen P0 A/B/C/E. Repository recovery proved checkpoint f0bd5786c3127d15f1be42ea9aacf3b02016176c is valid and Validation 41723477493 / #1906 SUCCESS. D remained at the intended leaf_worker handoff. Resume from durable state only; do not replay first results or rely on lost chat reasoning."
 }
