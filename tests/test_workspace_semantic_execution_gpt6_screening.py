@@ -30,6 +30,18 @@ class GPT6InstantScreeningTests(unittest.TestCase):
         self.assertEqual(expected["chat_configuration"], "Instant")
         self.assertEqual(expected["memory_mode"], "disabled_regular_chat")
 
+    def test_slot_accepts_explicit_user_attestation_for_unobservable_ui_state(self):
+        contract = RUN["contamination_policy"]["user_attestation_contract"]
+        self.assertIn(
+            "GPT-6 Instant was selected for this conversation",
+            contract["required_statements"],
+        )
+        self.assertIn(
+            "Memory was disabled before this conversation was opened",
+            contract["required_statements"],
+        )
+        self.assertIn("Explicit user attestation", contract["acceptance"])
+
     def test_public_inputs_exclude_oracle(self):
         public = json.dumps(RUN["public_inputs"], sort_keys=True).lower()
         self.assertNotIn("oracle", public)
