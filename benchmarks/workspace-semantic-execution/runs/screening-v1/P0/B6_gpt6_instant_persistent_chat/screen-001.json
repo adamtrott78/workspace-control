@@ -27,8 +27,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P0-B6-001-worker",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-6",
@@ -44,7 +44,30 @@
   "continuity_regime": "persistent_chat",
   "started_at": "2026-11-02T19:32:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-B6-001-inv-01",
+      "generation": 0,
+      "owner": "screening-v1-P0-B6-001-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-6 Instant is selected."
+      },
+      "context_bytes": 0,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -64,21 +87,63 @@
       "generation": 0,
       "worker_id": "screening-v1-P0-B6-001-worker",
       "identity_source": "user_attestation"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-B6-001-E_restore_timeout-01",
+      "generation": 0,
+      "payload_ref": "E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-B6-001-E_restore_timeout-01",
+    "kind": "experiment",
+    "payload_ref": "E_restore_timeout"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Obtain explicit user attestation for brand-new regular chat, Memory disabled before chat start, and GPT-6 Instant selection. If attested and no conflicting prior context/model evidence is present, claim this run and inspect only the listed public inputs.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "statement": "O1 shows a sharp 5.0-second cutoff; O2 shows low CPU, queue and packet loss, favoring a client deadline over resource saturation.",
+      "evidence_refs": [
+        "O1",
+        "O2"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "status": "leading_unconfirmed"
+    },
+    {
+      "id": "H_cpu",
+      "status": "competing"
+    },
+    {
+      "id": "H_network",
+      "status": "competing"
+    }
+  ],
+  "unresolved_questions": [
+    "Does restoring the 12-second timeout eliminate failures at fixed load and infrastructure?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_restore_timeout",
+      "reason": "Directly discriminate the timeout configuration hypothesis."
+    }
+  ],
+  "next_safe_action": "Stop while WAITING_EXTERNAL; control evaluator publishes E_restore_timeout result and sets READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "frontier_escalations": 0,
