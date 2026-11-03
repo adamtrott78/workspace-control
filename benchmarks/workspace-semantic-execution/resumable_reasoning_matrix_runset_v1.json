@@ -125,7 +125,8 @@
       "unbounded repository dump"
     ],
     "worker_repository_read_rule": "Workers may read only benchmark paths explicitly named by their run packet; evaluator/oracle paths are excluded.",
-    "memory_rule": "Use Temporary Chat or otherwise disable Memory for every clean screening/scored worker. A worker that receives prior benchmark/control-chat memory is contaminated and must be discarded."
+    "memory_rule": "Use a brand-new regular ChatGPT chat with Memory disabled before launch. Unpersonalized Temporary Chat is invalid because plugins are disabled; Personalized Temporary Chat is invalid because existing memory may be used.",
+    "plugin_rule": "Required plugin/app transport must remain available. For current screening arms, GitHub must be enabled; other connectors remain forbidden unless the run packet explicitly requires them."
   },
   "state_path_template": "benchmarks/workspace-semantic-execution/runs/matrix-v1/{phenotype}/{arm}/{replicate_id}.json",
   "required_run_identity": [
@@ -181,7 +182,7 @@
         "toolset": [
           "GitHub"
         ],
-        "memory_mode": "disabled_or_temporary_chat",
+        "memory_mode": "disabled_regular_chat",
         "continuity": "persistent_chat",
         "tier": "FRONTIER_MATCHED_SURFACE",
         "rationale": "Primary stronger-reasoning control keeps the ChatGPT chat surface and GitHub affordance matched to Instant arms; only reasoning configuration/continuity treatment should differ."
@@ -194,7 +195,7 @@
         "toolset": [
           "GitHub"
         ],
-        "memory_mode": "disabled_or_temporary_chat",
+        "memory_mode": "disabled_regular_chat",
         "continuity": "persistent_chat",
         "tier": "INSTANT"
       },
@@ -206,7 +207,7 @@
         "toolset": [
           "GitHub"
         ],
-        "memory_mode": "disabled_or_temporary_chat",
+        "memory_mode": "disabled_regular_chat",
         "continuity": "fresh_chat_per_reasoning_quantum",
         "tier": "INSTANT"
       },
@@ -218,7 +219,7 @@
         "toolset": [
           "GitHub"
         ],
-        "memory_mode": "disabled_or_temporary_chat",
+        "memory_mode": "disabled_regular_chat",
         "continuity": "fresh_or_role_isolated_instant_workers",
         "tier": "INSTANT",
         "roles": [
@@ -238,7 +239,7 @@
         "toolset": [
           "GitHub"
         ],
-        "memory_mode": "disabled_or_temporary_chat",
+        "memory_mode": "disabled_regular_chat",
         "tier": "HYBRID",
         "escalation_rule": "Only objectively evidenced INTRINSICALLY_DIFFICULT residuals may route to the matched-surface High control."
       }
@@ -262,7 +263,7 @@
         "toolset": [
           "GitHub"
         ],
-        "memory_mode": "disabled_or_temporary_chat",
+        "memory_mode": "disabled_regular_chat",
         "continuity": "persistent_chat",
         "tier": "INSTANT",
         "status": "PLANNED_SCREENING",
