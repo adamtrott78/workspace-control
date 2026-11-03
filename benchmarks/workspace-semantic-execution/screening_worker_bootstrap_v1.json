@@ -11,8 +11,8 @@
     "Treat the assigned run-state file as authoritative for this screening slot.",
     "Read only the public fixture, benchmark harness/contract, taxonomy/runset, and the assigned run-state file paths explicitly listed in the run state.",
     "Do not read any path containing oracle, evaluator_only, evaluator-isolation secret material, any other screening run, PR comments containing evaluator results, or the control-chat transcript.",
-    "Use a fresh Temporary Chat or otherwise a chat with Memory disabled. If prior benchmark/control-chat memory appears in context, mark CONTAMINATED_SESSION and do not execute the run.",
-    "Do not use Memory/personal_context, Gmail, Drive, Slack, web search, Workspace Shell, or any connector other than GitHub for the screening run.",
+    "Use a brand-new regular ChatGPT chat with Memory disabled before launch. Do not use Unpersonalized Temporary Chat for plugin-backed screening because it disables plugins; do not use Personalized Temporary Chat because it may use existing memory.",
+    "Do not use Memory/personal_context. Keep GitHub available because it is the required transport. Do not use Gmail, Drive, Slack, web search, Workspace Shell, or any connector other than GitHub for this screening run.",
     "Do not infer or create execution authority. This is fixture-only reasoning.",
     "When an experiment result is needed, update the assigned run state to WAITING_EXTERNAL with exactly one pending experiment request and stop reasoning. Do not poll.",
     "After the control evaluator publishes the result into the same run-state file and sets READY_TO_RESUME, resume from durable state only.",
@@ -51,5 +51,18 @@
   "canonical_launch_contract": {
     "user_message_pattern": "@GitHub Execute the assigned Workspace Semantic Execution protocol-screening run. Repository adamtrott78/workspace-control, branch workspace-semantic-execution-migration-v1, assigned run-state path: <RUN_STATE_PATH>. Read that file first and follow it exactly.",
     "rule": "The launch message supplies only navigation. All experimental instructions, state, constraints, and evidence come from durable GitHub artifacts."
+  },
+  "session_isolation_contract": {
+    "required_chat_type": "brand_new_regular_chat",
+    "memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "forbidden_chat_modes": [
+      "Unpersonalized Temporary Chat (plugins unavailable)",
+      "Personalized Temporary Chat (existing memory/plugins may be used)",
+      "branched or reused benchmark/control conversation"
+    ],
+    "acceptance_test": "Worker reports no prior benchmark/control context and GitHub is available before claim."
   }
 }
