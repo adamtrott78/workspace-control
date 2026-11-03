@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P0-D-001:leaf_worker",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -67,10 +67,10 @@
       },
       {
         "role": "leaf_worker",
-        "status": "READY_TO_RESUME"
+        "status": "RUNNING"
       }
     ],
-    "active_role": null,
+    "active_role": "leaf_worker",
     "leaf_processes": [],
     "independent_critic": {
       "status": "NOT_READY",
@@ -190,6 +190,12 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-001:leaf_worker",
+      "role": "leaf_worker"
     }
   ],
   "pending_external": null,
