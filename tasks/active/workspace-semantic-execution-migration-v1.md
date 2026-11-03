@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 8dcc8797882ee08f06ceecbd9c7b09c5f16e7ace
+- Remote checkpoint: 63179de41180c5876814ff9249fab060a02fd931
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-CONTROL-SIDE MATRIX EXPANSION: instantiate the remaining non-claim-bearing primary A-E × P0-P3 protocol-screening run-state slots under the clarified source checkpoint and exact fixture/harness bindings, with arm-specific continuity/decomposition/escalation semantics derived from the frozen runset. Validate those slots before asking the operator to launch clean worker chats. Do not start claim-bearing replicates yet.
+USER-ONLY P0 ARM SCREENING BATCH: launch four separate clean worker chats for the READY P0 slots A/C/D/E. A uses GPT-5.6 Sol / High and a persistent chat. C uses GPT-5.6 Sol / Instant but exactly one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat in role decomposer; every later role is a separate clean chat. E starts with GPT-5.6 Sol / Instant and may not use High unless durable lower-tier evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state permits escalation. All chats require Memory disabled before launch and GitHub enabled. Report any WAITING_EXTERNAL, READY_TO_RESUME role/quantum handoff, escalation request, or TERMINAL_CANDIDATE back to this control chat; it will service each run directly from GitHub.
 
 ## Remaining work
 
-- Instantiate and execute the remaining non-claim-bearing primary A-E × P0-P3 protocol-screening slots under the clarified terminal-output contract. Preserve completed P0 B/B6 runs as screening evidence; any further fixture/prompt/harness/protocol change requires fresh screening.
+- Execute the already-instantiated non-claim-bearing screening slots. Run P0 A/C/D/E first to validate arm-specific control/stateless/decompose-critic/hybrid mechanics, then run A-E across P1-P3 if no further protocol change is required.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
