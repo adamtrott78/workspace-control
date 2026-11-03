@@ -26,21 +26,51 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 1,
-  "status": "RUNNING",
-  "owner": "ChatGPT",
+  "generation": 0,
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
-    "model_family": "GPT-5.6 Sol",
+    "reported_model": "GPT-5.6 Sol",
     "chat_configuration": "Instant",
     "surface": "ChatGPT chat",
-    "toolset": ["GitHub"],
+    "toolset": [
+      "GitHub"
+    ],
     "memory_mode": "disabled_regular_chat",
-    "continuity": "persistent_chat"
+    "continuity": "persistent_chat",
+    "tier": "INSTANT",
+    "identity_source": "user_attestation",
+    "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
   },
   "started_at": "2026-11-03T01:18:00Z",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-B-002-q1",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+      },
+      "context_bytes": 1288,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -60,25 +90,84 @@
       "note": "Temporary Chat cannot satisfy the current plugin-backed screening transport: Unpersonalized disables plugins; Personalized may use existing memory. Clean workers now require a brand-new regular chat with Memory disabled and GitHub enabled."
     },
     {
-      "kind": "RUN_CLAIMED",
-      "source_checkpoint_sha": "fc59d52d4591f271c03a31f0778f746728e9933f",
-      "executor_identity": "OpenAI GPT-5.6 Sol / Instant",
-      "note": "Claimed from a brand-new regular ChatGPT conversation after explicit user attestation that Memory was disabled before chat start; GitHub transport is enabled."
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-B-002"
+    },
+    {
+      "kind": "CLAIM_STATE_CORRECTED",
+      "generation": 0,
+      "note": "Initial claim write advanced generation before the immutable checkpoint bootstrap was read. Corrected to the harness claim contract before any experiment request; immutable public inputs were then read at source_checkpoint_sha."
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 2
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-B-002-exp-01",
+      "generation": 0,
+      "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-B-002-exp-01",
+    "kind": "fixture_experiment",
+    "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Inspect only the listed public inputs, beginning with the screening worker bootstrap.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "statement": "Failures cluster at the configured 5.0-second boundary while shorter requests complete normally.",
+      "evidence": [
+        "O1"
+      ]
+    },
+    {
+      "id": "F2",
+      "statement": "Observed CPU, queue occupancy, and packet loss are low, so starting observations do not support resource saturation or packet-loss explanations.",
+      "evidence": [
+        "O2"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "status": "leading"
+    },
+    {
+      "id": "H_cpu",
+      "status": "competing"
+    },
+    {
+      "id": "H_network",
+      "status": "competing"
+    }
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second client timeout eliminate the regression while load and infrastructure remain fixed?"
+  ],
+  "evidence_refs": [
+    "fixture:research-iterate-timeout-control-p0-v1#O1",
+    "fixture:research-iterate-timeout-control-p0-v1#O2"
+  ],
+  "candidate_actions": [
+    {
+      "id": "E_restore_timeout",
+      "type": "experiment_request",
+      "intervention": "Restore the prior 12-second client timeout while holding load and infrastructure fixed.",
+      "rationale": "Directly tests the leading timeout-configuration mechanism while holding load and infrastructure fixed."
+    }
+  ],
+  "next_safe_action": "Stop reasoning and do not poll. Wait for the control evaluator to publish the exact result for screening-v1-P0-B-002-exp-01 into this run-state file and set READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "frontier_escalations": 0,
@@ -88,7 +177,7 @@
     "contaminated_predecessor_attempts": 1
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
+    "status": "RESULT_REQUESTED",
     "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
   },
   "allowed_mutation_paths": [
@@ -99,7 +188,9 @@
     "model_family": "GPT-5.6 Sol",
     "chat_configuration": "Instant",
     "surface": "ChatGPT chat",
-    "toolset": ["GitHub"],
+    "toolset": [
+      "GitHub"
+    ],
     "memory_mode": "disabled_regular_chat",
     "continuity": "persistent_chat"
   },
@@ -107,7 +198,9 @@
     "current_slot_must_be_new_session": true,
     "required_chat_type": "brand_new_regular_chat",
     "required_memory_setting": "disabled_before_chat_start",
-    "required_plugins": ["GitHub"],
+    "required_plugins": [
+      "GitHub"
+    ],
     "invalid_modes": [
       "Unpersonalized Temporary Chat: plugins unavailable",
       "Personalized Temporary Chat: existing memory may be available",
