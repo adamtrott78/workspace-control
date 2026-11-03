@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 7dcedf96dfd84dcf2a39433efed2357c6db9e5aa
+- Remote checkpoint: 3bf5f61d0b1de685fa2bbe9d2abc592e0a6a62ae
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY CLEAN SESSION LAUNCH: turn Memory off in Settings -> Personalization before opening the worker chat. Then open a brand-new regular ChatGPT chat (not Temporary Chat), keep GitHub enabled, choose the intended executor, and send only the canonical navigation message for the matching slot. GPT-5.6 Sol / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json; GPT-6 / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json. Temporary Chat is invalid for this plugin-backed benchmark because Unpersonalized disables plugins and Personalized may expose existing memory.
+USER ATTESTATION GATE: if the current GPT-6 worker conversation truly was a brand-new regular chat, Memory was disabled before opening it, and GPT-6 Instant was selected, reply in that same worker chat with an explicit attestation of those three facts and tell it to re-read benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json and continue. The updated protocol accepts user attestation for these UI/session properties because the worker cannot independently verify them. If any statement is false, do not attest; open a new compliant chat instead.
 
 ## Remaining work
 
