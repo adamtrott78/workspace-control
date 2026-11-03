@@ -27,8 +27,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P0-B6-001-worker",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-6",
@@ -100,6 +100,12 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-B6-001-worker",
+      "resume": true
     }
   ],
   "pending_external": null,
