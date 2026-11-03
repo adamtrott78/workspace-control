@@ -29,9 +29,20 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "FAILED",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+  },
   "continuity_regime": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
   "treatment_contract": {
     "mode": "hybrid_evidence_gated_escalation",
@@ -43,34 +54,100 @@
   },
   "treatment_state": {
     "phase": "LOWER_TIER_INSTANT",
-    "lower_tier_attempts": [],
-    "decomposition_state": "UNASSESSED",
+    "lower_tier_attempts": [
+      {
+        "attempt_id": "instant-quantum-001",
+        "generation": 0,
+        "classification": "PROTOCOL_INPUT_INTEGRITY_FAILURE",
+        "outcome": "FAILED_CLOSED",
+        "evidence_refs": [
+          "fixture_blob_sha:766a414e01197f6054e68c02f2fe856f710044b0",
+          "taxonomy_blob_sha:19cbf5db0370ed5e0029f74fc274bcd82035bf24",
+          "taxonomy.fixture_blob_sha:e40f826aa18ec7cd86f655da2ef3335c78d40a56"
+        ],
+        "reason": "Bound taxonomy internally references fixture blob e40f826aa18ec7cd86f655da2ef3335c78d40a56, but assigned run binds fixture blob 766a414e01197f6054e68c02f2fe856f710044b0 at source checkpoint 6b0ada4e0a9e9f29cd281d82e1fc786df8895982. Cannot establish provenance-consistent decomposition or experiment request."
+      }
+    ],
+    "decomposition_state": "BLOCKED_INPUT_INTEGRITY",
     "escalation_status": "NOT_REQUESTED",
-    "residual_reason": null,
+    "residual_reason": "Protocol input provenance mismatch; not an INTRINSICALLY_DIFFICULT reasoning residual.",
     "escalation_evidence_refs": []
   },
-  "started_at": null,
+  "started_at": "2026-11-02T23:41:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "instant-quantum-001",
+      "generation": 0,
+      "owner": "instant-screening-worker-001",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "FAILED_CLOSED_INPUT_INTEGRITY",
+      "evidence_refs": [
+        "source_checkpoint_sha:6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+        "fixture_blob_sha:766a414e01197f6054e68c02f2fe856f710044b0",
+        "taxonomy_blob_sha:19cbf5db0370ed5e0029f74fc274bcd82035bf24"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
       "note": "Primary E_hybrid_escalation P1_horizon_heavy_decomposable protocol-screening slot. Non-claim-bearing."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "instant-screening-worker-001",
+      "executor_identity_source": "user_attestation"
+    },
+    {
+      "kind": "FAILED_CLOSED",
+      "generation": 0,
+      "reason": "PUBLIC_INPUT_PROVENANCE_MISMATCH",
+      "detail": "taxonomy.fixture_blob_sha=e40f826aa18ec7cd86f655da2ef3335c78d40a56 does not equal assigned public_inputs.fixture_blob_sha=766a414e01197f6054e68c02f2fe856f710044b0"
     }
   ],
   "pending_external": null,
   "external_results": {},
-  "established_findings": [],
+  "established_findings": [
+    {
+      "id": "F_input_integrity_001",
+      "finding": "The assigned immutable taxonomy and fixture bindings are internally inconsistent.",
+      "evidence_refs": [
+        "taxonomy_blob_sha:19cbf5db0370ed5e0029f74fc274bcd82035bf24",
+        "fixture_blob_sha:766a414e01197f6054e68c02f2fe856f710044b0",
+        "taxonomy.fixture_blob_sha:e40f826aa18ec7cd86f655da2ef3335c78d40a56"
+      ]
+    }
+  ],
   "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
+  "unresolved_questions": [
+    "Control owner must determine whether the taxonomy fixture_blob_sha or assigned fixture binding is stale and re-freeze/re-screen affected inputs."
+  ],
+  "evidence_refs": [
+    "source_checkpoint_sha:6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+    "fixture_blob_sha:766a414e01197f6054e68c02f2fe856f710044b0",
+    "taxonomy_blob_sha:19cbf5db0370ed5e0029f74fc274bcd82035bf24",
+    "taxonomy.fixture_blob_sha:e40f826aa18ec7cd86f655da2ef3335c78d40a56"
+  ],
   "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as lower-tier worker. Decompose TOO_LARGE work before escalation; High may be launched only after durable evidence-gated escalation state permits it.",
+  "next_safe_action": "External control owner: reconcile and re-freeze the P1 fixture/taxonomy provenance binding, then instantiate or reset an authorized screening slot. Do not launch High and do not request an experiment from this failed slot.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
+    "reasoning_invocations": 1,
     "experiment_requests": 0,
     "retries": 0,
     "decomposition_count": 0,
