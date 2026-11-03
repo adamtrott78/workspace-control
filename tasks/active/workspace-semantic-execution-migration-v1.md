@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: ae85cece6b27e3e07ed95863365a1cc91ecafc40
+- Remote checkpoint: 8dcc8797882ee08f06ceecbd9c7b09c5f16e7ace
 - Remote verified: true
 
 ### PADataset
@@ -70,12 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY CLARIFIED P0 RE-SCREEN: launch either fresh clarified slot in a separate brand-new regular ChatGPT chat with Memory disabled before launch and GitHub enabled. GPT-5.6 Sol / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-003.json. GPT-6 / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-002.json. Send the canonical navigation message plus explicit session/model attestation. The worker must read immutable public inputs at source checkpoint 6b0ada4e0a9e9f29cd281d82e1fc786df8895982 and follow terminal_output_schema exactly. Once a slot reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat services the evaluator transition directly from GitHub.
+CONTROL-SIDE MATRIX EXPANSION: instantiate the remaining non-claim-bearing primary A-E × P0-P3 protocol-screening run-state slots under the clarified source checkpoint and exact fixture/harness bindings, with arm-specific continuity/decomposition/escalation semantics derived from the frozen runset. Validate those slots before asking the operator to launch clean worker chats. Do not start claim-bearing replicates yet.
 
 ## Remaining work
 
-- Re-screen the matched P0 persistent-chat Instant pair under the clarified terminal-output contract: GPT-5.6 Sol / Instant -> benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-003.json; GPT-6 / Instant -> benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-002.json. Use separate brand-new regular chats with Memory disabled and GitHub enabled.
-- After both clarified P0 re-screens complete without further protocol changes, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any further fixture/prompt/harness/protocol change requires fresh screening.
+- Instantiate and execute the remaining non-claim-bearing primary A-E × P0-P3 protocol-screening slots under the clarified terminal-output contract. Preserve completed P0 B/B6 runs as screening evidence; any further fixture/prompt/harness/protocol change requires fresh screening.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
