@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "63179de41180c5876814ff9249fab060a02fd931",
+        "checkpoint_sha": "c66a32421cf3ee15f9163c4e97ab7b154251c8f3",
         "verified": true
       },
       "local": null,
@@ -392,9 +392,24 @@
             "Regression tests enforce frozen bindings, stateless C semantics, D decomposer/critic separation, E evidence-gated escalation, and matched-surface A identity.",
             "Exact slot-instantiation commit 63179de41180c5876814ff9249fab060a02fd931 passed Workspace Control Validation 41565058378 / #1853 SUCCESS."
           ]
+        },
+        {
+          "check": "P0 primary A-E protocol-screening completion",
+          "result": "PASS",
+          "evidence": [
+            "Primary P0 arms A, B, C, D, and E are all durably COMPLETED under the clarified public terminal_output_schema.",
+            "Each passed research_iterate_objective_v1 with score 1.0 and zero violations.",
+            "A: 3 reasoning invocations, 2 experiment requests, 0 retries.",
+            "B: 3 reasoning invocations, 2 experiment requests, 0 retries.",
+            "C: 3 reasoning invocations, 2 experiment requests, 0 retries.",
+            "D: 4 reasoning invocations across role-isolated decomposer/leaf/critic/synthesizer, 2 experiment requests, 0 retries.",
+            "E: 4 reasoning invocations, 2 experiment requests, 1 public-protocol retry after premature terminal submission, 0 frontier escalations.",
+            "Exact D completion commit 7f7c9c8136cf8509de5310222bbb5a380399c4ea passed Workspace Control Validation 41570296752 / #1884 SUCCESS.",
+            "This clears P0 primary arm mechanics only. It remains non-claim-bearing and does not establish frontier/Instant equivalence."
+          ]
         }
       ],
-      "resume_condition": "Run the remaining P0 primary arms A/C/D/E first as protocol screening. Only after P0 arm-specific mechanics are clean should P1-P3 A-E screening proceed. Any shared fixture/harness/bootstrap/protocol change requires re-screening of affected comparisons."
+      "resume_condition": "Execute the already-instantiated P1 primary A-E protocol-screening slots next. If no protocol change is required, continue P2 and P3. Any shared fixture/prompt/harness/protocol change requires re-screening of affected comparisons."
     },
     {
       "id": "semantic_core_and_extension_contract",
@@ -1138,6 +1153,15 @@
         "Workspace Control Validation 41565058378 / #1853 SUCCESS.",
         "Completed clarified P0 B/B6 runs remain preserved; no claim-bearing replicate has begun."
       ]
+    },
+    {
+      "check": "P0 primary A-E screening checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "All five primary P0 arms passed objective validation with score 1.0 and zero violations.",
+        "Final P0 D completion commit 7f7c9c8136cf8509de5310222bbb5a380399c4ea passed Validation 41570296752 / #1884 SUCCESS.",
+        "Protocol-screening remains non-claim-bearing; P1-P3 and hidden evaluator runtime isolation remain open."
+      ]
     }
   ],
   "blockers": [
@@ -1147,7 +1171,7 @@
     "Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated."
   ],
   "remaining_work": [
-    "Execute the already-instantiated non-claim-bearing screening slots. Run P0 A/C/D/E first to validate arm-specific control/stateless/decompose-critic/hybrid mechanics, then run A-E across P1-P3 if no further protocol change is required.",
+    "Execute the already-instantiated non-claim-bearing P1-P3 primary screening slots. Run P1 A-E next, then P2 A-E and P3 A-E if no further protocol change is required.",
     "Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.",
     "After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.",
     "Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.",
@@ -1160,7 +1184,7 @@
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "USER-ONLY P0 ARM SCREENING BATCH: launch four separate clean worker chats for the READY P0 slots A/C/D/E. A uses GPT-5.6 Sol / High and a persistent chat. C uses GPT-5.6 Sol / Instant but exactly one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat in role decomposer; every later role is a separate clean chat. E starts with GPT-5.6 Sol / Instant and may not use High unless durable lower-tier evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state permits escalation. All chats require Memory disabled before launch and GitHub enabled. Report any WAITING_EXTERNAL, READY_TO_RESUME role/quantum handoff, ESCALATION request, or TERMINAL_CANDIDATE back to this control chat; it will service each run directly from GitHub.",
+  "next_safe_action": "USER-ONLY P1 ARM SCREENING BATCH: launch five separate clean worker chats for the READY P1 primary slots A/B/C/D/E. A uses GPT-5.6 Sol / High persistent chat. B uses GPT-5.6 Sol / Instant persistent chat. C uses GPT-5.6 Sol / Instant with one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat as decomposer and every later role in a separate clean chat. E starts GPT-5.6 Sol / Instant and may use High only after durable evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state explicitly authorizes escalation. Memory must be disabled before each new chat and GitHub enabled. Report every WAITING_EXTERNAL, role/quantum handoff, escalation request, or TERMINAL_CANDIDATE back to this control chat.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
   "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
