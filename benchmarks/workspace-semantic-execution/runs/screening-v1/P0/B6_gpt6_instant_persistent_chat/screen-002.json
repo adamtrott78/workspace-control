@@ -28,8 +28,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "gpt6-instant-screen-002-worker",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-6",
@@ -46,7 +46,32 @@
   "continuity_regime": "persistent_chat",
   "started_at": "2026-11-02T20:56:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screen-002-inv-001",
+      "generation": 0,
+      "owner": "gpt6-instant-screen-002-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-6 Instant is selected."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "E_restore_timeout"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -60,21 +85,72 @@
       "generation": 0,
       "worker_id": "gpt6-instant-screen-002-worker",
       "identity_source": "user_attestation"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-B6-002-exp-001",
+      "generation": 0,
+      "experiment_id": "E_restore_timeout",
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json#experiment_catalog/E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-B6-002-exp-001",
+    "kind": "experiment",
+    "experiment_id": "E_restore_timeout",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json#experiment_catalog/E_restore_timeout",
+    "intervention": "Restore the prior 12-second client timeout while holding load and infrastructure fixed."
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Claim only from a brand-new regular ChatGPT chat with Memory disabled before launch, GitHub enabled, and GPT-6 / Instant selected. Read immutable public inputs at source_checkpoint_sha and follow the clarified terminal_output_schema exactly.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "observation_refs": [
+        "O1"
+      ],
+      "finding": "Failures cluster at the exact 5.0-second deadline while shorter requests succeed, favoring a timeout threshold over gradual resource exhaustion."
+    },
+    {
+      "id": "F2",
+      "observation_refs": [
+        "O2"
+      ],
+      "finding": "Low CPU, queue occupancy, and packet loss weaken saturation and network-loss explanations."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "assessment": "leading; awaiting intervention"
+    },
+    {
+      "id": "H_cpu",
+      "assessment": "less supported by O2"
+    },
+    {
+      "id": "H_network",
+      "assessment": "less supported by O2"
+    }
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second timeout eliminate failures under fixed load and infrastructure?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_restore_timeout",
+      "reason": "Direct causal intervention on suspected timeout."
+    }
+  ],
+  "next_safe_action": "Await control-published E_restore_timeout result; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "frontier_escalations": 0,
