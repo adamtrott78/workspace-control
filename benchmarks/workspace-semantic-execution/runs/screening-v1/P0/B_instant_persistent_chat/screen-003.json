@@ -28,7 +28,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -44,7 +44,7 @@
   },
   "continuity_regime": "persistent_chat",
   "started_at": "2026-11-02T20:56:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-02T21:10:00-05:00",
   "invocations": [
     {
       "invocation_id": "screening-v1-P0-B-003-inv-001",
@@ -173,6 +173,21 @@
         "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
       }
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
     }
   ],
   "pending_external": null,
@@ -244,7 +259,7 @@
     "E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop at TERMINAL_CANDIDATE and wait for the control evaluator to publish objective validation; do not self-validate or poll.",
+  "next_safe_action": "Screening run complete. Preserve this run as non-claim-bearing clarified-protocol evidence; do not reinterpret it as scored capability evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_timeout_config",
     "rejected_hypotheses": [
@@ -260,7 +275,15 @@
     ],
     "rationale": "The failures cluster at the configured 5-second boundary despite low baseline CPU utilization and negligible packet loss. Restoring the prior 12-second client timeout allows p95 latency of 5100 ms with only a 0.01 timeout failure rate, showing requests just beyond five seconds are otherwise healthy. Doubling CPU while keeping the 5-second timeout leaves p95 latency pinned at 5000 ms and timeout failure rate at 0.39, rejecting CPU saturation as the primary mechanism. The combined evidence supports a newly lowered client timeout as the primary cause."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 3,
     "experiment_requests": 2,
@@ -270,14 +293,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-B-003-exp-002",
-    "last_experiment_id": "E_double_cpu",
-    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and all unused experiment results remain undisclosed."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-003.json"
