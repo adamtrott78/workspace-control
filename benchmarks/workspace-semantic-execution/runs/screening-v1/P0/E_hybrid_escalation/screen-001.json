@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
   "executor_identity": {
     "provider": "OpenAI",
@@ -146,6 +146,37 @@
       "evidence_refs": [
         "external_results:E_restore_timeout@3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
       ]
+    },
+    {
+      "invocation_id": "instant-g1-q3",
+      "generation": 1,
+      "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "HYBRID",
+        "phase": "LOWER_TIER_INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "context_packet": {
+        "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+        "fixture_id": "research-iterate-timeout-control-p0-v1",
+        "protocol_repair": "minimum_experiment_cycles_not_met",
+        "prior_completed_experiment": "E_restore_timeout",
+        "selected_experiment": "E_double_cpu",
+        "purpose": "Complete the second required experiment/result cycle and test competing hypothesis H_cpu while keeping the 5-second timeout unchanged."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture:research-iterate-timeout-control-p0-v1#E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -196,9 +227,21 @@
         "terminal_submission_schema_mismatch"
       ],
       "public_contract_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-E-001-exp-002",
+      "generation": 1,
+      "experiment_id": "E_double_cpu",
+      "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_double_cpu",
+      "note": "Protocol repair after CONTROL_PROTOCOL_REJECTION: second experiment cycle required before any terminal candidate."
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-E-001-exp-002",
+    "experiment_id": "E_double_cpu",
+    "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_double_cpu"
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-E-001-exp-001",
@@ -226,25 +269,17 @@
   ],
   "candidate_actions": [
     {
-      "action": "TERMINAL_VALIDATE",
-      "purpose": "Validate the lower-tier diagnosis against the bound deterministic validator.",
-      "authority": "external_control_validator_only"
+      "action": "WAIT_EXTERNAL_RESULT",
+      "purpose": "Await control publication of E_double_cpu result; do not poll.",
+      "authority": "external_control_only"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next lower-tier quantum. Re-read durable state and the public fixture worker_contract. Remain Instant; no High escalation is authorized. Repair the premature terminal attempt using only the public protocol rejection codes: complete the required experiment cycles and, when eligible, use the exact terminal_output_schema. Persist one bounded transition and stop at the next required boundary.",
-  "terminal_submission": {
-    "diagnosis": "H_timeout_config",
-    "conclusion": "The timeout regression is attributable to the client timeout configuration; restoring the prior 12-second timeout eliminates the ~5-second timeout failures to the observed 0.01 failure rate under the controlled experiment.",
-    "evidence_refs": [
-      "external_results:E_restore_timeout@3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
-    ],
-    "submitted_by": "screening-v1-P0-E-001-instant-lower-tier-g1",
-    "generation": 1
-  },
+  "next_safe_action": "Stop in WAITING_EXTERNAL. Do not poll. After the control evaluator publishes E_double_cpu into this assigned run-state and sets READY_TO_RESUME, launch the next required fresh regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled; resume from durable state only. No High escalation is authorized.",
+  "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 1,
+    "reasoning_invocations": 3,
+    "experiment_requests": 2,
     "retries": 1,
     "decomposition_count": 0,
     "decomposition_depth": 0,
@@ -257,14 +292,14 @@
     "deterministic_compute_operations": 2
   },
   "control_evaluator": {
-    "status": "TERMINAL_PROTOCOL_REJECTED",
+    "status": "PROTOCOL_REPAIR_IN_PROGRESS",
     "violations": [
       "unsupported_terminal_status:WAITING_TERMINAL_VALIDATION",
       "minimum_experiment_cycles_not_met",
       "terminal_submission_schema_mismatch"
     ],
     "public_contract_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0",
-    "note": "This was a public-protocol eligibility rejection, not objective oracle validation. No hidden expected answer was disclosed."
+    "note": "Prior terminal attempt remains rejected. Worker has requested the second public experiment cycle and must stop pending external control publication."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/E_hybrid_escalation/screen-001.json"
