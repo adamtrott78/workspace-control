@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -119,14 +119,28 @@
       "request_id": "screening-v1-P0-C-002-q0-E_restore_timeout",
       "generation": 0,
       "payload_ref": "E_restore_timeout"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-C-002-q0-E_restore_timeout",
+      "generation": 0,
+      "experiment_id": "E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-C-002-q0-E_restore_timeout",
-    "kind": "experiment",
-    "payload_ref": "E_restore_timeout"
+  "pending_external": null,
+  "external_results": {
+    "E_restore_timeout": {
+      "request_id": "screening-v1-P0-C-002-q0-E_restore_timeout",
+      "experiment_id": "E_restore_timeout",
+      "result": {
+        "p95_latency_ms": 5100,
+        "timeout_failure_rate": 0.01
+      },
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    }
   },
-  "external_results": {},
   "established_findings": [
     {
       "id": "F_q0_1",
@@ -186,7 +200,7 @@
       "rationale": "Alternative second cycle to test/reject H_network if needed after the first result."
     }
   ],
-  "next_safe_action": "Wait for the control evaluator to publish the exact result for request screening-v1-P0-C-002-q0-E_restore_timeout. Do not poll. Resume only in a brand-new qualifying chat when state is READY_TO_RESUME.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 1. Re-read durable state only, consume E_restore_timeout, perform exactly one bounded reasoning quantum, persist continuation state, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -201,11 +215,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P0-C-002-q0-E_restore_timeout",
+    "last_experiment_id": "E_restore_timeout",
+    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/C_instant_stateless_resume/screen-002.json"
