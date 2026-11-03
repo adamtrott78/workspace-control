@@ -58,7 +58,7 @@ class ScreeningBootstrapTests(unittest.TestCase):
                 "selected_model_and_chat_configuration",
             },
         )
-        self.assertIn("Explicit user attestation", contract["attestation_rule"])
+        self.assertIn("explicit user attestation", contract["attestation_rule"].lower())
         self.assertIn("CONTAMINATED_SESSION", contract["contamination_rule"])
 
     def test_clean_worker_connector_surface_is_bounded(self):
