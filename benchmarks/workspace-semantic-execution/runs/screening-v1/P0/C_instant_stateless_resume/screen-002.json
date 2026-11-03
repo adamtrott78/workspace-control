@@ -29,9 +29,20 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation."
+  },
   "continuity_regime": "fresh_chat_per_reasoning_quantum",
   "treatment_contract": {
     "mode": "instant_stateless_resume",
@@ -41,33 +52,146 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 0,
+    "quantum_index": 1,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": null
+    "last_quantum_chat": "quantum-0-user-attested-fresh-chat"
   },
-  "started_at": null,
+  "started_at": "2026-11-03T16:29:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-C-002-q0",
+      "generation": 0,
+      "owner": "openai-gpt-5.6-sol-instant-screening-worker-q0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "context_bytes": 2049,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh provenance-refrozen replacement slot for C_instant_stateless_resume P0_easy_control. Prior screening under the stale taxonomy->fixture binding is preserved separately and is not comparable."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "openai-gpt-5.6-sol-instant-screening-worker-q0"
+    },
+    {
+      "kind": "EXECUTOR_IDENTITY_CAPTURED",
+      "generation": 0,
+      "executor_identity": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation."
+      }
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 2
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-C-002-q0-E_restore_timeout",
+      "generation": 0,
+      "payload_ref": "E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-C-002-q0-E_restore_timeout",
+    "kind": "experiment",
+    "payload_ref": "E_restore_timeout"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 0. Perform exactly one bounded reasoning quantum, persist all continuation state, then stop.",
+  "established_findings": [
+    {
+      "id": "F_q0_1",
+      "finding": "O1's sharp failure boundary at ~5.0 seconds is directly consistent with H_timeout_config and not naturally explained by CPU saturation or network loss."
+    },
+    {
+      "id": "F_q0_2",
+      "finding": "O2 reports low CPU utilization, low queue occupancy, and negligible packet loss, reducing support for H_cpu and H_network but not yet constituting experimental rejection."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "status": "leading",
+      "basis": [
+        "O1",
+        "O2"
+      ]
+    },
+    {
+      "id": "H_cpu",
+      "status": "competing_weakened",
+      "basis": [
+        "O2"
+      ]
+    },
+    {
+      "id": "H_network",
+      "status": "competing_weakened",
+      "basis": [
+        "O2"
+      ]
+    }
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second client timeout eliminate the >4.9-second failures while load and infrastructure remain fixed?",
+    "A second independent experiment/result cycle is still required before any terminal claim."
+  ],
+  "evidence_refs": [
+    "fixture:O1",
+    "fixture:O2"
+  ],
+  "candidate_actions": [
+    {
+      "id": "E_restore_timeout",
+      "priority": 1,
+      "rationale": "Directly intervenes on the leading causal mechanism while holding load and infrastructure fixed."
+    },
+    {
+      "id": "E_double_cpu",
+      "priority": 2,
+      "rationale": "Potential second cycle to test/reject H_cpu if needed after the first result."
+    },
+    {
+      "id": "E_network_bypass",
+      "priority": 3,
+      "rationale": "Alternative second cycle to test/reject H_network if needed after the first result."
+    }
+  ],
+  "next_safe_action": "Wait for the control evaluator to publish the exact result for request screening-v1-P0-C-002-q0-E_restore_timeout. Do not poll. Resume only in a brand-new qualifying chat when state is READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
