@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "3bf5f61d0b1de685fa2bbe9d2abc592e0a6a62ae",
+        "checkpoint_sha": "e177ada29bfb5e21f514e4cf02e517ac820354b9",
         "verified": true
       },
       "local": null,
@@ -335,9 +335,21 @@
             "The screening bootstrap and GPT-6 B6 slot now accept explicit user attestation for those UI/session properties and record the attestation source.",
             "Any conflicting in-conversation benchmark context or surface-reported model identity still fails closed."
           ]
+        },
+        {
+          "check": "GPT-6 Instant P0 protocol screening completion",
+          "result": "PASS",
+          "evidence": [
+            "screening-v1-P0-B6-001 completed as a non-claim-bearing protocol screening run.",
+            "Worker executed 3 reasoning invocations and 2 experiment requests with zero retries, zero decompositions, zero frontier escalations, zero model polling while waiting, zero manual state relay count, and zero authority/provenance violations.",
+            "Terminal candidate selected H_timeout_config, rejected H_cpu, retained exact result hashes for E_restore_timeout and E_double_cpu, and addressed O1.",
+            "Objective research_iterate_objective_v1 validation passed with score 1.0 and zero violations; validator evidence commitment cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999.",
+            "Completion commit e72e183be5b969fad71c2122ff5c4e3f8bba80bb required a lifecycle-test update because the regression still asserted READY. Corrected exact head e177ada29bfb5e21f514e4cf02e517ac820354b9 passed Workspace Control Validation 41558373924 / #1804 SUCCESS.",
+            "This establishes GPT-6 Instant protocol/harness operability on P0 only; it is not claim-bearing reasoning-quality evidence."
+          ]
         }
       ],
-      "resume_condition": "In the existing clean GPT-6 worker chat, explicitly attest that it is a brand-new regular chat, Memory was disabled before it was opened, and GPT-6 Instant was selected; instruct the worker to re-read the assigned run-state and continue. If those statements are not true, start a new compliant chat instead."
+      "resume_condition": "Run the primary matched GPT-5.6 Sol / Instant P0 slot screen-002 next for an apples-to-apples same-surface counterpart. Then instantiate the remaining non-claim-bearing screening slots across A-E/P0-P3 under the now-working protocol."
     },
     {
       "id": "semantic_core_and_extension_contract",
@@ -865,6 +877,20 @@
         "Exact slot head 124edbf30587be8f64e579a053eb2beef8288f5a passed Validation 41526365989 SUCCESS.",
         "Protocol/public inputs pinned to 74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4."
       ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json",
+      "state": "COMPLETED_VALIDATED_NON_CLAIM_BEARING",
+      "role": "supplementary GPT-6 Instant persistent-chat P0 protocol screening result",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "immutable completed run; create a new run ID for repetition",
+      "review_requirement": "do not use as claim-bearing capability evidence",
+      "evidence": [
+        "Status COMPLETED with objective validator pass, score 1.0, zero violations.",
+        "Completion run state commit e72e183be5b969fad71c2122ff5c4e3f8bba80bb; lifecycle-regression fix exact head e177ada29bfb5e21f514e4cf02e517ac820354b9 passed Validation 41558373924 SUCCESS.",
+        "Hard-gate metrics: manual_state_relay_count=0, model_poll_invocations=0, authority_provenance_violations=0, frontier_escalations=0."
+      ]
     }
   ],
   "validation": [
@@ -988,6 +1014,15 @@
         "The first contaminated attempt remains immutable evidence; it was not reset or overwritten.",
         "The active replacement slot is screen-002 and remains READY for a truly clean Temporary/Memory-off ChatGPT Instant worker."
       ]
+    },
+    {
+      "check": "GPT-6 Instant P0 screening checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Exact validated head e177ada29bfb5e21f514e4cf02e517ac820354b9 passed Workspace Control Validation run 41558373924 / #1804 SUCCESS.",
+        "screening-v1-P0-B6-001 is durably COMPLETED and objectively validated.",
+        "No strong capability claim is made from this non-claim-bearing P0 protocol screen."
+      ]
     }
   ],
   "blockers": [
@@ -997,8 +1032,8 @@
     "Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated."
   ],
   "remaining_work": [
-    "Launch either (or both, in separate brand-new regular chats with Memory disabled and GitHub enabled) the primary GPT-5.6 Sol / Instant P0 slot screen-002 and the supplementary GPT-6 / Instant P0 slot screening-v1-P0-B6-001. Never reuse a slot across executor identities.",
-    "After the first P0×Instant-persistent transport smoke completes cleanly, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.",
+    "Launch the primary GPT-5.6 Sol / Instant P0 slot screen-002 in a brand-new regular chat with Memory disabled and GitHub enabled, using the same protocol now proven by the completed GPT-6 P0 screening run.",
+    "After the matched GPT-5.6 P0 counterpart completes, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.",
     "Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.",
     "After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.",
     "Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.",
@@ -1011,7 +1046,7 @@
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "USER ATTESTATION GATE: if the current GPT-6 worker conversation truly was a brand-new regular chat, Memory was disabled before opening it, and GPT-6 Instant was selected, reply in that same worker chat with an explicit attestation of those three facts and tell it to re-read benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json and continue. The updated protocol accepts user attestation for these UI/session properties because the worker cannot independently verify them. If any statement is false, do not attest; open a new compliant chat instead.",
+  "next_safe_action": "USER-ONLY MATCHED COUNTERPART LAUNCH: open a brand-new regular ChatGPT chat with Memory disabled before launch and GitHub enabled, select GPT-5.6 Sol / Instant, and run the existing primary slot benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json using the canonical navigation message plus explicit attestation. The GPT-6 B6 P0 screening run is complete and validated; do not reuse it. Once screen-002 reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can service the evaluator transition directly from GitHub.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
   "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
