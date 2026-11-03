@@ -28,7 +28,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -94,6 +94,31 @@
         "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "E_double_cpu"
       ]
+    },
+    {
+      "invocation_id": "screen-002-inv-003",
+      "generation": 0,
+      "owner": "gpt6-instant-screen-002-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-6 Instant is selected."
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
     }
   ],
   "events": [
@@ -143,6 +168,25 @@
       "generation": 0,
       "experiment_id": "E_double_cpu",
       "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt6-instant-screen-002-worker",
+      "resume": true
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0,
+      "worker_id": "gpt6-instant-screen-002-worker",
+      "experiment_ids": [
+        "E_restore_timeout",
+        "E_double_cpu"
+      ],
+      "result_hashes": [
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
     }
   ],
   "pending_external": null,
@@ -188,42 +232,55 @@
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
       "finding": "Restoring 12-second timeout under fixed load/infrastructure yields p95 latency 5100 ms and timeout failure rate 0.01, consistent with a 5-second client deadline causing the regression."
-    }
-  ],
-  "open_hypotheses": [
-    {
-      "id": "H_timeout_config",
-      "assessment": "strongly supported by restored-timeout intervention"
     },
     {
-      "id": "H_cpu",
-      "assessment": "competing hypothesis to test by CPU doubling at unchanged timeout"
+      "id": "F4",
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+      "finding": "Doubling CPU with 5-second timeout unchanged yields p95 5000 ms and failure rate 0.39; CPU capacity intervention does not resolve the deadline failures."
     },
     {
-      "id": "H_network",
-      "assessment": "disfavored by low packet loss in O2"
+      "id": "F5",
+      "finding": "Contrasting the 1% failure rate with restored timeout and 39% under doubled CPU at the 5-second timeout identifies client deadline configuration as primary cause.",
+      "evidence_refs": [
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+        "O1",
+        "O2"
+      ]
     }
   ],
-  "unresolved_questions": [
-    "Does doubling CPU with the 5-second timeout unchanged resolve the regression?"
-  ],
+  "open_hypotheses": [],
+  "unresolved_questions": [],
   "evidence_refs": [
     "O1",
     "O2",
     "E_restore_timeout",
-    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "E_double_cpu",
+    "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
-  "candidate_actions": [
-    {
-      "experiment_id": "E_double_cpu",
-      "reason": "Discriminate CPU saturation from deadline configuration by changing CPU alone."
-    }
-  ],
-  "next_safe_action": "Resume in the same clean persistent worker chat. Re-read this run state, consume only the published E_double_cpu result, and continue one bounded reasoning quantum. The public contract permits a terminal candidate if the evidence is sufficient; terminal completion still requires control-side objective validation.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Stop. Control evaluator must independently validate terminal_submission and publish validator result; worker must not self-validate or mark COMPLETED.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu",
+      "H_network"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2"
+    ],
+    "rationale": "O1 reports an abrupt failure cutoff at 5.0 seconds despite normal completion for shorter requests, matching a client-side deadline. O2 shows CPU below 35%, queue below 40%, and packet loss below 0.1%, weakening CPU and network explanations. Restoring the prior 12-second timeout with load and infrastructure fixed produced p95 latency 5100 ms and only 1% timeout failures; doubling CPU while retaining the 5-second timeout produced p95 5000 ms and 39% failures. The causal intervention on timeout resolves the regression whereas the CPU intervention does not, so H_timeout_config is primary; H_cpu is rejected and H_network is disfavored by O2."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
