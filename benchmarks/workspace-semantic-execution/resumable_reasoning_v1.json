@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "benchmark_id": "workspace-resumable-reasoning-v1",
-  "status": "PUBLIC_INPUT_PROVENANCE_REFROZEN_FULL_RESCREEN_REQUIRED",
+  "status": "PROVENANCE_REFROZEN_P0_PRIMARY_SCREENING_IN_PROGRESS",
   "purpose": "Measure whether disposable ChatGPT Instant invocations operating from durable Workspace Control state can match long-horizon frontier reasoning on decomposable research/evaluate/iterate work, and identify the residual boundary where stronger reasoning is required.",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "hypotheses": {
@@ -281,7 +281,7 @@
     "S5_resource_routing": "Quality-adjusted efficiency; evaluated only after S1 quality and S3 safety gates."
   },
   "fixture_matrix": {
-    "status": "PUBLIC_INPUT_PROVENANCE_REFROZEN_FULL_RESCREEN_REQUIRED",
+    "status": "PROVENANCE_REFROZEN_P0_PRIMARY_SCREENING_IN_PROGRESS",
     "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
     "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
     "phenotypes": [
@@ -293,7 +293,7 @@
     "design_rule": "Use matched research_iterate fixtures first so horizon/load and reasoning coupling vary without changing domain, worker interface, or evaluator class.",
     "screening_rule": "Run one non-claim-bearing clean screening execution per arm/fixture before replicated scoring. The public terminal submission schema is explicit: observed_results maps experiment_id directly to the exact control-published result_hash string. Any protocol change requires fresh screening.",
     "scored_rule": "After a frozen screening pass, use at least three independent clean replicates for each selected arm/fixture causal comparison.",
-    "current_claim_ceiling": "Protocol/harness evidence only. Prior P0/P1 screens are retained as mechanics/protocol-defect evidence but are superseded for frozen comparability because each taxonomy profile referenced the pre-clarification fixture blob. Fresh P0-P3 primary screening must use source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb.",
+    "current_claim_ceiling": "Protocol/harness evidence only. Provenance-refrozen P0 primary screening is actively in progress. A/B/C/E have consumed the first control-published E_restore_timeout result; D has completed decomposer classification and awaits a role-isolated leaf worker. No scored capability claim is authorized.",
     "clarified_p0_screening": {
       "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
       "completion_commit": "57d49bdc76a2c92092e49068a3c60c400a1ff5ae",
@@ -321,6 +321,13 @@
       "replacement_slot_commit": "a1cbd6fc14e43f06167c4738907e3406ed7f56ad",
       "replacement_slot_validation_run": 41580711957,
       "consequence": "Fresh primary P0-P3 screening required. P0 prior completions and started P1 screen-001 runs are not comparable screening evidence under the corrected provenance binding."
+    },
+    "active_provenance_refrozen_p0": {
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "replacement_slot_commit": "a1cbd6fc14e43f06167c4738907e3406ed7f56ad",
+      "current_control_checkpoint": "f0bd5786c3127d15f1be42ea9aacf3b02016176c",
+      "current_control_validation_run": 41723477493,
+      "state": "A/B/C/E READY_TO_RESUME after E_restore_timeout; D READY_TO_RESUME leaf_worker"
     }
   },
   "evaluator_isolation_upgrade": {
