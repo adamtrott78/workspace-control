@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "runset_id": "workspace-resumable-reasoning-matrix-v1",
-  "status": "FIXTURE_MATRIX_IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION_AND_CLEAN_EXECUTION",
+  "status": "PROTOCOL_SCHEMA_CLARIFIED_RESCREEN_REQUIRED",
   "benchmark_id": "workspace-resumable-reasoning-v1",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frozen_inputs": {
@@ -15,7 +15,7 @@
     },
     "fixture_matrix": {
       "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
-      "blob_sha": "9a19bb1edba960cbb938a38ecff27f25ebd4e5e3"
+      "blob_sha": "85abf25a12748463c7fd57a062e384d144123bf5"
     }
   },
   "execution_stages": [
@@ -40,7 +40,16 @@
       "freeze_rule": "Any fixture/prompt/harness/protocol change after screening invalidates screening comparability and requires a fresh screening pass.",
       "supplementary_screening_arms": [
         "B6_gpt6_instant_persistent_chat"
-      ]
+      ],
+      "screening_findings": {
+        "prior_completed_runs": [
+          "screening-v1-P0-B6-001",
+          "screening-v1-P0-B-002"
+        ],
+        "finding": "Terminal submission shape was under-specified: observed_results had named field only, while the frozen evaluator requires experiment_id -> raw result_hash string.",
+        "consequence": "Prior completed P0 runs remain valid non-claim-bearing evidence that the protocol caught and recovered from the defect, but they do not constitute a frozen comparable screening pass after the protocol clarification.",
+        "required_action": "Re-screen affected matched P0 Instant persistent-chat arms under the clarified public terminal_output_schema before expanding or scoring."
+      }
     },
     {
       "id": "scored_replicates",
