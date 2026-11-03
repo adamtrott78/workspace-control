@@ -47,7 +47,7 @@
       "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "7dcedf96dfd84dcf2a39433efed2357c6db9e5aa",
+        "checkpoint_sha": "3bf5f61d0b1de685fa2bbe9d2abc592e0a6a62ae",
         "verified": true
       },
       "local": null,
@@ -325,9 +325,19 @@
             "The screening bootstrap/runset were corrected to require a brand-new regular ChatGPT chat with Memory disabled before launch and GitHub enabled.",
             "Temporary-Chat GitHub-unavailable attempt produced no run-state mutation and is treated as a transport-capability finding, not a model failure."
           ]
+        },
+        {
+          "check": "User-attested launch properties",
+          "result": "PASS",
+          "evidence": [
+            "Worker-observable gates remain GitHub availability and actual presence/absence of prior benchmark/control context.",
+            "Brand-new-chat status, pre-chat Memory setting, and selected model/configuration are not reliably self-verifiable from inside the worker conversation.",
+            "The screening bootstrap and GPT-6 B6 slot now accept explicit user attestation for those UI/session properties and record the attestation source.",
+            "Any conflicting in-conversation benchmark context or surface-reported model identity still fails closed."
+          ]
         }
       ],
-      "resume_condition": "Launch a brand-new regular ChatGPT chat with Memory disabled before chat start and GitHub enabled. Use the exact executor-specific slot. Do not use Temporary Chat for plugin-backed screening."
+      "resume_condition": "In the existing clean GPT-6 worker chat, explicitly attest that it is a brand-new regular chat, Memory was disabled before it was opened, and GPT-6 Instant was selected; instruct the worker to re-read the assigned run-state and continue. If those statements are not true, start a new compliant chat instead."
     },
     {
       "id": "semantic_core_and_extension_contract",
@@ -1001,7 +1011,7 @@
     "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
     "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
   ],
-  "next_safe_action": "USER-ONLY CLEAN SESSION LAUNCH: turn Memory off in Settings -> Personalization before opening the worker chat. Then open a brand-new regular ChatGPT chat (not Temporary Chat), keep GitHub enabled, choose the intended executor, and send only the canonical navigation message for the matching slot. GPT-5.6 Sol / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json; GPT-6 / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json. Temporary Chat is invalid for this plugin-backed benchmark because Unpersonalized disables plugins and Personalized may expose existing memory.",
+  "next_safe_action": "USER ATTESTATION GATE: if the current GPT-6 worker conversation truly was a brand-new regular chat, Memory was disabled before opening it, and GPT-6 Instant was selected, reply in that same worker chat with an explicit attestation of those three facts and tell it to re-read benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json and continue. The updated protocol accepts user attestation for these UI/session properties because the worker cannot independently verify them. If any statement is false, do not attest; open a new compliant chat instead.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
   "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker."
