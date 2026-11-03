@@ -28,11 +28,22 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
+  "status": "RUNNING",
+  "owner": "chatgpt-screening-worker-screen-003",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": "this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+  },
   "continuity_regime": "persistent_chat",
-  "started_at": null,
+  "started_at": "2026-11-02T20:56:00-05:00",
   "completed_at": null,
   "invocations": [],
   "events": [
@@ -42,6 +53,12 @@
       "predecessor_run_id": "screening-v1-P0-B-002",
       "predecessor_commit": "6a510ce9371365ae9fbb4b5353d7230d770ec956",
       "note": "Fresh re-screen slot created after protocol screening exposed an under-specified terminal observed_results shape. This slot is bound to the clarified public terminal_output_schema requiring experiment_id -> raw result_hash string."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-worker-screen-003",
+      "identity_source": "user_attestation"
     }
   ],
   "pending_external": null,
