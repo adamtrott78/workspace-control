@@ -28,8 +28,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-worker-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -45,7 +45,29 @@
   "continuity_regime": "persistent_chat",
   "started_at": "2026-11-02T20:56:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-B-003-inv-001",
+      "generation": 0,
+      "owner": "chatgpt-screening-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT"
+      },
+      "context_bytes": 1188,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -59,21 +81,65 @@
       "generation": 0,
       "worker_id": "chatgpt-screening-worker-screen-003",
       "identity_source": "user_attestation"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-B-003-exp-001",
+      "generation": 0,
+      "payload_ref": "E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-B-003-exp-001",
+    "kind": "experiment",
+    "payload_ref": "E_restore_timeout"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Claim only from a brand-new regular ChatGPT chat with Memory disabled before launch, GitHub enabled, and GPT-5.6 Sol / Instant selected. Read immutable public inputs at source_checkpoint_sha and follow the clarified terminal_output_schema exactly.",
+  "established_findings": [
+    {
+      "id": "F_O1",
+      "statement": "Requests exceeding 4.9 seconds fail almost exactly at 5.0 seconds while shorter requests complete normally.",
+      "source": "O1"
+    },
+    {
+      "id": "F_O2",
+      "statement": "CPU utilization is below 35%, queue occupancy below 40%, and packet loss below 0.1%.",
+      "source": "O2"
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "status": "leading"
+    },
+    {
+      "id": "H_cpu",
+      "status": "competing"
+    },
+    {
+      "id": "H_network",
+      "status": "competing"
+    }
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second client timeout eliminate the 5-second failures?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_restore_timeout",
+      "reason": "Directly discriminates a lowered client timeout while holding load and infrastructure fixed."
+    }
+  ],
+  "next_safe_action": "Wait for the control evaluator to publish the E_restore_timeout result into this run-state file; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "frontier_escalations": 0,
