@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: a1cbd6fc14e43f06167c4738907e3406ed7f56ad
+- Remote checkpoint: f0bd5786c3127d15f1be42ea9aacf3b02016176c
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY PROVENANCE-REFROZEN P0 SCREENING BATCH: launch five separate brand-new clean worker chats for the fresh P0 replacement slots A/B/C/D/E. A uses GPT-5.6 Sol / High persistent chat. B uses GPT-5.6 Sol / Instant persistent chat. C uses GPT-5.6 Sol / Instant with exactly one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat as decomposer and every later role in a separate clean chat. E starts GPT-5.6 Sol / Instant and may use High only after durable lower-tier evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state explicitly authorizes escalation. All new chats require Memory disabled before launch and GitHub enabled. Use only the replacement run-state paths bound to source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb; do not continue any superseded/failed prior slot.
+CONTROL/OPERATOR RESUME FROM RECOVERED DURABLE P0 STATE. Do not replay E_restore_timeout. Current exact checkpoint f0bd5786c3127d15f1be42ea9aacf3b02016176c passed Validation 41723477493 / #1906 SUCCESS. A screening-v1-P0-A-002: READY_TO_RESUME in the SAME GPT-5.6 Sol High persistent chat after E_restore_timeout. B screening-v1-P0-B-004: READY_TO_RESUME in the SAME GPT-5.6 Sol Instant persistent chat after E_restore_timeout. C screening-v1-P0-C-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant chat for quantum 1. D screening-v1-P0-D-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for process screening-v1-P0-D-002-leaf-001. E screening-v1-P0-E-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat; no High escalation is authorized. Every new chat requires Memory disabled before launch and GitHub enabled. The control executor must re-read all five run-state files from GitHub before any mutation and service later WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE transitions directly from durable state.
 
 ## Remaining work
 
-- Execute the provenance-refrozen replacement primary screening slots: P0 A-E first, then P1 A-E, P2 A-E, and P3 A-E if no further shared protocol/public-input change is required.
+- Complete the active provenance-refrozen P0 replacement primary screening runs A/B/C/D/E from their durable READY_TO_RESUME states, then execute P1 A-E, P2 A-E, and P3 A-E replacement slots if no further shared protocol/public-input change is required.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
