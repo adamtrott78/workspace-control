@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "IN_PROGRESS",
-  "owner": "screening-v1-P0-D-001:synthesizer",
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -77,7 +77,8 @@
       },
       {
         "role": "synthesizer",
-        "status": "READY_TO_RESUME"
+        "status": "COMPLETE",
+        "decision": "TERMINAL_CANDIDATE_SUBMITTED"
       }
     ],
     "active_role": "synthesizer",
@@ -94,7 +95,7 @@
       "critique_ref": "established_finding:C1"
     },
     "synthesizer": {
-      "status": "IN_PROGRESS",
+      "status": "COMPLETE",
       "evidence_refs": [
         "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
@@ -256,7 +257,7 @@
         "identity_source": "user_attestation",
         "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
       },
-      "outcome": "IN_PROGRESS",
+      "outcome": "TERMINAL_CANDIDATE",
       "evidence_refs": [
         "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
@@ -402,6 +403,24 @@
       "generation": 0,
       "worker_id": "screening-v1-P0-D-001:synthesizer",
       "role": "synthesizer"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "role": "synthesizer",
+      "evidence_refs": [
+        "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+        "established_finding:L1",
+        "established_finding:L2",
+        "established_finding:C1"
+      ]
+    },
+    {
+      "kind": "ROLE_COMPLETE",
+      "generation": 0,
+      "role": "synthesizer",
+      "next_role": "control_evaluator"
     }
   ],
   "pending_external": null,
@@ -482,23 +501,22 @@
     "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
     "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
-  "candidate_actions": [
-    {
-      "id": "A_synthesizer_after_independent_critique",
-      "kind": "ROLE_HANDOFF",
-      "role": "synthesizer",
-      "objective": "Produce the terminal candidate from durable evidence and C1, respecting the public terminal_output_schema and critic guardrails.",
-      "constraints": [
-        "Use only durable state and immutable public inputs bound by this run.",
-        "Do not access evaluator-only or oracle material.",
-        "Use the exact published raw result hashes for observed_results.",
-        "Explicitly address O1, reject H_cpu, and do not claim H_network was experimentally rejected.",
-        "A fresh clean GPT-5.6 Sol Instant chat is required for the synthesizer role."
-      ]
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the synthesizer role. Re-read durable state only, claim synthesizer, produce the terminal candidate under C1 and the public schema, persist it, then stop for control evaluation.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Control evaluator validates terminal_submission. Worker must stop; do not poll or self-validate.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1"
+    ],
+    "rationale": "O1 reports that requests longer than 4.9 seconds fail almost exactly at 5.0 seconds. E_restore_timeout restored the prior 12-second client timeout while holding load and infrastructure fixed; p95 latency reached 5100 ms and timeout failure rate fell to 0.01, showing requests can complete beyond the former ~5.0-second cutoff when that timeout is removed and supporting H_timeout_config. E_double_cpu kept the 5-second timeout unchanged; p95 latency remained 5000 ms and timeout failure rate remained 0.39, so added CPU did not remove the cutoff and H_cpu is rejected. H_network remains a competing hypothesis and is not claimed as experimentally rejected because no durable E_network_bypass result exists."
+  },
   "validator_results": [],
   "metrics": {
     "reasoning_invocations": 4,
