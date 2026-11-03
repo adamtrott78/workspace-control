@@ -28,9 +28,9 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "generation": 1,
+  "status": "WAITING_EXTERNAL",
+  "owner": "chatgpt-screening-worker-screen-001-q1",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -58,9 +58,9 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 1,
+    "quantum_index": 2,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": "quantum-0:user-attested-clean-regular-chat"
+    "last_quantum_chat": "quantum-1:user-attested-clean-regular-chat"
   },
   "started_at": "2026-11-02T21:26:00-05:00",
   "completed_at": null,
@@ -69,6 +69,35 @@
       "invocation_id": "screening-v1-P0-C-001-q0",
       "generation": 0,
       "owner": "chatgpt-screening-worker-screen-001-q0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_chat_per_reasoning_quantum",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+          "Memory was disabled before this conversation was opened",
+          "GPT-5.6 Sol Instant was selected for this conversation"
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:O2",
+        "experiment:E_restore_timeout"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-C-001-q1",
+      "generation": 1,
+      "owner": "chatgpt-screening-worker-screen-001-q1",
       "executor": {
         "provider": "OpenAI",
         "reported_model": "GPT-5.6 Sol",
@@ -123,9 +152,28 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 1,
+      "worker_id": "chatgpt-screening-worker-screen-001-q1"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 1,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-C-001-exp-002",
+      "generation": 1,
+      "payload_ref": "E_double_cpu"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-C-001-exp-002",
+    "experiment_id": "E_double_cpu"
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-C-001-exp-001",
@@ -148,18 +196,24 @@
       "id": "F_O2",
       "statement": "CPU utilization stays below 35%, queue occupancy below 40%, and packet loss below 0.1%.",
       "source": "fixture:O2"
+    },
+    {
+      "id": "F_E_restore_timeout",
+      "statement": "Restoring the prior 12-second client timeout while holding load and infrastructure fixed produced p95 latency 5100 ms and timeout failure rate 0.01, strongly supporting H_timeout_config because requests can complete beyond the former 5-second cutoff with very low timeout failure.",
+      "source": "experiment:E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
       "statement": "A newly lowered client timeout is terminating otherwise healthy requests.",
-      "status": "PRIMARY_TEST"
+      "status": "SUPPORTED_BY_FIRST_CYCLE"
     },
     {
       "id": "H_cpu",
       "statement": "CPU saturation is causing the requests to exceed their deadline.",
-      "status": "COMPETING"
+      "status": "SECOND_CYCLE_TEST"
     },
     {
       "id": "H_network",
@@ -168,36 +222,32 @@
     }
   ],
   "unresolved_questions": [
-    "Does restoring the prior 12-second client timeout eliminate the failures while load and infrastructure remain fixed?",
-    "After the first published result, which second catalog experiment best rejects a remaining competing hypothesis?"
+    "Does doubling available CPU while keeping the 5-second timeout unchanged materially reduce timeout failures, or does the sharp 5-second cutoff persist?",
+    "After the second published result, is there sufficient evidence to reject H_cpu and submit a terminal candidate satisfying the two-cycle contract?"
   ],
   "evidence_refs": [
     "fixture:O1",
-    "fixture:O2"
+    "fixture:O2",
+    "experiment:E_restore_timeout"
   ],
   "candidate_actions": [
     {
-      "id": "E_restore_timeout",
-      "type": "experiment",
-      "reason": "Directly discriminates H_timeout_config by changing only the suspected 5-second client deadline."
-    },
-    {
       "id": "E_double_cpu",
       "type": "experiment",
-      "reason": "Potential second cycle to test/reject H_cpu while retaining the 5-second timeout."
+      "reason": "Second required cycle directly tests H_cpu while retaining the 5-second timeout; if failures remain pinned near 5 seconds despite doubled CPU, H_cpu is rejected in favor of H_timeout_config."
     },
     {
       "id": "E_network_bypass",
       "type": "experiment",
-      "reason": "Potential second cycle to test/reject H_network while retaining the 5-second timeout."
+      "reason": "Fallback competing-hypothesis test for H_network if the CPU experiment does not provide sufficient discrimination."
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 1. Re-read durable state only, perform exactly one bounded reasoning quantum, persist all continuation state, then stop.",
+  "next_safe_action": "Stop and wait for the control evaluator to publish only the requested E_double_cpu result into this assigned run state. In a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled, re-read durable state only and perform exactly one next bounded reasoning quantum. Do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
@@ -207,7 +257,7 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 2
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
