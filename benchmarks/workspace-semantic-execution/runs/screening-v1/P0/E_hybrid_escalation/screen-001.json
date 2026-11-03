@@ -29,9 +29,22 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P0-E-001-instant-lower-tier-g0",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "tier": "HYBRID",
+    "phase": "LOWER_TIER_INSTANT",
+    "identity_source": "user_attestation",
+    "user_attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+  },
   "continuity_regime": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
   "treatment_contract": {
     "mode": "hybrid_evidence_gated_escalation",
@@ -43,13 +56,24 @@
   },
   "treatment_state": {
     "phase": "LOWER_TIER_INSTANT",
-    "lower_tier_attempts": [],
-    "decomposition_state": "UNASSESSED",
+    "lower_tier_attempts": [
+      {
+        "attempt_id": "instant-g0-classification",
+        "generation": 0,
+        "disposition": "LEAF_EXECUTABLE",
+        "evidence_refs": [
+          "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0",
+          "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json@5a8b07cd3b0dbd33a04bfd202fc41968b03bcf2c"
+        ],
+        "rationale": "Bounded P0 diagnosis with a three-item experiment catalog and objective validator; no TOO_LARGE or INTRINSICALLY_DIFFICULT residual is evidenced."
+      }
+    ],
+    "decomposition_state": "LEAF_EXECUTABLE",
     "escalation_status": "NOT_REQUESTED",
-    "residual_reason": null,
+    "residual_reason": "P0 public taxonomy declares LOW horizon, ATOMIC separability, LOW reasoning stress, expected 2 reasoning quanta, and states competent executors should solve without decomposition or frontier escalation.",
     "escalation_evidence_refs": []
   },
-  "started_at": null,
+  "started_at": "2026-11-02T21:26:00-05:00",
   "completed_at": null,
   "invocations": [],
   "events": [
@@ -57,20 +81,43 @@
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
       "note": "Primary E_hybrid_escalation P0_easy_control protocol-screening slot. Non-claim-bearing."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-E-001-instant-lower-tier-g0",
+      "executor_identity_source": "user_attestation"
+    },
+    {
+      "kind": "LOWER_TIER_CLASSIFICATION",
+      "generation": 0,
+      "disposition": "LEAF_EXECUTABLE",
+      "note": "P0 public taxonomy declares LOW horizon, ATOMIC separability, LOW reasoning stress, expected 2 reasoning quanta, and states competent executors should solve without decomposition or frontier escalation."
     }
   ],
   "pending_external": null,
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
+  "established_findings": [
+    "Lower-tier routing classification: LEAF_EXECUTABLE; decomposition and High escalation are not justified by the bound P0 public evidence."
+  ],
+  "open_hypotheses": [
+    "H_timeout_config",
+    "H_cpu",
+    "H_network"
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second client timeout eliminate the ~5.0-second failures while load and infrastructure remain fixed?"
+  ],
+  "evidence_refs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json@5a8b07cd3b0dbd33a04bfd202fc41968b03bcf2c"
+  ],
   "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as lower-tier worker. Decompose TOO_LARGE work before escalation; High may be launched only after durable evidence-gated escalation state permits it.",
+  "next_safe_action": "Request E_restore_timeout as the first external experiment; then stop without polling.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
+    "reasoning_invocations": 1,
     "experiment_requests": 0,
     "retries": 0,
     "decomposition_count": 0,
