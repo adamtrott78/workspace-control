@@ -92,7 +92,7 @@ USER-ONLY CLEAN SESSION LAUNCH: turn Memory off in Settings -> Personalization b
 
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is now validated.
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
-- Scored resumable-reasoning arms require oracle-unexposed clean model sessions. For ChatGPT plugin-backed workers, use a brand-new regular chat with Memory disabled and required plugins enabled; Temporary Chat cannot provide both isolation and plugin transport simultaneously.
+- Scored resumable-reasoning arms require oracle-unexposed clean model sessions. For ChatGPT plugin-backed workers, the viable product surface is now a brand-new regular chat with Memory disabled and required plugins enabled; Temporary Chat cannot provide both isolation and plugin transport simultaneously.
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
 
 ## Fresh-chat initialization
