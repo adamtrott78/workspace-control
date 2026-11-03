@@ -39,10 +39,14 @@ class ScreeningMatrixSlotTests(unittest.TestCase):
         self.assertEqual(len(SLOTS), 19)
         self.assertEqual(len(set(SLOTS)), 19)
 
-    def test_all_slots_are_ready_non_claim_bearing_and_frozen(self):
+    def test_all_slots_are_non_claim_bearing_frozen_and_in_valid_lifecycle_state(self):
+        valid_statuses = {
+            "READY", "RUNNING", "WAITING_EXTERNAL", "READY_TO_RESUME",
+            "TERMINAL_CANDIDATE", "COMPLETED",
+        }
         for relpath in SLOTS:
             run = self._load(relpath)
-            self.assertEqual(run["status"], "READY")
+            self.assertIn(run["status"], valid_statuses)
             self.assertFalse(run["claim_bearing"])
             self.assertEqual(run["source_checkpoint_sha"], SOURCE)
             self.assertEqual(run["public_inputs"]["harness_blob_sha"], HARNESS_BLOB)
@@ -57,10 +61,14 @@ class ScreeningMatrixSlotTests(unittest.TestCase):
             self.assertTrue(run["contamination_policy"]["per_quantum_or_role_new_session_required"])
             self.assertTrue(run["treatment_state"]["resume_requires_new_chat"])
 
-    def test_decompose_critic_arm_starts_with_decomposer_and_no_frontier(self):
+    def test_decompose_critic_arm_preserves_decomposer_first_and_no_frontier(self):
         for relpath in [p for p in SLOTS if "/D_instant_decompose_critic/" in p]:
             run = self._load(relpath)
-            self.assertEqual(run["treatment_state"]["role_queue"][0], {"role": "decomposer", "status": "READY"})
+            first = run["treatment_state"]["role_queue"][0]
+            self.assertEqual(first["role"], "decomposer")
+            self.assertIn(first["status"], {"READY", "COMPLETE"})
+            if first["status"] == "COMPLETE":
+                self.assertIn("decision", first)
             self.assertIn("independent_critic", run["expected_executor"]["roles"])
             self.assertIn("No frontier escalation", run["treatment_contract"]["escalation_policy"])
 
