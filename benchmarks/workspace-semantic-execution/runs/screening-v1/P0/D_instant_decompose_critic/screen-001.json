@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P0-D-001:leaf_worker",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -67,10 +67,10 @@
       },
       {
         "role": "leaf_worker",
-        "status": "RUNNING"
+        "status": "WAITING_EXTERNAL"
       }
     ],
-    "active_role": "leaf_worker",
+    "active_role": null,
     "leaf_processes": [],
     "independent_critic": {
       "status": "NOT_READY",
@@ -111,6 +111,31 @@
         "harness_blob_sha:ff55438e933e91dad3057167c2243f0ef4933df2",
         "runset_blob_sha:f4ae2648694e2fb8b0d090c0c7c6f3a1dd952476"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-D-001-leaf_worker-g0",
+      "generation": 0,
+      "owner": "screening-v1-P0-D-001:leaf_worker",
+      "role": "leaf_worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_or_role_isolated_instant_workers",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
+        "experiment_catalog:E_restore_timeout"
+      ]
     }
   ],
   "events": [
@@ -150,9 +175,22 @@
       "generation": 0,
       "worker_id": "screening-v1-P0-D-001:leaf_worker",
       "role": "leaf_worker"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "payload_ref": "experiment_catalog:E_restore_timeout",
+      "experiment_id": "E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
+    "kind": "EXPERIMENT",
+    "payload_ref": "experiment_catalog:E_restore_timeout",
+    "experiment_id": "E_restore_timeout"
+  },
   "external_results": {},
   "established_findings": [
     {
@@ -182,7 +220,7 @@
     }
   ],
   "unresolved_questions": [
-    "Which catalog experiment should the leaf worker request first? This decomposer does not choose or execute the experiment."
+    "What control-published result is returned for E_restore_timeout?"
   ],
   "evidence_refs": [
     "source_checkpoint_sha:6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
@@ -193,29 +231,23 @@
   ],
   "candidate_actions": [
     {
-      "id": "A_leaf_worker",
+      "id": "A_resume_leaf_worker_after_E_restore_timeout",
       "kind": "ROLE_HANDOFF",
       "role": "leaf_worker",
-      "classification": "LEAF_EXECUTABLE",
-      "objective": "Determine the primary mechanism causing the synthetic request timeout regression using the fixture contract.",
+      "objective": "After control publication, interpret the exact E_restore_timeout result from durable state and choose the next catalog experiment if required.",
       "constraints": [
-        "Use a fresh clean GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled.",
-        "Request at most one external experiment in that invocation and then stop.",
-        "Do not access oracle/evaluator-only material or other screening run states."
-      ],
-      "verification": [
-        "Experiment request must be selected from the public fixture catalog.",
-        "Observed results may only come from control-published external_result evidence.",
-        "Minimum two experiment/result cycles are required before terminal synthesis."
+        "Resume only from control-published external_result evidence in this assigned run state.",
+        "Do not poll.",
+        "A fresh clean GPT-5.6 Sol Instant chat is required for the next role/quantum."
       ]
     }
   ],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled for the READY leaf_worker role; work one bounded leaf quantum and request at most one external experiment, then stop.",
+  "next_safe_action": "Control evaluator publishes the E_restore_timeout result into this assigned run state; then launch a fresh clean GPT-5.6 Sol Instant leaf_worker chat to resume from durable state.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
     "reasoning_invocations": 1,
-    "experiment_requests": 0,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
