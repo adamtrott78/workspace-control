@@ -28,8 +28,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-worker-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -66,6 +66,28 @@
       "evidence_refs": [
         "E_restore_timeout"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-B-003-inv-002",
+      "generation": 0,
+      "owner": "chatgpt-screening-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT"
+      },
+      "context_bytes": 1617,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -100,9 +122,19 @@
       "generation": 0,
       "worker_id": "chatgpt-screening-worker-screen-003",
       "resume": true
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-B-003-exp-002",
+      "generation": 0,
+      "payload_ref": "E_double_cpu"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-B-003-exp-002",
+    "kind": "experiment",
+    "payload_ref": "E_double_cpu"
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-B-003-exp-001",
@@ -125,41 +157,48 @@
       "id": "F_O2",
       "statement": "CPU utilization is below 35%, queue occupancy below 40%, and packet loss below 0.1%.",
       "source": "O2"
+    },
+    {
+      "id": "F_E_restore_timeout",
+      "statement": "With the prior 12-second client timeout restored, p95 latency is 5100 ms and timeout failure rate is 0.01; requests can complete beyond the prior 5-second cutoff.",
+      "source": "E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "status": "leading"
+      "status": "strongly_supported"
     },
     {
       "id": "H_cpu",
-      "status": "competing"
+      "status": "competing_low_prior"
     },
     {
       "id": "H_network",
-      "status": "competing"
+      "status": "competing_low_prior"
     }
   ],
   "unresolved_questions": [
-    "Does restoring the prior 12-second client timeout eliminate the 5-second failures?"
+    "Does doubling CPU while retaining the 5-second timeout materially reduce deadline failures?"
   ],
   "evidence_refs": [
     "O1",
-    "O2"
+    "O2",
+    "E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
   ],
   "candidate_actions": [
     {
-      "experiment_id": "E_restore_timeout",
-      "reason": "Directly discriminates a lowered client timeout while holding load and infrastructure fixed."
+      "experiment_id": "E_double_cpu",
+      "reason": "Tests CPU saturation as a competing cause while retaining the implicated 5-second timeout."
     }
   ],
-  "next_safe_action": "Resume in the same clean persistent worker chat. Re-read this run state, consume only the published E_restore_timeout result, and continue one bounded reasoning quantum. If another experiment is needed, persist exactly one request and stop at WAITING_EXTERNAL.",
+  "next_safe_action": "Wait for the control evaluator to publish the E_double_cpu result into this run-state file; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "frontier_escalations": 0,
