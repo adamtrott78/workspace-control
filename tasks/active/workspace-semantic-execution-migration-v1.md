@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 3bf5f61d0b1de685fa2bbe9d2abc592e0a6a62ae
+- Remote checkpoint: e177ada29bfb5e21f514e4cf02e517ac820354b9
 - Remote verified: true
 
 ### PADataset
@@ -70,12 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER ATTESTATION GATE: if the current GPT-6 worker conversation truly was a brand-new regular chat, Memory was disabled before opening it, and GPT-6 Instant was selected, reply in that same worker chat with an explicit attestation of those three facts and tell it to re-read benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json and continue. The updated protocol accepts user attestation for these UI/session properties because the worker cannot independently verify them. If any statement is false, do not attest; open a new compliant chat instead.
+USER-ONLY MATCHED COUNTERPART LAUNCH: open a brand-new regular ChatGPT chat with Memory disabled before launch and GitHub enabled, select GPT-5.6 Sol / Instant, and run the existing primary slot benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json using the canonical navigation message plus explicit attestation. The GPT-6 B6 P0 screening run is complete and validated; do not reuse it. Once screen-002 reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can service the evaluator transition directly from GitHub.
 
 ## Remaining work
 
-- Launch either (or both, in separate brand-new regular chats with Memory disabled and GitHub enabled) the primary GPT-5.6 Sol / Instant P0 slot screen-002 and the supplementary GPT-6 / Instant P0 slot screening-v1-P0-B6-001. Never reuse a slot across executor identities.
-- After the first P0×Instant-persistent transport smoke completes cleanly, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.
+- Launch the primary GPT-5.6 Sol / Instant P0 slot screen-002 in a brand-new regular chat with Memory disabled and GitHub enabled, using the same protocol now proven by the completed GPT-6 P0 screening run.
+- After the matched GPT-5.6 P0 counterpart completes, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
