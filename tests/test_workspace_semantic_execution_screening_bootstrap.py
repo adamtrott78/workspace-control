@@ -47,6 +47,20 @@ class ScreeningBootstrapTests(unittest.TestCase):
         self.assertIn("Unpersonalized Temporary Chat", invalid)
         self.assertIn("Personalized Temporary Chat", invalid)
 
+    def test_unobservable_launch_properties_may_use_explicit_user_attestation(self):
+        contract = BOOT["session_isolation_contract"]
+        allowed = set(contract["user_attestation_allowed_for"])
+        self.assertEqual(
+            allowed,
+            {
+                "brand_new_regular_chat",
+                "memory_disabled_before_chat_start",
+                "selected_model_and_chat_configuration",
+            },
+        )
+        self.assertIn("Explicit user attestation", contract["attestation_rule"])
+        self.assertIn("CONTAMINATED_SESSION", contract["contamination_rule"])
+
     def test_clean_worker_connector_surface_is_bounded(self):
         rules = "\n".join(BOOT["worker_rules"])
         self.assertIn("connector other than GitHub", rules)
