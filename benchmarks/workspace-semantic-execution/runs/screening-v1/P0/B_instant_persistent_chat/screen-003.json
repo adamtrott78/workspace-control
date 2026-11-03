@@ -28,7 +28,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -128,13 +128,16 @@
       "request_id": "screening-v1-P0-B-003-exp-002",
       "generation": 0,
       "payload_ref": "E_double_cpu"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-B-003-exp-002",
+      "generation": 0,
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-B-003-exp-002",
-    "kind": "experiment",
-    "payload_ref": "E_double_cpu"
-  },
+  "pending_external": null,
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-B-003-exp-001",
@@ -144,6 +147,16 @@
         "timeout_failure_rate": 0.01
       },
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    },
+    "E_double_cpu": {
+      "request_id": "screening-v1-P0-B-003-exp-002",
+      "experiment_id": "E_double_cpu",
+      "result": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39
+      },
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
       "publication_scope": "requested experiment only"
     }
   },
@@ -193,7 +206,7 @@
       "reason": "Tests CPU saturation as a competing cause while retaining the implicated 5-second timeout."
     }
   ],
-  "next_safe_action": "Wait for the control evaluator to publish the E_double_cpu result into this run-state file; do not poll.",
+  "next_safe_action": "Resume in the same clean persistent worker chat. Re-read this run state, consume only the published E_double_cpu result, and continue one bounded reasoning quantum. The public contract permits a terminal candidate if the evidence is sufficient; terminal completion still requires control-side objective validation.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -205,13 +218,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 2
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-B-003-exp-001",
-    "last_experiment_id": "E_restore_timeout",
-    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "last_request_id": "screening-v1-P0-B-003-exp-002",
+    "last_experiment_id": "E_double_cpu",
+    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
     "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and all unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
