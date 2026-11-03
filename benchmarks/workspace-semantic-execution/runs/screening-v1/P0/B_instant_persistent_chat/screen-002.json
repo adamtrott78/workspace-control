@@ -47,6 +47,10 @@
       "kind": "PROTOCOL_CORRECTION_APPLIED",
       "source_checkpoint_sha": "fc59d52d4591f271c03a31f0778f746728e9933f",
       "correction": "Expected GPT-5.6 Instant executor identity now records GPT-5.6 Sol / Instant, matching the ChatGPT surface report."
+    },
+    {
+      "kind": "SESSION_ISOLATION_CONTRACT_CORRECTED",
+      "note": "Temporary Chat cannot satisfy the current plugin-backed screening transport: Unpersonalized disables plugins; Personalized may use existing memory. Clean workers now require a brand-new regular chat with Memory disabled and GitHub enabled."
     }
   ],
   "pending_external": null,
@@ -56,7 +60,7 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [],
-  "next_safe_action": "Claim this run only from a fresh Temporary Chat or otherwise Memory-disabled ChatGPT Instant session, then inspect only the listed public inputs.",
+  "next_safe_action": "Claim this run only from a brand-new regular ChatGPT chat with Memory disabled and GitHub enabled ChatGPT Instant session, then inspect only the listed public inputs.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -85,12 +89,21 @@
     "toolset": [
       "GitHub"
     ],
-    "memory_mode": "disabled_or_temporary_chat",
+    "memory_mode": "disabled_regular_chat",
     "continuity": "persistent_chat"
   },
   "contamination_policy": {
-    "predecessor_preserved": true,
     "current_slot_must_be_new_session": true,
-    "user_visible_requirement": "Use Temporary Chat (preferred) or another session with Memory disabled. Do not branch from or continue an existing benchmark/control conversation."
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "user_visible_requirement": "Use a brand-new regular ChatGPT chat with Memory disabled before opening the chat, keep GitHub enabled, and do not branch from or continue an existing benchmark/control conversation."
   }
 }
