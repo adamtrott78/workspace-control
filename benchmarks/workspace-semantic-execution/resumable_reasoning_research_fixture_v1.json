@@ -71,7 +71,14 @@
       "addressed_observations",
       "rationale"
     ],
-    "oracle_path_is_not_worker_input": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json"
+    "oracle_path_is_not_worker_input": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+    "terminal_output_schema": {
+      "final_hypothesis": "hypothesis_id string",
+      "rejected_hypotheses": "array of hypothesis_id strings",
+      "observed_results": "object mapping experiment_id to the exact control-published result_hash string; each value MUST be the raw 64-character SHA-256 hash string, not a result object",
+      "addressed_observations": "array of observation_id strings",
+      "rationale": "non-empty reasoning string grounded in published evidence"
+    }
   },
   "authority": {
     "execution_authority": false,
