@@ -29,9 +29,22 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "High",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "FRONTIER_MATCHED_SURFACE",
+    "identity_source": "user_attestation",
+    "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation"
+  },
   "continuity_regime": "persistent_chat",
   "treatment_contract": {
     "mode": "frontier_long_horizon_control",
@@ -44,29 +57,108 @@
     "phase": "PRIMARY",
     "persistent_chat": true
   },
-  "started_at": null,
+  "started_at": "2026-11-03T16:29:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-A-002-inv-01",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation"
+      },
+      "context_bytes": 1322,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh provenance-refrozen replacement slot for A_frontier_long_horizon P0_easy_control. Prior screening under the stale taxonomy->fixture binding is preserved separately and is not comparable."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 2
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-A-002-exp-01",
+      "generation": 0,
+      "payload_ref": "E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-A-002-exp-01",
+    "kind": "experiment",
+    "payload_ref": "E_restore_timeout"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol High chat with Memory disabled before launch and GitHub enabled. Read this run state first and follow the treatment contract exactly.",
+  "established_findings": [
+    {
+      "id": "F_O1",
+      "statement": "Requests exceeding 4.9 seconds fail almost exactly at 5.0 seconds; shorter requests complete normally.",
+      "source": "O1"
+    },
+    {
+      "id": "F_O2",
+      "statement": "CPU <35%, queue <40%, packet loss <0.1%; saturation/loss are not supported by starting observations.",
+      "source": "O2"
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "status": "primary_candidate"
+    },
+    {
+      "id": "H_cpu",
+      "status": "competing"
+    },
+    {
+      "id": "H_network",
+      "status": "competing"
+    }
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second client timeout eliminate the regression while load and infrastructure remain fixed?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_restore_timeout",
+      "reason": "Directly tests whether the 5-second client deadline causes the sharp cutoff."
+    }
+  ],
+  "next_safe_action": "Await control-published result for E_restore_timeout; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
