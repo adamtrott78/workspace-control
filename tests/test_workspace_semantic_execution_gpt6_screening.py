@@ -28,7 +28,7 @@ class GPT6InstantScreeningTests(unittest.TestCase):
         expected = RUN["expected_executor"]
         self.assertEqual(expected["model_family"], "GPT-6")
         self.assertEqual(expected["chat_configuration"], "Instant")
-        self.assertEqual(expected["memory_mode"], "disabled_or_temporary_chat")
+        self.assertEqual(expected["memory_mode"], "disabled_regular_chat")
 
     def test_public_inputs_exclude_oracle(self):
         public = json.dumps(RUN["public_inputs"], sort_keys=True).lower()
