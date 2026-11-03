@@ -46,7 +46,8 @@
       "toolset",
       "memory_mode"
     ],
-    "mismatch_rule": "If the actual surface/configuration differs from the arm's expected executor configuration in the matrix runset, write status EXECUTOR_IDENTITY_MISMATCH and stop."
+    "mismatch_rule": "If the actual surface/configuration differs from the arm's expected executor configuration in the matrix runset, write status EXECUTOR_IDENTITY_MISMATCH and stop.",
+    "attestation_rule": "Model/configuration may be recorded from explicit user attestation when the surface does not expose verifiable model metadata to the worker; mark identity_source=user_attestation. If the surface reports conflicting identity, fail closed."
   },
   "canonical_launch_contract": {
     "user_message_pattern": "@GitHub Execute the assigned Workspace Semantic Execution protocol-screening run. Repository adamtrott78/workspace-control, branch workspace-semantic-execution-migration-v1, assigned run-state path: <RUN_STATE_PATH>. Read that file first and follow it exactly.",
@@ -63,6 +64,23 @@
       "Personalized Temporary Chat (existing memory/plugins may be used)",
       "branched or reused benchmark/control conversation"
     ],
-    "acceptance_test": "Worker reports no prior benchmark/control context and GitHub is available before claim."
+    "observable_gates": {
+      "worker_can_verify": [
+        "GitHub availability",
+        "absence/presence of prior benchmark/control context in the current conversation"
+      ],
+      "worker_cannot_reliably_verify": [
+        "whether the conversation was created as brand-new regular chat",
+        "selected model/configuration UI state before launch",
+        "whether Memory was disabled before chat creation"
+      ]
+    },
+    "user_attestation_allowed_for": [
+      "brand_new_regular_chat",
+      "memory_disabled_before_chat_start",
+      "selected_model_and_chat_configuration"
+    ],
+    "attestation_rule": "For properties the worker cannot observe directly, an explicit user attestation in the clean worker chat is sufficient for protocol screening. The worker must record the attestation text and may not infer unstated properties.",
+    "contamination_rule": "If actual prior benchmark/control content is present in the worker conversation despite attestation, fail closed as CONTAMINATED_SESSION."
   }
 }
