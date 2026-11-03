@@ -410,7 +410,7 @@
         },
         {
           "check": "Public-input taxonomy provenance refreeze",
-          "result": "PASS_WITH_FRESH_SCREEN_REQUIRED",
+          "result": "PASS",
           "evidence": [
             "P0-P3 taxonomy profiles all retained pre-clarification fixture_blob_sha values after terminal_output_schema clarification changed the fixture blobs.",
             "P1 B and E correctly failed closed on PUBLIC_INPUT_PROVENANCE_MISMATCH; control inspection confirmed the same stale binding existed in P0, P2, and P3 taxonomy profiles.",
@@ -1178,7 +1178,7 @@
     },
     {
       "check": "Taxonomy provenance refreeze and replacement slots",
-      "result": "PASS_WITH_RESCREEN_REQUIRED",
+      "result": "PASS",
       "evidence": [
         "Corrected public-input source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb passed Validation 41580217425 / #1894 SUCCESS.",
         "Replacement-slot checkpoint a1cbd6fc14e43f06167c4738907e3406ed7f56ad passed Validation 41580711957 / #1895 SUCCESS.",
