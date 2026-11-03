@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "fixture_id": "research-iterate-retry-pooling-v1",
-  "fixture_blob_sha": "6def452e61be0e823bc5ee871ee2888bb1c9359f",
+  "fixture_blob_sha": "389fd2ecd5bfe78e8258ecccb03dea759c043296",
   "taxonomy_ref": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
   "taxonomy_status": "DESIGN_CANDIDATE_NOT_FROZEN",
   "benchmark_suite": [

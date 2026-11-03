@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "runset_id": "workspace-resumable-reasoning-matrix-v1",
-  "status": "P0_PRIMARY_A_E_SCREENING_COMPLETE_P1_P3_PENDING",
+  "status": "PUBLIC_INPUT_PROVENANCE_REFROZEN_FULL_RESCREEN_REQUIRED",
   "benchmark_id": "workspace-resumable-reasoning-v1",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frozen_inputs": {
@@ -15,7 +15,7 @@
     },
     "fixture_matrix": {
       "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
-      "blob_sha": "85abf25a12748463c7fd57a062e384d144123bf5"
+      "blob_sha": "2fa11f2905a42a60fb58b7cf7feb0ac29d589bab"
     }
   },
   "execution_stages": [
@@ -50,7 +50,7 @@
         "consequence": "Prior completed P0 runs remain valid non-claim-bearing evidence that the protocol caught and recovered from the defect, but they do not constitute a frozen comparable screening pass after the protocol clarification.",
         "required_action": "Re-screen affected matched P0 Instant persistent-chat arms under the clarified public terminal_output_schema before expanding or scoring.",
         "clarified_p0_re_screen": {
-          "status": "COMPLETE",
+          "status": "SUPERSEDED_FOR_FROZEN_COMPARABILITY_BY_TAXONOMY_PROVENANCE_REFREEZE",
           "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
           "gpt56_run": "screening-v1-P0-B-003",
           "gpt6_run": "screening-v1-P0-B6-002",
@@ -59,7 +59,7 @@
           "result": "Both runs passed research_iterate_objective_v1 with score 1.0, zero violations, 3 reasoning invocations, 2 experiment requests, 0 retries, 0 frontier escalations, 0 model polling, 0 manual state relays, and 0 authority/provenance violations."
         },
         "p0_primary_a_e": {
-          "status": "COMPLETE",
+          "status": "SUPERSEDED_FOR_FROZEN_COMPARABILITY_BY_TAXONOMY_PROVENANCE_REFREEZE",
           "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
           "arms": {
             "A": {
@@ -101,10 +101,22 @@
           },
           "completion_commit": "7f7c9c8136cf8509de5310222bbb5a380399c4ea",
           "validation_run": 41570296752,
-          "interpretation": "P0 primary arm mechanics are operational under the clarified protocol. This remains non-claim-bearing protocol-screening evidence only; P1-P3 primary screening remains required."
+          "interpretation": "Retained as non-claim-bearing mechanics/protocol-defect evidence only. Exact provenance was invalid because the bound taxonomy profile referenced the pre-clarification fixture blob."
+        },
+        "public_input_provenance_defect_v1": {
+          "status": "FOUND_AND_CORRECTED_PENDING_FRESH_SCREEN",
+          "affected_phenotypes": [
+            "P0_easy_control",
+            "P1_horizon_heavy_decomposable",
+            "P2_reasoning_heavy_coupled",
+            "P3_mixed_long_hard"
+          ],
+          "defect": "taxonomy_profile.fixture_blob_sha referenced the pre-clarification fixture blob while the run/matrix bound the clarified fixture blob",
+          "hard_gate": "exact public-input provenance",
+          "resolution": "Correct all four taxonomy profile bindings, update the fixture-matrix profile blob SHAs, refreeze a new source checkpoint, and rerun affected screening."
         }
       },
-      "next_action": "Execute the already-instantiated non-claim-bearing P1 primary A-E screening slots next. If P1 completes without protocol changes, proceed to P2 and P3. Any fixture/prompt/harness/protocol change requires fresh affected screening."
+      "next_action": "After the provenance-refreeze checkpoint is validated, launch fresh replacement P0 primary A-E slots first; then P1, P2, and P3. Do not reuse or continue superseded runs."
     },
     {
       "id": "scored_replicates",

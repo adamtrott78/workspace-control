@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "fixture_id": "research-iterate-cross-region-feedback-p3-v1",
-  "fixture_blob_sha": "3a70c0eb8182d40c81e6d8a61b9ee354831073ef",
+  "fixture_blob_sha": "2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
   "taxonomy_ref": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
   "phenotype": {
     "primary": "P3_mixed_long_hard",

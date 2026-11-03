@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "fixture_id": "research-iterate-timeout-control-p0-v1",
-  "fixture_blob_sha": "ee443a5f9d943c9a77568f70c91bd646f838cfd8",
+  "fixture_blob_sha": "b33e0afa98d0051e5f41241eead770622c2c9eb0",
   "taxonomy_ref": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
   "phenotype": {
     "primary": "P0_easy_control",

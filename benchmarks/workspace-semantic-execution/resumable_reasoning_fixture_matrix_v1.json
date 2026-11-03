@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "matrix_id": "workspace-resumable-reasoning-p0-p3-v1",
-  "status": "PROTOCOL_SCHEMA_CLARIFIED_RESCREEN_REQUIRED",
+  "status": "PROVENANCE_PROFILE_REFROZEN_FULL_RESCREEN_REQUIRED",
   "taxonomy_ref": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
   "family": "research_iterate",
   "design": "Matched synthetic system-diagnosis fixtures vary horizon/load, separability, and reasoning coupling while preserving the same worker-visible experiment/result interface and deterministic objective evaluator.",
@@ -19,7 +19,7 @@
       },
       "taxonomy_profile": {
         "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json",
-        "blob_sha": "5a8b07cd3b0dbd33a04bfd202fc41968b03bcf2c"
+        "blob_sha": "b887ff6e05e1076b44ac874d38d48ba8956bc109"
       },
       "primary_signal": "Competent executor sanity control; no decomposition or frontier escalation should be necessary."
     },
@@ -36,7 +36,7 @@
       },
       "taxonomy_profile": {
         "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.taxonomy.json",
-        "blob_sha": "19cbf5db0370ed5e0029f74fc274bcd82035bf24"
+        "blob_sha": "11aea24d489b119518d514382dfd48047a7998b1"
       },
       "primary_signal": "Primary TOO_LARGE/decomposition test; broad independent leaves with low-coupling synthesis."
     },
@@ -53,7 +53,7 @@
       },
       "taxonomy_profile": {
         "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
-        "blob_sha": "2d02412d6c8470d7122d19218e60c2236238e9a1"
+        "blob_sha": "4416013ea8f553d3a971f592ce0fbf7faf30c59e"
       },
       "primary_signal": "Primary short/coupled causal-reasoning test; candidate intrinsic reasoning boundary."
     },
@@ -70,7 +70,7 @@
       },
       "taxonomy_profile": {
         "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.taxonomy.json",
-        "blob_sha": "5383954a222508131e383b7c816f9d66ef66298d"
+        "blob_sha": "54c63ee2d0fd7990312517fd90d2d1197cf75df1"
       },
       "primary_signal": "Decompose broad regional leaves first, then test whether a coupled residual justifies stronger reasoning."
     }
@@ -144,5 +144,16 @@
     "artifact_revision",
     "software_debug_repair",
     "unseen_extension_fixture"
-  ]
+  ],
+  "provenance_refreeze": {
+    "reason": "All P0-P3 taxonomy profiles still referenced pre-terminal-schema fixture blob SHAs after the clarified fixture files were written. Exact public-input provenance therefore did not close.",
+    "corrected_fixture_profile_bindings": {
+      "P0": "b33e0afa98d0051e5f41241eead770622c2c9eb0",
+      "P1": "766a414e01197f6054e68c02f2fe856f710044b0",
+      "P2": "389fd2ecd5bfe78e8258ecccb03dea759c043296",
+      "P3": "2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958"
+    },
+    "consequence": "All prior P0 primary/supplementary screening remains protocol-defect/mechanics evidence only and is superseded for frozen comparability. Started P1 screen-001 runs are invalidated. P2/P3 prelaunch slots must be rebound before use.",
+    "required_action": "Fresh affected screening under a new source checkpoint."
+  }
 }

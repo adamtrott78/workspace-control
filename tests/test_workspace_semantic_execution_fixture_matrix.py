@@ -50,6 +50,15 @@ class FixtureMatrixTests(unittest.TestCase):
             self.assertNotIn("experiment_results", serialized)
             self.assertNotEqual(entry["fixture"]["blob_sha"], entry["oracle"]["blob_sha"])
 
+    def test_taxonomy_profile_fixture_blob_binding_matches_matrix_fixture_blob(self):
+        for entry in MATRIX["fixtures"]:
+            profile = self._load(entry["taxonomy_profile"]["path"])
+            self.assertEqual(
+                profile["fixture_blob_sha"],
+                entry["fixture"]["blob_sha"],
+                entry["phenotype"],
+            )
+
     def test_all_public_fixtures_expose_exact_terminal_output_schema(self):
         for entry in MATRIX["fixtures"]:
             fixture = self._load(entry["fixture"]["path"])
