@@ -27,7 +27,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -205,6 +205,20 @@
       "generation": 0,
       "final_hypothesis": "H_timeout_config",
       "observed_result_count": 2
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.2,
+      "violations": [
+        "observed_results_not_mapping",
+        "insufficient_experiment_cycles",
+        "missing_required_discriminating_experiment:E_restore_timeout",
+        "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
+      ],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
     }
   ],
   "pending_external": null,
@@ -284,7 +298,7 @@
     "external_result:E_double_cpu#cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Control evaluator must objectively validate the terminal candidate; worker must not self-validate or mark COMPLETE.",
+  "next_safe_action": "Resume in the same clean GPT-5.6 Sol / Instant persistent chat. Re-read this run state and repair the terminal submission using only the published validator violation codes. Do not access evaluator-only inputs. The experiments do not need to be repeated unless the worker independently determines they are invalid.",
   "terminal_submission": {
     "final_hypothesis": "H_timeout_config",
     "rejected_hypotheses": [
@@ -314,7 +328,20 @@
     ],
     "rationale": "The failure cliff at 5.0 seconds tracks the configured client timeout. Restoring the prior 12-second timeout while holding load and infrastructure fixed reduces timeout failures to 1% even though p95 latency is 5.1 seconds, directly supporting a client-timeout mechanism. Doubling CPU while preserving the 5-second timeout leaves p95 pinned at 5.0 seconds with a 39% timeout failure rate, rejecting CPU saturation as the primary cause. Low baseline CPU, queue occupancy, and packet loss further weaken CPU and network alternatives."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.2,
+      "violations": [
+        "observed_results_not_mapping",
+        "insufficient_experiment_cycles",
+        "missing_required_discriminating_experiment:E_restore_timeout",
+        "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
+      ],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 3,
     "experiment_requests": 2,
@@ -325,11 +352,21 @@
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
     "contaminated_predecessor_attempts": 1,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "VALIDATION_REQUESTED",
-    "note": "Terminal candidate submitted. Control evaluator owns objective validation and completion publication."
+    "status": "TERMINAL_VALIDATED_FAIL",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": false,
+    "score": 0.2,
+    "violations": [
+      "observed_results_not_mapping",
+      "insufficient_experiment_cycles",
+      "missing_required_discriminating_experiment:E_restore_timeout",
+      "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
+    ],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Published only validator outcome and violation codes. Hidden expected answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json"
