@@ -29,9 +29,22 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
+  "status": "RUNNING",
+  "owner": "chatgpt-screening-worker",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "INSTANT",
+    "identity_source": "user_attestation",
+    "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+  },
   "continuity_regime": "persistent_chat",
   "treatment_contract": {
     "mode": "instant_persistent_chat",
@@ -44,7 +57,7 @@
     "phase": "PRIMARY",
     "persistent_chat": true
   },
-  "started_at": null,
+  "started_at": "2026-11-02T23:40:00-05:00",
   "completed_at": null,
   "invocations": [],
   "events": [
@@ -52,6 +65,12 @@
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
       "note": "Primary B_instant_persistent_chat P1_horizon_heavy_decomposable protocol-screening slot. Non-claim-bearing."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-worker",
+      "identity_source": "user_attestation"
     }
   ],
   "pending_external": null,
@@ -61,7 +80,7 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [],
-  "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled. Read this run state first and follow the treatment contract exactly.",
+  "next_safe_action": "Validate immutable public-input provenance and perform one bounded PRIMARY reasoning quantum.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
