@@ -67,14 +67,24 @@
       },
       {
         "role": "leaf_worker",
+        "status": "COMPLETE",
+        "decision": "LEAF_CONCLUSION_READY"
+      },
+      {
+        "role": "independent_critic",
         "status": "READY_TO_RESUME"
       }
     ],
-    "active_role": "leaf_worker",
+    "active_role": "independent_critic",
     "leaf_processes": [],
     "independent_critic": {
-      "status": "NOT_READY",
-      "evidence_refs": []
+      "status": "READY_TO_RESUME",
+      "evidence_refs": [
+        "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+        "established_finding:L1",
+        "established_finding:L2"
+      ]
     },
     "synthesizer": {
       "status": "NOT_READY",
@@ -161,6 +171,31 @@
         "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "experiment_catalog:E_double_cpu"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-D-001-leaf_worker-g0-resume-2",
+      "generation": 0,
+      "owner": "screening-v1-P0-D-001:leaf_worker",
+      "role": "leaf_worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_or_role_isolated_instant_workers",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "LEAF_CONCLUSION_READY",
+      "evidence_refs": [
+        "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+        "established_finding:L2"
+      ]
     }
   ],
   "events": [
@@ -236,6 +271,28 @@
       "generation": 0,
       "experiment_id": "E_double_cpu",
       "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-001:leaf_worker",
+      "role": "leaf_worker"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "finding_id": "L2",
+      "evidence_refs": [
+        "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ],
+      "rejected_hypothesis": "H_cpu"
+    },
+    {
+      "kind": "ROLE_COMPLETE",
+      "generation": 0,
+      "role": "leaf_worker",
+      "next_role": "independent_critic"
     }
   ],
   "pending_external": null,
@@ -277,6 +334,11 @@
       "id": "L1",
       "kind": "EXPERIMENT_INTERPRETATION",
       "finding": "E_restore_timeout restored the prior 12-second client timeout and produced p95_latency_ms=5100 with timeout_failure_rate=0.01. Requests can therefore complete beyond the former ~5.0-second failure boundary when that timeout is removed, supporting H_timeout_config."
+    },
+    {
+      "id": "L2",
+      "kind": "EXPERIMENT_INTERPRETATION",
+      "finding": "E_double_cpu doubled CPU and produced p95_latency_ms=5000 with timeout_failure_rate=0.39. The failure boundary remained at about 5.0 seconds and the timeout failure rate remained high, so added CPU did not remove the deadline failures. This rejects H_cpu as the leading explanation and, together with L1, leaves H_timeout_config as the supported explanation."
     }
   ],
   "open_hypotheses": [
@@ -288,7 +350,7 @@
     {
       "id": "H_cpu",
       "statement": "CPU saturation is causing the requests to exceed their deadline.",
-      "status": "COMPETING"
+      "status": "REJECTED_BY_E_double_cpu"
     },
     {
       "id": "H_network",
@@ -296,35 +358,34 @@
       "status": "COMPETING"
     }
   ],
-  "unresolved_questions": [
-    "What control-published result is returned for E_double_cpu?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "source_checkpoint_sha:6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
     "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
     "taxonomy_profile_blob_sha:5a8b07cd3b0dbd33a04bfd202fc41968b03bcf2c",
     "harness_blob_sha:ff55438e933e91dad3057167c2243f0ef4933df2",
     "runset_blob_sha:f4ae2648694e2fb8b0d090c0c7c6f3a1dd952476",
-    "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    "external_result:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "external_result:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
   "candidate_actions": [
     {
-      "id": "A_resume_leaf_worker_after_E_double_cpu",
+      "id": "A_independent_critic_after_leaf_conclusion",
       "kind": "ROLE_HANDOFF",
-      "role": "leaf_worker",
-      "objective": "After control publication, interpret the exact E_double_cpu result from durable state. This supplies the fixture-required second experiment/result cycle and directly tests the CPU competing hypothesis.",
+      "role": "independent_critic",
+      "objective": "Independently review the durable leaf evidence and conclusions, including L1 and L2, without relying on any leaf-worker conversation.",
       "constraints": [
-        "Resume only from control-published external_result evidence in this assigned run state.",
-        "Do not poll.",
-        "A fresh clean GPT-5.6 Sol Instant chat is required for the next role/quantum."
+        "Use only durable state and immutable public inputs bound by this run.",
+        "Do not access evaluator-only or oracle material.",
+        "A fresh clean GPT-5.6 Sol Instant chat is required for the independent_critic role."
       ]
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the leaf_worker role. Re-read durable state only, consume E_double_cpu, perform one bounded leaf-worker quantum, persist the leaf conclusion and next role handoff, then stop. Do not perform independent_critic or synthesizer work in the same chat.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the independent_critic role. Re-read durable state only, perform exactly one independent-critic quantum, persist its critique and next handoff, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
