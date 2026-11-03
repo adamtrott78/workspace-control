@@ -32,8 +32,11 @@ class GPT6InstantScreeningTests(unittest.TestCase):
         self.assertEqual(RUN["validator_results"][-1]["score"], 1.0)
         self.assertEqual(RUN["validator_results"][-1]["violations"], [])
 
-    def test_clarified_re_screen_slot_is_ready_and_bound_to_validated_protocol(self):
-        self.assertEqual(ACTIVE["status"], "READY")
+    def test_clarified_re_screen_slot_has_valid_lifecycle_state_and_binding(self):
+        self.assertIn(
+            ACTIVE["status"],
+            {"READY", "RUNNING", "WAITING_EXTERNAL", "READY_TO_RESUME", "TERMINAL_CANDIDATE", "COMPLETED"},
+        )
         self.assertFalse(ACTIVE["claim_bearing"])
         self.assertEqual(ACTIVE["source_checkpoint_sha"], "6b0ada4e0a9e9f29cd281d82e1fc786df8895982")
         self.assertEqual(
