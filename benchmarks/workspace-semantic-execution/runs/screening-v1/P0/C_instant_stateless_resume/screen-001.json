@@ -28,9 +28,9 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 1,
-  "status": "READY_TO_RESUME",
-  "owner": "chatgpt-screening-worker-screen-001-q1",
+  "generation": 2,
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -60,7 +60,7 @@
   "treatment_state": {
     "quantum_index": 2,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": "quantum-1:user-attested-clean-regular-chat"
+    "last_quantum_chat": "quantum-2:user-attested-clean-regular-chat"
   },
   "started_at": "2026-11-02T21:26:00-05:00",
   "completed_at": null,
@@ -122,6 +122,36 @@
         "fixture:O2",
         "experiment:E_restore_timeout"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-C-001-q2",
+      "generation": 2,
+      "owner": "chatgpt-screening-worker-screen-001-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_chat_per_reasoning_quantum",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+          "Memory was disabled before this conversation was opened",
+          "GPT-5.6 Sol Instant was selected for this conversation"
+        ]
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:O2",
+        "experiment:E_restore_timeout",
+        "experiment:E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -175,6 +205,21 @@
       "generation": 1,
       "experiment_id": "E_double_cpu",
       "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 2,
+      "worker_id": "chatgpt-screening-worker-screen-001-q2"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 2,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 2,
+      "worker_id": "chatgpt-screening-worker-screen-001-q2"
     }
   ],
   "pending_external": null,
@@ -216,51 +261,57 @@
       "statement": "Restoring the prior 12-second client timeout while holding load and infrastructure fixed produced p95 latency 5100 ms and timeout failure rate 0.01, strongly supporting H_timeout_config because requests can complete beyond the former 5-second cutoff with very low timeout failure.",
       "source": "experiment:E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "id": "F_E_double_cpu",
+      "statement": "Doubling available CPU while keeping the 5-second timeout unchanged produced p95 latency 5000 ms and timeout failure rate 0.39; the sharp 5-second failure behavior persists despite added CPU, rejecting CPU saturation as the primary mechanism.",
+      "source": "experiment:E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
       "statement": "A newly lowered client timeout is terminating otherwise healthy requests.",
-      "status": "SUPPORTED_BY_FIRST_CYCLE"
+      "status": "FINAL_SUPPORTED"
     },
     {
       "id": "H_cpu",
       "statement": "CPU saturation is causing the requests to exceed their deadline.",
-      "status": "SECOND_CYCLE_TEST"
+      "status": "REJECTED_BY_SECOND_CYCLE"
     },
     {
       "id": "H_network",
       "statement": "Network loss is causing retransmissions and deadline failures.",
-      "status": "COMPETING"
+      "status": "COMPETING_NOT_PRIMARY"
     }
   ],
-  "unresolved_questions": [
-    "Does doubling available CPU while keeping the 5-second timeout unchanged materially reduce timeout failures, or does the sharp 5-second cutoff persist?",
-    "After the second published result, is there sufficient evidence to reject H_cpu and submit a terminal candidate satisfying the two-cycle contract?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "fixture:O1",
     "fixture:O2",
-    "experiment:E_restore_timeout"
+    "experiment:E_restore_timeout",
+    "experiment:E_double_cpu"
   ],
-  "candidate_actions": [
-    {
-      "id": "E_double_cpu",
-      "type": "experiment",
-      "reason": "Second required cycle directly tests H_cpu while retaining the 5-second timeout; if failures remain pinned near 5 seconds despite doubled CPU, H_cpu is rejected in favor of H_timeout_config."
+  "candidate_actions": [],
+  "next_safe_action": "Stop. Control evaluator must score the terminal candidate; worker must not self-validate or poll.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     },
-    {
-      "id": "E_network_bypass",
-      "type": "experiment",
-      "reason": "Fallback competing-hypothesis test for H_network if the CPU experiment does not provide sufficient discrimination."
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 2. Re-read durable state only, consume E_double_cpu, perform exactly one bounded reasoning quantum, persist the next transition, then stop. The minimum experiment-cycle requirement is now satisfied; any terminal candidate must use the exact public terminal_output_schema.",
-  "terminal_submission": null,
+    "addressed_observations": [
+      "O1"
+    ],
+    "rationale": "O1 shows a sharp failure boundary at 5.0 seconds rather than generalized resource degradation. Restoring the prior 12-second client timeout reduced timeout failures to 0.01 while allowing p95 latency to reach 5100 ms, showing requests can complete beyond the former cutoff. In the second cycle, doubling CPU while retaining the 5-second timeout left p95 pinned at 5000 ms with a 0.39 timeout failure rate. Because extra CPU did not remove the cutoff while restoring the timeout did, H_timeout_config is the primary mechanism and H_cpu is rejected."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
