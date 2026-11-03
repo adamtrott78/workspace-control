@@ -27,11 +27,22 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P0-B6-001-worker",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-6",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-6 Instant is selected."
+  },
   "continuity_regime": "persistent_chat",
-  "started_at": null,
+  "started_at": "2026-11-02T19:32:00-05:00",
   "completed_at": null,
   "invocations": [],
   "events": [
@@ -47,6 +58,12 @@
     {
       "kind": "USER_ATTESTATION_GATE_ADDED",
       "note": "Brand-new chat, pre-chat Memory setting, and selected model/configuration are not reliably self-verifiable from inside the worker; explicit user attestation is now an accepted screening gate."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-B6-001-worker",
+      "identity_source": "user_attestation"
     }
   ],
   "pending_external": null,
