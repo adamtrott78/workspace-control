@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: b3f9acd8d32a913d33bbac017378ef7a92c0ff08
+- Remote checkpoint: 7dcedf96dfd84dcf2a39433efed2357c6db9e5aa
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY CLEAN SESSION LAUNCH: choose one executor and use the matching fresh slot. For GPT-5.6 Sol / Instant, use benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json. For GPT-6 / Instant, use benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json. Open a brand-new Temporary Chat (or otherwise Memory-disabled chat), make GitHub available, and send only the canonical navigation message for that exact slot. Do not branch from this conversation or reuse the prior GPT-6 chat. Once either slot reaches WAITING_EXTERNAL or TERMINAL_CANDIDATE, this control chat can service it directly from GitHub.
+USER-ONLY CLEAN SESSION LAUNCH: turn Memory off in Settings -> Personalization before opening the worker chat. Then open a brand-new regular ChatGPT chat (not Temporary Chat), keep GitHub enabled, choose the intended executor, and send only the canonical navigation message for the matching slot. GPT-5.6 Sol / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json; GPT-6 / Instant uses benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json. Temporary Chat is invalid for this plugin-backed benchmark because Unpersonalized disables plugins and Personalized may expose existing memory.
 
 ## Remaining work
 
-- Launch either (or both, in separate fresh chats) the primary GPT-5.6 Sol / Instant P0 slot screen-002 and the supplementary GPT-6 / Instant P0 slot screening-v1-P0-B6-001. Never reuse a slot across executor identities.
+- Launch either (or both, in separate brand-new regular chats with Memory disabled and GitHub enabled) the primary GPT-5.6 Sol / Instant P0 slot screen-002 and the supplementary GPT-6 / Instant P0 slot screening-v1-P0-B6-001. Never reuse a slot across executor identities.
 - After the first P0×Instant-persistent transport smoke completes cleanly, instantiate and execute the remaining non-claim-bearing A-E × P0-P3 protocol-screening slots. Any protocol change invalidates prior screening comparability and requires re-screening.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
@@ -92,7 +92,7 @@ USER-ONLY CLEAN SESSION LAUNCH: choose one executor and use the matching fresh s
 
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is now validated.
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
-- Scored resumable-reasoning arms require oracle-unexposed clean model sessions. This authoring chat has read evaluator-only oracle truth and cannot be counted as a scored arm; the current connected-tool surface does not provide a programmatic clean ChatGPT-session spawn primitive.
+- Scored resumable-reasoning arms require oracle-unexposed clean model sessions. For ChatGPT plugin-backed workers, use a brand-new regular chat with Memory disabled and required plugins enabled; Temporary Chat cannot provide both isolation and plugin transport simultaneously.
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
 
 ## Fresh-chat initialization
