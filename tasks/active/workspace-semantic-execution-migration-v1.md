@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-USER-ONLY P0 ARM SCREENING BATCH: launch four separate clean worker chats for the READY P0 slots A/C/D/E. A uses GPT-5.6 Sol / High and a persistent chat. C uses GPT-5.6 Sol / Instant but exactly one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat in role decomposer; every later role is a separate clean chat. E starts with GPT-5.6 Sol / Instant and may not use High unless durable lower-tier evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state permits escalation. All chats require Memory disabled before launch and GitHub enabled. Report any WAITING_EXTERNAL, READY_TO_RESUME role/quantum handoff, escalation request, or TERMINAL_CANDIDATE back to this control chat; it will service each run directly from GitHub.
+USER-ONLY P0 ARM SCREENING BATCH: launch four separate clean worker chats for the READY P0 slots A/C/D/E. A uses GPT-5.6 Sol / High and a persistent chat. C uses GPT-5.6 Sol / Instant but exactly one bounded reasoning quantum per brand-new chat. D uses GPT-5.6 Sol / Instant with the first chat in role decomposer; every later role is a separate clean chat. E starts with GPT-5.6 Sol / Instant and may not use High unless durable lower-tier evidence classifies an INTRINSICALLY_DIFFICULT residual after reasonable decomposition and control state permits escalation. All chats require Memory disabled before launch and GitHub enabled. Report any WAITING_EXTERNAL, READY_TO_RESUME role/quantum handoff, ESCALATION request, or TERMINAL_CANDIDATE back to this control chat; it will service each run directly from GitHub.
 
 ## Remaining work
 
