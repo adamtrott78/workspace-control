@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": "screening-v1-P0-E-001-instant-lower-tier-g1",
   "executor_identity": {
     "provider": "OpenAI",
@@ -235,13 +235,16 @@
       "experiment_id": "E_double_cpu",
       "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_double_cpu",
       "note": "Protocol repair after CONTROL_PROTOCOL_REJECTION: second experiment cycle required before any terminal candidate."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-E-001-exp-002",
+      "generation": 1,
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-E-001-exp-002",
-    "experiment_id": "E_double_cpu",
-    "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_double_cpu"
-  },
+  "pending_external": null,
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-E-001-exp-001",
@@ -251,6 +254,16 @@
         "timeout_failure_rate": 0.01
       },
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    },
+    "E_double_cpu": {
+      "request_id": "screening-v1-P0-E-001-exp-002",
+      "experiment_id": "E_double_cpu",
+      "result": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39
+      },
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
       "publication_scope": "requested experiment only"
     }
   },
@@ -274,7 +287,7 @@
       "authority": "external_control_only"
     }
   ],
-  "next_safe_action": "Stop in WAITING_EXTERNAL. Do not poll. After the control evaluator publishes E_double_cpu into this assigned run-state and sets READY_TO_RESUME, launch the next required fresh regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled; resume from durable state only. No High escalation is authorized.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next lower-tier quantum. Re-read durable state only, consume E_double_cpu, remain Instant with no High escalation authorized, and perform one bounded reasoning quantum. The minimum experiment-cycle requirement is now satisfied; if evidence is sufficient, persist a terminal candidate using the exact public terminal_output_schema and stop for control validation.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -289,17 +302,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "PROTOCOL_REPAIR_IN_PROGRESS",
-    "violations": [
-      "unsupported_terminal_status:WAITING_TERMINAL_VALIDATION",
-      "minimum_experiment_cycles_not_met",
-      "terminal_submission_schema_mismatch"
-    ],
-    "public_contract_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json@b33e0afa98d0051e5f41241eead770622c2c9eb0",
-    "note": "Prior terminal attempt remains rejected. Worker has requested the second public experiment cycle and must stop pending external control publication."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P0-E-001-exp-002",
+    "last_experiment_id": "E_double_cpu",
+    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/E_hybrid_escalation/screen-001.json"

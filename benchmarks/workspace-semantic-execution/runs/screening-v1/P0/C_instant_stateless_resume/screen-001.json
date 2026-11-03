@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": "chatgpt-screening-worker-screen-001-q1",
   "executor_identity": {
     "provider": "OpenAI",
@@ -168,12 +168,16 @@
       "request_id": "screening-v1-P0-C-001-exp-002",
       "generation": 1,
       "payload_ref": "E_double_cpu"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-C-001-exp-002",
+      "generation": 1,
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-C-001-exp-002",
-    "experiment_id": "E_double_cpu"
-  },
+  "pending_external": null,
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-C-001-exp-001",
@@ -183,6 +187,16 @@
         "timeout_failure_rate": 0.01
       },
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    },
+    "E_double_cpu": {
+      "request_id": "screening-v1-P0-C-001-exp-002",
+      "experiment_id": "E_double_cpu",
+      "result": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39
+      },
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
       "publication_scope": "requested experiment only"
     }
   },
@@ -242,7 +256,7 @@
       "reason": "Fallback competing-hypothesis test for H_network if the CPU experiment does not provide sufficient discrimination."
     }
   ],
-  "next_safe_action": "Stop and wait for the control evaluator to publish only the requested E_double_cpu result into this assigned run state. In a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled, re-read durable state only and perform exactly one next bounded reasoning quantum. Do not poll.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 2. Re-read durable state only, consume E_double_cpu, perform exactly one bounded reasoning quantum, persist the next transition, then stop. The minimum experiment-cycle requirement is now satisfied; any terminal candidate must use the exact public terminal_output_schema.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -257,14 +271,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-C-001-exp-001",
-    "last_experiment_id": "E_restore_timeout",
-    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and all unused experiment results remain undisclosed."
+    "last_request_id": "screening-v1-P0-C-001-exp-002",
+    "last_experiment_id": "E_double_cpu",
+    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/C_instant_stateless_resume/screen-001.json"

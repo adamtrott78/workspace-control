@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": "screening-v1-P0-D-001:leaf_worker",
   "executor_identity": {
     "provider": "OpenAI",
@@ -67,7 +67,7 @@
       },
       {
         "role": "leaf_worker",
-        "status": "WAITING_EXTERNAL"
+        "status": "READY_TO_RESUME"
       }
     ],
     "active_role": "leaf_worker",
@@ -229,15 +229,16 @@
       "role": "leaf_worker",
       "payload_ref": "experiment_catalog:E_double_cpu",
       "experiment_id": "E_double_cpu"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-D-001-E_double_cpu-g0",
+      "generation": 0,
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-D-001-E_double_cpu-g0",
-    "generation": 0,
-    "role": "leaf_worker",
-    "payload_ref": "experiment_catalog:E_double_cpu",
-    "experiment_id": "E_double_cpu"
-  },
+  "pending_external": null,
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
@@ -247,6 +248,16 @@
         "timeout_failure_rate": 0.01
       },
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    },
+    "E_double_cpu": {
+      "request_id": "screening-v1-P0-D-001-E_double_cpu-g0",
+      "experiment_id": "E_double_cpu",
+      "result": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39
+      },
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
       "publication_scope": "requested experiment only"
     }
   },
@@ -309,7 +320,7 @@
       ]
     }
   ],
-  "next_safe_action": "Stop at WAITING_EXTERNAL. After control publishes E_double_cpu, launch a brand-new regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next permitted role/quantum; re-read durable state only and do not poll.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the leaf_worker role. Re-read durable state only, consume E_double_cpu, perform one bounded leaf-worker quantum, persist the leaf conclusion and next role handoff, then stop. Do not perform independent_critic or synthesizer work in the same chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -324,13 +335,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-D-001-E_restore_timeout-g0",
-    "last_experiment_id": "E_restore_timeout",
-    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "last_request_id": "screening-v1-P0-D-001-E_double_cpu-g0",
+    "last_experiment_id": "E_double_cpu",
+    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
     "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
