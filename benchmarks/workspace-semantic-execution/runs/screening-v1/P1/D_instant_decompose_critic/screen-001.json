@@ -29,9 +29,23 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "READY_TO_RESUME",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "fresh_or_role_isolated_instant_workers",
+    "tier": "INSTANT",
+    "role": "decomposer",
+    "identity_source": "user_attestation",
+    "attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+  },
   "continuity_regime": "fresh_or_role_isolated_instant_workers",
   "treatment_contract": {
     "mode": "instant_decompose_critic",
@@ -49,11 +63,216 @@
     "role_queue": [
       {
         "role": "decomposer",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "leaf-shard-1",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "leaf-shard-2",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "leaf-shard-3",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "leaf-shard-4",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "leaf-shard-5",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "leaf-shard-6",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "leaf-shared-control",
         "status": "READY"
       }
     ],
     "active_role": null,
-    "leaf_processes": [],
+    "leaf_processes": [
+      {
+        "process_id": "leaf-shard-1",
+        "status": "READY",
+        "role": "leaf_worker",
+        "depth": 1,
+        "objective": "Obtain independently discriminating evidence for shard 1's request-policy mechanism.",
+        "allowed_experiments": [
+          "E_revert_s1"
+        ],
+        "inherited_constraints": [
+          "Use only durable state and immutable public inputs bound by source_checkpoint_sha 6b0ada4e0a9e9f29cd281d82e1fc786df8895982.",
+          "Fixture-only reasoning: no execution authority, production mutation, or external submission.",
+          "Each leaf-worker invocation must use a fresh clean GPT-5.6 Sol Instant regular chat with Memory disabled and GitHub only.",
+          "A leaf worker may request at most one external experiment, must persist WAITING_EXTERNAL, and must stop without polling.",
+          "Observed experiment evidence is valid only from a control-published external result in this assigned run state and must retain its exact result_hash.",
+          "Terminal synthesis requires at least 7 experiment cycles total, evidence across all six shard-local leaves plus at least one shared-infrastructure control, rejection of at least one competing hypothesis, and explicit treatment of O2.",
+          "O2 is strong local evidence for shard 1 but does not by itself exclude a shared dependency.",
+          "No frontier escalation is permitted in this arm."
+        ],
+        "verification_boundary": "Verified only by the exact control-published result for E_revert_s1; interpret locally and do not generalize to other shards or exclude shared causes.",
+        "evidence_refs": [],
+        "pending_external": null,
+        "result": null
+      },
+      {
+        "process_id": "leaf-shard-2",
+        "status": "READY",
+        "role": "leaf_worker",
+        "depth": 1,
+        "objective": "Obtain independently discriminating evidence for shard 2's request-policy mechanism.",
+        "allowed_experiments": [
+          "E_revert_s2"
+        ],
+        "inherited_constraints": [
+          "Use only durable state and immutable public inputs bound by source_checkpoint_sha 6b0ada4e0a9e9f29cd281d82e1fc786df8895982.",
+          "Fixture-only reasoning: no execution authority, production mutation, or external submission.",
+          "Each leaf-worker invocation must use a fresh clean GPT-5.6 Sol Instant regular chat with Memory disabled and GitHub only.",
+          "A leaf worker may request at most one external experiment, must persist WAITING_EXTERNAL, and must stop without polling.",
+          "Observed experiment evidence is valid only from a control-published external result in this assigned run state and must retain its exact result_hash.",
+          "Terminal synthesis requires at least 7 experiment cycles total, evidence across all six shard-local leaves plus at least one shared-infrastructure control, rejection of at least one competing hypothesis, and explicit treatment of O2.",
+          "O2 is strong local evidence for shard 1 but does not by itself exclude a shared dependency.",
+          "No frontier escalation is permitted in this arm."
+        ],
+        "verification_boundary": "Verified only by the exact control-published result for E_revert_s2; interpretation is bounded to shard 2.",
+        "evidence_refs": [],
+        "pending_external": null,
+        "result": null
+      },
+      {
+        "process_id": "leaf-shard-3",
+        "status": "READY",
+        "role": "leaf_worker",
+        "depth": 1,
+        "objective": "Obtain independently discriminating evidence for shard 3's request-policy mechanism.",
+        "allowed_experiments": [
+          "E_revert_s3"
+        ],
+        "inherited_constraints": [
+          "Use only durable state and immutable public inputs bound by source_checkpoint_sha 6b0ada4e0a9e9f29cd281d82e1fc786df8895982.",
+          "Fixture-only reasoning: no execution authority, production mutation, or external submission.",
+          "Each leaf-worker invocation must use a fresh clean GPT-5.6 Sol Instant regular chat with Memory disabled and GitHub only.",
+          "A leaf worker may request at most one external experiment, must persist WAITING_EXTERNAL, and must stop without polling.",
+          "Observed experiment evidence is valid only from a control-published external result in this assigned run state and must retain its exact result_hash.",
+          "Terminal synthesis requires at least 7 experiment cycles total, evidence across all six shard-local leaves plus at least one shared-infrastructure control, rejection of at least one competing hypothesis, and explicit treatment of O2.",
+          "O2 is strong local evidence for shard 1 but does not by itself exclude a shared dependency.",
+          "No frontier escalation is permitted in this arm."
+        ],
+        "verification_boundary": "Verified only by the exact control-published result for E_revert_s3; interpretation is bounded to shard 3.",
+        "evidence_refs": [],
+        "pending_external": null,
+        "result": null
+      },
+      {
+        "process_id": "leaf-shard-4",
+        "status": "READY",
+        "role": "leaf_worker",
+        "depth": 1,
+        "objective": "Obtain independently discriminating evidence for shard 4's request-policy mechanism.",
+        "allowed_experiments": [
+          "E_revert_s4"
+        ],
+        "inherited_constraints": [
+          "Use only durable state and immutable public inputs bound by source_checkpoint_sha 6b0ada4e0a9e9f29cd281d82e1fc786df8895982.",
+          "Fixture-only reasoning: no execution authority, production mutation, or external submission.",
+          "Each leaf-worker invocation must use a fresh clean GPT-5.6 Sol Instant regular chat with Memory disabled and GitHub only.",
+          "A leaf worker may request at most one external experiment, must persist WAITING_EXTERNAL, and must stop without polling.",
+          "Observed experiment evidence is valid only from a control-published external result in this assigned run state and must retain its exact result_hash.",
+          "Terminal synthesis requires at least 7 experiment cycles total, evidence across all six shard-local leaves plus at least one shared-infrastructure control, rejection of at least one competing hypothesis, and explicit treatment of O2.",
+          "O2 is strong local evidence for shard 1 but does not by itself exclude a shared dependency.",
+          "No frontier escalation is permitted in this arm."
+        ],
+        "verification_boundary": "Verified only by the exact control-published result for E_revert_s4; interpretation is bounded to shard 4.",
+        "evidence_refs": [],
+        "pending_external": null,
+        "result": null
+      },
+      {
+        "process_id": "leaf-shard-5",
+        "status": "READY",
+        "role": "leaf_worker",
+        "depth": 1,
+        "objective": "Obtain independently discriminating evidence for shard 5's request-policy mechanism.",
+        "allowed_experiments": [
+          "E_revert_s5"
+        ],
+        "inherited_constraints": [
+          "Use only durable state and immutable public inputs bound by source_checkpoint_sha 6b0ada4e0a9e9f29cd281d82e1fc786df8895982.",
+          "Fixture-only reasoning: no execution authority, production mutation, or external submission.",
+          "Each leaf-worker invocation must use a fresh clean GPT-5.6 Sol Instant regular chat with Memory disabled and GitHub only.",
+          "A leaf worker may request at most one external experiment, must persist WAITING_EXTERNAL, and must stop without polling.",
+          "Observed experiment evidence is valid only from a control-published external result in this assigned run state and must retain its exact result_hash.",
+          "Terminal synthesis requires at least 7 experiment cycles total, evidence across all six shard-local leaves plus at least one shared-infrastructure control, rejection of at least one competing hypothesis, and explicit treatment of O2.",
+          "O2 is strong local evidence for shard 1 but does not by itself exclude a shared dependency.",
+          "No frontier escalation is permitted in this arm."
+        ],
+        "verification_boundary": "Verified only by the exact control-published result for E_revert_s5; interpretation is bounded to shard 5.",
+        "evidence_refs": [],
+        "pending_external": null,
+        "result": null
+      },
+      {
+        "process_id": "leaf-shard-6",
+        "status": "READY",
+        "role": "leaf_worker",
+        "depth": 1,
+        "objective": "Obtain independently discriminating evidence for shard 6's request-policy mechanism.",
+        "allowed_experiments": [
+          "E_revert_s6"
+        ],
+        "inherited_constraints": [
+          "Use only durable state and immutable public inputs bound by source_checkpoint_sha 6b0ada4e0a9e9f29cd281d82e1fc786df8895982.",
+          "Fixture-only reasoning: no execution authority, production mutation, or external submission.",
+          "Each leaf-worker invocation must use a fresh clean GPT-5.6 Sol Instant regular chat with Memory disabled and GitHub only.",
+          "A leaf worker may request at most one external experiment, must persist WAITING_EXTERNAL, and must stop without polling.",
+          "Observed experiment evidence is valid only from a control-published external result in this assigned run state and must retain its exact result_hash.",
+          "Terminal synthesis requires at least 7 experiment cycles total, evidence across all six shard-local leaves plus at least one shared-infrastructure control, rejection of at least one competing hypothesis, and explicit treatment of O2.",
+          "O2 is strong local evidence for shard 1 but does not by itself exclude a shared dependency.",
+          "No frontier escalation is permitted in this arm."
+        ],
+        "verification_boundary": "Verified only by the exact control-published result for E_revert_s6; interpretation is bounded to shard 6.",
+        "evidence_refs": [],
+        "pending_external": null,
+        "result": null
+      },
+      {
+        "process_id": "leaf-shared-control",
+        "status": "READY",
+        "role": "leaf_worker",
+        "depth": 1,
+        "objective": "Obtain one independently discriminating shared-infrastructure control while shard policies remain unchanged.",
+        "allowed_experiments": [
+          "E_scale_shared_db",
+          "E_network_bypass"
+        ],
+        "inherited_constraints": [
+          "Use only durable state and immutable public inputs bound by source_checkpoint_sha 6b0ada4e0a9e9f29cd281d82e1fc786df8895982.",
+          "Fixture-only reasoning: no execution authority, production mutation, or external submission.",
+          "Each leaf-worker invocation must use a fresh clean GPT-5.6 Sol Instant regular chat with Memory disabled and GitHub only.",
+          "A leaf worker may request at most one external experiment, must persist WAITING_EXTERNAL, and must stop without polling.",
+          "Observed experiment evidence is valid only from a control-published external result in this assigned run state and must retain its exact result_hash.",
+          "Terminal synthesis requires at least 7 experiment cycles total, evidence across all six shard-local leaves plus at least one shared-infrastructure control, rejection of at least one competing hypothesis, and explicit treatment of O2.",
+          "O2 is strong local evidence for shard 1 but does not by itself exclude a shared dependency.",
+          "No frontier escalation is permitted in this arm."
+        ],
+        "verification_boundary": "Leaf worker must choose exactly one allowed shared-control experiment and request no other experiment; verified only by that experiment's exact control-published result. This leaf may reject/support only the shared mechanism directly tested.",
+        "evidence_refs": [],
+        "pending_external": null,
+        "result": null
+      }
+    ],
     "independent_critic": {
       "status": "NOT_READY",
       "evidence_refs": []
@@ -65,30 +284,167 @@
   },
   "started_at": null,
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P1-D-001-decomposer-g0",
+      "generation": 0,
+      "role": "decomposer",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_or_role_isolated_instant_workers",
+        "tier": "INSTANT",
+        "role": "decomposer",
+        "identity_source": "user_attestation",
+        "attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "DECOMPOSED",
+      "classification": "TOO_LARGE",
+      "decomposition_depth": 1,
+      "child_process_ids": [
+        "leaf-shard-1",
+        "leaf-shard-2",
+        "leaf-shard-3",
+        "leaf-shard-4",
+        "leaf-shard-5",
+        "leaf-shard-6",
+        "leaf-shared-control"
+      ],
+      "evidence_refs": [
+        "fixture:research-iterate-shard-rollout-p1-v1@766a414e01197f6054e68c02f2fe856f710044b0",
+        "taxonomy:research-iterate-shard-rollout-p1-v1@19cbf5db0370ed5e0029f74fc274bcd82035bf24"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
       "note": "Primary D_instant_decompose_critic P1_horizon_heavy_decomposable protocol-screening slot. Non-claim-bearing."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "role": "decomposer",
+      "executor_identity_source": "user_attestation"
+    },
+    {
+      "kind": "DECOMPOSITION",
+      "generation": 0,
+      "role": "decomposer",
+      "classification": "TOO_LARGE",
+      "depth": 1,
+      "child_process_ids": [
+        "leaf-shard-1",
+        "leaf-shard-2",
+        "leaf-shard-3",
+        "leaf-shard-4",
+        "leaf-shard-5",
+        "leaf-shard-6",
+        "leaf-shared-control"
+      ],
+      "note": "Horizon-heavy, mostly separable objective decomposed into six shard-local leaves and one shared-control leaf; no frontier escalation."
     }
   ],
   "pending_external": null,
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role decomposer. Persist the decomposition/LEAF_EXECUTABLE decision, then stop.",
+  "established_findings": [
+    {
+      "id": "D1",
+      "kind": "ROUTING_CLASSIFICATION",
+      "value": "TOO_LARGE",
+      "basis": "Fixture requires >=7 experiment cycles and taxonomy marks HIGH horizon load / MOSTLY_SEPARABLE / LOW_TO_MEDIUM reasoning stress."
+    },
+    {
+      "id": "D2",
+      "kind": "DECOMPOSITION",
+      "value": "7 independently verifiable leaves",
+      "basis": "Six shard-local reverts plus one shared-infrastructure control quantum."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "statement": "A shared database bottleneck is independently slowing all six shards."
+    },
+    {
+      "id": "H_network_fabric",
+      "statement": "A shared network-fabric regression is independently slowing all six shards."
+    },
+    {
+      "id": "H_shard_policy",
+      "statement": "The same newly deployed request-policy configuration causes a local latency regression on each shard."
+    }
+  ],
+  "unresolved_questions": [
+    "What exact control-published result is observed for each of the six shard-local revert experiments?",
+    "Which one shared-control experiment is selected and what exact control-published result does it produce?",
+    "After all required evidence is durable, which hypothesis is best supported and which competing hypothesis(es) are rejected?"
+  ],
+  "evidence_refs": [
+    "fixture:research-iterate-shard-rollout-p1-v1@766a414e01197f6054e68c02f2fe856f710044b0",
+    "taxonomy:research-iterate-shard-rollout-p1-v1@19cbf5db0370ed5e0029f74fc274bcd82035bf24",
+    "harness:resumable_reasoning_pilot_v1.py@ff55438e933e91dad3057167c2243f0ef4933df2"
+  ],
+  "candidate_actions": [
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "leaf-shard-1",
+      "role": "leaf_worker",
+      "status": "READY"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "leaf-shard-2",
+      "role": "leaf_worker",
+      "status": "READY"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "leaf-shard-3",
+      "role": "leaf_worker",
+      "status": "READY"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "leaf-shard-4",
+      "role": "leaf_worker",
+      "status": "READY"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "leaf-shard-5",
+      "role": "leaf_worker",
+      "status": "READY"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "leaf-shard-6",
+      "role": "leaf_worker",
+      "status": "READY"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "leaf-shared-control",
+      "role": "leaf_worker",
+      "status": "READY"
+    }
+  ],
+  "next_safe_action": "Launch one brand-new role-isolated GPT-5.6 Sol Instant leaf-worker chat for exactly one READY leaf_process, using durable state only; that worker may request at most one allowed external experiment and must then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
+    "reasoning_invocations": 1,
     "experiment_requests": 0,
     "retries": 0,
-    "decomposition_count": 0,
-    "decomposition_depth": 0,
+    "decomposition_count": 1,
+    "decomposition_depth": 1,
     "failed_leaves": 0,
     "recovered_leaves": 0,
     "frontier_escalations": 0,
