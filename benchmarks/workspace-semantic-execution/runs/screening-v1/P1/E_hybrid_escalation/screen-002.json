@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-gpt56-sol-instant-screening-v1-P1-E-002-g0",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -58,15 +58,55 @@
   },
   "treatment_state": {
     "phase": "LOWER_TIER_INSTANT",
-    "lower_tier_attempts": [],
-    "decomposition_state": "UNASSESSED",
+    "lower_tier_attempts": [
+      {
+        "invocation_id": "screening-v1-P1-E-002-g0-q0",
+        "classification": "TOO_LARGE",
+        "disposition": "DECOMPOSE",
+        "evidence": [
+          "taxonomy: phenotype P1_horizon_heavy_decomposable; MOSTLY_SEPARABLE; LOW_TO_MEDIUM reasoning stress",
+          "fixture: six independently executable shard-local leaves plus separate shared-infrastructure controls"
+        ],
+        "residual_classification": "NONE",
+        "escalation_requested": false
+      }
+    ],
+    "decomposition_state": "DECOMPOSED_LEAF_EXECUTABLE",
     "escalation_status": "NOT_REQUESTED",
     "residual_reason": null,
     "escalation_evidence_refs": []
   },
   "started_at": "2026-11-04T23:19:00Z",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P1-E-002-g0-q0",
+      "generation": 0,
+      "owner": "chatgpt-gpt56-sol-instant-screening-v1-P1-E-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+          "Memory was disabled before this conversation was opened",
+          "GPT-5.6 Sol Instant was selected for this conversation"
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s1"
+      ],
+      "classification": "TOO_LARGE_DECOMPOSED",
+      "decomposition_depth": 1
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -83,24 +123,165 @@
         "Memory was disabled before this conversation was opened.",
         "GPT-5.6 Sol Instant was selected for this conversation."
       ]
+    },
+    {
+      "kind": "DECOMPOSITION",
+      "generation": 0,
+      "invocation_id": "screening-v1-P1-E-002-g0-q0",
+      "classification": "TOO_LARGE",
+      "depth": 1,
+      "children": [
+        {
+          "process_id": "P1-E-002-leaf-s1",
+          "experiment_id": "E_revert_s1",
+          "leaf": "shard-1",
+          "status": "PENDING"
+        },
+        {
+          "process_id": "P1-E-002-leaf-s2",
+          "experiment_id": "E_revert_s2",
+          "leaf": "shard-2",
+          "status": "PENDING"
+        },
+        {
+          "process_id": "P1-E-002-leaf-s3",
+          "experiment_id": "E_revert_s3",
+          "leaf": "shard-3",
+          "status": "PENDING"
+        },
+        {
+          "process_id": "P1-E-002-leaf-s4",
+          "experiment_id": "E_revert_s4",
+          "leaf": "shard-4",
+          "status": "PENDING"
+        },
+        {
+          "process_id": "P1-E-002-leaf-s5",
+          "experiment_id": "E_revert_s5",
+          "leaf": "shard-5",
+          "status": "PENDING"
+        },
+        {
+          "process_id": "P1-E-002-leaf-s6",
+          "experiment_id": "E_revert_s6",
+          "leaf": "shard-6",
+          "status": "PENDING"
+        },
+        {
+          "process_id": "P1-E-002-leaf-shared",
+          "experiment_id": "E_scale_shared_db",
+          "leaf": "shared-control",
+          "status": "PENDING"
+        }
+      ]
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-E-002-E_revert_s1-g0",
+      "generation": 0,
+      "payload_ref": "E_revert_s1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-E-002-E_revert_s1-g0",
+    "kind": "fixture_experiment",
+    "payload_ref": "E_revert_s1"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Decompose the horizon-heavy fixture into six shard-local experiment leaves plus one shared-infrastructure control leaf, then request exactly one first experiment and stop for external evaluation.",
+  "established_findings": [
+    {
+      "id": "F_decomposition",
+      "finding": "The monolithic horizon is TOO_LARGE for one lower-tier quantum but decomposes into six shard-local leaves plus one shared-control leaf; no intrinsically difficult residual is established.",
+      "evidence_refs": [
+        "taxonomy_profile",
+        "fixture_decomposition_hint"
+      ]
+    },
+    {
+      "id": "F_O2",
+      "finding": "O2 is strong shard-1-local evidence for H_shard_policy but does not exclude a shared dependency; terminal synthesis still requires cross-shard and shared-control evidence.",
+      "evidence_refs": [
+        "fixture:O2"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_network_fabric",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_shard_policy",
+      "status": "OPEN"
+    }
+  ],
+  "unresolved_questions": [
+    "Do shard-local policy reverts reproduce the latency recovery independently across all six shards?",
+    "Does a shared-infrastructure control change latency while shard policies remain unchanged?"
+  ],
+  "evidence_refs": [
+    "fixture:O1",
+    "fixture:O2",
+    "fixture:O3",
+    "taxonomy_profile:expected_routing_signal"
+  ],
+  "candidate_actions": [
+    {
+      "process_id": "P1-E-002-leaf-s1",
+      "experiment_id": "E_revert_s1",
+      "leaf": "shard-1",
+      "status": "PENDING"
+    },
+    {
+      "process_id": "P1-E-002-leaf-s2",
+      "experiment_id": "E_revert_s2",
+      "leaf": "shard-2",
+      "status": "PENDING"
+    },
+    {
+      "process_id": "P1-E-002-leaf-s3",
+      "experiment_id": "E_revert_s3",
+      "leaf": "shard-3",
+      "status": "PENDING"
+    },
+    {
+      "process_id": "P1-E-002-leaf-s4",
+      "experiment_id": "E_revert_s4",
+      "leaf": "shard-4",
+      "status": "PENDING"
+    },
+    {
+      "process_id": "P1-E-002-leaf-s5",
+      "experiment_id": "E_revert_s5",
+      "leaf": "shard-5",
+      "status": "PENDING"
+    },
+    {
+      "process_id": "P1-E-002-leaf-s6",
+      "experiment_id": "E_revert_s6",
+      "leaf": "shard-6",
+      "status": "PENDING"
+    },
+    {
+      "process_id": "P1-E-002-leaf-shared",
+      "experiment_id": "E_scale_shared_db",
+      "leaf": "shared-control",
+      "status": "PENDING"
+    }
+  ],
+  "next_safe_action": "STOP. Await control evaluator publication for request screening-v1-P1-E-002-E_revert_s1-g0. Do not poll. Resume only from durable READY_TO_RESUME state in a fresh clean Instant chat as required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
-    "decomposition_count": 0,
-    "decomposition_depth": 0,
+    "decomposition_count": 1,
+    "decomposition_depth": 1,
     "failed_leaves": 0,
     "recovered_leaves": 0,
     "frontier_escalations": 0,
