@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -58,7 +58,7 @@
     "persistent_chat": true
   },
   "started_at": "2026-11-03T16:29:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-04T17:34:00-05:00",
   "invocations": [
     {
       "invocation_id": "screening-v1-P0-A-002-inv-01",
@@ -203,6 +203,21 @@
       "generation": 0,
       "invocation_id": "screening-v1-P0-A-002-inv-03",
       "evidence_ref_count": 4
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
     }
   ],
   "pending_external": null,
@@ -274,7 +289,7 @@
     "E_double_cpu"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop at TERMINAL_CANDIDATE. Control evaluator must score the submitted candidate and publish any validator result; worker must not self-validate or poll.",
+  "next_safe_action": "Screening run complete. Preserve this provenance-refrozen P0 run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_timeout_config",
     "rejected_hypotheses": [
@@ -291,7 +306,15 @@
     ],
     "rationale": "O1 shows a sharp failure boundary at the 5-second deadline rather than a gradual saturation pattern. Restoring the prior 12-second client timeout, with load and infrastructure fixed, allows p95 latency of 5100 ms while reducing timeout failures to 0.01, directly supporting a lowered client timeout as the causal mechanism. In the competing CPU test, doubling CPU while retaining the 5-second timeout leaves p95 at 5000 ms and the timeout failure rate at 0.39, so extra CPU does not materially remove the regression; O2 also shows CPU below 35% and queue occupancy below 40%. H_network is rejected as the primary mechanism because O2 reports packet loss below 0.1%, the failures align tightly to the 5-second threshold, and changing only the client timeout largely removes them."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 3,
     "experiment_requests": 2,
@@ -304,14 +327,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-A-002-exp-02",
-    "last_experiment_id": "E_double_cpu",
-    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/A_frontier_long_horizon/screen-002.json"
