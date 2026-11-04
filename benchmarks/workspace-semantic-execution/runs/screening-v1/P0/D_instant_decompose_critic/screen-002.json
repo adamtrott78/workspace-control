@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -65,14 +65,14 @@
       },
       {
         "role": "leaf_worker",
-        "status": "READY"
+        "status": "WAITING_EXTERNAL"
       }
     ],
     "active_role": null,
     "leaf_processes": [
       {
         "process_id": "screening-v1-P0-D-002-leaf-001",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "classification": "LEAF_EXECUTABLE",
         "objective": "Determine the primary mechanism causing the synthetic request timeout regression and justify the conclusion using at least two experiment/result cycles.",
         "inherited_constraints": [
@@ -134,6 +134,30 @@
         "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
         "taxonomy_profile_blob_sha:b887ff6e05e1076b44ac874d38d48ba8956bc109"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-D-002-leaf-worker-001",
+      "generation": 0,
+      "owner": "screening-v1-P0-D-002-leaf-worker-001",
+      "role": "leaf_worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
+        "experiment_id:E_restore_timeout"
+      ]
     }
   ],
   "events": [
@@ -153,21 +177,54 @@
       "generation": 0,
       "classification": "LEAF_EXECUTABLE",
       "process_id": "screening-v1-P0-D-002-leaf-001"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-002-leaf-worker-001",
+      "role": "leaf_worker"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-D-002-exp-001",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-002-leaf-worker-001",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P0-D-002-leaf-001",
+      "experiment_id": "E_restore_timeout",
+      "payload_ref": "experiment_id:E_restore_timeout"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-D-002-exp-001",
+    "kind": "EXPERIMENT",
+    "payload_ref": "experiment_id:E_restore_timeout",
+    "experiment_id": "E_restore_timeout",
+    "process_id": "screening-v1-P0-D-002-leaf-001",
+    "intervention": "Restore the prior 12-second client timeout while holding load and infrastructure fixed."
+  },
   "external_results": {},
   "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
+  "open_hypotheses": [
+    "H_timeout_config",
+    "H_cpu",
+    "H_network"
+  ],
+  "unresolved_questions": [
+    "Does restoring the prior 12-second client timeout eliminate the failures for requests exceeding 4.9 seconds while load and infrastructure remain fixed?"
+  ],
+  "evidence_refs": [
+    "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
+    "taxonomy_profile_blob_sha:b887ff6e05e1076b44ac874d38d48ba8956bc109",
+    "source_checkpoint_sha:052cf8224ec5a725e09207bde0bef8e43cefe8cb"
+  ],
   "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P0-D-002-leaf-001. Work one bounded quantum and request at most one external experiment before stopping.",
+  "next_safe_action": "Stop. Control evaluator must publish the result for request screening-v1-P0-D-002-exp-001 / E_restore_timeout into this assigned run state, with exact result_hash, and set READY_TO_RESUME. A fresh regular GPT-5.6 Sol Instant leaf_worker chat with Memory disabled before launch may then resume from durable state; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 0,
+    "reasoning_invocations": 2,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
