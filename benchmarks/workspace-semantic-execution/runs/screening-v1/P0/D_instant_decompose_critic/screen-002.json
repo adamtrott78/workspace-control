@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P0-D-002-leaf-worker-002",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -65,14 +65,14 @@
       },
       {
         "role": "leaf_worker",
-        "status": "READY"
+        "status": "RUNNING"
       }
     ],
-    "active_role": null,
+    "active_role": "leaf_worker",
     "leaf_processes": [
       {
         "process_id": "screening-v1-P0-D-002-leaf-001",
-        "status": "READY",
+        "status": "RUNNING",
         "classification": "LEAF_EXECUTABLE",
         "objective": "Determine the primary mechanism causing the synthetic request timeout regression and justify the conclusion using at least two experiment/result cycles.",
         "inherited_constraints": [
@@ -200,6 +200,12 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-002-leaf-worker-002",
+      "role": "leaf_worker"
     }
   ],
   "pending_external": null,
