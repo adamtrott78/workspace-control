@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
-  "owner": "gpt56-sol-instant-screening-v1-P0-E-002-q2",
+  "status": "READY_TO_RESUME",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -161,14 +161,16 @@
       "request_id": "screening-v1-P0-E-002-exp-002",
       "generation": 0,
       "payload_ref": "E_double_cpu"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-E-002-exp-002",
+      "generation": 0,
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-E-002-exp-002",
-    "generation": 0,
-    "kind": "experiment",
-    "payload_ref": "E_double_cpu"
-  },
+  "pending_external": null,
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-E-002-exp-001",
@@ -178,6 +180,16 @@
         "timeout_failure_rate": 0.01
       },
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    },
+    "E_double_cpu": {
+      "request_id": "screening-v1-P0-E-002-exp-002",
+      "experiment_id": "E_double_cpu",
+      "result": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39
+      },
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
       "publication_scope": "requested experiment only"
     }
   },
@@ -248,7 +260,7 @@
       "priority": "SECOND"
     }
   ],
-  "next_safe_action": "Stop reasoning while WAITING_EXTERNAL. After the control evaluator publishes E_double_cpu and sets READY_TO_RESUME, launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled; re-read durable state only, consume the published result, remain Instant unless durable control state explicitly authorizes escalation, and perform one bounded transition.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next lower-tier quantum. Re-read durable state only, consume the published E_double_cpu result, remain Instant with no High escalation authorized, persist one bounded transition, then stop at the next required boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -267,9 +279,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-E-002-exp-001",
-    "last_experiment_id": "E_restore_timeout",
-    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "last_request_id": "screening-v1-P0-E-002-exp-002",
+    "last_experiment_id": "E_double_cpu",
+    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
     "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
