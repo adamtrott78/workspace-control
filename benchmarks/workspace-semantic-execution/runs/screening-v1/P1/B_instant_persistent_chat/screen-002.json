@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-worker-screening-v1-P1-B-002",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -61,7 +61,34 @@
   },
   "started_at": "2026-11-04T18:18:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P1-B-002-q001",
+      "generation": 0,
+      "owner": "chatgpt-screening-worker-screening-v1-P1-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation.",
+        "github_available": true,
+        "prior_benchmark_control_context_present": false
+      },
+      "context_bytes": 902,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s1"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -77,21 +104,99 @@
       "kind": "EXECUTOR_IDENTITY_CAPTURED",
       "generation": 0,
       "identity_source": "user_attestation"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-B-002-exp-001",
+      "generation": 0,
+      "payload_ref": "E_revert_s1",
+      "experiment_id": "E_revert_s1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-B-002-exp-001",
+    "kind": "experiment",
+    "payload_ref": "E_revert_s1",
+    "experiment_id": "E_revert_s1"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Reason one bounded PRIMARY quantum and, if external evidence is required, request exactly one fixture experiment.",
+  "established_findings": [
+    {
+      "id": "O1",
+      "finding": "All six shards regressed together with p95 ~390-430 ms while CPU and queue occupancy remain moderate."
+    },
+    {
+      "id": "O2",
+      "finding": "Shard-1-only request-policy rollback lowers shard 1 to 205 ms while other shards remain degraded; strong local policy evidence but not sufficient to exclude a shared dependency."
+    },
+    {
+      "id": "O3",
+      "finding": "Baseline telemetry does not directly show shared DB saturation, network loss, or host CPU saturation."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_network_fabric",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_shard_policy",
+      "status": "SUPPORTED_LOCALLY_BY_O2_NOT_YET_GLOBAL"
+    }
+  ],
+  "unresolved_questions": [
+    "Does request-policy rollback independently recover each of shards 1-6?",
+    "Does at least one shared-infrastructure control materially improve latency with shard policies unchanged?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_revert_s1",
+      "status": "REQUESTED"
+    },
+    {
+      "experiment_id": "E_revert_s2",
+      "status": "PENDING"
+    },
+    {
+      "experiment_id": "E_revert_s3",
+      "status": "PENDING"
+    },
+    {
+      "experiment_id": "E_revert_s4",
+      "status": "PENDING"
+    },
+    {
+      "experiment_id": "E_revert_s5",
+      "status": "PENDING"
+    },
+    {
+      "experiment_id": "E_revert_s6",
+      "status": "PENDING"
+    },
+    {
+      "experiment_id": "E_scale_shared_db",
+      "status": "PENDING"
+    },
+    {
+      "experiment_id": "E_network_bypass",
+      "status": "ALTERNATE_SHARED_CONTROL"
+    }
+  ],
+  "next_safe_action": "Stop reasoning and wait for the control evaluator to publish the E_revert_s1 result into this run-state file and set READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
