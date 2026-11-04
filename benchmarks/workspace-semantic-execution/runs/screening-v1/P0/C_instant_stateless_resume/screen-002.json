@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "openai-gpt-5.6-sol-instant-screening-worker-q2",
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -102,6 +102,31 @@
       "evidence_refs": [
         "E_restore_timeout",
         "E_double_cpu"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-C-002-q2",
+      "generation": 0,
+      "owner": "openai-gpt-5.6-sol-instant-screening-worker-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "context_bytes": 1976,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:O2",
+        "external:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
       ]
     }
   ],
@@ -209,6 +234,16 @@
         "identity_source": "user_attestation",
         "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation."
       }
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "invocation_id": "screening-v1-P0-C-002-q2"
     }
   ],
   "pending_external": null,
@@ -246,55 +281,68 @@
     {
       "id": "F_q1_1",
       "finding": "Restoring the prior 12-second client timeout yields p95 latency 5100 ms with only a 0.01 timeout failure rate, despite p95 exceeding the prior 5-second boundary; this materially strengthens H_timeout_config."
+    },
+    {
+      "id": "F_q2_1",
+      "finding": "Doubling available CPU while retaining the 5-second timeout leaves a 0.39 timeout failure rate (p95 5000 ms), directly rejecting CPU saturation as the primary mechanism and, together with timeout restoration reducing failures to 0.01, isolating the lowered client timeout as primary."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "status": "leading_strengthened",
+      "status": "final_supported",
       "basis": [
         "O1",
         "O2",
-        "E_restore_timeout"
+        "E_restore_timeout",
+        "E_double_cpu"
       ]
     },
     {
       "id": "H_cpu",
-      "status": "competing_weakened_pending_direct_test",
+      "status": "rejected",
       "basis": [
         "O2",
-        "E_restore_timeout"
+        "E_restore_timeout",
+        "E_double_cpu"
       ]
     },
     {
       "id": "H_network",
-      "status": "competing_weakened",
+      "status": "competing_weakened_not_required_for_terminal",
       "basis": [
         "O2",
         "E_restore_timeout"
       ]
     }
   ],
-  "unresolved_questions": [
-    "Does doubling available CPU while retaining the 5-second timeout eliminate the sharp timeout failures? This second independent experiment/result cycle is required before any terminal claim."
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "fixture:O1",
     "fixture:O2",
-    "external:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    "external:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "external:E_double_cpu:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
-  "candidate_actions": [
-    {
-      "id": "E_double_cpu",
-      "priority": 1,
-      "rationale": "Second independent cycle directly tests the weakened CPU-saturation competitor while retaining the 5-second timeout; persistence of failures would reject H_cpu and further isolate timeout configuration as primary."
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 2. Re-read durable state only, consume the published E_double_cpu result, perform exactly one bounded reasoning quantum, persist continuation state, then stop.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Control evaluator must validate the terminal candidate; worker stops without polling or self-validation.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2"
+    ],
+    "rationale": "O1 shows failures pinned to the 5.0-second boundary, characteristic of a client deadline. Restoring the prior 12-second timeout while holding load and infrastructure fixed produced p95 latency 5100 ms with timeout failure rate 0.01, showing requests can complete healthily beyond five seconds. Independently, doubling CPU while retaining the 5-second timeout produced p95 5000 ms and timeout failure rate 0.39, so added CPU does not remove the boundary and H_cpu is rejected as the primary mechanism. O2's low CPU, queue occupancy, and packet loss further weakens CPU and network explanations. The combined evidence supports H_timeout_config as the primary cause."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
