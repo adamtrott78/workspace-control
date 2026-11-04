@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-v1-P1-A-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -67,7 +67,41 @@
   },
   "started_at": "2026-11-04T18:50:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P1-A-003-inv-001",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P1-A-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+          "Memory was disabled before this conversation was opened",
+          "GPT-5.6 Sol High was selected for this conversation"
+        ],
+        "observed_gates": {
+          "github_available": true,
+          "prior_benchmark_or_control_context_present": false
+        }
+      },
+      "context_bytes": 1608,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "public:O2",
+        "experiment:E_revert_s1"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -88,21 +122,124 @@
         "Memory was disabled before this conversation was opened",
         "GPT-5.6 Sol High was selected for this conversation"
       ]
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-003-exp-001",
+      "generation": 0,
+      "payload_ref": "E_revert_s1",
+      "experiment_id": "E_revert_s1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-A-003-exp-001",
+    "kind": "EXPERIMENT",
+    "payload_ref": "E_revert_s1",
+    "experiment_id": "E_revert_s1",
+    "fixture_id": "research-iterate-shard-rollout-p1-v1",
+    "leaf": "shard-1",
+    "intervention": "Revert only shard 1 request-policy configuration."
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol High chat with Memory disabled before launch and GitHub enabled. Read this run state first and follow the treatment contract exactly.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "evidence": [
+        "O1",
+        "O2"
+      ],
+      "finding": "The shard-1 policy rollback improves shard 1 only while the other five remain degraded, which is strong local evidence for a per-shard policy effect but is explicitly insufficient by itself to exclude a shared dependency."
+    },
+    {
+      "id": "F2",
+      "evidence": [
+        "O3"
+      ],
+      "finding": "Baseline telemetry does not directly show shared DB saturation, network loss, or host CPU saturation; these shared hypotheses remain testable rather than ruled out."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shard_policy",
+      "status": "supported_not_terminal"
+    },
+    {
+      "id": "H_shared_db",
+      "status": "open"
+    },
+    {
+      "id": "H_network_fabric",
+      "status": "open"
+    }
+  ],
+  "unresolved_questions": [
+    "Does the shard-1 rollback reproduce as a control-published experiment result?",
+    "Do shards 2-6 each improve under their own local policy rollback?",
+    "Does a shared-infrastructure control materially improve latency while shard policy remains unchanged?"
+  ],
+  "evidence_refs": [
+    "public:O1",
+    "public:O2",
+    "public:O3",
+    "experiment_request:screening-v1-P1-A-003-exp-001"
+  ],
+  "candidate_actions": [
+    {
+      "order": 1,
+      "kind": "experiment",
+      "experiment_id": "E_revert_s1",
+      "leaf": "shard-1",
+      "state": "pending"
+    },
+    {
+      "order": 2,
+      "kind": "experiment",
+      "experiment_id": "E_revert_s2",
+      "leaf": "shard-2",
+      "state": "planned"
+    },
+    {
+      "order": 3,
+      "kind": "experiment",
+      "experiment_id": "E_revert_s3",
+      "leaf": "shard-3",
+      "state": "planned"
+    },
+    {
+      "order": 4,
+      "kind": "experiment",
+      "experiment_id": "E_revert_s4",
+      "leaf": "shard-4",
+      "state": "planned"
+    },
+    {
+      "order": 5,
+      "kind": "experiment",
+      "experiment_id": "E_revert_s5",
+      "leaf": "shard-5",
+      "state": "planned"
+    },
+    {
+      "order": 6,
+      "kind": "experiment",
+      "experiment_id": "E_revert_s6",
+      "leaf": "shard-6",
+      "state": "planned"
+    },
+    {
+      "order": 7,
+      "kind": "experiment",
+      "experiment_id": "E_scale_shared_db",
+      "leaf": "shared-control",
+      "state": "planned"
+    }
+  ],
+  "next_safe_action": "STOP. Await a control-published result for screening-v1-P1-A-003-exp-001 (E_revert_s1); resume only after the run state is set to READY_TO_RESUME. Do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
