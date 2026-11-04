@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 2dd23aafae65de7274b424dddc5f3e15fc90d38c
+- Remote checkpoint: 283c4340cba1afbaca25905dca787b3a496a904f
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 PROVENANCE-REFROZEN SCREENING IN PROGRESS FROM VALIDATED FIRST-RESULT CHECKPOINT. Exact checkpoint 2dd23aafae65de7274b424dddc5f3e15fc90d38c passed Workspace Control Validation 41933218148 / #1943 SUCCESS. A/B/C/E have E_revert_s1 published and are READY_TO_RESUME; D decomposer is COMPLETE with seven READY leaf_worker processes. Resume A in the SAME GPT-5.6 Sol High persistent chat; B in the SAME GPT-5.6 Sol Instant persistent chat; C in a BRAND-NEW GPT-5.6 Sol Instant quantum-1 chat; D in exactly one BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for one READY process; E in a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat. Memory must be disabled before every new chat and GitHub enabled. E has no High escalation authorization. Continue servicing WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE boundaries directly from durable GitHub state.
+P1 screening continues from validated checkpoint 283c4340cba1afbaca25905dca787b3a496a904f. A/B resume same persistent chats after E_revert_s2. C uses a brand-new Instant chat for quantum 2. D uses a brand-new Instant leaf_worker chat for screening-v1-P1-D-002-leaf-001 to consume E_revert_s1 and persist its conclusion. E uses a brand-new Instant lower-tier chat after E_revert_s2; High is not authorized.
 
 ## Remaining work
 
