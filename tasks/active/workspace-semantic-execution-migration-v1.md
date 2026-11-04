@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 63e311fe6ccbb8b70de78234ce46955402b9264b
+- Remote checkpoint: 2563ee42ae29693030c21767836f2cbe59f96bbc
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-CONTROL/OPERATOR RESUME FROM VALIDATED P0 D-ONLY CHECKPOINT. Exact operational checkpoint 63e311fe6ccbb8b70de78234ce46955402b9264b passed Workspace Control Validation 41929877198 / #1926 SUCCESS. A screening-v1-P0-A-002, B screening-v1-P0-B-004, C screening-v1-P0-C-002, and E screening-v1-P0-E-002 are COMPLETED with objective validator score 1.0 and remain non-claim-bearing protocol-screening evidence only. D screening-v1-P0-D-002 is READY_TO_RESUME and MUST use a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for process screening-v1-P0-D-002-leaf-001. E_double_cpu is already published for D; do not replay any external result. The worker must re-read durable state only, work one bounded leaf quantum, persist the leaf conclusion or next required boundary, and stop.
+CONTROL/OPERATOR RESUME FROM VALIDATED P0 D CRITIC-HANDOFF CHECKPOINT. Exact operational checkpoint 2563ee42ae29693030c21767836f2cbe59f96bbc passed Workspace Control Validation 41930373147 / #1929 SUCCESS. A/B/C/E remain COMPLETED with objective validator score 1.0 and are non-claim-bearing protocol-screening evidence only. D screening-v1-P0-D-002 is READY_TO_RESUME with leaf_worker COMPLETE and independent_critic READY. Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled in role independent_critic. The critic must re-read durable state only, independently review the leaf conclusion against the two exact published result hashes and public fixture contract, persist critique and the next durable role handoff, then stop. Do not replay external results and do not self-validate.
 
 ## Remaining work
 
