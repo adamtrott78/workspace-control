@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P1-D-002-leaf-001-g0",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -65,7 +65,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-001",
-        "status": "READY"
+        "status": "RUNNING"
       },
       {
         "role": "leaf_worker",
@@ -106,14 +106,19 @@
         "status": "NOT_READY"
       }
     ],
-    "active_role": null,
+    "active_role": {
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "worker_id": "screening-v1-P1-D-002-leaf-001-g0",
+      "generation": 0
+    },
     "leaf_processes": [
       {
         "process_id": "screening-v1-P1-D-002-leaf-001",
         "leaf": "shard-1",
-        "status": "READY",
+        "status": "RUNNING",
         "generation": 0,
-        "owner": null,
+        "owner": "screening-v1-P1-D-002-leaf-001-g0",
         "objective": "Test whether reverting only shard-1 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
         "candidate_experiment_id": "E_revert_s1",
         "evidence_refs": [],
@@ -257,6 +262,13 @@
       "generation": 0,
       "role": "decomposer",
       "outcome": "DECOMPOSED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-001-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001"
     }
   ],
   "pending_external": null,
@@ -410,5 +422,5 @@
       "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
     }
   },
-  "active_role": null
+  "active_role": "leaf_worker"
 }
