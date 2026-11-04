@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -141,13 +141,16 @@
       "request_id": "screening-v1-P0-B-004-exp-2",
       "generation": 0,
       "payload_ref": "E_double_cpu"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-B-004-exp-2",
+      "generation": 0,
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P0-B-004-exp-2",
-    "kind": "experiment",
-    "payload_ref": "E_double_cpu"
-  },
+  "pending_external": null,
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-B-004-exp-1",
@@ -157,6 +160,16 @@
         "timeout_failure_rate": 0.01
       },
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    },
+    "E_double_cpu": {
+      "request_id": "screening-v1-P0-B-004-exp-2",
+      "experiment_id": "E_double_cpu",
+      "result": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39
+      },
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
       "publication_scope": "requested experiment only"
     }
   },
@@ -212,7 +225,7 @@
       "rationale": "Directly tests H_cpu while retaining the 5-second timeout; if failures persist despite doubled CPU, CPU saturation is rejected as the primary mechanism."
     }
   ],
-  "next_safe_action": "Wait for the control evaluator to publish the E_double_cpu result into this run state; do not poll.",
+  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / Instant persistent chat. Re-read this run state, consume only the published E_double_cpu result, continue the treatment, and stop again at the next external or terminal-validation boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -230,11 +243,11 @@
     "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_NEEDED",
-    "last_request_id": "screening-v1-P0-B-004-exp-1",
-    "last_experiment_id": "E_restore_timeout",
-    "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
-    "note": "Second requested experiment E_double_cpu now requires control publication. Worker must not poll or access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P0-B-004-exp-2",
+    "last_experiment_id": "E_double_cpu",
+    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-004.json"
