@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -90,6 +90,28 @@
         "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "E_double_cpu"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-B-004-inv-3",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-B-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat"
+      },
+      "context_bytes": 2100,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
     }
   ],
   "events": [
@@ -148,6 +170,20 @@
       "generation": 0,
       "experiment_id": "E_double_cpu",
       "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-B-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0
     }
   ],
   "pending_external": null,
@@ -185,51 +221,70 @@
     {
       "id": "F3",
       "statement": "E_restore_timeout restored the prior 12-second client timeout while holding load and infrastructure fixed; the control-published result reports p95_latency_ms=5100 and timeout_failure_rate=0.01 (result_hash 3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368). This is consistent with requests needing slightly more than 5 seconds and completing when the client cutoff is relaxed."
+    },
+    {
+      "id": "F4",
+      "statement": "E_double_cpu doubled CPU while retaining the 5-second timeout; the control-published result reports p95_latency_ms=5000 and timeout_failure_rate=0.39 (result_hash cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e). The timeout regression therefore persists despite added CPU, rejecting CPU saturation as the primary mechanism."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "status": "strongly_supported",
+      "status": "selected",
       "statement": "A newly lowered client timeout is terminating otherwise healthy requests."
     },
     {
       "id": "H_cpu",
-      "status": "competing_under_test",
+      "status": "rejected_primary",
       "statement": "CPU saturation is causing requests to exceed their deadline."
     },
     {
       "id": "H_network",
-      "status": "weakened_by_O2",
+      "status": "rejected_primary",
       "statement": "Network loss is causing retransmissions and deadline failures."
     }
   ],
-  "unresolved_questions": [
-    "With the 5-second timeout unchanged, does doubling available CPU materially reduce the timeout regression?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "O1",
     "O2",
-    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
   "candidate_actions": [
     {
       "experiment_id": "E_restore_timeout",
       "status": "OBSERVED",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
-      "interpretation": "Supports H_timeout_config because requests with p95 around 5.1 seconds largely complete after the timeout is restored to 12 seconds."
+      "interpretation": "Supports H_timeout_config: with the prior 12-second timeout restored, p95 latency is 5.1 seconds and timeout failures fall to 1%."
     },
     {
       "experiment_id": "E_double_cpu",
-      "status": "REQUESTED",
-      "rationale": "Directly tests H_cpu while retaining the 5-second timeout; if failures persist despite doubled CPU, CPU saturation is rejected as the primary mechanism."
+      "status": "OBSERVED",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+      "interpretation": "Rejects H_cpu as the primary mechanism: with the 5-second timeout retained, doubling CPU leaves a 39% timeout failure rate at p95 5.0 seconds."
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / Instant persistent chat. Re-read this run state, consume only the published E_double_cpu result, continue the treatment, and stop again at the next external or terminal-validation boundary.",
-  "terminal_submission": null,
+  "next_safe_action": "Stop and wait for the control evaluator to validate the terminal candidate; do not self-validate or poll.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu",
+      "H_network"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2"
+    ],
+    "rationale": "O1 identifies a sharp failure boundary at 5.0 seconds, matching the lowered client timeout. Restoring the prior 12-second timeout while holding load and infrastructure fixed yields p95 latency of 5.1 seconds with only a 1% timeout failure rate, showing that requests just beyond 5 seconds are otherwise healthy and complete when the cutoff is relaxed. Conversely, doubling CPU while retaining the 5-second timeout leaves p95 at 5.0 seconds and a 39% timeout failure rate, rejecting CPU saturation as the primary mechanism. O2 independently reports low CPU utilization, low queue occupancy, and negligible packet loss, which also rejects network loss as the primary mechanism. The primary mechanism is therefore the lowered client timeout."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
@@ -243,11 +298,11 @@
     "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "status": "TERMINAL_VALIDATION_NEEDED",
     "last_request_id": "screening-v1-P0-B-004-exp-2",
     "last_experiment_id": "E_double_cpu",
     "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
+    "note": "Worker submitted terminal candidate after two published experiment cycles. Control evaluator must validate; worker must not self-validate or poll."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-004.json"
