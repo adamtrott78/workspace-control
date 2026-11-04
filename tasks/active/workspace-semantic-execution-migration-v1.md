@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 6d70258628228bb1f265a24c59ef3baef04fc296
+- Remote checkpoint: 9b1c5f450fbb7b87677095eea52d8145ebcebb5f
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 screening recovery checkpoint: A/B screen-002 are FAILED due PERSISTENT_CHAT_CONTINUITY_LOST and must not resume; fresh replacement slots A screen-003 (High persistent) and B screen-003 (Instant persistent) are READY. C screen-002 is READY_TO_RESUME in a brand-new Instant quantum-3 chat after E_revert_s3. D screen-002 has leaf-001 COMPLETED; launch a brand-new Instant leaf_worker chat for leaf-002. E screen-002 is READY_TO_RESUME in a brand-new Instant lower-tier chat after E_revert_s3; High remains unauthorized.
+P1 screening continues from validated recovery checkpoint 9b1c5f450fbb7b87677095eea52d8145ebcebb5f / Workspace Control Validation 41937268610 #1985 SUCCESS. A screen-003 and B screen-003 are READY_TO_RESUME in their same persistent chats after E_revert_s1. C screen-002 is READY_TO_RESUME and must use a brand-new GPT-5.6 Sol Instant chat for quantum 4 after E_revert_s4. D screen-002 is READY_TO_RESUME and must use a brand-new GPT-5.6 Sol Instant leaf_worker chat for leaf-002 to consume E_revert_s2 and persist its conclusion. E screen-002 is FAILED because it violated the frozen WAITING_EXTERNAL transition contract; replacement E screen-003 is READY and must start in a brand-new GPT-5.6 Sol Instant lower-tier chat. High is not authorized for E.
 
 ## Remaining work
 
