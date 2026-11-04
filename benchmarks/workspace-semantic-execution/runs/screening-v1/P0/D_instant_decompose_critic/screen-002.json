@@ -69,7 +69,7 @@
       },
       {
         "role": "independent_critic",
-        "status": "READY"
+        "status": "COMPLETE"
       }
     ],
     "active_role": null,
@@ -122,17 +122,33 @@
       }
     ],
     "independent_critic": {
-      "status": "READY",
+      "status": "COMPLETE",
+      "verdict": "APPROVE_FOR_SYNTHESIS",
+      "process_id": "screening-v1-P0-D-002-leaf-001",
+      "reviewed_candidate_kind": "PROPOSED_SYNTHESIS_FOR_CRITIC",
+      "findings": [
+        "The candidate satisfies the public fixture contract: two unique experiment/result cycles are retained by exact raw result_hash strings, at least one competing hypothesis (H_cpu) is rejected, O1 is explicitly addressed, and all required terminal fields are present.",
+        "E_restore_timeout is causally discriminating for H_timeout_config: restoring the prior 12-second timeout while holding load and infrastructure fixed reduced timeout_failure_rate to 0.01 while p95 latency remained 5100 ms, which is above the original 5-second cutoff.",
+        "E_double_cpu is causally discriminating against H_cpu as the primary mechanism: doubling CPU with the 5-second timeout unchanged left timeout_failure_rate at 0.39 and p95_latency_ms at 5000.",
+        "H_network remains untested by an intervention, but the fixture requires rejection of at least one competing hypothesis rather than all alternatives; O2 also reports packet loss below 0.1%. This does not block the proposed primary-mechanism conclusion."
+      ],
       "evidence_refs": [
+        "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
         "experiment_id:E_restore_timeout",
         "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "experiment_id:E_double_cpu",
         "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
-      ]
+      ],
+      "required_changes": [],
+      "rationale": "The proposed synthesis is evidence-grounded and appropriately scoped to the primary mechanism. The intervention contrast directly supports H_timeout_config and rejects H_cpu as primary. No unsupported experiment result is introduced, and observed_results uses the exact required experiment_id-to-raw-result_hash shape."
     },
     "synthesizer": {
-      "status": "NOT_READY",
-      "evidence_refs": []
+      "status": "READY",
+      "evidence_refs": [
+        "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+        "critic_invocation_id:screening-v1-P0-D-002-independent-critic-001"
+      ]
     }
   },
   "started_at": "2026-11-03T16:30:00-05:00",
@@ -236,6 +252,33 @@
         "experiment_id:E_double_cpu",
         "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-D-002-independent-critic-001",
+      "generation": 0,
+      "owner": "screening-v1-P0-D-002-independent-critic-001",
+      "role": "independent_critic",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "CRITIQUE_COMPLETE",
+      "evidence_refs": [
+        "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
+        "experiment_id:E_restore_timeout",
+        "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "experiment_id:E_double_cpu",
+        "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
     }
   ],
   "events": [
@@ -322,6 +365,24 @@
         "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
         "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
       ]
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-002-independent-critic-001",
+      "role": "independent_critic"
+    },
+    {
+      "kind": "INDEPENDENT_CRITIQUE",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-002-independent-critic-001",
+      "role": "independent_critic",
+      "process_id": "screening-v1-P0-D-002-leaf-001",
+      "verdict": "APPROVE_FOR_SYNTHESIS",
+      "evidence_refs": [
+        "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
     }
   ],
   "pending_external": null,
@@ -368,7 +429,7 @@
     "H_network"
   ],
   "unresolved_questions": [
-    "Independent critic must review the durable leaf conclusion and evidence before any terminal synthesis."
+    "Synthesizer must produce the terminal candidate from durable evidence and the independent critique in a separate fresh role invocation."
   ],
   "evidence_refs": [
     "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
@@ -397,13 +458,37 @@
         ],
         "rationale": "O1 shows a sharp 5.0-second failure boundary. Restoring the prior 12-second timeout reduced timeout_failure_rate to 0.01 at p95_latency_ms 5100, whereas doubling CPU while retaining the 5-second timeout left timeout_failure_rate high at 0.39 with p95_latency_ms 5000. The intervention contrast supports a client-timeout configuration regression as the primary mechanism and rejects CPU saturation as the competing primary cause."
       }
+    },
+    {
+      "kind": "INDEPENDENT_CRITIQUE_FOR_SYNTHESIZER",
+      "process_id": "screening-v1-P0-D-002-leaf-001",
+      "critique": {
+        "verdict": "APPROVE_FOR_SYNTHESIS",
+        "process_id": "screening-v1-P0-D-002-leaf-001",
+        "reviewed_candidate_kind": "PROPOSED_SYNTHESIS_FOR_CRITIC",
+        "findings": [
+          "The candidate satisfies the public fixture contract: two unique experiment/result cycles are retained by exact raw result_hash strings, at least one competing hypothesis (H_cpu) is rejected, O1 is explicitly addressed, and all required terminal fields are present.",
+          "E_restore_timeout is causally discriminating for H_timeout_config: restoring the prior 12-second timeout while holding load and infrastructure fixed reduced timeout_failure_rate to 0.01 while p95 latency remained 5100 ms, which is above the original 5-second cutoff.",
+          "E_double_cpu is causally discriminating against H_cpu as the primary mechanism: doubling CPU with the 5-second timeout unchanged left timeout_failure_rate at 0.39 and p95_latency_ms at 5000.",
+          "H_network remains untested by an intervention, but the fixture requires rejection of at least one competing hypothesis rather than all alternatives; O2 also reports packet loss below 0.1%. This does not block the proposed primary-mechanism conclusion."
+        ],
+        "evidence_refs": [
+          "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
+          "experiment_id:E_restore_timeout",
+          "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+          "experiment_id:E_double_cpu",
+          "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+        ],
+        "required_changes": [],
+        "rationale": "The proposed synthesis is evidence-grounded and appropriately scoped to the primary mechanism. The intervention contrast directly supports H_timeout_config and rejects H_cpu as primary. No unsupported experiment result is introduced, and observed_results uses the exact required experiment_id-to-raw-result_hash shape."
+      }
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled in role independent_critic. Re-read durable state only, independently review the proposed synthesis against the two exact published result hashes and fixture contract, persist critique, then stop.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled in role synthesizer. Re-read durable state only, produce the terminal candidate from the approved durable synthesis/evidence and independent critique, persist it, then stop for control-evaluator validation.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 4,
+    "reasoning_invocations": 5,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
