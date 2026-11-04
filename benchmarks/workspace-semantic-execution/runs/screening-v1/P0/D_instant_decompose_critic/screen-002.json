@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P0-D-002-leaf-worker-003",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -65,14 +65,14 @@
       },
       {
         "role": "leaf_worker",
-        "status": "READY"
+        "status": "RUNNING"
       }
     ],
-    "active_role": null,
+    "active_role": "leaf_worker",
     "leaf_processes": [
       {
         "process_id": "screening-v1-P0-D-002-leaf-001",
-        "status": "READY",
+        "status": "RUNNING",
         "classification": "LEAF_EXECUTABLE",
         "objective": "Determine the primary mechanism causing the synthetic request timeout regression and justify the conclusion using at least two experiment/result cycles.",
         "inherited_constraints": [
@@ -248,6 +248,12 @@
       "generation": 0,
       "experiment_id": "E_double_cpu",
       "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-002-leaf-worker-003",
+      "role": "leaf_worker"
     }
   ],
   "pending_external": null,
@@ -299,7 +305,7 @@
     "experiment_id:E_double_cpu"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P0-D-002-leaf-001. Re-read durable state only, consume the published E_double_cpu result, work one bounded leaf quantum, persist the leaf conclusion or next protocol-required boundary, then stop.",
+  "next_safe_action": "Consume the already control-published E_double_cpu result, complete one bounded leaf-worker quantum, persist the leaf conclusion and hand off durably to an independent critic.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
