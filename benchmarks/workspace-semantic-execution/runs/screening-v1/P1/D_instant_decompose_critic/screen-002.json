@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P1-D-002-leaf-001-g0",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -65,7 +65,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-001",
-        "status": "RUNNING"
+        "status": "WAITING_EXTERNAL"
       },
       {
         "role": "leaf_worker",
@@ -106,24 +106,19 @@
         "status": "NOT_READY"
       }
     ],
-    "active_role": {
-      "role": "leaf_worker",
-      "process_id": "screening-v1-P1-D-002-leaf-001",
-      "worker_id": "screening-v1-P1-D-002-leaf-001-g0",
-      "generation": 0
-    },
+    "active_role": null,
     "leaf_processes": [
       {
         "process_id": "screening-v1-P1-D-002-leaf-001",
         "leaf": "shard-1",
-        "status": "RUNNING",
+        "status": "WAITING_EXTERNAL",
         "generation": 0,
-        "owner": "screening-v1-P1-D-002-leaf-001-g0",
+        "owner": null,
         "objective": "Test whether reverting only shard-1 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
         "candidate_experiment_id": "E_revert_s1",
         "evidence_refs": [],
         "established_findings": [],
-        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-001."
+        "next_safe_action": "Stop. Wait for the control evaluator to publish the E_revert_s1 result into this run state and set READY_TO_RESUME; do not poll."
       },
       {
         "process_id": "screening-v1-P1-D-002-leaf-002",
@@ -226,6 +221,19 @@
         "screening-v1-P1-D-002-leaf-007"
       ],
       "external_experiment_requested": false
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "worker_id": "screening-v1-P1-D-002-leaf-001-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s1",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s1"
+      ]
     }
   ],
   "events": [
@@ -269,9 +277,24 @@
       "worker_id": "screening-v1-P1-D-002-leaf-001-g0",
       "role": "leaf_worker",
       "process_id": "screening-v1-P1-D-002-leaf-001"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "experiment_id": "E_revert_s1",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
+    "kind": "EXPERIMENT",
+    "process_id": "screening-v1-P1-D-002-leaf-001",
+    "experiment_id": "E_revert_s1",
+    "payload_ref": "fixture:experiment_catalog:E_revert_s1"
+  },
   "external_results": {},
   "established_findings": [
     {
@@ -357,12 +380,12 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Stop this decomposer chat. Launch exactly one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for one READY leaf_worker process; that leaf worker may request at most one external experiment and must persist its state before stopping.",
+  "next_safe_action": "Control evaluator: publish the pending E_revert_s1 result into this same run-state file, clear pending_external, and set READY_TO_RESUME. Worker must not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 0,
+    "reasoning_invocations": 2,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -422,5 +445,5 @@
       "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
     }
   },
-  "active_role": "leaf_worker"
+  "active_role": null
 }
