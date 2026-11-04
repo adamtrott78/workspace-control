@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-v1-P1-A-002-g0",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -110,6 +110,31 @@
       "evidence_refs": [
         "E_revert_s2"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-A-002-inv-003",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P1-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation."
+      },
+      "context_bytes": 3376,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s3"
+      ]
     }
   ],
   "events": [
@@ -175,9 +200,24 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "chatgpt-screening-v1-P1-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-002-req-003",
+      "generation": 0,
+      "payload_ref": "E_revert_s3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-A-002-req-003",
+    "kind": "fixture_experiment",
+    "payload_ref": "E_revert_s3"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-A-002-req-001",
@@ -219,6 +259,11 @@
       "id": "F_E_revert_s1",
       "finding": "Control-published E_revert_s1 result: shard 1 p95 latency is 205 ms after reverting only shard 1 request-policy configuration, and other shards do not change.",
       "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "id": "F_E_revert_s2",
+      "finding": "Control-published E_revert_s2 result: shard 2 p95 latency is 211 ms after reverting only shard 2 request-policy configuration, and other shards do not change.",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
     }
   ],
   "open_hypotheses": [
@@ -236,20 +281,17 @@
     }
   ],
   "unresolved_questions": [
-    "Do controlled request-policy reverts independently recover shards 2 through 6?",
+    "Do controlled request-policy reverts independently recover shards 3 through 6?",
     "Does scaling shared database capacity materially improve latency while shard policies remain unchanged?"
   ],
   "evidence_refs": [
     "O1",
     "O2",
     "O3",
-    "E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    "E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
   ],
   "candidate_actions": [
-    {
-      "experiment_id": "E_revert_s2",
-      "purpose": "Test shard-2 local policy causality independently."
-    },
     {
       "experiment_id": "E_revert_s3",
       "purpose": "Test shard-3 local policy causality independently."
@@ -271,12 +313,12 @@
       "purpose": "Provide the required shared-infrastructure control and directly discriminate H_shared_db."
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / High persistent chat. Re-read durable state, consume only E_revert_s2, continue with the next unobserved experiment, and stop at the next external or terminal boundary.",
+  "next_safe_action": "Await the control-published result for E_revert_s3. Do not poll. After READY_TO_RESUME, consume only that published result and continue with the next unobserved experiment in the remaining shard reverts plus E_scale_shared_db plan.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 2,
+    "reasoning_invocations": 3,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
