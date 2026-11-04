@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-v1-P0-A-002-g0",
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -107,6 +107,33 @@
       "evidence_refs": [
         "E_double_cpu"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-A-002-inv-03",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation"
+      },
+      "context_bytes": 2824,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "E_restore_timeout",
+        "E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -165,6 +192,17 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "chatgpt-screening-v1-P0-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "invocation_id": "screening-v1-P0-A-002-inv-03",
+      "evidence_ref_count": 4
     }
   ],
   "pending_external": null,
@@ -206,41 +244,56 @@
       "statement": "Restoring the prior 12-second client timeout while load and infrastructure remain fixed yields p95 latency 5100 ms with timeout failure rate 0.01, strongly supporting the client-timeout configuration as the primary mechanism.",
       "source": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "id": "F_E_double_cpu",
+      "statement": "Doubling available CPU while keeping the 5-second timeout unchanged yields p95 latency 5000 ms with timeout failure rate 0.39; CPU capacity therefore does not materially remove the regression and is rejected as the primary mechanism.",
+      "source": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "status": "supported_by_E_restore_timeout"
+      "status": "supported_primary_by_E_restore_timeout_and_E_double_cpu"
     },
     {
       "id": "H_cpu",
-      "status": "competing_test_next"
+      "status": "rejected_by_E_double_cpu"
     },
     {
       "id": "H_network",
-      "status": "competing"
+      "status": "rejected_as_primary_by_O2_and_timeout_intervention"
     }
   ],
-  "unresolved_questions": [
-    "Does doubling available CPU while keeping the 5-second timeout unchanged materially reduce the timeout regression?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "O1",
     "O2",
-    "E_restore_timeout"
+    "E_restore_timeout",
+    "E_double_cpu"
   ],
-  "candidate_actions": [
-    {
-      "experiment_id": "E_double_cpu",
-      "reason": "Second required experiment cycle; directly tests the CPU-saturation competitor while preserving the 5-second timeout."
-    }
-  ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / High persistent chat. Re-read this run state, consume only the published E_double_cpu result, continue the treatment, and stop again at the next external or terminal-validation boundary.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Stop at TERMINAL_CANDIDATE. Control evaluator must score the submitted candidate and publish any validator result; worker must not self-validate or poll.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu",
+      "H_network"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2"
+    ],
+    "rationale": "O1 shows a sharp failure boundary at the 5-second deadline rather than a gradual saturation pattern. Restoring the prior 12-second client timeout, with load and infrastructure fixed, allows p95 latency of 5100 ms while reducing timeout failures to 0.01, directly supporting a lowered client timeout as the causal mechanism. In the competing CPU test, doubling CPU while retaining the 5-second timeout leaves p95 at 5000 ms and the timeout failure rate at 0.39, so extra CPU does not materially remove the regression; O2 also shows CPU below 35% and queue occupancy below 40%. H_network is rejected as the primary mechanism because O2 reports packet loss below 0.1%, the failures align tightly to the 5-second threshold, and changing only the client timeout largely removes them."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
