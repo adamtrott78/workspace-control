@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "WAITING_EXTERNAL",
+  "owner": "screening-v1-P1-D-002-leaf-002-g0",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -70,7 +70,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-002",
-        "status": "READY"
+        "status": "WAITING_EXTERNAL"
       },
       {
         "role": "leaf_worker",
@@ -106,7 +106,12 @@
         "status": "NOT_READY"
       }
     ],
-    "active_role": null,
+    "active_role": {
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "worker_id": "screening-v1-P1-D-002-leaf-002-g0",
+      "generation": 0
+    },
     "leaf_processes": [
       {
         "process_id": "screening-v1-P1-D-002-leaf-001",
@@ -142,14 +147,16 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-002",
         "leaf": "shard-2",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "generation": 0,
-        "owner": null,
+        "owner": "screening-v1-P1-D-002-leaf-002-g0",
         "objective": "Test whether reverting only shard-2 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
         "candidate_experiment_id": "E_revert_s2",
-        "evidence_refs": [],
+        "evidence_refs": [
+          "fixture:experiment_catalog:E_revert_s2"
+        ],
         "established_findings": [],
-        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-002."
+        "next_safe_action": "Wait for the control evaluator to publish E_revert_s2 into this run state; do not poll or perform further work in this worker session."
       },
       {
         "process_id": "screening-v1-P1-D-002-leaf-003",
@@ -267,6 +274,19 @@
         "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
         "fixture:starting_observations:O2"
       ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "worker_id": "screening-v1-P1-D-002-leaf-002-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s2",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s2"
+      ]
     }
   ],
   "events": [
@@ -356,9 +376,32 @@
       "role": "leaf_worker",
       "process_id": "screening-v1-P1-D-002-leaf-001",
       "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-002-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "experiment_id": "E_revert_s2",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
+    "generation": 0,
+    "role": "leaf_worker",
+    "process_id": "screening-v1-P1-D-002-leaf-002",
+    "experiment_id": "E_revert_s2",
+    "payload_ref": "fixture:experiment_catalog:E_revert_s2"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
@@ -427,7 +470,8 @@
     "After all required durable evidence is collected, which competing hypotheses can be rejected?"
   ],
   "evidence_refs": [
-    "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "fixture:experiment_catalog:E_revert_s2"
   ],
   "candidate_actions": [
     {
@@ -466,12 +510,12 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled for the next READY leaf process; this leaf_worker session must stop.",
+  "next_safe_action": "Control evaluator must service pending E_revert_s2; this leaf_worker session must stop without polling.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 3,
-    "experiment_requests": 1,
+    "reasoning_invocations": 4,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -484,11 +528,11 @@
     "deterministic_compute_operations": 2
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
-    "last_experiment_id": "E_revert_s1",
-    "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
-    "note": "Requested experiment result published."
+    "status": "EXTERNAL_REQUEST_PENDING",
+    "last_request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
+    "last_experiment_id": "E_revert_s2",
+    "result_hash": null,
+    "note": "Leaf worker requested one experiment and stopped."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/D_instant_decompose_critic/screen-002.json"
@@ -534,5 +578,10 @@
       "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
     }
   },
-  "active_role": null
+  "active_role": {
+    "role": "leaf_worker",
+    "process_id": "screening-v1-P1-D-002-leaf-002",
+    "worker_id": "screening-v1-P1-D-002-leaf-002-g0",
+    "generation": 0
+  }
 }
