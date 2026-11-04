@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P0-D-002-leaf-worker-002",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -65,14 +65,14 @@
       },
       {
         "role": "leaf_worker",
-        "status": "RUNNING"
+        "status": "WAITING_EXTERNAL"
       }
     ],
-    "active_role": "leaf_worker",
+    "active_role": null,
     "leaf_processes": [
       {
         "process_id": "screening-v1-P0-D-002-leaf-001",
-        "status": "RUNNING",
+        "status": "WAITING_EXTERNAL",
         "classification": "LEAF_EXECUTABLE",
         "objective": "Determine the primary mechanism causing the synthetic request timeout regression and justify the conclusion using at least two experiment/result cycles.",
         "inherited_constraints": [
@@ -158,6 +158,31 @@
         "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
         "experiment_id:E_restore_timeout"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-D-002-leaf-worker-002",
+      "generation": 0,
+      "owner": "screening-v1-P0-D-002-leaf-worker-002",
+      "role": "leaf_worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "experiment_id:E_restore_timeout",
+        "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "experiment_id:E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -206,9 +231,27 @@
       "generation": 0,
       "worker_id": "screening-v1-P0-D-002-leaf-worker-002",
       "role": "leaf_worker"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-D-002-exp-002",
+      "generation": 0,
+      "worker_id": "screening-v1-P0-D-002-leaf-worker-002",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P0-D-002-leaf-001",
+      "experiment_id": "E_double_cpu",
+      "payload_ref": "experiment_id:E_double_cpu"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-D-002-exp-002",
+    "generation": 0,
+    "worker_id": "screening-v1-P0-D-002-leaf-worker-002",
+    "role": "leaf_worker",
+    "process_id": "screening-v1-P0-D-002-leaf-001",
+    "experiment_id": "E_double_cpu",
+    "payload_ref": "experiment_id:E_double_cpu"
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-D-002-exp-001",
@@ -221,27 +264,38 @@
       "publication_scope": "requested experiment only"
     }
   },
-  "established_findings": [],
+  "established_findings": [
+    {
+      "finding": "Restoring the prior 12-second client timeout while holding load and infrastructure fixed reduced timeout_failure_rate to 0.01 with p95_latency_ms 5100, supporting H_timeout_config and directly addressing the 5.0-second cutoff pattern in O1.",
+      "evidence_refs": [
+        "experiment_id:E_restore_timeout",
+        "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+      ]
+    }
+  ],
   "open_hypotheses": [
     "H_timeout_config",
     "H_cpu",
     "H_network"
   ],
   "unresolved_questions": [
-    "Does restoring the prior 12-second client timeout eliminate the failures for requests exceeding 4.9 seconds while load and infrastructure remain fixed?"
+    "Does doubling available CPU while keeping the 5-second timeout unchanged materially reduce the timeout failures, or do failures persist at the configured deadline?"
   ],
   "evidence_refs": [
     "fixture_blob_sha:b33e0afa98d0051e5f41241eead770622c2c9eb0",
     "taxonomy_profile_blob_sha:b887ff6e05e1076b44ac874d38d48ba8956bc109",
-    "source_checkpoint_sha:052cf8224ec5a725e09207bde0bef8e43cefe8cb"
+    "source_checkpoint_sha:052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+    "experiment_id:E_restore_timeout",
+    "result_hash:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "experiment_id:E_double_cpu"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P0-D-002-leaf-001. Re-read durable state only, consume the published E_restore_timeout result, work one bounded leaf quantum, request at most one external experiment, then stop.",
+  "next_safe_action": "Stop. Wait for the control evaluator to publish the E_double_cpu result into this assigned run state and set READY_TO_RESUME. Resume only in a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 1,
+    "reasoning_invocations": 3,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
