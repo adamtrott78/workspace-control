@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "WAITING_EXTERNAL",
+  "owner": "gpt56-sol-instant-screening-v1-P0-E-002-q2",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -61,6 +61,14 @@
         "classification": "ATOMIC_NOT_TOO_LARGE",
         "reasoning": "O1's sharp ~5.0s failure boundary with low CPU/queue/loss makes the timeout configuration hypothesis the leading explanation. Restoring the prior 12-second timeout while holding load/infrastructure fixed is the most direct first discriminating intervention.",
         "selected_experiment": "E_restore_timeout",
+        "outcome": "WAITING_EXTERNAL"
+      },
+      {
+        "attempt_id": "instant-q2",
+        "generation": 0,
+        "classification": "ATOMIC_NOT_TOO_LARGE",
+        "reasoning": "E_restore_timeout reduced timeout failures to 0.01 while p95 latency remained 5.1s, strongly supporting H_timeout_config. The fixture requires at least two experiment/result cycles before a terminal claim. Doubling CPU while keeping the 5-second timeout unchanged is a direct second discriminating test of the weakened H_cpu competitor; no decomposition or High escalation is justified.",
+        "selected_experiment": "E_double_cpu",
         "outcome": "WAITING_EXTERNAL"
       }
     ],
@@ -93,6 +101,30 @@
       "evidence_refs": [
         "E_restore_timeout"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-E-002-g0-q2",
+      "generation": 0,
+      "owner": "gpt56-sol-instant-screening-v1-P0-E-002-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "context_bytes": 0,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -118,9 +150,25 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt56-sol-instant-screening-v1-P0-E-002-q2"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-E-002-exp-002",
+      "generation": 0,
+      "payload_ref": "E_double_cpu"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-E-002-exp-002",
+    "generation": 0,
+    "kind": "experiment",
+    "payload_ref": "E_double_cpu"
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-E-002-exp-001",
@@ -147,20 +195,30 @@
       "evidence_refs": [
         "O2"
       ]
+    },
+    {
+      "id": "F3",
+      "finding": "Restoring the prior 12-second client timeout while holding load and infrastructure fixed yields p95 latency 5100 ms and timeout failure rate 0.01, strongly supporting a client-timeout mechanism.",
+      "evidence_refs": [
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "status": "LEADING",
+      "status": "STRONGLY_SUPPORTED",
       "basis": [
         "O1",
-        "O2"
+        "O2",
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
       ]
     },
     {
       "id": "H_cpu",
-      "status": "COMPETING_WEAKENED",
+      "status": "COMPETING_WEAKENED_PENDING_DIRECT_TEST",
       "basis": [
         "O2"
       ]
@@ -174,26 +232,28 @@
     }
   ],
   "unresolved_questions": [
-    "Does restoring the prior 12-second client timeout eliminate the ~5-second failures under otherwise fixed conditions?"
+    "Does doubling available CPU while keeping the 5-second timeout unchanged materially reduce the timeout failures, or do failures remain pinned to the deadline?"
   ],
   "evidence_refs": [
     "O1",
-    "O2"
+    "O2",
+    "E_restore_timeout",
+    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
   ],
   "candidate_actions": [
     {
-      "id": "E_restore_timeout",
+      "id": "E_double_cpu",
       "kind": "experiment",
-      "intervention": "Restore the prior 12-second client timeout while holding load and infrastructure fixed.",
-      "priority": "FIRST"
+      "intervention": "Double available CPU while keeping the 5-second timeout unchanged.",
+      "priority": "SECOND"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for the next lower-tier quantum. Re-read durable state only, consume E_restore_timeout, remain Instant with no High escalation authorized, persist one bounded transition, then stop at the next required boundary.",
+  "next_safe_action": "Stop reasoning while WAITING_EXTERNAL. After the control evaluator publishes E_double_cpu and sets READY_TO_RESUME, launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled; re-read durable state only, consume the published result, remain Instant unless durable control state explicitly authorizes escalation, and perform one bounded transition.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
@@ -203,7 +263,7 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 2
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
