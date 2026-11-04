@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 3a48d8a3a7ff400e23c8a51ee074fd249e51eddd
+- Remote checkpoint: 2dd23aafae65de7274b424dddc5f3e15fc90d38c
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-CONTROL/OPERATOR P0 COMPLETE; LAUNCH PROVENANCE-REFROZEN P1 REPLACEMENT SCREENING. Exact P0 completion checkpoint 3a48d8a3a7ff400e23c8a51ee074fd249e51eddd passed Workspace Control Validation 41931918471 / #1934 SUCCESS. P0 A/B/C/D/E replacement runs are COMPLETED with objective validator score 1.0 and remain non-claim-bearing protocol-screening evidence only. P1 screening-v1-P1-A-002, B-002, C-002, D-002, and E-002 are all READY at source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb with frozen P1 fixture blob 766a414e01197f6054e68c02f2fe856f710044b0 and taxonomy blob 11aea24d489b119518d514382dfd48047a7998b1. Launch A in a BRAND-NEW regular GPT-5.6 Sol High persistent chat; B in a BRAND-NEW regular GPT-5.6 Sol Instant persistent chat; C in a BRAND-NEW regular GPT-5.6 Sol Instant chat for quantum 0; D in a BRAND-NEW regular GPT-5.6 Sol Instant decomposer chat; E in a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat. Every new chat requires Memory disabled before launch and GitHub enabled. E has no High escalation authorization. Service later WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE transitions directly from durable GitHub state.
+P1 PROVENANCE-REFROZEN SCREENING IN PROGRESS FROM VALIDATED FIRST-RESULT CHECKPOINT. Exact checkpoint 2dd23aafae65de7274b424dddc5f3e15fc90d38c passed Workspace Control Validation 41933218148 / #1943 SUCCESS. A/B/C/E have E_revert_s1 published and are READY_TO_RESUME; D decomposer is COMPLETE with seven READY leaf_worker processes. Resume A in the SAME GPT-5.6 Sol High persistent chat; B in the SAME GPT-5.6 Sol Instant persistent chat; C in a BRAND-NEW GPT-5.6 Sol Instant quantum-1 chat; D in exactly one BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for one READY process; E in a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat. Memory must be disabled before every new chat and GitHub enabled. E has no High escalation authorization. Continue servicing WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE boundaries directly from durable GitHub state.
 
 ## Remaining work
 
