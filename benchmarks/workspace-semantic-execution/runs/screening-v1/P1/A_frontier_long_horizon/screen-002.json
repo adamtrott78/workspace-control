@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-v1-P1-A-002-g0",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -85,6 +85,31 @@
       "evidence_refs": [
         "E_revert_s1"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-A-002-inv-002",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P1-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation."
+      },
+      "context_bytes": 3117,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s2"
+      ]
     }
   ],
   "events": [
@@ -120,9 +145,24 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "chatgpt-screening-v1-P1-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-002-req-002",
+      "generation": 0,
+      "payload_ref": "E_revert_s2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-A-002-req-002",
+    "kind": "fixture_experiment",
+    "payload_ref": "E_revert_s2"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-A-002-req-001",
@@ -148,6 +188,11 @@
     {
       "id": "O3",
       "finding": "Baseline telemetry does not directly show shared database saturation, network-fabric loss, or host CPU saturation."
+    },
+    {
+      "id": "F_E_revert_s1",
+      "finding": "Control-published E_revert_s1 result: shard 1 p95 latency is 205 ms after reverting only shard 1 request-policy configuration, and other shards do not change.",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
     }
   ],
   "open_hypotheses": [
@@ -165,20 +210,16 @@
     }
   ],
   "unresolved_questions": [
-    "Does a controlled revert on shard 1 reproduce the local recovery described by O2 under hash-bound external evidence?",
     "Do controlled request-policy reverts independently recover shards 2 through 6?",
     "Does scaling shared database capacity materially improve latency while shard policies remain unchanged?"
   ],
   "evidence_refs": [
     "O1",
     "O2",
-    "O3"
+    "O3",
+    "E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
   ],
   "candidate_actions": [
-    {
-      "experiment_id": "E_revert_s1",
-      "purpose": "Obtain hash-bound controlled evidence for shard-1 policy reversibility and directly address O2."
-    },
     {
       "experiment_id": "E_revert_s2",
       "purpose": "Test shard-2 local policy causality independently."
@@ -204,12 +245,12 @@
       "purpose": "Provide the required shared-infrastructure control and directly discriminate H_shared_db."
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / High persistent chat. Re-read durable state, consume only the published E_revert_s1 result, continue the next bounded step, and stop at the next external or terminal boundary.",
+  "next_safe_action": "Await the control-published result for E_revert_s2. Do not poll. After READY_TO_RESUME, consume only that published result and continue with the next unobserved experiment in the remaining shard reverts plus E_scale_shared_db plan.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
