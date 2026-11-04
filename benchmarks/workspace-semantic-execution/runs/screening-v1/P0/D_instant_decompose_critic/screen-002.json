@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "AWAITING_VALIDATION",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -154,7 +154,7 @@
     }
   },
   "started_at": "2026-11-03T16:30:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-04T17:34:00-05:00",
   "invocations": [
     {
       "invocation_id": "screening-v1-P0-D-002-decomposer-001",
@@ -432,6 +432,21 @@
         "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
         "critic_invocation_id:screening-v1-P0-D-002-independent-critic-001"
       ]
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
     }
   ],
   "pending_external": null,
@@ -488,7 +503,7 @@
     "result_hash:cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Await control-evaluator validation of the persisted terminal submission; do not poll or perform further worker reasoning.",
+  "next_safe_action": "Screening run complete. Preserve this provenance-refrozen P0 D run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_timeout_config",
     "rejected_hypotheses": [
@@ -503,7 +518,15 @@
     ],
     "rationale": "O1 shows a sharp 5.0-second failure boundary. Restoring the prior 12-second timeout reduced timeout_failure_rate to 0.01 at p95_latency_ms 5100, whereas doubling CPU while retaining the 5-second timeout left timeout_failure_rate high at 0.39 with p95_latency_ms 5000. The intervention contrast supports a client-timeout configuration regression as the primary mechanism and rejects CPU saturation as the competing primary cause."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 6,
     "experiment_requests": 2,
@@ -516,14 +539,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P0-D-002-exp-002",
-    "last_experiment_id": "E_double_cpu",
-    "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
-    "note": "Published only the requested experiment's worker-visible measurements. Hidden evaluator interpretation metadata and unused experiment results remain undisclosed."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/D_instant_decompose_critic/screen-002.json"
