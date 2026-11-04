@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-worker-screening-v1-P1-B-002",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -87,6 +87,33 @@
       "evidence_refs": [
         "E_revert_s1"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-002-q002",
+      "generation": 0,
+      "owner": "chatgpt-screening-worker-screening-v1-P1-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation.",
+        "github_available": true,
+        "prior_benchmark_control_context_present": false
+      },
+      "context_bytes": 1024,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "E_revert_s2"
+      ]
     }
   ],
   "events": [
@@ -123,9 +150,21 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "chatgpt-screening-worker-screening-v1-P1-B-002"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-B-002-exp-002",
+      "generation": 0,
+      "payload_ref": "E_revert_s2",
+      "experiment_id": "E_revert_s2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-B-002-exp-002",
+    "kind": "experiment",
+    "payload_ref": "E_revert_s2",
+    "experiment_id": "E_revert_s2"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-B-002-exp-001",
@@ -151,6 +190,11 @@
     {
       "id": "O3",
       "finding": "Baseline telemetry does not directly show shared DB saturation, network loss, or host CPU saturation."
+    },
+    {
+      "id": "F_E_revert_s1",
+      "finding": "Control-published E_revert_s1 reproduced the shard-1-local recovery: s1 p95=205 ms and other shards did not change.",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
     }
   ],
   "open_hypotheses": [
@@ -164,7 +208,7 @@
     },
     {
       "id": "H_shard_policy",
-      "status": "SUPPORTED_LOCALLY_BY_O2_NOT_YET_GLOBAL"
+      "status": "STRENGTHENED_BY_S1_LOCAL_INTERVENTION"
     }
   ],
   "unresolved_questions": [
@@ -174,16 +218,18 @@
   "evidence_refs": [
     "O1",
     "O2",
-    "O3"
+    "O3",
+    "E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
   ],
   "candidate_actions": [
     {
       "experiment_id": "E_revert_s1",
-      "status": "REQUESTED"
+      "status": "OBSERVED",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
     },
     {
       "experiment_id": "E_revert_s2",
-      "status": "PENDING"
+      "status": "REQUESTED"
     },
     {
       "experiment_id": "E_revert_s3",
@@ -210,12 +256,12 @@
       "status": "ALTERNATE_SHARED_CONTROL"
     }
   ],
-  "next_safe_action": "Consume the published E_revert_s1 result and perform one bounded reasoning quantum.",
+  "next_safe_action": "Stop reasoning and wait for the control evaluator to publish the E_revert_s2 result and set READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
