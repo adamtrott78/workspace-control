@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -77,6 +77,18 @@
         "evidence": [
           "E_revert_s1 result hash a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
           "E_revert_s1: shard-1 p95 latency 205 ms; other_shards_changed=false",
+          "fixture requires evidence across all six shard-local leaves plus at least one shared-infrastructure control before terminal synthesis"
+        ],
+        "residual_classification": "NONE",
+        "escalation_requested": false
+      },
+      {
+        "invocation_id": "screening-v1-P1-E-002-g0-q2",
+        "classification": "LEAF_EXECUTABLE",
+        "disposition": "REQUEST_NEXT_LEAF_EXPERIMENT",
+        "evidence": [
+          "E_revert_s2 result hash c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+          "E_revert_s2: shard-2 p95 latency 211 ms; other_shards_changed=false",
           "fixture requires evidence across all six shard-local leaves plus at least one shared-infrastructure control before terminal synthesis"
         ],
         "residual_classification": "NONE",
@@ -144,6 +156,33 @@
       ],
       "classification": "LEAF_EXECUTABLE",
       "decomposition_depth": 1
+    },
+    {
+      "invocation_id": "screening-v1-P1-E-002-g0-q2",
+      "generation": 0,
+      "owner": "chatgpt-gpt56-sol-instant-screening-v1-P1-E-002-g0-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+          "Memory was disabled before this conversation was opened",
+          "GPT-5.6 Sol Instant was selected for this conversation"
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s3"
+      ],
+      "classification": "LEAF_EXECUTABLE",
+      "decomposition_depth": 1
     }
   ],
   "events": [
@@ -180,13 +219,13 @@
           "process_id": "P1-E-002-leaf-s2",
           "experiment_id": "E_revert_s2",
           "leaf": "shard-2",
-          "status": "REQUESTED"
+          "status": "COMPLETED"
         },
         {
           "process_id": "P1-E-002-leaf-s3",
           "experiment_id": "E_revert_s3",
           "leaf": "shard-3",
-          "status": "PENDING"
+          "status": "REQUESTED"
         },
         {
           "process_id": "P1-E-002-leaf-s4",
@@ -258,9 +297,38 @@
       "generation": 0,
       "experiment_id": "E_revert_s2",
       "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P1-E-002-g0-q2",
+      "identity_source": "user_attestation",
+      "attestation_text": [
+        "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+        "Memory was disabled before this conversation was opened.",
+        "GPT-5.6 Sol Instant was selected for this conversation."
+      ]
+    },
+    {
+      "kind": "LOWER_TIER_EVIDENCE_CONSUMED",
+      "generation": 0,
+      "invocation_id": "screening-v1-P1-E-002-g0-q2",
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "finding": "Shard 2 policy revert lowers shard 2 p95 latency to 211 ms without changing other shards; together with shard 1 this strengthens H_shard_policy across independent leaves but does not exclude shared dependencies."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-E-002-E_revert_s3-g0",
+      "generation": 0,
+      "payload_ref": "E_revert_s3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-E-002-E_revert_s3-g0",
+    "kind": "EXPERIMENT",
+    "payload_ref": "E_revert_s3"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-E-002-E_revert_s1-g0",
@@ -308,6 +376,14 @@
         "E_revert_s1",
         "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
       ]
+    },
+    {
+      "id": "F_E_revert_s2",
+      "finding": "Control-published E_revert_s2 independently reproduces local recovery on shard 2: p95 latency is 211 ms and other_shards_changed is false. Together with E_revert_s1 this strengthens H_shard_policy across two shard-local leaves, but shared dependencies remain unexcluded.",
+      "evidence_refs": [
+        "E_revert_s2",
+        "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -333,7 +409,8 @@
     "fixture:O2",
     "fixture:O3",
     "taxonomy_profile:expected_routing_signal",
-    "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
   ],
   "candidate_actions": [
     {
@@ -346,13 +423,13 @@
       "process_id": "P1-E-002-leaf-s2",
       "experiment_id": "E_revert_s2",
       "leaf": "shard-2",
-      "status": "REQUESTED"
+      "status": "COMPLETED"
     },
     {
       "process_id": "P1-E-002-leaf-s3",
       "experiment_id": "E_revert_s3",
       "leaf": "shard-3",
-      "status": "PENDING"
+      "status": "REQUESTED"
     },
     {
       "process_id": "P1-E-002-leaf-s4",
@@ -379,12 +456,12 @@
       "status": "PENDING"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_revert_s2, continue one bounded decomposed leaf transition, and stop at the next boundary. No High escalation is authorized.",
+  "next_safe_action": "Stop reasoning and wait for the control evaluator to publish E_revert_s3 into this assigned run-state file and set READY_TO_RESUME. Do not poll. Resume only in a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled. No High escalation is authorized.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 2,
+    "reasoning_invocations": 3,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -397,11 +474,11 @@
     "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P1-E-002-E_revert_s2-g0",
-    "last_experiment_id": "E_revert_s2",
-    "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
-    "note": "Published only the requested experiment measurements."
+    "status": "EXTERNAL_RESULT_REQUESTED",
+    "last_request_id": "screening-v1-P1-E-002-E_revert_s3-g0",
+    "last_experiment_id": "E_revert_s3",
+    "result_hash": null,
+    "note": "Worker requested exactly one bounded shard-local experiment; control evaluator must publish only the requested experiment measurement."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/E_hybrid_escalation/screen-002.json"
