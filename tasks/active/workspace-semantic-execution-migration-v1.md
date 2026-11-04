@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: f0bd5786c3127d15f1be42ea9aacf3b02016176c
+- Remote checkpoint: 6bde217d9bf5b255303eaef8f1a2ef293da1a83c
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-CONTROL/OPERATOR RESUME FROM RECOVERED DURABLE P0 STATE. Do not replay E_restore_timeout. Current exact checkpoint f0bd5786c3127d15f1be42ea9aacf3b02016176c passed Validation 41723477493 / #1906 SUCCESS. A screening-v1-P0-A-002: READY_TO_RESUME in the SAME GPT-5.6 Sol High persistent chat after E_restore_timeout. B screening-v1-P0-B-004: READY_TO_RESUME in the SAME GPT-5.6 Sol Instant persistent chat after E_restore_timeout. C screening-v1-P0-C-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant chat for quantum 1. D screening-v1-P0-D-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for process screening-v1-P0-D-002-leaf-001. E screening-v1-P0-E-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat; no High escalation is authorized. Every new chat requires Memory disabled before launch and GitHub enabled. The control executor must re-read all five run-state files from GitHub before any mutation and service later WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE transitions directly from durable state.
+CONTROL/OPERATOR RESUME FROM VALIDATED SECOND-RESULT P0 CHECKPOINT. Exact operational checkpoint 6bde217d9bf5b255303eaef8f1a2ef293da1a83c passed Workspace Control Validation 41926873830 / #1917 SUCCESS. Do not replay already-published E_restore_timeout or E_double_cpu results. A screening-v1-P0-A-002: READY_TO_RESUME in the SAME GPT-5.6 Sol High persistent chat after E_double_cpu. B screening-v1-P0-B-004: READY_TO_RESUME in the SAME GPT-5.6 Sol Instant persistent chat after E_double_cpu. C screening-v1-P0-C-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant chat for quantum 2. D screening-v1-P0-D-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for process screening-v1-P0-D-002-leaf-001 after E_restore_timeout. E screening-v1-P0-E-002: READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat after E_double_cpu; no High escalation is authorized. Every new chat requires Memory disabled before launch and GitHub enabled. The control executor must service later WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE transitions directly from durable state.
 
 ## Remaining work
 
