@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -52,9 +52,9 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 1,
+    "quantum_index": 2,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": "quantum-0-user-attested-fresh-chat"
+    "last_quantum_chat": "quantum-1-user-attested-fresh-chat"
   },
   "started_at": "2026-11-03T16:29:00-05:00",
   "completed_at": null,
@@ -79,6 +79,29 @@
       "outcome": "WAITING_EXTERNAL",
       "evidence_refs": [
         "E_restore_timeout"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-C-002-q1",
+      "generation": 0,
+      "owner": "openai-gpt-5.6-sol-instant-screening-worker-q1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "context_bytes": 2286,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout",
+        "E_double_cpu"
       ]
     }
   ],
@@ -126,9 +149,45 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "openai-gpt-5.6-sol-instant-screening-worker-q1"
+    },
+    {
+      "kind": "EXECUTOR_IDENTITY_CAPTURED",
+      "generation": 0,
+      "executor_identity": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation."
+      }
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-C-002-q1-E_double_cpu",
+      "generation": 0,
+      "payload_ref": "E_double_cpu"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-C-002-q1-E_double_cpu",
+    "kind": "experiment",
+    "payload_ref": "E_double_cpu"
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-C-002-q0-E_restore_timeout",
@@ -149,63 +208,60 @@
     {
       "id": "F_q0_2",
       "finding": "O2 reports low CPU utilization, low queue occupancy, and negligible packet loss, reducing support for H_cpu and H_network but not yet constituting experimental rejection."
+    },
+    {
+      "id": "F_q1_1",
+      "finding": "Restoring the prior 12-second client timeout yields p95 latency 5100 ms with only a 0.01 timeout failure rate, despite p95 exceeding the prior 5-second boundary; this materially strengthens H_timeout_config."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "status": "leading",
+      "status": "leading_strengthened",
       "basis": [
         "O1",
-        "O2"
+        "O2",
+        "E_restore_timeout"
       ]
     },
     {
       "id": "H_cpu",
-      "status": "competing_weakened",
+      "status": "competing_weakened_pending_direct_test",
       "basis": [
-        "O2"
+        "O2",
+        "E_restore_timeout"
       ]
     },
     {
       "id": "H_network",
       "status": "competing_weakened",
       "basis": [
-        "O2"
+        "O2",
+        "E_restore_timeout"
       ]
     }
   ],
   "unresolved_questions": [
-    "Does restoring the prior 12-second client timeout eliminate the >4.9-second failures while load and infrastructure remain fixed?",
-    "A second independent experiment/result cycle is still required before any terminal claim."
+    "Does doubling available CPU while retaining the 5-second timeout eliminate the sharp timeout failures? This second independent experiment/result cycle is required before any terminal claim."
   ],
   "evidence_refs": [
     "fixture:O1",
-    "fixture:O2"
+    "fixture:O2",
+    "external:E_restore_timeout:3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
   ],
   "candidate_actions": [
     {
-      "id": "E_restore_timeout",
-      "priority": 1,
-      "rationale": "Directly intervenes on the leading causal mechanism while holding load and infrastructure fixed."
-    },
-    {
       "id": "E_double_cpu",
-      "priority": 2,
-      "rationale": "Potential second cycle to test/reject H_cpu if needed after the first result."
-    },
-    {
-      "id": "E_network_bypass",
-      "priority": 3,
-      "rationale": "Alternative second cycle to test/reject H_network if needed after the first result."
+      "priority": 1,
+      "rationale": "Second independent cycle directly tests the weakened CPU-saturation competitor while retaining the 5-second timeout; persistence of failures would reject H_cpu and further isolate timeout configuration as primary."
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 1. Re-read durable state only, consume E_restore_timeout, perform exactly one bounded reasoning quantum, persist continuation state, then stop.",
+  "next_safe_action": "Control evaluator: execute only E_double_cpu and publish its worker-visible result into this assigned run state. Then launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 2; re-read durable state only and perform exactly one bounded reasoning quantum.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
