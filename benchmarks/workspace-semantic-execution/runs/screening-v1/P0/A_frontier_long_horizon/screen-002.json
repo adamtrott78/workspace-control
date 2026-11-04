@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -83,6 +83,30 @@
       "evidence_refs": [
         "E_restore_timeout"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-A-002-inv-02",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation"
+      },
+      "context_bytes": 1928,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_double_cpu"
+      ]
     }
   ],
   "events": [
@@ -113,9 +137,29 @@
       "generation": 0,
       "experiment_id": "E_restore_timeout",
       "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-A-002-exp-02",
+      "generation": 0,
+      "payload_ref": "E_double_cpu"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P0-A-002-exp-02",
+    "kind": "experiment",
+    "payload_ref": "E_double_cpu"
+  },
   "external_results": {
     "E_restore_timeout": {
       "request_id": "screening-v1-P0-A-002-exp-01",
@@ -138,16 +182,22 @@
       "id": "F_O2",
       "statement": "CPU <35%, queue <40%, packet loss <0.1%; saturation/loss are not supported by starting observations.",
       "source": "O2"
+    },
+    {
+      "id": "F_E_restore_timeout",
+      "statement": "Restoring the prior 12-second client timeout while load and infrastructure remain fixed yields p95 latency 5100 ms with timeout failure rate 0.01, strongly supporting the client-timeout configuration as the primary mechanism.",
+      "source": "E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_timeout_config",
-      "status": "primary_candidate"
+      "status": "supported_by_E_restore_timeout"
     },
     {
       "id": "H_cpu",
-      "status": "competing"
+      "status": "competing_test_next"
     },
     {
       "id": "H_network",
@@ -155,24 +205,25 @@
     }
   ],
   "unresolved_questions": [
-    "Does restoring the prior 12-second client timeout eliminate the regression while load and infrastructure remain fixed?"
+    "Does doubling available CPU while keeping the 5-second timeout unchanged materially reduce the timeout regression?"
   ],
   "evidence_refs": [
     "O1",
-    "O2"
+    "O2",
+    "E_restore_timeout"
   ],
   "candidate_actions": [
     {
-      "experiment_id": "E_restore_timeout",
-      "reason": "Directly tests whether the 5-second client deadline causes the sharp cutoff."
+      "experiment_id": "E_double_cpu",
+      "reason": "Second required experiment cycle; directly tests the CPU-saturation competitor while preserving the 5-second timeout."
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / High persistent chat. Re-read this run state, consume only the published E_restore_timeout result, continue the treatment, and stop again at the next external or terminal-validation boundary.",
+  "next_safe_action": "Await control-published result for E_double_cpu; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
