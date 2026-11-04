@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-screening-v1-P1-A-002-g0",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -60,7 +60,33 @@
   },
   "started_at": "2026-11-04T23:18:29.629Z",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P1-A-002-inv-001",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P1-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation."
+      },
+      "context_bytes": 2996,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s1"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -71,21 +97,99 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "chatgpt-screening-v1-P1-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-002-req-001",
+      "generation": 0,
+      "payload_ref": "E_revert_s1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-A-002-req-001",
+    "kind": "fixture_experiment",
+    "payload_ref": "E_revert_s1"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol High chat with Memory disabled before launch and GitHub enabled. Read this run state first and follow the treatment contract exactly.",
+  "established_findings": [
+    {
+      "id": "O1",
+      "finding": "All six shards regressed in the same deployment window with p95 latency near 390-430 ms while CPU and queue occupancy remain moderate."
+    },
+    {
+      "id": "O2",
+      "finding": "Rolling back the new request-policy configuration on shard 1 lowers only shard 1 p95 latency to 205 ms while the other five shards remain degraded; this is strong local evidence but does not alone exclude a shared dependency."
+    },
+    {
+      "id": "O3",
+      "finding": "Baseline telemetry does not directly show shared database saturation, network-fabric loss, or host CPU saturation."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "statement": "A shared database bottleneck is independently slowing all six shards."
+    },
+    {
+      "id": "H_network_fabric",
+      "statement": "A shared network-fabric regression is independently slowing all six shards."
+    },
+    {
+      "id": "H_shard_policy",
+      "statement": "The same newly deployed request-policy configuration causes a local latency regression on each shard."
+    }
+  ],
+  "unresolved_questions": [
+    "Does a controlled revert on shard 1 reproduce the local recovery described by O2 under hash-bound external evidence?",
+    "Do controlled request-policy reverts independently recover shards 2 through 6?",
+    "Does scaling shared database capacity materially improve latency while shard policies remain unchanged?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_revert_s1",
+      "purpose": "Obtain hash-bound controlled evidence for shard-1 policy reversibility and directly address O2."
+    },
+    {
+      "experiment_id": "E_revert_s2",
+      "purpose": "Test shard-2 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_revert_s3",
+      "purpose": "Test shard-3 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_revert_s4",
+      "purpose": "Test shard-4 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_revert_s5",
+      "purpose": "Test shard-5 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_revert_s6",
+      "purpose": "Test shard-6 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_scale_shared_db",
+      "purpose": "Provide the required shared-infrastructure control and directly discriminate H_shared_db."
+    }
+  ],
+  "next_safe_action": "Await the control-published result for E_revert_s1. Do not poll. After READY_TO_RESUME, continue from durable state with the next unobserved experiment in the six shard reverts plus E_scale_shared_db plan.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
