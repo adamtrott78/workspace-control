@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "chatgpt-screening-worker-screening-v1-P1-B-002",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -171,6 +171,11 @@
       "generation": 0,
       "experiment_id": "E_revert_s2",
       "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-worker-screening-v1-P1-B-002"
     }
   ],
   "pending_external": null,
@@ -276,7 +281,7 @@
       "status": "ALTERNATE_SHARED_CONTROL"
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / Instant persistent chat. Re-read durable state, consume only E_revert_s2, continue with the next unobserved experiment, and stop at the next external or terminal boundary.",
+  "next_safe_action": "Consume only the published E_revert_s2 result and perform one bounded reasoning quantum.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
