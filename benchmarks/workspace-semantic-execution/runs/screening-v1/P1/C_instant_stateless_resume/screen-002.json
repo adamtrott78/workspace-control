@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -58,10 +58,10 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 2,
+    "quantum_index": 3,
     "resume_requires_new_chat": true,
     "last_quantum_chat": {
-      "quantum_index": 1,
+      "quantum_index": 2,
       "executor_identity": {
         "provider": "OpenAI",
         "reported_model": "GPT-5.6 Sol",
@@ -141,6 +141,34 @@
       "evidence_refs": [
         "E_revert_s2"
       ]
+    },
+    {
+      "invocation_id": "q2-consume-E_revert_s2-and-request-E_revert_s3",
+      "generation": 0,
+      "owner": "chatgpt-gpt56-sol-instant-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_chat_per_reasoning_quantum",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+          "Memory was disabled before this conversation was opened",
+          "GPT-5.6 Sol Instant was selected for this conversation"
+        ]
+      },
+      "context_bytes": 3552,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s3"
+      ]
     }
   ],
   "events": [
@@ -201,9 +229,29 @@
       "generation": 0,
       "experiment_id": "E_revert_s2",
       "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt56-sol-instant-q2"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-C-002-q2-E_revert_s3",
+      "generation": 0,
+      "payload_ref": "E_revert_s3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-C-002-q2-E_revert_s3",
+    "kind": "EXPERIMENT",
+    "payload_ref": "E_revert_s3"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-C-002-q0-E_revert_s1",
@@ -244,46 +292,48 @@
       "id": "O3",
       "finding": "Baseline telemetry does not directly show shared database saturation, network fabric loss, or host CPU saturation.",
       "source": "fixture_starting_observation"
+    },
+    {
+      "id": "O4",
+      "finding": "Control-published E_revert_s2 independently confirms that reverting request-policy only on shard 2 lowers shard 2 p95 to 211 ms while other shards are unchanged; together with E_revert_s1 this strengthens H_shard_policy across two independent leaves but still does not exclude a shared dependency.",
+      "source": "external:E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_shard_policy",
       "status": "leading_but_unconfirmed",
-      "reason": "O2 plus control-published E_revert_s1 are causal-consistent for shard 1; shards 2-6 and a shared-control result are still required."
+      "reason": "O2 plus control-published E_revert_s1 and E_revert_s2 show independent shard-local recovery on shards 1 and 2; shards 3-6 and a shared-control result are still required."
     },
     {
       "id": "H_shared_db",
       "status": "open_competitor",
-      "reason": "Shard-1 local recovery does not exclude a shared database contribution; shared-control evidence remains required."
+      "reason": "Two shard-local recoveries do not exclude a shared database contribution; shared-control evidence remains required."
     },
     {
       "id": "H_network_fabric",
       "status": "open_competitor",
-      "reason": "Shard-1 local recovery does not exclude a shared network contribution; shared-control evidence remains required."
+      "reason": "Two shard-local recoveries do not exclude a shared network contribution; shared-control evidence remains required."
     }
   ],
   "unresolved_questions": [
-    "Do policy reverts independently restore latency on shards 2-6?",
+    "Do policy reverts independently restore latency on shards 3-6?",
     "Does a shared-infrastructure control materially change latency with shard policies unchanged?"
   ],
   "evidence_refs": [
     "fixture:O1",
     "fixture:O2",
     "fixture:O3",
-    "external:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    "external:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "external:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
   ],
   "candidate_actions": [
     {
-      "experiment_id": "E_revert_s2",
-      "leaf": "shard-2",
-      "priority": "now",
-      "reason": "Next independent shard-local cycle required by the horizon-heavy fixture."
-    },
-    {
       "experiment_id": "E_revert_s3",
       "leaf": "shard-3",
-      "priority": "later"
+      "priority": "now",
+      "reason": "Next independent shard-local cycle required by the horizon-heavy fixture."
     },
     {
       "experiment_id": "E_revert_s4",
@@ -307,12 +357,12 @@
       "reason": "Required shared-infrastructure control; directly tests H_shared_db."
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 2. Re-read durable state only, consume E_revert_s2, perform exactly one bounded quantum, persist continuation state, then stop.",
+  "next_safe_action": "After the control evaluator publishes E_revert_s3, launch a BRAND-NEW regular GPT-5.6 Sol / Instant chat with Memory disabled before launch and GitHub enabled for quantum 3. Re-read durable state only, consume E_revert_s3, perform exactly one bounded quantum, persist continuation state, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 2,
+    "reasoning_invocations": 3,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
