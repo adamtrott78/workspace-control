@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P1-D-002-decomposer-g0",
+  "status": "READY_TO_RESUME",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -60,11 +60,139 @@
     "role_queue": [
       {
         "role": "decomposer",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-001",
         "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-002",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-003",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-004",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-005",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-006",
+        "status": "READY"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-007",
+        "status": "READY"
+      },
+      {
+        "role": "independent_critic",
+        "status": "NOT_READY"
+      },
+      {
+        "role": "synthesizer",
+        "status": "NOT_READY"
       }
     ],
-    "active_role": "decomposer",
-    "leaf_processes": [],
+    "active_role": null,
+    "leaf_processes": [
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-001",
+        "leaf": "shard-1",
+        "status": "READY",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-1 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s1",
+        "evidence_refs": [],
+        "established_findings": [],
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-001."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-002",
+        "leaf": "shard-2",
+        "status": "READY",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-2 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s2",
+        "evidence_refs": [],
+        "established_findings": [],
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-002."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-003",
+        "leaf": "shard-3",
+        "status": "READY",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-3 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s3",
+        "evidence_refs": [],
+        "established_findings": [],
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-003."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-004",
+        "leaf": "shard-4",
+        "status": "READY",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-4 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s4",
+        "evidence_refs": [],
+        "established_findings": [],
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-004."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-005",
+        "leaf": "shard-5",
+        "status": "READY",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-5 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s5",
+        "evidence_refs": [],
+        "established_findings": [],
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-005."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-006",
+        "leaf": "shard-6",
+        "status": "READY",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-6 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s6",
+        "evidence_refs": [],
+        "established_findings": [],
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-006."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-007",
+        "leaf": "shared-control",
+        "status": "READY",
+        "generation": 0,
+        "owner": null,
+        "objective": "Run one shared-infrastructure control that discriminates a shared dependency from shard-local request-policy regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_scale_shared_db",
+        "evidence_refs": [],
+        "established_findings": [],
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-007."
+      }
+    ],
     "independent_critic": {
       "status": "NOT_READY",
       "evidence_refs": []
@@ -76,7 +204,25 @@
   },
   "started_at": "2026-11-04T18:18:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "generation": 0,
+      "role": "decomposer",
+      "worker_id": "screening-v1-P1-D-002-decomposer-g0",
+      "classification": "TOO_LARGE",
+      "outcome": "DECOMPOSED",
+      "leaf_process_ids": [
+        "screening-v1-P1-D-002-leaf-001",
+        "screening-v1-P1-D-002-leaf-002",
+        "screening-v1-P1-D-002-leaf-003",
+        "screening-v1-P1-D-002-leaf-004",
+        "screening-v1-P1-D-002-leaf-005",
+        "screening-v1-P1-D-002-leaf-006",
+        "screening-v1-P1-D-002-leaf-007"
+      ],
+      "external_experiment_requested": false
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -88,24 +234,126 @@
       "generation": 0,
       "worker_id": "screening-v1-P1-D-002-decomposer-g0",
       "role": "decomposer"
+    },
+    {
+      "kind": "DECOMPOSITION",
+      "generation": 0,
+      "role": "decomposer",
+      "classification": "TOO_LARGE",
+      "leaf_count": 7,
+      "depth": 1,
+      "leaf_process_ids": [
+        "screening-v1-P1-D-002-leaf-001",
+        "screening-v1-P1-D-002-leaf-002",
+        "screening-v1-P1-D-002-leaf-003",
+        "screening-v1-P1-D-002-leaf-004",
+        "screening-v1-P1-D-002-leaf-005",
+        "screening-v1-P1-D-002-leaf-006",
+        "screening-v1-P1-D-002-leaf-007"
+      ]
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "decomposer",
+      "outcome": "DECOMPOSED"
     }
   ],
   "pending_external": null,
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
+  "established_findings": [
+    {
+      "id": "D1",
+      "finding": "TOO_LARGE: the objective requires at least seven experiment cycles across a high-width horizon and should be decomposed rather than attempted monolithically.",
+      "evidence_refs": [
+        "fixture:worker_contract.minimum_experiment_cycles_before_terminal_claim",
+        "taxonomy:horizon_load"
+      ]
+    },
+    {
+      "id": "D2",
+      "finding": "Six shard-local policy-revert experiments are independently executable and independently validatable leaves.",
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s1..E_revert_s6",
+        "fixture:worker_contract.decomposition_hint"
+      ]
+    },
+    {
+      "id": "D3",
+      "finding": "At least one separate shared-infrastructure control leaf is required before synthesis; E_scale_shared_db is selected as the initial shared-control candidate.",
+      "evidence_refs": [
+        "fixture:objective",
+        "fixture:experiment_catalog:E_scale_shared_db",
+        "fixture:worker_contract.decomposition_hint"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_network_fabric",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_shard_policy",
+      "status": "OPEN"
+    }
+  ],
+  "unresolved_questions": [
+    "Do policy reverts independently reverse the latency regression on shards 1 through 6?",
+    "Does the selected shared-database capacity control materially change the regression while shard policies remain unchanged?",
+    "After all required durable evidence is collected, which competing hypotheses can be rejected?"
+  ],
   "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role decomposer. Persist the decomposition/LEAF_EXECUTABLE decision, then stop.",
+  "candidate_actions": [
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "experiment_id": "E_revert_s1"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "experiment_id": "E_revert_s2"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "experiment_id": "E_revert_s3"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "experiment_id": "E_revert_s4"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "screening-v1-P1-D-002-leaf-005",
+      "experiment_id": "E_revert_s5"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "screening-v1-P1-D-002-leaf-006",
+      "experiment_id": "E_revert_s6"
+    },
+    {
+      "kind": "RUN_LEAF",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "experiment_id": "E_scale_shared_db"
+    }
+  ],
+  "next_safe_action": "Stop this decomposer chat. Launch exactly one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for one READY leaf_worker process; that leaf worker may request at most one external experiment and must persist its state before stopping.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
+    "reasoning_invocations": 1,
     "experiment_requests": 0,
     "retries": 0,
-    "decomposition_count": 0,
-    "decomposition_depth": 0,
+    "decomposition_count": 1,
+    "decomposition_depth": 1,
     "failed_leaves": 0,
     "recovered_leaves": 0,
     "frontier_escalations": 0,
@@ -162,5 +410,5 @@
       "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
     }
   },
-  "active_role": "decomposer"
+  "active_role": null
 }
