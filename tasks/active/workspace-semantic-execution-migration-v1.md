@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 283c4340cba1afbaca25905dca787b3a496a904f
+- Remote checkpoint: 6d70258628228bb1f265a24c59ef3baef04fc296
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 screening continues from validated checkpoint 283c4340cba1afbaca25905dca787b3a496a904f. A/B resume same persistent chats after E_revert_s2. C uses a brand-new Instant chat for quantum 2. D uses a brand-new Instant leaf_worker chat for screening-v1-P1-D-002-leaf-001 to consume E_revert_s1 and persist its conclusion. E uses a brand-new Instant lower-tier chat after E_revert_s2; High is not authorized.
+P1 screening recovery checkpoint: A/B screen-002 are FAILED due PERSISTENT_CHAT_CONTINUITY_LOST and must not resume; fresh replacement slots A screen-003 (High persistent) and B screen-003 (Instant persistent) are READY. C screen-002 is READY_TO_RESUME in a brand-new Instant quantum-3 chat after E_revert_s3. D screen-002 has leaf-001 COMPLETED; launch a brand-new Instant leaf_worker chat for leaf-002. E screen-002 is READY_TO_RESUME in a brand-new Instant lower-tier chat after E_revert_s3; High remains unauthorized.
 
 ## Remaining work
 
