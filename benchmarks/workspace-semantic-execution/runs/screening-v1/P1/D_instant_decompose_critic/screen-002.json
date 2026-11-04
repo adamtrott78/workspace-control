@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
-  "owner": "screening-v1-P1-D-002-leaf-002-g0",
+  "status": "READY_TO_RESUME",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -70,7 +70,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-002",
-        "status": "WAITING_EXTERNAL"
+        "status": "READY"
       },
       {
         "role": "leaf_worker",
@@ -106,12 +106,7 @@
         "status": "NOT_READY"
       }
     ],
-    "active_role": {
-      "role": "leaf_worker",
-      "process_id": "screening-v1-P1-D-002-leaf-002",
-      "worker_id": "screening-v1-P1-D-002-leaf-002-g0",
-      "generation": 0
-    },
+    "active_role": null,
     "leaf_processes": [
       {
         "process_id": "screening-v1-P1-D-002-leaf-001",
@@ -147,9 +142,9 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-002",
         "leaf": "shard-2",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY",
         "generation": 0,
-        "owner": "screening-v1-P1-D-002-leaf-002-g0",
+        "owner": null,
         "objective": "Test whether reverting only shard-2 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
         "candidate_experiment_id": "E_revert_s2",
         "evidence_refs": [
@@ -392,16 +387,16 @@
       "process_id": "screening-v1-P1-D-002-leaf-002",
       "experiment_id": "E_revert_s2",
       "payload_ref": "fixture:experiment_catalog:E_revert_s2"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
-    "generation": 0,
-    "role": "leaf_worker",
-    "process_id": "screening-v1-P1-D-002-leaf-002",
-    "experiment_id": "E_revert_s2",
-    "payload_ref": "fixture:experiment_catalog:E_revert_s2"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
@@ -412,6 +407,17 @@
         "other_shards_changed": false
       },
       "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s2": {
+      "request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
+      "experiment_id": "E_revert_s2",
+      "result": {
+        "shard": "s2",
+        "p95_latency_ms": 211,
+        "other_shards_changed": false
+      },
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
       "publication_scope": "requested experiment only"
     }
   },
@@ -510,7 +516,7 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Control evaluator must service pending E_revert_s2; this leaf_worker session must stop without polling.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-002. Re-read durable state only, consume E_revert_s2, persist the leaf conclusion, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -525,14 +531,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "EXTERNAL_REQUEST_PENDING",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
     "last_experiment_id": "E_revert_s2",
-    "result_hash": null,
-    "note": "Leaf worker requested one experiment and stopped."
+    "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+    "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/D_instant_decompose_critic/screen-002.json"
