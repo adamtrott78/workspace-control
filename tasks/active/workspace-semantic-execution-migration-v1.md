@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 A/B/C/E are COMPLETED. D screen-002 independent_critic is COMPLETED and the pre-existing synthesizer role is READY. Launch one BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as synthesizer. Use only durable run-state evidence plus the completed independent critique, persist TERMINAL_CANDIDATE, and stop for control-evaluator validation. After that, control should deterministically validate D and complete P1.
+P1 protocol screening is COMPLETE across A/B/C/D/E. All five P1 arms passed research_iterate_objective_v1 with score 1.0 and zero violations. Next, launch the frozen P2 screen-002 A-E slots from source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb: A in a brand-new GPT-5.6 Sol High persistent chat; B in a brand-new GPT-5.6 Sol Instant persistent chat; C in a brand-new GPT-5.6 Sol Instant stateless quantum-0 chat; D in a brand-new GPT-5.6 Sol Instant decomposer chat; E in a brand-new GPT-5.6 Sol Instant lower-tier chat. Memory must be disabled before launch and GitHub enabled. E High escalation remains unauthorized unless durable evidence later opens the gate. Service all subsequent WAITING_EXTERNAL / role / terminal boundaries directly from live GitHub.
 
 ## Remaining work
 
-- Finish P1 D screen-002 with one synthesizer role chat, then deterministic terminal validation. A/B/C/E are complete. Then proceed to P2/P3 only if no shared protocol/public-input change is required.
+- Execute frozen P2 A-E screen-002 protocol-screening slots, then P3 A-E screen-002 slots if no shared protocol/public-input change is required. P1 A-E are complete and validated.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
