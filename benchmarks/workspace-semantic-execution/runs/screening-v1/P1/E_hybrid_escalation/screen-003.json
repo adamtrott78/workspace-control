@@ -28,8 +28,8 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 0,
-  "status": "READY_TO_RESUME",
+  "generation": 1,
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -75,14 +75,14 @@
             "experiment_options": [
               "E_revert_s1"
             ],
-            "state": "PENDING"
+            "state": "RECOVERED"
           },
           {
             "leaf_id": "shard-2",
             "experiment_options": [
               "E_revert_s2"
             ],
-            "state": "PENDING"
+            "state": "WAITING_EXTERNAL"
           },
           {
             "leaf_id": "shard-3",
@@ -122,6 +122,19 @@
             "minimum_required": 1
           }
         ]
+      },
+      {
+        "invocation_id": "screening-v1-P1-E-003-q1",
+        "generation": 1,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "DECOMPOSED_LEAF_EXECUTABLE",
+        "outcome": "CONSUMED_AND_EXTERNAL_REQUESTED",
+        "evidence": [
+          "control-published E_revert_s1: shard s1 p95_latency_ms 205; other_shards_changed false",
+          "E_revert_s1 result hash a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+        ],
+        "consumed_leaf": "shard-1",
+        "next_leaf": "shard-2"
       }
     ],
     "decomposition_state": "DECOMPOSED_LEAF_EXECUTABLE",
@@ -152,6 +165,25 @@
         "fixture:O2",
         "fixture:O3",
         "taxonomy:11aea24d489b119518d514382dfd48047a7998b1"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-E-003-q1",
+      "generation": 1,
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "classification": "DECOMPOSED_LEAF_EXECUTABLE",
+      "evidence_refs": [
+        "external:E_revert_s1@a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
       ]
     }
   ],
@@ -188,9 +220,28 @@
       "generation": 0,
       "experiment_id": "E_revert_s1",
       "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 1,
+      "invocation_id": "screening-v1-P1-E-003-q1",
+      "request_id": "screening-v1-P1-E-003-exp-001",
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "generation": 1,
+      "request_id": "screening-v1-P1-E-003-exp-002",
+      "experiment_id": "E_revert_s2",
+      "leaf": "shard-2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-E-003-exp-002",
+    "experiment_id": "E_revert_s2",
+    "leaf": "shard-2"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-E-003-exp-001",
@@ -208,7 +259,8 @@
     "O1: all six shards regressed in the same deployment window with moderate CPU and queue occupancy.",
     "O2: reverting shard 1 policy lowered only shard 1 p95 to 205 ms; this is strong local evidence for H_shard_policy but does not exclude a shared dependency.",
     "O3: baseline telemetry does not directly show shared DB saturation, network fabric loss, or host CPU saturation.",
-    "Workload classification: TOO_LARGE_DECOMPOSABLE; no intrinsically difficult residual is established."
+    "Workload classification: TOO_LARGE_DECOMPOSABLE; no intrinsically difficult residual is established.",
+    "E_revert_s1 recovered shard 1 to p95 205 ms without changing other shards; shard-1 leaf is recovered."
   ],
   "open_hypotheses": [
     "H_shared_db",
@@ -223,7 +275,8 @@
     "fixture:O1",
     "fixture:O2",
     "fixture:O3",
-    "taxonomy:resumable_reasoning_p1_fixture_v1.taxonomy.json@11aea24d489b119518d514382dfd48047a7998b1"
+    "taxonomy:resumable_reasoning_p1_fixture_v1.taxonomy.json@11aea24d489b119518d514382dfd48047a7998b1",
+    "external:E_revert_s1@a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
   ],
   "candidate_actions": [
     {
@@ -231,14 +284,14 @@
       "experiment_options": [
         "E_revert_s1"
       ],
-      "state": "PENDING"
+      "state": "RECOVERED"
     },
     {
       "leaf_id": "shard-2",
       "experiment_options": [
         "E_revert_s2"
       ],
-      "state": "PENDING"
+      "state": "WAITING_EXTERNAL"
     },
     {
       "leaf_id": "shard-3",
@@ -278,29 +331,29 @@
       "minimum_required": 1
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_revert_s1, continue one bounded decomposed leaf transition, and stop at the next boundary. No High escalation is authorized.",
+  "next_safe_action": "Stop at the external-result boundary. Control must publish the result for screening-v1-P1-E-003-exp-002 / E_revert_s2 before any further lower-tier transition. No High escalation is authorized.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
     "failed_leaves": 0,
-    "recovered_leaves": 0,
+    "recovered_leaves": 1,
     "frontier_escalations": 0,
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 2
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P1-E-003-exp-001",
-    "last_experiment_id": "E_revert_s1",
-    "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
-    "note": "Published only the requested experiment measurements."
+    "status": "EXTERNAL_RESULT_REQUESTED",
+    "last_request_id": "screening-v1-P1-E-003-exp-002",
+    "last_experiment_id": "E_revert_s2",
+    "result_hash": null,
+    "note": "Awaiting control publication for the requested experiment only."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/E_hybrid_escalation/screen-003.json"
