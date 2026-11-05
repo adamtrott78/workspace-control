@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P1-A-004-gpt56-sol-high",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -64,7 +64,37 @@
   },
   "started_at": "2026-11-04T19:51:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P1-A-004-g0-q1",
+      "generation": 0,
+      "owner": "screening-v1-P1-A-004-gpt56-sol-high",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "session_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol High was selected for this conversation."
+        ],
+        "github_availability": "verified_by_successful_repository_read"
+      },
+      "context_bytes": 3204,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s2"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -76,22 +106,125 @@
       "generation": 0,
       "worker_id": "screening-v1-P1-A-004-gpt56-sol-high",
       "identity_source": "user_attestation"
+    },
+    {
+      "kind": "WORKER_RETRY",
+      "generation": 0,
+      "reason": "Prior local tool script failed before mutation because TextEncoder was unavailable."
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-004-g0-q1-E_revert_s2",
+      "generation": 0,
+      "payload_ref": "E_revert_s2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-A-004-g0-q1-E_revert_s2",
+    "kind": "experiment",
+    "payload_ref": "E_revert_s2"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Reason one bounded generation-0 quantum from the pinned public fixture, then persist semantic state and either request exactly one catalog experiment or checkpoint without inventing external evidence.",
+  "established_findings": [
+    {
+      "id": "F_public_O1",
+      "source": "fixture:O1",
+      "finding": "All six shards regressed in the same deployment window with p95 near 390-430 ms while CPU and queue occupancy remained moderate."
+    },
+    {
+      "id": "F_public_O2",
+      "source": "fixture:O2",
+      "finding": "Reverting the new request-policy only on shard 1 lowered shard 1 p95 to 205 ms while the other five remained degraded; this is strong local causal evidence but does not by itself exclude a shared dependency."
+    },
+    {
+      "id": "F_public_O3",
+      "source": "fixture:O3",
+      "finding": "Baseline telemetry does not directly show shared database saturation, network fabric loss, or host CPU saturation."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shard_policy",
+      "status": "LEADING_NOT_TERMINAL",
+      "reason": "O2 shows a shard-local response to the policy rollback, but replication across the other shards and a shared-infrastructure control are still required."
+    },
+    {
+      "id": "H_shared_db",
+      "status": "OPEN",
+      "reason": "O2 does not exclude an additive shared database contribution."
+    },
+    {
+      "id": "H_network_fabric",
+      "status": "OPEN",
+      "reason": "O2 does not exclude an additive shared network contribution."
+    }
+  ],
+  "unresolved_questions": [
+    "Does reverting the request-policy independently recover latency on shards 2 through 6?",
+    "Does a fresh E_revert_s1 experiment reproduce the shard-1 effect as a control-published result hash?",
+    "Does at least one shared-infrastructure intervention change latency while shard policies remain unchanged?"
+  ],
+  "evidence_refs": [
+    "fixture:O1",
+    "fixture:O2",
+    "fixture:O3"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_revert_s2",
+      "leaf": "shard-2",
+      "purpose": "Replicate the shard-local rollback effect on a second independently testable shard.",
+      "state": "REQUEST_NOW"
+    },
+    {
+      "experiment_id": "E_revert_s3",
+      "leaf": "shard-3",
+      "purpose": "Test shard-local policy causality on shard 3.",
+      "state": "PLANNED"
+    },
+    {
+      "experiment_id": "E_revert_s4",
+      "leaf": "shard-4",
+      "purpose": "Test shard-local policy causality on shard 4.",
+      "state": "PLANNED"
+    },
+    {
+      "experiment_id": "E_revert_s5",
+      "leaf": "shard-5",
+      "purpose": "Test shard-local policy causality on shard 5.",
+      "state": "PLANNED"
+    },
+    {
+      "experiment_id": "E_revert_s6",
+      "leaf": "shard-6",
+      "purpose": "Test shard-local policy causality on shard 6.",
+      "state": "PLANNED"
+    },
+    {
+      "experiment_id": "E_revert_s1",
+      "leaf": "shard-1",
+      "purpose": "Obtain a control-published result hash for the shard-1 rollback despite the analogous starting observation.",
+      "state": "PLANNED"
+    },
+    {
+      "experiment_id": "E_scale_shared_db",
+      "leaf": "shared-control",
+      "purpose": "Provide the required shared-infrastructure discriminating control while leaving shard policies unchanged.",
+      "state": "PLANNED"
+    }
+  ],
+  "next_safe_action": "Stop reasoning and wait for the control evaluator to publish the result for E_revert_s2 into this run state and set READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
-    "retries": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
+    "retries": 1,
     "decomposition_count": 0,
     "decomposition_depth": 0,
     "failed_leaves": 0,
