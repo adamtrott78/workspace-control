@@ -28,7 +28,7 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 1,
+  "generation": 2,
   "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
@@ -82,14 +82,14 @@
             "experiment_options": [
               "E_revert_s2"
             ],
-            "state": "WAITING_EXTERNAL"
+            "state": "RECOVERED"
           },
           {
             "leaf_id": "shard-3",
             "experiment_options": [
               "E_revert_s3"
             ],
-            "state": "PENDING"
+            "state": "WAITING_EXTERNAL"
           },
           {
             "leaf_id": "shard-4",
@@ -135,6 +135,19 @@
         ],
         "consumed_leaf": "shard-1",
         "next_leaf": "shard-2"
+      },
+      {
+        "invocation_id": "screening-v1-P1-E-003-q2",
+        "generation": 2,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "DECOMPOSED_LEAF_EXECUTABLE",
+        "outcome": "CONSUMED_AND_EXTERNAL_REQUESTED",
+        "evidence": [
+          "control-published E_revert_s2: shard s2 p95_latency_ms 211; other_shards_changed false",
+          "E_revert_s2 result hash c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+        ],
+        "consumed_leaf": "shard-2",
+        "next_leaf": "shard-3"
       }
     ],
     "decomposition_state": "DECOMPOSED_LEAF_EXECUTABLE",
@@ -184,6 +197,25 @@
       "classification": "DECOMPOSED_LEAF_EXECUTABLE",
       "evidence_refs": [
         "external:E_revert_s1@a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-E-003-q2",
+      "generation": 2,
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "classification": "DECOMPOSED_LEAF_EXECUTABLE",
+      "evidence_refs": [
+        "external:E_revert_s2@c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
       ]
     }
   ],
@@ -242,9 +274,28 @@
       "generation": 1,
       "experiment_id": "E_revert_s2",
       "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 2,
+      "invocation_id": "screening-v1-P1-E-003-q2",
+      "request_id": "screening-v1-P1-E-003-exp-002",
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "generation": 2,
+      "request_id": "screening-v1-P1-E-003-exp-003",
+      "experiment_id": "E_revert_s3",
+      "leaf": "shard-3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-E-003-exp-003",
+    "experiment_id": "E_revert_s3",
+    "leaf": "shard-3"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-E-003-exp-001",
@@ -274,7 +325,8 @@
     "O2: reverting shard 1 policy lowered only shard 1 p95 to 205 ms; this is strong local evidence for H_shard_policy but does not exclude a shared dependency.",
     "O3: baseline telemetry does not directly show shared DB saturation, network fabric loss, or host CPU saturation.",
     "Workload classification: TOO_LARGE_DECOMPOSABLE; no intrinsically difficult residual is established.",
-    "E_revert_s1 recovered shard 1 to p95 205 ms without changing other shards; shard-1 leaf is recovered."
+    "E_revert_s1 recovered shard 1 to p95 205 ms without changing other shards; shard-1 leaf is recovered.",
+    "E_revert_s2 recovered shard 2 to p95 211 ms without changing other shards; shard-2 leaf is recovered."
   ],
   "open_hypotheses": [
     "H_shared_db",
@@ -290,7 +342,8 @@
     "fixture:O2",
     "fixture:O3",
     "taxonomy:resumable_reasoning_p1_fixture_v1.taxonomy.json@11aea24d489b119518d514382dfd48047a7998b1",
-    "external:E_revert_s1@a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    "external:E_revert_s1@a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "external:E_revert_s2@c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
   ],
   "candidate_actions": [
     {
@@ -305,14 +358,14 @@
       "experiment_options": [
         "E_revert_s2"
       ],
-      "state": "WAITING_EXTERNAL"
+      "state": "RECOVERED"
     },
     {
       "leaf_id": "shard-3",
       "experiment_options": [
         "E_revert_s3"
       ],
-      "state": "PENDING"
+      "state": "WAITING_EXTERNAL"
     },
     {
       "leaf_id": "shard-4",
@@ -345,22 +398,22 @@
       "minimum_required": 1
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_revert_s2, continue one bounded decomposed leaf transition, and stop at the next boundary. No High escalation is authorized.",
+  "next_safe_action": "Stop at the external-result boundary. Control must publish only the requested E_revert_s3 result into durable state before another fresh regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled may resume. No High escalation is authorized.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 2,
+    "reasoning_invocations": 3,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
     "failed_leaves": 0,
-    "recovered_leaves": 1,
+    "recovered_leaves": 2,
     "frontier_escalations": 0,
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 3
+    "deterministic_compute_operations": 4
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
