@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -80,7 +80,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-004",
-        "status": "WAITING_EXTERNAL"
+        "status": "READY"
       },
       {
         "role": "leaf_worker",
@@ -204,7 +204,7 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-004",
         "leaf": "shard-4",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY",
         "generation": 0,
         "owner": null,
         "objective": "Test whether reverting only shard-4 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
@@ -213,7 +213,7 @@
           "fixture:experiment_catalog:E_revert_s4"
         ],
         "established_findings": [],
-        "next_safe_action": "Stop. Wait for the control evaluator to publish E_revert_s4 into this run-state file and set READY_TO_RESUME; do not poll."
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume the control-published E_revert_s4 result and persist this leaf conclusion."
       },
       {
         "process_id": "screening-v1-P1-D-002-leaf-005",
@@ -571,16 +571,16 @@
       "process_id": "screening-v1-P1-D-002-leaf-004",
       "experiment_id": "E_revert_s4",
       "payload_ref": "fixture:experiment_catalog:E_revert_s4"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-004-E_revert_s4-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s4",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P1-D-002-leaf-004-E_revert_s4-g0",
-    "generation": 0,
-    "role": "leaf_worker",
-    "process_id": "screening-v1-P1-D-002-leaf-004",
-    "experiment_id": "E_revert_s4",
-    "payload_ref": "fixture:experiment_catalog:E_revert_s4"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
@@ -613,6 +613,17 @@
         "other_shards_changed": false
       },
       "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s4": {
+      "request_id": "screening-v1-P1-D-002-leaf-004-E_revert_s4-g0",
+      "experiment_id": "E_revert_s4",
+      "result": {
+        "shard": "s4",
+        "p95_latency_ms": 214,
+        "other_shards_changed": false
+      },
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
       "publication_scope": "requested experiment only"
     }
   },
@@ -729,7 +740,7 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Stop. Wait for the control evaluator to publish E_revert_s4 into this assigned run-state file and set READY_TO_RESUME; do not poll.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-004. Re-read durable state only, consume E_revert_s4, persist the leaf conclusion, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -744,13 +755,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 6
+    "deterministic_compute_operations": 7
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
-    "last_experiment_id": "E_revert_s3",
-    "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+    "last_request_id": "screening-v1-P1-D-002-leaf-004-E_revert_s4-g0",
+    "last_experiment_id": "E_revert_s4",
+    "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
     "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
