@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P1-A-004-gpt56-sol-high",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -458,6 +458,12 @@
       "generation": 0,
       "experiment_id": "E_scale_shared_db",
       "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-A-004-gpt56-sol-high",
+      "resume_from": "E_scale_shared_db"
     }
   ],
   "pending_external": null,
@@ -672,7 +678,7 @@
       "state": "REQUEST_NOW"
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / High persistent chat. Re-read durable state, consume only E_scale_shared_db, and continue to the next protocol-required boundary; if the evidence is sufficient, submit the terminal candidate and stop.",
+  "next_safe_action": "Consume only E_scale_shared_db, synthesize against the seven durable experiment hashes, and if the public terminal contract is satisfied persist TERMINAL_CANDIDATE and stop for control-evaluator validation.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
