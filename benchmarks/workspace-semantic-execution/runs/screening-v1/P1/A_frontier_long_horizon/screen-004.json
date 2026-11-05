@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P1-A-004-gpt56-sol-high",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -291,6 +291,12 @@
       "generation": 0,
       "experiment_id": "E_revert_s5",
       "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-A-004-gpt56-sol-high",
+      "resume_from": "E_revert_s5"
     }
   ],
   "pending_external": null,
@@ -452,7 +458,7 @@
       "state": "PLANNED"
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / High persistent chat. Re-read durable state, consume only E_revert_s5, continue with the next unobserved experiment, and stop at the next external or terminal boundary.",
+  "next_safe_action": "Consume only the control-published E_revert_s5 result, persist its exact hash and interpretation, request the next unobserved experiment, and stop at WAITING_EXTERNAL.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
