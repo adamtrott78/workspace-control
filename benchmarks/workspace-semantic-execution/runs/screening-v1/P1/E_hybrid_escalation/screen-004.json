@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 7,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -267,12 +267,15 @@
       "generation": 7,
       "experiment_id": "E_scale_shared_db",
       "note": "Required bounded shared-infrastructure control requested after completing all six shard-local leaves. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 7,
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
     }
   ],
-  "pending_external": {
-    "experiment_id": "E_scale_shared_db",
-    "request_generation": 7
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s2": {
       "experiment_id": "E_revert_s2",
@@ -338,6 +341,15 @@
         "other_shards_changed": false
       },
       "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "publication_scope": "requested experiment only"
+    },
+    "E_scale_shared_db": {
+      "experiment_id": "E_scale_shared_db",
+      "request_generation": 7,
+      "result": {
+        "all_shards_p95_delta_ms": -4
+      },
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
       "publication_scope": "requested experiment only"
     }
   },
@@ -435,7 +447,7 @@
       "priority": 8
     }
   ],
-  "next_safe_action": "Stop at the external experiment boundary. Control must publish only the requested E_scale_shared_db result into durable state. Then launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled; re-read durable state only and continue according to the published state. No High escalation is authorized.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_scale_shared_db, and continue one bounded transition to the next protocol-required boundary; if sufficient, persist TERMINAL_CANDIDATE and stop. No High escalation is authorized.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -450,14 +462,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 17
+    "deterministic_compute_operations": 18
   },
   "control_evaluator": {
-    "status": "EXPERIMENT_REQUESTED",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_generation": 7,
     "last_experiment_id": "E_scale_shared_db",
-    "result_hash": null,
-    "note": "Awaiting control publication of only the requested experiment measurements."
+    "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+    "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/E_hybrid_escalation/screen-004.json"
