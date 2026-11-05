@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 A/B are both COMPLETED with research_iterate_objective_v1 passed=true, score=1.0, zero violations. Persistent-chat continuity is no longer needed for A or B; it is safe for the user to sign back in even if those tabs refresh. Do not launch further A/B workers. Per user instruction, defer all D/E work until after sign-in. When resumed, recover D and E from live GitHub durable state before issuing any worker prompts; do not rely on stale chat context. C remains COMPLETED. Preserve all P1 completed arms as non-claim-bearing protocol-screening evidence.
+P1 A/B/C are COMPLETED. Resume only D/E from live durable state. D screen-002 is READY_TO_RESUME and MUST launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-005; re-read durable state, work only that leaf, and stop at its next boundary. E screen-004 is READY_TO_RESUME after control-published E_revert_s3 and MUST launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled and GitHub enabled; consume only E_revert_s3, continue one bounded decomposed leaf transition, and stop at the next boundary. High remains NOT AUTHORIZED. Service subsequent WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE transitions directly from GitHub. Do not replay already-published results.
 
 ## Remaining work
 
