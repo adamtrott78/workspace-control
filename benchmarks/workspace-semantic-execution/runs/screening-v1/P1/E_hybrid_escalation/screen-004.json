@@ -28,8 +28,8 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 3,
-  "status": "READY_TO_RESUME",
+  "generation": 4,
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -106,6 +106,12 @@
       "role": "lower-tier-instant-worker",
       "configuration": "Instant",
       "purpose": "consume control-published E_revert_s3 result and continue one bounded decomposed leaf transition"
+    },
+    {
+      "generation": 4,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_revert_s4 result and continue one bounded decomposed leaf transition"
     }
   ],
   "events": [
@@ -173,9 +179,25 @@
       "generation": 3,
       "experiment_id": "E_revert_s4",
       "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 4,
+      "experiment_id": "E_revert_s4",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "note": "Consumed only the control-published requested result: reverting shard 4 policy lowers shard 4 p95 to 214 ms with no other shards changed."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 4,
+      "experiment_id": "E_revert_s5",
+      "note": "Next bounded decomposed shard-local leaf requested after consuming E_revert_s4. Stop at external boundary; do not poll."
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "experiment_id": "E_revert_s5",
+    "request_generation": 4
+  },
   "external_results": {
     "E_revert_s2": {
       "experiment_id": "E_revert_s2",
@@ -242,6 +264,13 @@
       "evidence_refs": [
         "external_results:E_revert_s3"
       ]
+    },
+    {
+      "id": "F_revert_s4_1",
+      "finding": "Reverting shard 4 policy lowers shard 4 p95 to 214 ms while no other shards change, providing a fourth independent shard-local response consistent with the shard-policy hypothesis; shared dependency remains unexcluded pending shared-control evidence.",
+      "evidence_refs": [
+        "external_results:E_revert_s4"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -264,12 +293,6 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [
-    {
-      "action": "request_experiment",
-      "experiment_id": "E_revert_s4",
-      "leaf": "shard-4",
-      "priority": 3
-    },
     {
       "action": "request_experiment",
       "experiment_id": "E_revert_s5",
@@ -295,12 +318,12 @@
       "priority": 7
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_revert_s4, continue one bounded decomposed leaf transition, and stop at the next boundary. No High escalation is authorized.",
+  "next_safe_action": "Stop at the external experiment boundary. Control may publish only the requested E_revert_s5 result into durable state. Do not poll. Resume only in a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled after durable state explicitly becomes READY_TO_RESUME. No High escalation is authorized.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 3,
-    "experiment_requests": 3,
+    "reasoning_invocations": 4,
+    "experiment_requests": 4,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -310,7 +333,7 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 6
+    "deterministic_compute_operations": 8
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
