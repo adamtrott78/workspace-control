@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -427,6 +427,21 @@
       "generation": 0,
       "experiment_id": "E_scale_shared_db",
       "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 17
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
     }
   ],
   "pending_external": null,
@@ -549,12 +564,17 @@
       "id": "E_revert_s6",
       "finding": "Control-published E_revert_s6 recovered shard 6 to p95 206 ms with no change on other shards, completing six independent shard-local policy recoveries.",
       "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
+    },
+    {
+      "id": "E_scale_shared_db",
+      "finding": "Control-published E_scale_shared_db changed all-shard p95 by only -4 ms with shard policies unchanged, providing no material recovery and directly disfavoring a shared-DB bottleneck as the primary mechanism.",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_shared_db",
-      "status": "OPEN"
+      "status": "REJECTED"
     },
     {
       "id": "H_network_fabric",
@@ -562,12 +582,10 @@
     },
     {
       "id": "H_shard_policy",
-      "status": "OPEN"
+      "status": "SUPPORTED"
     }
   ],
-  "unresolved_questions": [
-    "Does a shared-DB capacity control materially change latency with all shard policies unchanged?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "O1",
     "O2",
@@ -584,19 +602,35 @@
     "external_results.E_revert_s5#b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6",
     "external_results.E_revert_s6#2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
-    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db",
+    "external_results.E_scale_shared_db#f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
   ],
-  "candidate_actions": [
-    {
-      "experiment_id": "E_scale_shared_db",
-      "reason": "With all six local reversions showing target-only recovery, test the shared-DB competitor directly while policies remain unchanged; this supplies the required shared-infrastructure control."
-    }
-  ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / Instant persistent chat. Re-read durable state, consume only E_scale_shared_db, and continue to the next protocol-required boundary; if the evidence is sufficient, submit the terminal candidate and stop.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Stop. Await control-evaluator validation of TERMINAL_CANDIDATE; do not self-validate or poll.",
+  "terminal_submission": {
+    "final_hypothesis": "H_shard_policy",
+    "rejected_hypotheses": [
+      "H_shared_db"
+    ],
+    "observed_results": {
+      "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "All six independent shard-local policy reversions restored only their target shard to approximately 205-214 ms while leaving other shards unchanged, reproducing and generalizing O2 across every shard. In contrast, doubling shared DB capacity with policies unchanged moved all-shard p95 by only -4 ms, rejecting H_shared_db as the primary mechanism. The convergent local interventions support H_shard_policy as the primary mechanism behind the synchronized regression. O1 is explained by the same policy rollout affecting all six in the same deployment window; O2 is directly reproduced across all six; O3 is consistent with the lack of material shared-DB-control effect."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 7,
+    "reasoning_invocations": 8,
     "experiment_requests": 7,
     "retries": 0,
     "decomposition_count": 0,
