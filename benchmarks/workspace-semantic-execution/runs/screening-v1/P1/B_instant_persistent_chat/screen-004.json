@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -369,13 +369,16 @@
       "request_id": "E_revert_s6",
       "generation": 0,
       "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_revert_s6",
+      "generation": 0,
+      "experiment_id": "E_revert_s6",
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
     }
   ],
-  "pending_external": {
-    "request_id": "E_revert_s6",
-    "kind": "EXPERIMENT",
-    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "E_revert_s1",
@@ -430,6 +433,17 @@
         "other_shards_changed": false
       },
       "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s6": {
+      "request_id": "E_revert_s6",
+      "experiment_id": "E_revert_s6",
+      "result": {
+        "shard": "s6",
+        "p95_latency_ms": 206,
+        "other_shards_changed": false
+      },
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
       "publication_scope": "requested experiment only"
     }
   },
@@ -512,7 +526,7 @@
       "reason": "Complete the required six-shard independent local evidence sweep before selecting the shared-infrastructure control."
     }
   ],
-  "next_safe_action": "Await control publication for E_revert_s6; do not poll. Resume this same persistent chat only after READY_TO_RESUME.",
+  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / Instant persistent chat. Re-read durable state, consume only E_revert_s6, continue with the remaining required shared-control experiment, and stop at the next external or terminal boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -527,13 +541,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 5
+    "deterministic_compute_operations": 6
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "E_revert_s5",
-    "last_experiment_id": "E_revert_s5",
-    "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+    "last_request_id": "E_revert_s6",
+    "last_experiment_id": "E_revert_s6",
+    "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
     "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
