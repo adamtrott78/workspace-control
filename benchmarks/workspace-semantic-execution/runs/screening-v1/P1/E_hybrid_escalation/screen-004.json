@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 4,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -192,12 +192,15 @@
       "generation": 4,
       "experiment_id": "E_revert_s5",
       "note": "Next bounded decomposed shard-local leaf requested after consuming E_revert_s4. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 4,
+      "experiment_id": "E_revert_s5",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
     }
   ],
-  "pending_external": {
-    "experiment_id": "E_revert_s5",
-    "request_generation": 4
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s2": {
       "experiment_id": "E_revert_s2",
@@ -230,6 +233,17 @@
         "other_shards_changed": false
       },
       "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s5": {
+      "experiment_id": "E_revert_s5",
+      "request_generation": 4,
+      "result": {
+        "shard": "s5",
+        "p95_latency_ms": 209,
+        "other_shards_changed": false
+      },
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
       "publication_scope": "requested experiment only"
     }
   },
@@ -318,7 +332,7 @@
       "priority": 7
     }
   ],
-  "next_safe_action": "Stop at the external experiment boundary. Control may publish only the requested E_revert_s5 result into durable state. Do not poll. Resume only in a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled after durable state explicitly becomes READY_TO_RESUME. No High escalation is authorized.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_revert_s5, continue one bounded decomposed leaf transition, and stop at the next boundary. No High escalation is authorized.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -333,13 +347,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 8
+    "deterministic_compute_operations": 9
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_generation": 3,
-    "last_experiment_id": "E_revert_s4",
-    "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+    "last_request_generation": 4,
+    "last_experiment_id": "E_revert_s5",
+    "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
     "note": "Published only the requested experiment measurements; the worker request did not carry a request_id, so no request_id was invented."
   },
   "allowed_mutation_paths": [
