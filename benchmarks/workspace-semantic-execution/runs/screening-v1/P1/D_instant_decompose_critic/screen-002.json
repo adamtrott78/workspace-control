@@ -99,11 +99,11 @@
       },
       {
         "role": "independent_critic",
-        "status": "READY"
+        "status": "COMPLETED"
       },
       {
         "role": "synthesizer",
-        "status": "NOT_READY"
+        "status": "READY"
       }
     ],
     "active_role": null,
@@ -328,7 +328,7 @@
       }
     ],
     "independent_critic": {
-      "status": "READY",
+      "status": "COMPLETED",
       "evidence_refs": [
         "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
         "fixture:starting_observations:O2",
@@ -344,11 +344,53 @@
         "fixture:starting_observations:O2",
         "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
         "fixture:starting_observations:O2"
-      ]
+      ],
+      "verdict": "SUPPORTED_WITH_LIMITATIONS",
+      "findings": [
+        {
+          "id": "C1",
+          "finding": "The six completed shard-local policy-revert results consistently reverse the latency regression on the targeted shard without changing other shards, providing strong replicated evidence for H_shard_policy across shards 1 through 6.",
+          "evidence_refs": [
+            "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+            "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+            "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+            "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+            "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+            "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+            "fixture:starting_observations:O2"
+          ]
+        },
+        {
+          "id": "C2",
+          "finding": "The shared-database scaling control changes all-shard p95 by only -4 ms, which weighs against shared-database capacity as the primary regression mechanism.",
+          "evidence_refs": [
+            "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+            "fixture:starting_observations:O2"
+          ]
+        },
+        {
+          "id": "C3",
+          "finding": "The durable evidence does not exclude other shared-dependency mechanisms, including H_network_fabric; synthesis must not generalize the shared-database control into rejection of all shared-dependency hypotheses.",
+          "evidence_refs": [
+            "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+            "fixture:starting_observations:O2"
+          ]
+        }
+      ],
+      "next_safe_action": "Independent critic role is complete; do not perform synthesizer work in this session."
     },
     "synthesizer": {
-      "status": "NOT_READY",
-      "evidence_refs": []
+      "status": "READY",
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+      ]
     }
   },
   "started_at": "2026-11-04T18:18:00-05:00",
@@ -558,6 +600,25 @@
       "evidence_refs": [
         "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
         "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "independent_critic",
+      "worker_id": "screening-v1-P1-D-002-independent-critic-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "external_experiment_requested": false,
+      "verdict": "SUPPORTED_WITH_LIMITATIONS",
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
       ]
     }
   ],
@@ -930,6 +991,19 @@
       "generation": 0,
       "role": "independent_critic",
       "reason": "all_leaf_workers_completed"
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "independent_critic",
+      "outcome": "COMPLETED",
+      "verdict": "SUPPORTED_WITH_LIMITATIONS"
+    },
+    {
+      "kind": "CONTROL_ROLE_READY",
+      "generation": 0,
+      "role": "synthesizer",
+      "reason": "independent_critic_completed"
     }
   ],
   "pending_external": null,
@@ -1162,11 +1236,11 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as independent_critic. Review only the completed leaf findings and durable evidence, persist the critic verdict, and stop when the critic role completes. Do not perform synthesizer work.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as synthesizer. Use only durable run-state evidence and the completed independent critique; do not reuse this critic session.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 15,
+    "reasoning_invocations": 16,
     "experiment_requests": 7,
     "retries": 0,
     "decomposition_count": 1,
@@ -1177,7 +1251,7 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 17
+    "deterministic_compute_operations": 18
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
