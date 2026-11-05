@@ -80,7 +80,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-004",
-        "status": "READY"
+        "status": "COMPLETED"
       },
       {
         "role": "leaf_worker",
@@ -204,16 +204,33 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-004",
         "leaf": "shard-4",
-        "status": "READY",
+        "status": "COMPLETED",
         "generation": 0,
         "owner": null,
         "objective": "Test whether reverting only shard-4 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
         "candidate_experiment_id": "E_revert_s4",
         "evidence_refs": [
-          "fixture:experiment_catalog:E_revert_s4"
+          "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+          "fixture:starting_observations:O2"
         ],
-        "established_findings": [],
-        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume the control-published E_revert_s4 result and persist this leaf conclusion."
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Reverting only shard-4 request-policy configuration lowers shard-4 p95 latency to 214 ms while no other shard changes, reversing the shard-4 regression locally.",
+            "evidence_refs": [
+              "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This is strong shard-local evidence for H_shard_policy on shard 4, but by itself does not exclude a shared dependency as a contributor to the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-004 is complete; do not perform further work in this worker session."
       },
       {
         "process_id": "screening-v1-P1-D-002-leaf-005",
@@ -373,6 +390,20 @@
       "external_experiment_requested": true,
       "evidence_refs": [
         "fixture:experiment_catalog:E_revert_s4"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "worker_id": "screening-v1-P1-D-002-leaf-004-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_revert_s4",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "fixture:starting_observations:O2"
       ]
     }
   ],
@@ -578,6 +609,29 @@
       "generation": 0,
       "experiment_id": "E_revert_s4",
       "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-004-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "experiment_id": "E_revert_s4",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "conclusion": "Shard-4 request-policy revert reverses the shard-4 latency regression locally; evidence supports H_shard_policy for shard 4 but does not alone exclude shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "outcome": "COMPLETED"
     }
   ],
   "pending_external": null,
@@ -676,6 +730,14 @@
         "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
         "fixture:starting_observations:O2"
       ]
+    },
+    {
+      "id": "L1_s4",
+      "finding": "Shard-4 policy revert lowered only shard 4 p95 latency to 214 ms; this supports a shard-local request-policy mechanism for shard 4 but does not alone exclude a shared dependency.",
+      "evidence_refs": [
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "fixture:starting_observations:O2"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -698,6 +760,7 @@
     "After all required durable evidence is collected, which competing hypotheses can be rejected?"
   ],
   "evidence_refs": [
+    "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
     "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
     "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
     "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
@@ -740,11 +803,11 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-004. Re-read durable state only, consume E_revert_s4, persist the leaf conclusion, then stop.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-005. Re-read durable state only, work that leaf according to its next_safe_action, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 8,
+    "reasoning_invocations": 9,
     "experiment_requests": 4,
     "retries": 0,
     "decomposition_count": 1,
@@ -755,7 +818,7 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 7
+    "deterministic_compute_operations": 8
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
