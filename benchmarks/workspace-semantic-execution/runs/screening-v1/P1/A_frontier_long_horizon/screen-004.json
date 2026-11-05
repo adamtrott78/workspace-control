@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -451,13 +451,16 @@
       "request_id": "screening-v1-P1-A-004-g0-q7-E_scale_shared_db",
       "generation": 0,
       "payload_ref": "E_scale_shared_db"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-A-004-g0-q7-E_scale_shared_db",
+      "generation": 0,
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P1-A-004-g0-q7-E_scale_shared_db",
-    "kind": "experiment",
-    "payload_ref": "E_scale_shared_db"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s2": {
       "request_id": "screening-v1-P1-A-004-g0-q1-E_revert_s2",
@@ -523,6 +526,15 @@
         "other_shards_changed": false
       },
       "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "publication_scope": "requested experiment only"
+    },
+    "E_scale_shared_db": {
+      "request_id": "screening-v1-P1-A-004-g0-q7-E_scale_shared_db",
+      "experiment_id": "E_scale_shared_db",
+      "result": {
+        "all_shards_p95_delta_ms": -4
+      },
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
       "publication_scope": "requested experiment only"
     }
   },
@@ -660,7 +672,7 @@
       "state": "REQUEST_NOW"
     }
   ],
-  "next_safe_action": "Wait for the control-published E_scale_shared_db result; do not poll.",
+  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / High persistent chat. Re-read durable state, consume only E_scale_shared_db, and continue to the next protocol-required boundary; if the evidence is sufficient, submit the terminal candidate and stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -675,13 +687,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 6
+    "deterministic_compute_operations": 7
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P1-A-004-g0-q6-E_revert_s1",
-    "last_experiment_id": "E_revert_s1",
-    "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "last_request_id": "screening-v1-P1-A-004-g0-q7-E_scale_shared_db",
+    "last_experiment_id": "E_scale_shared_db",
+    "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
     "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
