@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "WAITING_EXTERNAL",
+  "owner": "screening-v1-P1-D-002-leaf-003-g0",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -75,7 +75,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-003",
-        "status": "READY"
+        "status": "WAITING_EXTERNAL"
       },
       {
         "role": "leaf_worker",
@@ -106,7 +106,11 @@
         "status": "NOT_READY"
       }
     ],
-    "active_role": null,
+    "active_role": {
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "worker_id": "screening-v1-P1-D-002-leaf-003-g0"
+    },
     "leaf_processes": [
       {
         "process_id": "screening-v1-P1-D-002-leaf-001",
@@ -173,14 +177,16 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-003",
         "leaf": "shard-3",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "generation": 0,
-        "owner": null,
+        "owner": "screening-v1-P1-D-002-leaf-003-g0",
         "objective": "Test whether reverting only shard-3 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
         "candidate_experiment_id": "E_revert_s3",
-        "evidence_refs": [],
+        "evidence_refs": [
+          "fixture:experiment_catalog:E_revert_s3"
+        ],
         "established_findings": [],
-        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled as leaf_worker for screening-v1-P1-D-002-leaf-003."
+        "next_safe_action": "Stop this worker session and wait for the control evaluator to publish the requested E_revert_s3 result into this run-state file."
       },
       {
         "process_id": "screening-v1-P1-D-002-leaf-004",
@@ -312,6 +318,19 @@
       "evidence_refs": [
         "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
         "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "worker_id": "screening-v1-P1-D-002-leaf-003-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s3",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s3"
       ]
     }
   ],
@@ -448,9 +467,32 @@
       "role": "leaf_worker",
       "process_id": "screening-v1-P1-D-002-leaf-002",
       "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-003-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "experiment_id": "E_revert_s3",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
+    "generation": 0,
+    "role": "leaf_worker",
+    "process_id": "screening-v1-P1-D-002-leaf-003",
+    "experiment_id": "E_revert_s3",
+    "payload_ref": "fixture:experiment_catalog:E_revert_s3"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
@@ -539,7 +581,8 @@
   ],
   "evidence_refs": [
     "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
-    "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+    "fixture:experiment_catalog:E_revert_s3"
   ],
   "candidate_actions": [
     {
@@ -578,12 +621,12 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-003. Re-read durable state only, request at most one external experiment for E_revert_s3, persist the resulting durable handoff, then stop.",
+  "next_safe_action": "Wait for the control evaluator to publish E_revert_s3 into this assigned run-state file; do not poll or perform further reasoning in this worker session.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 5,
-    "experiment_requests": 2,
+    "reasoning_invocations": 6,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -646,5 +689,5 @@
       "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
     }
   },
-  "active_role": null
+  "active_role": "leaf_worker"
 }
