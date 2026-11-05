@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 A/B/C are COMPLETED. D screen-002 is READY_TO_RESUME after control-published E_scale_shared_db and MUST launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-007; consume E_scale_shared_db, persist the shared-control leaf conclusion, and stop. E screen-004 is READY_TO_RESUME after control-published E_scale_shared_db and MUST launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled and GitHub enabled; consume E_scale_shared_db and continue one bounded transition to the next protocol-required boundary, which may be TERMINAL_CANDIDATE. High remains NOT AUTHORIZED. After D leaf-007 completes, follow the durable role queue for independent_critic then synthesizer; do not skip roles.
+P1 A/B/C/E are COMPLETED. D screen-002 has all seven leaf workers COMPLETED and the pre-existing independent_critic role is now READY. Launch one BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as independent_critic. Review only completed leaf findings and durable evidence, persist the critic verdict, and stop. Do not perform synthesizer work in that chat. After critic completion, promote and run the already-defined synthesizer role in a separate fresh Instant chat, then control-validate D terminal candidate.
 
 ## Remaining work
 
-- Finish P1: D screen-002 shared-control leaf-007, independent critic, and synthesizer; E screen-004 terminal transition/validation. A/B/C are complete. Then proceed to P2/P3 only if no shared protocol/public-input change is required.
+- Finish P1 D screen-002 with one independent-critic role chat and one synthesizer role chat, then deterministic terminal validation. A/B/C/E are complete. Then proceed to P2/P3 only if no shared protocol/public-input change is required.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
