@@ -95,7 +95,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-007",
-        "status": "READY"
+        "status": "COMPLETED"
       },
       {
         "role": "independent_critic",
@@ -297,16 +297,34 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-007",
         "leaf": "shared-control",
-        "status": "READY",
+        "status": "COMPLETED",
         "generation": 0,
         "owner": null,
         "objective": "Run one shared-infrastructure control that discriminates a shared dependency from shard-local request-policy regression; request at most one external experiment.",
         "candidate_experiment_id": "E_scale_shared_db",
         "evidence_refs": [
-          "fixture:experiment_catalog:E_scale_shared_db"
+          "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+          "fixture:starting_observations:O2"
         ],
-        "established_findings": [],
-        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume the control-published E_scale_shared_db result and persist this leaf conclusion."
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Scaling the shared database changes p95 latency by only -4 ms across all shards while shard policies remain unchanged, so the selected shared-database capacity control does not materially reverse the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+              "fixture:starting_observations:O2"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This shared-control result is evidence against shared-database capacity as the primary mechanism for the regression; it does not by itself adjudicate other shared-dependency hypotheses.",
+            "evidence_refs": [
+              "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-007 is complete; do not perform further work in this worker session."
       }
     ],
     "independent_critic": {
@@ -511,6 +529,20 @@
       "external_experiment_requested": true,
       "evidence_refs": [
         "fixture:experiment_catalog:E_scale_shared_db"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "worker_id": "screening-v1-P1-D-002-leaf-007-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_scale_shared_db",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+        "fixture:starting_observations:O2"
       ]
     }
   ],
@@ -854,6 +886,29 @@
       "generation": 0,
       "experiment_id": "E_scale_shared_db",
       "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-007-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+      "conclusion": "Scaling shared-database capacity changes all-shard p95 by only -4 ms and does not materially reverse the regression; this weighs against shared-database capacity as the primary mechanism but does not adjudicate other shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "outcome": "COMPLETED"
     }
   ],
   "pending_external": null,
@@ -1007,6 +1062,14 @@
         "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
         "fixture:starting_observations:O2"
       ]
+    },
+    {
+      "id": "L_shared_control",
+      "finding": "Scaling shared-database capacity changed all-shard p95 latency by only -4 ms; the selected shared-database control does not materially reverse the regression and weighs against shared-database capacity as the primary mechanism, without adjudicating other shared-dependency hypotheses.",
+      "evidence_refs": [
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+        "fixture:starting_observations:O2"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -1038,7 +1101,8 @@
     "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
     "fixture:experiment_catalog:E_revert_s6",
     "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
-    "fixture:experiment_catalog:E_scale_shared_db"
+    "fixture:experiment_catalog:E_scale_shared_db",
+    "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
   ],
   "candidate_actions": [
     {
@@ -1077,11 +1141,11 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-007. Re-read durable state only, consume E_scale_shared_db, persist the shared-control leaf conclusion, then stop.",
+  "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-007 is complete; stop this worker session. Do not perform independent critic or synthesizer work.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 14,
+    "reasoning_invocations": 15,
     "experiment_requests": 7,
     "retries": 0,
     "decomposition_count": 1,
@@ -1092,7 +1156,7 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 16
+    "deterministic_compute_operations": 17
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
