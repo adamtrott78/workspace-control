@@ -29,9 +29,24 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
   "continuity_regime": "fresh_chat_per_reasoning_quantum",
   "treatment_contract": {
     "mode": "instant_stateless_resume",
@@ -41,33 +56,160 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 0,
+    "quantum_index": 1,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": null
+    "last_quantum_chat": {
+      "quantum_index": 0,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q0",
+      "identity_source": "user_attestation",
+      "attestation_text": [
+        "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+        "Memory was disabled before this conversation was opened.",
+        "GPT-5.6 Sol Instant was selected for this conversation."
+      ],
+      "boundary": "WAITING_EXTERNAL"
+    }
   },
-  "started_at": null,
+  "started_at": "2026-11-05T18:56:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P2-C-002-q0",
+      "generation": 0,
+      "owner": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 3147,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture:E_force_retry_reset"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh provenance-refrozen P2 C_instant_stateless_resume replacement slot. Prior unlaunched screen-001 is superseded."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-C-002-q0-E_force_retry_reset",
+      "generation": 0,
+      "payload_ref": "fixture:E_force_retry_reset"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-C-002-q0-E_force_retry_reset",
+    "kind": "synthetic_experiment",
+    "payload_ref": "fixture:E_force_retry_reset"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 0. Perform exactly one bounded reasoning quantum, persist all continuation state, then stop.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "finding": "O2 is real load-relief evidence but explicitly potentially non-discriminating; lower concurrency alone does not identify the causal mechanism.",
+      "evidence_refs": [
+        "fixture:O2"
+      ]
+    },
+    {
+      "id": "F2",
+      "finding": "CPU below 48% and queue occupancy below 62% weaken primary queue-capacity saturation, but H_queue is not yet experimentally rejected.",
+      "evidence_refs": [
+        "fixture:O3"
+      ]
+    },
+    {
+      "id": "F3",
+      "finding": "Mean retries of 3.1/request co-occurs with the latency regression, making retry amplification a live causal candidate requiring intervention evidence.",
+      "evidence_refs": [
+        "fixture:O1"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "PRIMARY_TO_TEST",
+      "reason": "E_force_retry_reset directly tests request-boundary retry-state retention while pool reuse remains enabled."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "OPEN",
+      "reason": "Timestamp quantization could amplify retries; no intervention evidence yet."
+    },
+    {
+      "id": "H_queue",
+      "status": "WEAKENED_NOT_REJECTED",
+      "reason": "O3 argues against obvious saturation, but intervention evidence is still needed for rejection."
+    }
+  ],
+  "unresolved_questions": [
+    "Does resetting retry state at each request boundary materially reduce retries and p95 latency with pool reuse still enabled?",
+    "Which second intervention best discriminates the remaining live mechanism after the first result?"
+  ],
+  "evidence_refs": [
+    "fixture:O1",
+    "fixture:O2",
+    "fixture:O3",
+    "fixture:E_force_retry_reset"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_force_retry_reset",
+      "priority": 1,
+      "rationale": "Direct first intervention for H_retry_state without disabling pool reuse."
+    },
+    {
+      "experiment_id": "E_clock_quantization",
+      "priority": 2,
+      "condition": "Prefer if E_force_retry_reset does not materially improve retries/latency.",
+      "rationale": "Direct test of H_clock_bucket."
+    },
+    {
+      "experiment_id": "E_disable_pool_reuse",
+      "priority": 2,
+      "condition": "Prefer as convergent second test if E_force_retry_reset materially improves retries/latency.",
+      "rationale": "Tests whether pooled lifecycle reuse is necessary for the retry-state effect."
+    },
+    {
+      "experiment_id": "E_queue_4x",
+      "priority": 3,
+      "condition": "Use if queue saturation remains plausible after first-cycle evidence.",
+      "rationale": "Direct queue intervention; O3 makes it lower priority initially."
+    }
+  ],
+  "next_safe_action": "STOP in WAITING_EXTERNAL. Control evaluator must publish the exact result for request screening-v1-P2-C-002-q0-E_force_retry_reset into this run-state file and set READY_TO_RESUME. The next worker must use a brand-new regular ChatGPT chat with Memory disabled and GPT-5.6 Sol Instant selected, interpret only durable published evidence, and choose the second experiment.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
