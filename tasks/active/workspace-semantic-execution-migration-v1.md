@@ -70,15 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-RECOVERED CONTROL HANDOFF FROM VALIDATED P1 CHECKPOINT c24fda155bb5735aab5b34e7a4b3e68e46c0adbc / Workspace Control Validation 41937414748 #1986 SUCCESS. Treat GitHub durable state as authoritative.
-
-- A: `screening-v1-P1-A-003` is `READY_TO_RESUME`; resume the SAME GPT-5.6 Sol / High persistent chat after published `E_revert_s1`.
-- B: `screening-v1-P1-B-003` is `READY_TO_RESUME`; resume the SAME GPT-5.6 Sol / Instant persistent chat after published `E_revert_s1`.
-- C: `screening-v1-P1-C-002` is `READY_TO_RESUME`; launch a BRAND-NEW GPT-5.6 Sol / Instant chat for quantum 4 after published `E_revert_s4`.
-- D: `screening-v1-P1-D-002` has leaf-001 `COMPLETED`; leaf-002 is `READY_TO_RESUME`. Launch a BRAND-NEW GPT-5.6 Sol / Instant leaf_worker chat for `screening-v1-P1-D-002-leaf-002` to consume published `E_revert_s2` and persist its conclusion.
-- E: `screening-v1-P1-E-002` is `FAILED` for `WAITING_EXTERNAL_STATUS_MISSING` and MUST NOT resume. Replacement `screening-v1-P1-E-003` is `READY`; launch a BRAND-NEW GPT-5.6 Sol / Instant lower-tier chat. High is NOT authorized.
-
-Service subsequent `WAITING_EXTERNAL`, role-handoff, escalation, and `TERMINAL_CANDIDATE` boundaries directly from GitHub. Do not replay already-published results. If Heartbeat still reports ownership by the interrupted control conversation, do not override it or treat Heartbeat as task truth; GitHub durable state remains authoritative.
+RECOVERED CONTROL HANDOFF FROM VALIDATED P1 CHECKPOINT c24fda155bb5735aab5b34e7a4b3e68e46c0adbc / Workspace Control Validation 41937414748 #1986 SUCCESS. Treat GitHub durable state as authoritative. P1 A screen-003 is READY_TO_RESUME in the SAME GPT-5.6 Sol High persistent chat after published E_revert_s1. P1 B screen-003 is READY_TO_RESUME in the SAME GPT-5.6 Sol Instant persistent chat after published E_revert_s1. P1 C screen-002 is READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant chat for quantum 4 after published E_revert_s4. P1 D screen-002 has leaf-001 COMPLETED; leaf-002 is READY_TO_RESUME and MUST use a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat to consume published E_revert_s2 and persist its conclusion. P1 E screen-002 is FAILED for WAITING_EXTERNAL_STATUS_MISSING and MUST NOT resume; replacement P1 E screen-003 is READY and MUST launch in a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat. High is NOT authorized for E. Service subsequent WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE boundaries directly from GitHub. Do not replay already-published results. If Heartbeat ownership is still held by the interrupted control conversation, do not infer task state from Heartbeat and do not widen/override authority; GitHub remains authoritative.
 
 ## Remaining work
 
@@ -101,14 +93,6 @@ Service subsequent `WAITING_EXTERNAL`, role-handoff, escalation, and `TERMINAL_C
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
 - Scored resumable-reasoning arms require oracle-unexposed clean model sessions. For ChatGPT plugin-backed workers, the viable product surface is now a brand-new regular chat with Memory disabled and required plugins enabled; Temporary Chat cannot provide both isolation and plugin transport simultaneously.
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
-
-## Control interruption recovery
-
-- The interrupted control conversation had already reached final sync head `c24fda155bb5735aab5b34e7a4b3e68e46c0adbc`.
-- Workspace Control Validation `41937414748 / #1986` completed `SUCCESS` on that exact head.
-- Current run-state files above have been re-read directly from GitHub and agree with the recovery checkpoint.
-- Heartbeat begin from this replacement control chat returned `HEARTBEAT_TASK_OWNED_BY_ANOTHER_CONVERSATION`. Do not hijack or widen Heartbeat authority; this does not supersede GitHub state.
-- Directly related benchmark/run-state artifacts are already durable. Independent semantic-control, ontology, GitRunner, and Workspace Shell task capsules were not mutated merely because they are conceptually related; their separate owners remain authoritative.
 
 ## Fresh-chat initialization
 
