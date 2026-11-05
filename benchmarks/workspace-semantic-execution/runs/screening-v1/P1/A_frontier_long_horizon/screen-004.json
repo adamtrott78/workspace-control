@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -63,7 +63,7 @@
     "persistent_chat": true
   },
   "started_at": "2026-11-04T19:51:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-04T21:26:00-05:00",
   "invocations": [
     {
       "invocation_id": "screening-v1-P1-A-004-g0-q1",
@@ -510,6 +510,21 @@
       "generation": 0,
       "final_hypothesis": "H_shard_policy",
       "experiment_count": 7
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
     }
   ],
   "pending_external": null,
@@ -730,7 +745,7 @@
       "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
     }
   ],
-  "next_safe_action": "Stop. Await control-evaluator objective validation of the terminal candidate; do not self-validate or mark COMPLETED.",
+  "next_safe_action": "Screening run complete. Preserve screening-v1-P1-A-004 as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_shard_policy",
     "rejected_hypotheses": [
@@ -753,7 +768,15 @@
     ],
     "rationale": "The same request-policy configuration is the primary mechanism. Reverting that policy independently on shards 1 through 6 reduced only the reverted shard to 205-214 ms, reproducing O2 across every shard while leaving the others degraded. In contrast, doubling shared database capacity while leaving policies unchanged moved all-shard p95 by only -4 ms, which is not commensurate with the regression. O1's simultaneous onset is therefore best explained by the same configuration rollout applied across shards rather than one shared bottleneck. O3 is consistent with this conclusion because baseline telemetry did not directly show database saturation, network loss, or host CPU saturation. The shared-database and shared-network hypotheses are rejected as primary mechanisms."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 8,
     "experiment_requests": 7,
@@ -766,14 +789,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 7
+    "deterministic_compute_operations": 8
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P1-A-004-g0-q7-E_scale_shared_db",
-    "last_experiment_id": "E_scale_shared_db",
-    "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
-    "note": "Published only the requested experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/A_frontier_long_horizon/screen-004.json"
