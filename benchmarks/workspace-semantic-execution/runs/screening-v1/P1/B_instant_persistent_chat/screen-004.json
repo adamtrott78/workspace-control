@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -231,6 +231,34 @@
       "evidence_refs": [
         "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-007",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 4109,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
+      ]
     }
   ],
   "events": [
@@ -386,9 +414,19 @@
       "kind": "SEMANTIC_CHECKPOINT",
       "generation": 0,
       "evidence_ref_count": 15
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_scale_shared_db",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "E_scale_shared_db",
+    "kind": "EXPERIMENT",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "E_revert_s1",
@@ -533,7 +571,8 @@
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5",
     "external_results.E_revert_s5#b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6",
-    "external_results.E_revert_s6#2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
+    "external_results.E_revert_s6#2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
   ],
   "candidate_actions": [
     {
@@ -541,12 +580,12 @@
       "reason": "With all six local reversions showing target-only recovery, test the shared-DB competitor directly while policies remain unchanged; this supplies the required shared-infrastructure control."
     }
   ],
-  "next_safe_action": "Request E_scale_shared_db, then stop at WAITING_EXTERNAL.",
+  "next_safe_action": "Await control publication for E_scale_shared_db; do not poll. Resume this same persistent chat only after READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 6,
-    "experiment_requests": 6,
+    "reasoning_invocations": 7,
+    "experiment_requests": 7,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
