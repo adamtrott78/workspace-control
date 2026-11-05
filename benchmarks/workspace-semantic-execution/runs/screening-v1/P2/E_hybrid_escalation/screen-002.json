@@ -29,9 +29,20 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+  },
   "continuity_regime": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
   "treatment_contract": {
     "mode": "hybrid_evidence_gated_escalation",
@@ -43,35 +54,133 @@
   },
   "treatment_state": {
     "phase": "LOWER_TIER_INSTANT",
-    "lower_tier_attempts": [],
-    "decomposition_state": "UNASSESSED",
+    "lower_tier_attempts": [
+      {
+        "invocation_id": "screen-002-q0",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "REQUEST_EXPERIMENT",
+        "experiment_id": "E_force_retry_reset",
+        "rationale": "Directly tests whether retained retry state is causal while holding pool reuse enabled; more discriminating than load relief because O2 may be non-discriminating."
+      }
+    ],
+    "decomposition_state": "NOT_REQUIRED_BOUNDED_WORKLOAD",
     "escalation_status": "NOT_REQUESTED",
     "residual_reason": null,
     "escalation_evidence_refs": []
   },
-  "started_at": null,
+  "started_at": "2026-11-05T18:56:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screen-002-q0",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh provenance-refrozen P2 E_hybrid_escalation replacement slot. Prior unlaunched screen-001 is superseded."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q0"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q0",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "WORKLOAD_CLASSIFICATION",
+      "generation": 0,
+      "classification": "BOUNDED_NOT_TOO_LARGE",
+      "reason": "Taxonomy records LOW_TO_MEDIUM horizon load, BOUNDED_SMALL search space, expected 3 reasoning quanta, and says the fixture is not large enough to strongly test decomposition."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-exp-001",
+      "generation": 0,
+      "payload_ref": "E_force_retry_reset"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screen-002-exp-001",
+    "kind": "synthetic_experiment",
+    "payload_ref": "E_force_retry_reset",
+    "experiment_id": "E_force_retry_reset",
+    "intervention": "Explicitly reset retry state at each request boundary while leaving pool reuse enabled."
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as lower-tier worker. Decompose TOO_LARGE work before escalation; High may be launched only after durable evidence-gated escalation state permits it.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "finding": "O3 argues against primary queue-capacity saturation: CPU stays below 48% and queue occupancy below 62%."
+    },
+    {
+      "id": "F2",
+      "finding": "O2 shows load relief lowers latency but is explicitly non-discriminating and does not establish the causal mechanism."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "PRIMARY_TEST_TARGET"
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_queue",
+      "status": "WEAKENED_BY_O3_NOT_REJECTED"
+    }
+  ],
+  "unresolved_questions": [
+    "Does explicit retry-state reset normalize retries and latency while pool reuse remains enabled?",
+    "After the first result, which second intervention best discriminates the remaining competing mechanism?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3",
+    "E_force_retry_reset"
+  ],
+  "candidate_actions": [
+    {
+      "action": "After control-published result, interpret E_force_retry_reset and choose one second discriminating experiment; do not treat O2 as causal proof."
+    }
+  ],
+  "next_safe_action": "Control evaluator executes pending E_force_retry_reset and publishes its exact result/hash into this run state; worker must stop and must not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
