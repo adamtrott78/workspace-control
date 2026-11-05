@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P1-A-004-gpt56-sol-high",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -243,6 +243,36 @@
         "result_hash:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
         "E_revert_s1"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-A-004-g0-q7",
+      "generation": 0,
+      "owner": "screening-v1-P1-A-004-gpt56-sol-high",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "session_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol High was selected for this conversation."
+        ],
+        "github_availability": "verified_by_successful_repository_read"
+      },
+      "context_bytes": 2048,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "result_hash:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "E_scale_shared_db"
+      ]
     }
   ],
   "events": [
@@ -405,9 +435,29 @@
       "generation": 0,
       "worker_id": "screening-v1-P1-A-004-gpt56-sol-high",
       "resume_from": "E_revert_s1"
+    },
+    {
+      "kind": "WORKER_RETRY",
+      "generation": 0,
+      "reason": "Prior state-update tool call was blocked before GitHub mutation."
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 9
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-004-g0-q7-E_scale_shared_db",
+      "generation": 0,
+      "payload_ref": "E_scale_shared_db"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P1-A-004-g0-q7-E_scale_shared_db",
+    "kind": "experiment",
+    "payload_ref": "E_scale_shared_db"
+  },
   "external_results": {
     "E_revert_s2": {
       "request_id": "screening-v1-P1-A-004-g0-q1-E_revert_s2",
@@ -521,28 +571,33 @@
       "source": "external_results.E_revert_s6",
       "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
       "finding": "Control-published E_revert_s6 lowered shard 6 p95 latency to 206 ms while no other shards changed, completing independent shard-local rollback recovery evidence for shards 2 through 6."
+    },
+    {
+      "id": "F_external_E_revert_s1",
+      "source": "external_results.E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "finding": "E_revert_s1 reduced shard 1 p95 to 205 ms with no other shard change, matching O2 and completing exact rollback evidence for all six shards."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_shard_policy",
       "status": "LEADING_NOT_TERMINAL",
-      "reason": "O2 plus control-published E_revert_s2 through E_revert_s6 show shard-local recovery on all six shards in substance. A fresh control-published E_revert_s1 result is still required to give shard 1 an exact durable experiment hash for terminal observed_results, and at least one shared-infrastructure control remains required."
+      "reason": "All six shard-local rollback results recover only the reverted shard; one shared-infrastructure control remains required."
     },
     {
       "id": "H_shared_db",
-      "status": "OPEN_WEAKENED",
-      "reason": "Independent local recovery on every shard is strongly inconsistent with a shared database bottleneck as the primary mechanism, but a shared-control experiment is still required for clean rejection."
+      "status": "OPEN_WEAKENED_PENDING_SHARED_CONTROL",
+      "reason": "Six local recoveries argue strongly against a shared database bottleneck as primary mechanism; direct shared-control evidence remains required."
     },
     {
       "id": "H_network_fabric",
-      "status": "OPEN_WEAKENED",
-      "reason": "Independent local recovery on every shard is strongly inconsistent with a shared network regression as the primary mechanism, but a shared-control experiment is still required for clean rejection."
+      "status": "OPEN_WEAKENED_PENDING_SHARED_CONTROL",
+      "reason": "Six local recoveries argue strongly against a shared network regression as primary mechanism; at least one shared-control result remains required."
     }
   ],
   "unresolved_questions": [
-    "Does a fresh E_revert_s1 experiment reproduce the shard-1 effect as a control-published result hash?",
-    "Does at least one shared-infrastructure intervention change latency while shard policies remain unchanged?"
+    "Does increasing shared database capacity while leaving shard policies unchanged materially improve the degraded latency?"
   ],
   "evidence_refs": [
     "fixture:O1",
@@ -552,7 +607,8 @@
     "result_hash:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
     "result_hash:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
     "result_hash:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
-    "result_hash:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
+    "result_hash:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+    "result_hash:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
   ],
   "candidate_actions": [
     {
@@ -594,22 +650,23 @@
       "experiment_id": "E_revert_s1",
       "leaf": "shard-1",
       "purpose": "Obtain a control-published result hash for the shard-1 rollback and confirm O2 under the experiment protocol.",
-      "state": "REQUEST_NOW"
+      "state": "OBSERVED",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
     },
     {
       "experiment_id": "E_scale_shared_db",
       "leaf": "shared-control",
       "purpose": "Provide the required shared-infrastructure discriminating control while leaving shard policies unchanged.",
-      "state": "PLANNED"
+      "state": "REQUEST_NOW"
     }
   ],
-  "next_safe_action": "Consume only the control-published E_revert_s1 result, persist its exact hash and interpretation, request the remaining required shared-control experiment, and stop at WAITING_EXTERNAL.",
+  "next_safe_action": "Wait for the control-published E_scale_shared_db result; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 6,
-    "experiment_requests": 6,
-    "retries": 1,
+    "reasoning_invocations": 7,
+    "experiment_requests": 7,
+    "retries": 2,
     "decomposition_count": 0,
     "decomposition_depth": 0,
     "failed_leaves": 0,
