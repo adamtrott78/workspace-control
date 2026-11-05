@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 A/B persistent-chat terminal-candidate continuation: A screen-004 is READY_TO_RESUME after control-published E_scale_shared_db and MUST resume in the SAME GPT-5.6 Sol High persistent chat. B screen-004 is READY_TO_RESUME after control-published E_scale_shared_db and MUST resume in the SAME GPT-5.6 Sol Instant persistent chat. Each should consume only that durable shared-control result and continue to the next protocol-required boundary; if sufficient, submit its TERMINAL_CANDIDATE and stop for control validation. Do not refresh, branch, duplicate, reopen, or sign back in if doing so would refresh either A/B tab before the next durable boundary. C screen-002 is COMPLETED. D screen-002 remains READY_TO_RESUME at leaf-004 result consumption and still requires a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat when launched. E screen-004 remains READY_TO_RESUME after E_revert_s2 and still requires a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat when launched; High remains NOT AUTHORIZED. Service subsequent TERMINAL_CANDIDATE / WAITING_EXTERNAL transitions directly from GitHub.
+P1 A/B are both COMPLETED with research_iterate_objective_v1 passed=true, score=1.0, zero violations. Persistent-chat continuity is no longer needed for A or B; it is safe for the user to sign back in even if those tabs refresh. Do not launch further A/B workers. Per user instruction, defer all D/E work until after sign-in. When resumed, recover D and E from live GitHub durable state before issuing any worker prompts; do not rely on stale chat context. C remains COMPLETED. Preserve all P1 completed arms as non-claim-bearing protocol-screening evidence.
 
 ## Remaining work
 
