@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -1078,6 +1078,21 @@
         ],
         "rationale": "Across all six independently tested shards, reverting only the newly deployed request-policy configuration reverses the latency regression on the targeted shard without changing the others, providing replicated shard-local evidence for H_shard_policy. Doubling shared-database capacity while shard policies remain unchanged changes all-shard p95 by only -4 ms, weighing against H_shared_db as the primary mechanism. This control does not test or reject other shared-dependency mechanisms; H_network_fabric therefore remains open."
       }
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
     }
   ],
   "pending_external": null,
@@ -1272,7 +1287,7 @@
     "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop and await control-evaluator validation of the persisted TERMINAL_CANDIDATE.",
+  "next_safe_action": "Screening run complete. Preserve this P1 D run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_shard_policy",
     "rejected_hypotheses": [
@@ -1292,7 +1307,15 @@
     ],
     "rationale": "Across all six independently tested shards, reverting only the newly deployed request-policy configuration reverses the latency regression on the targeted shard without changing the others, providing replicated shard-local evidence for H_shard_policy. Doubling shared-database capacity while shard policies remain unchanged changes all-shard p95 by only -4 ms, weighing against H_shared_db as the primary mechanism. This control does not test or reject other shared-dependency mechanisms; H_network_fabric therefore remains open."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 17,
     "experiment_requests": 7,
@@ -1305,14 +1328,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 18
+    "deterministic_compute_operations": 19
   },
   "control_evaluator": {
-    "status": "READY_FOR_TERMINAL_VALIDATION",
-    "last_request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
-    "last_experiment_id": "E_scale_shared_db",
-    "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
-    "note": "Terminal candidate persisted by synthesizer; control-evaluator validation required before completion."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/D_instant_decompose_critic/screen-002.json"
