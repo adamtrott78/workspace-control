@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
-  "owner": "screening-v1-P1-D-002-leaf-003-g0",
+  "status": "READY_TO_RESUME",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -75,7 +75,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-003",
-        "status": "WAITING_EXTERNAL"
+        "status": "READY"
       },
       {
         "role": "leaf_worker",
@@ -106,11 +106,7 @@
         "status": "NOT_READY"
       }
     ],
-    "active_role": {
-      "role": "leaf_worker",
-      "process_id": "screening-v1-P1-D-002-leaf-003",
-      "worker_id": "screening-v1-P1-D-002-leaf-003-g0"
-    },
+    "active_role": null,
     "leaf_processes": [
       {
         "process_id": "screening-v1-P1-D-002-leaf-001",
@@ -177,16 +173,16 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-003",
         "leaf": "shard-3",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY",
         "generation": 0,
-        "owner": "screening-v1-P1-D-002-leaf-003-g0",
+        "owner": null,
         "objective": "Test whether reverting only shard-3 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
         "candidate_experiment_id": "E_revert_s3",
         "evidence_refs": [
           "fixture:experiment_catalog:E_revert_s3"
         ],
         "established_findings": [],
-        "next_safe_action": "Stop this worker session and wait for the control evaluator to publish the requested E_revert_s3 result into this run-state file."
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume the control-published E_revert_s3 result and persist this leaf conclusion."
       },
       {
         "process_id": "screening-v1-P1-D-002-leaf-004",
@@ -483,16 +479,16 @@
       "process_id": "screening-v1-P1-D-002-leaf-003",
       "experiment_id": "E_revert_s3",
       "payload_ref": "fixture:experiment_catalog:E_revert_s3"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s3",
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
-    "generation": 0,
-    "role": "leaf_worker",
-    "process_id": "screening-v1-P1-D-002-leaf-003",
-    "experiment_id": "E_revert_s3",
-    "payload_ref": "fixture:experiment_catalog:E_revert_s3"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
@@ -514,6 +510,17 @@
         "other_shards_changed": false
       },
       "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s3": {
+      "request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
+      "experiment_id": "E_revert_s3",
+      "result": {
+        "shard": "s3",
+        "p95_latency_ms": 207,
+        "other_shards_changed": false
+      },
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
       "publication_scope": "requested experiment only"
     }
   },
@@ -621,7 +628,7 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Wait for the control evaluator to publish E_revert_s3 into this assigned run-state file; do not poll or perform further reasoning in this worker session.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-003. Re-read durable state only, consume E_revert_s3, persist the leaf conclusion, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -636,13 +643,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 4
+    "deterministic_compute_operations": 5
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
-    "last_experiment_id": "E_revert_s2",
-    "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+    "last_request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
+    "last_experiment_id": "E_revert_s3",
+    "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
     "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
