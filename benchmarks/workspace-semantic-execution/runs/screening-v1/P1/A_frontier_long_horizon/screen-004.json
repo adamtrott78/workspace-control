@@ -29,9 +29,27 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P1-A-004-gpt56-sol-high",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "High",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "FRONTIER_MATCHED_SURFACE",
+    "identity_source": "user_attestation",
+    "session_attestation": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol High was selected for this conversation."
+    ],
+    "github_availability": "verified_by_successful_repository_read"
+  },
   "continuity_regime": "persistent_chat",
   "treatment_contract": {
     "mode": "frontier_long_horizon_control",
@@ -44,7 +62,7 @@
     "phase": "PRIMARY",
     "persistent_chat": true
   },
-  "started_at": null,
+  "started_at": "2026-11-04T19:51:00-05:00",
   "completed_at": null,
   "invocations": [],
   "events": [
@@ -52,6 +70,12 @@
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh replacement P1 A_frontier_long_horizon slot after A screen-003 persistent-chat continuity loss."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-A-004-gpt56-sol-high",
+      "identity_source": "user_attestation"
     }
   ],
   "pending_external": null,
@@ -61,7 +85,7 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol / High chat with Memory disabled before launch and GitHub enabled. Read this assigned run state first and follow it exactly; preserve persistent-chat continuity for all later resumes.",
+  "next_safe_action": "Reason one bounded generation-0 quantum from the pinned public fixture, then persist semantic state and either request exactly one catalog experiment or checkpoint without inventing external evidence.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
