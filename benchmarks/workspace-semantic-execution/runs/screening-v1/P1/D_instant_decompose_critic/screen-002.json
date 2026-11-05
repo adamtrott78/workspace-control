@@ -70,7 +70,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-002",
-        "status": "READY"
+        "status": "COMPLETED"
       },
       {
         "role": "leaf_worker",
@@ -142,16 +142,33 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-002",
         "leaf": "shard-2",
-        "status": "READY",
+        "status": "COMPLETED",
         "generation": 0,
         "owner": null,
         "objective": "Test whether reverting only shard-2 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
         "candidate_experiment_id": "E_revert_s2",
         "evidence_refs": [
-          "fixture:experiment_catalog:E_revert_s2"
+          "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+          "fixture:starting_observations:O2"
         ],
-        "established_findings": [],
-        "next_safe_action": "Wait for the control evaluator to publish E_revert_s2 into this run state; do not poll or perform further work in this worker session."
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Reverting only shard-2 request-policy configuration lowers shard-2 p95 latency to 211 ms while no other shard changes, reversing the shard-2 regression locally.",
+            "evidence_refs": [
+              "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This is strong shard-local evidence for H_shard_policy on shard 2, but by itself does not exclude a shared dependency as a contributor to the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-002 is complete; do not perform further work in this worker session."
       },
       {
         "process_id": "screening-v1-P1-D-002-leaf-003",
@@ -282,6 +299,20 @@
       "evidence_refs": [
         "fixture:experiment_catalog:E_revert_s2"
       ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "worker_id": "screening-v1-P1-D-002-leaf-002-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_revert_s2",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "fixture:starting_observations:O2"
+      ]
     }
   ],
   "events": [
@@ -394,6 +425,29 @@
       "generation": 0,
       "experiment_id": "E_revert_s2",
       "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-002-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "conclusion": "Shard-2 request-policy revert reverses the shard-2 latency regression locally; evidence supports H_shard_policy for shard 2 but does not alone exclude shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "outcome": "COMPLETED"
     }
   ],
   "pending_external": null,
@@ -454,6 +508,14 @@
         "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
         "fixture:starting_observations:O2"
       ]
+    },
+    {
+      "id": "L1_s2",
+      "finding": "Shard-2 policy revert lowered only shard 2 p95 latency to 211 ms; this supports a shard-local request-policy mechanism for shard 2 but does not alone exclude a shared dependency.",
+      "evidence_refs": [
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "fixture:starting_observations:O2"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -477,7 +539,7 @@
   ],
   "evidence_refs": [
     "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
-    "fixture:experiment_catalog:E_revert_s2"
+    "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
   ],
   "candidate_actions": [
     {
@@ -516,11 +578,11 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-002. Re-read durable state only, consume E_revert_s2, persist the leaf conclusion, then stop.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-003. Re-read durable state only, request at most one external experiment for E_revert_s3, persist the resulting durable handoff, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 4,
+    "reasoning_invocations": 5,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 1,
@@ -531,7 +593,7 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 3
+    "deterministic_compute_operations": 4
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
@@ -584,10 +646,5 @@
       "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
     }
   },
-  "active_role": {
-    "role": "leaf_worker",
-    "process_id": "screening-v1-P1-D-002-leaf-002",
-    "worker_id": "screening-v1-P1-D-002-leaf-002-g0",
-    "generation": 0
-  }
+  "active_role": null
 }
