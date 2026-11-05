@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -235,13 +235,16 @@
       "request_id": "screening-v1-P1-E-003-exp-002",
       "experiment_id": "E_revert_s2",
       "leaf": "shard-2"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-E-003-exp-002",
+      "generation": 1,
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P1-E-003-exp-002",
-    "experiment_id": "E_revert_s2",
-    "leaf": "shard-2"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-E-003-exp-001",
@@ -252,6 +255,17 @@
         "other_shards_changed": false
       },
       "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s2": {
+      "request_id": "screening-v1-P1-E-003-exp-002",
+      "experiment_id": "E_revert_s2",
+      "result": {
+        "shard": "s2",
+        "p95_latency_ms": 211,
+        "other_shards_changed": false
+      },
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
       "publication_scope": "requested experiment only"
     }
   },
@@ -331,7 +345,7 @@
       "minimum_required": 1
     }
   ],
-  "next_safe_action": "Stop at the external-result boundary. Control must publish the result for screening-v1-P1-E-003-exp-002 / E_revert_s2 before any further lower-tier transition. No High escalation is authorized.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_revert_s2, continue one bounded decomposed leaf transition, and stop at the next boundary. No High escalation is authorized.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -346,14 +360,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_REQUESTED",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P1-E-003-exp-002",
     "last_experiment_id": "E_revert_s2",
-    "result_hash": null,
-    "note": "Awaiting control publication for the requested experiment only."
+    "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+    "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/E_hybrid_escalation/screen-003.json"
