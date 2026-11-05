@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -420,13 +420,16 @@
       "request_id": "E_scale_shared_db",
       "generation": 0,
       "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_scale_shared_db",
+      "generation": 0,
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
     }
   ],
-  "pending_external": {
-    "request_id": "E_scale_shared_db",
-    "kind": "EXPERIMENT",
-    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "E_revert_s1",
@@ -492,6 +495,15 @@
         "other_shards_changed": false
       },
       "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "publication_scope": "requested experiment only"
+    },
+    "E_scale_shared_db": {
+      "request_id": "E_scale_shared_db",
+      "experiment_id": "E_scale_shared_db",
+      "result": {
+        "all_shards_p95_delta_ms": -4
+      },
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
       "publication_scope": "requested experiment only"
     }
   },
@@ -580,7 +592,7 @@
       "reason": "With all six local reversions showing target-only recovery, test the shared-DB competitor directly while policies remain unchanged; this supplies the required shared-infrastructure control."
     }
   ],
-  "next_safe_action": "Await control publication for E_scale_shared_db; do not poll. Resume this same persistent chat only after READY_TO_RESUME.",
+  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / Instant persistent chat. Re-read durable state, consume only E_scale_shared_db, and continue to the next protocol-required boundary; if the evidence is sufficient, submit the terminal candidate and stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -595,13 +607,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 6
+    "deterministic_compute_operations": 7
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "E_revert_s6",
-    "last_experiment_id": "E_revert_s6",
-    "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+    "last_request_id": "E_scale_shared_db",
+    "last_experiment_id": "E_scale_shared_db",
+    "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
     "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
