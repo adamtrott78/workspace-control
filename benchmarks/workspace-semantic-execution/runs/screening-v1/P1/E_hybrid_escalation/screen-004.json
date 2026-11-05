@@ -28,10 +28,25 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
+  "generation": 1,
+  "status": "RUNNING",
+  "owner": "lower-tier-instant-worker",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
   "continuity_regime": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
   "treatment_contract": {
     "mode": "hybrid_evidence_gated_escalation",
@@ -49,14 +64,26 @@
     "residual_reason": null,
     "escalation_evidence_refs": []
   },
-  "started_at": null,
+  "started_at": "2026-11-04T20:53:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "generation": 1,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "claim assigned READY screening slot before bounded lower-tier reasoning"
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh replacement P1 E_hybrid_escalation slot after screen-003 worker transition-contract invalidation."
+    },
+    {
+      "kind": "WORKER_CLAIMED",
+      "generation": 1,
+      "note": "Claimed by fresh lower-tier GPT-5.6 Sol Instant worker using explicit user attestation for unobservable session/configuration properties; GitHub availability verified."
     }
   ],
   "pending_external": null,
@@ -66,7 +93,7 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as lower-tier worker. Decompose TOO_LARGE work before escalation; High may be launched only after durable evidence-gated escalation state permits it.",
+  "next_safe_action": "Assess task size and decompose TOO_LARGE work before any escalation consideration.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
