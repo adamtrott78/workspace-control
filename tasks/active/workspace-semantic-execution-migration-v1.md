@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 9b1c5f450fbb7b87677095eea52d8145ebcebb5f
+- Remote checkpoint: c24fda155bb5735aab5b34e7a4b3e68e46c0adbc
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,19 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 screening continues from validated recovery checkpoint 9b1c5f450fbb7b87677095eea52d8145ebcebb5f / Workspace Control Validation 41937268610 #1985 SUCCESS. A screen-003 and B screen-003 are READY_TO_RESUME in their same persistent chats after E_revert_s1. C screen-002 is READY_TO_RESUME and must use a brand-new GPT-5.6 Sol Instant chat for quantum 4 after E_revert_s4. D screen-002 is READY_TO_RESUME and must use a brand-new GPT-5.6 Sol Instant leaf_worker chat for leaf-002 to consume E_revert_s2 and persist its conclusion. E screen-002 is FAILED because it violated the frozen WAITING_EXTERNAL transition contract; replacement E screen-003 is READY and must start in a brand-new GPT-5.6 Sol Instant lower-tier chat. High is not authorized for E.
+RECOVERED CONTROL HANDOFF FROM VALIDATED P1 CHECKPOINT c24fda155bb5735aab5b34e7a4b3e68e46c0adbc / Workspace Control Validation 41937414748 #1986 SUCCESS. Treat GitHub durable state as authoritative.
+
+- A: `screening-v1-P1-A-003` is `READY_TO_RESUME`; resume the SAME GPT-5.6 Sol / High persistent chat after published `E_revert_s1`.
+- B: `screening-v1-P1-B-003` is `READY_TO_RESUME`; resume the SAME GPT-5.6 Sol / Instant persistent chat after published `E_revert_s1`.
+- C: `screening-v1-P1-C-002` is `READY_TO_RESUME`; launch a BRAND-NEW GPT-5.6 Sol / Instant chat for quantum 4 after published `E_revert_s4`.
+- D: `screening-v1-P1-D-002` has leaf-001 `COMPLETED`; leaf-002 is `READY_TO_RESUME`. Launch a BRAND-NEW GPT-5.6 Sol / Instant leaf_worker chat for `screening-v1-P1-D-002-leaf-002` to consume published `E_revert_s2` and persist its conclusion.
+- E: `screening-v1-P1-E-002` is `FAILED` for `WAITING_EXTERNAL_STATUS_MISSING` and MUST NOT resume. Replacement `screening-v1-P1-E-003` is `READY`; launch a BRAND-NEW GPT-5.6 Sol / Instant lower-tier chat. High is NOT authorized.
+
+Service subsequent `WAITING_EXTERNAL`, role-handoff, escalation, and `TERMINAL_CANDIDATE` boundaries directly from GitHub. Do not replay already-published results. If Heartbeat still reports ownership by the interrupted control conversation, do not override it or treat Heartbeat as task truth; GitHub durable state remains authoritative.
 
 ## Remaining work
 
-- Complete the active provenance-refrozen P0 replacement primary screening runs A/B/C/D/E from their durable READY_TO_RESUME states, then execute P1 A-E, P2 A-E, and P3 A-E replacement slots if no further shared protocol/public-input change is required.
+- Complete the active provenance-refrozen P1 replacement screening: A screen-003, B screen-003, C screen-002, D screen-002 leaf/critic/synthesizer chain, and replacement E screen-003. Then execute P2 A-E and P3 A-E replacement slots if no further shared protocol/public-input change is required.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
@@ -93,6 +101,14 @@ P1 screening continues from validated recovery checkpoint 9b1c5f450fbb7b87677095
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
 - Scored resumable-reasoning arms require oracle-unexposed clean model sessions. For ChatGPT plugin-backed workers, the viable product surface is now a brand-new regular chat with Memory disabled and required plugins enabled; Temporary Chat cannot provide both isolation and plugin transport simultaneously.
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
+
+## Control interruption recovery
+
+- The interrupted control conversation had already reached final sync head `c24fda155bb5735aab5b34e7a4b3e68e46c0adbc`.
+- Workspace Control Validation `41937414748 / #1986` completed `SUCCESS` on that exact head.
+- Current run-state files above have been re-read directly from GitHub and agree with the recovery checkpoint.
+- Heartbeat begin from this replacement control chat returned `HEARTBEAT_TASK_OWNED_BY_ANOTHER_CONVERSATION`. Do not hijack or widen Heartbeat authority; this does not supersede GitHub state.
+- Directly related benchmark/run-state artifacts are already durable. Independent semantic-control, ontology, GitRunner, and Workspace Shell task capsules were not mutated merely because they are conceptually related; their separate owners remain authoritative.
 
 ## Fresh-chat initialization
 
