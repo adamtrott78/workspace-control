@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -103,7 +103,7 @@
       },
       {
         "role": "synthesizer",
-        "status": "READY"
+        "status": "COMPLETED"
       }
     ],
     "active_role": null,
@@ -380,7 +380,7 @@
       "next_safe_action": "Independent critic role is complete; do not perform synthesizer work in this session."
     },
     "synthesizer": {
-      "status": "READY",
+      "status": "COMPLETED",
       "evidence_refs": [
         "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
         "fixture:starting_observations:O2",
@@ -390,7 +390,27 @@
         "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
         "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
         "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
-      ]
+      ],
+      "verdict": "TERMINAL_CANDIDATE",
+      "terminal_submission": {
+        "final_hypothesis": "H_shard_policy",
+        "rejected_hypotheses": [
+          "H_shared_db"
+        ],
+        "observed_results": {
+          "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+          "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+          "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+          "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+          "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+          "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+          "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+        },
+        "addressed_observations": [
+          "O2"
+        ],
+        "rationale": "Across all six independently tested shards, reverting only the newly deployed request-policy configuration reverses the latency regression on the targeted shard without changing the others, providing replicated shard-local evidence for H_shard_policy. Doubling shared-database capacity while shard policies remain unchanged changes all-shard p95 by only -4 ms, weighing against H_shared_db as the primary mechanism. This control does not test or reject other shared-dependency mechanisms; H_network_fabric therefore remains open."
+      }
     }
   },
   "started_at": "2026-11-04T18:18:00-05:00",
@@ -610,6 +630,24 @@
       "outcome": "COMPLETED",
       "external_experiment_requested": false,
       "verdict": "SUPPORTED_WITH_LIMITATIONS",
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "synthesizer",
+      "worker_id": "screening-v1-P1-D-002-synthesizer-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "TERMINAL_CANDIDATE",
+      "external_experiment_requested": false,
       "evidence_refs": [
         "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
         "fixture:starting_observations:O2",
@@ -1004,6 +1042,42 @@
       "generation": 0,
       "role": "synthesizer",
       "reason": "independent_critic_completed"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-synthesizer-g0",
+      "role": "synthesizer"
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "synthesizer",
+      "outcome": "TERMINAL_CANDIDATE"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "role": "synthesizer",
+      "submission": {
+        "final_hypothesis": "H_shard_policy",
+        "rejected_hypotheses": [
+          "H_shared_db"
+        ],
+        "observed_results": {
+          "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+          "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+          "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+          "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+          "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+          "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+          "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+        },
+        "addressed_observations": [
+          "O2"
+        ],
+        "rationale": "Across all six independently tested shards, reverting only the newly deployed request-policy configuration reverses the latency regression on the targeted shard without changing the others, providing replicated shard-local evidence for H_shard_policy. Doubling shared-database capacity while shard policies remain unchanged changes all-shard p95 by only -4 ms, weighing against H_shared_db as the primary mechanism. This control does not test or reject other shared-dependency mechanisms; H_network_fabric therefore remains open."
+      }
     }
   ],
   "pending_external": null,
@@ -1170,7 +1244,7 @@
   "open_hypotheses": [
     {
       "id": "H_shared_db",
-      "status": "OPEN"
+      "status": "REJECTED_AS_PRIMARY"
     },
     {
       "id": "H_network_fabric",
@@ -1178,13 +1252,11 @@
     },
     {
       "id": "H_shard_policy",
-      "status": "OPEN"
+      "status": "SUPPORTED"
     }
   ],
   "unresolved_questions": [
-    "Do policy reverts independently reverse the latency regression on shards 1 through 6?",
-    "Does the selected shared-database capacity control materially change the regression while shard policies remain unchanged?",
-    "After all required durable evidence is collected, which competing hypotheses can be rejected?"
+    "H_network_fabric remains untested by the completed shared-database control and is not rejected by this synthesis."
   ],
   "evidence_refs": [
     "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
@@ -1199,48 +1271,30 @@
     "fixture:experiment_catalog:E_scale_shared_db",
     "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
   ],
-  "candidate_actions": [
-    {
-      "kind": "RUN_LEAF",
-      "process_id": "screening-v1-P1-D-002-leaf-001",
-      "experiment_id": "E_revert_s1"
+  "candidate_actions": [],
+  "next_safe_action": "Stop and await control-evaluator validation of the persisted TERMINAL_CANDIDATE.",
+  "terminal_submission": {
+    "final_hypothesis": "H_shard_policy",
+    "rejected_hypotheses": [
+      "H_shared_db"
+    ],
+    "observed_results": {
+      "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
     },
-    {
-      "kind": "RUN_LEAF",
-      "process_id": "screening-v1-P1-D-002-leaf-002",
-      "experiment_id": "E_revert_s2"
-    },
-    {
-      "kind": "RUN_LEAF",
-      "process_id": "screening-v1-P1-D-002-leaf-003",
-      "experiment_id": "E_revert_s3"
-    },
-    {
-      "kind": "RUN_LEAF",
-      "process_id": "screening-v1-P1-D-002-leaf-004",
-      "experiment_id": "E_revert_s4"
-    },
-    {
-      "kind": "RUN_LEAF",
-      "process_id": "screening-v1-P1-D-002-leaf-005",
-      "experiment_id": "E_revert_s5"
-    },
-    {
-      "kind": "RUN_LEAF",
-      "process_id": "screening-v1-P1-D-002-leaf-006",
-      "experiment_id": "E_revert_s6"
-    },
-    {
-      "kind": "RUN_LEAF",
-      "process_id": "screening-v1-P1-D-002-leaf-007",
-      "experiment_id": "E_scale_shared_db"
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled as synthesizer. Use only durable run-state evidence and the completed independent critique; do not reuse this critic session.",
-  "terminal_submission": null,
+    "addressed_observations": [
+      "O2"
+    ],
+    "rationale": "Across all six independently tested shards, reverting only the newly deployed request-policy configuration reverses the latency regression on the targeted shard without changing the others, providing replicated shard-local evidence for H_shard_policy. Doubling shared-database capacity while shard policies remain unchanged changes all-shard p95 by only -4 ms, weighing against H_shared_db as the primary mechanism. This control does not test or reject other shared-dependency mechanisms; H_network_fabric therefore remains open."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 16,
+    "reasoning_invocations": 17,
     "experiment_requests": 7,
     "retries": 0,
     "decomposition_count": 1,
@@ -1254,11 +1308,11 @@
     "deterministic_compute_operations": 18
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "status": "READY_FOR_TERMINAL_VALIDATION",
     "last_request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
     "last_experiment_id": "E_scale_shared_db",
     "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
-    "note": "Published only the requested experiment measurements."
+    "note": "Terminal candidate persisted by synthesizer; control-evaluator validation required before completion."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/D_instant_decompose_critic/screen-002.json"
