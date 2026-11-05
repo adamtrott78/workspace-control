@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 A/B/C are COMPLETED. Resume only D/E from live durable state. D screen-002 is READY_TO_RESUME and MUST launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-005; re-read durable state, work only that leaf, and stop at its next boundary. E screen-004 is READY_TO_RESUME after control-published E_revert_s3 and MUST launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled and GitHub enabled; consume only E_revert_s3, continue one bounded decomposed leaf transition, and stop at the next boundary. High remains NOT AUTHORIZED. Service subsequent WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE transitions directly from GitHub. Do not replay already-published results.
+P1 A/B/C are COMPLETED. Continue D/E only from live durable state. D screen-002 is READY_TO_RESUME after control-published E_revert_s5 and MUST launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-005; consume E_revert_s5, persist that leaf conclusion, and stop. E screen-004 is READY_TO_RESUME after control-published E_revert_s4 and MUST launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled and GitHub enabled; consume only E_revert_s4, continue one bounded decomposed leaf transition, and stop at the next boundary. High remains NOT AUTHORIZED. Service subsequent WAITING_EXTERNAL / role-handoff / TERMINAL_CANDIDATE transitions directly from GitHub. Do not replay already-published results.
 
 ## Remaining work
 
