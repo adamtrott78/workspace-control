@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 8,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -291,6 +291,21 @@
       "kind": "TERMINAL_CANDIDATE_SUBMITTED",
       "generation": 8,
       "note": "Public fixture contract satisfied after seven experiment cycles: six shard-local reversions plus one shared-infrastructure control. Stop for control-evaluator validation; no High escalation requested or authorized."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 8,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 8,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
     }
   ],
   "pending_external": null,
@@ -465,7 +480,7 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [],
-  "next_safe_action": "Stop. TERMINAL_CANDIDATE is awaiting control-evaluator validation; do not self-validate, request further experiments, poll, or escalate.",
+  "next_safe_action": "Screening run complete. Preserve this P1 E run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_shard_policy",
     "rejected_hypotheses": [
@@ -485,7 +500,15 @@
     ],
     "rationale": "O2 shows that reverting shard 1 policy restores only shard 1. Control-published experiments reproduce the same shard-local recovery independently on shards 2-6 and again on shard 1, with target p95 values 205-214 ms and no other shards changed. By contrast, doubling shared database capacity changes all-shard p95 by only -4 ms. Across the required seven experiment cycles, the intervention pattern identifies the newly deployed request-policy configuration as the primary mechanism and rejects a shared-database bottleneck as the primary cause."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 8,
     "experiment_requests": 7,
@@ -498,14 +521,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 18
+    "deterministic_compute_operations": 19
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_generation": 7,
-    "last_experiment_id": "E_scale_shared_db",
-    "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
-    "note": "Published only the requested experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/E_hybrid_escalation/screen-004.json"
