@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P1 protocol screening is COMPLETE across A/B/C/D/E. All five P1 arms passed research_iterate_objective_v1 with score 1.0 and zero violations. Next, launch the frozen P2 screen-002 A-E slots from source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb: A in a brand-new GPT-5.6 Sol High persistent chat; B in a brand-new GPT-5.6 Sol Instant persistent chat; C in a brand-new GPT-5.6 Sol Instant stateless quantum-0 chat; D in a brand-new GPT-5.6 Sol Instant decomposer chat; E in a brand-new GPT-5.6 Sol Instant lower-tier chat. Memory must be disabled before launch and GitHub enabled. E High escalation remains unauthorized unless durable evidence later opens the gate. Service all subsequent WAITING_EXTERNAL / role / terminal boundaries directly from live GitHub.
+P2 first experiment boundary serviced. A screen-002 and B screen-002 are READY_TO_RESUME in their SAME persistent chats after control-published E_force_retry_reset. C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-1 chat to consume E_force_retry_reset and perform exactly one bounded quantum. D screen-002 decomposer completed LEAF_EXECUTABLE; launch a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for screening-v1-P2-D-002-leaf-001. E screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat to consume E_force_retry_reset; High remains unauthorized unless durable evidence later opens the escalation gate. Service subsequent exact boundaries directly from live GitHub.
 
 ## Remaining work
 
