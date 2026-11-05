@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P2-B-002-persistent-worker",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -63,7 +63,30 @@
   },
   "started_at": "2026-11-05T18:56:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screen-002-inv-001",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-002-persistent-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT"
+      },
+      "context_bytes": 2252,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "experiment:E_force_retry_reset"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -74,21 +97,92 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "screening-v1-P2-B-002-persistent-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-exp-001",
+      "generation": 0,
+      "payload_ref": "experiment:E_force_retry_reset",
+      "experiment_id": "E_force_retry_reset"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screen-002-exp-001",
+    "kind": "synthetic_experiment",
+    "payload_ref": "experiment:E_force_retry_reset",
+    "experiment_id": "E_force_retry_reset"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Reason one bounded PRIMARY quantum and, if an experiment result is needed, persist exactly one external experiment request then stop.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "finding": "O3 weakens H_queue as the primary mechanism because CPU remains below 48% and queue occupancy never exceeds 62%; queue saturation is not established.",
+      "evidence_refs": [
+        "fixture:O3"
+      ]
+    },
+    {
+      "id": "F2",
+      "finding": "O2 shows load relief lowers p95 latency, but the fixture explicitly warns this is potentially non-discriminating and therefore it cannot identify the causal mechanism.",
+      "evidence_refs": [
+        "fixture:O2"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "PRIMARY_TEST_TARGET",
+      "reason": "Directly explains elevated retries and latency; E_force_retry_reset isolates retry-state retention while pool reuse remains enabled."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "OPEN",
+      "reason": "Could amplify retries through timeout bunching; requires discrimination if retry-reset evidence is insufficient."
+    },
+    {
+      "id": "H_queue",
+      "status": "WEAKENED_NOT_REJECTED",
+      "reason": "O3 is inconsistent with obvious capacity saturation, but an intervention result is needed for stronger rejection."
+    }
+  ],
+  "unresolved_questions": [
+    "Does resetting retry state at each request boundary materially reduce retries and p95 latency while pool reuse remains enabled?",
+    "After the first result, which second experiment best distinguishes the surviving causal hypotheses?"
+  ],
+  "evidence_refs": [
+    "fixture:O1",
+    "fixture:O2",
+    "fixture:O3"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_force_retry_reset",
+      "priority": 1,
+      "rationale": "Direct intervention on H_retry_state with pool reuse held enabled."
+    },
+    {
+      "experiment_id": "E_queue_4x",
+      "priority": 2,
+      "rationale": "Potential second-cycle discriminator for H_queue if needed."
+    },
+    {
+      "experiment_id": "E_clock_quantization",
+      "priority": 3,
+      "rationale": "Potential second-cycle discriminator for H_clock_bucket."
+    }
+  ],
+  "next_safe_action": "STOP. Await control publication for request screen-002-exp-001 (E_force_retry_reset); do not poll. Resume only when live state is READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
