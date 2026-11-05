@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -216,13 +216,16 @@
       "request_id": "E_revert_s3",
       "generation": 0,
       "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s3"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_revert_s3",
+      "generation": 0,
+      "experiment_id": "E_revert_s3",
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c"
     }
   ],
-  "pending_external": {
-    "request_id": "E_revert_s3",
-    "kind": "EXPERIMENT",
-    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s3"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "E_revert_s1",
@@ -244,6 +247,17 @@
         "other_shards_changed": false
       },
       "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s3": {
+      "request_id": "E_revert_s3",
+      "experiment_id": "E_revert_s3",
+      "result": {
+        "shard": "s3",
+        "p95_latency_ms": 207,
+        "other_shards_changed": false
+      },
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
       "publication_scope": "requested experiment only"
     }
   },
@@ -305,7 +319,7 @@
       "reason": "Continue the independent shard sweep; shard 3 is the next unobserved local leaf."
     }
   ],
-  "next_safe_action": "Await control publication for E_revert_s3; do not poll. Resume this same persistent chat only after READY_TO_RESUME.",
+  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / Instant persistent chat. Re-read durable state, consume only E_revert_s3, continue with the next unobserved experiment, and stop at the next external or terminal boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -320,13 +334,13 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 2
+    "deterministic_compute_operations": 3
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "E_revert_s2",
-    "last_experiment_id": "E_revert_s2",
-    "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+    "last_request_id": "E_revert_s3",
+    "last_experiment_id": "E_revert_s3",
+    "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
     "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
