@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -95,7 +95,7 @@
       {
         "role": "leaf_worker",
         "process_id": "screening-v1-P1-D-002-leaf-007",
-        "status": "WAITING_EXTERNAL"
+        "status": "READY"
       },
       {
         "role": "independent_critic",
@@ -297,7 +297,7 @@
       {
         "process_id": "screening-v1-P1-D-002-leaf-007",
         "leaf": "shared-control",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY",
         "generation": 0,
         "owner": null,
         "objective": "Run one shared-infrastructure control that discriminates a shared dependency from shard-local request-policy regression; request at most one external experiment.",
@@ -306,7 +306,7 @@
           "fixture:experiment_catalog:E_scale_shared_db"
         ],
         "established_findings": [],
-        "next_safe_action": "Wait for the control evaluator to publish the result for E_scale_shared_db; resume this same leaf in a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled."
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume the control-published E_scale_shared_db result and persist this leaf conclusion."
       }
     ],
     "independent_critic": {
@@ -847,16 +847,16 @@
       "process_id": "screening-v1-P1-D-002-leaf-007",
       "experiment_id": "E_scale_shared_db",
       "payload_ref": "fixture:experiment_catalog:E_scale_shared_db"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
+      "generation": 0,
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
-    "generation": 0,
-    "role": "leaf_worker",
-    "process_id": "screening-v1-P1-D-002-leaf-007",
-    "experiment_id": "E_scale_shared_db",
-    "payload_ref": "fixture:experiment_catalog:E_scale_shared_db"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
@@ -922,6 +922,15 @@
         "other_shards_changed": false
       },
       "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "publication_scope": "requested experiment only"
+    },
+    "E_scale_shared_db": {
+      "request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
+      "experiment_id": "E_scale_shared_db",
+      "result": {
+        "all_shards_p95_delta_ms": -4
+      },
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
       "publication_scope": "requested experiment only"
     }
   },
@@ -1068,7 +1077,7 @@
       "experiment_id": "E_scale_shared_db"
     }
   ],
-  "next_safe_action": "Wait for control evaluator publication of E_scale_shared_db. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled to resume leaf_worker process screening-v1-P1-D-002-leaf-007; re-read durable state only.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for leaf_worker process screening-v1-P1-D-002-leaf-007. Re-read durable state only, consume E_scale_shared_db, persist the shared-control leaf conclusion, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -1083,14 +1092,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 15
+    "deterministic_compute_operations": 16
   },
   "control_evaluator": {
-    "status": "REQUEST_PENDING",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
     "last_experiment_id": "E_scale_shared_db",
-    "result_hash": null,
-    "note": "Awaiting publication of only the requested experiment measurements."
+    "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+    "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/D_instant_decompose_critic/screen-002.json"
