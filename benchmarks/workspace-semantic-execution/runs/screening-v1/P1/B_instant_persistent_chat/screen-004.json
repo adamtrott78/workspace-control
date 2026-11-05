@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -325,6 +325,16 @@
       "generation": 0,
       "experiment_id": "E_revert_s5",
       "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 13
     }
   ],
   "pending_external": null,
@@ -417,6 +427,11 @@
       "id": "E_revert_s4",
       "finding": "Control-published E_revert_s4 recovered shard 4 to p95 214 ms with no change on other shards, adding a fourth independent local policy recovery.",
       "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+    },
+    {
+      "id": "E_revert_s5",
+      "finding": "Control-published E_revert_s5 recovered shard 5 to p95 209 ms with no change on other shards, adding a fifth independent local policy recovery.",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
     }
   ],
   "open_hypotheses": [
@@ -434,7 +449,7 @@
     }
   ],
   "unresolved_questions": [
-    "Do shard-local reversions on shards 5-6 each recover only their target shard?",
+    "Does shard-local reversion on shard 6 recover only shard 6?",
     "Does at least one shared-infrastructure control materially change latency with policies unchanged?"
   ],
   "evidence_refs": [
@@ -449,15 +464,16 @@
     "external_results.E_revert_s3#601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s4",
     "external_results.E_revert_s4#ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
-    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5"
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5",
+    "external_results.E_revert_s5#b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
   ],
   "candidate_actions": [
     {
-      "experiment_id": "E_revert_s5",
-      "reason": "Continue the independent shard sweep; shard 5 is the next unobserved local leaf."
+      "experiment_id": "E_revert_s6",
+      "reason": "Complete the required six-shard independent local evidence sweep before selecting the shared-infrastructure control."
     }
   ],
-  "next_safe_action": "Resume in the SAME clean GPT-5.6 Sol / Instant persistent chat. Re-read durable state, consume only E_revert_s5, continue with the next unobserved experiment, and stop at the next external or terminal boundary.",
+  "next_safe_action": "Request E_revert_s6, then stop at WAITING_EXTERNAL.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
