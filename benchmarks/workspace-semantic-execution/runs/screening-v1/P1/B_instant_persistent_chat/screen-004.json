@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -62,7 +62,7 @@
     "persistent_chat": true
   },
   "started_at": "2026-11-05T00:51:00Z",
-  "completed_at": null,
+  "completed_at": "2026-11-04T21:26:00-05:00",
   "invocations": [
     {
       "invocation_id": "screening-v1-P1-B-004-inv-001",
@@ -442,6 +442,21 @@
       "kind": "TERMINAL_CANDIDATE",
       "generation": 0,
       "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
     }
   ],
   "pending_external": null,
@@ -606,7 +621,7 @@
     "external_results.E_scale_shared_db#f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Await control-evaluator validation of TERMINAL_CANDIDATE; do not self-validate or poll.",
+  "next_safe_action": "Screening run complete. Preserve screening-v1-P1-B-004 as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_shard_policy",
     "rejected_hypotheses": [
@@ -628,7 +643,15 @@
     ],
     "rationale": "All six independent shard-local policy reversions restored only their target shard to approximately 205-214 ms while leaving other shards unchanged, reproducing and generalizing O2 across every shard. In contrast, doubling shared DB capacity with policies unchanged moved all-shard p95 by only -4 ms, rejecting H_shared_db as the primary mechanism. The convergent local interventions support H_shard_policy as the primary mechanism behind the synchronized regression. O1 is explained by the same policy rollout affecting all six in the same deployment window; O2 is directly reproduced across all six; O3 is consistent with the lack of material shared-DB-control effect."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 8,
     "experiment_requests": 7,
@@ -641,14 +664,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 7
+    "deterministic_compute_operations": 8
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "E_scale_shared_db",
-    "last_experiment_id": "E_scale_shared_db",
-    "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
-    "note": "Published only the requested experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/B_instant_persistent_chat/screen-004.json"
