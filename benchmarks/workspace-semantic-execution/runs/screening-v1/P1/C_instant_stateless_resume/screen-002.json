@@ -59,7 +59,7 @@
   },
   "treatment_state": {
     "quantum_index": 7,
-    "resume_requires_new_chat": false,
+    "resume_requires_new_chat": true,
     "last_quantum_chat": {
       "quantum_index": 7,
       "executor_identity": {
