@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -175,6 +175,34 @@
       "evidence_refs": [
         "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s4"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-005",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 3170,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5"
+      ]
     }
   ],
   "events": [
@@ -284,9 +312,19 @@
       "kind": "SEMANTIC_CHECKPOINT",
       "generation": 0,
       "evidence_ref_count": 11
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_revert_s5",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "E_revert_s5",
+    "kind": "EXPERIMENT",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "E_revert_s1",
@@ -396,7 +434,8 @@
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s3",
     "external_results.E_revert_s3#601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s4",
-    "external_results.E_revert_s4#ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+    "external_results.E_revert_s4#ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5"
   ],
   "candidate_actions": [
     {
@@ -404,12 +443,12 @@
       "reason": "Continue the independent shard sweep; shard 5 is the next unobserved local leaf."
     }
   ],
-  "next_safe_action": "Request E_revert_s5, then stop at WAITING_EXTERNAL.",
+  "next_safe_action": "Await control publication for E_revert_s5; do not poll. Resume this same persistent chat only after READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 4,
-    "experiment_requests": 4,
+    "reasoning_invocations": 5,
+    "experiment_requests": 5,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
