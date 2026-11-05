@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -203,6 +203,34 @@
       "evidence_refs": [
         "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-006",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 3635,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
+      ]
     }
   ],
   "events": [
@@ -335,9 +363,19 @@
       "kind": "SEMANTIC_CHECKPOINT",
       "generation": 0,
       "evidence_ref_count": 13
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_revert_s6",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "E_revert_s6",
+    "kind": "EXPERIMENT",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
+  },
   "external_results": {
     "E_revert_s1": {
       "request_id": "E_revert_s1",
@@ -465,7 +503,8 @@
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s4",
     "external_results.E_revert_s4#ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
     "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5",
-    "external_results.E_revert_s5#b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
+    "external_results.E_revert_s5#b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
   ],
   "candidate_actions": [
     {
@@ -473,12 +512,12 @@
       "reason": "Complete the required six-shard independent local evidence sweep before selecting the shared-infrastructure control."
     }
   ],
-  "next_safe_action": "Request E_revert_s6, then stop at WAITING_EXTERNAL.",
+  "next_safe_action": "Await control publication for E_revert_s6; do not poll. Resume this same persistent chat only after READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 5,
-    "experiment_requests": 5,
+    "reasoning_invocations": 6,
+    "experiment_requests": 6,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
