@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -347,13 +347,16 @@
       "request_id": "screening-v1-P1-C-002-q4-E_revert_s5",
       "generation": 0,
       "payload_ref": "E_revert_s5"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-C-002-q4-E_revert_s5",
+      "generation": 0,
+      "experiment_id": "E_revert_s5",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P1-C-002-q4-E_revert_s5",
-    "kind": "fixture_experiment",
-    "payload_ref": "E_revert_s5"
-  },
+  "pending_external": null,
   "external_results": {
     "E_revert_s1": {
       "request_id": "screening-v1-P1-C-002-q0-E_revert_s1",
@@ -397,6 +400,17 @@
         "other_shards_changed": false
       },
       "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s5": {
+      "request_id": "screening-v1-P1-C-002-q4-E_revert_s5",
+      "experiment_id": "E_revert_s5",
+      "result": {
+        "shard": "s5",
+        "p95_latency_ms": 209,
+        "other_shards_changed": false
+      },
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
       "publication_scope": "requested experiment only"
     }
   },
@@ -500,14 +514,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 8
+    "deterministic_compute_operations": 9
   },
   "control_evaluator": {
-    "status": "EXTERNAL_REQUEST_PENDING",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P1-C-002-q4-E_revert_s5",
     "last_experiment_id": "E_revert_s5",
-    "result_hash": null,
-    "note": "Worker requested only the next fixture experiment and stopped without polling."
+    "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+    "note": "Published only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/C_instant_stateless_resume/screen-002.json"
