@@ -28,8 +28,8 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 6,
-  "status": "READY_TO_RESUME",
+  "generation": 7,
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -124,6 +124,12 @@
       "role": "lower-tier-instant-worker",
       "configuration": "Instant",
       "purpose": "consume control-published E_revert_s6 result and continue one bounded decomposed leaf transition"
+    },
+    {
+      "generation": 7,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_revert_s1 result and continue one bounded decomposed shared-control leaf transition"
     }
   ],
   "events": [
@@ -248,9 +254,25 @@
       "generation": 6,
       "experiment_id": "E_revert_s1",
       "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 7,
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "note": "Consumed only the control-published requested result: reverting shard 1 policy lowers shard 1 p95 to 205 ms with no other shards changed."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 7,
+      "experiment_id": "E_scale_shared_db",
+      "note": "Required bounded shared-infrastructure control requested after completing all six shard-local leaves. Stop at external boundary; do not poll."
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "experiment_id": "E_scale_shared_db",
+    "request_generation": 7
+  },
   "external_results": {
     "E_revert_s2": {
       "experiment_id": "E_revert_s2",
@@ -371,6 +393,13 @@
       "evidence_refs": [
         "external_results:E_revert_s6"
       ]
+    },
+    {
+      "id": "F_revert_s1_1",
+      "finding": "Reverting shard 1 policy lowers shard 1 p95 to 205 ms while no other shards change, completing independent shard-local responses across all six shards consistent with the shard-policy hypothesis; shared dependency remains unexcluded pending shared-control evidence.",
+      "evidence_refs": [
+        "external_results:E_revert_s1"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -395,23 +424,23 @@
   "candidate_actions": [
     {
       "action": "request_experiment",
-      "experiment_id": "E_revert_s1",
-      "leaf": "shard-1",
-      "priority": 6
-    },
-    {
-      "action": "request_experiment",
       "experiment_id": "E_scale_shared_db",
       "leaf": "shared-control",
       "priority": 7
+    },
+    {
+      "action": "request_experiment",
+      "experiment_id": "E_network_bypass",
+      "leaf": "shared-control-alternate",
+      "priority": 8
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_revert_s1, continue one bounded decomposed leaf transition, and stop at the next boundary. No High escalation is authorized.",
+  "next_safe_action": "Stop at the external experiment boundary. Control must publish only the requested E_scale_shared_db result into durable state. Then launch a BRAND-NEW regular GPT-5.6 Sol / Instant lower-tier chat with Memory disabled before launch and GitHub enabled; re-read durable state only and continue according to the published state. No High escalation is authorized.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 6,
-    "experiment_requests": 6,
+    "reasoning_invocations": 7,
+    "experiment_requests": 7,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -421,14 +450,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 16
+    "deterministic_compute_operations": 17
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_generation": 6,
-    "last_experiment_id": "E_revert_s1",
-    "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
-    "note": "Published only the requested experiment measurements."
+    "status": "EXPERIMENT_REQUESTED",
+    "last_request_generation": 7,
+    "last_experiment_id": "E_scale_shared_db",
+    "result_hash": null,
+    "note": "Awaiting control publication of only the requested experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/E_hybrid_escalation/screen-004.json"
