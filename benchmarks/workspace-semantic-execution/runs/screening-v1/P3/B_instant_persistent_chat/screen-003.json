@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "p3-b-persistent-worker-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -122,6 +122,36 @@
       ],
       "reasoning_summary": "E_isolate_r1 materially reduced r1 latency and retries without materially changing other regions, supporting a cross-region propagation contribution. Because one regional leaf cannot establish generality or distinguish retained retry state from synchronized timers, request an independent second-region isolation before coupled-residual discrimination.",
       "experiment_id": "E_isolate_r2"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q003",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_global_retry_reset"
+      ],
+      "reasoning_summary": "E_isolate_r2 independently replicates the regional isolation improvement, so further identical regional replication has lower discriminating value. Request the coupled-residual retry-state reset intervention to test whether retained cross-region retry state is the mechanism linking the regional effects.",
+      "experiment_id": "E_global_retry_reset"
     }
   ],
   "events": [
@@ -176,9 +206,21 @@
       "worker_id": "p3-b-persistent-worker-screen-003",
       "resume_from": "E_isolate_r2",
       "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-003",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_global_retry_reset",
+      "experiment_id": "E_global_retry_reset"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-B-003-exp-003",
+    "kind": "experiment",
+    "experiment_id": "E_global_retry_reset",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_global_retry_reset"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-B-003-exp-001",
@@ -227,13 +269,20 @@
       "evidence_refs": [
         "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
       ]
+    },
+    {
+      "id": "F4",
+      "statement": "Region 2 independently replicates the isolation effect: p95 latency fell to 322 ms and mean retries to 2.0 while other regions did not materially change. The repeated locality of the intervention effect strengthens evidence that cross-region propagation drives the regression rather than a shared local-capacity deficit.",
+      "evidence_refs": [
+        "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
-      "status": "SUPPORTED_PENDING_DISCRIMINATION",
-      "reason": "E_isolate_r1 materially improves latency/retries when cross-region retry propagation is blocked, but timer synchronization remains a coupled alternative."
+      "status": "SUPPORTED_PENDING_COUPLED_TEST",
+      "reason": "Two independent regional isolation probes materially improve latency/retries when cross-region propagation is blocked; retained retry state remains to be discriminated from synchronized timers."
     },
     {
       "id": "H_clock_sync",
@@ -247,8 +296,8 @@
     }
   ],
   "unresolved_questions": [
-    "Does the regional isolation effect replicate independently in another region?",
-    "Does retry-state reset or timer desynchronization discriminate the coupled residual?",
+    "Does resetting retry state at every cross-region boundary collapse the coupled regression?",
+    "If needed, does timer desynchronization provide a competing coupled-mechanism result?",
     "Does a global capacity/load control reject capacity as the primary mechanism?"
   ],
   "evidence_refs": [
@@ -256,7 +305,8 @@
     "O2",
     "O3",
     "O4",
-    "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+    "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
   ],
   "candidate_actions": [
     {
@@ -288,12 +338,12 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "Interpret only the published E_isolate_r2 result and request exactly one next experiment if needed.",
+  "next_safe_action": "STOP. Wait for the control evaluator to publish the exact result for E_global_retry_reset and set READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 2,
+    "reasoning_invocations": 3,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
