@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-worker-screening-v1-P2-A-002",
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -94,6 +94,23 @@
         "control-result:E_force_retry_reset#6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
         "E_queue_4x"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-A-002-inv-003",
+      "generation": 0,
+      "owner": "chatgpt-worker-screening-v1-P2-A-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat"
+      },
+      "context_bytes": 4747,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "control-result:E_force_retry_reset#6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "control-result:E_queue_4x#fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+      ]
     }
   ],
   "events": [
@@ -154,6 +171,20 @@
       "generation": 0,
       "worker_id": "chatgpt-worker-screening-v1-P2-A-002",
       "resume_from": "READY_TO_RESUME"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 7
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "invocation_id": "screening-v1-P2-A-002-inv-003",
+      "observed_result_hashes": {
+        "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_queue_4x": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+      }
     }
   ],
   "pending_external": null,
@@ -201,48 +232,65 @@
         "E_force_retry_reset",
         "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
       ]
+    },
+    {
+      "id": "F4",
+      "statement": "Increasing queue capacity by 4x while holding concurrency and retry policy fixed left p95 latency at 405 ms and mean retries at 3.0, essentially unchanged from baseline 412 ms and 3.1. This directly rejects queue-capacity saturation as the primary mechanism.",
+      "evidence": [
+        "E_queue_4x",
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "STRONGLY_SUPPORTED",
-      "rationale": "The targeted retry-state reset materially reduced both retries and latency while retaining pool reuse."
+      "status": "PRIMARY_SUPPORTED",
+      "rationale": "Resetting retry state at request boundaries while leaving pool reuse enabled reduced p95 from 412 ms to 219 ms and mean retries from 3.1 to 1.0."
     },
     {
       "id": "H_queue",
-      "status": "WEAKENED_PENDING_DIRECT_TEST",
-      "rationale": "O3 already argues against primary queue-capacity saturation; a 4x queue-capacity intervention is the clean second-cycle test."
+      "status": "REJECTED_AS_PRIMARY",
+      "rationale": "A 4x queue-capacity increase produced essentially no improvement: p95 405 ms and mean retries 3.0."
     },
     {
       "id": "H_clock_bucket",
-      "status": "PLAUSIBLE_BUT_SECONDARY_UNTESTED",
-      "rationale": "Still possible in principle, but the retry-reset result directly explains retry amplification without changing timestamp quantization."
+      "status": "REJECTED_AS_PRIMARY",
+      "rationale": "The retry-state reset intervention materially corrected latency and retries without changing timeout timestamp quantization, so clock quantization is not needed to explain the primary regression."
     }
   ],
-  "unresolved_questions": [
-    "Does increasing queue capacity by 4x, while holding concurrency and retry policy fixed, materially reduce latency or retries enough to support H_queue?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "fixture:research-iterate-retry-pooling-v1#O1",
     "fixture:research-iterate-retry-pooling-v1#O2",
     "fixture:research-iterate-retry-pooling-v1#O3",
     "fixture:research-iterate-retry-pooling-v1#E_force_retry_reset",
     "control-result:E_force_retry_reset#6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
-    "fixture:research-iterate-retry-pooling-v1#E_queue_4x"
+    "fixture:research-iterate-retry-pooling-v1#E_queue_4x",
+    "control-result:E_queue_4x#fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
   ],
-  "candidate_actions": [
-    {
-      "action": "REQUEST_EXPERIMENT",
-      "experiment_id": "E_queue_4x",
-      "rationale": "This second experiment directly tests the main competing queue-capacity mechanism while preserving concurrency and retry policy, allowing O2 load relief to be distinguished from causal queue saturation."
-    }
-  ],
-  "next_safe_action": "Consume only the control-published E_queue_4x result, synthesize the two experiment cycles, and submit a terminal candidate if the fixture contract is satisfied.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Stop at TERMINAL_CANDIDATE. Control evaluator must validate the exact terminal submission; worker must not self-validate or mark COMPLETE.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
+      "H_queue",
+      "H_clock_bucket"
+    ],
+    "observed_results": {
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "E_queue_4x": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "The primary mechanism is retained retry state across pooled request lifecycles. Baseline O1 couples high p95 latency (412 ms) with elevated retries (3.1/request). O2 shows that halving concurrency reduces p95 to 286 ms, but that load-relief correlation is non-discriminating and does not identify queue saturation. O3 further weakens queue saturation because CPU stays below 48% and queue occupancy below 62%. The first causal intervention, E_force_retry_reset, leaves pool reuse enabled but resets retry state at each request boundary; it reduces p95 to 219 ms and mean retries to 1.0, directly supporting H_retry_state. The second causal intervention, E_queue_4x, increases queue capacity fourfold while holding concurrency and retry policy fixed; p95 remains 405 ms and retries 3.0, directly rejecting H_queue as the primary cause. H_clock_bucket is also rejected as the primary mechanism because the retry-reset intervention fixes the regression without changing timeout timestamp quantization. Thus the concurrency effect in O2 is load relief, not the causal mechanism."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
