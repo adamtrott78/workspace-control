@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -156,14 +156,16 @@
       "generation": 0,
       "payload_ref": "experiment:E_clock_quantization",
       "experiment_id": "E_clock_quantization"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screen-002-exp-002",
+      "generation": 0,
+      "experiment_id": "E_clock_quantization",
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
     }
   ],
-  "pending_external": {
-    "request_id": "screen-002-exp-002",
-    "kind": "synthetic_experiment",
-    "payload_ref": "experiment:E_clock_quantization",
-    "experiment_id": "E_clock_quantization"
-  },
+  "pending_external": null,
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screen-002-exp-001",
@@ -173,6 +175,16 @@
         "mean_retries": 1
       },
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "publication_scope": "requested experiment only"
+    },
+    "E_clock_quantization": {
+      "request_id": "screen-002-exp-002",
+      "experiment_id": "E_clock_quantization",
+      "result": {
+        "p95_latency_ms": 401,
+        "mean_retries": 3
+      },
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17",
       "publication_scope": "requested experiment only"
     }
   },
@@ -240,7 +252,7 @@
       "rationale": "Queue saturation remains weakened by O3 and by improvement without queue-capacity change; use only if second-cycle evidence leaves ambiguity."
     }
   ],
-  "next_safe_action": "STOP. Await control publication for request screen-002-exp-002 (E_clock_quantization); do not poll. Resume only when live state is READY_TO_RESUME.",
+  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_clock_quantization, continue until the next protocol-required boundary, persist state, and stop. Do not open a replacement chat while persistent continuity is required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -259,9 +271,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screen-002-exp-001",
-    "last_experiment_id": "E_force_retry_reset",
-    "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "last_request_id": "screen-002-exp-002",
+    "last_experiment_id": "E_clock_quantization",
+    "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
