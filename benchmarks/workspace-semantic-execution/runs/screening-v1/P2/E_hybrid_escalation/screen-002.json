@@ -388,72 +388,21 @@
   "candidate_actions": [],
   "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only. Reformat the existing lower-tier terminal reasoning into the exact public fixture worker_contract.terminal_output_schema using only the already published result hashes; persist a protocol-valid TERMINAL_CANDIDATE if supported and stop. Do not request High unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": {
-    "status": "TERMINAL_CANDIDATE",
-    "final_hypothesis": {
-      "id": "H_retry_state",
-      "conclusion": "Retained retry state is the supported causal mechanism, with pooled request lifecycles acting as its carrier."
-    },
+    "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
-      {
-        "id": "H_clock_bucket",
-        "reason": "Disabling pool reuse normalized retries and latency to nearly the explicit retry-state-reset result, rejecting clock-bucket timing as the primary mechanism."
-      },
-      {
-        "id": "H_queue",
-        "reason": "O3 argues against primary queue-capacity saturation, and explicit retry-state reset normalized retries and latency while pool reuse remained enabled."
-      }
+      "H_clock_bucket",
+      "H_queue"
     ],
-    "observed_results": [
-      {
-        "experiment_id": "E_force_retry_reset",
-        "result": {
-          "p95_latency_ms": 219,
-          "mean_retries": 1
-        },
-        "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
-      },
-      {
-        "experiment_id": "E_disable_pool_reuse",
-        "result": {
-          "p95_latency_ms": 228,
-          "mean_retries": 1.1
-        },
-        "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
-      }
-    ],
+    "observed_results": {
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
     "addressed_observations": [
-      {
-        "id": "O1",
-        "addressed_by": [
-          "E_force_retry_reset",
-          "E_disable_pool_reuse"
-        ]
-      },
-      {
-        "id": "O2",
-        "addressed_by": [
-          "E_force_retry_reset",
-          "E_disable_pool_reuse"
-        ],
-        "note": "Load relief is non-discriminating; the two interventions provide causal discrimination."
-      },
-      {
-        "id": "O3",
-        "addressed_by": [
-          "H_queue"
-        ],
-        "note": "CPU below 48% and queue occupancy below 62% argue against primary queue saturation."
-      }
-    ],
-    "evidence_refs": [
       "O1",
       "O2",
-      "O3",
-      "E_force_retry_reset",
-      "E_disable_pool_reuse"
+      "O3"
     ],
-    "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. Convergent normalization across two discriminating interventions supports retained retry state carried by pooled request lifecycles and rejects clock-bucket timing and queue saturation as primary explanations.",
-    "escalation_required": false
+    "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. Convergent normalization across two discriminating interventions supports retained retry state carried by pooled request lifecycles and rejects clock-bucket timing and queue saturation as primary explanations."
   },
   "validator_results": [],
   "metrics": {
