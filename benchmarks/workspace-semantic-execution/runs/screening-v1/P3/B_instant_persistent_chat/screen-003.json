@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "p3-b-persistent-worker-screen-003",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -480,6 +480,13 @@
       "generation": 0,
       "experiment_id": "E_isolate_r4",
       "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_isolate_r4",
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
     }
   ],
   "pending_external": null,
@@ -706,7 +713,7 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_isolate_r4, update the existing terminal submission with the exact published result hash as appropriate, persist a protocol-valid TERMINAL_CANDIDATE, and stop for control-evaluator validation. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
+  "next_safe_action": "Consume only E_isolate_r4, update the existing terminal submission with its exact hash, persist TERMINAL_CANDIDATE, and stop.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_feedback",
     "rejected_hypotheses": [
