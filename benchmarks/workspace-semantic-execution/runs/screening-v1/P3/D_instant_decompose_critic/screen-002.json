@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": "screening-v1-P3-D-002-leaf_worker-global-control-g0",
   "executor_identity": {
     "provider": "OpenAI",
@@ -134,7 +134,7 @@
       },
       {
         "process_id": "global-control",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY_TO_RESUME",
         "depth": 1,
         "objective": "Run exactly one competing-mechanism/control intervention and use it to test capacity/load relief against the surviving causal mechanism, including O2.",
         "experiment_ids": [
@@ -767,16 +767,18 @@
       "experiment_id": "E_capacity_2x",
       "payload_ref": "experiment:E_capacity_2x",
       "selection_rationale": "O2 shows that reducing concurrency produces real latency relief while abnormal retry amplification persists, so generic load relief is not itself diagnostic. With H_retry_feedback supported by E_global_retry_reset and H_capacity still open, doubling service capacity in all four regions while leaving retry and timer behavior unchanged is the clean competing-mechanism control: if retry amplification persists despite added capacity, it discriminates against primary capacity saturation without conflating the test with retry-state changes."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-D-002-E_capacity_2x-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "global-control",
+      "experiment_id": "E_capacity_2x",
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-D-002-E_capacity_2x-g0",
-    "generation": 0,
-    "role": "leaf_worker",
-    "process_id": "global-control",
-    "experiment_id": "E_capacity_2x",
-    "payload_ref": "experiment:E_capacity_2x"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-D-002-E_isolate_r1-g0",
@@ -840,6 +842,22 @@
         ]
       },
       "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "publication_scope": "requested experiment only"
+    },
+    "E_capacity_2x": {
+      "request_id": "screening-v1-P3-D-002-E_capacity_2x-g0",
+      "experiment_id": "E_capacity_2x",
+      "result": {
+        "all_regions_p95_ms_range": [
+          420,
+          455
+        ],
+        "mean_retries_range": [
+          2.7,
+          3.1
+        ]
+      },
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
       "publication_scope": "requested experiment only"
     }
   },
@@ -925,7 +943,7 @@
     "external_result:E_global_retry_reset@026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Wait for the control evaluator to publish the requested E_capacity_2x result. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant leaf_worker chat to re-read durable state, conclude only process global-control from control-published evidence, persist that leaf conclusion, and stop. Do not perform independent_critic or synthesizer work in that chat.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant leaf_worker chat for process global-control. Re-read durable state, consume only the control-published E_capacity_2x result, persist the global-control leaf conclusion, and stop. Do not perform independent_critic or synthesizer work in that chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -943,11 +961,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "AWAITING_EXTERNAL_RESULT",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P3-D-002-E_capacity_2x-g0",
     "last_experiment_id": "E_capacity_2x",
-    "result_hash": null,
-    "note": "Worker requested exactly one global-control experiment; awaiting control-published measurements."
+    "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/D_instant_decompose_critic/screen-002.json"
