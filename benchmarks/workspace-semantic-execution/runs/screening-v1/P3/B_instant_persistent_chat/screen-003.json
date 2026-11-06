@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -473,14 +473,16 @@
       "generation": 0,
       "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r4",
       "experiment_id": "E_isolate_r4"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-007",
+      "generation": 0,
+      "experiment_id": "E_isolate_r4",
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-B-003-exp-007",
-    "kind": "experiment",
-    "experiment_id": "E_isolate_r4",
-    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r4"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-B-003-exp-001",
@@ -564,6 +566,18 @@
         "other_regions_materially_changed": false
       },
       "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r4": {
+      "request_id": "screening-v1-P3-B-003-exp-007",
+      "experiment_id": "E_isolate_r4",
+      "result": {
+        "region": "r4",
+        "p95_latency_ms": 326,
+        "mean_retries": 2,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
       "publication_scope": "requested experiment only"
     }
   },
@@ -692,7 +706,7 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "STOP. Wait for the control evaluator to publish the exact result for E_isolate_r4 and set READY_TO_RESUME; do not poll.",
+  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_isolate_r4, update the existing terminal submission with the exact published result hash as appropriate, persist a protocol-valid TERMINAL_CANDIDATE, and stop for control-evaluator validation. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_feedback",
     "rejected_hypotheses": [
@@ -741,15 +755,11 @@
     "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "TERMINAL_VALIDATED_FAIL",
-    "validator_id": "research_iterate_objective_v1",
-    "passed": false,
-    "score": 0.8,
-    "violations": [
-      "missing_required_discriminating_experiment:E_isolate_r4"
-    ],
-    "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba",
-    "note": "Objective validator result only. Resume the same persistent worker chat from this public violation boundary."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P3-B-003-exp-007",
+    "last_experiment_id": "E_isolate_r4",
+    "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/B_instant_persistent_chat/screen-003.json"
