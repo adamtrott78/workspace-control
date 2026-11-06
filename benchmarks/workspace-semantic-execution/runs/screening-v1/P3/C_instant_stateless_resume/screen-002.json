@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -111,14 +111,30 @@
       "request_id": "q0-E_isolate_r1",
       "generation": 0,
       "payload_ref": "E_isolate_r1"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "q0-E_isolate_r1",
+      "generation": 0,
+      "experiment_id": "E_isolate_r1",
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
     }
   ],
-  "pending_external": {
-    "request_id": "q0-E_isolate_r1",
-    "kind": "experiment",
-    "payload_ref": "E_isolate_r1"
+  "pending_external": null,
+  "external_results": {
+    "E_isolate_r1": {
+      "request_id": "q0-E_isolate_r1",
+      "experiment_id": "E_isolate_r1",
+      "result": {
+        "region": "r1",
+        "p95_latency_ms": 315,
+        "mean_retries": 1.9,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "publication_scope": "requested experiment only"
+    }
   },
-  "external_results": {},
   "established_findings": [
     {
       "id": "F0_baseline_load_relief_not_causal",
@@ -208,7 +224,7 @@
       "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
     }
   ],
-  "next_safe_action": "Stop while WAITING_EXTERNAL. Control evaluator must publish the result for q0-E_isolate_r1. Do not poll. After READY_TO_RESUME, launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled; read this live run-state first and perform exactly one next quantum.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 1. Re-read durable state, consume only E_isolate_r1, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -226,8 +242,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "AWAITING_EXTERNAL_RESULT",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "q0-E_isolate_r1",
+    "last_experiment_id": "E_isolate_r1",
+    "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/C_instant_stateless_resume/screen-002.json"
