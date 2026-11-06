@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P2 A screen-002, B screen-003, and C screen-002 are COMPLETED. Remaining P2: D screen-003 has completed decomposer, leaf, and independent_critic roles; control promoted synthesizer to READY. Launch a BRAND-NEW GPT-5.6 Sol Instant synthesizer chat using durable evidence and critique only. E screen-002 is READY_TO_RESUME in lower-tier Instant after control-published E_clock_quantization; launch a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat to consume that result, update the protocol-valid terminal submission with the exact published hash if appropriate, persist TERMINAL_CANDIDATE, and stop. High remains NOT AUTHORIZED.
+P2 A-E protocol screening is complete: A screen-002, B screen-003, C screen-002, D screen-003, and E screen-002 all passed research_iterate_objective_v1 with score 1.0. P3 frozen launch slots A-E screen-002 are all READY at source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb with fixture research-iterate-cross-region-feedback-p3-v1 and intact control binding. Launch P3 A in a BRAND-NEW regular GPT-5.6 Sol High persistent chat; P3 B in a BRAND-NEW regular GPT-5.6 Sol Instant persistent chat; P3 C in a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-0 chat; P3 D in a BRAND-NEW GPT-5.6 Sol Instant decomposer chat; and P3 E in a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat. Memory must be disabled before each launch and GitHub enabled. P3 E High remains NOT AUTHORIZED unless durable evidence-gated escalation state explicitly permits it.
 
 ## Remaining work
 
-- Complete P2 D screen-003 synthesizer/terminal validation and E screen-002 terminal validation; P2 A, B, and C are complete. Then execute P3 A-E screen-002 slots if no shared protocol/public-input change is required.
+- Execute P3 A-E screen-002 protocol-screening slots from the frozen source checkpoint. After clean P3 screening, do not make claim-bearing equivalence conclusions until evaluator runtime-store isolation and replicated scoring gates are satisfied.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
