@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -105,6 +105,14 @@
         "action": "REQUEST_EXPERIMENT",
         "experiment_id": "E_clock_quantization",
         "rationale": "Addresses only the control-published missing_required_discriminating_experiment requirement using the public fixture catalog. Replacing quantized timeout timestamps with monotonic high-resolution timestamps directly discriminates H_clock_bucket; no result is inferred before control publication."
+      },
+      {
+        "invocation_id": "screen-002-q6",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "PERSIST_TERMINAL_CANDIDATE",
+        "rationale": "Consumed the control-published E_clock_quantization result. High-resolution monotonic timestamps left p95 latency at 401 ms and mean retries at 3, satisfying the control-published missing discriminating-experiment requirement while further rejecting H_clock_bucket. The existing protocol-valid terminal submission is updated with the exact published result hash; High escalation remains unauthorized."
       }
     ],
     "decomposition_state": "NOT_REQUIRED_BOUNDED_WORKLOAD",
@@ -257,6 +265,32 @@
       },
       "outcome": "WAITING_EXTERNAL",
       "evidence_refs": [
+        "E_clock_quantization"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q6",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q6",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse",
         "E_clock_quantization"
       ]
     }
@@ -439,6 +473,35 @@
       "generation": 0,
       "experiment_id": "E_clock_quantization",
       "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q6"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q6",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "EXPERIMENT_INTERPRETATION",
+      "generation": 0,
+      "experiment_id": "E_clock_quantization",
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17",
+      "note": "Replacing quantized timeout timestamps with monotonic high-resolution timestamps left p95 latency at 401 ms and mean retries at 3, close to the original degraded behavior rather than the normalization produced by retry-state reset or disabling pool reuse. This directly discriminates against H_clock_bucket as the primary mechanism and satisfies the control-published required discriminating-experiment condition."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q6",
+      "result_hashes": {
+        "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+        "E_clock_quantization": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+      },
+      "note": "Protocol-valid lower-tier terminal candidate updated with the exact control-published E_clock_quantization result hash and persisted for control-evaluator validation; High escalation remains unauthorized."
     }
   ],
   "pending_external": null,
@@ -490,12 +553,16 @@
     {
       "id": "F4",
       "finding": "E_disable_pool_reuse yielded mean retries 1.1 and p95 latency 228 ms, closely matching E_force_retry_reset (1 retry, 219 ms), corroborating pooled request lifecycles as the carrier of retained retry state and rejecting H_clock_bucket as the primary mechanism."
+    },
+    {
+      "id": "F5",
+      "finding": "E_clock_quantization yielded p95 latency 401 ms and mean retries 3 after replacing quantized timeout timestamps with monotonic high-resolution timestamps, directly rejecting H_clock_bucket as the primary mechanism."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "SUPPORTED_BY_TWO_DISCRIMINATING_CYCLES"
+      "status": "SUPPORTED_BY_THREE_DISCRIMINATING_CYCLES"
     },
     {
       "id": "H_clock_bucket",
@@ -516,7 +583,7 @@
     "E_clock_quantization"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_clock_quantization, update the existing protocol-valid terminal submission with the exact published result hash if appropriate, persist TERMINAL_CANDIDATE, and stop for control-evaluator validation. High remains unauthorized unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Stop for control-evaluator validation of the updated TERMINAL_CANDIDATE. Do not request another experiment or launch High unless durable control state explicitly authorizes further action; High remains unauthorized unless treatment_state.escalation_status changes to APPROVED_TO_LAUNCH.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
@@ -525,14 +592,15 @@
     ],
     "observed_results": {
       "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
-      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "E_clock_quantization": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
     },
     "addressed_observations": [
       "O1",
       "O2",
       "O3"
     ],
-    "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. Convergent normalization across two discriminating interventions supports retained retry state carried by pooled request lifecycles and rejects clock-bucket timing and queue saturation as primary explanations."
+    "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. Replacing quantized timeout timestamps with monotonic high-resolution timestamps left p95 latency at 401 ms and mean retries at 3, close to degraded behavior rather than normalization. These discriminating interventions support retained retry state carried by pooled request lifecycles and reject clock-bucket timing and queue saturation as primary explanations."
   },
   "validator_results": [
     {
@@ -546,7 +614,7 @@
     }
   ],
   "metrics": {
-    "reasoning_invocations": 6,
+    "reasoning_invocations": 7,
     "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 0,
