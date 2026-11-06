@@ -1,0 +1,381 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P1-A-002",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P1_horizon_heavy_decomposable",
+  "arm": "A_frontier_long_horizon",
+  "replicate_id": "screen-002",
+  "fixture_id": "research-iterate-shard-rollout-p1-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json",
+    "fixture_blob_sha": "766a414e01197f6054e68c02f2fe856f710044b0",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "11aea24d489b119518d514382dfd48047a7998b1",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "FAILED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "High",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "FRONTIER_MATCHED_SURFACE",
+    "identity_source": "user_attestation",
+    "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation."
+  },
+  "continuity_regime": "persistent_chat",
+  "treatment_contract": {
+    "mode": "frontier_long_horizon_control",
+    "quantum_policy": "A single clean persistent GPT-5.6 Sol / High chat may carry reasoning across quanta, but all external waits and terminal candidates must be durably checkpointed.",
+    "resume_policy": "Resume the same persistent chat after control-published external results.",
+    "decomposition_policy": "No decomposition is required by treatment; the frontier control may reason over the integrated task directly.",
+    "escalation_policy": "Not applicable; this arm is already the matched-surface stronger-reasoning control."
+  },
+  "treatment_state": {
+    "phase": "PRIMARY",
+    "persistent_chat": true
+  },
+  "started_at": "2026-11-04T23:18:29.629Z",
+  "completed_at": "2026-11-04T18:44:00-05:00",
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P1-A-002-inv-001",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P1-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation."
+      },
+      "context_bytes": 2996,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s1"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-A-002-inv-002",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P1-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation."
+      },
+      "context_bytes": 3117,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s2"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-A-002-inv-003",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P1-A-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol High was selected for this conversation."
+      },
+      "context_bytes": 3376,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_revert_s3"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh provenance-refrozen P1 A_frontier_long_horizon replacement slot. screen-001 evidence is preserved as invalidated by PUBLIC_INPUT_PROVENANCE_MISMATCH."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P1-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-002-req-001",
+      "generation": 0,
+      "payload_ref": "E_revert_s1"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-A-002-req-001",
+      "generation": 0,
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P1-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-002-req-002",
+      "generation": 0,
+      "payload_ref": "E_revert_s2"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-A-002-req-002",
+      "generation": 0,
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-A-002-req-002",
+      "generation": 0,
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P1-A-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-A-002-req-003",
+      "generation": 0,
+      "payload_ref": "E_revert_s3"
+    },
+    {
+      "kind": "CONTROL_SESSION_CONTINUITY_INVALIDATION",
+      "generation": 0,
+      "reason": "PERSISTENT_CHAT_CONTINUITY_LOST",
+      "replacement_replicate": "screen-003",
+      "note": "User reported forced re-authentication/tab refresh and loss of the persistent worker conversation. Same-chat continuation can no longer be established."
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_revert_s1": {
+      "request_id": "screening-v1-P1-A-002-req-001",
+      "experiment_id": "E_revert_s1",
+      "result": {
+        "shard": "s1",
+        "p95_latency_ms": 205,
+        "other_shards_changed": false
+      },
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s2": {
+      "request_id": "screening-v1-P1-A-002-req-002",
+      "experiment_id": "E_revert_s2",
+      "result": {
+        "shard": "s2",
+        "p95_latency_ms": 211,
+        "other_shards_changed": false
+      },
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "O1",
+      "finding": "All six shards regressed in the same deployment window with p95 latency near 390-430 ms while CPU and queue occupancy remain moderate."
+    },
+    {
+      "id": "O2",
+      "finding": "Rolling back the new request-policy configuration on shard 1 lowers only shard 1 p95 latency to 205 ms while the other five shards remain degraded; this is strong local evidence but does not alone exclude a shared dependency."
+    },
+    {
+      "id": "O3",
+      "finding": "Baseline telemetry does not directly show shared database saturation, network-fabric loss, or host CPU saturation."
+    },
+    {
+      "id": "F_E_revert_s1",
+      "finding": "Control-published E_revert_s1 result: shard 1 p95 latency is 205 ms after reverting only shard 1 request-policy configuration, and other shards do not change.",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "id": "F_E_revert_s2",
+      "finding": "Control-published E_revert_s2 result: shard 2 p95 latency is 211 ms after reverting only shard 2 request-policy configuration, and other shards do not change.",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "statement": "A shared database bottleneck is independently slowing all six shards."
+    },
+    {
+      "id": "H_network_fabric",
+      "statement": "A shared network-fabric regression is independently slowing all six shards."
+    },
+    {
+      "id": "H_shard_policy",
+      "statement": "The same newly deployed request-policy configuration causes a local latency regression on each shard."
+    }
+  ],
+  "unresolved_questions": [
+    "Do controlled request-policy reverts independently recover shards 3 through 6?",
+    "Does scaling shared database capacity materially improve latency while shard policies remain unchanged?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3",
+    "E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_revert_s3",
+      "purpose": "Test shard-3 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_revert_s4",
+      "purpose": "Test shard-4 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_revert_s5",
+      "purpose": "Test shard-5 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_revert_s6",
+      "purpose": "Test shard-6 local policy causality independently."
+    },
+    {
+      "experiment_id": "E_scale_shared_db",
+      "purpose": "Provide the required shared-infrastructure control and directly discriminate H_shared_db."
+    }
+  ],
+  "next_safe_action": "Do not continue this run. Persistent-chat continuity was lost after request E_revert_s3. Use replacement replicate screen-003 from a brand-new clean GPT-5.6 Sol High chat.",
+  "terminal_submission": null,
+  "validator_results": [],
+  "metrics": {
+    "reasoning_invocations": 3,
+    "experiment_requests": 3,
+    "retries": 0,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 3
+  },
+  "control_evaluator": {
+    "status": "SESSION_CONTINUITY_INVALIDATED",
+    "violations": [
+      "PERSISTENT_CHAT_CONTINUITY_LOST"
+    ],
+    "note": "Persistent-chat treatment cannot be continued in a new conversation. Replace with a fresh screening slot."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/A_frontier_long_horizon/screen-002.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "High",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "FRONTIER_MATCHED_SURFACE"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": false,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol High was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

@@ -1,0 +1,716 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P1-B-004",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P1_horizon_heavy_decomposable",
+  "arm": "B_instant_persistent_chat",
+  "replicate_id": "screen-004",
+  "fixture_id": "research-iterate-shard-rollout-p1-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json",
+    "fixture_blob_sha": "766a414e01197f6054e68c02f2fe856f710044b0",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "11aea24d489b119518d514382dfd48047a7998b1",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "INSTANT",
+    "identity_source": "user_attestation",
+    "user_attestation": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
+  "continuity_regime": "persistent_chat",
+  "treatment_contract": {
+    "mode": "instant_persistent_chat",
+    "quantum_policy": "Use the same clean GPT-5.6 Sol / Instant chat across bounded reasoning quanta.",
+    "resume_policy": "Resume the same persistent chat after control-published external results.",
+    "decomposition_policy": "Not forced by treatment; record decomposition only if the task itself requires it.",
+    "escalation_policy": "No frontier escalation in this arm."
+  },
+  "treatment_state": {
+    "phase": "PRIMARY",
+    "persistent_chat": true
+  },
+  "started_at": "2026-11-05T00:51:00Z",
+  "completed_at": "2026-11-04T21:26:00-05:00",
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-001",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 1671,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s1"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-002",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 1832,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s2"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-003",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 2275,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s3"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-004",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 2722,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s4"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-005",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 3170,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-006",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 3635,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P1-B-004-inv-007",
+      "generation": 0,
+      "owner": "chatgpt-gpt-5.6-sol-instant-screen-004",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 4109,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh replacement P1 B_instant_persistent_chat slot after B screen-003 persistent-chat continuity loss."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_revert_s1",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s1"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_revert_s1",
+      "generation": 0,
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_revert_s2",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s2"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_revert_s2",
+      "generation": 0,
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 7
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_revert_s3",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s3"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_revert_s3",
+      "generation": 0,
+      "experiment_id": "E_revert_s3",
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 9
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_revert_s4",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s4"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_revert_s4",
+      "generation": 0,
+      "experiment_id": "E_revert_s4",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 11
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_revert_s5",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_revert_s5",
+      "generation": 0,
+      "experiment_id": "E_revert_s5",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 13
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_revert_s6",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_revert_s6",
+      "generation": 0,
+      "experiment_id": "E_revert_s6",
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 15
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "E_scale_shared_db",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "E_scale_shared_db",
+      "generation": 0,
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 17
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt-5.6-sol-instant-screen-004"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_revert_s1": {
+      "request_id": "E_revert_s1",
+      "experiment_id": "E_revert_s1",
+      "result": {
+        "shard": "s1",
+        "p95_latency_ms": 205,
+        "other_shards_changed": false
+      },
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s2": {
+      "request_id": "E_revert_s2",
+      "experiment_id": "E_revert_s2",
+      "result": {
+        "shard": "s2",
+        "p95_latency_ms": 211,
+        "other_shards_changed": false
+      },
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s3": {
+      "request_id": "E_revert_s3",
+      "experiment_id": "E_revert_s3",
+      "result": {
+        "shard": "s3",
+        "p95_latency_ms": 207,
+        "other_shards_changed": false
+      },
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s4": {
+      "request_id": "E_revert_s4",
+      "experiment_id": "E_revert_s4",
+      "result": {
+        "shard": "s4",
+        "p95_latency_ms": 214,
+        "other_shards_changed": false
+      },
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s5": {
+      "request_id": "E_revert_s5",
+      "experiment_id": "E_revert_s5",
+      "result": {
+        "shard": "s5",
+        "p95_latency_ms": 209,
+        "other_shards_changed": false
+      },
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s6": {
+      "request_id": "E_revert_s6",
+      "experiment_id": "E_revert_s6",
+      "result": {
+        "shard": "s6",
+        "p95_latency_ms": 206,
+        "other_shards_changed": false
+      },
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "publication_scope": "requested experiment only"
+    },
+    "E_scale_shared_db": {
+      "request_id": "E_scale_shared_db",
+      "experiment_id": "E_scale_shared_db",
+      "result": {
+        "all_shards_p95_delta_ms": -4
+      },
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "O1",
+      "finding": "All six shards regressed in the same deployment window with p95 about 390-430 ms and moderate CPU/queue occupancy."
+    },
+    {
+      "id": "O2",
+      "finding": "Shard-1-only policy rollback lowered shard 1 p95 to 205 ms while other shards remained degraded; strong local evidence but not sufficient to exclude a shared dependency."
+    },
+    {
+      "id": "O3",
+      "finding": "Baseline telemetry does not directly show shared DB saturation, network fabric loss, or host CPU saturation."
+    },
+    {
+      "id": "E_revert_s1",
+      "finding": "Control-published E_revert_s1 reproduced shard-1 local recovery to p95 205 ms with no change on other shards.",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "id": "E_revert_s2",
+      "finding": "Control-published E_revert_s2 recovered shard 2 to p95 211 ms with no change on other shards, independently extending the shard-local policy effect.",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "id": "E_revert_s3",
+      "finding": "Control-published E_revert_s3 recovered shard 3 to p95 207 ms with no change on other shards, adding a third independent local policy recovery.",
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c"
+    },
+    {
+      "id": "E_revert_s4",
+      "finding": "Control-published E_revert_s4 recovered shard 4 to p95 214 ms with no change on other shards, adding a fourth independent local policy recovery.",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+    },
+    {
+      "id": "E_revert_s5",
+      "finding": "Control-published E_revert_s5 recovered shard 5 to p95 209 ms with no change on other shards, adding a fifth independent local policy recovery.",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
+    },
+    {
+      "id": "E_revert_s6",
+      "finding": "Control-published E_revert_s6 recovered shard 6 to p95 206 ms with no change on other shards, completing six independent shard-local policy recoveries.",
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
+    },
+    {
+      "id": "E_scale_shared_db",
+      "finding": "Control-published E_scale_shared_db changed all-shard p95 by only -4 ms with shard policies unchanged, providing no material recovery and directly disfavoring a shared-DB bottleneck as the primary mechanism.",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "status": "REJECTED"
+    },
+    {
+      "id": "H_network_fabric",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_shard_policy",
+      "status": "SUPPORTED"
+    }
+  ],
+  "unresolved_questions": [],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s1",
+    "external_results.E_revert_s1#a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s2",
+    "external_results.E_revert_s2#c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s3",
+    "external_results.E_revert_s3#601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s4",
+    "external_results.E_revert_s4#ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s5",
+    "external_results.E_revert_s5#b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_revert_s6",
+    "external_results.E_revert_s6#2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json#E_scale_shared_db",
+    "external_results.E_scale_shared_db#f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+  ],
+  "candidate_actions": [],
+  "next_safe_action": "Screening run complete. Preserve screening-v1-P1-B-004 as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_shard_policy",
+    "rejected_hypotheses": [
+      "H_shared_db"
+    ],
+    "observed_results": {
+      "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "All six independent shard-local policy reversions restored only their target shard to approximately 205-214 ms while leaving other shards unchanged, reproducing and generalizing O2 across every shard. In contrast, doubling shared DB capacity with policies unchanged moved all-shard p95 by only -4 ms, rejecting H_shared_db as the primary mechanism. The convergent local interventions support H_shard_policy as the primary mechanism behind the synchronized regression. O1 is explained by the same policy rollout affecting all six in the same deployment window; O2 is directly reproduced across all six; O3 is consistent with the lack of material shared-DB-control effect."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 8,
+    "experiment_requests": 7,
+    "retries": 0,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 8
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/B_instant_persistent_chat/screen-004.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "INSTANT"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": false,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

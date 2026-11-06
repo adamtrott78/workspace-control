@@ -1,0 +1,575 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P1-E-004",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P1_horizon_heavy_decomposable",
+  "arm": "E_hybrid_escalation",
+  "replicate_id": "screen-004",
+  "fixture_id": "research-iterate-shard-rollout-p1-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json",
+    "fixture_blob_sha": "766a414e01197f6054e68c02f2fe856f710044b0",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "11aea24d489b119518d514382dfd48047a7998b1",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 8,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
+  "continuity_regime": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
+  "treatment_contract": {
+    "mode": "hybrid_evidence_gated_escalation",
+    "quantum_policy": "Begin with clean GPT-5.6 Sol / Instant workers using stateless resume/decomposition as appropriate; persist all lower-tier evidence.",
+    "resume_policy": "Instant quanta/roles use fresh clean chats unless run state explicitly says same-chat resume. Any High escalation uses a separate clean GPT-5.6 Sol / High chat.",
+    "decomposition_policy": "TOO_LARGE work must be decomposed before escalation. Escalation is not a substitute for decomposition.",
+    "escalation_policy": "Only a residual classified INTRINSICALLY_DIFFICULT after reasonable decomposition/lower-tier attempts may request High. Persist residual, failed lower-tier evidence, and explicit escalation reason before switching executor identity.",
+    "high_phase_rule": "A High worker may claim only when treatment_state.escalation_status is APPROVED_TO_LAUNCH by durable control state; model reasoning cannot create authority."
+  },
+  "treatment_state": {
+    "phase": "LOWER_TIER_INSTANT",
+    "lower_tier_attempts": [
+      {
+        "generation": 1,
+        "classification": "TOO_LARGE",
+        "disposition": "DECOMPOSE_BEFORE_ESCALATION",
+        "evidence": "Fixture requires >=7 experiment cycles; taxonomy marks HIGH horizon load, MOSTLY_SEPARABLE, LOW_TO_MEDIUM reasoning stress, with six independently validatable shard-local leaves plus shared-control leaf.",
+        "decomposition": {
+          "shard_leaves": [
+            "E_revert_s1",
+            "E_revert_s2",
+            "E_revert_s3",
+            "E_revert_s4",
+            "E_revert_s5",
+            "E_revert_s6"
+          ],
+          "shared_control_candidates": [
+            "E_scale_shared_db",
+            "E_network_bypass"
+          ],
+          "synthesis_rule": "Collect discriminating evidence across all six shard leaves plus at least one shared-infrastructure control before terminal synthesis."
+        }
+      }
+    ],
+    "decomposition_state": "DECOMPOSED",
+    "escalation_status": "NOT_REQUESTED",
+    "residual_reason": null,
+    "escalation_evidence_refs": []
+  },
+  "started_at": "2026-11-04T20:53:00-05:00",
+  "completed_at": null,
+  "invocations": [
+    {
+      "generation": 1,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "claim assigned READY screening slot before bounded lower-tier reasoning"
+    },
+    {
+      "generation": 2,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_revert_s2 result and continue one bounded decomposed leaf transition"
+    },
+    {
+      "generation": 3,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_revert_s3 result and continue one bounded decomposed leaf transition"
+    },
+    {
+      "generation": 4,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_revert_s4 result and continue one bounded decomposed leaf transition"
+    },
+    {
+      "generation": 5,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_revert_s5 result and continue one bounded decomposed leaf transition"
+    },
+    {
+      "generation": 6,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_revert_s6 result and continue one bounded decomposed leaf transition"
+    },
+    {
+      "generation": 7,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_revert_s1 result and continue one bounded decomposed shared-control leaf transition"
+    },
+    {
+      "generation": 8,
+      "role": "lower-tier-instant-worker",
+      "configuration": "Instant",
+      "purpose": "consume control-published E_scale_shared_db result and submit terminal candidate for control-evaluator validation"
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh replacement P1 E_hybrid_escalation slot after screen-003 worker transition-contract invalidation."
+    },
+    {
+      "kind": "WORKER_CLAIMED",
+      "generation": 1,
+      "note": "Claimed by fresh lower-tier GPT-5.6 Sol Instant worker using explicit user attestation for unobservable session/configuration properties; GitHub availability verified."
+    },
+    {
+      "kind": "WORK_DECOMPOSED",
+      "generation": 1,
+      "note": "Classified monolithic work TOO_LARGE and decomposed into six shard-local leaves plus shared-control leaf; no intrinsic-difficulty residual and no escalation request."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 1,
+      "experiment_id": "E_revert_s2",
+      "note": "First bounded decomposed leaf requested. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 1,
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 2,
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "note": "Consumed only the control-published requested result: reverting shard 2 policy lowers shard 2 p95 to 211 ms with no other shards changed."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 2,
+      "experiment_id": "E_revert_s3",
+      "note": "Next bounded decomposed shard-local leaf requested after consuming E_revert_s2. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 2,
+      "experiment_id": "E_revert_s3",
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 3,
+      "experiment_id": "E_revert_s3",
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "note": "Consumed only the control-published requested result: reverting shard 3 policy lowers shard 3 p95 to 207 ms with no other shards changed."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 3,
+      "experiment_id": "E_revert_s4",
+      "note": "Next bounded decomposed shard-local leaf requested after consuming E_revert_s3. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 3,
+      "experiment_id": "E_revert_s4",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 4,
+      "experiment_id": "E_revert_s4",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "note": "Consumed only the control-published requested result: reverting shard 4 policy lowers shard 4 p95 to 214 ms with no other shards changed."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 4,
+      "experiment_id": "E_revert_s5",
+      "note": "Next bounded decomposed shard-local leaf requested after consuming E_revert_s4. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 4,
+      "experiment_id": "E_revert_s5",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 5,
+      "experiment_id": "E_revert_s5",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "note": "Consumed only the control-published requested result: reverting shard 5 policy lowers shard 5 p95 to 209 ms with no other shards changed."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 5,
+      "experiment_id": "E_revert_s6",
+      "note": "Next bounded decomposed shard-local leaf requested after consuming E_revert_s5. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 5,
+      "experiment_id": "E_revert_s6",
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 6,
+      "experiment_id": "E_revert_s6",
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "note": "Consumed only the control-published requested result: reverting shard 6 policy lowers shard 6 p95 to 206 ms with no other shards changed."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 6,
+      "experiment_id": "E_revert_s1",
+      "note": "Next bounded decomposed shard-local leaf requested after consuming E_revert_s6. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 6,
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 7,
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "note": "Consumed only the control-published requested result: reverting shard 1 policy lowers shard 1 p95 to 205 ms with no other shards changed."
+    },
+    {
+      "kind": "EXPERIMENT_REQUESTED",
+      "generation": 7,
+      "experiment_id": "E_scale_shared_db",
+      "note": "Required bounded shared-infrastructure control requested after completing all six shard-local leaves. Stop at external boundary; do not poll."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "generation": 7,
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "generation": 8,
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+      "note": "Consumed only the control-published requested result: doubling shared database capacity changes all-shard p95 by -4 ms, weak evidence against a shared-database bottleneck as the primary mechanism."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 8,
+      "note": "Public fixture contract satisfied after seven experiment cycles: six shard-local reversions plus one shared-infrastructure control. Stop for control-evaluator validation; no High escalation requested or authorized."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 8,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 8,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_revert_s2": {
+      "experiment_id": "E_revert_s2",
+      "request_generation": 1,
+      "result": {
+        "shard": "s2",
+        "p95_latency_ms": 211,
+        "other_shards_changed": false
+      },
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s3": {
+      "experiment_id": "E_revert_s3",
+      "request_generation": 2,
+      "result": {
+        "shard": "s3",
+        "p95_latency_ms": 207,
+        "other_shards_changed": false
+      },
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s4": {
+      "experiment_id": "E_revert_s4",
+      "request_generation": 3,
+      "result": {
+        "shard": "s4",
+        "p95_latency_ms": 214,
+        "other_shards_changed": false
+      },
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s5": {
+      "experiment_id": "E_revert_s5",
+      "request_generation": 4,
+      "result": {
+        "shard": "s5",
+        "p95_latency_ms": 209,
+        "other_shards_changed": false
+      },
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s6": {
+      "experiment_id": "E_revert_s6",
+      "request_generation": 5,
+      "result": {
+        "shard": "s6",
+        "p95_latency_ms": 206,
+        "other_shards_changed": false
+      },
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s1": {
+      "experiment_id": "E_revert_s1",
+      "request_generation": 6,
+      "result": {
+        "shard": "s1",
+        "p95_latency_ms": 205,
+        "other_shards_changed": false
+      },
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "publication_scope": "requested experiment only"
+    },
+    "E_scale_shared_db": {
+      "experiment_id": "E_scale_shared_db",
+      "request_generation": 7,
+      "result": {
+        "all_shards_p95_delta_ms": -4
+      },
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "F_decomposition_1",
+      "finding": "Work is TOO_LARGE because the fixture requires at least seven external experiment cycles across a high-horizon task, but it is mostly separable and low-to-medium reasoning stress; decomposition is required before escalation.",
+      "evidence_refs": [
+        "fixture:worker_contract.minimum_experiment_cycles_before_terminal_claim",
+        "taxonomy:horizon_load",
+        "taxonomy:decomposability",
+        "taxonomy:reasoning_stressors"
+      ]
+    },
+    {
+      "id": "F_o2_1",
+      "finding": "O2 already provides strong shard-1-local evidence: reverting shard 1 policy lowers only shard 1 p95 to 205 ms while other shards remain degraded; this supports testing the same local mechanism independently on remaining shards but does not alone exclude shared dependency.",
+      "evidence_refs": [
+        "fixture:O2"
+      ]
+    },
+    {
+      "id": "F_revert_s2_1",
+      "finding": "Reverting shard 2 policy lowers shard 2 p95 to 211 ms while no other shards change, providing a second independent shard-local response consistent with the shard-policy hypothesis; shared dependency remains unexcluded pending shared-control evidence.",
+      "evidence_refs": [
+        "external_results:E_revert_s2"
+      ]
+    },
+    {
+      "id": "F_revert_s3_1",
+      "finding": "Reverting shard 3 policy lowers shard 3 p95 to 207 ms while no other shards change, providing a third independent shard-local response consistent with the shard-policy hypothesis; shared dependency remains unexcluded pending shared-control evidence.",
+      "evidence_refs": [
+        "external_results:E_revert_s3"
+      ]
+    },
+    {
+      "id": "F_revert_s4_1",
+      "finding": "Reverting shard 4 policy lowers shard 4 p95 to 214 ms while no other shards change, providing a fourth independent shard-local response consistent with the shard-policy hypothesis; shared dependency remains unexcluded pending shared-control evidence.",
+      "evidence_refs": [
+        "external_results:E_revert_s4"
+      ]
+    },
+    {
+      "id": "F_revert_s5_1",
+      "finding": "Reverting shard 5 policy lowers shard 5 p95 to 209 ms while no other shards change, providing a fifth independent shard-local response consistent with the shard-policy hypothesis; shared dependency remains unexcluded pending shared-control evidence.",
+      "evidence_refs": [
+        "external_results:E_revert_s5"
+      ]
+    },
+    {
+      "id": "F_revert_s6_1",
+      "finding": "Reverting shard 6 policy lowers shard 6 p95 to 206 ms while no other shards change, providing a sixth independent shard-local response consistent with the shard-policy hypothesis; shared dependency remains unexcluded pending shared-control evidence.",
+      "evidence_refs": [
+        "external_results:E_revert_s6"
+      ]
+    },
+    {
+      "id": "F_revert_s1_1",
+      "finding": "Reverting shard 1 policy lowers shard 1 p95 to 205 ms while no other shards change, completing independent shard-local responses across all six shards consistent with the shard-policy hypothesis; shared dependency remains unexcluded pending shared-control evidence.",
+      "evidence_refs": [
+        "external_results:E_revert_s1"
+      ]
+    },
+    {
+      "id": "F_scale_shared_db_1",
+      "finding": "Doubling shared database capacity changes all-shard p95 by only -4 ms; combined with independent shard-local recovery on all six policy reversions, this rejects a shared-database bottleneck as the primary mechanism and supports the shard-policy hypothesis.",
+      "evidence_refs": [
+        "external_results:E_scale_shared_db",
+        "external_results:E_revert_s1",
+        "external_results:E_revert_s2",
+        "external_results:E_revert_s3",
+        "external_results:E_revert_s4",
+        "external_results:E_revert_s5",
+        "external_results:E_revert_s6"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shard_policy",
+      "status": "SELECTED_TERMINAL",
+      "reason": "Each of six shard-local policy reversions independently restores only its target shard to ~205-214 ms; the required shared-DB control produces only a -4 ms all-shard change."
+    },
+    {
+      "id": "H_shared_db",
+      "status": "REJECTED",
+      "reason": "Doubling shared database capacity changes all-shard p95 by only -4 ms, while local policy reversions produce large target-shard recoveries."
+    },
+    {
+      "id": "H_network_fabric",
+      "status": "UNRESOLVED_NONPRIMARY",
+      "reason": "No network-bypass experiment was required by the public contract after seven cycles; the repeated shard-local intervention response is sufficient for the primary-mechanism terminal claim."
+    }
+  ],
+  "unresolved_questions": [],
+  "evidence_refs": [],
+  "candidate_actions": [],
+  "next_safe_action": "Screening run complete. Preserve this P1 E run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_shard_policy",
+    "rejected_hypotheses": [
+      "H_shared_db"
+    ],
+    "observed_results": {
+      "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    "addressed_observations": [
+      "O2"
+    ],
+    "rationale": "O2 shows that reverting shard 1 policy restores only shard 1. Control-published experiments reproduce the same shard-local recovery independently on shards 2-6 and again on shard 1, with target p95 values 205-214 ms and no other shards changed. By contrast, doubling shared database capacity changes all-shard p95 by only -4 ms. Across the required seven experiment cycles, the intervention pattern identifies the newly deployed request-policy configuration as the primary mechanism and rejects a shared-database bottleneck as the primary cause."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 8,
+    "experiment_requests": 7,
+    "retries": 0,
+    "decomposition_count": 1,
+    "decomposition_depth": 1,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 19
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/E_hybrid_escalation/screen-004.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
+    "tier": "HYBRID",
+    "escalation_model_family": "GPT-5.6 Sol",
+    "escalation_chat_configuration": "High"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": true,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

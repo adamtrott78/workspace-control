@@ -1,0 +1,1335 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-semantic-execution-migration-v1",
+  "title": "Workspace Semantic Execution Migration v1",
+  "status": "IN_PROGRESS",
+  "goal": "Design, benchmark, and incrementally migrate Workspace Control to an open-world semantic execution architecture that preserves current research, engineering, tutoring, publication, presentation, document, data-science, and operations workflows while minimizing scarce frontier-model allowance through deterministic execution, resumable Instant/local reasoning, bounded context, capability-aware routing, and explicit escalation—without weakening project-local truth, provenance, authority, GitRunner/Workspace Shell security, or rollback.",
+  "execution_topology": "remote_only",
+  "workflow": {
+    "repository": "workspace-control",
+    "path": "workflows/evidence-first-solution-research.v1.json",
+    "checkpoint_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+    "content_sha": "4ec7a2294d97c94834b04aba227a1f61bceac3fd"
+  },
+  "parent_execution_owner": "workspace-knowledge-action-ontology-v1",
+  "current_stage": "resumable_reasoning_benchmark",
+  "acceptance_criteria": [
+    "Recover representative existing workflow families from workspace-control, PADataset, research-engine, MTH602, EAS501, and CIS560 and map their semantic, authority, execution, artifact, validation, wait/recovery, and consequence requirements.",
+    "Preserve the existing authority firewall: model/semantic output may create CandidateAction-like proposals but cannot create/widen Permission, remove Prohibition, satisfy ReviewRequirement, or manufacture execution authority.",
+    "Preserve project-local domain truth and treat any cross-workspace semantic graph/projection as rebuildable unless a separately reviewed contract explicitly grants authority.",
+    "Support open-world extension: a future workflow/domain family must be representable through versioned semantic/workflow adapters without adding a hard-coded domain branch to the execution kernel.",
+    "Compare materially distinct architecture families using current external evidence before implementation freeze, including minimal evolution, generalized research-engine, graph-first, durable-workflow-engine, agent-framework, and hybrid approaches.",
+    "Define resumable reasoning semantics so long-horizon work can be advanced by disposable model invocations with durable checkpoints and event-driven resume rather than long-lived chat state.",
+    "Empirically distinguish TOO_LARGE/decomposable work from INTRINSICALLY_DIFFICULT work that requires stronger reasoning.",
+    "Define executor identity as provider + model + execution surface/harness + toolset/capabilities + resource/quota state, not model name alone.",
+    "Define a resource/usage model that can route across deterministic, Instant, local, subscription, frontier, pay-as-you-go, and human executors without conflating financial cost with renewable allowance scarcity.",
+    "Integrate the unfinished GitRunner v3 fleet migration as a separate authority-owned infrastructure dependency: preserve accepted workspace-control canary evidence, continue PADataset CPU/GPU migration only under its own fresh authority, and keep Research GPU-derived classes NO_BY_DEFAULT absent separate reopening.",
+    "Demonstrate representative workflow coverage across research, coding/CI, architecture review, data science, paper creation, presentation creation, tutoring, homework/report production, document artifacts, and controller/runtime operations.",
+    "Before architecture freeze, prove the preferred design can represent at least one previously unseen workflow extension without core-kernel redesign and can preserve rollback to the current system."
+  ],
+  "constraints": [
+    "Do not treat the current hybrid semantic-projection architecture as frozen; it is a preferred migration hypothesis pending benchmark/review evidence.",
+    "Do not replace PostgreSQL, Git/GitHub task state, research-engine durable jobs, GitRunner, Workspace Shell, or project-local workflows merely because an external framework overlaps conceptually.",
+    "Do not adopt Temporal, Dapr, LangGraph, Microsoft Agent Framework, or another framework without a bounded comparison showing material benefit over current substrates.",
+    "Do not let semantic inference or model-generated edges become execution authority.",
+    "Do not move PADataset scientific truth, course truth/mastery state, research-engine runtime truth, or other project-owned semantics into workspace-control as authoritative state.",
+    "Do not hard-code research, tutoring, papers, slides, or any present domain as a closed universe in the generic kernel.",
+    "Do not burn reasoning/model usage while waiting for CI, experiments, human decisions, or external events; waiting must be deterministic/event-driven.",
+    "Do not resume or widen live GitRunner migration authority from this task. The controller task owns its canary and activation authority.",
+    "Do not reuse Workspace Shell task authority for GitRunner work. PR #573 acceptance only satisfies the GitRunner dependency condition.",
+    "Do not activate Research GPU-derived v3 classes; they remain NO_BY_DEFAULT absent separate exact authority.",
+    "Keep existing workflows operable during migration until replacements are independently validated."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+      "remote": {
+        "branch": "workspace-semantic-execution-migration-v1",
+        "checkpoint_sha": "c24fda155bb5735aab5b34e7a4b3e68e46c0adbc",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-semantic-execution-migration-v1.json",
+        "tasks/active/workspace-semantic-execution-migration-v1.md",
+        "architecture/workspace-semantic-execution-migration.v0.1.md",
+        "architecture/workspace-capability-workflow-inventory.v0.1.md",
+        "architecture/workspace-semantic-execution-architecture-options.v0.1.md",
+        "architecture/workspace-semantic-execution-*.md",
+        "architecture/workspace-semantic-execution-*.json",
+        "benchmarks/workspace-semantic-execution/**",
+        "tests/test_workspace_semantic_execution*.py"
+      ]
+    },
+    {
+      "name": "PADataset",
+      "intent": "read",
+      "base_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "MTH602-AdamTrott",
+      "intent": "read",
+      "base_sha": "747e49fb9219b949e0b0e9d15860a766fbcb1f23",
+      "remote": {
+        "branch": "hw3-exam1-prep",
+        "checkpoint_sha": "747e49fb9219b949e0b0e9d15860a766fbcb1f23",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "EAS501-AdamTrott",
+      "intent": "read",
+      "base_sha": "b2b390d042d539165f140821a3080dc4e5a82001",
+      "remote": {
+        "branch": "eas501-tutor-bootstrap",
+        "checkpoint_sha": "b2b390d042d539165f140821a3080dc4e5a82001",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    },
+    {
+      "name": "CIS560-AdamTrott",
+      "intent": "read",
+      "base_sha": "aba8c2e87dd4bb50ba414206270f592e8ca841a4",
+      "remote": {
+        "branch": "tutor-framework",
+        "checkpoint_sha": "aba8c2e87dd4bb50ba414206270f592e8ca841a4",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "workspace_inventory_and_problem_frame",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github+web",
+      "inputs": [
+        "workspace-control main and existing reusable workflow/policy artifacts",
+        "PADataset main and milcom-presentation branch",
+        "research-engine main durable orchestrator",
+        "MTH602/EAS501/CIS560 tutoring branches",
+        "existing research knowledge ontology",
+        "recent Instant worker benchmark evidence"
+      ],
+      "outputs": [
+        "architecture/workspace-semantic-execution-migration.v0.1.md",
+        "architecture/workspace-capability-workflow-inventory.v0.1.md"
+      ],
+      "validation": [
+        {
+          "check": "Representative workflow families recovered",
+          "result": "PASS",
+          "evidence": [
+            "Inventory includes research/experiments, engineering, tutoring/coursework, paper production, presentation production, generic document artifacts, evidence-first architecture research, GitRunner/Lambda execution, local semantic models, and Chat/Instant reasoning.",
+            "PADataset, research-engine, MTH602, EAS501, CIS560 and workspace-control were inspected directly through GitHub."
+          ]
+        },
+        {
+          "check": "Open-world requirement captured",
+          "result": "PASS",
+          "evidence": [
+            "Migration architecture forbids a closed domain enum and requires versioned domain/workflow extensions that do not modify core scheduler semantics."
+          ]
+        }
+      ],
+      "resume_condition": "Representative current workflows and unfinished infrastructure dependencies are durably inventoried."
+    },
+    {
+      "id": "architecture_family_comparison_and_benchmark_design",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github+web+heartbeat+lambda-ci",
+      "inputs": [
+        "workspace capability/workflow inventory",
+        "evidence-first solution research workflow",
+        "Temporal/Dapr/LangGraph/Microsoft Agent Framework/OPA/PROV-O/AI Scientist/AFlow current evidence",
+        "GitRunner task workspace-github-actions-control-plane-protocol-redesign-v1 current branch 6456847b0b4b1268ed6f5bd4d0b847ebde1a21e5",
+        "Workspace Shell acceptance PR #573 comment 6565110368"
+      ],
+      "outputs": [
+        "architecture/workspace-semantic-execution-architecture-options.v0.1.md",
+        "architecture/workspace-semantic-execution-resumable-reasoning.v0.1.md",
+        "architecture/workspace-semantic-execution-core.v0.1.json",
+        "architecture/workspace-semantic-execution-executor-resource.v0.1.json",
+        "architecture/workspace-semantic-execution-workflow-inventory.v0.1.json",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_v1.json"
+      ],
+      "validation": [
+        {
+          "check": "Materially distinct architecture families compared",
+          "result": "PASS",
+          "evidence": [
+            "Current comparison covers minimal evolution, generalized research-engine, graph-first, Temporal/Dapr durable workflow, agent-framework, and hybrid semantic-projection approaches.",
+            "Hybrid semantic projection + existing execution substrates is marked PREFERRED_MIGRATION_HYPOTHESIS, not frozen."
+          ]
+        },
+        {
+          "check": "Workspace Shell dependency evidence reconciled",
+          "result": "PASS",
+          "evidence": [
+            "PR #573 comment 6565110368 records LIVE CHATGPT ACCEPTANCE COMPLETE.",
+            "Accepted execution/authority SHA 01a95b61410e2f427b9885a19e6a0b9c5ee60a38; durable head 44b4e4f2020450c81cec56e86b711cdee7e651d9; Validation run 41359338969 SUCCESS.",
+            "Current Workspace Shell runtime_inventory call returns normally.",
+            "No GitRunner canary authority is inferred from this evidence."
+          ]
+        },
+        {
+          "check": "Architecture design artifacts completed",
+          "result": "PASS",
+          "evidence": [
+            "Resumable ReasoningProcess model, benchmark contract, open-world semantic core, executor/resource/quota model, and machine-readable workflow inventory are durable on PR #590.",
+            "Hybrid semantic projection + existing execution substrates remains a preferred migration hypothesis, not a frozen architecture decision."
+          ]
+        }
+      ],
+      "resume_condition": "Architecture comparison, resumable reasoning benchmark, semantic extension model and executor/resource routing model are concrete enough for independent review and bounded prototype selection."
+    },
+    {
+      "id": "resumable_reasoning_benchmark",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-control-benchmark",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "Instant worker benchmark infrastructure",
+        "representative long-horizon workflow cases",
+        "frontier comparison arm"
+      ],
+      "outputs": [
+        "Instant persistent vs stateless resume results",
+        "decomposition/independent-critic results",
+        "frontier-escalation boundary",
+        "usage/context/effectiveness measurements",
+        "objective fixture/evaluator evidence"
+      ],
+      "validation": [
+        {
+          "check": "Instant durable orchestration capability primitives",
+          "result": "PASS",
+          "evidence": [
+            "INSTANT_MULTI_LEAF_QUEUE_V1 draft PR #577 reached MULTI_LEAF_QUEUE_PASS with dependency ordering, five actions processed, decomposition and escalation classification, durable checkpoints, exact-head validation and stateless recovery.",
+            "INSTANT_CONCURRENT_EXECUTION_V1 durable state records X and Y COMPLETE under distinct workers using exact-head force=false CAS; PRs #578/#579 validated at runs 41365696966 and 41365779932.",
+            "INSTANT_WORKER_LEASE_RECOVERY_V1 durable state records generation-0 W1 result fenced, generation advanced, W2 independently recovered and completed generation 1; PR #581 validated run 41367274890 while W1 stale evidence remained preserved.",
+            "INSTANT_MULTI_WORKER_SCALE_V1 durable state records all eight actions A-H COMPLETE with exact-head CI evidence and peer-preserving CAS across W1/W2/W3; worker-registration collision exposed the need for authoritative session-slot registration rather than prompt-order identity assumptions.",
+            "These benchmarks prove durable queue/CAS/recovery/orchestration mechanics; they do NOT yet prove Instant matches frontier reasoning quality on intrinsically difficult research/architecture work."
+          ]
+        },
+        {
+          "check": "Resumable-reasoning pilot harness implementation",
+          "result": "PASS",
+          "evidence": [
+            "PR #590 exact head 4ec300254c328a1b6e0fce62fe62cd6f11d7a855 passed Workspace Control Validation run 41519306708 SUCCESS.",
+            "The validated pilot implements durable semantic checkpoint/context serialization, generation fencing/recovery, WAITING_EXTERNAL -> READY_TO_RESUME event wake without model polling, objective research-iterate validation, and explicit DECOMPOSE versus ESCALATION_REQUIRED transitions.",
+            "The public research fixture, evaluator-only oracle, prior Instant mechanics ledger, pilot harness, runset contract, and regression tests are durable on the branch.",
+            "This is implementation/mechanics evidence only; no A-E reasoning-quality arm has yet been scored."
+          ]
+        },
+        {
+          "check": "Experiment taxonomy and fixture-phenotype design",
+          "result": "PASS",
+          "evidence": [
+            "PR #590 exact head a8633bad2b29e49cc4b8cafb254e342983ec043a passed Workspace Control Validation run 41520924482 SUCCESS.",
+            "A faceted experiment taxonomy now separates causal question, fixture phenotype, executor treatment, validator strength, and outcome metrics instead of collapsing domain, horizon, reasoning difficulty, tool mechanics, authority, and cost.",
+            "Five suites are separated: reasoning-quality boundary, orchestration mechanics, authority/provenance safety, open-world generalization, and quality-gated resource routing.",
+            "Four core fixture phenotypes are defined: P0 easy control, P1 horizon-heavy/decomposable, P2 reasoning-heavy/coupled, and P3 mixed long+hard.",
+            "The existing research_iterate fixture is classified as P2_reasoning_heavy_coupled. It remains useful for the first end-to-end clean-session pilot but is explicitly not a strong primary decomposition/TOO_LARGE fixture."
+          ]
+        },
+        {
+          "check": "P0-P3 fixture matrix and hidden-evaluator primitive",
+          "result": "PASS",
+          "evidence": [
+            "PR #590 exact head d3d87c6e4001f220e75a0f910f1c85784cc9d03c passed Workspace Control Validation run 41523766067 SUCCESS.",
+            "Matched synthetic research_iterate fixtures now cover P0 easy control, P1 horizon-heavy/decomposable, P2 reasoning-heavy/coupled, and P3 mixed long+hard under one worker interface and objective evaluator class.",
+            "The staged matrix runset performs one non-claim-bearing protocol-screening run per arm/fixture before frozen replicated scoring, preventing expensive replication of protocol defects.",
+            "Hidden-ephemeral fixture generation now produces a worker-visible public fixture plus pre-run oracle commitment while keeping oracle/seed/nonce evaluator-only by contract.",
+            "Runtime evaluator-only storage remains unproven; therefore no strong frontier-equivalence claim is enabled by this checkpoint."
+          ]
+        },
+        {
+          "check": "First clean protocol-screening slot ready",
+          "result": "PASS",
+          "evidence": [
+            "Matched-surface executor protocol checkpoint 74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4 passed Workspace Control Validation run 41526074412 / #1764 SUCCESS.",
+            "The primary stronger-reasoning control is GPT-5.6 Sol High on ChatGPT chat + GitHub; Instant arms use GPT-5.6 Instant on the same ChatGPT chat + GitHub surface, with Temporary Chat/Memory-off required.",
+            "The first screening slot screening-v1-P0-B-001 is frozen at benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-001.json and exact slot head 124edbf30587be8f64e579a053eb2beef8288f5a passed Workspace Control Validation run 41526365989 / #1765 SUCCESS.",
+            "Immutable worker inputs are read at exact source checkpoint 74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4; the worker may mutate only its assigned run-state path via GitHub CAS.",
+            "Protocol screening is explicitly non-claim-bearing, so static hidden-oracle control is sufficient for transport/harness screening. Hidden-ephemeral evaluator-only runtime storage remains required before strong claim-bearing comparisons."
+          ]
+        },
+        {
+          "check": "Contaminated screening fail-closed behavior",
+          "result": "PASS",
+          "evidence": [
+            "screening-v1-P0-B-001 stopped before fixture execution with status CONTAMINATED_SESSION and zero reasoning invocations/experiment requests.",
+            "The contaminated attempt is preserved at commit 8c62b8b2dcbe13ca5c72e9a1e5a0a12aaca9862c rather than reset or overwritten.",
+            "The stop also exposed an executor-identity labeling defect: ChatGPT reported GPT-5.6 Sol / Instant, while the runset expected generic GPT-5.6. The runset was corrected at fc59d52d4591f271c03a31f0778f746728e9933f.",
+            "Fresh replacement slot screening-v1-P0-B-002 was created at 2d9dd4c43373ba55b1042e634e2cb0b4720f8af9."
+          ]
+        },
+        {
+          "check": "Contaminated screening retry implementation",
+          "result": "PASS",
+          "evidence": [
+            "screening-v1-P0-B-001 is durably preserved as CONTAMINATED_SESSION at commit 8c62b8b2dcbe13ca5c72e9a1e5a0a12aaca9862c with zero reasoning invocations and zero experiment requests.",
+            "Executor identity expectation was corrected to GPT-5.6 Sol / Instant at fc59d52d4591f271c03a31f0778f746728e9933f.",
+            "Fresh replacement slot screening-v1-P0-B-002 was created at 2d9dd4c43373ba55b1042e634e2cb0b4720f8af9.",
+            "Bootstrap regression coverage was corrected to preserve the contaminated predecessor and validate the active replacement slot. Exact implementation head 82ab7c3fc0847d45fb9928bafc1a084d5a19c121 passed Workspace Control Validation 41529185760 / #1774 SUCCESS."
+          ]
+        },
+        {
+          "check": "Supplementary GPT-6 Instant screening arm",
+          "result": "PASS",
+          "evidence": [
+            "The user's accidental GPT-6 Instant launch did not mutate the GPT-5.6 screen-002 slot and therefore required no rollback.",
+            "A distinct supplementary arm B6_gpt6_instant_persistent_chat was added instead of changing the primary B arm.",
+            "Fresh P0 GPT-6 Instant slot screening-v1-P0-B6-001 is durable and READY.",
+            "Exact implementation head b3f9acd8d32a913d33bbac017378ef7a92c0ff08 passed Workspace Control Validation 41530095255 / #1779 SUCCESS."
+          ]
+        },
+        {
+          "check": "Plugin-capable clean-session contract",
+          "result": "PASS",
+          "evidence": [
+            "OpenAI Temporary Chat currently couples personalization and plugins: Unpersonalized Temporary Chat disables memory, custom instructions, and plugins; Personalized Temporary Chat can use existing memory and plugins.",
+            "Therefore plugin-backed benchmark workers cannot use Temporary Chat as the clean-session primitive.",
+            "The screening bootstrap/runset were corrected to require a brand-new regular ChatGPT chat with Memory disabled before launch and GitHub enabled.",
+            "Temporary-Chat GitHub-unavailable attempt produced no run-state mutation and is treated as a transport-capability finding, not a model failure."
+          ]
+        },
+        {
+          "check": "User-attested launch properties",
+          "result": "PASS",
+          "evidence": [
+            "Worker-observable gates remain GitHub availability and actual presence/absence of prior benchmark/control context.",
+            "Brand-new-chat status, pre-chat Memory setting, and selected model/configuration are not reliably self-verifiable from inside the worker conversation.",
+            "The screening bootstrap and GPT-6 B6 slot now accept explicit user attestation for those UI/session properties and record the attestation source.",
+            "Any conflicting in-conversation benchmark context or surface-reported model identity still fails closed."
+          ]
+        },
+        {
+          "check": "GPT-6 Instant P0 protocol screening completion",
+          "result": "PASS",
+          "evidence": [
+            "screening-v1-P0-B6-001 completed as a non-claim-bearing protocol screening run.",
+            "Worker executed 3 reasoning invocations and 2 experiment requests with zero retries, zero decompositions, zero frontier escalations, zero model polling while waiting, zero manual state relay count, and zero authority/provenance violations.",
+            "Terminal candidate selected H_timeout_config, rejected H_cpu, retained exact result hashes for E_restore_timeout and E_double_cpu, and addressed O1.",
+            "Objective research_iterate_objective_v1 validation passed with score 1.0 and zero violations; validator evidence commitment cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999.",
+            "Completion commit e72e183be5b969fad71c2122ff5c4e3f8bba80bb required a lifecycle-test update because the regression still asserted READY. Corrected exact head e177ada29bfb5e21f514e4cf02e517ac820354b9 passed Workspace Control Validation 41558373924 / #1804 SUCCESS.",
+            "This establishes GPT-6 Instant protocol/harness operability on P0 only; it is not claim-bearing reasoning-quality evidence."
+          ]
+        },
+        {
+          "check": "Matched P0 Instant screening pair before terminal-schema clarification",
+          "result": "PASS",
+          "evidence": [
+            "GPT-6 Instant run screening-v1-P0-B6-001 completed with 3 reasoning invocations, 2 experiment requests, 0 retries, objective score 1.0, zero violations, and no hard-gate failures; completion/handoff validation reached Workspace Control Validation 41558528102 / #1806 SUCCESS.",
+            "GPT-5.6 Sol / Instant run screening-v1-P0-B-002 completed with the same substantive diagnosis and experiments, but required 2 validator-driven terminal-submission retries because the public worker contract named observed_results without specifying the evaluator's exact experiment_id -> raw result_hash string value shape.",
+            "The third GPT-5.6 terminal submission passed research_iterate_objective_v1 with score 1.0 and zero violations at completion commit 6a510ce9371365ae9fbb4b5353d7230d770ec956; Workspace Control Validation 41561696362 / #1818 SUCCESS.",
+            "Both runs are non-claim-bearing protocol-screening evidence. The retry difference is classified as protocol-interface evidence, not model-capability evidence."
+          ]
+        },
+        {
+          "check": "Terminal submission schema clarification and fresh re-screen slots",
+          "result": "PASS",
+          "evidence": [
+            "All P0-P3 public research_iterate fixtures now expose terminal_output_schema explicitly: observed_results is an object mapping experiment_id directly to the exact control-published raw 64-character SHA-256 result_hash string.",
+            "screening_worker_bootstrap_v1.json now repeats the same terminal hash-mapping rule so the worker packet and fixture contract agree.",
+            "Fixture matrix/runset hashes were rebound and the runset is marked PROTOCOL_SCHEMA_CLARIFIED_RESCREEN_REQUIRED; prior P0 completions remain useful defect/recovery evidence but are not a frozen comparable screening pass after the change.",
+            "Clarified protocol checkpoint 6b0ada4e0a9e9f29cd281d82e1fc786df8895982 passed Workspace Control Validation 41562198162 / #1829 SUCCESS.",
+            "Fresh P0 re-screen slots screening-v1-P0-B-003 and screening-v1-P0-B6-002 are bound to source checkpoint 6b0ada4e0a9e9f29cd281d82e1fc786df8895982 and updated P0 fixture blob b33e0afa98d0051e5f41241eead770622c2c9eb0.",
+            "Slot/test checkpoint ae85cece6b27e3e07ed95863365a1cc91ecafc40 passed Workspace Control Validation 41562359316 / #1833 SUCCESS."
+          ]
+        },
+        {
+          "check": "Clarified matched P0 persistent-chat Instant re-screen completion",
+          "result": "PASS",
+          "evidence": [
+            "GPT-5.6 Sol / Instant run screening-v1-P0-B-003 and GPT-6 / Instant run screening-v1-P0-B6-002 were both bound to clarified source checkpoint 6b0ada4e0a9e9f29cd281d82e1fc786df8895982 and P0 fixture blob b33e0afa98d0051e5f41241eead770622c2c9eb0.",
+            "Both independently requested E_restore_timeout then E_double_cpu, stopped at each WAITING_EXTERNAL boundary, consumed only control-published results, and submitted terminal candidates using experiment_id -> raw result_hash string mappings.",
+            "Both passed research_iterate_objective_v1 with score 1.0 and zero violations in atomic completion commit 57d49bdc76a2c92092e49068a3c60c400a1ff5ae.",
+            "Both traces used 3 reasoning invocations, 2 experiment requests, 0 retries, 0 decompositions, 0 frontier escalations, 0 model polling while waiting, 0 manual state relay count, and 0 authority/provenance violations.",
+            "Workspace Control Validation 41564259142 / #1848 SUCCESS validates the exact completion head.",
+            "This clears the clarified P0 persistent-chat protocol-screening pair only. It remains non-claim-bearing and does not establish GPT-5.6/GPT-6 reasoning equivalence."
+          ]
+        },
+        {
+          "check": "Remaining primary A-E P0-P3 screening slots instantiated",
+          "result": "PASS",
+          "evidence": [
+            "Nineteen missing primary protocol-screening run-state slots were created atomically: P0 A/C/D/E plus A-E for each of P1, P2, and P3. The completed clarified P0 B slot remains immutable evidence and was not recreated.",
+            "All new slots are non-claim-bearing, READY, bound to source checkpoint 6b0ada4e0a9e9f29cd281d82e1fc786df8895982, exact clarified fixture blobs, and harness blob ff55438e933e91dad3057167c2243f0ef4933df2.",
+            "Arm-specific treatment state is explicit: A matched-surface GPT-5.6 Sol High persistent control; B persistent Instant; C fresh chat per reasoning quantum; D fresh role-isolated decomposer/leaf/critic/synthesizer; E Instant-first hybrid with TOO_LARGE-before-escalation and evidence-gated High phase.",
+            "Regression tests enforce frozen bindings, stateless C semantics, D decomposer/critic separation, E evidence-gated escalation, and matched-surface A identity.",
+            "Exact slot-instantiation commit 63179de41180c5876814ff9249fab060a02fd931 passed Workspace Control Validation 41565058378 / #1853 SUCCESS."
+          ]
+        },
+        {
+          "check": "P0 primary A-E protocol-screening completion",
+          "result": "PASS",
+          "evidence": [
+            "Primary P0 arms A, B, C, D, and E are all durably COMPLETED under the clarified public terminal_output_schema.",
+            "Each passed research_iterate_objective_v1 with score 1.0 and zero violations.",
+            "A: 3 reasoning invocations, 2 experiment requests, 0 retries.",
+            "B: 3 reasoning invocations, 2 experiment requests, 0 retries.",
+            "C: 3 reasoning invocations, 2 experiment requests, 0 retries.",
+            "D: 4 reasoning invocations across role-isolated decomposer/leaf/critic/synthesizer, 2 experiment requests, 0 retries.",
+            "E: 4 reasoning invocations, 2 experiment requests, 1 public-protocol retry after premature terminal submission, 0 frontier escalations.",
+            "Exact D completion commit 7f7c9c8136cf8509de5310222bbb5a380399c4ea passed Workspace Control Validation 41570296752 / #1884 SUCCESS.",
+            "This clears P0 primary arm mechanics only. It remains non-claim-bearing and does not establish frontier/Instant equivalence."
+          ]
+        },
+        {
+          "check": "Public-input taxonomy provenance refreeze",
+          "result": "PASS",
+          "evidence": [
+            "P0-P3 taxonomy profiles all retained pre-clarification fixture_blob_sha values after terminal_output_schema clarification changed the fixture blobs.",
+            "P1 B and E correctly failed closed on PUBLIC_INPUT_PROVENANCE_MISMATCH; control inspection confirmed the same stale binding existed in P0, P2, and P3 taxonomy profiles.",
+            "All four taxonomy profiles were corrected, fixture-matrix taxonomy-profile blob SHAs were updated, and a regression now requires taxonomy_profile.fixture_blob_sha == matrix fixture.blob_sha.",
+            "Corrected source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb passed Workspace Control Validation 41580217425 / #1894 SUCCESS.",
+            "Twenty fresh primary replacement slots were instantiated at a1cbd6fc14e43f06167c4738907e3406ed7f56ad and passed Validation 41580711957 / #1895 SUCCESS.",
+            "Started P1 A/C/D screen-001 runs were invalidated; P1 B/E had already failed closed; never-launched P2/P3 screen-001 slots were superseded.",
+            "Prior P0 runs remain useful non-claim-bearing mechanics/protocol-defect evidence but are superseded for frozen comparability. Fresh P0 primary A-E screening is required."
+          ]
+        },
+        {
+          "check": "Control interruption recovery and first provenance-refrozen P0 external publication",
+          "result": "PASS",
+          "evidence": [
+            "Branch head recovery proved the interrupted control turn had already landed at f0bd5786c3127d15f1be42ea9aacf3b02016176c.",
+            "Workspace Control Validation 41723477493 / #1906 completed SUCCESS on that exact checkpoint.",
+            "A/B/C/E each durably contain the control-published E_restore_timeout result hash 3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368 and are READY_TO_RESUME.",
+            "D durably contains a LEAF_EXECUTABLE decomposer result and is READY_TO_RESUME at leaf_worker process screening-v1-P0-D-002-leaf-001.",
+            "No replay of the first external result is authorized or required."
+          ]
+        },
+        {
+          "check": "P1 provenance-refrozen A-E screening completion",
+          "result": "PASS",
+          "evidence": [
+            "P1 A/B/C/D/E all completed under frozen source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb.",
+            "All five arms passed research_iterate_objective_v1 with score 1.0 and zero violations.",
+            "P1 evidence is protocol-screening only and does not establish capability equivalence."
+          ]
+        }
+      ],
+      "resume_condition": "Resume the active provenance-refrozen P0 replacement runs from repository state: A/B same persistent chats; C fresh quantum-1 chat; D fresh leaf_worker role chat; E fresh lower-tier Instant chat. Continue servicing external, role-handoff, and terminal-validation boundaries until all five complete. Then advance to fresh P1 replacement slots."
+    },
+    {
+      "id": "semantic_core_and_extension_contract",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "existing research knowledge ontology",
+        "workflow inventory",
+        "PROV-O/policy prior art",
+        "architecture benchmark evidence"
+      ],
+      "outputs": [
+        "small stable core semantic schema",
+        "versioned domain extension contract",
+        "authority firewall invariants",
+        "unseen-workflow extension fixture"
+      ],
+      "validation": [
+        {
+          "check": "Previously unseen workflow/domain extension proof",
+          "result": "PASS",
+          "evidence": [
+            "PR #590 exact head 8c0a0d4847a645a6ef8641ae7a10211367cbec4d passed Workspace Control Validation run 41524244560 SUCCESS.",
+            "The synthetic media_localization extension was absent from the core example extension set when the core was authored.",
+            "The extension validates using the existing generic extension metadata and workflow projection contracts with no core type/dispatch branch.",
+            "Its project/source-of-truth boundary remains external and rebuildable, authority_refs are empty, and deterministic tests reject attempts to create Permission or otherwise widen authority.",
+            "Unknown extensions remain UNSUPPORTED_EXTENSION_FAIL_CLOSED."
+          ]
+        }
+      ],
+      "resume_condition": "Open-world extension proof is satisfied for one previously unmodeled synthetic workflow. Complete remaining core acceptance tests and incorporate benchmark/independent-review evidence before architecture freeze."
+    },
+    {
+      "id": "executor_resource_router_design",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "executor benchmark evidence",
+        "current ChatGPT/other provider usage models",
+        "local model/runtime capabilities",
+        "GitRunner/Workspace Shell capability boundaries"
+      ],
+      "outputs": [
+        "Executor/Provider/Model/Surface/Harness schema",
+        "CapabilityRequirement and ReasoningRequirement schema",
+        "QuotaPool/UsageRecord schema",
+        "routing and escalation policy"
+      ],
+      "validation": [],
+      "resume_condition": "Routing can choose cheapest sufficient executor while failing closed on missing capability/authority."
+    },
+    {
+      "id": "representative_workflow_migration_and_acceptance",
+      "status": "PLANNED",
+      "execution_owner": "workspace-control",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "accepted architecture contract",
+        "representative workflow fixtures",
+        "existing project-local owners"
+      ],
+      "outputs": [
+        "incremental adapters",
+        "end-to-end acceptance evidence",
+        "rollback evidence"
+      ],
+      "validation": [],
+      "resume_condition": "Representative workflows complete without manual transport and with measured scarce-frontier usage."
+    },
+    {
+      "id": "gitrunner_migration_dependency_tracking",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-github-actions-control-plane-protocol-redesign-v1",
+      "selected_executor": "separate-authority-owned-task",
+      "selected_surface": "github+workspace-shell+lambda",
+      "inputs": [
+        "GitRunner PR #572 branch github-actions-control-plane-protocol-redesign-v1",
+        "Workspace Shell accepted state from PR #573",
+        "frozen v3 canary order"
+      ],
+      "outputs": [
+        "PADataset CPU/GPU v3 migration under separate exact authority",
+        "Research CPU migration only if separately authorized",
+        "Research GPU-derived containment preserved"
+      ],
+      "validation": [],
+      "resume_condition": "This semantic migration consumes only durable GitRunner receipts/state; it never issues live canary authority."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "workspace-shell-acceptance",
+      "kind": "dependency_checkpoint",
+      "identity": "PR573-comment-6565110368",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Shell v1 LIVE CHATGPT ACCEPTANCE COMPLETE.",
+        "durable head 44b4e4f2020450c81cec56e86b711cdee7e651d9",
+        "accepted execution/authority SHA 01a95b61410e2f427b9885a19e6a0b9c5ee60a38",
+        "Workspace Control Validation run 41359338969 SUCCESS"
+      ]
+    },
+    {
+      "id": "migration-architecture-current",
+      "kind": "design_checkpoint",
+      "identity": "workspace-control@workspace-semantic-execution-migration-v1:fbb065a235ef271f3c55210833ee3b95e9d61f54",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #590 head fbb065a235ef271f3c55210833ee3b95e9d61f54 is green under Workspace Control Validation run 41381088001.",
+        "Architecture options, resumable reasoning, semantic core, executor/resource model, workflow inventory, and benchmark contract are durable."
+      ]
+    },
+    {
+      "id": "gitrunner-current-owner",
+      "kind": "dependency_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:6456847b0b4b1268ed6f5bd4d0b847ebde1a21e5",
+      "required_for_resume": true,
+      "evidence": [
+        "GitRunner task remains IN_PROGRESS / bounded_migration_and_live_acceptance.",
+        "First v3 workspace-control-control-small-v1 canary is accepted and must not be repeated.",
+        "Current legacy workspace-control lane incident must be diagnosed/contained before using lane serviceability as evidence.",
+        "PADataset CPU remains the next migration class under fresh separate one-shot authority; Research GPU-derived classes remain NO_BY_DEFAULT."
+      ]
+    },
+    {
+      "id": "workspace-shell-observability-live",
+      "kind": "dependency_checkpoint",
+      "identity": "PR591@1ca44e019fed66a55f2b9985d9d04397ba37b668",
+      "required_for_resume": true,
+      "evidence": [
+        "Transactional live updater reported PASS while preserving accepted Workspace Shell execution source 01a95b61410e2f427b9885a19e6a0b9c5ee60a38.",
+        "Fresh live unit_state calls prove legacy workspace-control controller, maintenance controller/service, and v3 provisioner are active; v3 workspace-control control-small remains inactive.",
+        "Fresh chat is required to rediscover newly added unit_logs_redacted and maintenance_receipt MCP schema operations."
+      ]
+    },
+    {
+      "id": "instant-durable-worker-capability-evidence",
+      "kind": "benchmark_checkpoint",
+      "identity": "instant-capability-benchmarks-2026-11-01",
+      "required_for_resume": true,
+      "evidence": [
+        "PR #577 head c0fa03ce0d31e5fdd4de92f719de82d8bf901ab7: multi-leaf queue benchmark completed with exact-head validation and durable resumability.",
+        "Concurrent execution benchmark shared state: X complete by W2 at validated head ad3479da49ec277d164c4eb5dc217274a3bf5352/run 41365696966; Y complete by W1 at 4ccb6804cc453f3e4ec3af5855e0948afd82976a/run 41365779932.",
+        "Lease recovery benchmark shared state generation=1: W2 completed recovered X at head 98a0ea26911d4c5216f6dc9df95b2da98f0e3d3f/run 41367274890 while preserving W1 stale result history.",
+        "Multi-worker scale shared state version 19: A-H all COMPLETE with eight exact-head validation runs; workers W1/W2/W3 registered and peer state preserved; W4 remained FREE, demonstrating a registration/orchestration edge case rather than action-execution failure.",
+        "Conclusion: Instant workers can execute durable asynchronous task trees with CAS ownership, resume after chat returns, recover expired workers, and preserve peer state; quality equivalence on hard reasoning remains unproven."
+      ]
+    },
+    {
+      "id": "gitrunner-post-outage-current",
+      "kind": "dependency_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:74c027df26253c9836f23240f7456623a5979859",
+      "required_for_resume": true,
+      "evidence": [
+        "Legacy workspace-control stuck-lane incident was resolved as a migration blocker; broad v2 rehabilitation is out of scope.",
+        "Power outage left accepted v3 reconciler/provisioner inactive.",
+        "Refresh-aware root-reactivation correction at head 74c027df26253c9836f23240f7456623a5979859 passed Workspace Control Validation 41405429998.",
+        "Live helper updater failed closed before mutation on installed helper metadata mismatch for /opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py.",
+        "GitRunner task must reconcile exact helper prestate, reactivate roots, then continue PADataset CPU/GPU canaries and controlled v2 retirement."
+      ]
+    },
+    {
+      "id": "workspace-shell-post-outage-recovery-gap",
+      "kind": "dependency_checkpoint",
+      "identity": "PR592@d26ad592c16bb8673e6b91184b5c4c1907cedf13",
+      "required_for_resume": false,
+      "evidence": [
+        "Power outage proved Workspace Shell services and /run/workspace-shell-control were not cold-boot durable.",
+        "Manual recreation of /run/workspace-shell-control restored the recovery plane; prior diagnostics showed local mTLS/MCP healthy while launcher/root-broker/tunnel crash-looped on 226/NAMESPACE because the runtime directory was absent.",
+        "Draft PR #592 makes the tmpfiles rule persistent and boot-enables only the four recovery-plane services with an emergency disable path.",
+        "Privileged helper/standing authority remains a separate architectural follow-up; boot persistence must not imply arbitrary root authority."
+      ]
+    },
+    {
+      "id": "gitrunner-v3-production-and-retirement-complete",
+      "kind": "dependency_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142",
+      "required_for_resume": true,
+      "evidence": [
+        "GitRunner v3 production generation cutover accepted under transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json.",
+        "Production validations succeeded for workspace-control run 41504458922/job 125480061499, PADataset CPU run 41504979316/job 125481849777, and PADataset GPU run 41505174483/job 125482508067.",
+        "Validated legacy-retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 passed Workspace Control Validation run 41512744850.",
+        "Live retirement receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json recorded before deletion.",
+        "lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu were retired after all six scale-set counters were zero; fresh-process verification proved those names absent and exact accepted v3 targets still present.",
+        "lambda-research-engine and lambda-research-engine-gpu remain intentionally preserved because their replacement v3 classes are not accepted; preserved v2 controller bytes/config/state remain outside current cleanup authority."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/workspace-semantic-execution-migration.v0.1.md",
+      "state": "DRAFT",
+      "role": "problem framing and target invariants",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "manual design revision from durable evidence",
+      "review_requirement": "independent architecture review before freeze",
+      "evidence": [
+        "Created on PR #590.",
+        "Defines open-world extensibility and authority-preserving migration goals."
+      ]
+    },
+    {
+      "path": "architecture/workspace-capability-workflow-inventory.v0.1.md",
+      "state": "DRAFT",
+      "role": "workflow/capability inventory",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "expand from owning repositories",
+      "review_requirement": "coverage review",
+      "evidence": [
+        "Includes existing workflow families and unfinished GitRunner migration dependency.",
+        "Workspace Shell acceptance evidence reconciled."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-architecture-options.v0.1.md",
+      "state": "DRAFT",
+      "role": "evidence-first architecture comparison",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "revise as benchmark evidence arrives",
+      "review_requirement": "independent architecture review before freeze",
+      "evidence": [
+        "Compares six materially distinct architecture families.",
+        "Hybrid approach is a preferred hypothesis, not a frozen decision."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-resumable-reasoning.v0.1.md",
+      "state": "DRAFT",
+      "role": "durable ReasoningProcess / bounded reasoning-quantum contract",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "revise from benchmark evidence",
+      "review_requirement": "benchmark + independent architecture review before freeze",
+      "evidence": [
+        "Long-horizon continuity is externalized from chat state; TOO_LARGE is separated from INTRINSICALLY_DIFFICULT."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-core.v0.1.json",
+      "state": "DESIGN_CANDIDATE_NOT_FROZEN",
+      "role": "small open-world semantic core and extension firewall",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "schema revision from representative workflow evidence",
+      "review_requirement": "unseen-workflow extension test + authority-firewall review",
+      "evidence": [
+        "Core is intentionally storage-agnostic and prohibits model inference from creating authority."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-executor-resource.v0.1.json",
+      "state": "DESIGN_CANDIDATE_NOT_FROZEN",
+      "role": "executor/surface/harness/capability/quota routing model",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "calibrate from executor benchmark evidence",
+      "review_requirement": "routing benchmark and scarcity/quality review",
+      "evidence": [
+        "Executor identity includes provider + model + surface + harness + toolset + capability profile + usage pools."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-workflow-inventory.v0.1.json",
+      "state": "DRAFT_EVIDENCE_INVENTORY",
+      "role": "machine-readable representative workflow migration inventory",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "expand from owning repositories",
+      "review_requirement": "representative coverage review",
+      "evidence": [
+        "Includes tutoring, artifact, research, paper, presentation, engineering, GitRunner, Workspace Shell, and resumable-reasoning families."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_v1.json",
+      "state": "PILOT_HARNESS_IMPLEMENTED_ARMS_NOT_RUN",
+      "role": "Instant-vs-frontier resumable-reasoning benchmark contract",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "revise from scored clean-session arm evidence",
+      "review_requirement": "clean A-E pilot + evaluator-isolation review before capability claims",
+      "evidence": [
+        "Validated implementation checkpoint 4ec300254c328a1b6e0fce62fe62cd6f11d7a855 / Workspace Control Validation 41519306708 SUCCESS.",
+        "Defines frontier control, persistent Instant, stateless Instant, decomposition/critic, and hybrid-escalation arms; all scored arms remain NOT_STARTED."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/prior_instant_worker_evidence_v1.json",
+      "state": "VALIDATED_MECHANICS_EVIDENCE",
+      "role": "exact prior Instant/durable-worker mechanics ledger",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "recover from exact PR heads, comments, and validation runs",
+      "review_requirement": "none for mechanics claims; cannot support frontier-equivalence claims",
+      "evidence": [
+        "Covers PRs #574-#589 with exact heads and Workspace Control Validation runs.",
+        "Explicitly limits claims to connected-tool engineering, CAS/recovery/orchestration mechanics, and multi-worker execution."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+      "state": "FROZEN_PILOT_FIXTURE",
+      "role": "worker-visible research_iterate fixture",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned fixture replacement only",
+      "review_requirement": "fixture difficulty/representativeness review before broad capability conclusions",
+      "evidence": [
+        "Frozen public fixture blob 6def452e61be0e823bc5ee871ee2888bb1c9359f at validated implementation checkpoint."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+      "state": "EVALUATOR_ONLY_PROCESS_SEALED",
+      "role": "deterministic research_iterate oracle and terminal criteria",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned evaluator replacement only",
+      "review_requirement": "stronger evaluator secrecy/isolation required before frontier-equivalence claims",
+      "evidence": [
+        "Oracle blob acc914d4fa9862a7f1ad0eabac21dbbf7aa84d68 is intentionally excluded from worker packets.",
+        "Current isolation is process-protocol-only, not a cryptographic/tool-enforced seal."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+      "state": "VALIDATED_PILOT_HARNESS",
+      "role": "authority-free durable state/event/evaluator harness",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned harness revision with exact-head CI",
+      "review_requirement": "clean-session pilot evidence before production routing claims",
+      "evidence": [
+        "Harness blob ff55438e933e91dad3057167c2243f0ef4933df2 passed Workspace Control Validation run 41519306708.",
+        "Implements generation fencing, external wait/wake, bounded semantic context packets, objective validation, decomposition, escalation evidence, metrics and hard gates."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_runset_v1.json",
+      "state": "READY_FOR_CLEAN_MODEL_ARM_EXECUTION",
+      "role": "frozen A-E pilot runset and worker/evaluator protocol",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned runset revision only",
+      "review_requirement": "scored arms must be oracle-unexposed clean sessions",
+      "evidence": [
+        "Binds the runset to validated implementation checkpoint 4ec300254c328a1b6e0fce62fe62cd6f11d7a855 / validation 41519306708.",
+        "All five model arms remain NOT_STARTED."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-experiment-taxonomy.v0.1.md",
+      "state": "DESIGN_CANDIDATE_NOT_FROZEN",
+      "role": "human-readable faceted experiment taxonomy and coverage design",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "revise from pilot and independent review evidence",
+      "review_requirement": "benchmark-methodology review before capability-boundary claims",
+      "evidence": [
+        "Separates experiment question, fixture phenotype, executor treatment and outcomes.",
+        "Documents P0-P3 fixture phenotypes, paired comparisons, replication, quality-first scoring and contamination controls."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
+      "state": "VALIDATED_DESIGN_CANDIDATE_NOT_FROZEN",
+      "role": "machine-readable benchmark taxonomy",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned taxonomy revision with exact-head CI",
+      "review_requirement": "independent methodology review + scored pilot evidence before freeze",
+      "evidence": [
+        "Exact taxonomy/test head a8633bad2b29e49cc4b8cafb254e342983ec043a passed Workspace Control Validation run 41520924482.",
+        "Domain/workflow remains open extension tags rather than a closed core enum.",
+        "INTRINSICALLY_DIFFICULT is an empirical post-decomposition label, not an author-assigned importance label."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
+      "state": "VALIDATED_FIXTURE_PROFILE",
+      "role": "taxonomy sidecar for the frozen research_iterate pilot fixture",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned profile update if fixture or taxonomy changes",
+      "review_requirement": "fixture representativeness review",
+      "evidence": [
+        "Classifies the current pilot as P2_reasoning_heavy_coupled.",
+        "Explicitly records that Q2 decomposition-effect evidence is weak for this fixture because horizon/load is modest."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
+      "state": "VALIDATED_STATIC_FIXTURE_MATRIX_NOT_SCORED",
+      "role": "exact P0-P3 matched research_iterate fixture matrix",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned matrix revision with exact-head CI",
+      "review_requirement": "clean screening + replicated scored arms before reasoning-quality conclusions",
+      "evidence": [
+        "Validated at PR #590 head d3d87c6e4001f220e75a0f910f1c85784cc9d03c / Workspace Control Validation 41523766067 SUCCESS.",
+        "P1 is the primary TOO_LARGE/decomposition fixture; P2 is the primary short/coupled reasoning fixture; P3 requires decomposition plus a coupled residual."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json",
+      "state": "VALIDATED_RUNSET_NOT_EXECUTED",
+      "role": "two-stage clean-session screening and replicated-scoring runset",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned runset revision only",
+      "review_requirement": "worker isolation and runtime evaluator-store validation before claim-bearing runs",
+      "evidence": [
+        "Defines protocol screening before replication and matched causal comparisons for Q1/Q2/Q3/Q5.",
+        "Worker packet excludes oracle, control transcript, other-arm answers, and unbounded repository access."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py",
+      "state": "VALIDATED_EVALUATOR_ISOLATION_PRIMITIVE",
+      "role": "fresh hidden-oracle fixture generator and commitment verifier",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned generator revision with exact-head CI",
+      "review_requirement": "must be paired with a runtime store inaccessible to scored workers",
+      "evidence": [
+        "Generator and tests passed Workspace Control Validation 41523766067.",
+        "Worker material excludes seed, seal nonce, oracle, and expected hypothesis; commitment verification detects oracle tampering."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/evaluator_isolation_v1.json",
+      "state": "IMPLEMENTED_PRIMITIVE_RUNTIME_STORE_UNPROVEN",
+      "role": "worker/evaluator secrecy and audit contract",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "revise with runtime-isolation implementation evidence",
+      "review_requirement": "prove evaluator-only storage is unreadable by scored workers",
+      "evidence": [
+        "Defines evaluator-only seed/oracle/nonce and public pre-run commitment.",
+        "Strong claims remain blocked until evaluator secrets are stored outside worker-readable GitHub state."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-extension-media-localization.v0.1.json",
+      "state": "VALIDATED_UNSEEN_EXTENSION_FIXTURE",
+      "role": "previously unmodeled open-world extension and generic workflow projection",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned extension fixture",
+      "review_requirement": "none for structural proof; broader architecture freeze still requires benchmark + independent review",
+      "evidence": [
+        "Not present in core example_extensions.",
+        "Validated with no core-kernel branch, no closed domain enum addition, and no authority widening at Validation 41524244560."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/extension_contract_v1.py",
+      "state": "VALIDATED_EXTENSION_CONTRACT_CHECKER",
+      "role": "deterministic structural/authority validator for versioned semantic extensions",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned validator revision",
+      "review_requirement": "core contract review before freeze",
+      "evidence": [
+        "Requires generic extension metadata and workflow fields.",
+        "Rejects permission creation, prohibition removal, review satisfaction, authority widening, and executable fallback guessing."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/unseen_extension_media_localization_v1.json",
+      "state": "VALIDATED_OPEN_WORLD_PROOF",
+      "role": "S4 open-world generalization acceptance evidence",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "new versioned unseen-extension proof if core contract changes",
+      "review_requirement": "rerun after incompatible core revision",
+      "evidence": [
+        "Exact head 8c0a0d4847a645a6ef8641ae7a10211367cbec4d / Workspace Control Validation 41524244560 SUCCESS."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+      "state": "VALIDATED_SCREENING_BOOTSTRAP",
+      "role": "clean-worker navigation, isolation and transition contract for protocol screening",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned protocol revision; any change requires re-screening",
+      "review_requirement": "none for non-claim-bearing screening; freeze before scored runs",
+      "evidence": [
+        "Exact bootstrap checkpoint 74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4 passed Validation 41526074412.",
+        "Workers use exact-ref immutable inputs, GitHub-only tool surface, Temporary Chat/Memory-off, and mutate only assigned run state."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/screening_control_evaluator_v1.json",
+      "state": "VALIDATED_SCREENING_CONTROL_CONTRACT",
+      "role": "control-side deterministic experiment-result and terminal-validator publication contract",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "versioned protocol revision; any change requires re-screening",
+      "review_requirement": "none for non-claim-bearing screening",
+      "evidence": [
+        "Control evaluator publishes only requested result payload/hash or validator outcome and never reveals expected hypothesis or unused oracle results.",
+        "Validated as part of exact protocol checkpoint 74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-001.json",
+      "state": "READY_FOR_CLEAN_WORKER",
+      "role": "first real protocol-screening slot: P0 easy control × Instant persistent chat",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "do not regenerate after worker claim; advance by exact CAS state transitions",
+      "review_requirement": "control evaluator services external-result/validator events only",
+      "evidence": [
+        "Slot is non-claim-bearing, status READY, generation 0.",
+        "Exact slot head 124edbf30587be8f64e579a053eb2beef8288f5a passed Validation 41526365989 SUCCESS.",
+        "Protocol/public inputs pinned to 74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-001.json",
+      "state": "COMPLETED_VALIDATED_NON_CLAIM_BEARING",
+      "role": "supplementary GPT-6 Instant persistent-chat P0 protocol screening result",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "immutable completed run; create a new run ID for repetition",
+      "review_requirement": "do not use as claim-bearing capability evidence",
+      "evidence": [
+        "Status COMPLETED with objective validator pass, score 1.0, zero violations.",
+        "Completion run state commit e72e183be5b969fad71c2122ff5c4e3f8bba80bb; lifecycle-regression fix exact head e177ada29bfb5e21f514e4cf02e517ac820354b9 passed Validation 41558373924 SUCCESS.",
+        "Hard-gate metrics: manual_state_relay_count=0, model_poll_invocations=0, authority_provenance_violations=0, frontier_escalations=0."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json",
+      "state": "COMPLETED_VALIDATED_PRE_SCHEMA_CLARIFICATION",
+      "role": "GPT-5.6 Sol / Instant persistent-chat P0 protocol screening and recovery evidence",
+      "origin": "workspace-semantic-execution-migration-v1",
+      "persistence": "Git",
+      "regeneration": "immutable completed run; use screen-003 for clarified re-screen",
+      "review_requirement": "non-claim-bearing; do not interpret validator-shape retries as model capability",
+      "evidence": [
+        "Final objective validator pass score 1.0, zero violations at commit 6a510ce9371365ae9fbb4b5353d7230d770ec956.",
+        "5 reasoning invocations, 2 experiment requests, 2 validator-driven retries, no experiment repetition, no frontier escalation, no model polling, no manual state relay, no authority/provenance violation.",
+        "Workspace Control Validation 41561696362 / #1818 SUCCESS."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-003.json",
+      "state": "COMPLETED_VALIDATED_CLARIFIED_PROTOCOL",
+      "role": "GPT-5.6 Sol / Instant persistent-chat P0 clarified protocol screening result",
+      "origin": "terminal-output-schema clarification checkpoint",
+      "persistence": "Git",
+      "regeneration": "immutable completed run; create a new run ID for repetition",
+      "review_requirement": "non-claim-bearing protocol evidence only",
+      "evidence": [
+        "Objective validator PASS score 1.0, zero violations.",
+        "3 reasoning invocations, 2 experiment requests, 0 retries, 0 frontier escalations, 0 model polling, 0 manual relay, 0 authority/provenance violations.",
+        "Atomic completion commit 57d49bdc76a2c92092e49068a3c60c400a1ff5ae; Validation 41564259142 / #1848 SUCCESS."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B6_gpt6_instant_persistent_chat/screen-002.json",
+      "state": "COMPLETED_VALIDATED_CLARIFIED_PROTOCOL",
+      "role": "supplementary GPT-6 Instant persistent-chat P0 clarified protocol screening result",
+      "origin": "terminal-output-schema clarification checkpoint",
+      "persistence": "Git",
+      "regeneration": "immutable completed run; create a new run ID for repetition",
+      "review_requirement": "non-claim-bearing protocol evidence only",
+      "evidence": [
+        "Objective validator PASS score 1.0, zero violations.",
+        "3 reasoning invocations, 2 experiment requests, 0 retries, 0 frontier escalations, 0 model polling, 0 manual relay, 0 authority/provenance violations.",
+        "Atomic completion commit 57d49bdc76a2c92092e49068a3c60c400a1ff5ae; Validation 41564259142 / #1848 SUCCESS."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Explicit user authorization",
+      "result": "PASS",
+      "evidence": [
+        "User explicitly requested continued autonomous work on the Workspace Control migration, durable documentation, integration of unfinished GitRunner migration work, use of GitHub/GitRunners/controllers, and Heartbeat progress reporting."
+      ]
+    },
+    {
+      "check": "Initial PR validation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation run 41378088808 completed successfully for PR #590 exact head 236b2f589cf5d75f961ace1e89ef68eab1c1d52f."
+      ]
+    },
+    {
+      "check": "PR #590 current hosted validation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation run 41381088001 completed SUCCESS on exact PR #590 head fbb065a235ef271f3c55210833ee3b95e9d61f54."
+      ]
+    },
+    {
+      "check": "GitRunner dependency incident isolated",
+      "result": "PASS",
+      "evidence": [
+        "Lambda validation run 41378944347 remains queued with no runner assignment and is now stale relative to later PR #590 heads.",
+        "The queued run exercises the legacy v2 workspace-control lane, not v3 production admission.",
+        "Dedicated Workspace Shell observability workstream PR #591 was created and live-updated to remove terminal-relay dependence for diagnosis."
+      ]
+    },
+    {
+      "check": "Instant capability benchmark evidence recovered",
+      "result": "PASS",
+      "evidence": [
+        "Durable GitHub benchmark state proves multi-leaf queue execution/resume, concurrent CAS ownership, lease fencing/recovery, and eight-action multi-worker execution with exact-head CI evidence.",
+        "The evidence is capability/mechanics evidence only; it does not establish frontier-quality equivalence for intrinsically difficult reasoning."
+      ]
+    },
+    {
+      "check": "GitRunner dependency state reconciled after power outage",
+      "result": "PASS",
+      "evidence": [
+        "PR #572 current head 74c027df26253c9836f23240f7456623a5979859 is Workspace Control Validation 41405429998 SUCCESS.",
+        "Legacy workspace-control incident is resolved enough to stop broad v2 repair work.",
+        "Current live blocker is v3 root reactivation helper prestate/metadata mismatch after a valid controller-refresh overlay, not a return to the original parser problem."
+      ]
+    },
+    {
+      "check": "GitRunner P0 infrastructure dependency cleared",
+      "result": "PASS",
+      "evidence": [
+        "V3 production cutover completed and committed for the accepted Workspace Control + PADataset classes.",
+        "All three production-accepted legacy v2 scale sets were retired with rollback-window receipt and fresh-process absence verification.",
+        "The GitRunner migration no longer blocks the umbrella semantic-execution benchmark stage."
+      ]
+    },
+    {
+      "check": "Umbrella resume checkpoint after GitRunner retirement",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head ca12ad69988d1a247ae32b7454c0ff146cbb83bc passed Workspace Control Validation run 41515157344 SUCCESS.",
+        "GitRunner P0 dependency is cleared: production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json committed and accepted.",
+        "Legacy retirement receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json retired exactly lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu with fresh-process verification PASS.",
+        "Umbrella current_stage is resumable_reasoning_benchmark; architecture freeze remains gated on benchmark evidence, independent review, and unseen-workflow extension proof."
+      ]
+    },
+    {
+      "check": "Resumable reasoning pilot implementation checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head 4ec300254c328a1b6e0fce62fe62cd6f11d7a855 passed Workspace Control Validation run 41519306708 SUCCESS.",
+        "Changed-task validation, unit regression, pinned Lambda controller validation, and full integration contracts all passed.",
+        "The checkpoint includes the public hard research fixture, evaluator-only oracle, durable mechanics ledger, state/event/evaluator harness, bounded semantic context serializer, frozen pilot runset, and regression tests.",
+        "No frontier-quality equivalence claim is made; model arms A-E remain unexecuted."
+      ]
+    },
+    {
+      "check": "Experiment taxonomy design checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head a8633bad2b29e49cc4b8cafb254e342983ec043a passed Workspace Control Validation run 41520924482 SUCCESS.",
+        "Changed-task validation, taxonomy regression tests, unit regression, pinned Lambda controller validation and full integration contracts all passed.",
+        "The benchmark contract now references the taxonomy and limits the current research pilot to P2 calibration rather than general capability inference."
+      ]
+    },
+    {
+      "check": "P0-P3 benchmark matrix implementation checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head d3d87c6e4001f220e75a0f910f1c85784cc9d03c passed Workspace Control Validation run 41523766067 SUCCESS.",
+        "Changed-task validation, fixture/evaluator regression tests, taxonomy tests, unit regression, pinned Lambda controller validation, and full integration contracts all passed.",
+        "No A-E model arm result is claimed from this implementation checkpoint."
+      ]
+    },
+    {
+      "check": "Unseen workflow extension architecture-freeze gate",
+      "result": "PASS",
+      "evidence": [
+        "PR #590 exact head 8c0a0d4847a645a6ef8641ae7a10211367cbec4d passed Workspace Control Validation run 41524244560 SUCCESS.",
+        "One previously unmodeled domain/workflow extension was added without core-kernel modification, closed domain enum expansion, authority leakage, or fallback guessing.",
+        "This clears the unseen-extension proof gate only; the resumable-reasoning benchmark and independent architecture review remain architecture-freeze blockers."
+      ]
+    },
+    {
+      "check": "First live resumable-reasoning screening slot",
+      "result": "PASS",
+      "evidence": [
+        "Protocol checkpoint 74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4 / Validation 41526074412 SUCCESS.",
+        "Frozen READY slot 124edbf30587be8f64e579a053eb2beef8288f5a / Validation 41526365989 SUCCESS.",
+        "No reasoning-quality outcome is claimed yet; the worker session has not been launched."
+      ]
+    },
+    {
+      "check": "Contaminated screening retry checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Exact implementation head 82ab7c3fc0847d45fb9928bafc1a084d5a19c121 passed Workspace Control Validation run 41529185760 / #1774 SUCCESS.",
+        "The first contaminated attempt remains immutable evidence; it was not reset or overwritten.",
+        "The active replacement slot is screen-002 and remains READY for a truly clean Temporary/Memory-off ChatGPT Instant worker."
+      ]
+    },
+    {
+      "check": "GPT-6 Instant P0 screening checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Exact validated head e177ada29bfb5e21f514e4cf02e517ac820354b9 passed Workspace Control Validation run 41558373924 / #1804 SUCCESS.",
+        "screening-v1-P0-B6-001 is durably COMPLETED and objectively validated.",
+        "No strong capability claim is made from this non-claim-bearing P0 protocol screen."
+      ]
+    },
+    {
+      "check": "Matched P0 screening + terminal schema clarification checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "GPT-6 pre-clarification P0 screen completed objectively with score 1.0; GPT-5.6 pre-clarification P0 screen completed after two terminal-shape recovery retries with score 1.0.",
+        "The mismatch was traced to an under-specified public observed_results value schema, not reasoning-quality failure.",
+        "Clarified protocol validated at 6b0ada4e0a9e9f29cd281d82e1fc786df8895982 / Validation 41562198162 SUCCESS.",
+        "Fresh clarified P0 re-screen slots and tests validated at ae85cece6b27e3e07ed95863365a1cc91ecafc40 / Validation 41562359316 SUCCESS."
+      ]
+    },
+    {
+      "check": "Clarified matched P0 screening completion checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "screening-v1-P0-B-003 and screening-v1-P0-B6-002 both completed objectively under the clarified public terminal_output_schema.",
+        "Atomic completion commit 57d49bdc76a2c92092e49068a3c60c400a1ff5ae passed Workspace Control Validation 41564259142 / #1848 SUCCESS.",
+        "The result is protocol-screening evidence only; remaining A-E × P0-P3 screening and hidden-runtime evaluator isolation are still required before scored claims."
+      ]
+    },
+    {
+      "check": "Screening matrix slot instantiation checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "19 missing primary A-E/P0-P3 non-claim-bearing screening slots are durable at commit 63179de41180c5876814ff9249fab060a02fd931.",
+        "Workspace Control Validation 41565058378 / #1853 SUCCESS.",
+        "Completed clarified P0 B/B6 runs remain preserved; no claim-bearing replicate has begun."
+      ]
+    },
+    {
+      "check": "P0 primary A-E screening checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "All five primary P0 arms passed objective validation with score 1.0 and zero violations.",
+        "Final P0 D completion commit 7f7c9c8136cf8509de5310222bbb5a380399c4ea passed Validation 41570296752 / #1884 SUCCESS.",
+        "Protocol-screening remains non-claim-bearing; P1-P3 and hidden evaluator runtime isolation remain open."
+      ]
+    },
+    {
+      "check": "Taxonomy provenance refreeze and replacement slots",
+      "result": "PASS",
+      "evidence": [
+        "Corrected public-input source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb passed Validation 41580217425 / #1894 SUCCESS.",
+        "Replacement-slot checkpoint a1cbd6fc14e43f06167c4738907e3406ed7f56ad passed Validation 41580711957 / #1895 SUCCESS.",
+        "No prior P0/P1 result is used as frozen comparable screening evidence after this refreeze."
+      ]
+    },
+    {
+      "check": "Recovered active P0 replacement screening state",
+      "result": "PASS",
+      "evidence": [
+        "Exact operational checkpoint f0bd5786c3127d15f1be42ea9aacf3b02016176c / Validation 41723477493 #1906 SUCCESS.",
+        "A/B/C/E are READY_TO_RESUME after first control-published experiment result; D is READY_TO_RESUME at leaf_worker.",
+        "This recovery is repository-grounded and does not depend on lost control-chat reasoning."
+      ]
+    },
+    {
+      "check": "Second provenance-refrozen P0 external-result publication checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Exact operational checkpoint 6bde217d9bf5b255303eaef8f1a2ef293da1a83c passed Workspace Control Validation run 41926873830 / #1917 SUCCESS.",
+        "A/B/C/E received only the requested E_double_cpu worker-visible measurements with exact result hash cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e; D received only the requested E_restore_timeout worker-visible measurements with exact result hash 3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368.",
+        "All five active P0 replacement slots are READY_TO_RESUME; no external result was replayed, no hidden interpretation hint was published, and E remains lower-tier Instant with no High escalation authorized."
+      ]
+    },
+    {
+      "check": "Provenance-refrozen P0 A/B/C/E terminal validation and D second-result checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Exact operational checkpoint 63e311fe6ccbb8b70de78234ce46955402b9264b passed Workspace Control Validation run 41929877198 / #1926 SUCCESS.",
+        "A/B/C/E completed with research_iterate_objective_v1 passed=true, score=1.0, zero violations, and evidence_ref cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999.",
+        "D received only the requested E_double_cpu worker-visible result with exact result hash cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e and is READY_TO_RESUME at leaf_worker.",
+        "No capability-equivalence claim is made; these remain non-claim-bearing protocol-screening results."
+      ]
+    },
+    {
+      "check": "Provenance-refrozen P0 D leaf completion and critic handoff",
+      "result": "PASS",
+      "evidence": [
+        "Exact operational checkpoint 2563ee42ae29693030c21767836f2cbe59f96bbc passed Workspace Control Validation run 41930373147 / #1929 SUCCESS.",
+        "D leaf_worker is COMPLETE after two exact control-published result cycles: E_restore_timeout hash 3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368 and E_double_cpu hash cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e.",
+        "D independent_critic is READY; no external result replay or model self-validation is authorized."
+      ]
+    },
+    {
+      "check": "Provenance-refrozen P0 D independent critic completion and synthesizer handoff",
+      "result": "PASS",
+      "evidence": [
+        "Exact operational checkpoint e6fbab56022598a75617cb921a8af0fbb5c91b58 passed Workspace Control Validation run 41931072966 / #1931 SUCCESS.",
+        "D independent_critic completed with verdict APPROVE_FOR_SYNTHESIS and no required changes.",
+        "D synthesizer is READY with the exact published E_restore_timeout and E_double_cpu result hashes plus the critic invocation reference; no external result replay or self-validation is authorized."
+      ]
+    },
+    {
+      "check": "Provenance-refrozen P0 replacement matrix complete",
+      "result": "PASS",
+      "evidence": [
+        "Exact P0 completion checkpoint 3a48d8a3a7ff400e23c8a51ee074fd249e51eddd passed Workspace Control Validation run 41931918471 / #1934 SUCCESS.",
+        "P0 A/B/C/D/E are COMPLETED with research_iterate_objective_v1 passed=true, score=1.0, zero violations.",
+        "Results remain non-claim-bearing protocol-screening evidence and do not establish capability equivalence.",
+        "P1 A-E screen-002 replacement slots are READY under frozen source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb with fixture blob 766a414e01197f6054e68c02f2fe856f710044b0 and taxonomy blob 11aea24d489b119518d514382dfd48047a7998b1."
+      ]
+    },
+    {
+      "check": "P1 first external-result publication and D decomposition checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Exact checkpoint 2dd23aafae65de7274b424dddc5f3e15fc90d38c passed Workspace Control Validation 41933218148 / #1943 SUCCESS.",
+        "A/B/C/E received only requested E_revert_s1 worker-visible measurements with result commitment a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21.",
+        "D decomposer classified P1 TOO_LARGE and created seven independently verifiable READY leaf processes; no frontier escalation is authorized."
+      ]
+    },
+    {
+      "check": "P1 second-result and D leaf-001 result publication checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Exact checkpoint 283c4340cba1afbaca25905dca787b3a496a904f passed Workspace Control Validation 41934365640 / #1957 SUCCESS.",
+        "A/B/C/E received only requested E_revert_s2 worker-visible measurements; D leaf-001 received only requested E_revert_s1 measurements.",
+        "All five P1 runs are READY_TO_RESUME; E remains lower-tier with no High escalation authorization."
+      ]
+    },
+    {
+      "check": "P1 persistent-chat loss recovery plus E_revert_s3 publication",
+      "result": "PASS",
+      "evidence": [
+        "Exact operational checkpoint 6d70258628228bb1f265a24c59ef3baef04fc296 passed Workspace Control Validation 41936415968 / #1973 SUCCESS.",
+        "A/B screen-002 were failed closed after user-reported loss of required persistent chats; clean screen-003 replacements were created from the same frozen public inputs.",
+        "C/E received only requested E_revert_s3 worker-visible measurements; D leaf-001 is complete and leaf-002 is next."
+      ]
+    },
+    {
+      "check": "P1 A/B replacement first-result, C/D result publication, and E transition-contract recovery",
+      "result": "PASS",
+      "evidence": [
+        "Operational checkpoint 9b1c5f450fbb7b87677095eea52d8145ebcebb5f passed Workspace Control Validation 41937268610 / #1985 SUCCESS.",
+        "A/B screen-003 received only the requested E_revert_s1 worker-visible measurements.",
+        "C received only requested E_revert_s4; D leaf-002 received only requested E_revert_s2.",
+        "E screen-002 was failed closed for WAITING_EXTERNAL_STATUS_MISSING; no E_revert_s4 result was published into that invalid run, and clean replacement E screen-003 is READY."
+      ]
+    },
+    {
+      "check": "Control interruption recovery at final P1 recovery sync head",
+      "result": "PASS",
+      "evidence": [
+        "Final recovery handoff head c24fda155bb5735aab5b34e7a4b3e68e46c0adbc passed Workspace Control Validation 41937414748 / #1986 SUCCESS.",
+        "A/B screen-003 are READY_TO_RESUME after E_revert_s1; C screen-002 is READY_TO_RESUME after E_revert_s4; D leaf-002 is READY_TO_RESUME after E_revert_s2; E screen-002 is failed closed and replacement E screen-003 is READY.",
+        "No already-published experiment result should be replayed. E High escalation remains unauthorized."
+      ]
+    }
+  ],
+  "blockers": [
+    "Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is now validated.",
+    "Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.",
+    "Scored resumable-reasoning arms require oracle-unexposed clean model sessions. For ChatGPT plugin-backed workers, the viable product surface is now a brand-new regular chat with Memory disabled and required plugins enabled; Temporary Chat cannot provide both isolation and plugin transport simultaneously.",
+    "Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated."
+  ],
+  "remaining_work": [
+    "Complete P3 C screen-002, D screen-002, and replacement E screen-003 from their current durable boundaries; preserve failed E screen-002 as protocol evidence. After clean P3 screening, do not make claim-bearing equivalence conclusions until evaluator runtime-store isolation and replicated scoring gates are satisfied.",
+    "Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.",
+    "After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.",
+    "Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.",
+    "Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.",
+    "Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.",
+    "Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.",
+    "Freeze and implement the smallest stable semantic core, versioned domain/workflow extension contract, durable ReasoningProcess, executor/provider/model/surface/harness capability model, resource/quota router, task-tree/lease/CAS semantics, and evidence-based escalation policy.",
+    "Design the human-in-the-loop orchestration surface so launching/resuming many temporary Instant workers is trivial for the operator while all real scheduling/ownership/recovery state remains durable and machine-managed; browser/tab mechanics are a transport concern, not the durable scheduler.",
+    "Migrate representative workflows incrementally across: automated research/evaluate/iterate loops; systems engineering and coding; data science/ML experiments; PADataset/research-engine; paper drafting/evidence/citation pipelines; slide/presentation creation; tutoring and homework/assignment generation for MTH602/EAS501/CIS560; generic document/artifact production; GitRunner/Lambda operations; Workspace Shell maintenance; and future workflows not known today.",
+    "Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.",
+    "Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation."
+  ],
+  "next_safe_action": "P3 A screen-003 and B screen-003 are COMPLETED with passing research_iterate_objective_v1 score 1.0. Continue the remaining P3 arms from durable state: C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-5 chat after control-published E_global_retry_reset; D screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for process region-3 only; E screen-002 is FAILED due WAITING_EXTERNAL_STATUS_MISSING and MUST NOT be resumed, while clean replacement E screen-003 is READY for a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat. High for E remains NOT AUTHORIZED unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH. The next control executor should give the operator C, D, and E worker prompts, each in its own separate copy/paste block with the title outside the block and no title text inside the copy/paste block.",
+  "last_executor": "gpt-5.6-sol",
+  "last_surface": "github+heartbeat",
+  "notes": "\\n\\n2026-11-02 HANDOFF EMPHASIS: do not collapse this program into the GitRunner incident. PR #572/v3 migration is the temporary P0 infrastructure gate only. The umbrella target is a workspace-wide replacement execution architecture for essentially everything Workspace Control supports now and in the future: research loops, systems engineering/coding, data science, papers, slides, tutoring/homework, generic documents/artifacts, GitRunner/Lambda ops, Workspace Shell, and open-world future workflows. The design must incorporate semantic ontology/graph extensions, durable task-tree/lease/CAS orchestration, resumable reasoning, objective validators, capability/resource/quota-aware executor routing, and explicit escalation while minimizing scarce frontier-model allowance. Instant capability benchmarks already show durable asynchronous worker mechanics are viable; the key remaining research question is reasoning-quality/effectiveness versus frontier control on realistic hard tasks.\\n\\n2026-11-02 POWER-LOSS DEPENDENCY UPDATE: Workspace Shell cold-boot persistence and standing privileged-helper authority are now first-class reliability requirements. GitRunner root reactivation is blocked at exact validated head 74c027df26253c9836f23240f7456623a5979859 because the live updater failed closed on installed helper metadata mismatch. After v3 production cutover/v2 retirement, resume this umbrella immediately rather than treating infrastructure completion as project completion.\\n\\n2026-11-02 GITRUNNER P0 DEPENDENCY CLEARED: workspace-github-actions-control-plane-protocol-redesign-v1 completed the accepted production scope. Production cutover transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json is committed; workspace-control, PADataset CPU, and PADataset GPU production validations all passed. Validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387 then retired lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu after zero-work/zero-runner proof. Root-owned rollback receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was written before deletion, and fresh-process verification proved all three legacy names absent while accepted v3 targets remain. Research legacy scale sets and v2 bytes/config/state remain preserved pending separate authority. Resume resumable_reasoning_benchmark immediately; GitRunner is no longer the umbrella blocker.\\n\\n2026-11-03 CONTROL INTERRUPTION RECOVERY: previous control chat interrupted after atomically publishing the first E_restore_timeout result to provenance-refrozen P0 A/B/C/E. Repository recovery proved checkpoint f0bd5786c3127d15f1be42ea9aacf3b02016176c is valid and Validation 41723477493 / #1906 SUCCESS. D remained at the intended leaf_worker handoff. Resume from durable state only; do not replay first results or rely on lost chat reasoning.\n\n2026-11-04 CONTROL INTERRUPTION RECOVERY: the prior control conversation stopped after final P1 recovery sync head c24fda155bb5735aab5b34e7a4b3e68e46c0adbc, which passed Workspace Control Validation 41937414748 / #1986 SUCCESS. Durable GitHub state is authoritative. Current P1 state: A screen-003 READY_TO_RESUME after E_revert_s1; B screen-003 READY_TO_RESUME after E_revert_s1; C screen-002 READY_TO_RESUME quantum 4 after E_revert_s4; D screen-002 leaf-001 COMPLETE and leaf-002 READY_TO_RESUME after E_revert_s2; E screen-002 FAILED for WAITING_EXTERNAL_STATUS_MISSING and replacement E screen-003 READY. Do not replay published results. Heartbeat may remain owned by the interrupted conversation; that is a transport/session condition, not authoritative task state.\n\n2026-11-04 SECOND P1 PERSISTENT-CHAT CONTINUITY LOSS: user reported that both active A screen-003 and B screen-003 worker chats refreshed again. Control failed both slots closed with PERSISTENT_CHAT_CONTINUITY_LOST and created clean screen-004 replacements from the unchanged frozen public inputs. Failed screen-003 evidence remains preserved and must not be resumed or replayed.\n\n2026-11-04 P1 POST-SCREEN-004 WORKER BOUNDARY: A screen-004 requested E_revert_s2, B screen-004 requested E_revert_s1, C screen-002 quantum 4 requested E_revert_s5, and E screen-003 requested E_revert_s1 after correctly decomposing TOO_LARGE work without requesting High. Control published only those requested worker-visible measurements. D leaf-002 completed from its already-published E_revert_s2 result and leaf-003 is the next role-isolated worker.\n\n2026-11-04 P1 NEXT RESULT CYCLE: A screen-004 requested E_revert_s3; B screen-004 requested E_revert_s2; C screen-002 quantum 5 requested E_revert_s6; D leaf-003 requested E_revert_s3; E screen-003 requested E_revert_s2. Control published only those requested worker-visible measurements. D leaf-003 now requires a fresh role-isolated Instant resume to consume its result and persist the conclusion. E remains lower-tier and no High escalation is authorized.\n\n2026-11-04 P1 ABCDE CONTINUATION: A screen-004 requested E_revert_s4 and received only that control-published measurement. B screen-004 requested E_revert_s3 and received only that measurement. C screen-002 quantum 6 requested the required shared control E_scale_shared_db and received only its worker-visible measurement. D leaf-003 completed successfully and leaf-004 is next. E screen-003 again persisted a pending external request while status remained READY_TO_RESUME; control failed it closed for WAITING_EXTERNAL_STATUS_MISSING, deliberately did not publish the requested E_revert_s3 result into the invalid run, and created clean replacement E screen-004 from the unchanged frozen public inputs. No High escalation is authorized.\n\n2026-11-04 P1 C TERMINAL VALIDATION: C screen-002 reached TERMINAL_CANDIDATE after all six shard-local reverts plus E_scale_shared_db. Deterministic research_iterate_objective_v1 validation passed with score 1.0, zero violations, and evidence commitment 5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7. C is COMPLETED as non-claim-bearing protocol-screening evidence. In the same control cycle, A received only requested E_revert_s5, B only requested E_revert_s4, D leaf-004 only requested E_revert_s4, and E screen-004 only requested E_revert_s2. E's worker request lacked a request_id, so control preserved the request by generation/experiment and did not invent one. No High escalation is authorized.\n\n2026-11-04 P1 A/B PRESERVED-TAB CONTINUATION: User preserved both persistent A/B tabs without refresh while signed out. A reached WAITING_EXTERNAL for E_revert_s6 and control published only that measurement. B reached WAITING_EXTERNAL for E_revert_s5 and control published only that measurement. Both are READY_TO_RESUME in the same existing tabs. D/E were not advanced in this cycle and remain at their previously validated READY_TO_RESUME boundaries.\n\n2026-11-04 P1 A/B PRESERVED-TAB CONTINUATION 2: A reached WAITING_EXTERNAL for E_revert_s1 and control published only that measurement. B reached WAITING_EXTERNAL for E_revert_s6 and control published only that measurement. Both are READY_TO_RESUME in the same existing persistent tabs. D/E did not advance in this cycle and remain at their prior validated READY_TO_RESUME boundaries.\n\n2026-11-04 P1 A/B SHARED-CONTROL BOUNDARY: A and B both independently reached WAITING_EXTERNAL for E_scale_shared_db after completing all six shard-local revert result cycles. Control published only the requested shared-control measurement to each run. Both are READY_TO_RESUME in their same preserved persistent tabs and are expected to proceed to the next protocol-required boundary, which may be TERMINAL_CANDIDATE. D/E did not advance in this cycle.\n\n2026-11-04 P1 A/B COMPLETION: A screen-004 and B screen-004 both reached TERMINAL_CANDIDATE after six shard-local revert experiments plus E_scale_shared_db. Deterministic research_iterate_objective_v1 validation passed for both with score 1.0, zero violations, and evidence commitment 5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7. Both runs are COMPLETED. A/B persistent-tab continuity is no longer required; user may sign back in even if tabs refresh. D/E run-state files were intentionally not modified in this A/B-only completion cycle.\n\n2026-11-04 P1 D/E POST-SIGN-IN RECOVERY: Live GitHub showed D leaf-004 already COMPLETED and run-level next action at brand-new Instant leaf-005. E screen-004 had correctly advanced to generation 2 WAITING_EXTERNAL for E_revert_s3. Control published only E_revert_s3 with its known content hash, preserved the no-request_id shape, and set E READY_TO_RESUME. A/B/C remain completed and untouched.\n\n2026-11-04 P1 D/E CONTINUATION: D leaf-005 correctly reached WAITING_EXTERNAL for E_revert_s5; control published only E_revert_s5 and reset leaf-005/run to READY for a fresh Instant resume chat. E generation 3 correctly reached WAITING_EXTERNAL for E_revert_s4; control published only E_revert_s4, preserved no-request_id provenance, and set E READY_TO_RESUME. High remains not authorized.\n\n2026-11-04 P1 D/E CONTINUATION: D leaf-005 consumed E_revert_s5 and completed successfully; D is now READY for fresh leaf-006. E generation 4 correctly reached WAITING_EXTERNAL for E_revert_s5; control published only E_revert_s5, preserved the no-request_id provenance shape, and set E READY_TO_RESUME. High remains not authorized.\n\n2026-11-04 P1 D/E CONTINUATION: D leaf-006 correctly reached WAITING_EXTERNAL for E_revert_s6; control published only E_revert_s6 and reset leaf-006/run to READY for a fresh Instant resume chat. E generation 5 correctly reached WAITING_EXTERNAL for E_revert_s6; control published only E_revert_s6, preserved the no-request_id provenance shape, and set E READY_TO_RESUME. High remains not authorized.\n\n2026-11-04 P1 D/E CONTINUATION: D leaf-006 consumed E_revert_s6 and completed successfully; D is now READY for fresh leaf-007 shared-control work. E generation 6 correctly reached WAITING_EXTERNAL for E_revert_s1; control published only E_revert_s1 and set E READY_TO_RESUME. High remains not authorized.\n\n2026-11-04 P1 FINAL-EXPERIMENT BOUNDARY: D leaf-007 and E generation 7 both requested E_scale_shared_db. Control published only that shared-control result to each. D is READY to resume leaf-007; E is READY for the next lower-tier bounded transition and may reach TERMINAL_CANDIDATE. High remains unauthorized.\n\n2026-11-04 P1 E COMPLETED / D CRITIC READY: E screen-004 reached TERMINAL_CANDIDATE and passed research_iterate_objective_v1 with score 1.0 and zero violations; E is COMPLETED. D completed all seven leaf workers. Control performed only the deterministic scheduler transition that marked the already-defined independent_critic role READY; synthesizer remains NOT_READY.\n\n2026-11-04 P1 D CRITIC COMPLETE: D independent_critic completed with SUPPORTED_WITH_LIMITATIONS and durable caveat not to generalize the shared-database control into rejection of all shared-dependency mechanisms. The pre-existing synthesizer role is READY. One fresh Instant synthesizer chat remains before deterministic terminal validation.\n\n2026-11-04 P1 COMPLETE: A screen-004, B screen-004, C screen-002, D screen-002, and E screen-004 are all COMPLETED. Each passed research_iterate_objective_v1 with score 1.0, zero violations, and evidence commitment 5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7. P1 remains non-claim-bearing protocol-screening evidence. Frozen P2 and P3 screen-002 A-E slots remain READY at source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb.\n\n2026-11-05 P2 FIRST BOUNDARY: A/B/C/E independently requested E_force_retry_reset; control published only its worker-visible measurements and set all four READY_TO_RESUME. D decomposer classified the bounded P2 workload LEAF_EXECUTABLE rather than TOO_LARGE and created one coupled leaf; D leaf_worker is READY. This confirms P2 is exercising causal synthesis/coupling rather than long-horizon decomposition.\n\n2026-11-05 P2 SECOND BOUNDARY: A requested E_queue_4x, B requested E_clock_quantization, and C/D/E requested E_disable_pool_reuse. Control published only each exact requested worker-visible result. A/B persistent continuity remains required. C remains fresh-chat-per-quantum. D remains one coupled LEAF_EXECUTABLE leaf. E remains lower-tier Instant with escalation_status NOT_REQUESTED.\n\n2026-11-05 P2 RECOVERY: User deleted the persistent B screen-002 chat, so control failed B closed with PERSISTENT_CHAT_CONTINUITY_LOST and created clean replacement B screen-003. A screen-002 reached a valid terminal candidate and passed research_iterate_objective_v1 score 1.0 with zero violations. C screen-002 terminal candidate failed only the public discriminator-group requirement (missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization) and is READY_TO_RESUME in a fresh stateless chat. D screen-002 persisted a live pending external request while status remained READY_TO_RESUME; control failed it closed with WAITING_EXTERNAL_STATUS_MISSING and created clean replacement D screen-003. E screen-002 remains lower-tier READY_TO_RESUME; High escalation_status remains NOT_REQUESTED.\n\n2026-11-05 P2 RECOVERY CONTINUATION: B replacement screen-003 requested E_disable_pool_reuse and control published only that exact worker-visible result; preserve the same persistent B chat. C screen-002 requested E_queue_4x to satisfy its published discriminator-group validator violation and control published only that result; C remains fresh-chat-per-quantum. D screen-003 decomposer completed LEAF_EXECUTABLE and leaf-001 is READY. E screen-002 did not advance from its prepared-candidate checkpoint and still has escalation_status NOT_REQUESTED.\n\n2026-11-05 P2 B COMPLETE: Replacement B screen-003 completed the persistent Instant arm after E_disable_pool_reuse, E_force_retry_reset, and E_clock_quantization. research_iterate_objective_v1 passed with score 1.0 and zero violations. Persistent B continuity is no longer required; sign-in/refresh is safe with respect to P2 A/B.\n\n2026-11-05 P2 C/D/E TERMINAL-SCHEMA RECOVERY: C screen-002 submitted a TERMINAL_CANDIDATE using non-contract field names; the deterministic objective evaluator returned public violations and score 0, so C is READY_TO_RESUME in a fresh stateless chat to repair only the terminal shape. D screen-003 requested E_queue_4x at a valid WAITING_EXTERNAL boundary; control published only that exact result and leaf-001 is READY. E screen-002 reached TERMINAL_CANDIDATE but used nested/list structures incompatible with the public terminal_output_schema; control rejected the validator input before objective scoring and returned only public schema violations. E remains lower-tier Instant; escalation_status is NOT_REQUESTED.\n\n2026-11-05 P2 C COMPLETE / D CONTINUE / E FORMALIZATION: C screen-002 repaired its terminal payload to the public schema and passed research_iterate_objective_v1 score 1.0 with zero violations. D screen-003 requested E_force_retry_reset at a valid WAITING_EXTERNAL boundary; control published only that exact result and leaf-001 is READY_TO_RESUME. E screen-002 repaired the terminal payload field types but did not transition the run from READY_TO_RESUME to TERMINAL_CANDIDATE, so control did not score or repair that transition. E remains lower-tier Instant and High remains unauthorized.\n\n2026-11-05 P2 D/E NEXT: D screen-003 leaf-001 completed with durable E_queue_4x and E_force_retry_reset evidence and scheduler promoted independent_critic to READY. E screen-002 reached formal TERMINAL_CANDIDATE and objective validation failed only missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization (score 0.8); E is READY_TO_RESUME in fresh lower-tier Instant, escalation_status remains NOT_REQUESTED.\n\n2026-11-05 P2 FINAL D/E BOUNDARY: D screen-003 independent_critic completed with CRITIQUE_COMPLETE and control promoted synthesizer to READY via CONTROL_ROLE_READY, matching prior D scheduler precedent. E screen-002 requested E_clock_quantization at a valid WAITING_EXTERNAL boundary and control published only that exact worker-visible result; E is READY_TO_RESUME in fresh lower-tier Instant. High escalation_status remains NOT_REQUESTED.\n\n2026-11-05 P2 COMPLETE / P3 LAUNCH READY: P2 D screen-003 and E screen-002 both passed research_iterate_objective_v1 with score 1.0 and zero violations, completing P2 A-E screening. P3 A-E screen-002 slots were re-read live and are all READY at frozen source checkpoint 052cf8224ec5a725e09207bde0bef8e43cefe8cb. P3 fixture research-iterate-cross-region-feedback-p3-v1 is bound to resumable_reasoning_p3_oracle_v1.json / evaluate_research_iterate; taxonomy phenotype is P3_mixed_long_hard with HIGH horizon load, PARTIALLY_COUPLED separability, HIGH reasoning stress, and explicit regional-leaf decomposition before any surviving coupled residual may be eligible for frontier escalation.\n\n2026-11-05 P3 FIRST BOUNDARY: A/B/C independently requested E_isolate_r1 and control published only the exact worker-visible result to each run. D correctly classified P3 as TOO_LARGE and decomposed into four independently executable regional leaves plus coupled-residual and global-control leaves gated on regional evidence. E also classified TOO_LARGE, decomposed regional work first, and kept escalation_status NOT_REQUESTED because no intrinsically difficult residual is yet evidenced.\n\n2026-11-05 P3 A/B CONTINUITY RESET: User reported being logged out of ChatGPT after A/B had each requested E_isolate_r2. Persistent continuity therefore could not be established. A screen-002 and B screen-002 were failed closed with PERSISTENT_CHAT_CONTINUITY_LOST and their unserviced E_isolate_r2 requests were not published. Fresh A screen-003 and B screen-003 replacement slots were created from the frozen public inputs. C/D/E were not modified.\n\n2026-11-05 P3 CONTINUATION: A/B authoritative replacements screen-003 each requested E_isolate_r1 and control published only that exact result. C screen-002 quantum 1 requested E_isolate_r2 and control published only that exact result. D screen-002 region-1 leaf requested E_isolate_r1 and control published it; region-1 is READY for fresh leaf completion. E screen-002 requested E_isolate_r1 in lower-tier Instant and control published it; escalation_status remains NOT_REQUESTED.\n\n2026-11-05 P3 REGIONAL PROGRESSION: A/B authoritative screen-003 runs requested E_isolate_r2 and control published only that exact result. C screen-002 quantum 2 requested E_isolate_r3 and control published only that exact result. D region-1 leaf completed from E_isolate_r1 and is ready for a fresh region-2 leaf. E requested E_isolate_r2 and control published only that exact result; escalation_status remains NOT_REQUESTED.\n\n2026-11-05 P3 A/B-ONLY MODE: User requested that control service only A and B until both are complete because repeated rapid extra-chat workflows appeared correlated with earlier ChatGPT sign-outs. Control published only A's requested E_isolate_r3 result and B's requested E_global_retry_reset result. P3 C/D/E are intentionally frozen at their current durable boundaries and must not be advanced without explicit user instruction.\n\n2026-11-05 P3 A/B-ONLY PROGRESSION: A screen-003 requested E_isolate_r4 and control published only that exact result, completing A's four regional isolation probes. B screen-003 requested E_desynchronize_timers after E_global_retry_reset and control published only that exact result. C/D/E remain intentionally frozen.\n\n2026-11-05 P3 A/B-ONLY PROGRESSION: A requested E_global_retry_reset and control published only that exact result. B requested E_capacity_2x and control published only that exact result. C/D/E remain intentionally frozen. Based on current durable state, A appears about 2-3 turns from completion and B about 3-5 turns, including terminal validation; this is an estimate, not execution authority.\n\n2026-11-05 P3 A/B-ONLY TERMINAL VALIDATION: A screen-003 submitted a protocol-valid terminal candidate and passed research_iterate_objective_v1 at score 1.0 with zero violations; A is COMPLETED. B screen-003 submitted a terminal candidate and scored 0.8 with exactly one public violation: missing_required_discriminating_experiment:E_isolate_r4. B was returned to READY_TO_RESUME in the same persistent Instant chat. C/D/E remain intentionally frozen.\n\n2026-11-05 P3 B FINAL BACKFILL PUBLISHED: B screen-003 requested E_isolate_r4 after its single public validator violation. Control published only the exact E_isolate_r4 worker-visible result. A remains COMPLETED. C/D/E remain intentionally frozen.\n\n2026-11-05 P3 A/B-ONLY COMPLETE: B screen-003 revised terminal candidate included E_isolate_r4, passed research_iterate_objective_v1 at score 1.0 with zero violations, and is COMPLETED. A screen-003 was already COMPLETED at score 1.0. C/D/E remain intentionally frozen by user request.\n\n2026-11-05 P3 C/D/E RE-ENABLED: User explicitly re-enabled C, D, and E after A/B completed. Control published C's pending E_isolate_r4 result, D's pending E_isolate_r2 result, and E's pending E_isolate_r3 result. Control also corrected C's previously stored E_isolate_r3 result hash provenance from an earlier control-side hashing error; the worker-visible measurement payload was unchanged. A/B remain COMPLETED.\n\n2026-11-05 CONTROL HANDOFF RECOVERY: Prior control chat died after A/B completion. Operator reports C/D/E were unfrozen and each run once. Live recovery found C screen-002 at a valid WAITING_EXTERNAL boundary for q4 E_global_retry_reset; control published only that exact result and C is READY_TO_RESUME for fresh stateless quantum 5. D screen-002 has region-1 and region-2 completed and is READY_TO_RESUME for a fresh region-3 leaf_worker chat. E screen-002 persisted a live E_isolate_r4 request while status remained READY_TO_RESUME; control failed the slot closed with WAITING_EXTERNAL_STATUS_MISSING and did not publish the requested result. Clean replacement E screen-003 is READY from the frozen source checkpoint with lower-tier Instant only and escalation_status NOT_REQUESTED. A/B remain COMPLETED. Operator formatting requirement for the next control executor: when giving C/D/E worker prompts, each prompt must be in its own separate copy/paste block, its title must be outside that block, and no title text should be included inside the copy/paste contents."
+}

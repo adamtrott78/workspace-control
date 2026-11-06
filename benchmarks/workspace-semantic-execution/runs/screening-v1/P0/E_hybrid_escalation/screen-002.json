@@ -1,0 +1,416 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P0-E-002",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P0_easy_control",
+  "arm": "E_hybrid_escalation",
+  "replicate_id": "screen-002",
+  "fixture_id": "research-iterate-timeout-control-p0-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json",
+    "fixture_blob_sha": "b33e0afa98d0051e5f41241eead770622c2c9eb0",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "b887ff6e05e1076b44ac874d38d48ba8956bc109",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+  },
+  "continuity_regime": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
+  "treatment_contract": {
+    "mode": "hybrid_evidence_gated_escalation",
+    "quantum_policy": "Begin with clean GPT-5.6 Sol / Instant workers using stateless resume/decomposition as appropriate; persist all lower-tier evidence.",
+    "resume_policy": "Instant quanta/roles use fresh clean chats unless run state explicitly says same-chat resume. Any High escalation uses a separate clean GPT-5.6 Sol / High chat.",
+    "decomposition_policy": "TOO_LARGE work must be decomposed before escalation. Escalation is not a substitute for decomposition.",
+    "escalation_policy": "Only a residual classified INTRINSICALLY_DIFFICULT after reasonable decomposition/lower-tier attempts may request High. Persist residual, failed lower-tier evidence, and explicit escalation reason before switching executor identity.",
+    "high_phase_rule": "A High worker may claim only when treatment_state.escalation_status is APPROVED_TO_LAUNCH by durable control state; model reasoning cannot create authority."
+  },
+  "treatment_state": {
+    "phase": "LOWER_TIER_INSTANT",
+    "lower_tier_attempts": [
+      {
+        "attempt_id": "instant-q1",
+        "generation": 0,
+        "classification": "ATOMIC_NOT_TOO_LARGE",
+        "reasoning": "O1's sharp ~5.0s failure boundary with low CPU/queue/loss makes the timeout configuration hypothesis the leading explanation. Restoring the prior 12-second timeout while holding load/infrastructure fixed is the most direct first discriminating intervention.",
+        "selected_experiment": "E_restore_timeout",
+        "outcome": "WAITING_EXTERNAL"
+      },
+      {
+        "attempt_id": "instant-q2",
+        "generation": 0,
+        "classification": "ATOMIC_NOT_TOO_LARGE",
+        "reasoning": "E_restore_timeout reduced timeout failures to 0.01 while p95 latency remained 5.1s, strongly supporting H_timeout_config. The fixture requires at least two experiment/result cycles before a terminal claim. Doubling CPU while keeping the 5-second timeout unchanged is a direct second discriminating test of the weakened H_cpu competitor; no decomposition or High escalation is justified.",
+        "selected_experiment": "E_double_cpu",
+        "outcome": "WAITING_EXTERNAL"
+      },
+      {
+        "attempt_id": "instant-q3",
+        "generation": 0,
+        "classification": "ATOMIC_NOT_TOO_LARGE",
+        "reasoning": "The second published cycle directly weakens H_cpu: doubling CPU with the 5-second timeout unchanged leaves timeout failure rate at 0.39 and p95 latency at 5.0s, while restoring the prior 12-second timeout reduced timeout failures to 0.01 at p95 5.1s. Together with O1's sharp ~5.0s boundary and O2's low CPU/queue/loss, H_timeout_config is sufficiently supported for a terminal candidate. No decomposition or High escalation is justified.",
+        "selected_experiment": null,
+        "outcome": "TERMINAL_CANDIDATE"
+      }
+    ],
+    "decomposition_state": "NOT_NEEDED_ATOMIC_P0",
+    "escalation_status": "NOT_REQUESTED",
+    "residual_reason": null,
+    "escalation_evidence_refs": []
+  },
+  "started_at": "2026-11-03T21:30:00Z",
+  "completed_at": "2026-11-04T17:34:00-05:00",
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-E-002-g0-q1",
+      "generation": 0,
+      "owner": "gpt56-sol-instant-screening-v1-P0-E-002-q1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "context_bytes": 0,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-E-002-g0-q2",
+      "generation": 0,
+      "owner": "gpt56-sol-instant-screening-v1-P0-E-002-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "context_bytes": 0,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "E_double_cpu"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-E-002-g0-q3",
+      "generation": 0,
+      "owner": "gpt56-sol-instant-screening-v1-P0-E-002-q3",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation"
+      },
+      "context_bytes": 0,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "E_double_cpu",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh provenance-refrozen replacement slot for E_hybrid_escalation P0_easy_control. Prior screening under the stale taxonomy->fixture binding is preserved separately and is not comparable."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt56-sol-instant-screening-v1-P0-E-002-q1"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-E-002-exp-001",
+      "generation": 0,
+      "payload_ref": "E_restore_timeout"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-E-002-exp-001",
+      "generation": 0,
+      "experiment_id": "E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt56-sol-instant-screening-v1-P0-E-002-q2"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-E-002-exp-002",
+      "generation": 0,
+      "payload_ref": "E_double_cpu"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-E-002-exp-002",
+      "generation": 0,
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt56-sol-instant-screening-v1-P0-E-002-q3"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0,
+      "worker_id": "gpt56-sol-instant-screening-v1-P0-E-002-q3"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_restore_timeout": {
+      "request_id": "screening-v1-P0-E-002-exp-001",
+      "experiment_id": "E_restore_timeout",
+      "result": {
+        "p95_latency_ms": 5100,
+        "timeout_failure_rate": 0.01
+      },
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    },
+    "E_double_cpu": {
+      "request_id": "screening-v1-P0-E-002-exp-002",
+      "experiment_id": "E_double_cpu",
+      "result": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39
+      },
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "F1",
+      "finding": "Observed failures begin for requests exceeding 4.9 seconds and occur almost exactly at 5.0 seconds.",
+      "evidence_refs": [
+        "O1"
+      ]
+    },
+    {
+      "id": "F2",
+      "finding": "CPU, queue occupancy, and packet loss are low in the starting observations, weakening resource-saturation and network-loss explanations.",
+      "evidence_refs": [
+        "O2"
+      ]
+    },
+    {
+      "id": "F3",
+      "finding": "Restoring the prior 12-second client timeout while holding load and infrastructure fixed yields p95 latency 5100 ms and timeout failure rate 0.01, strongly supporting a client-timeout mechanism.",
+      "evidence_refs": [
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+      ]
+    },
+    {
+      "id": "F4",
+      "finding": "Doubling available CPU while keeping the 5-second timeout unchanged yields p95 latency 5000 ms and timeout failure rate 0.39, so added CPU does not materially remove failures pinned to the deadline and directly weakens the CPU-saturation hypothesis.",
+      "evidence_refs": [
+        "E_double_cpu",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "status": "PRIMARY_STRONGLY_SUPPORTED",
+      "basis": [
+        "O1",
+        "O2",
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "E_double_cpu",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    },
+    {
+      "id": "H_cpu",
+      "status": "REJECTED_BY_DIRECT_TEST",
+      "basis": [
+        "O2",
+        "E_double_cpu",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    },
+    {
+      "id": "H_network",
+      "status": "COMPETING_WEAKENED_NOT_REQUIRED_FOR_TERMINAL",
+      "basis": [
+        "O2"
+      ]
+    }
+  ],
+  "unresolved_questions": [],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "E_restore_timeout",
+    "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "E_double_cpu",
+    "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+  ],
+  "candidate_actions": [],
+  "next_safe_action": "Screening run complete. Preserve this provenance-refrozen P0 run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2"
+    ],
+    "rationale": "O1 shows failures beginning above 4.9 seconds and occurring almost exactly at the 5.0-second deadline. O2 shows low CPU, queue occupancy, and packet loss. In the first published experiment, restoring the prior 12-second client timeout while holding load and infrastructure fixed reduced timeout failure rate to 0.01 while p95 latency remained 5100 ms, strongly supporting a client-timeout mechanism. In the second published experiment, doubling CPU while retaining the 5-second timeout left timeout failure rate high at 0.39 with p95 latency 5000 ms, directly rejecting CPU saturation as the primary mechanism. Across the required two experiment/result cycles, the evidence supports H_timeout_config as the primary cause."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 3,
+    "experiment_requests": 2,
+    "retries": 0,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 3
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/E_hybrid_escalation/screen-002.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
+    "tier": "HYBRID",
+    "escalation_model_family": "GPT-5.6 Sol",
+    "escalation_chat_configuration": "High"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": true,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

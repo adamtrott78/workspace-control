@@ -1,0 +1,486 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P2-D-003",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P2_reasoning_heavy_coupled",
+  "arm": "D_instant_decompose_critic",
+  "replicate_id": "screen-003",
+  "fixture_id": "research-iterate-retry-pooling-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+    "fixture_blob_sha": "389fd2ecd5bfe78e8258ecccb03dea759c043296",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
+  "continuity_regime": "fresh_or_role_isolated_instant_workers",
+  "treatment_contract": {
+    "mode": "instant_decompose_critic",
+    "quantum_policy": "Every role invocation uses a fresh clean GPT-5.6 Sol / Instant chat and persists its output into the assigned run state.",
+    "resume_policy": "Role handoff is durable only; no role may depend on another role's chat transcript.",
+    "role_contract": {
+      "decomposer": "Classify as LEAF_EXECUTABLE or TOO_LARGE and create independently verifiable leaves when needed.",
+      "leaf_worker": "Work one READY leaf/quantum and request at most one external experiment before stopping.",
+      "independent_critic": "Review durable proposed synthesis/evidence independently.",
+      "synthesizer": "Produce terminal candidate only after required evidence and independent critique are durable."
+    },
+    "escalation_policy": "No frontier escalation in this arm. Intrinsically difficult residuals may be recorded but remain unsolved by stronger tier here."
+  },
+  "treatment_state": {
+    "role_queue": [
+      {
+        "role": "decomposer",
+        "status": "COMPLETED",
+        "decision": "LEAF_EXECUTABLE"
+      },
+      {
+        "role": "leaf_worker",
+        "status": "COMPLETED",
+        "process_id": "screening-v1-P2-D-003-leaf-001",
+        "decision": "EVIDENCE_READY"
+      },
+      {
+        "role": "independent_critic",
+        "status": "COMPLETED",
+        "evidence_refs": [
+          "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+          "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+        ],
+        "decision": "CRITIQUE_COMPLETE"
+      },
+      {
+        "role": "synthesizer",
+        "status": "COMPLETED",
+        "evidence_refs": [
+          "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+          "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+        ],
+        "decision": "TERMINAL_CANDIDATE"
+      }
+    ],
+    "active_role": null,
+    "leaf_processes": [
+      {
+        "process_id": "screening-v1-P2-D-003-leaf-001",
+        "status": "COMPLETED",
+        "decomposition_depth": 0,
+        "objective": "Determine the primary mechanism causing the synthetic request-latency regression using at least two experiment/result cycles; reject at least one competing hypothesis; address O2 as potentially non-discriminating; preserve exact control-published result hashes for terminal synthesis.",
+        "decision_basis": "LEAF_EXECUTABLE: bounded small experiment graph, LOW_TO_MEDIUM horizon load, dependency width 1, PARTIALLY_COUPLED work, HIGH synthesis coupling, and taxonomy explicitly states this fixture is not large enough to provide strong decomposition-benefit evidence.",
+        "allowed_experiments": [
+          "E_queue_4x",
+          "E_disable_pool_reuse",
+          "E_force_retry_reset",
+          "E_clock_quantization",
+          "E_half_concurrency"
+        ],
+        "experiment_cycles_required": 2,
+        "next_safe_action": "Stop at the explicit role boundary. Launch a fresh role-isolated independent_critic invocation only after durable scheduler promotion."
+      }
+    ],
+    "independent_critic": {
+      "status": "COMPLETED",
+      "decision": "CRITIQUE_COMPLETE",
+      "conclusion": "The two durable experiment/result cycles sufficiently support retained retry state as the primary regression mechanism: E_queue_4x is near-null, rejecting queue-capacity saturation as primary, while E_force_retry_reset restores p95 latency from 412 to 219 ms and mean retries from 3.1 to 1.0 despite pool reuse remaining enabled.",
+      "limitations": [
+        "H_clock_bucket was not independently tested and therefore is not ruled out as a contributing mechanism.",
+        "O2 remains potentially non-discriminating load relief and is not causal evidence for the primary mechanism."
+      ],
+      "evidence_refs": [
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ]
+    },
+    "synthesizer": {
+      "status": "COMPLETED",
+      "evidence_refs": [
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ],
+      "decision": "TERMINAL_CANDIDATE"
+    }
+  },
+  "started_at": "2026-11-05T19:37:00-05:00",
+  "completed_at": null,
+  "invocations": [
+    {
+      "generation": 0,
+      "role": "decomposer",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "LEAF_EXECUTABLE",
+      "note": "Fresh role-isolated decomposer invocation. No experiment requested and no leaf/critic/synthesizer work performed."
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "REQUEST_EXTERNAL",
+      "experiment_id": "E_queue_4x",
+      "note": "First required experiment/result cycle. Chosen to test H_queue directly; E_half_concurrency was not chosen because O2 already establishes load relief and explicitly warns it may be non-discriminating."
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "REQUEST_EXTERNAL",
+      "experiment_id": "E_force_retry_reset",
+      "note": "Consumed only control-published E_queue_4x. Its near-null effect (p95 412→405 ms; mean retries 3.1→3.0) rejects queue-capacity saturation as the primary mechanism, consistent with O3 queue occupancy <=62%. Requested E_force_retry_reset as the second required discriminating cycle to test retained retry state directly while leaving pool reuse enabled; O2 remains treated as potentially non-discriminating load relief."
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "EVIDENCE_READY",
+      "note": "Consumed only control-published E_force_retry_reset. Resetting retry state at request boundaries while leaving pool reuse enabled reduced p95 412→219 ms and mean retries 3.1→1.0, strongly supporting H_retry_state as the primary mechanism. Together with the prior near-null E_queue_4x result, the required two experiment/result cycles are complete and H_queue is rejected as a competing primary hypothesis. O2 remains potentially non-discriminating load relief; H_clock_bucket is not independently ruled out. Stopped at the independent_critic role boundary."
+    },
+    {
+      "generation": 0,
+      "role": "independent_critic",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "CRITIQUE_COMPLETE",
+      "note": "Fresh role-isolated independent critic. Reviewed only the two durable control-published result hashes in the assigned run state. Concludes retained retry state is sufficiently supported as primary and queue-capacity saturation is rejected as primary; preserves H_clock_bucket as not independently ruled out and O2 as potentially non-discriminating. No synthesizer work performed."
+    },
+    {
+      "generation": 0,
+      "role": "synthesizer",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "TERMINAL_CANDIDATE",
+      "note": "Fresh role-isolated synthesizer. Used only durable leaf evidence and completed independent critique. Submitted H_retry_state as primary, rejected H_queue as primary, preserved H_clock_bucket as unresolved, and treated O2 as potentially non-discriminating."
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh replacement P2 D_instant_decompose_critic slot after screen-002 worker transition contract invalidation."
+    },
+    {
+      "kind": "DECOMPOSER_ROLE_COMPLETED",
+      "generation": 0,
+      "decision": "LEAF_EXECUTABLE",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "rationale": "Fixture is bounded and synthesis-coupled rather than horizon-heavy/separable; further decomposition would not create independently verifiable leaves."
+    },
+    {
+      "kind": "LEAF_EXPERIMENT_REQUESTED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
+      "experiment_id": "E_queue_4x",
+      "rationale": "Directly tests queue-capacity saturation while holding concurrency and retry policy fixed; avoids treating O2 load relief as causal discrimination."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "experiment_id": "E_queue_4x",
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    {
+      "kind": "LEAF_RESULT_CONSUMED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "experiment_id": "E_queue_4x",
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+      "finding": "4x queue capacity produced only a 7 ms p95 reduction (412→405 ms) and 0.1 lower mean retries (3.1→3.0), rejecting H_queue as the primary regression mechanism."
+    },
+    {
+      "kind": "LEAF_EXPERIMENT_REQUESTED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
+      "experiment_id": "E_force_retry_reset",
+      "rationale": "Directly tests H_retry_state by resetting retry state at request boundaries while leaving pool reuse enabled. Chosen over E_half_concurrency because O2 already demonstrates non-discriminating load relief, and over E_disable_pool_reuse because retry reset isolates retry-state retention more specifically."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "kind": "LEAF_RESULT_CONSUMED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "finding": "Forcing retry-state reset at each request boundary while pool reuse remained enabled reduced p95 latency 412→219 ms and mean retries 3.1→1.0, strongly supporting retained retry state as the primary regression mechanism."
+    },
+    {
+      "kind": "LEAF_ROLE_COMPLETED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "decision": "EVIDENCE_READY",
+      "rationale": "Two required experiment/result cycles are durable. E_queue_4x rejects queue-capacity saturation as primary; E_force_retry_reset strongly supports retained retry state. O2 is preserved as potentially non-discriminating, and H_clock_bucket remains not independently ruled out. Independent critique is now the next explicit role boundary."
+    },
+    {
+      "kind": "INDEPENDENT_CRITIC_ROLE_COMPLETED",
+      "generation": 0,
+      "decision": "CRITIQUE_COMPLETE",
+      "evidence_refs": [
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ],
+      "rationale": "E_queue_4x is near-null while E_force_retry_reset strongly restores latency and retries with pool reuse retained. This is sufficient to support retained retry state as primary, subject to the explicit limitation that H_clock_bucket remains independently untested and O2 is non-discriminating load relief."
+    },
+    {
+      "kind": "CONTROL_ROLE_READY",
+      "generation": 0,
+      "role": "synthesizer",
+      "reason": "independent_critic_completed"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0,
+      "role": "synthesizer",
+      "evidence_refs": [
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ],
+      "rationale": "Two required experiment/result cycles and independent critique are durable; terminal candidate follows the public fixture terminal output schema."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_queue_4x": {
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
+      "experiment_id": "E_queue_4x",
+      "result": {
+        "p95_latency_ms": 405,
+        "mean_retries": 3
+      },
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+      "publication_scope": "requested experiment only"
+    },
+    "E_force_retry_reset": {
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
+      "experiment_id": "E_force_retry_reset",
+      "result": {
+        "p95_latency_ms": 219,
+        "mean_retries": 1
+      },
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "D1",
+      "finding": "Decomposer classification is LEAF_EXECUTABLE; no further decomposition is justified by the public taxonomy and fixture structure."
+    },
+    {
+      "id": "L1",
+      "finding": "E_queue_4x is near-null versus O1 (p95 412→405 ms; mean retries 3.1→3.0), so queue-capacity saturation is rejected as the primary mechanism; this is also consistent with O3 queue occupancy never exceeding 62%."
+    },
+    {
+      "id": "L2",
+      "finding": "E_force_retry_reset is strongly discriminating versus O1: with pool reuse still enabled, request-boundary retry-state reset reduces p95 412→219 ms and mean retries 3.1→1.0, supporting retained retry state as the primary regression mechanism."
+    },
+    {
+      "id": "C1",
+      "finding": "Independent critique accepts the two durable cycles as sufficient to support retained retry state as the primary regression mechanism and reject queue-capacity saturation as primary; H_clock_bucket remains not independently ruled out, and O2 remains potentially non-discriminating load relief."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_queue",
+      "status": "REJECTED_PRIMARY",
+      "statement": "The regression is primarily queue-capacity saturation under concurrency.",
+      "test": "E_queue_4x directly changes queue capacity while holding concurrency and retry policy fixed.",
+      "evidence_ref": "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    {
+      "id": "H_retry_state",
+      "status": "SUPPORTED_PRIMARY",
+      "statement": "Retry state is incorrectly retained across pooled request lifecycles, amplifying retries and latency.",
+      "test": "E_force_retry_reset resets retry state at request boundaries while leaving pool reuse enabled.",
+      "evidence_ref": "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "OPEN_NOT_REQUIRED_TO_RESOLVE",
+      "statement": "Timeout timestamp quantization is causing retries to bunch into the same bucket.",
+      "note": "Not independently ruled out by the two consumed experiments; current evidence nevertheless discriminates strongly for retained retry state as primary."
+    }
+  ],
+  "unresolved_questions": [
+    "H_clock_bucket remains not independently ruled out and must not be represented as eliminated by the current evidence.",
+    "O2 must remain characterized as potentially non-discriminating load relief rather than causal evidence."
+  ],
+  "evidence_refs": [
+    "fixture_blob_sha:389fd2ecd5bfe78e8258ecccb03dea759c043296",
+    "taxonomy_profile_blob_sha:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+    "harness_blob_sha:ff55438e933e91dad3057167c2243f0ef4933df2",
+    "source_checkpoint_sha:052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+    "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+    "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+  ],
+  "candidate_actions": [
+    {
+      "action": "Stop for control-evaluator validation of the persisted terminal candidate.",
+      "status": "BLOCKED_ON_CONTROL_EVALUATOR",
+      "authority": "worker_transition_contract.TERMINAL_CANDIDATE"
+    }
+  ],
+  "next_safe_action": "Screening run complete. Preserve this P2 run as non-claim-bearing protocol-screening evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
+      "H_queue"
+    ],
+    "observed_results": {
+      "E_queue_4x": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "E_queue_4x was near-null versus O1 (p95 412→405 ms; mean retries 3.1→3.0), rejecting H_queue as the primary mechanism and aligning with O3 queue occupancy never exceeding 62%. E_force_retry_reset, with pool reuse still enabled, reduced p95 412→219 ms and mean retries 3.1→1.0, strongly supporting H_retry_state as the primary mechanism. O2 is addressed only as potentially non-discriminating load relief, not causal evidence. H_clock_bucket remains independently untested and is therefore not rejected."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 6,
+    "experiment_requests": 2,
+    "retries": 0,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 1
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-003.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "fresh_or_role_isolated_instant_workers",
+    "tier": "INSTANT",
+    "roles": [
+      "decomposer",
+      "leaf_worker",
+      "independent_critic",
+      "synthesizer"
+    ]
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": true,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

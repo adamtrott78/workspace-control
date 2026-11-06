@@ -1,0 +1,393 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P2-D-002",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P2_reasoning_heavy_coupled",
+  "arm": "D_instant_decompose_critic",
+  "replicate_id": "screen-002",
+  "fixture_id": "research-iterate-retry-pooling-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+    "fixture_blob_sha": "389fd2ecd5bfe78e8258ecccb03dea759c043296",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "FAILED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
+  "continuity_regime": "fresh_or_role_isolated_instant_workers",
+  "treatment_contract": {
+    "mode": "instant_decompose_critic",
+    "quantum_policy": "Every role invocation uses a fresh clean GPT-5.6 Sol / Instant chat and persists its output into the assigned run state.",
+    "resume_policy": "Role handoff is durable only; no role may depend on another role's chat transcript.",
+    "role_contract": {
+      "decomposer": "Classify as LEAF_EXECUTABLE or TOO_LARGE and create independently verifiable leaves when needed.",
+      "leaf_worker": "Work one READY leaf/quantum and request at most one external experiment before stopping.",
+      "independent_critic": "Review durable proposed synthesis/evidence independently.",
+      "synthesizer": "Produce terminal candidate only after required evidence and independent critique are durable."
+    },
+    "escalation_policy": "No frontier escalation in this arm. Intrinsically difficult residuals may be recorded but remain unsolved by stronger tier here."
+  },
+  "treatment_state": {
+    "role_queue": [
+      {
+        "role": "decomposer",
+        "status": "COMPLETED",
+        "decision": "LEAF_EXECUTABLE"
+      },
+      {
+        "role": "leaf_worker",
+        "status": "FAILED",
+        "process_id": "screening-v1-P2-D-002-leaf-001"
+      }
+    ],
+    "active_role": null,
+    "leaf_processes": [
+      {
+        "process_id": "screening-v1-P2-D-002-leaf-001",
+        "status": "FAILED",
+        "depth": 0,
+        "objective": "Determine the primary mechanism causing the synthetic request-latency regression using the fixture contract, including at least two experiment/result cycles, rejection of at least one competing hypothesis, and explicit treatment of O2 as potentially non-discriminating.",
+        "constraints": [
+          "Use only the bound public fixture and durable run state.",
+          "Request at most one external experiment per leaf_worker invocation.",
+          "Do not infer experiment results; only use control-published external results.",
+          "Preserve the coupled causal-discrimination problem rather than treating load relief as causal proof."
+        ],
+        "evidence_refs": [
+          "fixture:research-iterate-retry-pooling-v1",
+          "taxonomy_profile:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+          "experiment_result:E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+          "experiment:E_force_retry_reset"
+        ],
+        "next_safe_action": "Wait for control to publish E_force_retry_reset; then launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume only that published result and continue the leaf."
+      }
+    ],
+    "independent_critic": {
+      "status": "NOT_READY",
+      "evidence_refs": []
+    },
+    "synthesizer": {
+      "status": "NOT_READY",
+      "evidence_refs": []
+    },
+    "decomposition_decision": {
+      "classification": "LEAF_EXECUTABLE",
+      "rationale": "The bound P2 taxonomy describes a bounded-small experiment graph with LOW_TO_MEDIUM horizon load, dependency width 1, PARTIALLY_COUPLED separability, HIGH synthesis coupling, and explicitly states the task is not large enough to provide strong evidence about decomposition closing a horizon gap. The causal diagnosis should therefore remain one coupled leaf rather than be split into independently verifiable subproblems."
+    }
+  },
+  "started_at": null,
+  "completed_at": "2026-11-05T19:29:30-05:00",
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P2-D-002-decomposer-001",
+      "generation": 0,
+      "role": "decomposer",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "LEAF_EXECUTABLE",
+      "evidence_refs": [
+        "fixture_blob:389fd2ecd5bfe78e8258ecccb03dea759c043296",
+        "taxonomy_profile_blob:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+        "harness_blob:ff55438e933e91dad3057167c2243f0ef4933df2",
+        "source_checkpoint:052cf8224ec5a725e09207bde0bef8e43cefe8cb"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-D-002-leaf-001-inv-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture_blob:389fd2ecd5bfe78e8258ecccb03dea759c043296",
+        "taxonomy_profile_blob:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+        "experiment:E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-D-002-leaf-001-inv-002",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "experiment_result:E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+        "experiment:E_force_retry_reset"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh provenance-refrozen P2 D_instant_decompose_critic replacement slot. Prior unlaunched screen-001 is superseded."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "role": "decomposer",
+      "generation": 0,
+      "decision": "LEAF_EXECUTABLE",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "note": "Single coupled leaf created; no further decomposition justified by the bound P2 taxonomy."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "worker_id": "screening-v1-P2-D-002-leaf-001"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-D-002-exp-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "payload_ref": "experiment:E_disable_pool_reuse"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-D-002-exp-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "request_id": "screening-v1-P2-D-002-exp-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-D-002-exp-002",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "payload_ref": "experiment:E_force_retry_reset"
+    },
+    {
+      "kind": "CONTROL_WORKER_TRANSITION_INVALIDATION",
+      "generation": 0,
+      "reason": "WAITING_EXTERNAL_STATUS_MISSING",
+      "replacement_replicate": "screen-003",
+      "note": "Worker persisted live pending request screening-v1-P2-D-002-exp-002 while run status remained READY_TO_RESUME, violating the frozen WAITING_EXTERNAL transition contract. Control did not publish the requested result."
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_disable_pool_reuse": {
+      "request_id": "screening-v1-P2-D-002-exp-001",
+      "experiment_id": "E_disable_pool_reuse",
+      "result": {
+        "p95_latency_ms": 228,
+        "mean_retries": 1.1
+      },
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "F_initial_discrimination",
+      "finding": "O3 (CPU below 48% and queue occupancy never above 62%) makes primary queue-capacity saturation less supported by the starting observations, but does not by itself causally reject H_queue."
+    },
+    {
+      "id": "F_O2_non_discriminating",
+      "finding": "O2 (lower p95 at half concurrency) is load-relief evidence only and is explicitly potentially non-discriminating; it cannot establish queue saturation as the causal mechanism."
+    },
+    {
+      "id": "F_disable_pool_reuse_supports_retry_state",
+      "finding": "E_disable_pool_reuse reduced p95 latency from the O1 baseline 412 ms to 228 ms and mean retries from 3.1 to 1.1 while concurrency and retry policy were fixed. This materially supports H_retry_state and is not explained by O2-style load relief, but disabling pool reuse may break retained state indirectly, so a second direct reset intervention is required before a terminal claim."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "SUPPORTED_PENDING_CONFIRMATION",
+      "note": "E_disable_pool_reuse materially reduced both retries and latency at fixed concurrency/retry policy. Direct confirmation requested via E_force_retry_reset with pool reuse enabled."
+    },
+    {
+      "id": "H_queue",
+      "status": "OPEN_WEAKENED",
+      "note": "O3 weakens saturation, but an intervention result is still required before causal rejection."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "OPEN",
+      "note": "Not discriminated by the starting observations."
+    }
+  ],
+  "unresolved_questions": [
+    "Does explicitly resetting retry state at each request boundary while leaving pool reuse enabled reproduce the retry and latency improvement?",
+    "At least one competing hypothesis must be causally rejected before any terminal claim."
+  ],
+  "evidence_refs": [
+    "fixture_blob:389fd2ecd5bfe78e8258ecccb03dea759c043296",
+    "taxonomy_profile_blob:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+    "observation:O1",
+    "observation:O2",
+    "observation:O3",
+    "experiment_request:screening-v1-P2-D-002-exp-001",
+    "experiment_result:E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+    "experiment_request:screening-v1-P2-D-002-exp-002"
+  ],
+  "candidate_actions": [
+    {
+      "action": "After control publishes E_force_retry_reset, compare its retry and latency response with E_disable_pool_reuse. If the direct reset reproduces the improvement while pool reuse remains enabled, use the two fixed-load interventions to discriminate H_retry_state from competing mechanisms; continue to treat O2 as non-discriminating load relief.",
+      "authority": "proposal_only"
+    }
+  ],
+  "next_safe_action": "Do not continue this run. Worker transition contract was invalidated. Use replacement replicate screen-003 from a brand-new clean GPT-5.6 Sol Instant decomposer chat.",
+  "terminal_submission": null,
+  "validator_results": [],
+  "metrics": {
+    "reasoning_invocations": 3,
+    "experiment_requests": 2,
+    "retries": 0,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 1
+  },
+  "control_evaluator": {
+    "status": "WORKER_TRANSITION_CONTRACT_INVALIDATED",
+    "violations": [
+      "WAITING_EXTERNAL_STATUS_MISSING"
+    ],
+    "note": "Control did not publish the pending E_force_retry_reset result because the run was not durably in WAITING_EXTERNAL. Replacement slot required."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-002.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "fresh_or_role_isolated_instant_workers",
+    "tier": "INSTANT",
+    "roles": [
+      "decomposer",
+      "leaf_worker",
+      "independent_critic",
+      "synthesizer"
+    ]
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": true,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

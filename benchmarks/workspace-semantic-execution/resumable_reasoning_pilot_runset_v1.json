@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "runset_id": "workspace-resumable-reasoning-pilot-v1",
+  "status": "READY_FOR_CLEAN_MODEL_ARM_EXECUTION",
+  "benchmark_id": "workspace-resumable-reasoning-v1",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "frozen_implementation_checkpoint": {
+    "commit_sha": "4ec300254c328a1b6e0fce62fe62cd6f11d7a855",
+    "validation_run": 41519306708,
+    "validation": "SUCCESS",
+    "note": "Includes durable semantic checkpoint/context serialization, wait/wake semantics, generation fencing, objective validation, decomposition/escalation discipline, and regression coverage."
+  },
+  "frozen_artifacts": {
+    "public_fixture": {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+      "blob_sha": "6def452e61be0e823bc5ee871ee2888bb1c9359f"
+    },
+    "evaluator_oracle": {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+      "blob_sha": "acc914d4fa9862a7f1ad0eabac21dbbf7aa84d68"
+    },
+    "mechanics_evidence": {
+      "path": "benchmarks/workspace-semantic-execution/prior_instant_worker_evidence_v1.json",
+      "blob_sha": "5cb78b22efe7333b5c97601a3215dea844c016a8"
+    },
+    "harness": {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+      "blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2"
+    },
+    "regression_tests": {
+      "path": "tests/test_workspace_semantic_execution_resumable_reasoning.py",
+      "blob_sha": "68df34b1a4d51e8d6d9cd566f1e797359541aa70"
+    }
+  },
+  "run_state": {
+    "path_template": "benchmarks/workspace-semantic-execution/runs/{run_id}.json",
+    "required_identity_fields": [
+      "run_id",
+      "arm",
+      "fixture_id",
+      "source_checkpoint_sha",
+      "fixture_blob_sha",
+      "generation",
+      "status",
+      "owner",
+      "invocations",
+      "events",
+      "validator_results",
+      "metrics"
+    ],
+    "ownership": "exact-head CAS plus generation fencing",
+    "completion_rule": "objective validator evidence required; worker self-assertion is insufficient"
+  },
+  "worker_packet": {
+    "allowed_inputs": [
+      "public fixture",
+      "current durable run state",
+      "bounded context packet generated from current state",
+      "exact evidence references explicitly named by the run state"
+    ],
+    "forbidden_inputs": [
+      "evaluator oracle",
+      "full prior chat transcript by default",
+      "unbounded repository dump",
+      "stale/superseded handoffs"
+    ],
+    "required_output": [
+      "updated durable findings",
+      "evidence refs",
+      "next-safe-action or terminal submission",
+      "TOO_LARGE vs INTRINSICALLY_DIFFICULT disposition when applicable",
+      "executor/provider/model/surface identity",
+      "context consumption"
+    ]
+  },
+  "evaluator_isolation": {
+    "level": "PROCESS_PROTOCOL_ONLY",
+    "oracle_must_not_be_supplied_to_reasoning_worker": true,
+    "authoring_session_eligible_as_scored_model_arm": false,
+    "reason": "The authoring session has seen evaluator-only truth and is therefore contaminated for scored model-arm execution.",
+    "strong_tool_enforced_seal_available": false,
+    "claim_ceiling": "Pilot results may validate workflow mechanics and comparative behavior only; no frontier-equivalence claim may rely on a worker that inspected evaluator-only truth."
+  },
+  "external_wait_protocol": {
+    "request_transition": "RUNNING -> WAITING_EXTERNAL",
+    "result_transition": "WAITING_EXTERNAL -> READY_TO_RESUME",
+    "model_polling_allowed": false,
+    "result_publication": "deterministic evaluator/oracle operation only",
+    "wake_evidence_required": true
+  },
+  "arms": {
+    "A_frontier_long_horizon": {
+      "executor_requirement": "FRONTIER",
+      "continuity": "single clean persistent session",
+      "status": "NOT_STARTED"
+    },
+    "B_instant_persistent_chat": {
+      "executor_requirement": "INSTANT",
+      "continuity": "single clean persistent session with durable checkpoints",
+      "status": "NOT_STARTED"
+    },
+    "C_instant_stateless_resume": {
+      "executor_requirement": "INSTANT",
+      "continuity": "fresh clean session each reasoning quantum",
+      "status": "NOT_STARTED"
+    },
+    "D_instant_decompose_critic": {
+      "executor_requirement": "INSTANT",
+      "continuity": "fresh clean workers for decomposition, leaves, critic, synthesis",
+      "status": "NOT_STARTED"
+    },
+    "E_hybrid_escalation": {
+      "executor_requirement": "INSTANT_THEN_FRONTIER_ON_EVIDENCE",
+      "continuity": "stateless lower-tier workers plus explicit residual escalation",
+      "status": "NOT_STARTED"
+    }
+  },
+  "metrics_required": [
+    "terminal validator pass rate",
+    "validator score",
+    "correctness",
+    "retries",
+    "decomposition count",
+    "decomposition depth",
+    "failed leaves",
+    "recovery effectiveness",
+    "context bytes/tokens per invocation",
+    "execution work quanta",
+    "provider/model/surface usage",
+    "frontier escalation count",
+    "frontier escalation reason",
+    "elapsed workflow steps",
+    "durable-state correctness",
+    "provenance correctness"
+  ],
+  "hard_gates": [
+    "zero authority/provenance escapes",
+    "zero manual SHA/log/JSON relay",
+    "zero stale-generation completion acceptance",
+    "zero model polling while waiting externally",
+    "all COMPLETE states carry passing objective validator evidence",
+    "all frontier escalations carry lower-tier evidence and explicit residual reason"
+  ],
+  "next_action": "Launch clean model sessions for arms A-E against the frozen public fixture without exposing evaluator-only oracle state; persist every quantum to the run-state paths and evaluate terminal submissions through the deterministic harness."
+}

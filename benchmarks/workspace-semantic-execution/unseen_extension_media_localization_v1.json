@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "proof_id": "workspace-semantic-execution-unseen-extension-media-localization-v1",
+  "suite": "S4_open_world_generalization",
+  "status": "IMPLEMENTED_PENDING_EXACT_HEAD_VALIDATION",
+  "premise": "media_localization was not encoded in the core example_extensions or representative workflow inventory when the core was authored.",
+  "core_ref": "architecture/workspace-semantic-execution-core.v0.1.json",
+  "extension_ref": "architecture/workspace-semantic-execution-extension-media-localization.v0.1.json",
+  "validator_ref": "benchmarks/workspace-semantic-execution/extension_contract_v1.py",
+  "acceptance": [
+    "extension validates using only the generic extension/workflow projection contracts",
+    "no modification to core type lists, example extension registry, or generic dispatch is required",
+    "domain-specific types and relations remain namespaced to media_localization",
+    "source-of-truth remains external/project-owned and projection is rebuildable",
+    "extension creates no Permission, removes no Prohibition, satisfies no ReviewRequirement, and widens no authority",
+    "an authority-widening extension mutation is deterministically rejected",
+    "unknown extension fallback remains UNSUPPORTED_EXTENSION_FAIL_CLOSED"
+  ],
+  "claim": "Passing this proof demonstrates structural open-world extensibility of the v0.1 contract for one previously unmodeled synthetic workflow. It does not freeze the architecture or prove all future extensions."
+}

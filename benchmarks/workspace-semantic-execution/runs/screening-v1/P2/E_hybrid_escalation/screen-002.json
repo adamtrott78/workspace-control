@@ -1,0 +1,701 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P2-E-002",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P2_reasoning_heavy_coupled",
+  "arm": "E_hybrid_escalation",
+  "replicate_id": "screen-002",
+  "fixture_id": "research-iterate-retry-pooling-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+    "fixture_blob_sha": "389fd2ecd5bfe78e8258ecccb03dea759c043296",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+  },
+  "continuity_regime": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
+  "treatment_contract": {
+    "mode": "hybrid_evidence_gated_escalation",
+    "quantum_policy": "Begin with clean GPT-5.6 Sol / Instant workers using stateless resume/decomposition as appropriate; persist all lower-tier evidence.",
+    "resume_policy": "Instant quanta/roles use fresh clean chats unless run state explicitly says same-chat resume. Any High escalation uses a separate clean GPT-5.6 Sol / High chat.",
+    "decomposition_policy": "TOO_LARGE work must be decomposed before escalation. Escalation is not a substitute for decomposition.",
+    "escalation_policy": "Only a residual classified INTRINSICALLY_DIFFICULT after reasonable decomposition/lower-tier attempts may request High. Persist residual, failed lower-tier evidence, and explicit escalation reason before switching executor identity.",
+    "high_phase_rule": "A High worker may claim only when treatment_state.escalation_status is APPROVED_TO_LAUNCH by durable control state; model reasoning cannot create authority."
+  },
+  "treatment_state": {
+    "phase": "LOWER_TIER_INSTANT",
+    "lower_tier_attempts": [
+      {
+        "invocation_id": "screen-002-q0",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "REQUEST_EXPERIMENT",
+        "experiment_id": "E_force_retry_reset",
+        "rationale": "Directly tests whether retained retry state is causal while holding pool reuse enabled; more discriminating than load relief because O2 may be non-discriminating."
+      },
+      {
+        "invocation_id": "screen-002-q1",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "REQUEST_EXPERIMENT",
+        "experiment_id": "E_disable_pool_reuse",
+        "rationale": "E_force_retry_reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled, strongly supporting retry-state retention. Disabling pool reuse next directly tests whether pooled request lifecycles are the carrier of retained retry state and discriminates that mechanism from H_clock_bucket."
+      },
+      {
+        "invocation_id": "screen-002-q2",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "PREPARE_TERMINAL_CANDIDATE",
+        "rationale": "E_disable_pool_reuse kept mean retries near 1 (1.1) and p95 latency near the explicit-reset result (228 ms versus 219 ms), providing the required second discriminating cycle and corroborating pooled request lifecycles as the carrier of retained retry state. This supports H_retry_state over H_clock_bucket without requiring escalation."
+      },
+      {
+        "invocation_id": "screen-002-q3",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "PERSIST_TERMINAL_CANDIDATE",
+        "rationale": "Prepared checkpoint contains two published discriminating lower-tier results with exact hashes, no unresolved questions, and no authorized escalation. The public terminal-output contract is satisfied."
+      },
+      {
+        "invocation_id": "screen-002-q4",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "PERSIST_TERMINAL_CANDIDATE",
+        "rationale": "Existing terminal_submission is already repaired to the public terminal-output schema and is supported by the two published discriminating result hashes; formal protocol transition only, with no additional experiment or escalation."
+      },
+      {
+        "invocation_id": "screen-002-q5",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "REQUEST_EXPERIMENT",
+        "experiment_id": "E_clock_quantization",
+        "rationale": "Addresses only the control-published missing_required_discriminating_experiment requirement using the public fixture catalog. Replacing quantized timeout timestamps with monotonic high-resolution timestamps directly discriminates H_clock_bucket; no result is inferred before control publication."
+      },
+      {
+        "invocation_id": "screen-002-q6",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "PERSIST_TERMINAL_CANDIDATE",
+        "rationale": "Consumed the control-published E_clock_quantization result. High-resolution monotonic timestamps left p95 latency at 401 ms and mean retries at 3, satisfying the control-published missing discriminating-experiment requirement while further rejecting H_clock_bucket. The existing protocol-valid terminal submission is updated with the exact published result hash; High escalation remains unauthorized."
+      }
+    ],
+    "decomposition_state": "NOT_REQUIRED_BOUNDED_WORKLOAD",
+    "escalation_status": "NOT_REQUESTED",
+    "residual_reason": null,
+    "escalation_evidence_refs": []
+  },
+  "started_at": "2026-11-05T18:56:00-05:00",
+  "completed_at": null,
+  "invocations": [
+    {
+      "invocation_id": "screen-002-q0",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q1",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q2",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "TERMINAL_CANDIDATE_PREPARED",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q3",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q3",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q4",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q4",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q5",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q5",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_clock_quantization"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q6",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q6",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse",
+        "E_clock_quantization"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh provenance-refrozen P2 E_hybrid_escalation replacement slot. Prior unlaunched screen-001 is superseded."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q0"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q0",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "WORKLOAD_CLASSIFICATION",
+      "generation": 0,
+      "classification": "BOUNDED_NOT_TOO_LARGE",
+      "reason": "Taxonomy records LOW_TO_MEDIUM horizon load, BOUNDED_SMALL search space, expected 3 reasoning quanta, and says the fixture is not large enough to strongly test decomposition."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-exp-001",
+      "generation": 0,
+      "payload_ref": "E_force_retry_reset"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screen-002-exp-001",
+      "generation": 0,
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q1"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q1",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "EXPERIMENT_INTERPRETATION",
+      "generation": 0,
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "note": "Explicit retry-state reset lowered mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms with pool reuse still enabled; this strongly supports H_retry_state and further weakens H_queue, but a second discriminating cycle is required before terminal claim."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-exp-002",
+      "generation": 0,
+      "payload_ref": "E_disable_pool_reuse"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screen-002-exp-002",
+      "generation": 0,
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q2"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q2",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "EXPERIMENT_INTERPRETATION",
+      "generation": 0,
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "note": "Disabling pool reuse yielded mean retries 1.1 and p95 latency 228 ms, closely matching the explicit retry-state reset result (1 retry, 219 ms). This second discriminating cycle corroborates pooled request lifecycles as the carrier of retained retry state, supports H_retry_state, and rejects H_clock_bucket as the primary mechanism."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_PREPARED",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q2",
+      "note": "Two discriminating interventions independently normalize retries and latency when retained retry state or its pooled-lifecycle carrier is removed. Lower-tier contract is satisfied; High escalation is unnecessary and remains unauthorized."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q3"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q3",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q3",
+      "result_hashes": {
+        "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+      },
+      "note": "Formal lower-tier terminal candidate persisted for control-evaluator validation; High escalation remains unauthorized."
+    },
+    {
+      "kind": "CONTROL_TERMINAL_SCHEMA_REJECTION",
+      "generation": 0,
+      "violations": [
+        "terminal_output_schema:final_hypothesis_not_string",
+        "terminal_output_schema:rejected_hypotheses_not_string_array",
+        "terminal_output_schema:observed_results_not_hash_mapping",
+        "terminal_output_schema:addressed_observations_not_string_array"
+      ],
+      "note": "Public terminal-output schema mismatch; no objective score published."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q4"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q4",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q4",
+      "result_hashes": {
+        "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+      },
+      "note": "Protocol-valid lower-tier terminal candidate resubmitted after public-schema repair for control-evaluator validation; existing corrected terminal_submission preserved and High escalation remains unauthorized."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q5"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q5",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-exp-003",
+      "generation": 0,
+      "payload_ref": "E_clock_quantization"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screen-002-exp-003",
+      "generation": 0,
+      "experiment_id": "E_clock_quantization",
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q6"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q6",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "EXPERIMENT_INTERPRETATION",
+      "generation": 0,
+      "experiment_id": "E_clock_quantization",
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17",
+      "note": "Replacing quantized timeout timestamps with monotonic high-resolution timestamps left p95 latency at 401 ms and mean retries at 3, close to the original degraded behavior rather than the normalization produced by retry-state reset or disabling pool reuse. This directly discriminates against H_clock_bucket as the primary mechanism and satisfies the control-published required discriminating-experiment condition."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q6",
+      "result_hashes": {
+        "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+        "E_clock_quantization": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+      },
+      "note": "Protocol-valid lower-tier terminal candidate updated with the exact control-published E_clock_quantization result hash and persisted for control-evaluator validation; High escalation remains unauthorized."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_force_retry_reset": {
+      "request_id": "screen-002-exp-001",
+      "experiment_id": "E_force_retry_reset",
+      "result": {
+        "p95_latency_ms": 219,
+        "mean_retries": 1
+      },
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "publication_scope": "requested experiment only"
+    },
+    "E_disable_pool_reuse": {
+      "request_id": "screen-002-exp-002",
+      "experiment_id": "E_disable_pool_reuse",
+      "result": {
+        "p95_latency_ms": 228,
+        "mean_retries": 1.1
+      },
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_clock_quantization": {
+      "request_id": "screen-002-exp-003",
+      "experiment_id": "E_clock_quantization",
+      "result": {
+        "p95_latency_ms": 401,
+        "mean_retries": 3
+      },
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "F1",
+      "finding": "O3 argues against primary queue-capacity saturation: CPU stays below 48% and queue occupancy below 62%."
+    },
+    {
+      "id": "F2",
+      "finding": "O2 shows load relief lowers latency but is explicitly non-discriminating and does not establish the causal mechanism."
+    },
+    {
+      "id": "F3",
+      "finding": "E_force_retry_reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled, strongly supporting retained retry state as causal."
+    },
+    {
+      "id": "F4",
+      "finding": "E_disable_pool_reuse yielded mean retries 1.1 and p95 latency 228 ms, closely matching E_force_retry_reset (1 retry, 219 ms), corroborating pooled request lifecycles as the carrier of retained retry state and rejecting H_clock_bucket as the primary mechanism."
+    },
+    {
+      "id": "F5",
+      "finding": "E_clock_quantization yielded p95 latency 401 ms and mean retries 3 after replacing quantized timeout timestamps with monotonic high-resolution timestamps, directly rejecting H_clock_bucket as the primary mechanism."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "SUPPORTED_BY_THREE_DISCRIMINATING_CYCLES"
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "REJECTED_AS_PRIMARY_MECHANISM"
+    },
+    {
+      "id": "H_queue",
+      "status": "REJECTED_AS_PRIMARY_MECHANISM"
+    }
+  ],
+  "unresolved_questions": [],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3",
+    "E_force_retry_reset",
+    "E_disable_pool_reuse",
+    "E_clock_quantization"
+  ],
+  "candidate_actions": [],
+  "next_safe_action": "Screening run complete. Preserve this P2 run as non-claim-bearing protocol-screening evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
+      "H_clock_bucket",
+      "H_queue"
+    ],
+    "observed_results": {
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "E_clock_quantization": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. Replacing quantized timeout timestamps with monotonic high-resolution timestamps left p95 latency at 401 ms and mean retries at 3, close to degraded behavior rather than normalization. These discriminating interventions support retained retry state carried by pooled request lifecycles and reject clock-bucket timing and queue saturation as primary explanations."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 7,
+    "experiment_requests": 3,
+    "retries": 0,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 2
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/E_hybrid_escalation/screen-002.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "fresh_or_role_isolated_instant_until_evidence_gated_escalation",
+    "tier": "HYBRID",
+    "escalation_model_family": "GPT-5.6 Sol",
+    "escalation_chat_configuration": "High"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": true,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}
