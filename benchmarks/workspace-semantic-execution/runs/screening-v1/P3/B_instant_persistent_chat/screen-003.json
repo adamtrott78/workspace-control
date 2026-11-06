@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "p3-b-persistent-worker-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -63,7 +63,37 @@
   },
   "started_at": "2026-11-05T21:04:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P3-B-003-q001",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r1"
+      ],
+      "reasoning_summary": "O2 and O3 weaken capacity as the primary cause but do not satisfy the required control. O4 leaves retry-state propagation and timer synchronization live. Begin with an independent regional isolation leaf; later synthesis must include at least one coupled-residual intervention and one competing-mechanism/control intervention.",
+      "experiment_id": "E_isolate_r1"
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -74,21 +104,103 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "p3-b-persistent-worker-screen-003"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-001",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r1",
+      "experiment_id": "E_isolate_r1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-B-003-exp-001",
+    "kind": "experiment",
+    "experiment_id": "E_isolate_r1",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r1"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Reason one bounded PRIMARY quantum and request exactly one discriminating experiment if external evidence is needed.",
+  "established_findings": [
+    {
+      "id": "F1",
+      "statement": "The starting observations do not support primary regional capacity saturation: CPU and queue occupancy are moderate, and per-region concurrency relief reduces latency but leaves retry amplification.",
+      "evidence_refs": [
+        "O2",
+        "O3"
+      ]
+    },
+    {
+      "id": "F2",
+      "statement": "Cross-region temporal correlation after failover makes a propagated retry-state mechanism and a synchronized-timer mechanism the principal live alternatives.",
+      "evidence_refs": [
+        "O4"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_feedback",
+      "status": "LIVE",
+      "reason": "Explains cross-region retry amplification after failover and persistence under local load relief."
+    },
+    {
+      "id": "H_clock_sync",
+      "status": "LIVE",
+      "reason": "Could explain narrow-window correlated retry bursts."
+    },
+    {
+      "id": "H_capacity",
+      "status": "WEAKENED",
+      "reason": "O2/O3 conflict with capacity saturation as the primary mechanism, but a control intervention is still required before terminal rejection."
+    }
+  ],
+  "unresolved_questions": [
+    "Does isolating a region from cross-region retry propagation remove retry amplification while preserving local retry behavior?",
+    "After regional evidence, does retry-state reset or timer desynchronization discriminate the coupled residual?",
+    "Does a global capacity/load control reject capacity as the primary mechanism?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3",
+    "O4"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_isolate_r1",
+      "purpose": "First independently testable regional leaf; establish whether blocking cross-region retry propagation changes the abnormal amplification."
+    },
+    {
+      "experiment_id": "E_isolate_r2",
+      "purpose": "Independent regional replication."
+    },
+    {
+      "experiment_id": "E_isolate_r3",
+      "purpose": "Independent regional replication."
+    },
+    {
+      "experiment_id": "E_isolate_r4",
+      "purpose": "Independent regional replication."
+    },
+    {
+      "experiment_id": "E_global_retry_reset",
+      "purpose": "Coupled-residual discriminator for retained retry state."
+    },
+    {
+      "experiment_id": "E_desynchronize_timers",
+      "purpose": "Competing coupled-residual discriminator for timer synchronization."
+    },
+    {
+      "experiment_id": "E_capacity_2x",
+      "purpose": "Competing-mechanism control for capacity saturation."
+    }
+  ],
+  "next_safe_action": "STOP. Wait for the control evaluator to publish the exact result for E_isolate_r1 into this run-state file and set READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
