@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -185,6 +185,17 @@
       "kind": "SEMANTIC_CHECKPOINT",
       "generation": 0,
       "evidence_ref_count": 5
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
     }
   ],
   "pending_external": null,
@@ -252,7 +263,7 @@
     "E_force_retry_reset:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop for control evaluator validation of the terminal candidate. Do not mark COMPLETE unless the objective validator passes.",
+  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state only. Address the exact control-published validator violation missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization using only public fixture/catalog evidence; continue until the next protocol-required boundary, persist state, and stop. Do not open, refresh, delete, sign out of, or replace this chat while persistent continuity is required.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
@@ -270,7 +281,17 @@
     ],
     "rationale": "The baseline combines high latency (412 ms p95) with elevated retries (3.1/request), while O3 shows CPU below 48% and queue occupancy below 62%, weakening queue saturation. Disabling pool reuse at fixed concurrency/retry policy cuts p95 to 228 ms and retries to 1.1, implicating reuse-linked state. More specifically, resetting retry state at each request boundary while keeping pool reuse enabled cuts p95 to 219 ms and retries to 1.0, demonstrating that retained retry state—not pooling generically—is sufficient to account for the regression. Because this correction does not alter timeout timestamp quantization, H_clock_bucket is not required as the primary mechanism. O2's improvement when concurrency is halved is therefore a genuine load-relief correlation, but it is non-discriminating and does not identify queue saturation as causal."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 3,
     "experiment_requests": 2,
@@ -283,14 +304,18 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-B-003-exp-002",
-    "last_experiment_id": "E_force_retry_reset",
-    "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_FAIL",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": false,
+    "score": 0.8,
+    "violations": [
+      "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+    ],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Worker may continue from the exact public violation code; hidden expected answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/B_instant_persistent_chat/screen-003.json"
