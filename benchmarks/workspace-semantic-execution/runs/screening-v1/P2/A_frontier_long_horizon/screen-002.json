@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-worker-screening-v1-P2-A-002",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -77,6 +77,23 @@
       "evidence_refs": [
         "E_force_retry_reset"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-A-002-inv-002",
+      "generation": 0,
+      "owner": "chatgpt-worker-screening-v1-P2-A-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat"
+      },
+      "context_bytes": 3074,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "control-result:E_force_retry_reset#6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_queue_4x"
+      ]
     }
   ],
   "events": [
@@ -113,9 +130,24 @@
       "generation": 0,
       "worker_id": "chatgpt-worker-screening-v1-P2-A-002",
       "resume_from": "READY_TO_RESUME"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 6
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-A-002-exp-002",
+      "generation": 0,
+      "payload_ref": "E_queue_4x"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-A-002-exp-002",
+    "kind": "SYNTHETIC_EXPERIMENT",
+    "payload_ref": "E_queue_4x"
+  },
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screening-v1-P2-A-002-exp-001",
@@ -142,47 +174,57 @@
       "evidence": [
         "O3"
       ]
+    },
+    {
+      "id": "F3",
+      "statement": "With pool reuse still enabled, explicit retry-state reset at each request boundary reduced p95 latency from 412 ms to 219 ms and mean retries from 3.1 to 1.0. This directly supports H_retry_state and is not merely the O2 concurrency-relief correlation.",
+      "evidence": [
+        "E_force_retry_reset",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "LEADING_UNTESTED",
-      "rationale": "High retries (3.1/request) plus the pooled-lifecycle mechanism make retry-state retention a direct candidate; a boundary reset intervention can test it causally."
-    },
-    {
-      "id": "H_clock_bucket",
-      "status": "PLAUSIBLE_ALTERNATIVE",
-      "rationale": "Clock quantization could amplify retries without high CPU or queue occupancy and remains unresolved."
+      "status": "STRONGLY_SUPPORTED",
+      "rationale": "The targeted retry-state reset materially reduced both retries and latency while retaining pool reuse."
     },
     {
       "id": "H_queue",
-      "status": "WEAKENED_NOT_REJECTED",
-      "rationale": "O3 argues against primary queue-capacity saturation, but a direct intervention/result is still needed before formal rejection."
+      "status": "WEAKENED_PENDING_DIRECT_TEST",
+      "rationale": "O3 already argues against primary queue-capacity saturation; a 4x queue-capacity intervention is the clean second-cycle test."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "PLAUSIBLE_BUT_SECONDARY_UNTESTED",
+      "rationale": "Still possible in principle, but the retry-reset result directly explains retry amplification without changing timestamp quantization."
     }
   ],
   "unresolved_questions": [
-    "Does explicitly resetting retry state at each request boundary, with pool reuse and concurrency unchanged, materially reduce retries and latency?"
+    "Does increasing queue capacity by 4x, while holding concurrency and retry policy fixed, materially reduce latency or retries enough to support H_queue?"
   ],
   "evidence_refs": [
     "fixture:research-iterate-retry-pooling-v1#O1",
     "fixture:research-iterate-retry-pooling-v1#O2",
     "fixture:research-iterate-retry-pooling-v1#O3",
-    "fixture:research-iterate-retry-pooling-v1#E_force_retry_reset"
+    "fixture:research-iterate-retry-pooling-v1#E_force_retry_reset",
+    "control-result:E_force_retry_reset#6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "fixture:research-iterate-retry-pooling-v1#E_queue_4x"
   ],
   "candidate_actions": [
     {
       "action": "REQUEST_EXPERIMENT",
-      "experiment_id": "E_force_retry_reset",
-      "rationale": "This intervention directly isolates request-boundary retry-state retention without changing concurrency or disabling pool reuse, so it is more causally discriminating than the observed load-relief correlation."
+      "experiment_id": "E_queue_4x",
+      "rationale": "This second experiment directly tests the main competing queue-capacity mechanism while preserving concurrency and retry policy, allowing O2 load relief to be distinguished from causal queue saturation."
     }
   ],
-  "next_safe_action": "Consume the control-published E_force_retry_reset result and reason one bounded PRIMARY quantum; request one second discriminating experiment if needed, then stop at WAITING_EXTERNAL.",
+  "next_safe_action": "Stop at WAITING_EXTERNAL. Resume only after control publishes the matching E_queue_4x result and sets READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
