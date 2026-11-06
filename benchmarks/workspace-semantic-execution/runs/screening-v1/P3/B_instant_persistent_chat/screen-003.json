@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "p3-b-persistent-worker-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -212,6 +212,36 @@
       ],
       "reasoning_summary": "Timer desynchronization leaves the regression essentially intact, discriminating against H_clock_sync as primary. Request the global 2x-capacity control to test the remaining capacity explanation; one further experiment cycle will still be required by the six-cycle minimum.",
       "experiment_id": "E_capacity_2x"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q006",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r3"
+      ],
+      "reasoning_summary": "Global 2x capacity leaves latency and retry amplification high, rejecting capacity saturation as primary and satisfying the required control. The protocol still requires a sixth experiment cycle, so request a third independent regional isolation replication before terminal synthesis.",
+      "experiment_id": "E_isolate_r3"
     }
   ],
   "events": [
@@ -329,9 +359,21 @@
       "worker_id": "p3-b-persistent-worker-screen-003",
       "resume_from": "E_capacity_2x",
       "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-006",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r3",
+      "experiment_id": "E_isolate_r3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-B-003-exp-006",
+    "kind": "experiment",
+    "experiment_id": "E_isolate_r3",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r3"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-B-003-exp-001",
@@ -450,6 +492,15 @@
         "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
         "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
       ]
+    },
+    {
+      "id": "F7",
+      "statement": "Doubling global capacity does not materially resolve the regression: all-region p95 remains 420–455 ms and mean retries 2.7–3.1. Together with moderate CPU/queue occupancy and persistent retry amplification under concurrency relief, this rejects capacity saturation as the primary mechanism.",
+      "evidence_refs": [
+        "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+        "O2",
+        "O3"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -465,13 +516,13 @@
     },
     {
       "id": "H_capacity",
-      "status": "WEAKENED",
-      "reason": "O2/O3 conflict with capacity saturation as the primary mechanism, but a control intervention is still required before terminal rejection."
+      "status": "REJECTED_PRIMARY",
+      "reason": "Global 2x capacity leaves latency/retry amplification high; O2/O3 already showed load relief without eliminating retry amplification."
     }
   ],
   "unresolved_questions": [
-    "Does doubling global capacity materially resolve retry amplification, or only provide limited latency relief?",
-    "One additional experiment cycle after the capacity control is required to reach the six-cycle minimum before terminal submission."
+    "Does the cross-region isolation effect replicate in a third independent region?",
+    "After the sixth experiment result, synthesize the terminal candidate using exact published hashes and submit for control validation."
   ],
   "evidence_refs": [
     "O1",
@@ -481,7 +532,8 @@
     "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
     "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
     "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
-    "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
+    "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+    "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
   ],
   "candidate_actions": [
     {
@@ -513,12 +565,12 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "Interpret only the published E_capacity_2x result and request exactly one sixth experiment.",
+  "next_safe_action": "STOP. Wait for the control evaluator to publish the exact result for E_isolate_r3 and set READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 5,
-    "experiment_requests": 5,
+    "reasoning_invocations": 6,
+    "experiment_requests": 6,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
