@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -91,6 +91,35 @@
       "evidence_refs": [
         "E_isolate_r1"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-002-inv-002",
+      "generation": 0,
+      "owner": "chatgpt-p3-b-screen-002-persistent-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 3213,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+        "E_isolate_r2"
+      ]
     }
   ],
   "events": [
@@ -126,9 +155,29 @@
       "generation": 0,
       "experiment_id": "E_isolate_r1",
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-p3-b-screen-002-persistent-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 6
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-002-exp-002",
+      "generation": 0,
+      "payload_ref": "E_isolate_r2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-B-002-exp-002",
+    "kind": "experiment",
+    "payload_ref": "E_isolate_r2"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-B-002-exp-001",
@@ -158,6 +207,14 @@
         "O4"
       ],
       "finding": "Retry bursts are correlated across regions after cross-region failover events, motivating direct tests of cross-region retry propagation before global synthesis."
+    },
+    {
+      "id": "F_r1_isolation_response",
+      "basis": [
+        "E_isolate_r1",
+        "result_hash:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+      ],
+      "finding": "Isolating region 1 from cross-region retry propagation reduced r1 p95 latency to 315 ms and mean retries to 1.9 without materially changing other regions. This is intervention evidence that cross-region propagation contributes causally in r1, but one region is insufficient for the required regional synthesis."
     }
   ],
   "open_hypotheses": [
@@ -168,8 +225,8 @@
     },
     {
       "id": "H_retry_feedback",
-      "status": "OPEN",
-      "note": "Consistent with persistent retry amplification and cross-region correlation; requires intervention evidence."
+      "status": "SUPPORTED_PENDING_REPLICATION",
+      "note": "E_isolate_r1 causally supports cross-region retry propagation in r1; replicate independently across additional regions before coupled synthesis."
     },
     {
       "id": "H_clock_sync",
@@ -187,13 +244,10 @@
     "O2",
     "O3",
     "O4",
-    "fixture_blob:2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958"
+    "fixture_blob:2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
+    "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
   ],
   "candidate_actions": [
-    {
-      "experiment_id": "E_isolate_r1",
-      "purpose": "First independent regional probe of cross-region retry propagation."
-    },
     {
       "experiment_id": "E_isolate_r2",
       "purpose": "Independent regional replication after r1 result."
@@ -219,12 +273,12 @@
       "purpose": "Timer-specific discriminator if clock synchronization remains viable after other evidence."
     }
   ],
-  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_isolate_r1, continue until the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
+  "next_safe_action": "STOP while WAITING_EXTERNAL. After control publishes E_isolate_r2 and sets READY_TO_RESUME, resume this same persistent chat from durable state; consume only that result and continue one bounded quantum.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
