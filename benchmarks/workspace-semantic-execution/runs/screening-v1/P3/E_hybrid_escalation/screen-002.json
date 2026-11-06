@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -63,8 +63,16 @@
         "leaf": "region-1",
         "experiment_id": "E_isolate_r1",
         "executor_tier": "INSTANT",
-        "status": "RESULT_PUBLISHED",
-        "request_id": "screen-002-g0-E_isolate_r1-001"
+        "status": "COMPLETED",
+        "request_id": "screen-002-g0-E_isolate_r1-001",
+        "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+      },
+      {
+        "leaf": "region-2",
+        "experiment_id": "E_isolate_r2",
+        "executor_tier": "INSTANT",
+        "status": "WAITING_EXTERNAL",
+        "request_id": "screen-002-g0-E_isolate_r2-001"
       }
     ],
     "decomposition_state": "DECOMPOSED_REGIONAL_LEAVES",
@@ -125,6 +133,32 @@
       "evidence_refs": [
         "experiment:E_isolate_r1"
       ]
+    },
+    {
+      "invocation_id": "screen-002-g0-leaf-r2-001",
+      "generation": 0,
+      "owner": "instant-leaf-worker-screen-002-g0-r2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "external_result:E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+        "experiment:E_isolate_r2"
+      ]
     }
   ],
   "events": [
@@ -171,9 +205,26 @@
       "generation": 0,
       "experiment_id": "E_isolate_r1",
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "instant-leaf-worker-screen-002-g0-r2",
+      "role": "leaf_worker",
+      "leaf": "region-2"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-g0-E_isolate_r2-001",
+      "generation": 0,
+      "payload_ref": "experiment:E_isolate_r2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screen-002-g0-E_isolate_r2-001",
+    "kind": "experiment",
+    "payload_ref": "experiment:E_isolate_r2"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screen-002-g0-E_isolate_r1-001",
@@ -204,6 +255,13 @@
         "screening_worker_bootstrap_v1.json",
         "resumable_reasoning_p3_fixture_v1.taxonomy.json"
       ]
+    },
+    {
+      "id": "F_isolate_r1_1",
+      "finding": "E_isolate_r1 reduced region 1 p95 latency to 315 ms and mean retries to 1.9 while other regions did not materially change.",
+      "evidence_refs": [
+        "external_result:E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -228,20 +286,21 @@
   "evidence_refs": [
     "fixture:2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
     "taxonomy_profile:54c63ee2d0fd7990312517fd90d2d1197cf75df1",
-    "harness:ff55438e933e91dad3057167c2243f0ef4933df2"
+    "harness:ff55438e933e91dad3057167c2243f0ef4933df2",
+    "external_result:E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
   ],
   "candidate_actions": [
     {
       "id": "leaf-region-1",
       "experiment_id": "E_isolate_r1",
       "leaf": "region-1",
-      "status": "WAITING_EXTERNAL"
+      "status": "COMPLETED"
     },
     {
       "id": "leaf-region-2",
       "experiment_id": "E_isolate_r2",
       "leaf": "region-2",
-      "status": "READY"
+      "status": "WAITING_EXTERNAL"
     },
     {
       "id": "leaf-region-3",
@@ -256,12 +315,12 @@
       "status": "READY"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state, consume only E_isolate_r1, continue exactly one authorized lower-tier regional-leaf transition, persist the exact next protocol boundary, and stop. Do not launch High; escalation remains unauthorized unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Wait for the control evaluator to publish the exact E_isolate_r2 external result into this run-state file and set READY_TO_RESUME; do not poll and do not launch High.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 1,
+    "reasoning_invocations": 3,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
