@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "TERMINAL_CANDIDATE",
+  "owner": "screening-v1-P3-E-003-instant-q007",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -176,9 +176,20 @@
           "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_capacity_2x"
         ],
         "escalation_requested": false
+      },
+      {
+        "attempt_id": "instant-quantum-007",
+        "generation": 0,
+        "classification": "LOWER_TIER_TERMINAL_SYNTHESIS_EXECUTABLE",
+        "outcome": "TERMINAL_CANDIDATE_SUBMITTED",
+        "evidence_refs": [
+          "external_results.E_capacity_2x@5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+          "established_findings.F_retry_reset_001"
+        ],
+        "escalation_requested": false
       }
     ],
-    "decomposition_state": "COUPLED_RESIDUAL_EVIDENCE_AVAILABLE_GLOBAL_CONTROL_IN_PROGRESS",
+    "decomposition_state": "TERMINAL_SYNTHESIS_REACHED_WITH_LOWER_TIER_EVIDENCE",
     "escalation_status": "NOT_REQUESTED",
     "residual_reason": null,
     "escalation_evidence_refs": []
@@ -366,6 +377,32 @@
         "external_results.E_global_retry_reset@026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
         "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_capacity_2x"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-E-003-instant-q007",
+      "generation": 0,
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation.",
+          "GitHub is enabled."
+        ]
+      },
+      "outcome": "TERMINAL_CANDIDATE_SUBMITTED",
+      "evidence_refs": [
+        "external_results.E_capacity_2x@5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+        "established_findings.F_retry_reset_001"
+      ]
     }
   ],
   "events": [
@@ -540,6 +577,25 @@
       "generation": 0,
       "experiment_id": "E_capacity_2x",
       "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P3-E-003-instant-q007",
+      "identity_source": "user_attestation"
+    },
+    {
+      "kind": "LOWER_TIER_RESULT_CONSUMED",
+      "generation": 0,
+      "experiment_id": "E_capacity_2x",
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+      "note": "Consumed only the control-published E_capacity_2x result. Capacity doubling left the regression materially present, rejecting primary capacity saturation when combined with the already-durable retry-reset finding; no unpublished evidence or escalation."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0,
+      "worker_id": "screening-v1-P3-E-003-instant-q007",
+      "note": "Lower-tier Instant synthesis satisfied the public six-cycle, coupled-residual, competing-control, and O2 requirements. High escalation was neither requested nor authorized."
     }
   ],
   "pending_external": null,
@@ -653,25 +709,31 @@
       "evidence_refs": [
         "external_results.E_global_retry_reset@026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
       ]
+    },
+    {
+      "id": "F_capacity_001",
+      "finding": "Control-published E_capacity_2x measured all-region p95 latency 420-455 ms and mean retries 2.7-3.1 after doubling regional service capacity; the regression therefore remained materially present under added capacity.",
+      "evidence_refs": [
+        "external_results.E_capacity_2x@5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_capacity",
-      "status": "OPEN"
+      "status": "REJECTED_AS_PRIMARY"
     },
     {
       "id": "H_retry_feedback",
-      "status": "OPEN"
+      "status": "SELECTED_PRIMARY"
     },
     {
       "id": "H_clock_sync",
-      "status": "OPEN"
+      "status": "NOT_REQUIRED_TO_REJECT_FOR_TERMINAL_CONTRACT"
     }
   ],
   "unresolved_questions": [
-    "After regional evidence, does retry-state reset or timer desynchronization discriminate the surviving coupled mechanism?",
-    "Does a capacity/concurrency control reject capacity saturation as the primary mechanism?"
+    "Timer synchronization remains a possible contributing mechanism, but the published evidence is sufficient to select retained cross-region retry feedback as primary and reject capacity saturation as primary."
   ],
   "evidence_refs": [
     "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
@@ -679,20 +741,32 @@
     "public_inputs.harness_path@ff55438e933e91dad3057167c2243f0ef4933df2",
     "source_checkpoint_sha@052cf8224ec5a725e09207bde0bef8e43cefe8cb"
   ],
-  "candidate_actions": [
-    {
-      "priority": 1,
-      "kind": "EXPERIMENT",
-      "experiment_id": "E_capacity_2x",
-      "leaf": "global-control",
-      "authority": "fixture_only_external_request"
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state, consume only the control-published E_capacity_2x result, perform exactly one authorized lower-tier transition toward terminal synthesis, persist the exact next protocol boundary, and stop. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "STOP at TERMINAL_CANDIDATE. Await control-evaluator validation; do not poll, self-validate, request another experiment, or launch High.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_feedback",
+    "rejected_hypotheses": [
+      "H_capacity"
+    ],
+    "observed_results": {
+      "E_isolate_r1": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "E_isolate_r2": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+      "E_isolate_r3": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+      "E_isolate_r4": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+      "E_global_retry_reset": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "E_capacity_2x": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3",
+      "O4"
+    ],
+    "rationale": "Regional isolation probes reduced the affected regions from the 440-485 ms starting p95 range to 315-326 ms while leaving other regions materially unchanged, showing that cross-region propagation participates in the regression. Resetting retry state at every cross-region boundary reduced all-region p95 to 215-235 ms and mean retries to 0.9-1.1, directly supporting retained retry-state feedback. In contrast, doubling service capacity left all-region p95 at 420-455 ms and mean retries at 2.7-3.1, so capacity saturation is not the primary mechanism. This also addresses O2: load relief can lower latency without removing retry amplification, so its improvement is not causal identification. O3 further disfavors saturation, while O4 is consistent with cross-region retry feedback. The evidence therefore selects H_retry_feedback as the primary mechanism and rejects H_capacity as primary; H_clock_sync may contribute but need not be rejected by the public terminal contract."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 7,
+    "reasoning_invocations": 8,
     "experiment_requests": 6,
     "retries": 0,
     "decomposition_count": 1,
