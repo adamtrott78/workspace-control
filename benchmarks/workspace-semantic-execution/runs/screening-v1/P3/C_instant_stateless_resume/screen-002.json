@@ -28,8 +28,8 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 2,
-  "status": "READY_TO_RESUME",
+  "generation": 3,
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -56,9 +56,9 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 3,
+    "quantum_index": 4,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": "q2 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
+    "last_quantum_chat": "q3 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
   },
   "started_at": "2026-11-05T20:44:00-05:00",
   "completed_at": null,
@@ -143,6 +143,35 @@
         "E_isolate_r2",
         "E_isolate_r3"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-C-002-q3",
+      "generation": 3,
+      "owner": "screening-v1-P3-C-002-q3-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 16877,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_isolate_r1",
+        "E_isolate_r2",
+        "E_isolate_r3",
+        "E_isolate_r4"
+      ]
     }
   ],
   "events": [
@@ -219,9 +248,30 @@
       "generation": 2,
       "experiment_id": "E_isolate_r3",
       "result_hash": "abd38a935a5321bd12336ff00002e16f1a5a05d2ded590aa29cfae318ddfe68e"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 3,
+      "worker_id": "screening-v1-P3-C-002-q3-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 3,
+      "evidence_ref_count": 7
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "q3-E_isolate_r4",
+      "generation": 3,
+      "payload_ref": "E_isolate_r4"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "q3-E_isolate_r4",
+    "generation": 3,
+    "experiment_id": "E_isolate_r4",
+    "payload_ref": "E_isolate_r4"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "q0-E_isolate_r1",
@@ -296,18 +346,27 @@
         "E_isolate_r2",
         "E_isolate_r1"
       ]
+    },
+    {
+      "id": "F3_r3_isolation_extends_regional_replication",
+      "statement": "Isolating region 3 from cross-region retry propagation reduces region-3 p95 latency to 318 ms and mean retries to 1.8, while other regions do not materially change. Together with E_isolate_r1 and E_isolate_r2, this extends independent regional replication of the local suppression effect through three regions, strengthening cross-region propagation as a causal contributor while still not distinguishing retained retry-state feedback from synchronized-timer coupling.",
+      "evidence_refs": [
+        "E_isolate_r3",
+        "E_isolate_r2",
+        "E_isolate_r1"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
       "status": "OPEN_LEADING",
-      "reason": "Independent r1 and r2 isolation probes both suppress local latency/retry amplification without materially changing other regions, strengthening cross-region propagation as causal; further regional replication and a coupled-residual discriminator remain required."
+      "reason": "Independent r1, r2, and r3 isolation probes suppress local latency/retry amplification without materially changing other regions, strongly supporting cross-region propagation as causal; r4 replication and a coupled-residual discriminator remain required."
     },
     {
       "id": "H_clock_sync",
       "status": "OPEN",
-      "reason": "The replicated isolation response remains compatible with a cross-region synchronization mechanism because isolation removes the same coupling path; state-reset versus timer-desynchronization evidence is still required."
+      "reason": "The three-region replicated isolation response remains compatible with a cross-region synchronization mechanism because isolation removes the same coupling path; state-reset versus timer-desynchronization evidence is still required."
     },
     {
       "id": "H_capacity",
@@ -316,7 +375,7 @@
     }
   ],
   "unresolved_questions": [
-    "Do regional isolation effects replicate across regions 3 and 4?",
+    "Does the regional isolation effect replicate in region 4?",
     "After regional evidence, does resetting cross-region retry state or desynchronizing timers discriminate the coupled mechanism?",
     "Does a global capacity/control intervention reject H_capacity as primary?"
   ],
@@ -326,7 +385,8 @@
     "O3",
     "O4",
     "E_isolate_r1",
-    "E_isolate_r2"
+    "E_isolate_r2",
+    "E_isolate_r3"
   ],
   "candidate_actions": [
     {
@@ -365,12 +425,12 @@
       "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 3. Re-read durable state, consume only E_isolate_r3, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
+  "next_safe_action": "Wait for control to publish only the requested E_isolate_r4 result. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 4; re-read durable state, consume only E_isolate_r4, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 3,
-    "experiment_requests": 3,
+    "reasoning_invocations": 4,
+    "experiment_requests": 4,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
@@ -383,11 +443,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "q2-E_isolate_r3",
-    "last_experiment_id": "E_isolate_r3",
-    "result_hash": "abd38a935a5321bd12336ff00002e16f1a5a05d2ded590aa29cfae318ddfe68e",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "AWAITING_EXTERNAL_RESULT",
+    "last_request_id": "q3-E_isolate_r4",
+    "last_experiment_id": "E_isolate_r4",
+    "result_hash": null,
+    "note": "Worker requested only the next independent regional replication leaf; control must publish only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/C_instant_stateless_resume/screen-002.json"
