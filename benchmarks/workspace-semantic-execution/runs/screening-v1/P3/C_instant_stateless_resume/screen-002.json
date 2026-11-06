@@ -29,9 +29,24 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
   "continuity_regime": "fresh_chat_per_reasoning_quantum",
   "treatment_contract": {
     "mode": "instant_stateless_resume",
@@ -41,33 +56,164 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 0,
+    "quantum_index": 1,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": null
+    "last_quantum_chat": "q0 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
   },
-  "started_at": null,
+  "started_at": "2026-11-05T20:44:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P3-C-002-q0",
+      "generation": 0,
+      "owner": "screening-v1-P3-C-002-q0-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 4075,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_isolate_r1"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh provenance-refrozen P3 C_instant_stateless_resume replacement slot. Prior unlaunched screen-001 is superseded."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P3-C-002-q0-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "q0-E_isolate_r1",
+      "generation": 0,
+      "payload_ref": "E_isolate_r1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "q0-E_isolate_r1",
+    "kind": "experiment",
+    "payload_ref": "E_isolate_r1"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 0. Perform exactly one bounded reasoning quantum, persist all continuation state, then stop.",
+  "established_findings": [
+    {
+      "id": "F0_baseline_load_relief_not_causal",
+      "statement": "O2 shows that reducing one region's concurrency lowers local latency by roughly 20% while abnormal retry amplification persists; load contributes to latency but does not by itself explain the retry regression.",
+      "evidence_refs": [
+        "O2"
+      ]
+    },
+    {
+      "id": "F0_capacity_not_supported_as_primary",
+      "statement": "CPU below 55% and queue occupancy below 65% across regions weakens H_capacity as the primary mechanism, though a later global capacity/control intervention is still required before terminal diagnosis.",
+      "evidence_refs": [
+        "O3"
+      ]
+    },
+    {
+      "id": "F0_cross_region_coupling_signal",
+      "statement": "Retry bursts correlate across regions shortly after cross-region failover events, so a cross-region coupling mechanism is a stronger initial target than purely regional saturation.",
+      "evidence_refs": [
+        "O4"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_feedback",
+      "status": "OPEN_LEADING",
+      "reason": "Consistent with failover-linked cross-region correlation and persistent retry amplification under local load relief."
+    },
+    {
+      "id": "H_clock_sync",
+      "status": "OPEN",
+      "reason": "Could also explain synchronized retry bursts; requires a coupled residual timer intervention to discriminate."
+    },
+    {
+      "id": "H_capacity",
+      "status": "OPEN_WEAKENED",
+      "reason": "O2 and O3 weaken primary saturation, but a competing-mechanism/global control is required before rejection."
+    }
+  ],
+  "unresolved_questions": [
+    "Does isolating region 1 from cross-region retry propagation suppress abnormal retry amplification?",
+    "Do regional isolation effects replicate across all four regions?",
+    "After regional evidence, does resetting cross-region retry state or desynchronizing timers discriminate the coupled mechanism?",
+    "Does a global capacity/control intervention reject H_capacity as primary?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3",
+    "O4"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_isolate_r1",
+      "priority": 1,
+      "reason": "Independent regional leaf testing whether removing cross-region retry propagation changes region-1 retry amplification while preserving local retry policy."
+    },
+    {
+      "experiment_id": "E_isolate_r2",
+      "priority": 2,
+      "reason": "Independent regional replication leaf after durable resume."
+    },
+    {
+      "experiment_id": "E_isolate_r3",
+      "priority": 3,
+      "reason": "Independent regional replication leaf after durable resume."
+    },
+    {
+      "experiment_id": "E_isolate_r4",
+      "priority": 4,
+      "reason": "Independent regional replication leaf after durable resume."
+    },
+    {
+      "experiment_id": "E_global_retry_reset",
+      "priority": 5,
+      "reason": "Required coupled-residual discriminator between retained retry-state feedback and alternatives after regional evidence."
+    },
+    {
+      "experiment_id": "E_desynchronize_timers",
+      "priority": 6,
+      "reason": "Alternative coupled-residual discriminator for H_clock_sync if needed."
+    },
+    {
+      "experiment_id": "E_capacity_2x",
+      "priority": 7,
+      "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
+    }
+  ],
+  "next_safe_action": "Stop while WAITING_EXTERNAL. Control evaluator must publish the result for q0-E_isolate_r1. Do not poll. After READY_TO_RESUME, launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled; read this live run-state first and perform exactly one next quantum.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
@@ -80,7 +226,7 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
+    "status": "AWAITING_EXTERNAL_RESULT",
     "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
   },
   "allowed_mutation_paths": [
