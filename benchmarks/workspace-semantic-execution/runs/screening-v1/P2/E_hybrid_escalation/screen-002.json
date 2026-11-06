@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -96,6 +96,15 @@
         "classification": "BOUNDED_NOT_TOO_LARGE",
         "action": "PERSIST_TERMINAL_CANDIDATE",
         "rationale": "Existing terminal_submission is already repaired to the public terminal-output schema and is supported by the two published discriminating result hashes; formal protocol transition only, with no additional experiment or escalation."
+      },
+      {
+        "invocation_id": "screen-002-q5",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "REQUEST_EXPERIMENT",
+        "experiment_id": "E_clock_quantization",
+        "rationale": "Addresses only the control-published missing_required_discriminating_experiment requirement using the public fixture catalog. Replacing quantized timeout timestamps with monotonic high-resolution timestamps directly discriminates H_clock_bucket; no result is inferred before control publication."
       }
     ],
     "decomposition_state": "NOT_REQUIRED_BOUNDED_WORKLOAD",
@@ -104,7 +113,7 @@
     "escalation_evidence_refs": []
   },
   "started_at": "2026-11-05T18:56:00-05:00",
-  "completed_at": "2026-11-05T19:59:00-05:00",
+  "completed_at": null,
   "invocations": [
     {
       "invocation_id": "screen-002-q0",
@@ -228,6 +237,27 @@
         "O3",
         "E_force_retry_reset",
         "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q5",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q5",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_clock_quantization"
       ]
     }
   ],
@@ -385,9 +415,30 @@
         "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
       ],
       "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q5"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q5",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-exp-003",
+      "generation": 0,
+      "payload_ref": "E_clock_quantization"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screen-002-exp-003",
+    "kind": "fixture_experiment",
+    "payload_ref": "E_clock_quantization"
+  },
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screen-002-exp-001",
@@ -448,10 +499,11 @@
     "O2",
     "O3",
     "E_force_retry_reset",
-    "E_disable_pool_reuse"
+    "E_disable_pool_reuse",
+    "E_clock_quantization"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only. Address the exact control-published validator violation missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization using only the public fixture catalog; request at most one external experiment if required, persist state, and stop at the next protocol-required boundary. High remains unauthorized unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "STOP. Await control publication of the exact result for pending request screen-002-exp-003 (E_clock_quantization). Do not poll or infer the result. Resume only when durable state is READY_TO_RESUME. High remains unauthorized unless treatment_state.escalation_status is explicitly APPROVED_TO_LAUNCH.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
@@ -481,8 +533,8 @@
     }
   ],
   "metrics": {
-    "reasoning_invocations": 5,
-    "experiment_requests": 2,
+    "reasoning_invocations": 6,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
