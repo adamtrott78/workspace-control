@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -273,15 +273,16 @@
       "request_id": "screening-v1-P3-E-003-E_isolate_r2-g0",
       "generation": 0,
       "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r2"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-E-003-E_isolate_r2-g0",
+      "generation": 0,
+      "experiment_id": "E_isolate_r2",
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-E-003-E_isolate_r2-g0",
-    "generation": 0,
-    "experiment_id": "E_isolate_r2",
-    "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r2",
-    "authority": "fixture_only_external_request"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
@@ -293,6 +294,18 @@
         "other_regions_materially_changed": false
       },
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r2": {
+      "request_id": "screening-v1-P3-E-003-E_isolate_r2-g0",
+      "experiment_id": "E_isolate_r2",
+      "result": {
+        "region": "r2",
+        "p95_latency_ms": 322,
+        "mean_retries": 2,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
       "publication_scope": "requested experiment only"
     }
   },
@@ -367,7 +380,7 @@
       "authority": "fixture_only_external_request"
     }
   ],
-  "next_safe_action": "Control evaluator must publish only the requested E_isolate_r2 result. Then launch a brand-new regular GPT-5.6 Sol Instant lower-tier chat, read this run state first, consume only that published result, perform one authorized lower-tier transition, persist the next protocol boundary, and stop.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state, consume only the control-published E_isolate_r2 result, perform exactly one authorized lower-tier transition, persist the exact next protocol boundary, and stop. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -385,11 +398,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_REQUEST_PENDING",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P3-E-003-E_isolate_r2-g0",
     "last_experiment_id": "E_isolate_r2",
-    "result_hash": null,
-    "note": "Worker requested only E_isolate_r2 under fixture-only external-request authority; awaiting control publication."
+    "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-003.json"
