@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -502,6 +502,21 @@
         "E_clock_quantization": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
       },
       "note": "Protocol-valid lower-tier terminal candidate updated with the exact control-published E_clock_quantization result hash and persisted for control-evaluator validation; High escalation remains unauthorized."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
     }
   ],
   "pending_external": null,
@@ -583,7 +598,7 @@
     "E_clock_quantization"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop for control-evaluator validation of the updated TERMINAL_CANDIDATE. Do not request another experiment or launch High unless durable control state explicitly authorizes further action; High remains unauthorized unless treatment_state.escalation_status changes to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Screening run complete. Preserve this P2 run as non-claim-bearing protocol-screening evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
@@ -611,6 +626,13 @@
         "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
       ],
       "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
     }
   ],
   "metrics": {
@@ -625,14 +647,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 2
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screen-002-exp-003",
-    "last_experiment_id": "E_clock_quantization",
-    "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/E_hybrid_escalation/screen-002.json"
