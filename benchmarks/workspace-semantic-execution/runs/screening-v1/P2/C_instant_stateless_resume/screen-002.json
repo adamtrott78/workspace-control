@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -315,6 +315,22 @@
       "kind": "SEMANTIC_CHECKPOINT",
       "generation": 1,
       "evidence_ref_count": 6
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 1,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0,
+      "violations": [
+        "wrong_final_hypothesis",
+        "insufficient_experiment_cycles",
+        "missing_required_discriminating_experiment:E_disable_pool_reuse|E_force_retry_reset",
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization",
+        "missing_rejected_hypothesis:H_queue",
+        "misleading_observation_not_addressed:O2"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
     }
   ],
   "pending_external": null,
@@ -438,7 +454,7 @@
     "fixture:E_queue_4x"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Control evaluator must validate this terminal candidate. Do not perform further worker reasoning or request additional experiments unless durable control state explicitly returns the slot as READY_TO_RESUME.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled. Re-read durable state only and repair the terminal submission using the public fixture worker_contract.terminal_output_schema and the exact control-published result hashes already in this run. Perform exactly one bounded reasoning quantum, persist a protocol-valid TERMINAL_CANDIDATE if supported, and stop.",
   "terminal_submission": {
     "conclusion": "The primary mechanism is retry-state amplification coupled to pooled connection lifecycle reuse, not queue-capacity saturation. Resetting retry state at request boundaries with pool reuse retained and disabling pool reuse with retry policy fixed both normalize retries and latency, whereas increasing queue capacity 4x leaves the regression essentially unchanged.",
     "primary_hypothesis": "H_retry_state",
@@ -469,6 +485,20 @@
         "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
       ],
       "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0,
+      "violations": [
+        "wrong_final_hypothesis",
+        "insufficient_experiment_cycles",
+        "missing_required_discriminating_experiment:E_disable_pool_reuse|E_force_retry_reset",
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization",
+        "missing_rejected_hypothesis:H_queue",
+        "misleading_observation_not_addressed:O2"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
     }
   ],
   "metrics": {
@@ -483,14 +513,23 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 1
+    "deterministic_compute_operations": 2
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-C-002-q3-E_queue_4x",
-    "last_experiment_id": "E_queue_4x",
-    "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_FAIL",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": false,
+    "score": 0,
+    "violations": [
+      "wrong_final_hypothesis",
+      "insufficient_experiment_cycles",
+      "missing_required_discriminating_experiment:E_disable_pool_reuse|E_force_retry_reset",
+      "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization",
+      "missing_rejected_hypothesis:H_queue",
+      "misleading_observation_not_addressed:O2"
+    ],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Worker may continue from the exact public violation codes; hidden expected answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/C_instant_stateless_resume/screen-002.json"
