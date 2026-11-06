@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -231,6 +231,39 @@
         "external_result:E_isolate_r4#65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
         "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_global_retry_reset"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-A-003-g0-q6",
+      "generation": 0,
+      "owner": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol High was selected for this conversation."
+        ],
+        "worker_verified": {
+          "github_available": true,
+          "prior_benchmark_or_control_context_present": false
+        }
+      },
+      "context_bytes": 8330,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "external_result:E_global_retry_reset#026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+        "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_desynchronize_timers"
+      ]
     }
   ],
   "events": [
@@ -363,9 +396,27 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 10
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-A-003-E_desynchronize_timers-006",
+      "generation": 0,
+      "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_desynchronize_timers",
+      "experiment_id": "E_desynchronize_timers"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-A-003-E_desynchronize_timers-006",
+    "kind": "EXPERIMENT",
+    "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_desynchronize_timers",
+    "experiment_id": "E_desynchronize_timers",
+    "intervention": "Add randomized jitter to timeout scheduling and use independent monotonic timer epochs per region."
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-A-003-E_isolate_r1-001",
@@ -474,29 +525,36 @@
         "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
       ],
       "finding": "Isolating region 4 from cross-region retry propagation reduced r4 p95 latency to 326 ms and mean retries to 2.0, while other regions did not materially change. This fourth independent replication completes regional coverage and shows a consistent region-local benefit from severing cross-region propagation across all four regions."
+    },
+    {
+      "id": "F_E_global_retry_reset",
+      "basis": [
+        "E_global_retry_reset",
+        "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+      ],
+      "finding": "Resetting retry state at every cross-region request boundary while leaving failover and pooling enabled reduced all regions to 215-235 ms p95 latency and 0.9-1.1 mean retries. This directly identifies retained retry state crossing region boundaries as a major causal driver of the coupled regression rather than failover/pooling or regional load alone."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
-      "status": "DOMINANT_UNRESOLVED",
-      "rationale": "All four regional propagation-isolation probes independently reduced both latency and retry amplification locally without materially changing other regions. Cross-region propagation is therefore causally implicated across the full topology; the next discriminating step is a global retry-state reset to test retained retry state specifically."
+      "status": "PRIMARY_SUPPORTED_PENDING_COMPETING_CONTROL",
+      "rationale": "Four independent regional isolations implicated cross-region propagation, and the coupled global retry-state reset nearly normalized both latency and retries while failover and pooling remained enabled. This directly supports retained retry-state positive feedback as the primary mechanism, pending the required competing timer intervention."
     },
     {
       "id": "H_clock_sync",
-      "status": "PLAUSIBLE_UNRESOLVED",
-      "rationale": "The four regional results still do not distinguish retained retry state from a synchronized cross-region retry/timer mechanism, because isolation can disrupt either. Timer desynchronization remains required after the global retry-state test."
+      "status": "COMPETING_PENDING_DIRECT_TEST",
+      "rationale": "The global retry-state reset supports retained state directly, but a timer/synchronization contribution has not yet been directly tested. E_desynchronize_timers is required to determine whether timer synchronization can account for the regression independently."
     },
     {
       "id": "H_capacity",
-      "status": "NEAR_REJECTION_AS_PRIMARY",
-      "rationale": "Four targeted propagation-isolation interventions improved latency and retries without increasing capacity, while O3 shows low CPU/queue occupancy. O2 demonstrates secondary load sensitivity but does not explain persistent retry amplification, so pure capacity saturation is no longer a credible primary mechanism absent contradictory coupled-control evidence."
+      "status": "REJECTABLE_AS_PRIMARY_PENDING_FINAL_SYNTHESIS",
+      "rationale": "O3 shows low CPU/queue occupancy; O2 shows latency relief under lower load but retry amplification persists; four propagation isolations and a global retry-state reset improve retries without adding capacity. Capacity can therefore remain a secondary latency modulator but is not supported as the primary regression mechanism."
     }
   ],
   "unresolved_questions": [
-    "Does resetting retry state at every cross-region request boundary eliminate the coupled latency/retry regression while failover and pooling remain enabled?",
-    "Does timer desynchronization produce a materially weaker effect than retry-state reset, allowing H_clock_sync to be rejected?",
-    "Can H_capacity be rejected as the primary mechanism while explicitly preserving O2 as evidence of secondary load sensitivity?"
+    "Does timer desynchronization materially normalize both latency and retry amplification, or is its effect weaker than the retry-state reset?",
+    "After the competing timer intervention, can H_clock_sync be rejected and H_capacity formally rejected as primary while O2 is explicitly addressed?"
   ],
   "evidence_refs": [
     "fixture:research-iterate-cross-region-feedback-p3-v1#O1",
@@ -507,7 +565,8 @@
     "external_result:E_isolate_r1#060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
     "external_result:E_isolate_r2#e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
     "external_result:E_isolate_r3#e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
-    "external_result:E_isolate_r4#65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+    "external_result:E_isolate_r4#65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+    "external_result:E_global_retry_reset#026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
   ],
   "candidate_actions": [
     {
@@ -515,54 +574,55 @@
       "role": "regional_leaf",
       "status": "OBSERVED",
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
-      "reason": "Observed regional causal improvement."
+      "reason": "Observed regional propagation-isolation evidence."
     },
     {
       "experiment_id": "E_isolate_r2",
       "role": "regional_leaf",
       "status": "OBSERVED",
       "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
-      "reason": "Observed independent regional causal improvement."
+      "reason": "Observed regional propagation-isolation evidence."
     },
     {
       "experiment_id": "E_isolate_r3",
       "role": "regional_leaf",
       "status": "OBSERVED",
       "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
-      "reason": "Observed independent regional causal improvement."
+      "reason": "Observed regional propagation-isolation evidence."
     },
     {
       "experiment_id": "E_isolate_r4",
       "role": "regional_leaf",
       "status": "OBSERVED",
       "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
-      "reason": "Fourth replication completes regional coverage."
+      "reason": "Observed regional propagation-isolation evidence."
     },
     {
       "experiment_id": "E_global_retry_reset",
       "role": "coupled_residual",
-      "status": "REQUEST_NOW",
-      "reason": "Directly tests whether retained retry state crossing region boundaries is the coupled mechanism."
+      "status": "OBSERVED",
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "reason": "Direct coupled evidence for retained retry-state propagation."
     },
     {
       "experiment_id": "E_desynchronize_timers",
       "role": "competing_mechanism",
-      "status": "PROPOSED_NEXT",
-      "reason": "Required discriminating intervention for H_clock_sync after the retry-state result."
+      "status": "REQUEST_NOW",
+      "reason": "Required direct test of the remaining H_clock_sync competing mechanism; also reaches the fixture minimum of six experiment cycles when observed."
     },
     {
       "experiment_id": "E_capacity_2x",
       "role": "global_control",
-      "status": "OPTIONAL",
-      "reason": "Additional capacity control only if the coupled and timer interventions leave capacity ambiguity."
+      "status": "NOT_CURRENTLY_REQUIRED",
+      "reason": "O2/O3 plus propagation-isolation and retry-reset evidence already distinguish capacity as a secondary load effect; reserve only if timer evidence leaves material ambiguity."
     }
   ],
-  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_global_retry_reset, continue until the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
+  "next_safe_action": "STOP. Await control-published result for E_desynchronize_timers in this assigned run-state file; do not poll. Resume this same persistent GPT-5.6 Sol High chat only after status becomes READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 5,
-    "experiment_requests": 5,
+    "reasoning_invocations": 6,
+    "experiment_requests": 6,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
