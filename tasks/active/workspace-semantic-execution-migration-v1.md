@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P2 A screen-002 and B screen-003 are COMPLETED. Remaining P2: C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless chat to repair its terminal submission to the exact public worker_contract.terminal_output_schema using already published result hashes; D screen-003 leaf screening-v1-P2-D-003-leaf-001 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat after control-published E_queue_4x; E screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat to reformat its existing durable terminal reasoning into the exact public terminal-output schema. High remains NOT AUTHORIZED.
+P2 A screen-002, B screen-003, and C screen-002 are COMPLETED with passing research_iterate_objective_v1 results. Remaining P2: D screen-003 leaf screening-v1-P2-D-003-leaf-001 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat after control-published E_force_retry_reset; E screen-002 has a corrected terminal_submission payload in durable state but remains READY_TO_RESUME rather than formal TERMINAL_CANDIDATE, so launch a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat to claim the run, preserve the corrected terminal payload, transition durably to TERMINAL_CANDIDATE, and stop. High remains NOT AUTHORIZED.
 
 ## Remaining work
 
-- Complete P2 C screen-002, D screen-003, and E screen-002; P2 A and B are complete. Then execute P3 A-E screen-002 slots if no shared protocol/public-input change is required.
+- Complete P2 D screen-003 and E screen-002; P2 A, B, and C are complete. Then execute P3 A-E screen-002 slots if no shared protocol/public-input change is required.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
