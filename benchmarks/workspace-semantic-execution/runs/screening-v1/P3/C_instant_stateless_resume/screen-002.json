@@ -28,9 +28,9 @@
     "control-chat transcript or memory",
     "PR comments containing evaluator results"
   ],
-  "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "generation": 1,
+  "status": "WAITING_EXTERNAL",
+  "owner": "screening-v1-P3-C-002-q1-worker",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -56,9 +56,9 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 1,
+    "quantum_index": 2,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": "q0 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
+    "last_quantum_chat": "q1 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
   },
   "started_at": "2026-11-05T20:44:00-05:00",
   "completed_at": null,
@@ -87,6 +87,33 @@
       "outcome": "WAITING_EXTERNAL",
       "evidence_refs": [
         "E_isolate_r1"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-C-002-q1",
+      "generation": 1,
+      "owner": "screening-v1-P3-C-002-q1-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 11653,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_isolate_r1",
+        "E_isolate_r2"
       ]
     }
   ],
@@ -118,9 +145,29 @@
       "generation": 0,
       "experiment_id": "E_isolate_r1",
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 1,
+      "worker_id": "screening-v1-P3-C-002-q1-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 1,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "q1-E_isolate_r2",
+      "generation": 1,
+      "payload_ref": "E_isolate_r2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "q1-E_isolate_r2",
+    "experiment_id": "E_isolate_r2",
+    "generation": 1
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "q0-E_isolate_r1",
@@ -156,18 +203,25 @@
       "evidence_refs": [
         "O4"
       ]
+    },
+    {
+      "id": "F1_r1_isolation_suppresses_local_regression",
+      "statement": "Isolating region 1 from cross-region retry propagation while preserving local retry policy reduces region-1 p95 latency to 315 ms and mean retries to 1.9, while other regions do not materially change. This supports cross-region retry propagation as a contributor to the region-1 regression but does not yet distinguish retained retry-state feedback from synchronized-timer coupling or establish replication across regions.",
+      "evidence_refs": [
+        "E_isolate_r1"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
       "status": "OPEN_LEADING",
-      "reason": "Consistent with failover-linked cross-region correlation and persistent retry amplification under local load relief."
+      "reason": "Region-1 isolation suppresses local latency/retry amplification, consistent with cross-region retry propagation; replication and a coupled-residual discriminator are still required."
     },
     {
       "id": "H_clock_sync",
       "status": "OPEN",
-      "reason": "Could also explain synchronized retry bursts; requires a coupled residual timer intervention to discriminate."
+      "reason": "Region-1 isolation is also compatible with a cross-region synchronization mechanism; a coupled residual timer/state intervention is required to discriminate."
     },
     {
       "id": "H_capacity",
@@ -176,8 +230,7 @@
     }
   ],
   "unresolved_questions": [
-    "Does isolating region 1 from cross-region retry propagation suppress abnormal retry amplification?",
-    "Do regional isolation effects replicate across all four regions?",
+    "Do regional isolation effects replicate across regions 2, 3, and 4?",
     "After regional evidence, does resetting cross-region retry state or desynchronizing timers discriminate the coupled mechanism?",
     "Does a global capacity/control intervention reject H_capacity as primary?"
   ],
@@ -185,7 +238,8 @@
     "O1",
     "O2",
     "O3",
-    "O4"
+    "O4",
+    "E_isolate_r1"
   ],
   "candidate_actions": [
     {
@@ -224,12 +278,12 @@
       "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 1. Re-read durable state, consume only E_isolate_r1, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
+  "next_safe_action": "Stop now at WAITING_EXTERNAL. Control evaluator must publish only E_isolate_r2 into this assigned run-state file. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 2; re-read durable state, consume only that published result, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
