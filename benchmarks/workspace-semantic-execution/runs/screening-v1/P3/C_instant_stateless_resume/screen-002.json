@@ -57,7 +57,7 @@
   },
   "treatment_state": {
     "quantum_index": 7,
-    "resume_requires_new_chat": false,
+    "resume_requires_new_chat": true,
     "last_quantum_chat": "q6 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
   },
   "started_at": "2026-11-05T20:44:00-05:00",
@@ -446,6 +446,12 @@
       "generation": 4,
       "validator_id": "research_iterate_objective_v1",
       "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "CONTROL_STATE_CONTRACT_REPAIR",
+      "generation": 4,
+      "reason": "STATELESS_RESUME_FLAG_FALSE_AT_TERMINAL",
+      "note": "Validation caught resume_requires_new_chat=false on the stateless arm. Control restored the invariant to true after terminal validation; terminal submission, validator result, and worker evidence are unchanged."
     }
   ],
   "pending_external": null,
