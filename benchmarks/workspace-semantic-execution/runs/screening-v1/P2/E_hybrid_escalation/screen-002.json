@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "TERMINAL_CANDIDATE",
+  "owner": "gpt-5.6-sol-instant-screen-002-q3",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -80,6 +80,14 @@
         "classification": "BOUNDED_NOT_TOO_LARGE",
         "action": "PREPARE_TERMINAL_CANDIDATE",
         "rationale": "E_disable_pool_reuse kept mean retries near 1 (1.1) and p95 latency near the explicit-reset result (228 ms versus 219 ms), providing the required second discriminating cycle and corroborating pooled request lifecycles as the carrier of retained retry state. This supports H_retry_state over H_clock_bucket without requiring escalation."
+      },
+      {
+        "invocation_id": "screen-002-q3",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "PERSIST_TERMINAL_CANDIDATE",
+        "rationale": "Prepared checkpoint contains two published discriminating lower-tier results with exact hashes, no unresolved questions, and no authorized escalation. The public terminal-output contract is satisfied."
       }
     ],
     "decomposition_state": "NOT_REQUIRED_BOUNDED_WORKLOAD",
@@ -88,7 +96,7 @@
     "escalation_evidence_refs": []
   },
   "started_at": "2026-11-05T18:56:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-05T19:59:00-05:00",
   "invocations": [
     {
       "invocation_id": "screen-002-q0",
@@ -156,6 +164,31 @@
         "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
       },
       "outcome": "TERMINAL_CANDIDATE_PREPARED",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q3",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q3",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "TERMINAL_CANDIDATE",
       "evidence_refs": [
         "O1",
         "O2",
@@ -255,6 +288,27 @@
       "generation": 0,
       "worker_id": "gpt-5.6-sol-instant-screen-002-q2",
       "note": "Two discriminating interventions independently normalize retries and latency when retained retry state or its pooled-lifecycle carrier is removed. Lower-tier contract is satisfied; High escalation is unnecessary and remains unauthorized."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q3"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q3",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q3",
+      "result_hashes": {
+        "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+      },
+      "note": "Formal lower-tier terminal candidate persisted for control-evaluator validation; High escalation remains unauthorized."
     }
   ],
   "pending_external": null,
@@ -321,10 +375,65 @@
     "E_disable_pool_reuse"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Terminal candidate is prepared from two discriminating lower-tier cycles. Await protocol/control validation; do not launch High unless durable control state explicitly changes treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Stop. TERMINAL_CANDIDATE is persisted. Await protocol/control-evaluator validation; do not launch High unless durable control state explicitly changes treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": {
-    "status": "CANDIDATE",
-    "conclusion": "Retained retry state is the supported causal mechanism, with pooled request lifecycles acting as its carrier.",
+    "status": "TERMINAL_CANDIDATE",
+    "final_hypothesis": {
+      "id": "H_retry_state",
+      "conclusion": "Retained retry state is the supported causal mechanism, with pooled request lifecycles acting as its carrier."
+    },
+    "rejected_hypotheses": [
+      {
+        "id": "H_clock_bucket",
+        "reason": "Disabling pool reuse normalized retries and latency to nearly the explicit retry-state-reset result, rejecting clock-bucket timing as the primary mechanism."
+      },
+      {
+        "id": "H_queue",
+        "reason": "O3 argues against primary queue-capacity saturation, and explicit retry-state reset normalized retries and latency while pool reuse remained enabled."
+      }
+    ],
+    "observed_results": [
+      {
+        "experiment_id": "E_force_retry_reset",
+        "result": {
+          "p95_latency_ms": 219,
+          "mean_retries": 1
+        },
+        "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      },
+      {
+        "experiment_id": "E_disable_pool_reuse",
+        "result": {
+          "p95_latency_ms": 228,
+          "mean_retries": 1.1
+        },
+        "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+      }
+    ],
+    "addressed_observations": [
+      {
+        "id": "O1",
+        "addressed_by": [
+          "E_force_retry_reset",
+          "E_disable_pool_reuse"
+        ]
+      },
+      {
+        "id": "O2",
+        "addressed_by": [
+          "E_force_retry_reset",
+          "E_disable_pool_reuse"
+        ],
+        "note": "Load relief is non-discriminating; the two interventions provide causal discrimination."
+      },
+      {
+        "id": "O3",
+        "addressed_by": [
+          "H_queue"
+        ],
+        "note": "CPU below 48% and queue occupancy below 62% argue against primary queue saturation."
+      }
+    ],
     "evidence_refs": [
       "O1",
       "O2",
@@ -332,12 +441,12 @@
       "E_force_retry_reset",
       "E_disable_pool_reuse"
     ],
-    "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. The convergent normalization across two discriminating interventions supports retained retry state carried by pooled request lifecycles and rejects clock-bucket timing and queue saturation as primary explanations.",
+    "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. Convergent normalization across two discriminating interventions supports retained retry state carried by pooled request lifecycles and rejects clock-bucket timing and queue saturation as primary explanations.",
     "escalation_required": false
   },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 3,
+    "reasoning_invocations": 4,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
