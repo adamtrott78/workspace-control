@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -98,7 +98,7 @@
       },
       {
         "process_id": "region-3",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "depth": 1,
         "objective": "Run the independently verifiable region-3 isolation probe and persist only control-published evidence.",
         "experiment_ids": [
@@ -318,6 +318,36 @@
       "evidence_refs": [
         "external_result:E_isolate_r2@e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-D-002-leaf_worker-region-3-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "region-3",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT",
+        "role": "decomposer",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ],
+        "github_transport_verified": true
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "public_input:resumable_reasoning_p3_fixture_v1.json@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
+        "experiment:E_isolate_r3"
+      ]
     }
   ],
   "events": [
@@ -420,9 +450,30 @@
       "experiment_id": "E_isolate_r2",
       "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
       "conclusion": "Isolating region 2 from cross-region retry propagation reduced r2 p95 latency to 322 ms and mean retries to 2.0 without materially changing other regions. This is evidence that cross-region propagation contributes to the region-2 regression; this leaf alone does not discriminate H_retry_feedback from H_clock_sync or globally reject H_capacity."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P3-D-002-leaf_worker-region-3-g0",
+      "role": "leaf_worker",
+      "process_id": "region-3"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-D-002-E_isolate_r3-g0",
+      "generation": 0,
+      "process_id": "region-3",
+      "experiment_id": "E_isolate_r3",
+      "payload_ref": "experiment:E_isolate_r3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-D-002-E_isolate_r3-g0",
+    "generation": 0,
+    "process_id": "region-3",
+    "experiment_id": "E_isolate_r3",
+    "payload_ref": "experiment:E_isolate_r3"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-D-002-E_isolate_r1-g0",
@@ -509,12 +560,12 @@
     "external_result:E_isolate_r2@e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant leaf_worker chat for process region-3. Re-read durable state, request only E_isolate_r3, persist the external request, mutate only the assigned run-state path, and stop while waiting for control-published evidence. Do not perform any other leaf, critic, or synthesizer work.",
+  "next_safe_action": "Stop and wait for the control evaluator to publish only the requested E_isolate_r3 result into this assigned run state and set READY_TO_RESUME. Do not poll, request another experiment, or perform any other leaf, critic, or synthesizer work in this chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 5,
-    "experiment_requests": 2,
+    "reasoning_invocations": 6,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -527,11 +578,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-D-002-E_isolate_r2-g0",
-    "last_experiment_id": "E_isolate_r2",
-    "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "AWAITING_EXTERNAL_RESULT",
+    "last_request_id": "screening-v1-P3-D-002-E_isolate_r3-g0",
+    "last_experiment_id": "E_isolate_r3",
+    "result_hash": null,
+    "note": "Worker requested only E_isolate_r3 and must stop without polling until control-published evidence is durable."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/D_instant_decompose_critic/screen-002.json"
