@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P2 first experiment boundary serviced. A screen-002 and B screen-002 are READY_TO_RESUME in their SAME persistent chats after control-published E_force_retry_reset. C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-1 chat to consume E_force_retry_reset and perform exactly one bounded quantum. D screen-002 decomposer completed LEAF_EXECUTABLE; launch a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for screening-v1-P2-D-002-leaf-001. E screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat to consume E_force_retry_reset; High remains unauthorized unless durable evidence later opens the escalation gate. Service subsequent exact boundaries directly from live GitHub.
+P2 second experiment boundary serviced. A screen-002 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol High chat after E_queue_4x. B screen-002 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after E_clock_quantization. C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-2 chat after E_disable_pool_reuse. D screen-002 leaf screening-v1-P2-D-002-leaf-001 is READY_TO_RESUME in a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat after E_disable_pool_reuse. E screen-002 is READY_TO_RESUME in a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat after E_disable_pool_reuse; High remains NOT AUTHORIZED. Service subsequent exact WAITING_EXTERNAL / role / TERMINAL_CANDIDATE boundaries directly from live GitHub.
 
 ## Remaining work
 
