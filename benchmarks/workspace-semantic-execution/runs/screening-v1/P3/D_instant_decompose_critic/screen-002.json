@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -71,14 +71,14 @@
       },
       {
         "role": "leaf_worker",
-        "status": "READY"
+        "status": "WAITING_EXTERNAL"
       }
     ],
     "active_role": null,
     "leaf_processes": [
       {
         "process_id": "region-1",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "depth": 1,
         "objective": "Run the independently verifiable region-1 isolation probe and persist only control-published evidence.",
         "experiment_ids": [
@@ -200,6 +200,36 @@
         "public_input:resumable_reasoning_pilot_v1.py@ff55438e933e91dad3057167c2243f0ef4933df2",
         "public_input:resumable_reasoning_matrix_runset_v1.json@352027642d461e2f42a93bd32911beee54eafb22"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-D-002-leaf_worker-region-1-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "region-1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT",
+        "role": "leaf_worker",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ],
+        "github_transport_verified": true
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "public_input:resumable_reasoning_p3_fixture_v1.json@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
+        "experiment:E_isolate_r1"
+      ]
     }
   ],
   "events": [
@@ -222,9 +252,30 @@
         "global-control"
       ],
       "note": "Four regional leaves are independently executable. Coupled-residual and global-control leaves depend on durable regional evidence and each permit one evidence-conditioned experiment choice."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P3-D-002-leaf_worker-region-1-g0",
+      "role": "leaf_worker",
+      "process_id": "region-1"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-D-002-E_isolate_r1-g0",
+      "generation": 0,
+      "process_id": "region-1",
+      "experiment_id": "E_isolate_r1",
+      "payload_ref": "experiment:E_isolate_r1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-D-002-E_isolate_r1-g0",
+    "kind": "experiment",
+    "payload_ref": "experiment:E_isolate_r1",
+    "process_id": "region-1",
+    "experiment_id": "E_isolate_r1"
+  },
   "external_results": {},
   "established_findings": [
     {
@@ -269,13 +320,20 @@
     "public_input:resumable_reasoning_pilot_v1.py@ff55438e933e91dad3057167c2243f0ef4933df2",
     "public_input:resumable_reasoning_matrix_runset_v1.json@352027642d461e2f42a93bd32911beee54eafb22"
   ],
-  "candidate_actions": [],
-  "next_safe_action": "Launch a brand-new role-isolated GPT-5.6 Sol Instant leaf_worker chat for one READY regional leaf. The leaf worker may request at most one external experiment and must stop; do not perform critic or synthesis yet.",
+  "candidate_actions": [
+    {
+      "process_id": "region-1",
+      "experiment_id": "E_isolate_r1",
+      "action": "Await control-published result for the authorized region-1 isolation probe.",
+      "authority": "fixture_only_external_experiment_request"
+    }
+  ],
+  "next_safe_action": "STOP. Await control evaluator publication of E_isolate_r1 into this same run-state file; do not poll, infer results, or perform any other leaf.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 0,
+    "reasoning_invocations": 2,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
