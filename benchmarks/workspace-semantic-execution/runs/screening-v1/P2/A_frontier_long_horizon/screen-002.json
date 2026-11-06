@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -185,6 +185,21 @@
         "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
         "E_queue_4x": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
       }
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
     }
   ],
   "pending_external": null,
@@ -270,7 +285,7 @@
     "control-result:E_queue_4x#fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop at TERMINAL_CANDIDATE. Control evaluator must validate the exact terminal submission; worker must not self-validate or mark COMPLETE.",
+  "next_safe_action": "Screening run complete. Preserve this P2 A run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
@@ -288,7 +303,15 @@
     ],
     "rationale": "The primary mechanism is retained retry state across pooled request lifecycles. Baseline O1 couples high p95 latency (412 ms) with elevated retries (3.1/request). O2 shows that halving concurrency reduces p95 to 286 ms, but that load-relief correlation is non-discriminating and does not identify queue saturation. O3 further weakens queue saturation because CPU stays below 48% and queue occupancy below 62%. The first causal intervention, E_force_retry_reset, leaves pool reuse enabled but resets retry state at each request boundary; it reduces p95 to 219 ms and mean retries to 1.0, directly supporting H_retry_state. The second causal intervention, E_queue_4x, increases queue capacity fourfold while holding concurrency and retry policy fixed; p95 remains 405 ms and retries 3.0, directly rejecting H_queue as the primary cause. H_clock_bucket is also rejected as the primary mechanism because the retry-reset intervention fixes the regression without changing timeout timestamp quantization. Thus the concurrency effect in O2 is load relief, not the causal mechanism."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 3,
     "experiment_requests": 2,
@@ -301,14 +324,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-A-002-exp-002",
-    "last_experiment_id": "E_queue_4x",
-    "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/A_frontier_long_horizon/screen-002.json"
