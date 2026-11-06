@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -130,6 +130,11 @@
       "generation": 0,
       "experiment_id": "E_isolate_r1",
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003"
     }
   ],
   "pending_external": null,
