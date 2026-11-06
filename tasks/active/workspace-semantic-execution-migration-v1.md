@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P3 A/B-only operation is active by user request. A replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol High chat after control-published E_isolate_r3. B replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after control-published E_global_retry_reset. Preserve both chats continuously until those runs complete. Do not advance P3 C, D, or E unless the user explicitly re-enables them.
+P3 A/B-only operation remains active by user request. A replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol High chat after control-published E_isolate_r4; A now has all four regional isolation results. B replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after control-published E_desynchronize_timers; B now has E_global_retry_reset and E_desynchronize_timers in addition to its regional evidence. Preserve both chats continuously until completion. Do not advance P3 C, D, or E unless the user explicitly re-enables them.
 
 ## Remaining work
 
