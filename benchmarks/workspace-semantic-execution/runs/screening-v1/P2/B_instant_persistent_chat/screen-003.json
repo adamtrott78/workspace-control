@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P2-B-003-worker",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -61,7 +61,28 @@
   },
   "started_at": "2026-11-05T19:37:00-05:00",
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-001",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1248,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_disable_pool_reuse"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
@@ -72,21 +93,68 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-B-003-exp-001",
+      "generation": 0,
+      "payload_ref": "E_disable_pool_reuse"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-B-003-exp-001",
+    "kind": "synthetic_experiment",
+    "payload_ref": "E_disable_pool_reuse"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Run one bounded PRIMARY reasoning quantum and request exactly one discriminating experiment if external evidence is needed.",
+  "established_findings": [
+    {
+      "id": "F_initial",
+      "statement": "O1 shows high latency/retries at concurrency 64; O3 shows CPU below 48% and queue occupancy below 62%, weakening queue-capacity saturation as the primary mechanism."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "priority_test",
+      "basis": "Directly explains elevated retries and predicts sensitivity to pooled lifecycle reuse/reset."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "open",
+      "basis": "Could bunch retries but is not yet discriminated."
+    },
+    {
+      "id": "H_queue",
+      "status": "weakened",
+      "basis": "O3 reports substantial CPU and queue headroom; O2 load relief alone is non-discriminating."
+    }
+  ],
+  "unresolved_questions": [
+    "Does disabling pool reuse eliminate the retry/latency regression?"
+  ],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_disable_pool_reuse",
+      "reason": "Directly tests whether pooled lifecycle reuse is necessary for retry-state amplification while holding concurrency and retry policy fixed."
+    }
+  ],
+  "next_safe_action": "Wait for control evaluator to publish the E_disable_pool_reuse result into this run state; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
-    "experiment_requests": 0,
+    "reasoning_invocations": 1,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
