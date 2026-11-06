@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -71,7 +71,7 @@
       },
       {
         "role": "leaf_worker",
-        "status": "WAITING_EXTERNAL"
+        "status": "READY"
       }
     ],
     "active_role": null,
@@ -108,7 +108,7 @@
       },
       {
         "process_id": "region-4",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY_TO_RESUME",
         "depth": 1,
         "objective": "Run the independently verifiable region-4 isolation probe and persist only control-published evidence.",
         "experiment_ids": [
@@ -564,15 +564,18 @@
       "process_id": "region-4",
       "experiment_id": "E_isolate_r4",
       "payload_ref": "experiment:E_isolate_r4"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-D-002-E_isolate_r4-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "region-4",
+      "experiment_id": "E_isolate_r4",
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-D-002-E_isolate_r4-g0",
-    "generation": 0,
-    "process_id": "region-4",
-    "experiment_id": "E_isolate_r4",
-    "payload_ref": "experiment:E_isolate_r4"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-D-002-E_isolate_r1-g0",
@@ -608,6 +611,18 @@
         "other_regions_materially_changed": false
       },
       "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r4": {
+      "request_id": "screening-v1-P3-D-002-E_isolate_r4-g0",
+      "experiment_id": "E_isolate_r4",
+      "result": {
+        "region": "r4",
+        "p95_latency_ms": 326,
+        "mean_retries": 2,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
       "publication_scope": "requested experiment only"
     }
   },
@@ -679,7 +694,7 @@
     "external_result:E_isolate_r3@e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Wait for the control evaluator to publish the result for E_isolate_r4 into this run state and set READY_TO_RESUME. Stop; do not poll or perform coupled-residual, global-control, independent_critic, or synthesizer work.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant leaf_worker chat for process region-4. Re-read durable state, consume only the control-published E_isolate_r4 result, persist the region-4 leaf conclusion, and stop. Do not perform coupled-residual, global-control, independent_critic, or synthesizer work in that chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -697,11 +712,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "WAITING_EXTERNAL",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P3-D-002-E_isolate_r4-g0",
     "last_experiment_id": "E_isolate_r4",
-    "result_hash": null,
-    "note": "Awaiting control-published result for the single requested experiment."
+    "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/D_instant_decompose_critic/screen-002.json"
