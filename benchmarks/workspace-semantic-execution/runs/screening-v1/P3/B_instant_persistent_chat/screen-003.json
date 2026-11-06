@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "p3-b-persistent-worker-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -273,6 +273,36 @@
         "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
       ],
       "reasoning_summary": "Six experiment cycles are complete. Three independent regional isolation probes reduce latency/retries; resetting retry state at cross-region boundaries globally normalizes both; timer desynchronization and doubled capacity leave the regression high. Retained cross-region retry state causing positive feedback is therefore the primary mechanism; clock synchronization and capacity saturation are rejected as primary explanations."
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q008",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "validator:missing_required_discriminating_experiment:E_isolate_r4",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r4"
+      ],
+      "reasoning_summary": "The public objective validator rejected the terminal candidate solely for missing required discriminating experiment E_isolate_r4. Request exactly that experiment; do not alter the substantive hypothesis from validator information beyond this explicit requirement.",
+      "experiment_id": "E_isolate_r4"
     }
   ],
   "events": [
@@ -436,9 +466,21 @@
       "resume_from": "validator_violation",
       "violation": "missing_required_discriminating_experiment:E_isolate_r4",
       "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-007",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r4",
+      "experiment_id": "E_isolate_r4"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-B-003-exp-007",
+    "kind": "experiment",
+    "experiment_id": "E_isolate_r4",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r4"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-B-003-exp-001",
@@ -604,7 +646,10 @@
       "reason": "Global 2x capacity leaves latency/retry amplification high; O2/O3 already showed load relief without eliminating retry amplification."
     }
   ],
-  "unresolved_questions": [],
+  "unresolved_questions": [
+    "Does the required fourth regional isolation probe replicate the cross-region propagation effect?",
+    "After E_isolate_r4 is published, revise the terminal submission with its exact result hash and return it for objective validation."
+  ],
   "evidence_refs": [
     "O1",
     "O2",
@@ -647,7 +692,7 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "Consume only the published missing_required_discriminating_experiment:E_isolate_r4 violation and request E_isolate_r4.",
+  "next_safe_action": "STOP. Wait for the control evaluator to publish the exact result for E_isolate_r4 and set READY_TO_RESUME; do not poll.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_feedback",
     "rejected_hypotheses": [
@@ -682,9 +727,9 @@
     }
   ],
   "metrics": {
-    "reasoning_invocations": 7,
-    "experiment_requests": 6,
-    "retries": 0,
+    "reasoning_invocations": 8,
+    "experiment_requests": 7,
+    "retries": 1,
     "decomposition_count": 0,
     "decomposition_depth": 0,
     "failed_leaves": 0,
