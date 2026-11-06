@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -208,14 +208,30 @@
       "request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
       "generation": 0,
       "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r1"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
+      "generation": 0,
+      "experiment_id": "E_isolate_r1",
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
-    "kind": "EXPERIMENT",
-    "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r1"
+  "pending_external": null,
+  "external_results": {
+    "E_isolate_r1": {
+      "request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
+      "experiment_id": "E_isolate_r1",
+      "result": {
+        "region": "r1",
+        "p95_latency_ms": 315,
+        "mean_retries": 1.9,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "publication_scope": "requested experiment only"
+    }
   },
-  "external_results": {},
   "established_findings": [
     {
       "id": "F_route_001",
@@ -287,7 +303,7 @@
       "authority": "fixture_only_external_request"
     }
   ],
-  "next_safe_action": "Stop without polling. Await control evaluator publication of E_isolate_r1 into this same run-state file and READY_TO_RESUME before any further reasoning. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant lower-tier chat. Read this run state first, consume only the published E_isolate_r1 result, perform one authorized lower-tier transition, persist the next protocol boundary, and stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -305,8 +321,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
+    "last_experiment_id": "E_isolate_r1",
+    "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-003.json"
