@@ -75,11 +75,12 @@
       },
       {
         "role": "independent_critic",
-        "status": "READY",
+        "status": "COMPLETED",
         "evidence_refs": [
           "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
           "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
-        ]
+        ],
+        "decision": "CRITIQUE_COMPLETE"
       }
     ],
     "active_role": null,
@@ -102,7 +103,13 @@
       }
     ],
     "independent_critic": {
-      "status": "READY",
+      "status": "COMPLETED",
+      "decision": "CRITIQUE_COMPLETE",
+      "conclusion": "The two durable experiment/result cycles sufficiently support retained retry state as the primary regression mechanism: E_queue_4x is near-null, rejecting queue-capacity saturation as primary, while E_force_retry_reset restores p95 latency from 412 to 219 ms and mean retries from 3.1 to 1.0 despite pool reuse remaining enabled.",
+      "limitations": [
+        "H_clock_bucket was not independently tested and therefore is not ruled out as a contributing mechanism.",
+        "O2 remains potentially non-discriminating load relief and is not causal evidence for the primary mechanism."
+      ],
       "evidence_refs": [
         "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
         "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
@@ -156,6 +163,15 @@
       "chat_configuration": "Instant",
       "decision": "EVIDENCE_READY",
       "note": "Consumed only control-published E_force_retry_reset. Resetting retry state at request boundaries while leaving pool reuse enabled reduced p95 412→219 ms and mean retries 3.1→1.0, strongly supporting H_retry_state as the primary mechanism. Together with the prior near-null E_queue_4x result, the required two experiment/result cycles are complete and H_queue is rejected as a competing primary hypothesis. O2 remains potentially non-discriminating load relief; H_clock_bucket is not independently ruled out. Stopped at the independent_critic role boundary."
+    },
+    {
+      "generation": 0,
+      "role": "independent_critic",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "CRITIQUE_COMPLETE",
+      "note": "Fresh role-isolated independent critic. Reviewed only the two durable control-published result hashes in the assigned run state. Concludes retained retry state is sufficiently supported as primary and queue-capacity saturation is rejected as primary; preserves H_clock_bucket as not independently ruled out and O2 as potentially non-discriminating. No synthesizer work performed."
     }
   ],
   "events": [
@@ -227,6 +243,16 @@
       "process_id": "screening-v1-P2-D-003-leaf-001",
       "decision": "EVIDENCE_READY",
       "rationale": "Two required experiment/result cycles are durable. E_queue_4x rejects queue-capacity saturation as primary; E_force_retry_reset strongly supports retained retry state. O2 is preserved as potentially non-discriminating, and H_clock_bucket remains not independently ruled out. Independent critique is now the next explicit role boundary."
+    },
+    {
+      "kind": "INDEPENDENT_CRITIC_ROLE_COMPLETED",
+      "generation": 0,
+      "decision": "CRITIQUE_COMPLETE",
+      "evidence_refs": [
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ],
+      "rationale": "E_queue_4x is near-null while E_force_retry_reset strongly restores latency and retries with pool reuse retained. This is sufficient to support retained retry state as primary, subject to the explicit limitation that H_clock_bucket remains independently untested and O2 is non-discriminating load relief."
     }
   ],
   "pending_external": null,
@@ -264,6 +290,10 @@
     {
       "id": "L2",
       "finding": "E_force_retry_reset is strongly discriminating versus O1: with pool reuse still enabled, request-boundary retry-state reset reduces p95 412→219 ms and mean retries 3.1→1.0, supporting retained retry state as the primary regression mechanism."
+    },
+    {
+      "id": "C1",
+      "finding": "Independent critique accepts the two durable cycles as sufficient to support retained retry state as the primary regression mechanism and reject queue-capacity saturation as primary; H_clock_bucket remains not independently ruled out, and O2 remains potentially non-discriminating load relief."
     }
   ],
   "open_hypotheses": [
@@ -289,7 +319,7 @@
     }
   ],
   "unresolved_questions": [
-    "Independent critic must assess whether the two durable experiment cycles sufficiently support H_retry_state as primary while preserving the limitation that H_clock_bucket was not independently tested.",
+    "H_clock_bucket remains not independently ruled out and must not be represented as eliminated by the current evidence.",
     "O2 must remain characterized as potentially non-discriminating load relief rather than causal evidence."
   ],
   "evidence_refs": [
@@ -302,16 +332,16 @@
   ],
   "candidate_actions": [
     {
-      "action": "Stop leaf_worker work. Next eligible invocation is a fresh role-isolated independent_critic review of the durable evidence only; do not perform critic work in this invocation.",
-      "status": "READY",
-      "authority": "treatment_state.independent_critic.status=READY"
+      "action": "Stop at the independent_critic role boundary. Do not perform synthesizer work unless the durable scheduler explicitly promotes synthesizer.",
+      "status": "BLOCKED_ON_SCHEDULER_PROMOTION",
+      "authority": "treatment_state.synthesizer.status=NOT_READY"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role independent_critic. Re-read durable state only, review the durable leaf evidence independently, persist only the assigned run-state path, and stop at the next explicit role/protocol boundary.",
+  "next_safe_action": "Await durable scheduler promotion of synthesizer. Do not perform synthesizer work while treatment_state.synthesizer.status remains NOT_READY.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 4,
+    "reasoning_invocations": 5,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
