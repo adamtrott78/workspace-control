@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 4,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -324,14 +324,16 @@
       "request_id": "q4-E_global_retry_reset",
       "generation": 4,
       "payload_ref": "E_global_retry_reset"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "q4-E_global_retry_reset",
+      "generation": 4,
+      "experiment_id": "E_global_retry_reset",
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
     }
   ],
-  "pending_external": {
-    "request_id": "q4-E_global_retry_reset",
-    "generation": 4,
-    "experiment_id": "E_global_retry_reset",
-    "status": "REQUESTED"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "q0-E_isolate_r1",
@@ -379,6 +381,22 @@
         "other_regions_materially_changed": false
       },
       "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+      "publication_scope": "requested experiment only"
+    },
+    "E_global_retry_reset": {
+      "request_id": "q4-E_global_retry_reset",
+      "experiment_id": "E_global_retry_reset",
+      "result": {
+        "all_regions_p95_ms_range": [
+          215,
+          235
+        ],
+        "mean_retries_range": [
+          0.9,
+          1.1
+        ]
+      },
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
       "publication_scope": "requested experiment only"
     }
   },
@@ -508,7 +526,7 @@
       "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
     }
   ],
-  "next_safe_action": "Stop this chat. Control must publish only the requested E_global_retry_reset result. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 5; re-read durable state, consume only E_global_retry_reset, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 5. Re-read durable state, consume only E_global_retry_reset, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -526,11 +544,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "REQUESTED",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "q4-E_global_retry_reset",
     "last_experiment_id": "E_global_retry_reset",
-    "result_hash": null,
-    "note": "Worker requested the next coupled-residual discriminator after completing four-region isolation replication; awaiting control-published requested measurement only."
+    "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/C_instant_stateless_resume/screen-002.json"
