@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -132,6 +132,39 @@
         "external_result:E_isolate_r1#060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
         "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_isolate_r2"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-A-003-g0-q3",
+      "generation": 0,
+      "owner": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol High was selected for this conversation."
+        ],
+        "worker_verified": {
+          "github_available": true,
+          "prior_benchmark_or_control_context_present": false
+        }
+      },
+      "context_bytes": 5924,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "external_result:E_isolate_r2#e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+        "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_isolate_r3"
+      ]
     }
   ],
   "events": [
@@ -192,9 +225,27 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 7
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-A-003-E_isolate_r3-003",
+      "generation": 0,
+      "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_isolate_r3",
+      "experiment_id": "E_isolate_r3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-A-003-E_isolate_r3-003",
+    "kind": "EXPERIMENT",
+    "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_isolate_r3",
+    "experiment_id": "E_isolate_r3",
+    "intervention": "Temporarily isolate region 3 from cross-region retry propagation while preserving local retry policy."
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-A-003-E_isolate_r1-001",
@@ -239,30 +290,38 @@
         "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
       ],
       "finding": "Isolating region 1 from cross-region retry propagation reduced r1 p95 latency from the observed elevated regime to 315 ms and mean retries to 1.9, while other regions did not materially change. This is evidence that cross-region propagation contributes causally to the local regression, but a single regional isolation does not yet distinguish retained retry-state feedback from a cross-region timing/synchronization mechanism."
+    },
+    {
+      "id": "F_E_isolate_r2",
+      "basis": [
+        "E_isolate_r2",
+        "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+      ],
+      "finding": "Isolating region 2 from cross-region retry propagation reduced r2 p95 latency to 322 ms and mean retries to 2.0, while other regions did not materially change. This independently replicates the region-1 pattern, strengthening evidence that cross-region propagation causally contributes to the regression while still leaving retained retry-state feedback versus synchronized timing unresolved."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
-      "status": "STRENGTHENED_UNRESOLVED",
-      "rationale": "E_isolate_r1 causally links cross-region retry propagation to region-1 latency/retry improvement without materially changing other regions. Replication across additional regions and a global retry-state reset are still needed to identify retained-state feedback as the primary mechanism."
+      "status": "STRONGLY_STRENGTHENED_UNRESOLVED",
+      "rationale": "Two independent regional propagation-isolation probes reduced both latency and retry amplification locally without materially changing other regions. This repeated causal pattern is consistent with propagated retained retry state, but a coupled global retry-state reset is still needed to identify that mechanism directly."
     },
     {
       "id": "H_clock_sync",
       "status": "PLAUSIBLE_UNRESOLVED",
-      "rationale": "E_isolate_r1 is also compatible with a synchronized cross-region retry/timer mechanism because severing propagation can disrupt correlated timing. Timer desynchronization remains required as a competing-mechanism intervention."
+      "rationale": "The two isolation results can still be explained by a cross-region timing/synchronization mechanism because isolation may break synchronized retry timing. A timer-desynchronization intervention remains necessary to discriminate it."
     },
     {
       "id": "H_capacity",
-      "status": "FURTHER_WEAKENED_NOT_REJECTED",
-      "rationale": "The targeted propagation isolation improved latency and retries without adding capacity, which weighs against pure regional capacity saturation; O2 still establishes that load relief can reduce latency, so a global capacity/concurrency control is still needed."
+      "status": "SUBSTANTIALLY_WEAKENED_NOT_REJECTED",
+      "rationale": "Two targeted propagation isolations improved latency and retries without increasing capacity, arguing against regional capacity saturation as the primary mechanism. O2 still shows real load sensitivity, so capacity/load effects must be addressed as secondary symptom relief rather than ignored."
     }
   ],
   "unresolved_questions": [
-    "Does the region-1 causal pattern replicate when region 2 is isolated from cross-region retry propagation?",
-    "Do additional regional isolation probes show the same local improvement without materially changing non-isolated regions?",
-    "Does resetting retry state at every cross-region boundary eliminate the coupled residual more strongly than timer desynchronization?",
-    "Does a capacity/control intervention reduce latency without eliminating retry amplification, confirming O2 as symptom relief rather than mechanism identification?"
+    "Does the regional propagation-isolation effect replicate in region 3 and region 4?",
+    "Does resetting retry state at every cross-region boundary eliminate the coupled residual, directly supporting retained retry-state feedback?",
+    "Does timer desynchronization fail to reproduce the full effect of retry-state reset, allowing H_clock_sync to be rejected?",
+    "How should O2's genuine load-relief effect be interpreted relative to the propagation mechanism?"
   ],
   "evidence_refs": [
     "fixture:research-iterate-cross-region-feedback-p3-v1#O1",
@@ -270,7 +329,8 @@
     "fixture:research-iterate-cross-region-feedback-p3-v1#O3",
     "fixture:research-iterate-cross-region-feedback-p3-v1#O4",
     "blob:2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
-    "external_result:E_isolate_r1#060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    "external_result:E_isolate_r1#060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+    "external_result:E_isolate_r2#e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
   ],
   "candidate_actions": [
     {
@@ -278,51 +338,52 @@
       "role": "regional_leaf",
       "status": "OBSERVED",
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
-      "reason": "Causal regional evidence: isolation improved r1 latency/retries without material change elsewhere."
+      "reason": "Observed causal local improvement under propagation isolation."
     },
     {
       "experiment_id": "E_isolate_r2",
       "role": "regional_leaf",
-      "status": "REQUEST_NOW",
-      "reason": "Replicate the regional causal pattern independently before moving to coupled residual synthesis."
+      "status": "OBSERVED",
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+      "reason": "Independent replication of the regional causal pattern."
     },
     {
       "experiment_id": "E_isolate_r3",
       "role": "regional_leaf",
-      "status": "PROPOSED_AFTER_RESULT",
-      "reason": "Additional regional replication if needed to establish consistency."
+      "status": "REQUEST_NOW",
+      "reason": "Continue the four-region independent evidence sweep before coupled synthesis."
     },
     {
       "experiment_id": "E_isolate_r4",
       "role": "regional_leaf",
       "status": "PROPOSED_AFTER_RESULT",
-      "reason": "Additional regional replication if needed to establish consistency."
+      "reason": "Complete regional coverage if the r3 pattern remains consistent."
     },
     {
       "experiment_id": "E_global_retry_reset",
       "role": "coupled_residual",
       "status": "PROPOSED_AFTER_REGIONAL_EVIDENCE",
-      "reason": "Directly tests retained retry-state propagation across region boundaries."
+      "reason": "Directly tests retained retry-state propagation across every cross-region boundary."
     },
     {
       "experiment_id": "E_desynchronize_timers",
       "role": "competing_mechanism",
       "status": "PROPOSED_CONTROL",
-      "reason": "Discriminates clock/timer synchronization from retry-state feedback."
+      "reason": "Discriminates synchronized timer behavior from retained retry-state feedback."
     },
     {
       "experiment_id": "E_capacity_2x",
       "role": "global_control",
-      "status": "ALTERNATE_PROPOSED_CONTROL",
-      "reason": "Tests whether added capacity reduces latency without resolving retry amplification."
+      "status": "OPTIONAL_CONTROL",
+      "reason": "Can test whether added capacity changes latency without eliminating retry amplification if a separate load/capacity control is still needed."
     }
   ],
-  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_isolate_r2, continue until the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
+  "next_safe_action": "STOP. Await control-published result for E_isolate_r3 in this assigned run-state file; do not poll. Resume this same persistent GPT-5.6 Sol High chat only after status becomes READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 2,
+    "reasoning_invocations": 3,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
