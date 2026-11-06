@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-worker-P3-A-screen-002-g0",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -98,6 +98,37 @@
       "evidence_refs": [
         "experiment:E_isolate_r1"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-A-002-g0-q002",
+      "generation": 0,
+      "owner": "screening-worker-P3-A-screen-002-g0",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "user_attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol High was selected for this conversation."
+        ],
+        "worker_observations": {
+          "github_available": true,
+          "prior_benchmark_or_control_context_present": false
+        }
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "experiment:E_isolate_r2"
+      ]
     }
   ],
   "events": [
@@ -134,9 +165,29 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "screening-worker-P3-A-screen-002-g0"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-A-002-g0-exp-002",
+      "generation": 0,
+      "payload_ref": "experiment:E_isolate_r2",
+      "experiment_id": "E_isolate_r2"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-A-002-g0-exp-002",
+    "kind": "EXPERIMENT",
+    "payload_ref": "experiment:E_isolate_r2",
+    "experiment_id": "E_isolate_r2",
+    "intervention": "Temporarily isolate region 2 from cross-region retry propagation while preserving local retry policy.",
+    "cost": 1,
+    "leaf": "region-2"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-A-002-g0-exp-001",
@@ -179,80 +230,82 @@
         "O4"
       ],
       "finding": "Retry bursts correlate across regions shortly after cross-region failover events, supporting a coupled cross-region mechanism but not yet distinguishing retry-state propagation from timer synchronization."
+    },
+    {
+      "id": "F5",
+      "basis": [
+        "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+      ],
+      "finding": "Isolating region 1 from cross-region retry propagation reduced r1 p95 latency to 315 ms and mean retries to 1.9 while other regions did not materially change. This is a localized intervention effect consistent with cross-region retry propagation contributing causally to the regression; one region alone is insufficient for global synthesis."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
-      "status": "OPEN_PRIORITY",
-      "rationale": "Consistent with cross-region burst correlation and persistent retry amplification after local load relief; requires intervention evidence."
+      "status": "SUPPORTED_BY_ONE_REGIONAL_INTERVENTION",
+      "rationale": "E_isolate_r1 materially reduced both r1 latency and retries under an intervention that blocks cross-region retry propagation while preserving local retry policy. Independent regional replication and a coupled-residual intervention are still required."
     },
     {
       "id": "H_clock_sync",
-      "status": "OPEN",
-      "rationale": "Could also explain aligned retry bursts; must later be discriminated from retained retry state."
+      "status": "OPEN_COMPETING",
+      "rationale": "Aligned bursts remain compatible with timer synchronization; r1 isolation does not yet directly discriminate retained retry state from synchronized timing as the primary global mechanism."
     },
     {
       "id": "H_capacity",
       "status": "OPEN_WEAKENED",
-      "rationale": "O2 and O3 weaken a primary saturation mechanism, but a global capacity control is still required before rejection."
+      "rationale": "O2/O3 already weaken primary saturation, and the r1 propagation-specific intervention improves retries without a global capacity change. A competing global capacity/control experiment is still required before rejection."
     }
   ],
   "unresolved_questions": [
-    "Does isolating a region from cross-region retry propagation suppress abnormal retry amplification while preserving its local retry policy?",
-    "Is any isolation effect consistent across independently probed regions?",
-    "For the coupled residual, does resetting retry state at cross-region boundaries discriminate against timer synchronization?",
+    "Is the region-1 isolation effect reproducible in the other independently probed regions?",
+    "For the coupled residual, does resetting retry state at cross-region boundaries discriminate retained retry-state feedback from timer synchronization?",
     "Does a competing capacity/control intervention fail to remove retry amplification despite reducing load-related latency?"
   ],
   "evidence_refs": [
     "fixture:O1",
     "fixture:O2",
     "fixture:O3",
-    "fixture:O4"
+    "fixture:O4",
+    "external_result:E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
   ],
   "candidate_actions": [
     {
-      "experiment_id": "E_isolate_r1",
-      "priority": 1,
-      "rationale": "Begin the fixture-directed independently testable regional evidence sequence."
-    },
-    {
       "experiment_id": "E_isolate_r2",
-      "priority": 2,
-      "rationale": "Replicate the regional isolation signal independently."
+      "priority": 1,
+      "rationale": "Replicate the propagation-specific regional intervention independently after the positive r1 result."
     },
     {
       "experiment_id": "E_isolate_r3",
-      "priority": 3,
-      "rationale": "Replicate the regional isolation signal independently."
+      "priority": 2,
+      "rationale": "Continue independent regional replication."
     },
     {
       "experiment_id": "E_isolate_r4",
-      "priority": 4,
+      "priority": 3,
       "rationale": "Complete the four-region isolation evidence set."
     },
     {
       "experiment_id": "E_global_retry_reset",
-      "priority": 5,
-      "rationale": "Coupled-residual intervention targeted at retained retry-state propagation."
+      "priority": 4,
+      "rationale": "Required coupled-residual intervention targeted directly at retained retry-state propagation."
     },
     {
       "experiment_id": "E_capacity_2x",
-      "priority": 6,
-      "rationale": "Competing-mechanism control needed before rejecting primary capacity saturation."
+      "priority": 5,
+      "rationale": "Required competing-mechanism/global control before rejecting capacity saturation."
     },
     {
       "experiment_id": "E_desynchronize_timers",
-      "priority": 7,
-      "rationale": "Use if needed to directly distinguish timer synchronization from retry-state feedback after the required residual/control evidence."
+      "priority": 6,
+      "rationale": "Additional direct discriminator for timer synchronization if needed after required residual/control evidence."
     }
   ],
-  "next_safe_action": "Reason one bounded resumed PRIMARY quantum using only the published E_isolate_r1 result, then request the next single catalog experiment or checkpoint.",
+  "next_safe_action": "Stop reasoning and wait for the control evaluator to publish only the E_isolate_r2 result into this run-state file and set READY_TO_RESUME. Do not poll; resume this same persistent GPT-5.6 Sol High conversation after publication.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
