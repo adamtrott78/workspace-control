@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -417,6 +417,17 @@
       "generation": 0,
       "worker_id": "p3-b-persistent-worker-screen-003",
       "final_hypothesis": "H_retry_feedback"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_isolate_r4"
+      ],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
     }
   ],
   "pending_external": null,
@@ -628,7 +639,7 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "STOP. Await control evaluator validation of the terminal candidate; do not poll or mark COMPLETED without a passing control validator.",
+  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only the control-published validator violation missing_required_discriminating_experiment:E_isolate_r4, continue to the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_feedback",
     "rejected_hypotheses": [
@@ -651,7 +662,17 @@
     ],
     "rationale": "The primary mechanism is retained retry state propagating across cross-region failover boundaries and creating a positive feedback loop. Independent isolation of r1, r2, and r3 lowers each isolated region's latency and retries without materially changing other regions, establishing a repeatable cross-region propagation contribution. The discriminating coupled intervention, E_global_retry_reset, collapses all-region p95 latency to 215–235 ms and retries to 0.9–1.1 while preserving failover and pooling. In contrast, E_desynchronize_timers leaves p95 at 425–462 ms and retries at 2.7–3.2, rejecting clock/timer synchronization as primary. E_capacity_2x leaves p95 at 420–455 ms and retries at 2.7–3.1; together with O2, where concurrency relief lowers latency but not abnormal retry amplification, and O3's moderate CPU/queue occupancy, this rejects capacity saturation as primary. O4's correlated post-failover bursts are explained by propagated retry state, and O1 is resolved by the global retry-state reset."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_isolate_r4"
+      ],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 7,
     "experiment_requests": 6,
@@ -664,14 +685,18 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-B-003-exp-006",
-    "last_experiment_id": "E_isolate_r3",
-    "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_FAIL",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": false,
+    "score": 0.8,
+    "violations": [
+      "missing_required_discriminating_experiment:E_isolate_r4"
+    ],
+    "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba",
+    "note": "Objective validator result only. Resume the same persistent worker chat from this public violation boundary."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/B_instant_persistent_chat/screen-003.json"
