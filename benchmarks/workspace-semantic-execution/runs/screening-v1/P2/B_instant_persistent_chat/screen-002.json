@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P2-B-002-persistent-worker",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -116,6 +116,11 @@
       "generation": 0,
       "experiment_id": "E_force_retry_reset",
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-002-persistent-worker"
     }
   ],
   "pending_external": null,
@@ -190,7 +195,7 @@
       "rationale": "Potential second-cycle discriminator for H_clock_bucket."
     }
   ],
-  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only the control-published E_force_retry_reset result, continue until the next protocol-required boundary, persist state, and stop. Do not open a replacement chat while persistent continuity is required.",
+  "next_safe_action": "Consume the published E_force_retry_reset result in one bounded reasoning quantum; request exactly one second discriminating experiment if required, then stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
