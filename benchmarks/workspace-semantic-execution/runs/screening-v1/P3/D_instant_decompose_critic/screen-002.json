@@ -29,9 +29,27 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
+  "status": "READY_TO_RESUME",
   "owner": null,
-  "executor_identity": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "tier": "INSTANT",
+    "role": "decomposer",
+    "identity_source": "user_attestation",
+    "user_attestation": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ],
+    "github_transport_verified": true
+  },
   "continuity_regime": "fresh_or_role_isolated_instant_workers",
   "treatment_contract": {
     "mode": "instant_decompose_critic",
@@ -49,11 +67,88 @@
     "role_queue": [
       {
         "role": "decomposer",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
         "status": "READY"
       }
     ],
     "active_role": null,
-    "leaf_processes": [],
+    "leaf_processes": [
+      {
+        "process_id": "region-1",
+        "status": "READY",
+        "depth": 1,
+        "objective": "Run the independently verifiable region-1 isolation probe and persist only control-published evidence.",
+        "experiment_ids": [
+          "E_isolate_r1"
+        ],
+        "dependencies": []
+      },
+      {
+        "process_id": "region-2",
+        "status": "READY",
+        "depth": 1,
+        "objective": "Run the independently verifiable region-2 isolation probe and persist only control-published evidence.",
+        "experiment_ids": [
+          "E_isolate_r2"
+        ],
+        "dependencies": []
+      },
+      {
+        "process_id": "region-3",
+        "status": "READY",
+        "depth": 1,
+        "objective": "Run the independently verifiable region-3 isolation probe and persist only control-published evidence.",
+        "experiment_ids": [
+          "E_isolate_r3"
+        ],
+        "dependencies": []
+      },
+      {
+        "process_id": "region-4",
+        "status": "READY",
+        "depth": 1,
+        "objective": "Run the independently verifiable region-4 isolation probe and persist only control-published evidence.",
+        "experiment_ids": [
+          "E_isolate_r4"
+        ],
+        "dependencies": []
+      },
+      {
+        "process_id": "coupled-residual",
+        "status": "READY",
+        "depth": 1,
+        "objective": "Run exactly one coupled-residual discriminating intervention after regional evidence is durable; choose between retry-state reset and timer desynchronization based on surviving hypotheses.",
+        "experiment_ids": [
+          "E_global_retry_reset",
+          "E_desynchronize_timers"
+        ],
+        "dependencies": [
+          "region-1",
+          "region-2",
+          "region-3",
+          "region-4"
+        ]
+      },
+      {
+        "process_id": "global-control",
+        "status": "READY",
+        "depth": 1,
+        "objective": "Run exactly one competing-mechanism/control intervention and use it to test capacity/load relief against the surviving causal mechanism, including O2.",
+        "experiment_ids": [
+          "E_capacity_2x",
+          "E_half_concurrency_all"
+        ],
+        "dependencies": [
+          "region-1",
+          "region-2",
+          "region-3",
+          "region-4"
+        ]
+      }
+    ],
     "independent_critic": {
       "status": "NOT_READY",
       "evidence_refs": []
@@ -65,30 +160,125 @@
   },
   "started_at": null,
   "completed_at": null,
-  "invocations": [],
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P3-D-002-decomposer-g0",
+      "generation": 0,
+      "role": "decomposer",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT",
+        "role": "decomposer",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ],
+        "github_transport_verified": true
+      },
+      "outcome": "DECOMPOSED",
+      "decision": "TOO_LARGE",
+      "child_process_ids": [
+        "region-1",
+        "region-2",
+        "region-3",
+        "region-4",
+        "coupled-residual",
+        "global-control"
+      ],
+      "evidence_refs": [
+        "public_input:resumable_reasoning_p3_fixture_v1.json@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
+        "public_input:resumable_reasoning_p3_fixture_v1.taxonomy.json@54c63ee2d0fd7990312517fd90d2d1197cf75df1",
+        "public_input:resumable_reasoning_pilot_v1.py@ff55438e933e91dad3057167c2243f0ef4933df2",
+        "public_input:resumable_reasoning_matrix_runset_v1.json@352027642d461e2f42a93bd32911beee54eafb22"
+      ]
+    }
+  ],
   "events": [
     {
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh provenance-refrozen P3 D_instant_decompose_critic replacement slot. Prior unlaunched screen-001 is superseded."
+    },
+    {
+      "kind": "DECOMPOSITION",
+      "generation": 0,
+      "role": "decomposer",
+      "decision": "TOO_LARGE",
+      "child_process_ids": [
+        "region-1",
+        "region-2",
+        "region-3",
+        "region-4",
+        "coupled-residual",
+        "global-control"
+      ],
+      "note": "Four regional leaves are independently executable. Coupled-residual and global-control leaves depend on durable regional evidence and each permit one evidence-conditioned experiment choice."
     }
   ],
   "pending_external": null,
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
+  "established_findings": [
+    {
+      "id": "D1",
+      "finding": "The task is TOO_LARGE for a single leaf: four regional probes are independently executable, while terminal diagnosis additionally requires coupled-residual and competing-mechanism/control evidence.",
+      "source_refs": [
+        "fixture:worker_contract.decomposition_hint",
+        "taxonomy:decomposability"
+      ]
+    },
+    {
+      "id": "D2",
+      "finding": "A six-leaf plan can satisfy the minimum six experiment cycles without precommitting the coupled-residual or global-control experiment before regional evidence is available.",
+      "source_refs": [
+        "fixture:worker_contract.minimum_experiment_cycles_before_terminal_claim",
+        "fixture:experiment_catalog"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_capacity",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_retry_feedback",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_clock_sync",
+      "status": "OPEN"
+    }
+  ],
+  "unresolved_questions": [
+    "Which causal hypothesis survives the four regional isolation probes?",
+    "Which coupled-residual intervention best discriminates the surviving retry-feedback versus clock/timer mechanism?",
+    "Which global control best rejects or supports capacity saturation while explicitly addressing O2?"
+  ],
+  "evidence_refs": [
+    "public_input:resumable_reasoning_p3_fixture_v1.json@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
+    "public_input:resumable_reasoning_p3_fixture_v1.taxonomy.json@54c63ee2d0fd7990312517fd90d2d1197cf75df1",
+    "public_input:resumable_reasoning_pilot_v1.py@ff55438e933e91dad3057167c2243f0ef4933df2",
+    "public_input:resumable_reasoning_matrix_runset_v1.json@352027642d461e2f42a93bd32911beee54eafb22"
+  ],
   "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role decomposer. Persist the decomposition/LEAF_EXECUTABLE decision, then stop.",
+  "next_safe_action": "Launch a brand-new role-isolated GPT-5.6 Sol Instant leaf_worker chat for one READY regional leaf. The leaf worker may request at most one external experiment and must stop; do not perform critic or synthesis yet.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 0,
+    "reasoning_invocations": 1,
     "experiment_requests": 0,
     "retries": 0,
-    "decomposition_count": 0,
-    "decomposition_depth": 0,
+    "decomposition_count": 1,
+    "decomposition_depth": 1,
     "failed_leaves": 0,
     "recovered_leaves": 0,
     "frontier_escalations": 0,
