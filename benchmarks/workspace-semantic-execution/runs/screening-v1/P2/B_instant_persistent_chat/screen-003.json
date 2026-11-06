@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -148,13 +148,16 @@
       "request_id": "screening-v1-P2-B-003-exp-002",
       "generation": 0,
       "payload_ref": "E_force_retry_reset"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-B-003-exp-002",
+      "generation": 0,
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P2-B-003-exp-002",
-    "kind": "synthetic_experiment",
-    "payload_ref": "E_force_retry_reset"
-  },
+  "pending_external": null,
   "external_results": {
     "E_disable_pool_reuse": {
       "request_id": "screening-v1-P2-B-003-exp-001",
@@ -164,6 +167,16 @@
         "mean_retries": 1.1
       },
       "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_force_retry_reset": {
+      "request_id": "screening-v1-P2-B-003-exp-002",
+      "experiment_id": "E_force_retry_reset",
+      "result": {
+        "p95_latency_ms": 219,
+        "mean_retries": 1
+      },
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
       "publication_scope": "requested experiment only"
     }
   },
@@ -210,7 +223,7 @@
       "reason": "Mechanism-specific test: preserve pool reuse while resetting retry state, distinguishing retained retry state from generic benefits of disabling reuse."
     }
   ],
-  "next_safe_action": "Wait for control evaluator to publish the E_force_retry_reset result into this run state; do not poll. Resume this SAME persistent GPT-5.6 Sol Instant conversation afterward.",
+  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_force_retry_reset, continue until the next protocol-required boundary, persist state, and stop. Do not open, refresh, delete, or replace this chat while persistent continuity is required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -229,9 +242,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-B-003-exp-001",
-    "last_experiment_id": "E_disable_pool_reuse",
-    "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+    "last_request_id": "screening-v1-P2-B-003-exp-002",
+    "last_experiment_id": "E_force_retry_reset",
+    "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
