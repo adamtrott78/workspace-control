@@ -30,7 +30,7 @@
   ],
   "generation": 0,
   "status": "READY_TO_RESUME",
-  "owner": "screening-v1-P3-D-002-leaf_worker-coupled-residual-g0",
+  "owner": "screening-v1-P3-D-002-leaf_worker-global-control-g0",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -118,7 +118,7 @@
       },
       {
         "process_id": "coupled-residual",
-        "status": "READY_TO_RESUME",
+        "status": "COMPLETED",
         "depth": 1,
         "objective": "Run exactly one coupled-residual discriminating intervention after regional evidence is durable; choose between retry-state reset and timer desynchronization based on surviving hypotheses.",
         "experiment_ids": [
@@ -469,6 +469,35 @@
         "external_result:E_isolate_r4@65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
         "experiment:E_global_retry_reset"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-D-002-leaf_worker-coupled-residual-conclude-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "coupled-residual",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "INSTANT",
+        "role": "leaf_worker",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ],
+        "github_transport_verified": true
+      },
+      "outcome": "LEAF_COMPLETED",
+      "evidence_refs": [
+        "external_result:E_global_retry_reset@026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+      ]
     }
   ],
   "events": [
@@ -676,6 +705,22 @@
       "process_id": "coupled-residual",
       "experiment_id": "E_global_retry_reset",
       "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P3-D-002-leaf_worker-coupled-residual-conclude-g0",
+      "role": "leaf_worker",
+      "process_id": "coupled-residual"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "coupled-residual",
+      "experiment_id": "E_global_retry_reset",
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "conclusion": "Resetting retry state at every cross-region request boundary reduced all-region p95 latency to 215-235 ms and mean retries to 0.9-1.1 while failover and pooling remained enabled. Because this intervention removes retained cross-region retry state without changing timer synchronization, the result supports H_retry_feedback as the coupled mechanism and rejects H_clock_sync as the primary explanation. H_capacity remains open for the separate global-control leaf."
     }
   ],
   "pending_external": null,
@@ -789,6 +834,13 @@
       "source_refs": [
         "external_result:E_isolate_r4@65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
       ]
+    },
+    {
+      "id": "CR1",
+      "finding": "E_global_retry_reset reduced all-region p95 latency to 215-235 ms and mean retries to 0.9-1.1 while preserving failover and pooling. Removing retained retry state resolves the coupled regression without a timer intervention, supporting H_retry_feedback over H_clock_sync; H_capacity remains open pending global-control evidence.",
+      "source_refs": [
+        "external_result:E_global_retry_reset@026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -798,16 +850,14 @@
     },
     {
       "id": "H_retry_feedback",
-      "status": "OPEN"
+      "status": "SUPPORTED"
     },
     {
       "id": "H_clock_sync",
-      "status": "OPEN"
+      "status": "REJECTED"
     }
   ],
   "unresolved_questions": [
-    "Which causal hypothesis survives the four regional isolation probes?",
-    "Which coupled-residual intervention best discriminates the surviving retry-feedback versus clock/timer mechanism?",
     "Which global control best rejects or supports capacity saturation while explicitly addressing O2?"
   ],
   "evidence_refs": [
@@ -818,14 +868,15 @@
     "external_result:E_isolate_r1@060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
     "external_result:E_isolate_r2@e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
     "external_result:E_isolate_r3@e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
-    "external_result:E_isolate_r4@65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+    "external_result:E_isolate_r4@65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+    "external_result:E_global_retry_reset@026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant leaf_worker chat for process coupled-residual. Re-read durable state, consume only the control-published E_global_retry_reset result, persist the coupled-residual leaf conclusion, and stop. Do not perform global-control, independent_critic, or synthesizer work in that chat.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant leaf_worker chat for process global-control. Re-read durable state, run exactly one competing-mechanism/control intervention, persist only control-published evidence, and stop. Do not perform independent_critic or synthesizer work in that chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 10,
+    "reasoning_invocations": 11,
     "experiment_requests": 5,
     "retries": 0,
     "decomposition_count": 1,
