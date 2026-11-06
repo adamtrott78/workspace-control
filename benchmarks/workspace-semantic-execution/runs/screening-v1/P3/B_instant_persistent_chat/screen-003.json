@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "p3-b-persistent-worker-screen-003",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -428,6 +428,14 @@
         "missing_required_discriminating_experiment:E_isolate_r4"
       ],
       "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "validator_violation",
+      "violation": "missing_required_discriminating_experiment:E_isolate_r4",
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
     }
   ],
   "pending_external": null,
@@ -639,7 +647,7 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only the control-published validator violation missing_required_discriminating_experiment:E_isolate_r4, continue to the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
+  "next_safe_action": "Consume only the published missing_required_discriminating_experiment:E_isolate_r4 violation and request E_isolate_r4.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_feedback",
     "rejected_hypotheses": [
