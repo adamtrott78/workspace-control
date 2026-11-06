@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "chatgpt-worker-screening-v1-P2-A-002",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -107,6 +107,12 @@
       "generation": 0,
       "experiment_id": "E_force_retry_reset",
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-worker-screening-v1-P2-A-002",
+      "resume_from": "READY_TO_RESUME"
     }
   ],
   "pending_external": null,
@@ -171,7 +177,7 @@
       "rationale": "This intervention directly isolates request-boundary retry-state retention without changing concurrency or disabling pool reuse, so it is more causally discriminating than the observed load-relief correlation."
     }
   ],
-  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only the control-published E_force_retry_reset result, continue until the next protocol-required boundary, persist state, and stop. Do not open a replacement chat while persistent continuity is required.",
+  "next_safe_action": "Consume the control-published E_force_retry_reset result and reason one bounded PRIMARY quantum; request one second discriminating experiment if needed, then stop at WAITING_EXTERNAL.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
