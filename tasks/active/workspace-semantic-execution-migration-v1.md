@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P2 current state: A screen-002 is COMPLETED. B replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after control-published E_disable_pool_reuse. C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless chat after control-published E_queue_4x; perform exactly one bounded quantum. D replacement screen-003 decomposer is COMPLETED with LEAF_EXECUTABLE and leaf process screening-v1-P2-D-003-leaf-001 is READY; launch a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat. E screen-002 remains READY_TO_RESUME in lower-tier Instant with a prepared candidate checkpoint but no formal TERMINAL_CANDIDATE transition yet; launch a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat to persist a formal terminal candidate if durable evidence is sufficient. High remains NOT AUTHORIZED.
+P2 A screen-002 and B replacement screen-003 are COMPLETED and passed research_iterate_objective_v1 with score 1.0. Persistent-chat continuity is no longer required for either arm, so browser sign-in/refresh is safe with respect to P2 A/B. Remaining P2 work: C screen-002 is READY_TO_RESUME after control-published E_queue_4x and requires a BRAND-NEW GPT-5.6 Sol Instant stateless chat; D replacement screen-003 leaf process screening-v1-P2-D-003-leaf-001 is READY and requires a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat; E screen-002 remains READY_TO_RESUME in lower-tier Instant and requires a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat to persist a formal TERMINAL_CANDIDATE if evidence is sufficient. High remains NOT AUTHORIZED.
 
 ## Remaining work
 
-- Complete P2 B screen-003, C screen-002, D screen-003, and E screen-002; A screen-002 is complete. Then execute P3 A-E screen-002 slots if no shared protocol/public-input change is required.
+- Complete P2 C screen-002, D screen-003, and E screen-002; P2 A screen-002 and B screen-003 are complete. Then execute P3 A-E screen-002 slots if no shared protocol/public-input change is required.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
