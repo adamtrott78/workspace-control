@@ -72,6 +72,14 @@
         "action": "REQUEST_EXPERIMENT",
         "experiment_id": "E_disable_pool_reuse",
         "rationale": "E_force_retry_reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled, strongly supporting retry-state retention. Disabling pool reuse next directly tests whether pooled request lifecycles are the carrier of retained retry state and discriminates that mechanism from H_clock_bucket."
+      },
+      {
+        "invocation_id": "screen-002-q2",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "PREPARE_TERMINAL_CANDIDATE",
+        "rationale": "E_disable_pool_reuse kept mean retries near 1 (1.1) and p95 latency near the explicit-reset result (228 ms versus 219 ms), providing the required second discriminating cycle and corroborating pooled request lifecycles as the carrier of retained retry state. This supports H_retry_state over H_clock_bucket without requiring escalation."
       }
     ],
     "decomposition_state": "NOT_REQUIRED_BOUNDED_WORKLOAD",
@@ -123,6 +131,31 @@
         "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
       },
       "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q2",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "TERMINAL_CANDIDATE_PREPARED",
       "evidence_refs": [
         "O1",
         "O2",
@@ -198,6 +231,30 @@
       "generation": 0,
       "experiment_id": "E_disable_pool_reuse",
       "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q2"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q2",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "EXPERIMENT_INTERPRETATION",
+      "generation": 0,
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "note": "Disabling pool reuse yielded mean retries 1.1 and p95 latency 228 ms, closely matching the explicit retry-state reset result (1 retry, 219 ms). This second discriminating cycle corroborates pooled request lifecycles as the carrier of retained retry state, supports H_retry_state, and rejects H_clock_bucket as the primary mechanism."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_PREPARED",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q2",
+      "note": "Two discriminating interventions independently normalize retries and latency when retained retry state or its pooled-lifecycle carrier is removed. Lower-tier contract is satisfied; High escalation is unnecessary and remains unauthorized."
     }
   ],
   "pending_external": null,
@@ -235,26 +292,27 @@
     {
       "id": "F3",
       "finding": "E_force_retry_reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled, strongly supporting retained retry state as causal."
+    },
+    {
+      "id": "F4",
+      "finding": "E_disable_pool_reuse yielded mean retries 1.1 and p95 latency 228 ms, closely matching E_force_retry_reset (1 retry, 219 ms), corroborating pooled request lifecycles as the carrier of retained retry state and rejecting H_clock_bucket as the primary mechanism."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "STRONGLY_SUPPORTED_PENDING_SECOND_DISCRIMINATING_CYCLE"
+      "status": "SUPPORTED_BY_TWO_DISCRIMINATING_CYCLES"
     },
     {
       "id": "H_clock_bucket",
-      "status": "OPEN_SECONDARY_DISCRIMINATION_TARGET"
+      "status": "REJECTED_AS_PRIMARY_MECHANISM"
     },
     {
       "id": "H_queue",
-      "status": "FURTHER_WEAKENED"
+      "status": "REJECTED_AS_PRIMARY_MECHANISM"
     }
   ],
-  "unresolved_questions": [
-    "Does disabling pool reuse normalize retries and latency, corroborating pooled request lifecycles as the carrier of retained retry state?",
-    "Can H_clock_bucket be rejected after the second discriminating result?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "O1",
     "O2",
@@ -262,16 +320,24 @@
     "E_force_retry_reset",
     "E_disable_pool_reuse"
   ],
-  "candidate_actions": [
-    {
-      "action": "After control publishes E_disable_pool_reuse, interpret it against H_retry_state and H_clock_bucket; if the worker contract is satisfied, prepare a terminal candidate. Do not treat O2 as causal proof."
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_disable_pool_reuse, continue one bounded lower-tier transition, and stop at the next protocol-required boundary. High escalation remains unauthorized unless durable control state explicitly opens the gate.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Stop. Terminal candidate is prepared from two discriminating lower-tier cycles. Await protocol/control validation; do not launch High unless durable control state explicitly changes treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
+  "terminal_submission": {
+    "status": "CANDIDATE",
+    "conclusion": "Retained retry state is the supported causal mechanism, with pooled request lifecycles acting as its carrier.",
+    "evidence_refs": [
+      "O1",
+      "O2",
+      "O3",
+      "E_force_retry_reset",
+      "E_disable_pool_reuse"
+    ],
+    "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. The convergent normalization across two discriminating interventions supports retained retry state carried by pooled request lifecycles and rejects clock-bucket timing and queue saturation as primary explanations.",
+    "escalation_required": false
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
