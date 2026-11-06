@@ -81,6 +81,14 @@
           "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
         ],
         "decision": "CRITIQUE_COMPLETE"
+      },
+      {
+        "role": "synthesizer",
+        "status": "READY",
+        "evidence_refs": [
+          "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+          "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+        ]
       }
     ],
     "active_role": null,
@@ -116,8 +124,11 @@
       ]
     },
     "synthesizer": {
-      "status": "NOT_READY",
-      "evidence_refs": []
+      "status": "READY",
+      "evidence_refs": [
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ]
     }
   },
   "started_at": "2026-11-05T19:37:00-05:00",
@@ -253,6 +264,12 @@
         "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
       ],
       "rationale": "E_queue_4x is near-null while E_force_retry_reset strongly restores latency and retries with pool reuse retained. This is sufficient to support retained retry state as primary, subject to the explicit limitation that H_clock_bucket remains independently untested and O2 is non-discriminating load relief."
+    },
+    {
+      "kind": "CONTROL_ROLE_READY",
+      "generation": 0,
+      "role": "synthesizer",
+      "reason": "independent_critic_completed"
     }
   ],
   "pending_external": null,
@@ -337,7 +354,7 @@
       "authority": "treatment_state.synthesizer.status=NOT_READY"
     }
   ],
-  "next_safe_action": "Await durable scheduler promotion of synthesizer. Do not perform synthesizer work while treatment_state.synthesizer.status remains NOT_READY.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role synthesizer. Re-read durable state only, synthesize from the durable leaf evidence and independent critique, persist a protocol-valid TERMINAL_CANDIDATE if supported, mutate only the assigned run-state path, and stop for control-evaluator validation.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
