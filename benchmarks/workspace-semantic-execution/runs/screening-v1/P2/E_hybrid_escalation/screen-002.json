@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -374,6 +374,17 @@
         "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
       },
       "note": "Protocol-valid lower-tier terminal candidate resubmitted after public-schema repair for control-evaluator validation; existing corrected terminal_submission preserved and High escalation remains unauthorized."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
     }
   ],
   "pending_external": null,
@@ -440,7 +451,7 @@
     "E_disable_pool_reuse"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Await control-evaluator validation of this TERMINAL_CANDIDATE; do not self-validate or poll.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only. Address the exact control-published validator violation missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization using only the public fixture catalog; request at most one external experiment if required, persist state, and stop at the next protocol-required boundary. High remains unauthorized unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
@@ -458,7 +469,17 @@
     ],
     "rationale": "Explicit retry-state reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled. Independently disabling pool reuse produced mean retries 1.1 and p95 latency 228 ms. Convergent normalization across two discriminating interventions supports retained retry state carried by pooled request lifecycles and rejects clock-bucket timing and queue saturation as primary explanations."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 5,
     "experiment_requests": 2,
@@ -471,17 +492,18 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "TERMINAL_VALIDATOR_INPUT_REJECTED",
+    "status": "TERMINAL_VALIDATED_FAIL",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": false,
+    "score": 0.8,
     "violations": [
-      "terminal_output_schema:final_hypothesis_not_string",
-      "terminal_output_schema:rejected_hypotheses_not_string_array",
-      "terminal_output_schema:observed_results_not_hash_mapping",
-      "terminal_output_schema:addressed_observations_not_string_array"
+      "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
     ],
-    "note": "The public fixture terminal_output_schema requires final_hypothesis as a hypothesis_id string, rejected_hypotheses as an array of hypothesis_id strings, observed_results as an object mapping experiment_id to raw 64-character published result_hash strings, and addressed_observations as an array of observation_id strings. Objective scoring was not run because this malformed validator input would not produce a deterministic verdict."
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Worker may continue from the exact public violation code; hidden expected answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/E_hybrid_escalation/screen-002.json"
