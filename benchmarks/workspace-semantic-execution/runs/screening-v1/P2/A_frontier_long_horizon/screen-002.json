@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "chatgpt-worker-screening-v1-P2-A-002",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -148,6 +148,12 @@
       "generation": 0,
       "experiment_id": "E_queue_4x",
       "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-worker-screening-v1-P2-A-002",
+      "resume_from": "READY_TO_RESUME"
     }
   ],
   "pending_external": null,
@@ -232,7 +238,7 @@
       "rationale": "This second experiment directly tests the main competing queue-capacity mechanism while preserving concurrency and retry policy, allowing O2 load relief to be distinguished from causal queue saturation."
     }
   ],
-  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_queue_4x, continue until the next protocol-required boundary, persist state, and stop. Do not open a replacement chat while persistent continuity is required.",
+  "next_safe_action": "Consume only the control-published E_queue_4x result, synthesize the two experiment cycles, and submit a terminal candidate if the fixture contract is satisfied.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
