@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "FAILED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -97,7 +97,7 @@
     "escalation_evidence_refs": []
   },
   "started_at": null,
-  "completed_at": null,
+  "completed_at": "2026-11-05T21:58:00-05:00",
   "invocations": [
     {
       "invocation_id": "screen-002-g0-decompose-001",
@@ -326,13 +326,16 @@
       "request_id": "screen-002-g0-E_isolate_r4-001",
       "generation": 0,
       "payload_ref": "experiment:E_isolate_r4"
+    },
+    {
+      "kind": "CONTROL_WORKER_TRANSITION_INVALIDATION",
+      "generation": 0,
+      "reason": "WAITING_EXTERNAL_STATUS_MISSING",
+      "replacement_replicate": "screen-003",
+      "note": "Worker persisted a live E_isolate_r4 external request while run status remained READY_TO_RESUME, violating the frozen WAITING_EXTERNAL transition contract. Control did not publish the requested result."
     }
   ],
-  "pending_external": {
-    "request_id": "screen-002-g0-E_isolate_r4-001",
-    "experiment_id": "E_isolate_r4",
-    "payload_ref": "experiment:E_isolate_r4"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screen-002-g0-E_isolate_r1-001",
@@ -463,7 +466,7 @@
       "status": "WAITING_EXTERNAL"
     }
   ],
-  "next_safe_action": "Wait for control to publish the E_isolate_r4 result into durable state. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled; re-read durable state, consume only E_isolate_r4, persist the exact next protocol boundary, and stop. Do not launch High unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Do not continue this run. Use replacement replicate screen-003 from a brand-new clean GPT-5.6 Sol Instant lower-tier chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -478,14 +481,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_REQUEST_PENDING",
-    "last_request_id": "screen-002-g0-E_isolate_r4-001",
-    "last_experiment_id": "E_isolate_r4",
-    "result_hash": null,
-    "note": "Worker requested only the next authorized regional isolation experiment; awaiting control-published result."
+    "status": "WORKER_TRANSITION_CONTRACT_INVALIDATED",
+    "violations": [
+      "WAITING_EXTERNAL_STATUS_MISSING"
+    ],
+    "note": "Control did not publish the pending E_isolate_r4 result because the run was not durably in WAITING_EXTERNAL. Replacement slot required."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-002.json"
