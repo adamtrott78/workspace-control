@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -77,7 +77,7 @@
     "leaf_processes": [
       {
         "process_id": "screening-v1-P2-D-003-leaf-001",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY",
         "decomposition_depth": 0,
         "objective": "Determine the primary mechanism causing the synthetic request-latency regression using at least two experiment/result cycles; reject at least one competing hypothesis; address O2 as potentially non-discriminating; preserve exact control-published result hashes for terminal synthesis.",
         "decision_basis": "LEAF_EXECUTABLE: bounded small experiment graph, LOW_TO_MEDIUM horizon load, dependency width 1, PARTIALLY_COUPLED work, HIGH synthesis coupling, and taxonomy explicitly states this fixture is not large enough to provide strong decomposition-benefit evidence.",
@@ -89,7 +89,7 @@
           "E_half_concurrency"
         ],
         "experiment_cycles_required": 2,
-        "next_safe_action": "Stop. Control evaluator must publish the result for E_queue_4x into this run-state file and set READY_TO_RESUME; the next fresh leaf_worker quantum must resume from durable state only."
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled to consume only E_queue_4x and continue one bounded leaf quantum."
       }
     ],
     "independent_critic": {
@@ -145,14 +145,30 @@
       "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
       "experiment_id": "E_queue_4x",
       "rationale": "Directly tests queue-capacity saturation while holding concurrency and retry policy fixed; avoids treating O2 load relief as causal discrimination."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "experiment_id": "E_queue_4x",
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
-    "kind": "synthetic_experiment",
-    "payload_ref": "E_queue_4x"
+  "pending_external": null,
+  "external_results": {
+    "E_queue_4x": {
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
+      "experiment_id": "E_queue_4x",
+      "result": {
+        "p95_latency_ms": 405,
+        "mean_retries": 3
+      },
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+      "publication_scope": "requested experiment only"
+    }
   },
-  "external_results": {},
   "established_findings": [
     {
       "id": "D1",
@@ -194,7 +210,7 @@
       "authority": "treatment_contract.role_contract.leaf_worker"
     }
   ],
-  "next_safe_action": "Stop at WAITING_EXTERNAL. Control evaluator publishes E_queue_4x result; no model polling. A fresh leaf_worker role invocation then resumes from durable state.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P2-D-003-leaf-001. Re-read durable state only, consume E_queue_4x, continue one bounded leaf quantum, request at most one further experiment if required, persist state, and stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -212,8 +228,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
+    "last_experiment_id": "E_queue_4x",
+    "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-003.json"
