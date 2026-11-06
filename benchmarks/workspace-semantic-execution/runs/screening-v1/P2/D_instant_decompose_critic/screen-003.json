@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -77,7 +77,7 @@
     "leaf_processes": [
       {
         "process_id": "screening-v1-P2-D-003-leaf-001",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "decomposition_depth": 0,
         "objective": "Determine the primary mechanism causing the synthetic request-latency regression using at least two experiment/result cycles; reject at least one competing hypothesis; address O2 as potentially non-discriminating; preserve exact control-published result hashes for terminal synthesis.",
         "decision_basis": "LEAF_EXECUTABLE: bounded small experiment graph, LOW_TO_MEDIUM horizon load, dependency width 1, PARTIALLY_COUPLED work, HIGH synthesis coupling, and taxonomy explicitly states this fixture is not large enough to provide strong decomposition-benefit evidence.",
@@ -89,7 +89,7 @@
           "E_half_concurrency"
         ],
         "experiment_cycles_required": 2,
-        "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for process screening-v1-P2-D-003-leaf-001."
+        "next_safe_action": "Stop. Control evaluator must publish the result for E_queue_4x into this run-state file and set READY_TO_RESUME; the next fresh leaf_worker quantum must resume from durable state only."
       }
     ],
     "independent_critic": {
@@ -112,6 +112,17 @@
       "chat_configuration": "Instant",
       "decision": "LEAF_EXECUTABLE",
       "note": "Fresh role-isolated decomposer invocation. No experiment requested and no leaf/critic/synthesizer work performed."
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "REQUEST_EXTERNAL",
+      "experiment_id": "E_queue_4x",
+      "note": "First required experiment/result cycle. Chosen to test H_queue directly; E_half_concurrency was not chosen because O2 already establishes load relief and explicitly warns it may be non-discriminating."
     }
   ],
   "events": [
@@ -126,9 +137,21 @@
       "decision": "LEAF_EXECUTABLE",
       "process_id": "screening-v1-P2-D-003-leaf-001",
       "rationale": "Fixture is bounded and synthesis-coupled rather than horizon-heavy/separable; further decomposition would not create independently verifiable leaves."
+    },
+    {
+      "kind": "LEAF_EXPERIMENT_REQUESTED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
+      "experiment_id": "E_queue_4x",
+      "rationale": "Directly tests queue-capacity saturation while holding concurrency and retry policy fixed; avoids treating O2 load relief as causal discrimination."
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
+    "kind": "synthetic_experiment",
+    "payload_ref": "E_queue_4x"
+  },
   "external_results": {},
   "established_findings": [
     {
@@ -136,8 +159,28 @@
       "finding": "Decomposer classification is LEAF_EXECUTABLE; no further decomposition is justified by the public taxonomy and fixture structure."
     }
   ],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
+  "open_hypotheses": [
+    {
+      "id": "H_queue",
+      "status": "OPEN",
+      "statement": "The regression is primarily queue-capacity saturation under concurrency.",
+      "test": "E_queue_4x directly changes queue capacity while holding concurrency and retry policy fixed."
+    },
+    {
+      "id": "H_retry_state",
+      "status": "OPEN",
+      "statement": "Retry state is incorrectly retained across pooled request lifecycles, amplifying retries and latency."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "OPEN",
+      "statement": "Timeout timestamp quantization is causing retries to bunch into the same bucket."
+    }
+  ],
+  "unresolved_questions": [
+    "Does a 4x queue-capacity increase materially remove the latency/retry regression at fixed concurrency and retry policy?",
+    "After the first published result, which second discriminating experiment best separates the remaining mechanisms?"
+  ],
   "evidence_refs": [
     "fixture_blob_sha:389fd2ecd5bfe78e8258ecccb03dea759c043296",
     "taxonomy_profile_blob_sha:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
@@ -146,17 +189,17 @@
   ],
   "candidate_actions": [
     {
-      "action": "Run the single READY leaf process under a fresh leaf_worker role chat.",
-      "status": "PROPOSED_NEXT_ROLE",
+      "action": "Await control publication for E_queue_4x; do not poll. Resume in a fresh leaf_worker chat only after READY_TO_RESUME.",
+      "status": "WAITING_EXTERNAL",
       "authority": "treatment_contract.role_contract.leaf_worker"
     }
   ],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for process screening-v1-P2-D-003-leaf-001. Do not reuse this decomposer chat.",
+  "next_safe_action": "Stop at WAITING_EXTERNAL. Control evaluator publishes E_queue_4x result; no model polling. A fresh leaf_worker role invocation then resumes from durable state.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 0,
+    "reasoning_invocations": 2,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
