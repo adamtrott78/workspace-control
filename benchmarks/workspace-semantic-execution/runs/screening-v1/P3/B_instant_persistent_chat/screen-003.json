@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -366,14 +366,16 @@
       "generation": 0,
       "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r3",
       "experiment_id": "E_isolate_r3"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-006",
+      "generation": 0,
+      "experiment_id": "E_isolate_r3",
+      "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-B-003-exp-006",
-    "kind": "experiment",
-    "experiment_id": "E_isolate_r3",
-    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r3"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-B-003-exp-001",
@@ -445,6 +447,18 @@
         ]
       },
       "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r3": {
+      "request_id": "screening-v1-P3-B-003-exp-006",
+      "experiment_id": "E_isolate_r3",
+      "result": {
+        "region": "r3",
+        "p95_latency_ms": 318,
+        "mean_retries": 1.8,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
       "publication_scope": "requested experiment only"
     }
   },
@@ -565,7 +579,7 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "STOP. Wait for the control evaluator to publish the exact result for E_isolate_r3 and set READY_TO_RESUME; do not poll.",
+  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_isolate_r3, continue until the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -584,9 +598,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-B-003-exp-005",
-    "last_experiment_id": "E_capacity_2x",
-    "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+    "last_request_id": "screening-v1-P3-B-003-exp-006",
+    "last_experiment_id": "E_isolate_r3",
+    "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
