@@ -69,7 +69,7 @@
       },
       {
         "role": "leaf_worker",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "process_id": "screening-v1-P2-D-002-leaf-001"
       }
     ],
@@ -77,7 +77,7 @@
     "leaf_processes": [
       {
         "process_id": "screening-v1-P2-D-002-leaf-001",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "depth": 0,
         "objective": "Determine the primary mechanism causing the synthetic request-latency regression using the fixture contract, including at least two experiment/result cycles, rejection of at least one competing hypothesis, and explicit treatment of O2 as potentially non-discriminating.",
         "constraints": [
@@ -88,9 +88,11 @@
         ],
         "evidence_refs": [
           "fixture:research-iterate-retry-pooling-v1",
-          "taxonomy_profile:4416013ea8f553d3a971f592ce0fbf7faf30c59e"
+          "taxonomy_profile:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+          "experiment_result:E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+          "experiment:E_force_retry_reset"
         ],
-        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume E_disable_pool_reuse and continue one bounded leaf quantum."
+        "next_safe_action": "Wait for control to publish E_force_retry_reset; then launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume only that published result and continue the leaf."
       }
     ],
     "independent_critic": {
@@ -164,6 +166,33 @@
         "taxonomy_profile_blob:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
         "experiment:E_disable_pool_reuse"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-D-002-leaf-001-inv-002",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "experiment_result:E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+        "experiment:E_force_retry_reset"
+      ]
     }
   ],
   "events": [
@@ -203,9 +232,30 @@
       "process_id": "screening-v1-P2-D-002-leaf-001",
       "experiment_id": "E_disable_pool_reuse",
       "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "EXTERNAL_RESULT_CONSUMED",
+      "request_id": "screening-v1-P2-D-002-exp-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-D-002-exp-002",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "payload_ref": "experiment:E_force_retry_reset"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-D-002-exp-002",
+    "experiment_id": "E_force_retry_reset",
+    "requested_by": "screening-v1-P2-D-002-leaf-001"
+  },
   "external_results": {
     "E_disable_pool_reuse": {
       "request_id": "screening-v1-P2-D-002-exp-001",
@@ -226,13 +276,17 @@
     {
       "id": "F_O2_non_discriminating",
       "finding": "O2 (lower p95 at half concurrency) is load-relief evidence only and is explicitly potentially non-discriminating; it cannot establish queue saturation as the causal mechanism."
+    },
+    {
+      "id": "F_disable_pool_reuse_supports_retry_state",
+      "finding": "E_disable_pool_reuse reduced p95 latency from the O1 baseline 412 ms to 228 ms and mean retries from 3.1 to 1.1 while concurrency and retry policy were fixed. This materially supports H_retry_state and is not explained by O2-style load relief, but disabling pool reuse may break retained state indirectly, so a second direct reset intervention is required before a terminal claim."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "OPEN",
-      "note": "Directly predicts that breaking pooled lifecycle reuse should reduce retry amplification if retained retry state is causal."
+      "status": "SUPPORTED_PENDING_CONFIRMATION",
+      "note": "E_disable_pool_reuse materially reduced both retries and latency at fixed concurrency/retry policy. Direct confirmation requested via E_force_retry_reset with pool reuse enabled."
     },
     {
       "id": "H_queue",
@@ -246,8 +300,8 @@
     }
   ],
   "unresolved_questions": [
-    "Does disabling connection-pool reuse materially reduce retries and latency at fixed concurrency and retry policy?",
-    "A second experiment/result cycle is required before any terminal claim."
+    "Does explicitly resetting retry state at each request boundary while leaving pool reuse enabled reproduce the retry and latency improvement?",
+    "At least one competing hypothesis must be causally rejected before any terminal claim."
   ],
   "evidence_refs": [
     "fixture_blob:389fd2ecd5bfe78e8258ecccb03dea759c043296",
@@ -255,20 +309,22 @@
     "observation:O1",
     "observation:O2",
     "observation:O3",
-    "experiment_request:screening-v1-P2-D-002-exp-001"
+    "experiment_request:screening-v1-P2-D-002-exp-001",
+    "experiment_result:E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+    "experiment_request:screening-v1-P2-D-002-exp-002"
   ],
   "candidate_actions": [
     {
-      "action": "After the published result, choose the second discriminating experiment from the fixture catalog based on that evidence; do not treat O2 as causal proof.",
+      "action": "After control publishes E_force_retry_reset, compare its retry and latency response with E_disable_pool_reuse. If the direct reset reproduces the improvement while pool reuse remains enabled, use the two fixed-load interventions to discriminate H_retry_state from competing mechanisms; continue to treat O2 as non-discriminating load relief.",
       "authority": "proposal_only"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P2-D-002-leaf-001. Re-read durable state only, consume E_disable_pool_reuse, continue one bounded leaf quantum, request at most one further experiment if required, persist state, and stop.",
+  "next_safe_action": "Wait for control to publish E_force_retry_reset; then launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume only that published result and continue the leaf.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 1,
+    "reasoning_invocations": 3,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
@@ -281,11 +337,10 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-D-002-exp-001",
-    "last_experiment_id": "E_disable_pool_reuse",
-    "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "EXTERNAL_REQUEST_PENDING",
+    "last_request_id": "screening-v1-P2-D-002-exp-002",
+    "last_experiment_id": "E_force_retry_reset",
+    "note": "Worker requested one further fixture-catalog experiment after consuming the control-published E_disable_pool_reuse result."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-002.json"
