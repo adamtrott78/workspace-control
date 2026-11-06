@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P3 A/B-only operation is complete. A screen-003 and B screen-003 are both COMPLETED after research_iterate_objective_v1 passed with score 1.0 and zero violations. Preserve both as non-claim-bearing protocol-screening evidence. P3 C, D, and E remain intentionally frozen at their existing durable boundaries; do not advance them unless the user explicitly re-enables them.
+P3 A and B remain COMPLETED. User explicitly re-enabled P3 C, D, and E. C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-4 chat after control-published E_isolate_r4; its prior E_isolate_r3 control result hash provenance was corrected without changing the measurement payload. D screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for region-2 only after control-published E_isolate_r2; persist the region-2 leaf conclusion and stop. E screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat after control-published E_isolate_r3; continue exactly one authorized lower-tier regional-leaf transition and stop. High for E remains unauthorized unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.
 
 ## Remaining work
 
