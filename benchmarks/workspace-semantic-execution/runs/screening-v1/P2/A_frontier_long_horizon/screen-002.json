@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -141,13 +141,16 @@
       "request_id": "screening-v1-P2-A-002-exp-002",
       "generation": 0,
       "payload_ref": "E_queue_4x"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-A-002-exp-002",
+      "generation": 0,
+      "experiment_id": "E_queue_4x",
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P2-A-002-exp-002",
-    "kind": "SYNTHETIC_EXPERIMENT",
-    "payload_ref": "E_queue_4x"
-  },
+  "pending_external": null,
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screening-v1-P2-A-002-exp-001",
@@ -157,6 +160,16 @@
         "mean_retries": 1
       },
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "publication_scope": "requested experiment only"
+    },
+    "E_queue_4x": {
+      "request_id": "screening-v1-P2-A-002-exp-002",
+      "experiment_id": "E_queue_4x",
+      "result": {
+        "p95_latency_ms": 405,
+        "mean_retries": 3
+      },
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
       "publication_scope": "requested experiment only"
     }
   },
@@ -219,7 +232,7 @@
       "rationale": "This second experiment directly tests the main competing queue-capacity mechanism while preserving concurrency and retry policy, allowing O2 load relief to be distinguished from causal queue saturation."
     }
   ],
-  "next_safe_action": "Stop at WAITING_EXTERNAL. Resume only after control publishes the matching E_queue_4x result and sets READY_TO_RESUME; do not poll.",
+  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_queue_4x, continue until the next protocol-required boundary, persist state, and stop. Do not open a replacement chat while persistent continuity is required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -238,9 +251,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-A-002-exp-001",
-    "last_experiment_id": "E_force_retry_reset",
-    "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "last_request_id": "screening-v1-P2-A-002-exp-002",
+    "last_experiment_id": "E_queue_4x",
+    "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
