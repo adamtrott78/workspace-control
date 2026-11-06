@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -122,6 +122,27 @@
       "evidence_refs": [
         "E_force_retry_reset:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-004",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1536,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "validator:missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization",
+        "E_clock_quantization"
+      ]
     }
   ],
   "events": [
@@ -196,9 +217,29 @@
         "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
       ],
       "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-B-003-exp-003",
+      "generation": 0,
+      "payload_ref": "E_clock_quantization"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-B-003-exp-003",
+    "kind": "synthetic_experiment",
+    "payload_ref": "E_clock_quantization"
+  },
   "external_results": {
     "E_disable_pool_reuse": {
       "request_id": "screening-v1-P2-B-003-exp-001",
@@ -254,7 +295,9 @@
       "basis": "The regression is removed by retry-state reset without changing timestamp quantization, so clock bucketing is not required to explain the primary effect."
     }
   ],
-  "unresolved_questions": [],
+  "unresolved_questions": [
+    "Does replacing quantized timeout timestamps with monotonic high-resolution timestamps materially reduce retries/latency, as H_clock_bucket predicts?"
+  ],
   "evidence_refs": [
     "O1",
     "O2",
@@ -262,25 +305,14 @@
     "E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
     "E_force_retry_reset:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
   ],
-  "candidate_actions": [],
-  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state only. Address the exact control-published validator violation missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization using only public fixture/catalog evidence; continue until the next protocol-required boundary, persist state, and stop. Do not open, refresh, delete, sign out of, or replace this chat while persistent continuity is required.",
-  "terminal_submission": {
-    "final_hypothesis": "H_retry_state",
-    "rejected_hypotheses": [
-      "H_queue",
-      "H_clock_bucket"
-    ],
-    "observed_results": {
-      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
-      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
-    },
-    "addressed_observations": [
-      "O1",
-      "O2",
-      "O3"
-    ],
-    "rationale": "The baseline combines high latency (412 ms p95) with elevated retries (3.1/request), while O3 shows CPU below 48% and queue occupancy below 62%, weakening queue saturation. Disabling pool reuse at fixed concurrency/retry policy cuts p95 to 228 ms and retries to 1.1, implicating reuse-linked state. More specifically, resetting retry state at each request boundary while keeping pool reuse enabled cuts p95 to 219 ms and retries to 1.0, demonstrating that retained retry state—not pooling generically—is sufficient to account for the regression. Because this correction does not alter timeout timestamp quantization, H_clock_bucket is not required as the primary mechanism. O2's improvement when concurrency is halved is therefore a genuine load-relief correlation, but it is non-discriminating and does not identify queue saturation as causal."
-  },
+  "candidate_actions": [
+    {
+      "experiment_id": "E_clock_quantization",
+      "reason": "Exact validator-directed discriminating catalog experiment: change timeout timestamp quantization while leaving the established retry-state intervention evidence intact, directly testing H_clock_bucket."
+    }
+  ],
+  "next_safe_action": "Wait for control evaluator to publish the E_clock_quantization result into this run state; do not poll. Resume this SAME persistent GPT-5.6 Sol Instant conversation afterward.",
+  "terminal_submission": null,
   "validator_results": [
     {
       "validator_id": "research_iterate_objective_v1",
@@ -293,9 +325,9 @@
     }
   ],
   "metrics": {
-    "reasoning_invocations": 3,
-    "experiment_requests": 2,
-    "retries": 0,
+    "reasoning_invocations": 4,
+    "experiment_requests": 3,
+    "retries": 1,
     "decomposition_count": 0,
     "decomposition_depth": 0,
     "failed_leaves": 0,
