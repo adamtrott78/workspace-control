@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -69,7 +69,7 @@
       },
       {
         "role": "leaf_worker",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "process_id": "screening-v1-P2-D-002-leaf-001"
       }
     ],
@@ -77,7 +77,7 @@
     "leaf_processes": [
       {
         "process_id": "screening-v1-P2-D-002-leaf-001",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "depth": 0,
         "objective": "Determine the primary mechanism causing the synthetic request-latency regression using the fixture contract, including at least two experiment/result cycles, rejection of at least one competing hypothesis, and explicit treatment of O2 as potentially non-discriminating.",
         "constraints": [
@@ -135,6 +135,34 @@
         "harness_blob:ff55438e933e91dad3057167c2243f0ef4933df2",
         "source_checkpoint:052cf8224ec5a725e09207bde0bef8e43cefe8cb"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-D-002-leaf-001-inv-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture_blob:389fd2ecd5bfe78e8258ecccb03dea759c043296",
+        "taxonomy_profile_blob:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+        "experiment:E_disable_pool_reuse"
+      ]
     }
   ],
   "events": [
@@ -150,21 +178,80 @@
       "decision": "LEAF_EXECUTABLE",
       "process_id": "screening-v1-P2-D-002-leaf-001",
       "note": "Single coupled leaf created; no further decomposition justified by the bound P2 taxonomy."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "worker_id": "screening-v1-P2-D-002-leaf-001"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-D-002-exp-001",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-002-leaf-001",
+      "payload_ref": "experiment:E_disable_pool_reuse"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-D-002-exp-001",
+    "kind": "synthetic_experiment",
+    "payload_ref": "experiment:E_disable_pool_reuse"
+  },
   "external_results": {},
-  "established_findings": [],
-  "open_hypotheses": [],
-  "unresolved_questions": [],
-  "evidence_refs": [],
-  "candidate_actions": [],
-  "next_safe_action": "Launch one brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P2-D-002-leaf-001. Work one bounded leaf quantum, request at most one external experiment if needed, persist durable state, then stop.",
+  "established_findings": [
+    {
+      "id": "F_initial_discrimination",
+      "finding": "O3 (CPU below 48% and queue occupancy never above 62%) makes primary queue-capacity saturation less supported by the starting observations, but does not by itself causally reject H_queue."
+    },
+    {
+      "id": "F_O2_non_discriminating",
+      "finding": "O2 (lower p95 at half concurrency) is load-relief evidence only and is explicitly potentially non-discriminating; it cannot establish queue saturation as the causal mechanism."
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "OPEN",
+      "note": "Directly predicts that breaking pooled lifecycle reuse should reduce retry amplification if retained retry state is causal."
+    },
+    {
+      "id": "H_queue",
+      "status": "OPEN_WEAKENED",
+      "note": "O3 weakens saturation, but an intervention result is still required before causal rejection."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "OPEN",
+      "note": "Not discriminated by the starting observations."
+    }
+  ],
+  "unresolved_questions": [
+    "Does disabling connection-pool reuse materially reduce retries and latency at fixed concurrency and retry policy?",
+    "A second experiment/result cycle is required before any terminal claim."
+  ],
+  "evidence_refs": [
+    "fixture_blob:389fd2ecd5bfe78e8258ecccb03dea759c043296",
+    "taxonomy_profile_blob:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+    "observation:O1",
+    "observation:O2",
+    "observation:O3",
+    "experiment_request:screening-v1-P2-D-002-exp-001"
+  ],
+  "candidate_actions": [
+    {
+      "action": "After the published result, choose the second discriminating experiment from the fixture catalog based on that evidence; do not treat O2 as causal proof.",
+      "authority": "proposal_only"
+    }
+  ],
+  "next_safe_action": "Control evaluator must publish the deterministic result for request screening-v1-P2-D-002-exp-001 (E_disable_pool_reuse) into this run state and set READY_TO_RESUME. Worker must stop and must not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 0,
+    "reasoning_invocations": 2,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
