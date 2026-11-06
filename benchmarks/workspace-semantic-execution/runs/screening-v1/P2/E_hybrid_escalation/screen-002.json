@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
-  "owner": "gpt-5.6-sol-instant-screen-002-q3",
+  "status": "READY_TO_RESUME",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -309,6 +309,17 @@
         "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
       },
       "note": "Formal lower-tier terminal candidate persisted for control-evaluator validation; High escalation remains unauthorized."
+    },
+    {
+      "kind": "CONTROL_TERMINAL_SCHEMA_REJECTION",
+      "generation": 0,
+      "violations": [
+        "terminal_output_schema:final_hypothesis_not_string",
+        "terminal_output_schema:rejected_hypotheses_not_string_array",
+        "terminal_output_schema:observed_results_not_hash_mapping",
+        "terminal_output_schema:addressed_observations_not_string_array"
+      ],
+      "note": "Public terminal-output schema mismatch; no objective score published."
     }
   ],
   "pending_external": null,
@@ -375,7 +386,7 @@
     "E_disable_pool_reuse"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. TERMINAL_CANDIDATE is persisted. Await protocol/control-evaluator validation; do not launch High unless durable control state explicitly changes treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only. Reformat the existing lower-tier terminal reasoning into the exact public fixture worker_contract.terminal_output_schema using only the already published result hashes; persist a protocol-valid TERMINAL_CANDIDATE if supported and stop. Do not request High unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": {
     "status": "TERMINAL_CANDIDATE",
     "final_hypothesis": {
@@ -460,11 +471,14 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screen-002-exp-002",
-    "last_experiment_id": "E_disable_pool_reuse",
-    "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATOR_INPUT_REJECTED",
+    "violations": [
+      "terminal_output_schema:final_hypothesis_not_string",
+      "terminal_output_schema:rejected_hypotheses_not_string_array",
+      "terminal_output_schema:observed_results_not_hash_mapping",
+      "terminal_output_schema:addressed_observations_not_string_array"
+    ],
+    "note": "The public fixture terminal_output_schema requires final_hypothesis as a hypothesis_id string, rejected_hypotheses as an array of hypothesis_id strings, observed_results as an object mapping experiment_id to raw 64-character published result_hash strings, and addressed_observations as an array of observation_id strings. Objective scoring was not run because this malformed validator input would not produce a deterministic verdict."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/E_hybrid_escalation/screen-002.json"
