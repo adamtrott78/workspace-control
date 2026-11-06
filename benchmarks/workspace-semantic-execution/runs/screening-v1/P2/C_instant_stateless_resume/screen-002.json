@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -56,18 +56,18 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 2,
-    "resume_requires_new_chat": true,
+    "quantum_index": 3,
+    "resume_requires_new_chat": false,
     "last_quantum_chat": {
-      "quantum_index": 1,
-      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q1",
+      "quantum_index": 2,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q2",
       "identity_source": "user_attestation",
       "attestation_text": [
         "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
         "Memory was disabled before this conversation was opened.",
         "GPT-5.6 Sol Instant was selected for this conversation."
       ],
-      "boundary": "WAITING_EXTERNAL"
+      "boundary": "TERMINAL_CANDIDATE"
     }
   },
   "started_at": "2026-11-05T18:56:00-05:00",
@@ -124,6 +124,35 @@
         "fixture:E_force_retry_reset",
         "fixture:E_disable_pool_reuse"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-C-002-q2",
+      "generation": 1,
+      "owner": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q2",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "fixture:E_disable_pool_reuse",
+        "fixture:E_force_retry_reset",
+        "fixture:O1",
+        "fixture:O2",
+        "fixture:O3"
+      ]
     }
   ],
   "events": [
@@ -177,6 +206,16 @@
       "generation": 1,
       "experiment_id": "E_disable_pool_reuse",
       "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 1,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q2"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 1,
+      "evidence_ref_count": 5
     }
   ],
   "pending_external": null,
@@ -231,29 +270,46 @@
         "fixture:O1",
         "fixture:E_force_retry_reset"
       ]
+    },
+    {
+      "id": "F5",
+      "finding": "Disabling connection-pool reuse while holding concurrency and retry policy fixed reduced mean retries from the 3.1/request baseline to 1.1 and p95 latency from 412 ms to 228 ms. This converges with the prior request-boundary retry-reset intervention (1 retry, 219 ms), supporting pooled lifecycle reuse as necessary for retry-state amplification.",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:E_force_retry_reset",
+        "fixture:E_disable_pool_reuse"
+      ]
+    },
+    {
+      "id": "F6",
+      "finding": "The two discriminating interventions normalize retries and latency without reducing concurrency: explicit retry-state reset with pool reuse enabled and disabling pool reuse with retry policy fixed. This rejects queue-capacity saturation as the primary mechanism and makes O2's improvement under halved concurrency load-relief evidence rather than causal identification.",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:O2",
+        "fixture:O3",
+        "fixture:E_force_retry_reset",
+        "fixture:E_disable_pool_reuse"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "STRONGLY_SUPPORTED_AWAITING_CONVERGENT_TEST",
-      "reason": "E_force_retry_reset directly intervened on request-boundary retry-state retention while pool reuse remained enabled; retries fell from 3.1 to 1 and p95 from 412 ms baseline to 219 ms."
+      "status": "SUPPORTED_PRIMARY",
+      "reason": "Two convergent mechanism-discriminating interventions reduced retries to about 1/request and p95 to 219-228 ms from the 412 ms, 3.1-retry baseline: resetting retry state while retaining pool reuse, and disabling pool reuse while retaining retry policy."
     },
     {
       "id": "H_clock_bucket",
-      "status": "WEAKENED_NOT_REJECTED",
-      "reason": "A direct retry-state reset materially improved both retries and latency without changing timestamp quantization, making clock quantization less likely to be primary; no direct clock intervention yet."
+      "status": "WEAKENED_NOT_REQUIRED_FOR_TERMINAL",
+      "reason": "Both lifecycle/retry-state interventions materially improve the regression without a clock intervention; clock quantization is not needed to explain the observed causal pattern, though it was not directly tested."
     },
     {
       "id": "H_queue",
-      "status": "WEAKENED_NOT_REJECTED",
-      "reason": "O3 argues against obvious saturation, and E_force_retry_reset materially improved latency without changing queue capacity or concurrency; direct queue intervention has not been run."
+      "status": "REJECTED_AS_PRIMARY",
+      "reason": "CPU/queue observations do not show saturation, and two interventions that leave concurrency unchanged normalize latency/retries. The halved-concurrency O2 result is therefore non-discriminating load relief rather than evidence that queue capacity is primary."
     }
   ],
-  "unresolved_questions": [
-    "Does disabling pool reuse while holding concurrency and retry policy fixed converge with E_force_retry_reset, supporting pooled lifecycle reuse as necessary for the retry-state amplification?",
-    "After the second experiment cycle, is evidence sufficient to reject at least one competing hypothesis and make the terminal claim?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "fixture:O1",
     "fixture:O2",
@@ -261,30 +317,27 @@
     "fixture:E_force_retry_reset",
     "fixture:E_disable_pool_reuse"
   ],
-  "candidate_actions": [
-    {
-      "experiment_id": "E_disable_pool_reuse",
-      "priority": 1,
-      "rationale": "Convergent second test predeclared for the case where E_force_retry_reset materially improves retries/latency; tests whether pooled lifecycle reuse is necessary for the retry-state effect."
+  "candidate_actions": [],
+  "next_safe_action": "Stop at TERMINAL_CANDIDATE. Control evaluator must validate the submitted terminal candidate; worker must not self-validate, poll, or mark COMPLETED.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
+      "H_queue"
+    ],
+    "observed_results": {
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
     },
-    {
-      "experiment_id": "E_clock_quantization",
-      "priority": 2,
-      "condition": "Use only if the second cycle leaves H_clock_bucket materially plausible.",
-      "rationale": "Direct test of the remaining clock-bucket competitor."
-    },
-    {
-      "experiment_id": "E_queue_4x",
-      "priority": 3,
-      "condition": "Use only if queue saturation remains plausible after second-cycle evidence.",
-      "rationale": "Direct queue intervention; O3 and the retry-reset result make it lower priority."
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for the next stateless quantum. Re-read durable state only, consume E_disable_pool_reuse, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
-  "terminal_submission": null,
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "The baseline regression couples 412 ms p95 latency with 3.1 retries/request. First, explicitly resetting retry state at each request boundary while keeping pool reuse enabled reduced retries to 1 and p95 to 219 ms. Second, disabling pool reuse while holding concurrency and retry policy fixed independently reduced retries to 1.1 and p95 to 228 ms. These convergent interventions isolate pooled request-lifecycle retry-state retention as the primary mechanism. Queue-capacity saturation is rejected as primary because CPU stayed below 48%, queue occupancy below 62%, and both successful interventions retained concurrency rather than relieving it. O2's 286 ms result after halving concurrency is real but non-discriminating load relief: reducing load can mitigate retry amplification without identifying its cause."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
+    "reasoning_invocations": 3,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
@@ -298,11 +351,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "status": "TERMINAL_CANDIDATE_AWAITING_VALIDATION",
     "last_request_id": "screening-v1-P2-C-002-q1-E_disable_pool_reuse",
     "last_experiment_id": "E_disable_pool_reuse",
     "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "note": "Worker submitted terminal candidate after consuming the published E_disable_pool_reuse result. Control evaluator must validate; worker must stop."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/C_instant_stateless_resume/screen-002.json"
