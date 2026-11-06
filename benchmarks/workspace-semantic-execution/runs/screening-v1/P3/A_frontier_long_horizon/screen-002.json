@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-worker-P3-A-screen-002-g0",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -129,6 +129,11 @@
       "generation": 0,
       "experiment_id": "E_isolate_r1",
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-worker-P3-A-screen-002-g0"
     }
   ],
   "pending_external": null,
@@ -242,7 +247,7 @@
       "rationale": "Use if needed to directly distinguish timer synchronization from retry-state feedback after the required residual/control evidence."
     }
   ],
-  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_isolate_r1, continue until the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
+  "next_safe_action": "Reason one bounded resumed PRIMARY quantum using only the published E_isolate_r1 result, then request the next single catalog experiment or checkpoint.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
