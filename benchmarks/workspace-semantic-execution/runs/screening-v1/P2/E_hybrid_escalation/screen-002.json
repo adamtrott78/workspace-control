@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "gpt-5.6-sol-instant-screen-002-q4",
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -88,6 +88,14 @@
         "classification": "BOUNDED_NOT_TOO_LARGE",
         "action": "PERSIST_TERMINAL_CANDIDATE",
         "rationale": "Prepared checkpoint contains two published discriminating lower-tier results with exact hashes, no unresolved questions, and no authorized escalation. The public terminal-output contract is satisfied."
+      },
+      {
+        "invocation_id": "screen-002-q4",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "PERSIST_TERMINAL_CANDIDATE",
+        "rationale": "Existing terminal_submission is already repaired to the public terminal-output schema and is supported by the two published discriminating result hashes; formal protocol transition only, with no additional experiment or escalation."
       }
     ],
     "decomposition_state": "NOT_REQUIRED_BOUNDED_WORKLOAD",
@@ -176,6 +184,31 @@
       "invocation_id": "screen-002-q3",
       "generation": 0,
       "owner": "gpt-5.6-sol-instant-screen-002-q3",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q4",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q4",
       "executor": {
         "provider": "OpenAI",
         "reported_model": "GPT-5.6 Sol",
@@ -331,6 +364,16 @@
       "generation": 0,
       "worker_id": "gpt-5.6-sol-instant-screen-002-q4",
       "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q4",
+      "result_hashes": {
+        "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+      },
+      "note": "Protocol-valid lower-tier terminal candidate resubmitted after public-schema repair for control-evaluator validation; existing corrected terminal_submission preserved and High escalation remains unauthorized."
     }
   ],
   "pending_external": null,
@@ -397,7 +440,7 @@
     "E_disable_pool_reuse"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only. Reformat the existing lower-tier terminal reasoning into the exact public fixture worker_contract.terminal_output_schema using only the already published result hashes; persist a protocol-valid TERMINAL_CANDIDATE if supported and stop. Do not request High unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Stop. Await control-evaluator validation of this TERMINAL_CANDIDATE; do not self-validate or poll.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
@@ -417,7 +460,7 @@
   },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 4,
+    "reasoning_invocations": 5,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
