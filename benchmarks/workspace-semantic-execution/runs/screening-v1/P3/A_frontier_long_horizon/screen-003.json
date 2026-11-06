@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -294,15 +294,16 @@
       "generation": 0,
       "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_isolate_r4",
       "experiment_id": "E_isolate_r4"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-A-003-E_isolate_r4-004",
+      "generation": 0,
+      "experiment_id": "E_isolate_r4",
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-A-003-E_isolate_r4-004",
-    "kind": "EXPERIMENT",
-    "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_isolate_r4",
-    "experiment_id": "E_isolate_r4",
-    "intervention": "Temporarily isolate region 4 from cross-region retry propagation while preserving local retry policy."
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-A-003-E_isolate_r1-001",
@@ -338,6 +339,18 @@
         "other_regions_materially_changed": false
       },
       "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r4": {
+      "request_id": "screening-v1-P3-A-003-E_isolate_r4-004",
+      "experiment_id": "E_isolate_r4",
+      "result": {
+        "region": "r4",
+        "p95_latency_ms": 326,
+        "mean_retries": 2,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
       "publication_scope": "requested experiment only"
     }
   },
@@ -457,7 +470,7 @@
       "reason": "Available if an additional direct capacity control is needed beyond interpreting O2."
     }
   ],
-  "next_safe_action": "STOP. Await control-published result for E_isolate_r4 in this assigned run-state file; do not poll. Resume this same persistent GPT-5.6 Sol High chat only after status becomes READY_TO_RESUME.",
+  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_isolate_r4, continue until the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -476,9 +489,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-A-003-E_isolate_r3-003",
-    "last_experiment_id": "E_isolate_r3",
-    "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+    "last_request_id": "screening-v1-P3-A-003-E_isolate_r4-004",
+    "last_experiment_id": "E_isolate_r4",
+    "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
