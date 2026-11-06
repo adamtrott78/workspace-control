@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -63,7 +63,7 @@
         "leaf": "region-1",
         "experiment_id": "E_isolate_r1",
         "executor_tier": "INSTANT",
-        "status": "WAITING_EXTERNAL",
+        "status": "RESULT_PUBLISHED",
         "request_id": "screen-002-g0-E_isolate_r1-001"
       }
     ],
@@ -164,14 +164,30 @@
       "request_id": "screen-002-g0-E_isolate_r1-001",
       "generation": 0,
       "payload_ref": "experiment:E_isolate_r1"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screen-002-g0-E_isolate_r1-001",
+      "generation": 0,
+      "experiment_id": "E_isolate_r1",
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
     }
   ],
-  "pending_external": {
-    "request_id": "screen-002-g0-E_isolate_r1-001",
-    "kind": "experiment",
-    "payload_ref": "experiment:E_isolate_r1"
+  "pending_external": null,
+  "external_results": {
+    "E_isolate_r1": {
+      "request_id": "screen-002-g0-E_isolate_r1-001",
+      "experiment_id": "E_isolate_r1",
+      "result": {
+        "region": "r1",
+        "p95_latency_ms": 315,
+        "mean_retries": 1.9,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "publication_scope": "requested experiment only"
+    }
   },
-  "external_results": {},
   "established_findings": [
     {
       "id": "F_decomposition_1",
@@ -240,7 +256,7 @@
       "status": "READY"
     }
   ],
-  "next_safe_action": "Wait for the control evaluator to publish the exact E_isolate_r1 external result into this run-state file and set READY_TO_RESUME; do not poll and do not launch High.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state, consume only E_isolate_r1, continue exactly one authorized lower-tier regional-leaf transition, persist the exact next protocol boundary, and stop. Do not launch High; escalation remains unauthorized unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -258,8 +274,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screen-002-g0-E_isolate_r1-001",
+    "last_experiment_id": "E_isolate_r1",
+    "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-002.json"
