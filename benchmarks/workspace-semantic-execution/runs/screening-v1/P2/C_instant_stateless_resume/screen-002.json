@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -56,18 +56,18 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 4,
+    "quantum_index": 5,
     "resume_requires_new_chat": true,
     "last_quantum_chat": {
-      "quantum_index": 3,
-      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q3",
+      "quantum_index": 4,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q4",
       "identity_source": "user_attestation",
       "attestation_text": [
         "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
         "Memory was disabled before this conversation was opened.",
         "GPT-5.6 Sol Instant was selected for this conversation."
       ],
-      "boundary": "WAITING_EXTERNAL"
+      "boundary": "TERMINAL_CANDIDATE"
     }
   },
   "started_at": "2026-11-05T18:56:00-05:00",
@@ -178,6 +178,36 @@
       "evidence_refs": [
         "fixture:E_queue_4x"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-C-002-q4",
+      "generation": 1,
+      "owner": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q4",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:O2",
+        "fixture:O3",
+        "fixture:E_force_retry_reset",
+        "fixture:E_disable_pool_reuse",
+        "fixture:E_queue_4x"
+      ]
     }
   ],
   "events": [
@@ -275,6 +305,16 @@
       "generation": 1,
       "experiment_id": "E_queue_4x",
       "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 1,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q4"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 1,
+      "evidence_ref_count": 6
     }
   ],
   "pending_external": null,
@@ -359,13 +399,23 @@
         "fixture:E_force_retry_reset",
         "fixture:E_disable_pool_reuse"
       ]
+    },
+    {
+      "id": "F7",
+      "finding": "Increasing queue capacity 4x left the regression essentially intact: p95 latency was 405 ms and mean retries were 3/request versus the 412 ms, 3.1-retry baseline. Queue capacity therefore fails a direct discriminating intervention, strengthening rejection of H_queue as the primary mechanism and reinforcing pooled retry-state amplification as the causal explanation.",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:E_queue_4x",
+        "fixture:E_force_retry_reset",
+        "fixture:E_disable_pool_reuse"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
       "status": "SUPPORTED_PRIMARY",
-      "reason": "Two convergent mechanism-discriminating interventions reduced retries to about 1/request and p95 to 219-228 ms from the 412 ms, 3.1-retry baseline: resetting retry state while retaining pool reuse, and disabling pool reuse while retaining retry policy."
+      "reason": "Two convergent lifecycle/retry-state interventions reduced retries to about 1/request and p95 to 219-228 ms from the 412 ms, 3.1-retry baseline, while a 4x queue-capacity intervention left p95 at 405 ms and retries at 3/request. This intervention pattern supports pooled retry-state amplification as primary."
     },
     {
       "id": "H_clock_bucket",
@@ -375,7 +425,7 @@
     {
       "id": "H_queue",
       "status": "REJECTED_AS_PRIMARY",
-      "reason": "CPU/queue observations do not show saturation, and two interventions that leave concurrency unchanged normalize latency/retries. The halved-concurrency O2 result is therefore non-discriminating load relief rather than evidence that queue capacity is primary."
+      "reason": "A direct 4x queue-capacity intervention left p95 latency at 405 ms and retries at 3/request versus the 412 ms, 3.1-retry baseline; combined with non-saturated CPU/queue observations and two concurrency-preserving lifecycle interventions that normalize latency/retries, queue capacity is rejected as primary."
     }
   ],
   "unresolved_questions": [],
@@ -388,8 +438,28 @@
     "fixture:E_queue_4x"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for the next stateless quantum. Re-read durable state only, consume E_queue_4x, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
-  "terminal_submission": null,
+  "next_safe_action": "Control evaluator must validate this terminal candidate. Do not perform further worker reasoning or request additional experiments unless durable control state explicitly returns the slot as READY_TO_RESUME.",
+  "terminal_submission": {
+    "conclusion": "The primary mechanism is retry-state amplification coupled to pooled connection lifecycle reuse, not queue-capacity saturation. Resetting retry state at request boundaries with pool reuse retained and disabling pool reuse with retry policy fixed both normalize retries and latency, whereas increasing queue capacity 4x leaves the regression essentially unchanged.",
+    "primary_hypothesis": "H_retry_state",
+    "rejected_primary_hypotheses": [
+      "H_queue"
+    ],
+    "residual_hypotheses": [
+      {
+        "id": "H_clock_bucket",
+        "status": "WEAKENED_NOT_REQUIRED_FOR_TERMINAL"
+      }
+    ],
+    "evidence_refs": [
+      "fixture:O1",
+      "fixture:O2",
+      "fixture:O3",
+      "fixture:E_force_retry_reset",
+      "fixture:E_disable_pool_reuse",
+      "fixture:E_queue_4x"
+    ]
+  },
   "validator_results": [
     {
       "validator_id": "research_iterate_objective_v1",
@@ -402,7 +472,7 @@
     }
   ],
   "metrics": {
-    "reasoning_invocations": 4,
+    "reasoning_invocations": 5,
     "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 0,
