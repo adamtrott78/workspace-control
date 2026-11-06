@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P3 A screen-002 and B screen-002 were invalidated by persistent-chat continuity loss after user logout. Clean replacement slots A screen-003 and B screen-003 are READY at the frozen source checkpoint. Launch A screen-003 in a BRAND-NEW regular GPT-5.6 Sol High chat with Memory disabled before launch and GitHub enabled; launch B screen-003 in a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled. Preserve each replacement chat continuously until that run completes. C/D/E are intentionally untouched at their prior durable boundaries.
+P3 current state: A replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol High chat after control-published E_isolate_r1. B replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after control-published E_isolate_r1. C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-2 chat after control-published E_isolate_r2. D screen-002 region-1 leaf has E_isolate_r1 published and must resume in a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for region-1 only to persist that leaf conclusion and stop. E screen-002 has E_isolate_r1 published and must resume in a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat for exactly one authorized regional-leaf transition. High for E remains NOT AUTHORIZED.
 
 ## Remaining work
 
