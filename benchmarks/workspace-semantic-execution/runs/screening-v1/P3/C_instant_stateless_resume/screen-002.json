@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 4,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -378,13 +378,16 @@
       "request_id": "q5-E_capacity_2x",
       "generation": 4,
       "payload_ref": "E_capacity_2x"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "q5-E_capacity_2x",
+      "generation": 4,
+      "experiment_id": "E_capacity_2x",
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
     }
   ],
-  "pending_external": {
-    "request_id": "q5-E_capacity_2x",
-    "kind": "EXPERIMENT",
-    "payload_ref": "E_capacity_2x"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "q0-E_isolate_r1",
@@ -448,6 +451,22 @@
         ]
       },
       "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "publication_scope": "requested experiment only"
+    },
+    "E_capacity_2x": {
+      "request_id": "q5-E_capacity_2x",
+      "experiment_id": "E_capacity_2x",
+      "result": {
+        "all_regions_p95_ms_range": [
+          420,
+          455
+        ],
+        "mean_retries_range": [
+          2.7,
+          3.1
+        ]
+      },
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
       "publication_scope": "requested experiment only"
     }
   },
@@ -587,7 +606,7 @@
       "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
     }
   ],
-  "next_safe_action": "Wait for the control evaluator to publish only E_capacity_2x. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled, re-read durable state, consume only that published result, and perform exactly one bounded reasoning quantum toward a terminal candidate.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 6. Re-read durable state, consume only E_capacity_2x, perform exactly one bounded reasoning quantum toward a terminal candidate, persist the exact next protocol boundary, and stop.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -606,9 +625,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "q4-E_global_retry_reset",
-    "last_experiment_id": "E_global_retry_reset",
-    "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+    "last_request_id": "q5-E_capacity_2x",
+    "last_experiment_id": "E_capacity_2x",
+    "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
