@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "p3-b-persistent-worker-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -182,6 +182,36 @@
       ],
       "reasoning_summary": "Global retry-state reset normalizes latency and retries, strongly supporting retained cross-region retry feedback. Request timer desynchronization next as the direct competing coupled-mechanism discriminator; a capacity control and the six-cycle minimum remain outstanding.",
       "experiment_id": "E_desynchronize_timers"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q005",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_capacity_2x"
+      ],
+      "reasoning_summary": "Timer desynchronization leaves the regression essentially intact, discriminating against H_clock_sync as primary. Request the global 2x-capacity control to test the remaining capacity explanation; one further experiment cycle will still be required by the six-cycle minimum.",
+      "experiment_id": "E_capacity_2x"
     }
   ],
   "events": [
@@ -278,9 +308,21 @@
       "worker_id": "p3-b-persistent-worker-screen-003",
       "resume_from": "E_desynchronize_timers",
       "result_hash": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-005",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_capacity_2x",
+      "experiment_id": "E_capacity_2x"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-B-003-exp-005",
+    "kind": "experiment",
+    "experiment_id": "E_capacity_2x",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_capacity_2x"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-B-003-exp-001",
@@ -375,6 +417,14 @@
       "evidence_refs": [
         "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
       ]
+    },
+    {
+      "id": "F6",
+      "statement": "Timer desynchronization does not materially resolve the regression: all-region p95 remains 425–462 ms and mean retries 2.7–3.2. Contrasted with global normalization under retry-state reset, this rejects clock/timer synchronization as the primary mechanism.",
+      "evidence_refs": [
+        "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+        "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -385,8 +435,8 @@
     },
     {
       "id": "H_clock_sync",
-      "status": "LIVE",
-      "reason": "Could explain narrow-window correlated retry bursts."
+      "status": "REJECTED_PRIMARY",
+      "reason": "Timer desynchronization leaves latency/retry amplification high, unlike retry-state reset which normalizes both."
     },
     {
       "id": "H_capacity",
@@ -395,9 +445,8 @@
     }
   ],
   "unresolved_questions": [
-    "Does timer desynchronization independently collapse the regression, or does the effect persist, discriminating H_clock_sync from retry-state feedback?",
-    "Does a global capacity/load control reject capacity as the primary mechanism?",
-    "Additional experiment cycles are required before terminal submission."
+    "Does doubling global capacity materially resolve retry amplification, or only provide limited latency relief?",
+    "One additional experiment cycle after the capacity control is required to reach the six-cycle minimum before terminal submission."
   ],
   "evidence_refs": [
     "O1",
@@ -406,7 +455,8 @@
     "O4",
     "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
     "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
-    "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+    "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+    "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
   ],
   "candidate_actions": [
     {
@@ -438,12 +488,12 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "Interpret only the published E_desynchronize_timers result and request exactly one next experiment if needed.",
+  "next_safe_action": "STOP. Wait for the control evaluator to publish the exact result for E_capacity_2x and set READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 4,
-    "experiment_requests": 4,
+    "reasoning_invocations": 5,
+    "experiment_requests": 5,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
