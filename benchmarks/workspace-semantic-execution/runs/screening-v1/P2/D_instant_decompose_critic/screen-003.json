@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "WAITING_EXTERNAL",
+  "owner": "screening-v1-P2-D-003-leaf-001",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -69,15 +69,15 @@
       },
       {
         "role": "leaf_worker",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "process_id": "screening-v1-P2-D-003-leaf-001"
       }
     ],
-    "active_role": null,
+    "active_role": "leaf_worker",
     "leaf_processes": [
       {
         "process_id": "screening-v1-P2-D-003-leaf-001",
-        "status": "READY",
+        "status": "WAITING_EXTERNAL",
         "decomposition_depth": 0,
         "objective": "Determine the primary mechanism causing the synthetic request-latency regression using at least two experiment/result cycles; reject at least one competing hypothesis; address O2 as potentially non-discriminating; preserve exact control-published result hashes for terminal synthesis.",
         "decision_basis": "LEAF_EXECUTABLE: bounded small experiment graph, LOW_TO_MEDIUM horizon load, dependency width 1, PARTIALLY_COUPLED work, HIGH synthesis coupling, and taxonomy explicitly states this fixture is not large enough to provide strong decomposition-benefit evidence.",
@@ -89,7 +89,7 @@
           "E_half_concurrency"
         ],
         "experiment_cycles_required": 2,
-        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled to consume only E_queue_4x and continue one bounded leaf quantum."
+        "next_safe_action": "Await control publication for E_force_retry_reset; do not poll. Resume in a fresh leaf_worker chat only after READY_TO_RESUME."
       }
     ],
     "independent_critic": {
@@ -123,6 +123,17 @@
       "decision": "REQUEST_EXTERNAL",
       "experiment_id": "E_queue_4x",
       "note": "First required experiment/result cycle. Chosen to test H_queue directly; E_half_concurrency was not chosen because O2 already establishes load relief and explicitly warns it may be non-discriminating."
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "REQUEST_EXTERNAL",
+      "experiment_id": "E_force_retry_reset",
+      "note": "Consumed only control-published E_queue_4x. Its near-null effect (p95 412→405 ms; mean retries 3.1→3.0) rejects queue-capacity saturation as the primary mechanism, consistent with O3 queue occupancy <=62%. Requested E_force_retry_reset as the second required discriminating cycle to test retained retry state directly while leaving pool reuse enabled; O2 remains treated as potentially non-discriminating load relief."
     }
   ],
   "events": [
@@ -154,9 +165,31 @@
       "process_id": "screening-v1-P2-D-003-leaf-001",
       "experiment_id": "E_queue_4x",
       "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    {
+      "kind": "LEAF_RESULT_CONSUMED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "experiment_id": "E_queue_4x",
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+      "finding": "4x queue capacity produced only a 7 ms p95 reduction (412→405 ms) and 0.1 lower mean retries (3.1→3.0), rejecting H_queue as the primary regression mechanism."
+    },
+    {
+      "kind": "LEAF_EXPERIMENT_REQUESTED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
+      "experiment_id": "E_force_retry_reset",
+      "rationale": "Directly tests H_retry_state by resetting retry state at request boundaries while leaving pool reuse enabled. Chosen over E_half_concurrency because O2 already demonstrates non-discriminating load relief, and over E_disable_pool_reuse because retry reset isolates retry-state retention more specifically."
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
+    "generation": 0,
+    "role": "leaf_worker",
+    "process_id": "screening-v1-P2-D-003-leaf-001",
+    "experiment_id": "E_force_retry_reset"
+  },
   "external_results": {
     "E_queue_4x": {
       "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
@@ -173,14 +206,19 @@
     {
       "id": "D1",
       "finding": "Decomposer classification is LEAF_EXECUTABLE; no further decomposition is justified by the public taxonomy and fixture structure."
+    },
+    {
+      "id": "L1",
+      "finding": "E_queue_4x is near-null versus O1 (p95 412→405 ms; mean retries 3.1→3.0), so queue-capacity saturation is rejected as the primary mechanism; this is also consistent with O3 queue occupancy never exceeding 62%."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_queue",
-      "status": "OPEN",
+      "status": "REJECTED_PRIMARY",
       "statement": "The regression is primarily queue-capacity saturation under concurrency.",
-      "test": "E_queue_4x directly changes queue capacity while holding concurrency and retry policy fixed."
+      "test": "E_queue_4x directly changes queue capacity while holding concurrency and retry policy fixed.",
+      "evidence_ref": "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
     },
     {
       "id": "H_retry_state",
@@ -194,28 +232,29 @@
     }
   ],
   "unresolved_questions": [
-    "Does a 4x queue-capacity increase materially remove the latency/retry regression at fixed concurrency and retry policy?",
-    "After the first published result, which second discriminating experiment best separates the remaining mechanisms?"
+    "Does explicit retry-state reset at each request boundary materially remove the latency/retry regression while pool reuse remains enabled?",
+    "If E_force_retry_reset is discriminating, is H_retry_state sufficiently supported over H_clock_bucket for a later synthesis role?"
   ],
   "evidence_refs": [
     "fixture_blob_sha:389fd2ecd5bfe78e8258ecccb03dea759c043296",
     "taxonomy_profile_blob_sha:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
     "harness_blob_sha:ff55438e933e91dad3057167c2243f0ef4933df2",
-    "source_checkpoint_sha:052cf8224ec5a725e09207bde0bef8e43cefe8cb"
+    "source_checkpoint_sha:052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+    "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
   ],
   "candidate_actions": [
     {
-      "action": "Await control publication for E_queue_4x; do not poll. Resume in a fresh leaf_worker chat only after READY_TO_RESUME.",
+      "action": "Await control publication for E_force_retry_reset; do not poll. Resume in a fresh leaf_worker chat only after READY_TO_RESUME.",
       "status": "WAITING_EXTERNAL",
       "authority": "treatment_contract.role_contract.leaf_worker"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P2-D-003-leaf-001. Re-read durable state only, consume E_queue_4x, continue one bounded leaf quantum, request at most one further experiment if required, persist state, and stop.",
+  "next_safe_action": "Stop now. Control evaluator must publish E_force_retry_reset into this assigned run state and set READY_TO_RESUME before any further leaf reasoning.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 2,
-    "experiment_requests": 1,
+    "reasoning_invocations": 3,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
@@ -228,11 +267,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
-    "last_experiment_id": "E_queue_4x",
-    "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "EXTERNAL_REQUEST_PENDING",
+    "last_request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
+    "last_experiment_id": "E_force_retry_reset",
+    "result_hash": null,
+    "note": "Worker requested exactly one further experiment; control evaluator must publish only that requested result before resume."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-003.json"
