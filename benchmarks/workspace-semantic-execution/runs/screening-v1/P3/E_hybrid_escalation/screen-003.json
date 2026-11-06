@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -533,13 +533,16 @@
       "request_id": "screening-v1-P3-E-003-E_capacity_2x-g0",
       "generation": 0,
       "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_capacity_2x"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-E-003-E_capacity_2x-g0",
+      "generation": 0,
+      "experiment_id": "E_capacity_2x",
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-E-003-E_capacity_2x-g0",
-    "kind": "EXPERIMENT",
-    "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_capacity_2x"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
@@ -603,6 +606,22 @@
         ]
       },
       "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "publication_scope": "requested experiment only"
+    },
+    "E_capacity_2x": {
+      "request_id": "screening-v1-P3-E-003-E_capacity_2x-g0",
+      "experiment_id": "E_capacity_2x",
+      "result": {
+        "all_regions_p95_ms_range": [
+          420,
+          455
+        ],
+        "mean_retries_range": [
+          2.7,
+          3.1
+        ]
+      },
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
       "publication_scope": "requested experiment only"
     }
   },
@@ -669,7 +688,7 @@
       "authority": "fixture_only_external_request"
     }
   ],
-  "next_safe_action": "Stop. Wait for the control evaluator to publish only the requested E_capacity_2x result into this run-state file and set READY_TO_RESUME. Do not poll. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state, consume only the control-published E_capacity_2x result, perform exactly one authorized lower-tier transition toward terminal synthesis, persist the exact next protocol boundary, and stop. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -687,10 +706,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "AWAITING_EXTERNAL_RESULT",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P3-E-003-E_capacity_2x-g0",
     "last_experiment_id": "E_capacity_2x",
-    "note": "Worker requested exactly one fixture-authorized competing-mechanism/control experiment; no result is assumed."
+    "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-003.json"
