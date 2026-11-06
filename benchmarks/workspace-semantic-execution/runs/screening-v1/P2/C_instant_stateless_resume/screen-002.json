@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "TERMINAL_CANDIDATE",
+  "owner": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q5",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -56,11 +56,11 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 5,
+    "quantum_index": 6,
     "resume_requires_new_chat": true,
     "last_quantum_chat": {
-      "quantum_index": 4,
-      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q4",
+      "quantum_index": 5,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q5",
       "identity_source": "user_attestation",
       "attestation_text": [
         "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
@@ -183,6 +183,36 @@
       "invocation_id": "screening-v1-P2-C-002-q4",
       "generation": 1,
       "owner": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q4",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "fixture:O1",
+        "fixture:O2",
+        "fixture:O3",
+        "fixture:E_force_retry_reset",
+        "fixture:E_disable_pool_reuse",
+        "fixture:E_queue_4x"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-C-002-q5",
+      "generation": 1,
+      "owner": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q5",
       "executor": {
         "provider": "OpenAI",
         "reported_model": "GPT-5.6 Sol",
@@ -331,6 +361,16 @@
         "misleading_observation_not_addressed:O2"
       ],
       "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 1,
+      "worker_id": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q5"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 1,
+      "evidence_ref_count": 6
     }
   ],
   "pending_external": null,
@@ -454,27 +494,23 @@
     "fixture:E_queue_4x"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled. Re-read durable state only and repair the terminal submission using the public fixture worker_contract.terminal_output_schema and the exact control-published result hashes already in this run. Perform exactly one bounded reasoning quantum, persist a protocol-valid TERMINAL_CANDIDATE if supported, and stop.",
+  "next_safe_action": "Stop for control-evaluator validation of this TERMINAL_CANDIDATE.",
   "terminal_submission": {
-    "conclusion": "The primary mechanism is retry-state amplification coupled to pooled connection lifecycle reuse, not queue-capacity saturation. Resetting retry state at request boundaries with pool reuse retained and disabling pool reuse with retry policy fixed both normalize retries and latency, whereas increasing queue capacity 4x leaves the regression essentially unchanged.",
-    "primary_hypothesis": "H_retry_state",
-    "rejected_primary_hypotheses": [
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
       "H_queue"
     ],
-    "residual_hypotheses": [
-      {
-        "id": "H_clock_bucket",
-        "status": "WEAKENED_NOT_REQUIRED_FOR_TERMINAL"
-      }
+    "observed_results": {
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "E_queue_4x": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
     ],
-    "evidence_refs": [
-      "fixture:O1",
-      "fixture:O2",
-      "fixture:O3",
-      "fixture:E_force_retry_reset",
-      "fixture:E_disable_pool_reuse",
-      "fixture:E_queue_4x"
-    ]
+    "rationale": "H_retry_state is supported by two independent concurrency-preserving interventions: explicit request-boundary retry-state reset with pool reuse enabled reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms, while disabling pool reuse with retry policy fixed reduced retries to 1.1 and p95 to 228 ms. In contrast, increasing queue capacity 4x left the regression essentially intact at 3 retries/request and 405 ms p95, rejecting H_queue as the primary mechanism. O2 is addressed as genuine load-relief evidence but non-discriminating: halving concurrency improves latency without identifying the mechanism, whereas the lifecycle/retry-state interventions do so without lowering concurrency."
   },
   "validator_results": [
     {
@@ -502,7 +538,7 @@
     }
   ],
   "metrics": {
-    "reasoning_invocations": 5,
+    "reasoning_invocations": 6,
     "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 0,
