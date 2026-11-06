@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 4,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -56,9 +56,9 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 5,
+    "quantum_index": 6,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": "q4 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
+    "last_quantum_chat": "q5 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
   },
   "started_at": "2026-11-05T20:44:00-05:00",
   "completed_at": null,
@@ -202,6 +202,37 @@
         "E_isolate_r4",
         "E_global_retry_reset"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-C-002-q5",
+      "generation": 4,
+      "owner": "screening-v1-P3-C-002-q5-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 6799,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_isolate_r1",
+        "E_isolate_r2",
+        "E_isolate_r3",
+        "E_isolate_r4",
+        "E_global_retry_reset",
+        "E_capacity_2x"
+      ]
     }
   ],
   "events": [
@@ -331,9 +362,29 @@
       "generation": 4,
       "experiment_id": "E_global_retry_reset",
       "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 4,
+      "worker_id": "screening-v1-P3-C-002-q5-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 4,
+      "evidence_ref_count": 9
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "q5-E_capacity_2x",
+      "generation": 4,
+      "payload_ref": "E_capacity_2x"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "q5-E_capacity_2x",
+    "kind": "EXPERIMENT",
+    "payload_ref": "E_capacity_2x"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "q0-E_isolate_r1",
@@ -455,29 +506,38 @@
         "E_isolate_r2",
         "E_isolate_r1"
       ]
+    },
+    {
+      "id": "F5_global_retry_reset_normalizes_regression",
+      "statement": "Resetting retry state at every cross-region request boundary while leaving failover and pooling enabled reduces all-regions p95 latency to 215-235 ms and mean retries to 0.9-1.1. Because the intervention directly removes retained cross-region retry state without a timer-desynchronization intervention, this strongly supports H_retry_feedback as the primary coupled mechanism and rejects H_clock_sync as the primary explanation; H_capacity still requires the mandated global control before terminal diagnosis.",
+      "evidence_refs": [
+        "E_global_retry_reset",
+        "E_isolate_r1",
+        "E_isolate_r2",
+        "E_isolate_r3",
+        "E_isolate_r4"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
-      "status": "OPEN_LEADING",
-      "reason": "Four-region isolation replication strongly establishes cross-region propagation as causal; a coupled-residual discriminator is now required to test whether retained retry state is the mechanism."
+      "status": "OPEN_LEADING_STRONGLY_SUPPORTED",
+      "reason": "Four-region isolation replication plus normalization after cross-region retry-state reset directly supports retained retry-state feedback as the primary mechanism."
     },
     {
       "id": "H_clock_sync",
-      "status": "OPEN",
-      "reason": "The four-region replicated isolation response remains compatible with synchronized-timer coupling because isolation removes the same cross-region path; state-reset versus timer-desynchronization evidence is required."
+      "status": "REJECTED_AS_PRIMARY",
+      "reason": "Global retry-state reset normalizes latency and retries while the intervention targets retained retry state rather than timer synchronization; the prior isolation evidence is therefore better explained by H_retry_feedback."
     },
     {
       "id": "H_capacity",
-      "status": "OPEN_WEAKENED",
-      "reason": "O2 and O3 weaken primary saturation, but a competing-mechanism/global control is required before rejection."
+      "status": "OPEN_WEAKENED_CONTROL_REQUIRED",
+      "reason": "O2 and O3 weaken primary saturation, and retry-state reset normalizes the regression without added capacity, but the fixture contract still requires a competing-mechanism/global control before terminal diagnosis."
     }
   ],
   "unresolved_questions": [
-    "Does resetting cross-region retry state discriminate retained retry-state feedback from synchronized-timer coupling?",
-    "If retry-state reset does not discriminate sufficiently, does desynchronizing timers support H_clock_sync?",
-    "Does a global capacity/control intervention reject H_capacity as primary?"
+    "Does doubling service capacity without changing retry or timer behavior reject H_capacity as the primary mechanism and satisfy the required competing-mechanism/global control?"
   ],
   "evidence_refs": [
     "O1",
@@ -487,7 +547,8 @@
     "E_isolate_r1",
     "E_isolate_r2",
     "E_isolate_r3",
-    "E_isolate_r4"
+    "E_isolate_r4",
+    "E_global_retry_reset"
   ],
   "candidate_actions": [
     {
@@ -526,12 +587,12 @@
       "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 5. Re-read durable state, consume only E_global_retry_reset, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
+  "next_safe_action": "Wait for the control evaluator to publish only E_capacity_2x. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled, re-read durable state, consume only that published result, and perform exactly one bounded reasoning quantum toward a terminal candidate.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 5,
-    "experiment_requests": 5,
+    "reasoning_invocations": 6,
+    "experiment_requests": 6,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
