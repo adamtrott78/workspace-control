@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -191,13 +191,16 @@
       "request_id": "screen-002-exp-002",
       "generation": 0,
       "payload_ref": "E_disable_pool_reuse"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screen-002-exp-002",
+      "generation": 0,
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
     }
   ],
-  "pending_external": {
-    "request_id": "screen-002-exp-002",
-    "kind": "experiment",
-    "payload_ref": "E_disable_pool_reuse"
-  },
+  "pending_external": null,
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screen-002-exp-001",
@@ -207,6 +210,16 @@
         "mean_retries": 1
       },
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "publication_scope": "requested experiment only"
+    },
+    "E_disable_pool_reuse": {
+      "request_id": "screen-002-exp-002",
+      "experiment_id": "E_disable_pool_reuse",
+      "result": {
+        "p95_latency_ms": 228,
+        "mean_retries": 1.1
+      },
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
       "publication_scope": "requested experiment only"
     }
   },
@@ -254,7 +267,7 @@
       "action": "After control publishes E_disable_pool_reuse, interpret it against H_retry_state and H_clock_bucket; if the worker contract is satisfied, prepare a terminal candidate. Do not treat O2 as causal proof."
     }
   ],
-  "next_safe_action": "Stop at WAITING_EXTERNAL. Control must execute and publish only E_disable_pool_reuse. Do not poll. Resume only from durable READY_TO_RESUME state in a fresh regular GPT-5.6 Sol Instant chat with Memory disabled. High escalation remains unauthorized unless durable control state explicitly opens the gate.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_disable_pool_reuse, continue one bounded lower-tier transition, and stop at the next protocol-required boundary. High escalation remains unauthorized unless durable control state explicitly opens the gate.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -273,9 +286,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screen-002-exp-001",
-    "last_experiment_id": "E_force_retry_reset",
-    "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "last_request_id": "screen-002-exp-002",
+    "last_experiment_id": "E_disable_pool_reuse",
+    "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
