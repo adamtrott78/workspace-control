@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -143,6 +143,26 @@
         "validator:missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization",
         "E_clock_quantization"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-005",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1536,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "E_clock_quantization:b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+      ]
     }
   ],
   "events": [
@@ -240,6 +260,16 @@
       "generation": 0,
       "experiment_id": "E_clock_quantization",
       "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 6
     }
   ],
   "pending_external": null,
@@ -289,43 +319,59 @@
       "id": "F_retry_reset",
       "statement": "Control-published E_force_retry_reset result: with pool reuse enabled, resetting retry state at each request boundary yields p95 latency 219 ms and mean retries 1.0. This reproduces and slightly exceeds the improvement from disabling pool reuse, isolating retained retry state across pooled request lifecycles as the primary mechanism.",
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "id": "F_clock_quantization",
+      "statement": "Control-published E_clock_quantization result: replacing quantized timeout timestamps with monotonic high-resolution timestamps yields p95 latency 401 ms and mean retries 3.0, close to O1 baseline 412 ms and 3.1. Timestamp quantization therefore does not materially explain the regression.",
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
       "status": "selected_primary",
-      "basis": "Two interventions converge: disabling pool reuse lowers p95/retries to 228 ms/1.1, and explicit retry reset while preserving reuse lowers them to 219 ms/1.0, directly isolating retained retry state."
+      "basis": "Disabling pool reuse improves p95/retries to 228 ms/1.1, and resetting retry state while preserving reuse improves them to 219 ms/1.0; the mechanism-specific reset isolates retained retry state."
     },
     {
       "id": "H_queue",
       "status": "rejected_primary",
-      "basis": "CPU and queue occupancy retain substantial headroom (O3), and mechanism-specific retry reset at fixed pooling/concurrency removes the regression; O2 is load relief, not evidence of queue saturation as root cause."
+      "basis": "O3 shows CPU below 48% and queue occupancy below 62%; fixed-concurrency retry-state interventions remove the regression, while O2 is non-discriminating load relief."
     },
     {
       "id": "H_clock_bucket",
-      "status": "rejected_primary",
-      "basis": "The regression is removed by retry-state reset without changing timestamp quantization, so clock bucketing is not required to explain the primary effect."
+      "status": "rejected",
+      "basis": "E_clock_quantization changes the proposed clock mechanism but leaves p95/retries near baseline at 401 ms/3.0."
     }
   ],
-  "unresolved_questions": [
-    "Does replacing quantized timeout timestamps with monotonic high-resolution timestamps materially reduce retries/latency, as H_clock_bucket predicts?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "O1",
     "O2",
     "O3",
     "E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
-    "E_force_retry_reset:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    "E_force_retry_reset:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "E_clock_quantization:b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
   ],
-  "candidate_actions": [
-    {
-      "experiment_id": "E_clock_quantization",
-      "reason": "Exact validator-directed discriminating catalog experiment: change timeout timestamp quantization while leaving the established retry-state intervention evidence intact, directly testing H_clock_bucket."
-    }
-  ],
-  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_clock_quantization, continue until the next protocol-required boundary, persist state, and stop. Do not open, refresh, delete, sign out of, or replace this chat while persistent continuity is required.",
-  "terminal_submission": null,
+  "candidate_actions": [],
+  "next_safe_action": "Stop for control evaluator validation of the complete terminal candidate. Do not mark COMPLETE unless the objective validator passes.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
+      "H_queue",
+      "H_clock_bucket"
+    ],
+    "observed_results": {
+      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "E_clock_quantization": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "O1 shows the regression at 412 ms p95 with 3.1 retries/request, while O3 shows CPU below 48% and queue occupancy below 62%, weakening queue saturation. E_disable_pool_reuse at fixed concurrency/retry policy reduces p95 to 228 ms and retries to 1.1, implicating reuse-linked state. E_force_retry_reset preserves pool reuse but resets retry state at request boundaries and reduces p95 to 219 ms and retries to 1.0, specifically isolating retained retry state as causal rather than pooling generically. The required discriminating E_clock_quantization intervention changes timestamp quantization yet leaves p95 at 401 ms and retries at 3.0, near baseline, directly rejecting H_clock_bucket. O2's improvement from halving concurrency is therefore genuine load relief but non-discriminating: it reduces symptom severity without identifying the primary mechanism. The convergent interventions support H_retry_state and reject H_queue and H_clock_bucket as primary explanations."
+  },
   "validator_results": [
     {
       "validator_id": "research_iterate_objective_v1",
@@ -338,7 +384,7 @@
     }
   ],
   "metrics": {
-    "reasoning_invocations": 4,
+    "reasoning_invocations": 5,
     "experiment_requests": 3,
     "retries": 1,
     "decomposition_count": 0,
