@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "FAILED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -62,7 +62,7 @@
     "persistent_chat": true
   },
   "started_at": "2026-11-05T18:56:00-05:00",
-  "completed_at": null,
+  "completed_at": "2026-11-05T19:29:30-05:00",
   "invocations": [
     {
       "invocation_id": "screen-002-inv-001",
@@ -163,6 +163,13 @@
       "generation": 0,
       "experiment_id": "E_clock_quantization",
       "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    },
+    {
+      "kind": "CONTROL_SESSION_CONTINUITY_INVALIDATION",
+      "generation": 0,
+      "reason": "PERSISTENT_CHAT_CONTINUITY_LOST",
+      "replacement_replicate": "screen-003",
+      "note": "User reported the persistent P2 B worker chat was deleted. Same-chat continuation cannot be established."
     }
   ],
   "pending_external": null,
@@ -252,7 +259,7 @@
       "rationale": "Queue saturation remains weakened by O3 and by improvement without queue-capacity change; use only if second-cycle evidence leaves ambiguity."
     }
   ],
-  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_clock_quantization, continue until the next protocol-required boundary, persist state, and stop. Do not open a replacement chat while persistent continuity is required.",
+  "next_safe_action": "Do not continue this run. Persistent-chat continuity was lost after the latest control-published result. Use replacement replicate screen-003 from a brand-new clean GPT-5.6 Sol Instant chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -267,14 +274,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screen-002-exp-002",
-    "last_experiment_id": "E_clock_quantization",
-    "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "SESSION_CONTINUITY_INVALIDATED",
+    "violations": [
+      "PERSISTENT_CHAT_CONTINUITY_LOST"
+    ],
+    "note": "Persistent-chat treatment cannot continue after deletion of the worker conversation. Existing evidence is preserved only as failed-run protocol evidence; replacement slot required."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/B_instant_persistent_chat/screen-002.json"
