@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -468,6 +468,21 @@
       "generation": 0,
       "final_hypothesis": "H_retry_feedback",
       "observed_experiment_count": 6
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
     }
   ],
   "pending_external": null,
@@ -645,7 +660,7 @@
     "external_result:E_desynchronize_timers#90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
   ],
   "candidate_actions": [],
-  "next_safe_action": "STOP. TERMINAL_CANDIDATE submitted; await control-evaluator validation. Do not self-validate, complete, poll, or mutate further until control publishes the next authorized state.",
+  "next_safe_action": "Screening run complete. Preserve this P3 A run as non-claim-bearing protocol-screening evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_feedback",
     "rejected_hypotheses": [
@@ -668,7 +683,15 @@
     ],
     "rationale": "The primary mechanism is cross-region retained retry-state positive feedback. All four independent regional isolation experiments reduce the isolated region's p95 latency to 315-326 ms and retries to 1.8-2.0 without materially changing other regions, showing that cross-region propagation causally contributes across the full topology. The decisive coupled intervention is E_global_retry_reset: resetting retry state at every cross-region boundary while keeping failover and pooling enabled reduces all regions to 215-235 ms p95 and 0.9-1.1 retries. By contrast, E_desynchronize_timers leaves the regression largely intact at 425-462 ms p95 and 2.7-3.2 retries, rejecting H_clock_sync as the primary mechanism. H_capacity is also rejected as primary: O2 shows halving concurrency lowers latency by about 20% but abnormal retry amplification remains, while O3 shows CPU below 55% and queue occupancy below 65%. Thus load relief is a real secondary latency effect, but it does not explain the retry amplification; retained retry state propagated across failover boundaries does."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 7,
     "experiment_requests": 6,
@@ -681,14 +704,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-A-003-E_desynchronize_timers-006",
-    "last_experiment_id": "E_desynchronize_timers",
-    "result_hash": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/A_frontier_long_horizon/screen-003.json"
