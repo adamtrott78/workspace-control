@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003",
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -264,6 +264,43 @@
         "external_result:E_global_retry_reset#026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
         "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_desynchronize_timers"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-A-003-g0-q7",
+      "generation": 0,
+      "owner": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "identity_source": "user_attestation",
+        "user_attestation": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol High was selected for this conversation."
+        ],
+        "worker_verified": {
+          "github_available": true,
+          "prior_benchmark_or_control_context_present": false
+        }
+      },
+      "context_bytes": 8077,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "external_result:E_isolate_r1#060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+        "external_result:E_isolate_r2#e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+        "external_result:E_isolate_r3#e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+        "external_result:E_isolate_r4#65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+        "external_result:E_global_retry_reset#026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+        "external_result:E_desynchronize_timers#90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
+      ]
     }
   ],
   "events": [
@@ -420,6 +457,17 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "chatgpt-gpt56-sol-high-persistent-P3-A-screen-003"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 11
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0,
+      "final_hypothesis": "H_retry_feedback",
+      "observed_experiment_count": 6
     }
   ],
   "pending_external": null,
@@ -555,29 +603,34 @@
         "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
       ],
       "finding": "Resetting retry state at every cross-region request boundary while leaving failover and pooling enabled reduced all regions to 215-235 ms p95 latency and 0.9-1.1 mean retries. This directly identifies retained retry state crossing region boundaries as a major causal driver of the coupled regression rather than failover/pooling or regional load alone."
+    },
+    {
+      "id": "F_E_desynchronize_timers",
+      "basis": [
+        "E_desynchronize_timers",
+        "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
+      ],
+      "finding": "Desynchronizing timeout scheduling with randomized jitter and independent monotonic timer epochs left all-region p95 latency at 425-462 ms and mean retries at 2.7-3.2. Because the regression largely persists under timer desynchronization while the global retry-state reset nearly normalizes both metrics, clock/timer synchronization is not supported as the primary mechanism."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
-      "status": "PRIMARY_SUPPORTED_PENDING_COMPETING_CONTROL",
-      "rationale": "Four independent regional isolations implicated cross-region propagation, and the coupled global retry-state reset nearly normalized both latency and retries while failover and pooling remained enabled. This directly supports retained retry-state positive feedback as the primary mechanism, pending the required competing timer intervention."
+      "status": "SELECTED_PRIMARY",
+      "rationale": "All four regional isolation probes independently reduce the local regression, and resetting retry state at every cross-region boundary nearly normalizes both latency and retries while failover and pooling remain enabled. The competing timer-desynchronization intervention leaves the regression largely intact."
     },
     {
       "id": "H_clock_sync",
-      "status": "COMPETING_PENDING_DIRECT_TEST",
-      "rationale": "The global retry-state reset supports retained state directly, but a timer/synchronization contribution has not yet been directly tested. E_desynchronize_timers is required to determine whether timer synchronization can account for the regression independently."
+      "status": "REJECTED",
+      "rationale": "Direct timer desynchronization leaves p95 latency at 425-462 ms and retries at 2.7-3.2, far weaker than the normalization from retry-state reset."
     },
     {
       "id": "H_capacity",
-      "status": "REJECTABLE_AS_PRIMARY_PENDING_FINAL_SYNTHESIS",
-      "rationale": "O3 shows low CPU/queue occupancy; O2 shows latency relief under lower load but retry amplification persists; four propagation isolations and a global retry-state reset improve retries without adding capacity. Capacity can therefore remain a secondary latency modulator but is not supported as the primary regression mechanism."
+      "status": "REJECTED_AS_PRIMARY",
+      "rationale": "O2 shows that lower concurrency relieves latency by roughly 20% but retry amplification persists; O3 shows CPU below 55% and queue occupancy below 65%; propagation isolation and retry-state reset reduce retries without adding capacity. Capacity is therefore a secondary latency modulator, not the primary regression mechanism."
     }
   ],
-  "unresolved_questions": [
-    "Does timer desynchronization materially normalize both latency and retry amplification, or is its effect weaker than the retry-state reset?",
-    "After the competing timer intervention, can H_clock_sync be rejected and H_capacity formally rejected as primary while O2 is explicitly addressed?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "fixture:research-iterate-cross-region-feedback-p3-v1#O1",
     "fixture:research-iterate-cross-region-feedback-p3-v1#O2",
@@ -588,62 +641,36 @@
     "external_result:E_isolate_r2#e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
     "external_result:E_isolate_r3#e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
     "external_result:E_isolate_r4#65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
-    "external_result:E_global_retry_reset#026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+    "external_result:E_global_retry_reset#026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+    "external_result:E_desynchronize_timers#90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
   ],
-  "candidate_actions": [
-    {
-      "experiment_id": "E_isolate_r1",
-      "role": "regional_leaf",
-      "status": "OBSERVED",
-      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
-      "reason": "Observed regional propagation-isolation evidence."
+  "candidate_actions": [],
+  "next_safe_action": "STOP. TERMINAL_CANDIDATE submitted; await control-evaluator validation. Do not self-validate, complete, poll, or mutate further until control publishes the next authorized state.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_feedback",
+    "rejected_hypotheses": [
+      "H_clock_sync",
+      "H_capacity"
+    ],
+    "observed_results": {
+      "E_isolate_r1": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "E_isolate_r2": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+      "E_isolate_r3": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+      "E_isolate_r4": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+      "E_global_retry_reset": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "E_desynchronize_timers": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
     },
-    {
-      "experiment_id": "E_isolate_r2",
-      "role": "regional_leaf",
-      "status": "OBSERVED",
-      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
-      "reason": "Observed regional propagation-isolation evidence."
-    },
-    {
-      "experiment_id": "E_isolate_r3",
-      "role": "regional_leaf",
-      "status": "OBSERVED",
-      "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
-      "reason": "Observed regional propagation-isolation evidence."
-    },
-    {
-      "experiment_id": "E_isolate_r4",
-      "role": "regional_leaf",
-      "status": "OBSERVED",
-      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
-      "reason": "Observed regional propagation-isolation evidence."
-    },
-    {
-      "experiment_id": "E_global_retry_reset",
-      "role": "coupled_residual",
-      "status": "OBSERVED",
-      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
-      "reason": "Direct coupled evidence for retained retry-state propagation."
-    },
-    {
-      "experiment_id": "E_desynchronize_timers",
-      "role": "competing_mechanism",
-      "status": "REQUEST_NOW",
-      "reason": "Required direct test of the remaining H_clock_sync competing mechanism; also reaches the fixture minimum of six experiment cycles when observed."
-    },
-    {
-      "experiment_id": "E_capacity_2x",
-      "role": "global_control",
-      "status": "NOT_CURRENTLY_REQUIRED",
-      "reason": "O2/O3 plus propagation-isolation and retry-reset evidence already distinguish capacity as a secondary load effect; reserve only if timer evidence leaves material ambiguity."
-    }
-  ],
-  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_desynchronize_timers, and if the public terminal contract is satisfied persist a protocol-valid TERMINAL_CANDIDATE; otherwise continue only to the next required boundary. Mutate only the assigned run-state path and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
-  "terminal_submission": null,
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3",
+      "O4"
+    ],
+    "rationale": "The primary mechanism is cross-region retained retry-state positive feedback. All four independent regional isolation experiments reduce the isolated region's p95 latency to 315-326 ms and retries to 1.8-2.0 without materially changing other regions, showing that cross-region propagation causally contributes across the full topology. The decisive coupled intervention is E_global_retry_reset: resetting retry state at every cross-region boundary while keeping failover and pooling enabled reduces all regions to 215-235 ms p95 and 0.9-1.1 retries. By contrast, E_desynchronize_timers leaves the regression largely intact at 425-462 ms p95 and 2.7-3.2 retries, rejecting H_clock_sync as the primary mechanism. H_capacity is also rejected as primary: O2 shows halving concurrency lowers latency by about 20% but abnormal retry amplification remains, while O3 shows CPU below 55% and queue occupancy below 65%. Thus load relief is a real secondary latency effect, but it does not explain the retry amplification; retained retry state propagated across failover boundaries does."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 6,
+    "reasoning_invocations": 7,
     "experiment_requests": 6,
     "retries": 0,
     "decomposition_count": 0,
