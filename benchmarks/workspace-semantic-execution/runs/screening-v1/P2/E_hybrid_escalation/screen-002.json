@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -63,6 +63,15 @@
         "action": "REQUEST_EXPERIMENT",
         "experiment_id": "E_force_retry_reset",
         "rationale": "Directly tests whether retained retry state is causal while holding pool reuse enabled; more discriminating than load relief because O2 may be non-discriminating."
+      },
+      {
+        "invocation_id": "screen-002-q1",
+        "generation": 0,
+        "executor": "GPT-5.6 Sol / Instant",
+        "classification": "BOUNDED_NOT_TOO_LARGE",
+        "action": "REQUEST_EXPERIMENT",
+        "experiment_id": "E_disable_pool_reuse",
+        "rationale": "E_force_retry_reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled, strongly supporting retry-state retention. Disabling pool reuse next directly tests whether pooled request lifecycles are the carrier of retained retry state and discriminates that mechanism from H_clock_bucket."
       }
     ],
     "decomposition_state": "NOT_REQUIRED_BOUNDED_WORKLOAD",
@@ -95,6 +104,31 @@
         "O2",
         "O3",
         "E_force_retry_reset"
+      ]
+    },
+    {
+      "invocation_id": "screen-002-q1",
+      "generation": 0,
+      "owner": "gpt-5.6-sol-instant-screen-002-q1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "O1",
+        "O2",
+        "O3",
+        "E_force_retry_reset",
+        "E_disable_pool_reuse"
       ]
     }
   ],
@@ -133,9 +167,37 @@
       "generation": 0,
       "experiment_id": "E_force_retry_reset",
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q1"
+    },
+    {
+      "kind": "SESSION_ATTESTATION",
+      "generation": 0,
+      "worker_id": "gpt-5.6-sol-instant-screen-002-q1",
+      "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat. Memory was disabled before this conversation was opened. GPT-5.6 Sol Instant was selected for this conversation."
+    },
+    {
+      "kind": "EXPERIMENT_INTERPRETATION",
+      "generation": 0,
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "note": "Explicit retry-state reset lowered mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms with pool reuse still enabled; this strongly supports H_retry_state and further weakens H_queue, but a second discriminating cycle is required before terminal claim."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-exp-002",
+      "generation": 0,
+      "payload_ref": "E_disable_pool_reuse"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screen-002-exp-002",
+    "kind": "experiment",
+    "payload_ref": "E_disable_pool_reuse"
+  },
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screen-002-exp-001",
@@ -156,43 +218,48 @@
     {
       "id": "F2",
       "finding": "O2 shows load relief lowers latency but is explicitly non-discriminating and does not establish the causal mechanism."
+    },
+    {
+      "id": "F3",
+      "finding": "E_force_retry_reset reduced mean retries from 3.1 to 1 and p95 latency from 412 ms to 219 ms while pool reuse remained enabled, strongly supporting retained retry state as causal."
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "PRIMARY_TEST_TARGET"
+      "status": "STRONGLY_SUPPORTED_PENDING_SECOND_DISCRIMINATING_CYCLE"
     },
     {
       "id": "H_clock_bucket",
-      "status": "OPEN"
+      "status": "OPEN_SECONDARY_DISCRIMINATION_TARGET"
     },
     {
       "id": "H_queue",
-      "status": "WEAKENED_BY_O3_NOT_REJECTED"
+      "status": "FURTHER_WEAKENED"
     }
   ],
   "unresolved_questions": [
-    "Does explicit retry-state reset normalize retries and latency while pool reuse remains enabled?",
-    "After the first result, which second intervention best discriminates the remaining competing mechanism?"
+    "Does disabling pool reuse normalize retries and latency, corroborating pooled request lifecycles as the carrier of retained retry state?",
+    "Can H_clock_bucket be rejected after the second discriminating result?"
   ],
   "evidence_refs": [
     "O1",
     "O2",
     "O3",
-    "E_force_retry_reset"
+    "E_force_retry_reset",
+    "E_disable_pool_reuse"
   ],
   "candidate_actions": [
     {
-      "action": "After control-published result, interpret E_force_retry_reset and choose one second discriminating experiment; do not treat O2 as causal proof."
+      "action": "After control publishes E_disable_pool_reuse, interpret it against H_retry_state and H_clock_bucket; if the worker contract is satisfied, prepare a terminal candidate. Do not treat O2 as causal proof."
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state only, consume E_force_retry_reset, continue one bounded lower-tier transition, and stop at the next protocol-required boundary. High escalation remains unauthorized unless durable control state explicitly opens the gate.",
+  "next_safe_action": "Stop at WAITING_EXTERNAL. Control must execute and publish only E_disable_pool_reuse. Do not poll. Resume only from durable READY_TO_RESUME state in a fresh regular GPT-5.6 Sol Instant chat with Memory disabled. High escalation remains unauthorized unless durable control state explicitly opens the gate.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
