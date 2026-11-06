@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -104,14 +104,28 @@
       "request_id": "screening-v1-P2-B-003-exp-001",
       "generation": 0,
       "payload_ref": "E_disable_pool_reuse"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-B-003-exp-001",
+      "generation": 0,
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P2-B-003-exp-001",
-    "kind": "synthetic_experiment",
-    "payload_ref": "E_disable_pool_reuse"
+  "pending_external": null,
+  "external_results": {
+    "E_disable_pool_reuse": {
+      "request_id": "screening-v1-P2-B-003-exp-001",
+      "experiment_id": "E_disable_pool_reuse",
+      "result": {
+        "p95_latency_ms": 228,
+        "mean_retries": 1.1
+      },
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "publication_scope": "requested experiment only"
+    }
   },
-  "external_results": {},
   "established_findings": [
     {
       "id": "F_initial",
@@ -149,7 +163,7 @@
       "reason": "Directly tests whether pooled lifecycle reuse is necessary for retry-state amplification while holding concurrency and retry policy fixed."
     }
   ],
-  "next_safe_action": "Wait for control evaluator to publish the E_disable_pool_reuse result into this run state; do not poll.",
+  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_disable_pool_reuse, continue until the next protocol-required boundary, persist state, and stop. Do not open a replacement chat while persistent continuity is required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -167,8 +181,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "NOT_YET_NEEDED",
-    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P2-B-003-exp-001",
+    "last_experiment_id": "E_disable_pool_reuse",
+    "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/B_instant_persistent_chat/screen-003.json"
