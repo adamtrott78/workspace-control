@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -81,6 +81,27 @@
       "evidence_refs": [
         "E_disable_pool_reuse"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-002",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1536,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+        "E_force_retry_reset"
+      ]
     }
   ],
   "events": [
@@ -111,9 +132,29 @@
       "generation": 0,
       "experiment_id": "E_disable_pool_reuse",
       "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-B-003-exp-002",
+      "generation": 0,
+      "payload_ref": "E_force_retry_reset"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P2-B-003-exp-002",
+    "kind": "synthetic_experiment",
+    "payload_ref": "E_force_retry_reset"
+  },
   "external_results": {
     "E_disable_pool_reuse": {
       "request_id": "screening-v1-P2-B-003-exp-001",
@@ -130,45 +171,51 @@
     {
       "id": "F_initial",
       "statement": "O1 shows high latency/retries at concurrency 64; O3 shows CPU below 48% and queue occupancy below 62%, weakening queue-capacity saturation as the primary mechanism."
+    },
+    {
+      "id": "F_pool_reuse",
+      "statement": "Control-published E_disable_pool_reuse result: p95 latency 228 ms and mean retries 1.1 versus O1 baseline 412 ms and 3.1. Pool reuse is therefore materially involved in the regression, while this intervention alone does not isolate retained retry state from other reuse-linked mechanisms.",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "priority_test",
-      "basis": "Directly explains elevated retries and predicts sensitivity to pooled lifecycle reuse/reset."
+      "status": "strengthened_priority_test",
+      "basis": "Disabling pool reuse sharply reduces both retries and latency; explicit retry reset with reuse enabled can test the specific retained-state mechanism."
     },
     {
       "id": "H_clock_bucket",
-      "status": "open",
-      "basis": "Could bunch retries but is not yet discriminated."
+      "status": "open_weakened_relative",
+      "basis": "The pool-reuse intervention improved outcomes without changing timestamp quantization, but a reuse-linked confound remains possible."
     },
     {
       "id": "H_queue",
       "status": "weakened",
-      "basis": "O3 reports substantial CPU and queue headroom; O2 load relief alone is non-discriminating."
+      "basis": "O3 shows queue headroom, and the large improvement from changing pool reuse at fixed concurrency is inconsistent with queue capacity being the primary mechanism."
     }
   ],
   "unresolved_questions": [
-    "Does disabling pool reuse eliminate the retry/latency regression?"
+    "With pool reuse still enabled, does resetting retry state at each request boundary reproduce the latency/retry improvement?"
   ],
   "evidence_refs": [
     "O1",
     "O2",
-    "O3"
+    "O3",
+    "E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
   ],
   "candidate_actions": [
     {
-      "experiment_id": "E_disable_pool_reuse",
-      "reason": "Directly tests whether pooled lifecycle reuse is necessary for retry-state amplification while holding concurrency and retry policy fixed."
+      "experiment_id": "E_force_retry_reset",
+      "reason": "Mechanism-specific test: preserve pool reuse while resetting retry state, distinguishing retained retry state from generic benefits of disabling reuse."
     }
   ],
-  "next_safe_action": "Resume the SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_disable_pool_reuse, continue until the next protocol-required boundary, persist state, and stop. Do not open a replacement chat while persistent continuity is required.",
+  "next_safe_action": "Wait for control evaluator to publish the E_force_retry_reset result into this run state; do not poll. Resume this SAME persistent GPT-5.6 Sol Instant conversation afterward.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
