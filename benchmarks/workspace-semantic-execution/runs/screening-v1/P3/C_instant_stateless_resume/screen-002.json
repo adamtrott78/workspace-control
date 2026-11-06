@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 4,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "screening-v1-P3-C-002-q6-worker",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -58,7 +58,7 @@
   "treatment_state": {
     "quantum_index": 6,
     "resume_requires_new_chat": true,
-    "last_quantum_chat": "q5 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
+    "last_quantum_chat": "q6 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
   },
   "started_at": "2026-11-05T20:44:00-05:00",
   "completed_at": null,
@@ -385,6 +385,11 @@
       "generation": 4,
       "experiment_id": "E_capacity_2x",
       "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 4,
+      "worker_id": "screening-v1-P3-C-002-q6-worker"
     }
   ],
   "pending_external": null,
