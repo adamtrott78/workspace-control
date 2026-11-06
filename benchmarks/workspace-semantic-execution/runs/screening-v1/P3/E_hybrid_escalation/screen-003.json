@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "WAITING_EXTERNAL",
+  "owner": "screening-v1-P3-E-003-instant-q003",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -124,6 +124,19 @@
           "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r2"
         ],
         "escalation_requested": false
+      },
+      {
+        "attempt_id": "instant-quantum-003",
+        "generation": 0,
+        "classification": "REGIONAL_LEAF_EXECUTABLE",
+        "outcome": "WAITING_EXTERNAL",
+        "experiment_id": "E_isolate_r3",
+        "leaf": "region-3",
+        "evidence_refs": [
+          "external_results.E_isolate_r2@e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+          "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r3"
+        ],
+        "escalation_requested": false
       }
     ],
     "decomposition_state": "REGIONAL_LEAVES_DECOMPOSED",
@@ -210,6 +223,32 @@
         "external_results.E_isolate_r1@060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
         "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r2"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-E-003-instant-q003",
+      "generation": 0,
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation.",
+          "GitHub is enabled."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "external_results.E_isolate_r2@e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+        "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r3"
+      ]
     }
   ],
   "events": [
@@ -280,9 +319,33 @@
       "generation": 0,
       "experiment_id": "E_isolate_r2",
       "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P3-E-003-instant-q003",
+      "identity_source": "user_attestation"
+    },
+    {
+      "kind": "LOWER_TIER_RESULT_CONSUMED",
+      "generation": 0,
+      "experiment_id": "E_isolate_r2",
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+      "note": "Consumed only the control-published E_isolate_r2 result; no cross-experiment inference or escalation."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-E-003-E_isolate_r3-g0",
+      "generation": 0,
+      "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r3"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-E-003-E_isolate_r3-g0",
+    "generation": 0,
+    "experiment_id": "E_isolate_r3",
+    "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r3"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
@@ -380,12 +443,12 @@
       "authority": "fixture_only_external_request"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state, consume only the control-published E_isolate_r2 result, perform exactly one authorized lower-tier transition, persist the exact next protocol boundary, and stop. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Stop. Wait for the control evaluator to publish E_isolate_r3 into this assigned run-state file and set READY_TO_RESUME. Do not poll. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 3,
-    "experiment_requests": 2,
+    "reasoning_invocations": 4,
+    "experiment_requests": 3,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
