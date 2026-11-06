@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P3 current state: A replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol High chat after control-published E_isolate_r2. B replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after control-published E_isolate_r2. C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-3 chat after control-published E_isolate_r3. D screen-002 has completed region-1 and is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for region-2 only. E screen-002 is READY_TO_RESUME in a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat after control-published E_isolate_r2. High for E remains NOT AUTHORIZED.
+P3 A/B-only operation is active by user request. A replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol High chat after control-published E_isolate_r3. B replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after control-published E_global_retry_reset. Preserve both chats continuously until those runs complete. Do not advance P3 C, D, or E unless the user explicitly re-enables them.
 
 ## Remaining work
 
