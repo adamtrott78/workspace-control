@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": "screening-v1-P3-D-002-synthesizer-g0",
   "executor_identity": {
     "provider": "OpenAI",
@@ -954,6 +954,21 @@
         "external_result:E_global_retry_reset@026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
         "external_result:E_capacity_2x@5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
       ]
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
     }
   ],
   "pending_external": null,
@@ -1127,7 +1142,7 @@
     "external_result:E_capacity_2x@5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Control evaluator must validate the terminal candidate and publish any validator result; synthesizer must not self-validate.",
+  "next_safe_action": "Screening run complete. Preserve this P3 D run as non-claim-bearing protocol-screening evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_feedback",
     "rejected_hypotheses": [
@@ -1150,7 +1165,15 @@
     ],
     "rationale": "All four regional isolation probes reduced local p95 latency and retry counts without materially changing other regions, consistently implicating cross-region retry propagation. Resetting retry state at every cross-region request boundary reduced all-region p95 latency to 215-235 ms and mean retries to 0.9-1.1 while failover and pooling remained enabled, supporting retained retry-state positive feedback and rejecting clock/timer synchronization as the primary mechanism because no timer intervention was required. Doubling capacity left p95 latency elevated at 420-455 ms and mean retries at 2.7-3.1, rejecting capacity saturation as the primary mechanism. This also addresses O2: load relief can lower latency, but persistence of abnormal retry amplification under load/capacity changes makes generic load relief non-diagnostic."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 15,
     "experiment_requests": 6,
@@ -1166,11 +1189,13 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-D-002-E_capacity_2x-g0",
-    "last_experiment_id": "E_capacity_2x",
-    "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/D_instant_decompose_critic/screen-002.json"
