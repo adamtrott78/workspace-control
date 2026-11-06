@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "FAILED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -69,7 +69,7 @@
       },
       {
         "role": "leaf_worker",
-        "status": "WAITING_EXTERNAL",
+        "status": "FAILED",
         "process_id": "screening-v1-P2-D-002-leaf-001"
       }
     ],
@@ -77,7 +77,7 @@
     "leaf_processes": [
       {
         "process_id": "screening-v1-P2-D-002-leaf-001",
-        "status": "WAITING_EXTERNAL",
+        "status": "FAILED",
         "depth": 0,
         "objective": "Determine the primary mechanism causing the synthetic request-latency regression using the fixture contract, including at least two experiment/result cycles, rejection of at least one competing hypothesis, and explicit treatment of O2 as potentially non-discriminating.",
         "constraints": [
@@ -109,7 +109,7 @@
     }
   },
   "started_at": null,
-  "completed_at": null,
+  "completed_at": "2026-11-05T19:29:30-05:00",
   "invocations": [
     {
       "invocation_id": "screening-v1-P2-D-002-decomposer-001",
@@ -249,13 +249,16 @@
       "role": "leaf_worker",
       "process_id": "screening-v1-P2-D-002-leaf-001",
       "payload_ref": "experiment:E_force_retry_reset"
+    },
+    {
+      "kind": "CONTROL_WORKER_TRANSITION_INVALIDATION",
+      "generation": 0,
+      "reason": "WAITING_EXTERNAL_STATUS_MISSING",
+      "replacement_replicate": "screen-003",
+      "note": "Worker persisted live pending request screening-v1-P2-D-002-exp-002 while run status remained READY_TO_RESUME, violating the frozen WAITING_EXTERNAL transition contract. Control did not publish the requested result."
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P2-D-002-exp-002",
-    "experiment_id": "E_force_retry_reset",
-    "requested_by": "screening-v1-P2-D-002-leaf-001"
-  },
+  "pending_external": null,
   "external_results": {
     "E_disable_pool_reuse": {
       "request_id": "screening-v1-P2-D-002-exp-001",
@@ -319,7 +322,7 @@
       "authority": "proposal_only"
     }
   ],
-  "next_safe_action": "Wait for control to publish E_force_retry_reset; then launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled and GitHub enabled to consume only that published result and continue the leaf.",
+  "next_safe_action": "Do not continue this run. Worker transition contract was invalidated. Use replacement replicate screen-003 from a brand-new clean GPT-5.6 Sol Instant decomposer chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -334,13 +337,14 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_REQUEST_PENDING",
-    "last_request_id": "screening-v1-P2-D-002-exp-002",
-    "last_experiment_id": "E_force_retry_reset",
-    "note": "Worker requested one further fixture-catalog experiment after consuming the control-published E_disable_pool_reuse result."
+    "status": "WORKER_TRANSITION_CONTRACT_INVALIDATED",
+    "violations": [
+      "WAITING_EXTERNAL_STATUS_MISSING"
+    ],
+    "note": "Control did not publish the pending E_force_retry_reset result because the run was not durably in WAITING_EXTERNAL. Replacement slot required."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-002.json"
