@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
-  "owner": "screening-v1-P2-D-003-leaf-001",
+  "status": "READY_TO_RESUME",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -69,15 +69,15 @@
       },
       {
         "role": "leaf_worker",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY",
         "process_id": "screening-v1-P2-D-003-leaf-001"
       }
     ],
-    "active_role": "leaf_worker",
+    "active_role": null,
     "leaf_processes": [
       {
         "process_id": "screening-v1-P2-D-003-leaf-001",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY",
         "decomposition_depth": 0,
         "objective": "Determine the primary mechanism causing the synthetic request-latency regression using at least two experiment/result cycles; reject at least one competing hypothesis; address O2 as potentially non-discriminating; preserve exact control-published result hashes for terminal synthesis.",
         "decision_basis": "LEAF_EXECUTABLE: bounded small experiment graph, LOW_TO_MEDIUM horizon load, dependency width 1, PARTIALLY_COUPLED work, HIGH synthesis coupling, and taxonomy explicitly states this fixture is not large enough to provide strong decomposition-benefit evidence.",
@@ -89,7 +89,7 @@
           "E_half_concurrency"
         ],
         "experiment_cycles_required": 2,
-        "next_safe_action": "Await control publication for E_force_retry_reset; do not poll. Resume in a fresh leaf_worker chat only after READY_TO_RESUME."
+        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled to consume E_force_retry_reset and continue one bounded leaf quantum."
       }
     ],
     "independent_critic": {
@@ -181,15 +181,18 @@
       "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
       "experiment_id": "E_force_retry_reset",
       "rationale": "Directly tests H_retry_state by resetting retry state at request boundaries while leaving pool reuse enabled. Chosen over E_half_concurrency because O2 already demonstrates non-discriminating load relief, and over E_disable_pool_reuse because retry reset isolates retry-state retention more specifically."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
-    "generation": 0,
-    "role": "leaf_worker",
-    "process_id": "screening-v1-P2-D-003-leaf-001",
-    "experiment_id": "E_force_retry_reset"
-  },
+  "pending_external": null,
   "external_results": {
     "E_queue_4x": {
       "request_id": "screening-v1-P2-D-003-leaf-001-exp-001",
@@ -199,6 +202,16 @@
         "mean_retries": 3
       },
       "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+      "publication_scope": "requested experiment only"
+    },
+    "E_force_retry_reset": {
+      "request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
+      "experiment_id": "E_force_retry_reset",
+      "result": {
+        "p95_latency_ms": 219,
+        "mean_retries": 1
+      },
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
       "publication_scope": "requested experiment only"
     }
   },
@@ -249,7 +262,7 @@
       "authority": "treatment_contract.role_contract.leaf_worker"
     }
   ],
-  "next_safe_action": "Stop now. Control evaluator must publish E_force_retry_reset into this assigned run state and set READY_TO_RESUME before any further leaf reasoning.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P2-D-003-leaf-001. Re-read durable state only, consume E_force_retry_reset, continue one bounded leaf quantum, persist state, and stop at the next explicit role/protocol boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -267,11 +280,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_REQUEST_PENDING",
+    "status": "EXTERNAL_RESULT_PUBLISHED",
     "last_request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
     "last_experiment_id": "E_force_retry_reset",
-    "result_hash": null,
-    "note": "Worker requested exactly one further experiment; control evaluator must publish only that requested result before resume."
+    "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-003.json"
