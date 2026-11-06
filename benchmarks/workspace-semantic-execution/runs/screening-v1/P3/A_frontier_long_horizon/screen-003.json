@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -351,15 +351,16 @@
       "generation": 0,
       "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_global_retry_reset",
       "experiment_id": "E_global_retry_reset"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-A-003-E_global_retry_reset-005",
+      "generation": 0,
+      "experiment_id": "E_global_retry_reset",
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-A-003-E_global_retry_reset-005",
-    "kind": "EXPERIMENT",
-    "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_global_retry_reset",
-    "experiment_id": "E_global_retry_reset",
-    "intervention": "Reset retry state at every cross-region request boundary while leaving failover and pooling enabled."
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-A-003-E_isolate_r1-001",
@@ -407,6 +408,22 @@
         "other_regions_materially_changed": false
       },
       "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+      "publication_scope": "requested experiment only"
+    },
+    "E_global_retry_reset": {
+      "request_id": "screening-v1-P3-A-003-E_global_retry_reset-005",
+      "experiment_id": "E_global_retry_reset",
+      "result": {
+        "all_regions_p95_ms_range": [
+          215,
+          235
+        ],
+        "mean_retries_range": [
+          0.9,
+          1.1
+        ]
+      },
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
       "publication_scope": "requested experiment only"
     }
   },
@@ -535,7 +552,7 @@
       "reason": "Additional capacity control only if the coupled and timer interventions leave capacity ambiguity."
     }
   ],
-  "next_safe_action": "STOP. Await control-published result for E_global_retry_reset in this assigned run-state file; do not poll. Resume this same persistent GPT-5.6 Sol High chat only after status becomes READY_TO_RESUME.",
+  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_global_retry_reset, continue until the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -554,9 +571,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-A-003-E_isolate_r4-004",
-    "last_experiment_id": "E_isolate_r4",
-    "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+    "last_request_id": "screening-v1-P3-A-003-E_global_retry_reset-005",
+    "last_experiment_id": "E_global_retry_reset",
+    "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
