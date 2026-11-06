@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": "screening-v1-P3-E-003-instant-q007",
   "executor_identity": {
     "provider": "OpenAI",
@@ -596,6 +596,21 @@
       "generation": 0,
       "worker_id": "screening-v1-P3-E-003-instant-q007",
       "note": "Lower-tier Instant synthesis satisfied the public six-cycle, coupled-residual, competing-control, and O2 requirements. High escalation was neither requested nor authorized."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
     }
   ],
   "pending_external": null,
@@ -742,7 +757,7 @@
     "source_checkpoint_sha@052cf8224ec5a725e09207bde0bef8e43cefe8cb"
   ],
   "candidate_actions": [],
-  "next_safe_action": "STOP at TERMINAL_CANDIDATE. Await control-evaluator validation; do not poll, self-validate, request another experiment, or launch High.",
+  "next_safe_action": "Screening run complete. Preserve this P3 E run as non-claim-bearing protocol-screening evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_feedback",
     "rejected_hypotheses": [
@@ -764,7 +779,15 @@
     ],
     "rationale": "Regional isolation probes reduced the affected regions from the 440-485 ms starting p95 range to 315-326 ms while leaving other regions materially unchanged, showing that cross-region propagation participates in the regression. Resetting retry state at every cross-region boundary reduced all-region p95 to 215-235 ms and mean retries to 0.9-1.1, directly supporting retained retry-state feedback. In contrast, doubling service capacity left all-region p95 at 420-455 ms and mean retries at 2.7-3.1, so capacity saturation is not the primary mechanism. This also addresses O2: load relief can lower latency without removing retry amplification, so its improvement is not causal identification. O3 further disfavors saturation, while O4 is consistent with cross-region retry feedback. The evidence therefore selects H_retry_feedback as the primary mechanism and rejects H_capacity as primary; H_clock_sync may contribute but need not be rejected by the public terminal contract."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 8,
     "experiment_requests": 6,
@@ -780,11 +803,13 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-E-003-E_capacity_2x-g0",
-    "last_experiment_id": "E_capacity_2x",
-    "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-003.json"
