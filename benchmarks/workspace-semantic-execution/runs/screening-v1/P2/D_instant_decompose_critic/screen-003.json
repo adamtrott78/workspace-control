@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "TERMINAL_CANDIDATE",
+  "status": "COMPLETED",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -291,6 +291,21 @@
         "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
       ],
       "rationale": "Two required experiment/result cycles and independent critique are durable; terminal candidate follows the public fixture terminal output schema."
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
     }
   ],
   "pending_external": null,
@@ -375,7 +390,7 @@
       "authority": "worker_transition_contract.TERMINAL_CANDIDATE"
     }
   ],
-  "next_safe_action": "Stop. Await control-evaluator validation; do not self-validate or mutate further.",
+  "next_safe_action": "Screening run complete. Preserve this P2 run as non-claim-bearing protocol-screening evidence.",
   "terminal_submission": {
     "final_hypothesis": "H_retry_state",
     "rejected_hypotheses": [
@@ -392,7 +407,15 @@
     ],
     "rationale": "E_queue_4x was near-null versus O1 (p95 412→405 ms; mean retries 3.1→3.0), rejecting H_queue as the primary mechanism and aligning with O3 queue occupancy never exceeding 62%. E_force_retry_reset, with pool reuse still enabled, reduced p95 412→219 ms and mean retries 3.1→1.0, strongly supporting H_retry_state as the primary mechanism. O2 is addressed only as potentially non-discriminating load relief, not causal evidence. H_clock_bucket remains independently untested and is therefore not rejected."
   },
-  "validator_results": [],
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
   "metrics": {
     "reasoning_invocations": 6,
     "experiment_requests": 2,
@@ -405,14 +428,16 @@
     "manual_state_relay_count": 0,
     "model_poll_invocations": 0,
     "authority_provenance_violations": 0,
-    "deterministic_compute_operations": 0
+    "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-D-003-leaf-001-exp-002",
-    "last_experiment_id": "E_force_retry_reset",
-    "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-003.json"
