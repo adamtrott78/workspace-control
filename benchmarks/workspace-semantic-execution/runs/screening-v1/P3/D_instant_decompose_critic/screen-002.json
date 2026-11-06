@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": "screening-v1-P3-D-002-leaf_worker-coupled-residual-g0",
   "executor_identity": {
     "provider": "OpenAI",
@@ -118,7 +118,7 @@
       },
       {
         "process_id": "coupled-residual",
-        "status": "WAITING_EXTERNAL",
+        "status": "READY_TO_RESUME",
         "depth": 1,
         "objective": "Run exactly one coupled-residual discriminating intervention after regional evidence is durable; choose between retry-state reset and timer desynchronization based on surviving hypotheses.",
         "experiment_ids": [
@@ -667,15 +667,18 @@
       "experiment_id": "E_global_retry_reset",
       "payload_ref": "experiment:E_global_retry_reset",
       "selection_rationale": "All four regional isolation probes reduced local latency and retries without materially changing other regions, consistently implicating cross-region retry propagation while leaving H_retry_feedback versus H_clock_sync unresolved. Resetting retry state at every cross-region boundary directly tests retained retry-state feedback while preserving failover and pooling, making it the selected single coupled-residual discriminator."
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-D-002-E_global_retry_reset-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "coupled-residual",
+      "experiment_id": "E_global_retry_reset",
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-D-002-E_global_retry_reset-g0",
-    "generation": 0,
-    "process_id": "coupled-residual",
-    "experiment_id": "E_global_retry_reset",
-    "payload_ref": "experiment:E_global_retry_reset"
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-D-002-E_isolate_r1-g0",
@@ -723,6 +726,22 @@
         "other_regions_materially_changed": false
       },
       "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+      "publication_scope": "requested experiment only"
+    },
+    "E_global_retry_reset": {
+      "request_id": "screening-v1-P3-D-002-E_global_retry_reset-g0",
+      "experiment_id": "E_global_retry_reset",
+      "result": {
+        "all_regions_p95_ms_range": [
+          215,
+          235
+        ],
+        "mean_retries_range": [
+          0.9,
+          1.1
+        ]
+      },
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
       "publication_scope": "requested experiment only"
     }
   },
@@ -802,7 +821,7 @@
     "external_result:E_isolate_r4@65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
   ],
   "candidate_actions": [],
-  "next_safe_action": "Stop. Wait for the control evaluator to publish only E_global_retry_reset into this assigned run state and set READY_TO_RESUME. Do not poll. Do not perform global-control, independent_critic, or synthesizer work in this chat.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant leaf_worker chat for process coupled-residual. Re-read durable state, consume only the control-published E_global_retry_reset result, persist the coupled-residual leaf conclusion, and stop. Do not perform global-control, independent_critic, or synthesizer work in that chat.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -821,9 +840,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-D-002-E_isolate_r4-g0",
-    "last_experiment_id": "E_isolate_r4",
-    "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+    "last_request_id": "screening-v1-P3-D-002-E_global_retry_reset-g0",
+    "last_experiment_id": "E_global_retry_reset",
+    "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
