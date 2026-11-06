@@ -69,15 +69,24 @@
       },
       {
         "role": "leaf_worker",
+        "status": "COMPLETED",
+        "process_id": "screening-v1-P2-D-003-leaf-001",
+        "decision": "EVIDENCE_READY"
+      },
+      {
+        "role": "independent_critic",
         "status": "READY",
-        "process_id": "screening-v1-P2-D-003-leaf-001"
+        "evidence_refs": [
+          "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+          "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+        ]
       }
     ],
     "active_role": null,
     "leaf_processes": [
       {
         "process_id": "screening-v1-P2-D-003-leaf-001",
-        "status": "READY",
+        "status": "COMPLETED",
         "decomposition_depth": 0,
         "objective": "Determine the primary mechanism causing the synthetic request-latency regression using at least two experiment/result cycles; reject at least one competing hypothesis; address O2 as potentially non-discriminating; preserve exact control-published result hashes for terminal synthesis.",
         "decision_basis": "LEAF_EXECUTABLE: bounded small experiment graph, LOW_TO_MEDIUM horizon load, dependency width 1, PARTIALLY_COUPLED work, HIGH synthesis coupling, and taxonomy explicitly states this fixture is not large enough to provide strong decomposition-benefit evidence.",
@@ -89,12 +98,15 @@
           "E_half_concurrency"
         ],
         "experiment_cycles_required": 2,
-        "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled to consume E_force_retry_reset and continue one bounded leaf quantum."
+        "next_safe_action": "Stop at the explicit role boundary. Launch a fresh role-isolated independent_critic invocation only after durable scheduler promotion."
       }
     ],
     "independent_critic": {
-      "status": "NOT_READY",
-      "evidence_refs": []
+      "status": "READY",
+      "evidence_refs": [
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ]
     },
     "synthesizer": {
       "status": "NOT_READY",
@@ -134,6 +146,16 @@
       "decision": "REQUEST_EXTERNAL",
       "experiment_id": "E_force_retry_reset",
       "note": "Consumed only control-published E_queue_4x. Its near-null effect (p95 412→405 ms; mean retries 3.1→3.0) rejects queue-capacity saturation as the primary mechanism, consistent with O3 queue occupancy <=62%. Requested E_force_retry_reset as the second required discriminating cycle to test retained retry state directly while leaving pool reuse enabled; O2 remains treated as potentially non-discriminating load relief."
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "EVIDENCE_READY",
+      "note": "Consumed only control-published E_force_retry_reset. Resetting retry state at request boundaries while leaving pool reuse enabled reduced p95 412→219 ms and mean retries 3.1→1.0, strongly supporting H_retry_state as the primary mechanism. Together with the prior near-null E_queue_4x result, the required two experiment/result cycles are complete and H_queue is rejected as a competing primary hypothesis. O2 remains potentially non-discriminating load relief; H_clock_bucket is not independently ruled out. Stopped at the independent_critic role boundary."
     }
   ],
   "events": [
@@ -190,6 +212,21 @@
       "process_id": "screening-v1-P2-D-003-leaf-001",
       "experiment_id": "E_force_retry_reset",
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "kind": "LEAF_RESULT_CONSUMED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "finding": "Forcing retry-state reset at each request boundary while pool reuse remained enabled reduced p95 latency 412→219 ms and mean retries 3.1→1.0, strongly supporting retained retry state as the primary regression mechanism."
+    },
+    {
+      "kind": "LEAF_ROLE_COMPLETED",
+      "generation": 0,
+      "process_id": "screening-v1-P2-D-003-leaf-001",
+      "decision": "EVIDENCE_READY",
+      "rationale": "Two required experiment/result cycles are durable. E_queue_4x rejects queue-capacity saturation as primary; E_force_retry_reset strongly supports retained retry state. O2 is preserved as potentially non-discriminating, and H_clock_bucket remains not independently ruled out. Independent critique is now the next explicit role boundary."
     }
   ],
   "pending_external": null,
@@ -223,6 +260,10 @@
     {
       "id": "L1",
       "finding": "E_queue_4x is near-null versus O1 (p95 412→405 ms; mean retries 3.1→3.0), so queue-capacity saturation is rejected as the primary mechanism; this is also consistent with O3 queue occupancy never exceeding 62%."
+    },
+    {
+      "id": "L2",
+      "finding": "E_force_retry_reset is strongly discriminating versus O1: with pool reuse still enabled, request-boundary retry-state reset reduces p95 412→219 ms and mean retries 3.1→1.0, supporting retained retry state as the primary regression mechanism."
     }
   ],
   "open_hypotheses": [
@@ -235,38 +276,42 @@
     },
     {
       "id": "H_retry_state",
-      "status": "OPEN",
-      "statement": "Retry state is incorrectly retained across pooled request lifecycles, amplifying retries and latency."
+      "status": "SUPPORTED_PRIMARY",
+      "statement": "Retry state is incorrectly retained across pooled request lifecycles, amplifying retries and latency.",
+      "test": "E_force_retry_reset resets retry state at request boundaries while leaving pool reuse enabled.",
+      "evidence_ref": "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
     },
     {
       "id": "H_clock_bucket",
-      "status": "OPEN",
-      "statement": "Timeout timestamp quantization is causing retries to bunch into the same bucket."
+      "status": "OPEN_NOT_REQUIRED_TO_RESOLVE",
+      "statement": "Timeout timestamp quantization is causing retries to bunch into the same bucket.",
+      "note": "Not independently ruled out by the two consumed experiments; current evidence nevertheless discriminates strongly for retained retry state as primary."
     }
   ],
   "unresolved_questions": [
-    "Does explicit retry-state reset at each request boundary materially remove the latency/retry regression while pool reuse remains enabled?",
-    "If E_force_retry_reset is discriminating, is H_retry_state sufficiently supported over H_clock_bucket for a later synthesis role?"
+    "Independent critic must assess whether the two durable experiment cycles sufficiently support H_retry_state as primary while preserving the limitation that H_clock_bucket was not independently tested.",
+    "O2 must remain characterized as potentially non-discriminating load relief rather than causal evidence."
   ],
   "evidence_refs": [
     "fixture_blob_sha:389fd2ecd5bfe78e8258ecccb03dea759c043296",
     "taxonomy_profile_blob_sha:4416013ea8f553d3a971f592ce0fbf7faf30c59e",
     "harness_blob_sha:ff55438e933e91dad3057167c2243f0ef4933df2",
     "source_checkpoint_sha:052cf8224ec5a725e09207bde0bef8e43cefe8cb",
-    "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+    "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
   ],
   "candidate_actions": [
     {
-      "action": "Await control publication for E_force_retry_reset; do not poll. Resume in a fresh leaf_worker chat only after READY_TO_RESUME.",
-      "status": "WAITING_EXTERNAL",
-      "authority": "treatment_contract.role_contract.leaf_worker"
+      "action": "Stop leaf_worker work. Next eligible invocation is a fresh role-isolated independent_critic review of the durable evidence only; do not perform critic work in this invocation.",
+      "status": "READY",
+      "authority": "treatment_state.independent_critic.status=READY"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role leaf_worker for screening-v1-P2-D-003-leaf-001. Re-read durable state only, consume E_force_retry_reset, continue one bounded leaf quantum, persist state, and stop at the next explicit role/protocol boundary.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role independent_critic. Re-read durable state only, review the durable leaf evidence independently, persist only the assigned run-state path, and stop at the next explicit role/protocol boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 3,
+    "reasoning_invocations": 4,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
