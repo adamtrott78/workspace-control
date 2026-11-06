@@ -79,9 +79,16 @@
         "leaf": "region-3",
         "experiment_id": "E_isolate_r3",
         "executor_tier": "INSTANT",
-        "status": "RESULT_PUBLISHED",
+        "status": "COMPLETED",
         "request_id": "screen-002-g0-E_isolate_r3-001",
         "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
+      },
+      {
+        "leaf": "region-4",
+        "experiment_id": "E_isolate_r4",
+        "executor_tier": "INSTANT",
+        "status": "WAITING_EXTERNAL",
+        "request_id": "screen-002-g0-E_isolate_r4-001"
       }
     ],
     "decomposition_state": "DECOMPOSED_REGIONAL_LEAVES",
@@ -194,6 +201,32 @@
         "external_result:E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
         "experiment:E_isolate_r3"
       ]
+    },
+    {
+      "invocation_id": "screen-002-g0-leaf-r4-001",
+      "generation": 0,
+      "owner": "instant-leaf-worker-screen-002-g0-r4",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "external_result:E_isolate_r3:e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+        "experiment:E_isolate_r4"
+      ]
     }
   ],
   "events": [
@@ -280,9 +313,26 @@
       "generation": 0,
       "experiment_id": "E_isolate_r3",
       "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "instant-leaf-worker-screen-002-g0-r4",
+      "role": "leaf_worker",
+      "leaf": "region-4"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-g0-E_isolate_r4-001",
+      "generation": 0,
+      "payload_ref": "experiment:E_isolate_r4"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screen-002-g0-E_isolate_r4-001",
+    "experiment_id": "E_isolate_r4",
+    "payload_ref": "experiment:E_isolate_r4"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screen-002-g0-E_isolate_r1-001",
@@ -351,6 +401,13 @@
       "evidence_refs": [
         "external_result:E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
       ]
+    },
+    {
+      "id": "F_isolate_r3_1",
+      "finding": "E_isolate_r3 reduced region 3 p95 latency to 318 ms and mean retries to 1.8 while other regions did not materially change.",
+      "evidence_refs": [
+        "external_result:E_isolate_r3:e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -377,7 +434,8 @@
     "taxonomy_profile:54c63ee2d0fd7990312517fd90d2d1197cf75df1",
     "harness:ff55438e933e91dad3057167c2243f0ef4933df2",
     "external_result:E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
-    "external_result:E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+    "external_result:E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+    "external_result:E_isolate_r3:e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
   ],
   "candidate_actions": [
     {
@@ -396,21 +454,21 @@
       "id": "leaf-region-3",
       "experiment_id": "E_isolate_r3",
       "leaf": "region-3",
-      "status": "WAITING_EXTERNAL"
+      "status": "COMPLETED"
     },
     {
       "id": "leaf-region-4",
       "experiment_id": "E_isolate_r4",
       "leaf": "region-4",
-      "status": "READY"
+      "status": "WAITING_EXTERNAL"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state, consume only E_isolate_r3, continue exactly one authorized lower-tier regional-leaf transition, persist the exact next protocol boundary, and stop. Do not launch High; escalation remains unauthorized unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "Wait for control to publish the E_isolate_r4 result into durable state. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled; re-read durable state, consume only E_isolate_r4, persist the exact next protocol boundary, and stop. Do not launch High unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 4,
-    "experiment_requests": 3,
+    "reasoning_invocations": 5,
+    "experiment_requests": 4,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -423,11 +481,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screen-002-g0-E_isolate_r3-001",
-    "last_experiment_id": "E_isolate_r3",
-    "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "EXTERNAL_REQUEST_PENDING",
+    "last_request_id": "screen-002-g0-E_isolate_r4-001",
+    "last_experiment_id": "E_isolate_r4",
+    "result_hash": null,
+    "note": "Worker requested only the next authorized regional isolation experiment; awaiting control-published result."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-002.json"
