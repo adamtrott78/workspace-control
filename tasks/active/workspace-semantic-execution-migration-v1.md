@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-P3 A/B-only operation remains active. A replacement screen-003 is COMPLETED after research_iterate_objective_v1 passed with score 1.0 and zero violations. B replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after a terminal validator score of 0.8 with the single public violation missing_required_discriminating_experiment:E_isolate_r4. Resume B from that exact validator boundary, preserve the same chat, and stop at the next protocol-required boundary. Do not advance P3 C, D, or E unless the user explicitly re-enables them.
+P3 A is COMPLETED. P3 B replacement screen-003 is READY_TO_RESUME in the SAME persistent GPT-5.6 Sol Instant chat after control-published E_isolate_r4, the single missing experiment from its prior 0.8 terminal validator result. Resume B, consume only E_isolate_r4, update the existing terminal submission with the exact published result hash as appropriate, persist a protocol-valid TERMINAL_CANDIDATE, and stop for control-evaluator validation. Do not advance P3 C, D, or E unless the user explicitly re-enables them.
 
 ## Remaining work
 
