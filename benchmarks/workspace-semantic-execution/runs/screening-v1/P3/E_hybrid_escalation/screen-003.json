@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -150,9 +150,22 @@
           "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r4"
         ],
         "escalation_requested": false
+      },
+      {
+        "attempt_id": "instant-quantum-005",
+        "generation": 0,
+        "classification": "COUPLED_RESIDUAL_EXECUTABLE",
+        "outcome": "WAITING_EXTERNAL",
+        "experiment_id": "E_global_retry_reset",
+        "leaf": "coupled-residual",
+        "evidence_refs": [
+          "external_results.E_isolate_r4@65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+          "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_global_retry_reset"
+        ],
+        "escalation_requested": false
       }
     ],
-    "decomposition_state": "REGIONAL_LEAVES_DECOMPOSED",
+    "decomposition_state": "REGIONAL_LEAVES_COMPLETE_COUPLED_RESIDUAL_IN_PROGRESS",
     "escalation_status": "NOT_REQUESTED",
     "residual_reason": null,
     "escalation_evidence_refs": []
@@ -288,6 +301,32 @@
         "external_results.E_isolate_r3@e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
         "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_isolate_r4"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-E-003-instant-q005",
+      "generation": 0,
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation.",
+          "GitHub is enabled."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "external_results.E_isolate_r4@65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+        "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_global_retry_reset"
+      ]
     }
   ],
   "events": [
@@ -410,9 +449,32 @@
       "generation": 0,
       "experiment_id": "E_isolate_r4",
       "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P3-E-003-instant-q005",
+      "identity_source": "user_attestation"
+    },
+    {
+      "kind": "LOWER_TIER_RESULT_CONSUMED",
+      "generation": 0,
+      "experiment_id": "E_isolate_r4",
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+      "note": "Consumed only the control-published E_isolate_r4 result; no cross-experiment inference or escalation."
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-E-003-E_global_retry_reset-g0",
+      "generation": 0,
+      "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_global_retry_reset"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-E-003-E_global_retry_reset-g0",
+    "kind": "EXPERIMENT",
+    "payload_ref": "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958#E_global_retry_reset"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-E-003-E_isolate_r1-g0",
@@ -477,6 +539,13 @@
       "evidence_refs": [
         "public_inputs.fixture_path@2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958"
       ]
+    },
+    {
+      "id": "F_r4_001",
+      "finding": "Control-published E_isolate_r4 measured region r4 p95 latency 326 ms and mean retries 2.0, with other regions not materially changed.",
+      "evidence_refs": [
+        "external_results.E_isolate_r4@65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+      ]
     }
   ],
   "open_hypotheses": [
@@ -494,7 +563,6 @@
     }
   ],
   "unresolved_questions": [
-    "What does regional isolation show in each of the four regions?",
     "After regional evidence, does retry-state reset or timer desynchronization discriminate the surviving coupled mechanism?",
     "Does a capacity/concurrency control reject capacity saturation as the primary mechanism?"
   ],
@@ -508,38 +576,17 @@
     {
       "priority": 1,
       "kind": "EXPERIMENT",
-      "experiment_id": "E_isolate_r1",
-      "leaf": "region-1",
-      "authority": "fixture_only_external_request"
-    },
-    {
-      "priority": 2,
-      "kind": "EXPERIMENT",
-      "experiment_id": "E_isolate_r2",
-      "leaf": "region-2",
-      "authority": "fixture_only_external_request"
-    },
-    {
-      "priority": 3,
-      "kind": "EXPERIMENT",
-      "experiment_id": "E_isolate_r3",
-      "leaf": "region-3",
-      "authority": "fixture_only_external_request"
-    },
-    {
-      "priority": 4,
-      "kind": "EXPERIMENT",
-      "experiment_id": "E_isolate_r4",
-      "leaf": "region-4",
+      "experiment_id": "E_global_retry_reset",
+      "leaf": "coupled-residual",
       "authority": "fixture_only_external_request"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled. Re-read durable state, consume only the control-published E_isolate_r4 result, perform exactly one authorized lower-tier transition, persist the exact next protocol boundary, and stop. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
+  "next_safe_action": "STOP. Await control publication for E_global_retry_reset. Do not poll. After control sets READY_TO_RESUME, launch a BRAND-NEW regular GPT-5.6 Sol Instant lower-tier chat with Memory disabled before launch and GitHub enabled; re-read durable state, consume only that control-published result, perform exactly one authorized lower-tier transition, persist the next protocol boundary, and stop. High remains unauthorized unless durable control state explicitly sets treatment_state.escalation_status to APPROVED_TO_LAUNCH.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 5,
-    "experiment_requests": 4,
+    "reasoning_invocations": 6,
+    "experiment_requests": 5,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
@@ -552,11 +599,11 @@
     "deterministic_compute_operations": 0
   },
   "control_evaluator": {
-    "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-E-003-E_isolate_r4-g0",
-    "last_experiment_id": "E_isolate_r4",
-    "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
-    "note": "Published only the requested worker-visible experiment measurements."
+    "status": "EXTERNAL_REQUEST_PENDING",
+    "last_request_id": "screening-v1-P3-E-003-E_global_retry_reset-g0",
+    "last_experiment_id": "E_global_retry_reset",
+    "result_hash": null,
+    "note": "Worker requested exactly one fixture-authorized coupled-residual experiment; control evaluator must publish the result before resume."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-003.json"
