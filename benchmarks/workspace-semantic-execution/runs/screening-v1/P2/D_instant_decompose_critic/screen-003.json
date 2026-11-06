@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "TERMINAL_CANDIDATE",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -84,11 +84,12 @@
       },
       {
         "role": "synthesizer",
-        "status": "READY",
+        "status": "COMPLETED",
         "evidence_refs": [
           "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
           "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
-        ]
+        ],
+        "decision": "TERMINAL_CANDIDATE"
       }
     ],
     "active_role": null,
@@ -124,11 +125,12 @@
       ]
     },
     "synthesizer": {
-      "status": "READY",
+      "status": "COMPLETED",
       "evidence_refs": [
         "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
         "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
-      ]
+      ],
+      "decision": "TERMINAL_CANDIDATE"
     }
   },
   "started_at": "2026-11-05T19:37:00-05:00",
@@ -183,6 +185,15 @@
       "chat_configuration": "Instant",
       "decision": "CRITIQUE_COMPLETE",
       "note": "Fresh role-isolated independent critic. Reviewed only the two durable control-published result hashes in the assigned run state. Concludes retained retry state is sufficiently supported as primary and queue-capacity saturation is rejected as primary; preserves H_clock_bucket as not independently ruled out and O2 as potentially non-discriminating. No synthesizer work performed."
+    },
+    {
+      "generation": 0,
+      "role": "synthesizer",
+      "provider": "OpenAI",
+      "model": "GPT-5.6 Sol",
+      "chat_configuration": "Instant",
+      "decision": "TERMINAL_CANDIDATE",
+      "note": "Fresh role-isolated synthesizer. Used only durable leaf evidence and completed independent critique. Submitted H_retry_state as primary, rejected H_queue as primary, preserved H_clock_bucket as unresolved, and treated O2 as potentially non-discriminating."
     }
   ],
   "events": [
@@ -270,6 +281,16 @@
       "generation": 0,
       "role": "synthesizer",
       "reason": "independent_critic_completed"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0,
+      "role": "synthesizer",
+      "evidence_refs": [
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ],
+      "rationale": "Two required experiment/result cycles and independent critique are durable; terminal candidate follows the public fixture terminal output schema."
     }
   ],
   "pending_external": null,
@@ -349,16 +370,31 @@
   ],
   "candidate_actions": [
     {
-      "action": "Stop at the independent_critic role boundary. Do not perform synthesizer work unless the durable scheduler explicitly promotes synthesizer.",
-      "status": "BLOCKED_ON_SCHEDULER_PROMOTION",
-      "authority": "treatment_state.synthesizer.status=NOT_READY"
+      "action": "Stop for control-evaluator validation of the persisted terminal candidate.",
+      "status": "BLOCKED_ON_CONTROL_EVALUATOR",
+      "authority": "worker_transition_contract.TERMINAL_CANDIDATE"
     }
   ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled in role synthesizer. Re-read durable state only, synthesize from the durable leaf evidence and independent critique, persist a protocol-valid TERMINAL_CANDIDATE if supported, mutate only the assigned run-state path, and stop for control-evaluator validation.",
-  "terminal_submission": null,
+  "next_safe_action": "Stop. Await control-evaluator validation; do not self-validate or mutate further.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
+      "H_queue"
+    ],
+    "observed_results": {
+      "E_queue_4x": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "E_queue_4x was near-null versus O1 (p95 412→405 ms; mean retries 3.1→3.0), rejecting H_queue as the primary mechanism and aligning with O3 queue occupancy never exceeding 62%. E_force_retry_reset, with pool reuse still enabled, reduced p95 412→219 ms and mean retries 3.1→1.0, strongly supporting H_retry_state as the primary mechanism. O2 is addressed only as potentially non-discriminating load relief, not causal evidence. H_clock_bucket remains independently untested and is therefore not rejected."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 5,
+    "reasoning_invocations": 6,
     "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
