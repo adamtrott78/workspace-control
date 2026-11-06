@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "WAITING_EXTERNAL",
-  "owner": "screening-v1-P3-C-002-q1-worker",
+  "status": "READY_TO_RESUME",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -161,13 +161,16 @@
       "request_id": "q1-E_isolate_r2",
       "generation": 1,
       "payload_ref": "E_isolate_r2"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "q1-E_isolate_r2",
+      "generation": 1,
+      "experiment_id": "E_isolate_r2",
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
     }
   ],
-  "pending_external": {
-    "request_id": "q1-E_isolate_r2",
-    "experiment_id": "E_isolate_r2",
-    "generation": 1
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "q0-E_isolate_r1",
@@ -179,6 +182,18 @@
         "other_regions_materially_changed": false
       },
       "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r2": {
+      "request_id": "q1-E_isolate_r2",
+      "experiment_id": "E_isolate_r2",
+      "result": {
+        "region": "r2",
+        "p95_latency_ms": 322,
+        "mean_retries": 2,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
       "publication_scope": "requested experiment only"
     }
   },
@@ -278,7 +293,7 @@
       "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
     }
   ],
-  "next_safe_action": "Stop now at WAITING_EXTERNAL. Control evaluator must publish only E_isolate_r2 into this assigned run-state file. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 2; re-read durable state, consume only that published result, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 2. Re-read durable state, consume only E_isolate_r2, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -297,9 +312,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "q0-E_isolate_r1",
-    "last_experiment_id": "E_isolate_r1",
-    "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+    "last_request_id": "q1-E_isolate_r2",
+    "last_experiment_id": "E_isolate_r2",
+    "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
