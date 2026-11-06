@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "WAITING_EXTERNAL",
-  "owner": "chatgpt-gpt56-sol-instant-screening-v1-P2-C-002-q3",
+  "status": "READY_TO_RESUME",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -268,15 +268,16 @@
       "request_id": "screening-v1-P2-C-002-q3-E_queue_4x",
       "generation": 1,
       "payload_ref": "fixture:E_queue_4x"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-C-002-q3-E_queue_4x",
+      "generation": 1,
+      "experiment_id": "E_queue_4x",
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P2-C-002-q3-E_queue_4x",
-    "generation": 1,
-    "experiment_id": "E_queue_4x",
-    "payload_ref": "fixture:E_queue_4x",
-    "reason": "Directly satisfy the control-published discriminator requirement and test H_queue by increasing queue capacity 4x while holding concurrency and retry policy fixed."
-  },
+  "pending_external": null,
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screening-v1-P2-C-002-q0-E_force_retry_reset",
@@ -296,6 +297,16 @@
         "mean_retries": 1.1
       },
       "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_queue_4x": {
+      "request_id": "screening-v1-P2-C-002-q3-E_queue_4x",
+      "experiment_id": "E_queue_4x",
+      "result": {
+        "p95_latency_ms": 405,
+        "mean_retries": 3
+      },
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
       "publication_scope": "requested experiment only"
     }
   },
@@ -377,7 +388,7 @@
     "fixture:E_queue_4x"
   ],
   "candidate_actions": [],
-  "next_safe_action": "STOP. WAITING_EXTERNAL: control must publish the E_queue_4x result into this assigned run-state file. Do not poll. Resume only in a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled, then re-read durable state.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for the next stateless quantum. Re-read durable state only, consume E_queue_4x, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
   "terminal_submission": null,
   "validator_results": [
     {
@@ -405,15 +416,11 @@
     "deterministic_compute_operations": 1
   },
   "control_evaluator": {
-    "status": "TERMINAL_VALIDATED_FAIL",
-    "validator_id": "research_iterate_objective_v1",
-    "passed": false,
-    "score": 0.8,
-    "violations": [
-      "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
-    ],
-    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
-    "note": "Objective validator result only. Worker may continue from the exact public violation code; hidden expected answer remains undisclosed."
+    "status": "EXTERNAL_RESULT_PUBLISHED",
+    "last_request_id": "screening-v1-P2-C-002-q3-E_queue_4x",
+    "last_experiment_id": "E_queue_4x",
+    "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+    "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
     "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/C_instant_stateless_resume/screen-002.json"
