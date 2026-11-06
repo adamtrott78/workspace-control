@@ -29,9 +29,30 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY",
-  "owner": null,
-  "executor_identity": null,
+  "status": "RUNNING",
+  "owner": "screening-worker-P3-A-screen-002-g0",
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "High",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "FRONTIER_MATCHED_SURFACE",
+    "identity_source": "user_attestation",
+    "user_attestation_text": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol High was selected for this conversation."
+    ],
+    "worker_observations": {
+      "github_available": true,
+      "prior_benchmark_or_control_context_present": false
+    }
+  },
   "continuity_regime": "persistent_chat",
   "treatment_contract": {
     "mode": "frontier_long_horizon_control",
@@ -44,7 +65,7 @@
     "phase": "PRIMARY",
     "persistent_chat": true
   },
-  "started_at": null,
+  "started_at": "2026-11-06T01:44:00Z",
   "completed_at": null,
   "invocations": [],
   "events": [
@@ -52,6 +73,11 @@
       "kind": "SCREENING_SLOT_CREATED",
       "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
       "note": "Fresh provenance-refrozen P3 A_frontier_long_horizon replacement slot. Prior unlaunched screen-001 is superseded."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-worker-P3-A-screen-002-g0"
     }
   ],
   "pending_external": null,
@@ -61,7 +87,7 @@
   "unresolved_questions": [],
   "evidence_refs": [],
   "candidate_actions": [],
-  "next_safe_action": "Launch a brand-new regular GPT-5.6 Sol High chat with Memory disabled before launch and GitHub enabled. Read this run state first and follow the treatment contract exactly.",
+  "next_safe_action": "Reason one bounded PRIMARY quantum from the frozen public fixture and request exactly one catalog experiment if external evidence is needed.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
