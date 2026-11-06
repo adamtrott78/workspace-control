@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 4,
-  "status": "RUNNING",
-  "owner": "screening-v1-P3-C-002-q6-worker",
+  "status": "TERMINAL_CANDIDATE",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -56,8 +56,8 @@
     "escalation_policy": "No frontier escalation in this arm."
   },
   "treatment_state": {
-    "quantum_index": 6,
-    "resume_requires_new_chat": true,
+    "quantum_index": 7,
+    "resume_requires_new_chat": false,
     "last_quantum_chat": "q6 user-attested brand-new regular ChatGPT chat; Memory disabled before launch; GPT-5.6 Sol Instant; GitHub enabled"
   },
   "started_at": "2026-11-05T20:44:00-05:00",
@@ -233,6 +233,37 @@
         "E_global_retry_reset",
         "E_capacity_2x"
       ]
+    },
+    {
+      "invocation_id": "screening-v1-P3-C-002-q6",
+      "generation": 4,
+      "owner": "screening-v1-P3-C-002-q6-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "context_bytes": 809,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "E_isolate_r1",
+        "E_isolate_r2",
+        "E_isolate_r3",
+        "E_isolate_r4",
+        "E_global_retry_reset",
+        "E_capacity_2x"
+      ]
     }
   ],
   "events": [
@@ -390,6 +421,16 @@
       "kind": "CLAIM",
       "generation": 4,
       "worker_id": "screening-v1-P3-C-002-q6-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 4,
+      "evidence_ref_count": 10
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 4,
+      "worker_id": "screening-v1-P3-C-002-q6-worker"
     }
   ],
   "pending_external": null,
@@ -541,28 +582,36 @@
         "E_isolate_r3",
         "E_isolate_r4"
       ]
+    },
+    {
+      "id": "F6_capacity_2x_fails_to_normalize_regression",
+      "statement": "Doubling service capacity in all four regions without changing retry or timer behavior leaves all-regions p95 latency at 420-455 ms and mean retries at 2.7-3.1. Together with O2/O3 and normalization under cross-region retry-state reset, this rejects H_capacity as the primary mechanism and satisfies the required competing-mechanism/global control.",
+      "evidence_refs": [
+        "E_capacity_2x",
+        "E_global_retry_reset",
+        "O2",
+        "O3"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
-      "status": "OPEN_LEADING_STRONGLY_SUPPORTED",
-      "reason": "Four-region isolation replication plus normalization after cross-region retry-state reset directly supports retained retry-state feedback as the primary mechanism."
+      "status": "SELECTED_PRIMARY",
+      "reason": "Four independent regional isolation probes suppress the local regression, and resetting retry state at every cross-region boundary normalizes all regions while failover and pooling remain enabled."
     },
     {
       "id": "H_clock_sync",
       "status": "REJECTED_AS_PRIMARY",
-      "reason": "Global retry-state reset normalizes latency and retries while the intervention targets retained retry state rather than timer synchronization; the prior isolation evidence is therefore better explained by H_retry_feedback."
+      "reason": "Normalization follows an intervention that removes retained cross-region retry state rather than timer synchronization, making retained retry-state feedback the better causal explanation."
     },
     {
       "id": "H_capacity",
-      "status": "OPEN_WEAKENED_CONTROL_REQUIRED",
-      "reason": "O2 and O3 weaken primary saturation, and retry-state reset normalizes the regression without added capacity, but the fixture contract still requires a competing-mechanism/global control before terminal diagnosis."
+      "status": "REJECTED_AS_PRIMARY",
+      "reason": "Regional load relief does not remove retry amplification, utilization/queues are not saturated, global retry-state reset normalizes without added capacity, and doubling capacity leaves substantial latency/retry regression."
     }
   ],
-  "unresolved_questions": [
-    "Does doubling service capacity without changing retry or timer behavior reject H_capacity as the primary mechanism and satisfy the required competing-mechanism/global control?"
-  ],
+  "unresolved_questions": [],
   "evidence_refs": [
     "O1",
     "O2",
@@ -572,50 +621,36 @@
     "E_isolate_r2",
     "E_isolate_r3",
     "E_isolate_r4",
-    "E_global_retry_reset"
+    "E_global_retry_reset",
+    "E_capacity_2x"
   ],
-  "candidate_actions": [
-    {
-      "experiment_id": "E_isolate_r1",
-      "priority": 1,
-      "reason": "Independent regional leaf testing whether removing cross-region retry propagation changes region-1 retry amplification while preserving local retry policy."
+  "candidate_actions": [],
+  "next_safe_action": "Stop. Await the control evaluator to validate the terminal candidate; do not self-validate or poll.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_feedback",
+    "rejected_hypotheses": [
+      "H_clock_sync",
+      "H_capacity"
+    ],
+    "observed_results": {
+      "E_isolate_r1": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "E_isolate_r2": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+      "E_isolate_r3": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+      "E_isolate_r4": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+      "E_global_retry_reset": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "E_capacity_2x": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
     },
-    {
-      "experiment_id": "E_isolate_r2",
-      "priority": 2,
-      "reason": "Independent regional replication leaf after durable resume."
-    },
-    {
-      "experiment_id": "E_isolate_r3",
-      "priority": 3,
-      "reason": "Independent regional replication leaf after durable resume."
-    },
-    {
-      "experiment_id": "E_isolate_r4",
-      "priority": 4,
-      "reason": "Independent regional replication leaf after durable resume."
-    },
-    {
-      "experiment_id": "E_global_retry_reset",
-      "priority": 5,
-      "reason": "Required coupled-residual discriminator between retained retry-state feedback and alternatives after regional evidence."
-    },
-    {
-      "experiment_id": "E_desynchronize_timers",
-      "priority": 6,
-      "reason": "Alternative coupled-residual discriminator for H_clock_sync if needed."
-    },
-    {
-      "experiment_id": "E_capacity_2x",
-      "priority": 7,
-      "reason": "Competing-mechanism/global control required before terminal diagnosis; directly probes H_capacity."
-    }
-  ],
-  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for quantum 6. Re-read durable state, consume only E_capacity_2x, perform exactly one bounded reasoning quantum toward a terminal candidate, persist the exact next protocol boundary, and stop.",
-  "terminal_submission": null,
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3",
+      "O4"
+    ],
+    "rationale": "The four regional isolation experiments independently reduce each isolated region to roughly 315-326 ms p95 and 1.8-2.0 mean retries without materially changing the other regions, establishing cross-region retry propagation as a causal contributor. The coupled residual is discriminated by E_global_retry_reset: resetting retry state at every cross-region boundary while retaining failover and pooling normalizes all-region p95 to 215-235 ms and mean retries to 0.9-1.1, directly supporting retained retry-state feedback over synchronized timers. H_capacity is rejected as primary because O2 shows load relief lowers latency but leaves abnormal retry amplification, O3 shows CPU below 55% and queues below 65%, and the mandated E_capacity_2x global control still leaves p95 at 420-455 ms with 2.7-3.1 mean retries. Thus the primary mechanism is cross-region propagation of retained retry state creating positive feedback."
+  },
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 6,
+    "reasoning_invocations": 7,
     "experiment_requests": 6,
     "retries": 0,
     "decomposition_count": 0,
