@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
+  "status": "WAITING_EXTERNAL",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -58,7 +58,15 @@
   },
   "treatment_state": {
     "phase": "LOWER_TIER_INSTANT",
-    "lower_tier_attempts": [],
+    "lower_tier_attempts": [
+      {
+        "leaf": "region-1",
+        "experiment_id": "E_isolate_r1",
+        "executor_tier": "INSTANT",
+        "status": "WAITING_EXTERNAL",
+        "request_id": "screen-002-g0-E_isolate_r1-001"
+      }
+    ],
     "decomposition_state": "DECOMPOSED_REGIONAL_LEAVES",
     "escalation_status": "NOT_REQUESTED",
     "residual_reason": "Workload is TOO_LARGE as a single lower-tier quantum because four independently testable regional leaves precede a coupled residual. Regional leaves must be executed first; no intrinsically difficult residual is yet evidenced.",
@@ -92,6 +100,31 @@
         "fixture:2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
         "taxonomy_profile:54c63ee2d0fd7990312517fd90d2d1197cf75df1"
       ]
+    },
+    {
+      "invocation_id": "screen-002-g0-leaf-r1-001",
+      "generation": 0,
+      "owner": "instant-leaf-worker-screen-002-g0-r1",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "experiment:E_isolate_r1"
+      ]
     }
   ],
   "events": [
@@ -118,9 +151,26 @@
         "leaf-region-4"
       ],
       "note": "Regional leaves decomposed before any escalation consideration; coupled residual deferred until lower-tier evidence exists."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "instant-leaf-worker-screen-002-g0-r1",
+      "role": "leaf_worker",
+      "leaf": "region-1"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-g0-E_isolate_r1-001",
+      "generation": 0,
+      "payload_ref": "experiment:E_isolate_r1"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screen-002-g0-E_isolate_r1-001",
+    "kind": "experiment",
+    "payload_ref": "experiment:E_isolate_r1"
+  },
   "external_results": {},
   "established_findings": [
     {
@@ -169,7 +219,7 @@
       "id": "leaf-region-1",
       "experiment_id": "E_isolate_r1",
       "leaf": "region-1",
-      "status": "READY"
+      "status": "WAITING_EXTERNAL"
     },
     {
       "id": "leaf-region-2",
@@ -190,12 +240,12 @@
       "status": "READY"
     }
   ],
-  "next_safe_action": "Launch one fresh clean GPT-5.6 Sol Instant lower-tier leaf-worker chat from durable state and request exactly one regional isolation experiment, beginning with E_isolate_r1; persist WAITING_EXTERNAL and stop. Do not launch High.",
+  "next_safe_action": "Wait for the control evaluator to publish the exact E_isolate_r1 external result into this run-state file and set READY_TO_RESUME; do not poll and do not launch High.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 0,
+    "reasoning_invocations": 2,
+    "experiment_requests": 1,
     "retries": 0,
     "decomposition_count": 1,
     "decomposition_depth": 1,
