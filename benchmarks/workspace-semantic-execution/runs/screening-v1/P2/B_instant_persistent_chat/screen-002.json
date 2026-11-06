@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "screening-v1-P2-B-002-persistent-worker",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -85,6 +85,29 @@
       "evidence_refs": [
         "experiment:E_force_retry_reset"
       ]
+    },
+    {
+      "invocation_id": "screen-002-inv-002",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-002-persistent-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT"
+      },
+      "context_bytes": 2164,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "experiment:E_force_retry_reset",
+        "experiment:E_clock_quantization"
+      ]
     }
   ],
   "events": [
@@ -121,9 +144,26 @@
       "kind": "CLAIM",
       "generation": 0,
       "worker_id": "screening-v1-P2-B-002-persistent-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screen-002-exp-002",
+      "generation": 0,
+      "payload_ref": "experiment:E_clock_quantization",
+      "experiment_id": "E_clock_quantization"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screen-002-exp-002",
+    "kind": "synthetic_experiment",
+    "payload_ref": "experiment:E_clock_quantization",
+    "experiment_id": "E_clock_quantization"
+  },
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screen-002-exp-001",
@@ -150,57 +190,62 @@
       "evidence_refs": [
         "fixture:O2"
       ]
+    },
+    {
+      "id": "F3",
+      "finding": "E_force_retry_reset reduced p95 latency from 412 ms to 219 ms and mean retries from 3.1 to 1.0 while pool reuse remained enabled, providing direct intervention evidence for H_retry_state.",
+      "evidence_refs": [
+        "experiment:E_force_retry_reset",
+        "result:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_state",
-      "status": "PRIMARY_TEST_TARGET",
-      "reason": "Directly explains elevated retries and latency; E_force_retry_reset isolates retry-state retention while pool reuse remains enabled."
+      "status": "SUPPORTED_PRIMARY",
+      "reason": "Direct retry-boundary reset with pool reuse enabled materially reduced both retries and p95 latency."
     },
     {
       "id": "H_clock_bucket",
-      "status": "OPEN",
-      "reason": "Could amplify retries through timeout bunching; requires discrimination if retry-reset evidence is insufficient."
+      "status": "STRONGEST_REMAINING_ALTERNATIVE",
+      "reason": "Could still contribute to retry amplification; E_clock_quantization directly tests whether timestamp quantization is causal."
     },
     {
       "id": "H_queue",
-      "status": "WEAKENED_NOT_REJECTED",
-      "reason": "O3 is inconsistent with obvious capacity saturation, but an intervention result is needed for stronger rejection."
+      "status": "WEAKENED",
+      "reason": "O3 shows no capacity saturation and the retry-state intervention produced a large improvement without changing queue capacity."
     }
   ],
   "unresolved_questions": [
-    "Does resetting retry state at each request boundary materially reduce retries and p95 latency while pool reuse remains enabled?",
-    "After the first result, which second experiment best distinguishes the surviving causal hypotheses?"
+    "Does replacing quantized timeout timestamps with monotonic high-resolution timestamps materially reduce retries or p95 latency?",
+    "After the second result, is H_clock_bucket rejectable relative to H_retry_state?"
   ],
   "evidence_refs": [
     "fixture:O1",
     "fixture:O2",
-    "fixture:O3"
+    "fixture:O3",
+    "experiment:E_force_retry_reset",
+    "result:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
   ],
   "candidate_actions": [
     {
-      "experiment_id": "E_force_retry_reset",
+      "experiment_id": "E_clock_quantization",
       "priority": 1,
-      "rationale": "Direct intervention on H_retry_state with pool reuse held enabled."
+      "rationale": "Directly tests the strongest remaining alternative mechanism after retry-state reset strongly supported H_retry_state."
     },
     {
       "experiment_id": "E_queue_4x",
       "priority": 2,
-      "rationale": "Potential second-cycle discriminator for H_queue if needed."
-    },
-    {
-      "experiment_id": "E_clock_quantization",
-      "priority": 3,
-      "rationale": "Potential second-cycle discriminator for H_clock_bucket."
+      "rationale": "Queue saturation remains weakened by O3 and by improvement without queue-capacity change; use only if second-cycle evidence leaves ambiguity."
     }
   ],
-  "next_safe_action": "Consume the published E_force_retry_reset result in one bounded reasoning quantum; request exactly one second discriminating experiment if required, then stop.",
+  "next_safe_action": "STOP. Await control publication for request screen-002-exp-002 (E_clock_quantization); do not poll. Resume only when live state is READY_TO_RESUME.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 1,
-    "experiment_requests": 1,
+    "reasoning_invocations": 2,
+    "experiment_requests": 2,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
