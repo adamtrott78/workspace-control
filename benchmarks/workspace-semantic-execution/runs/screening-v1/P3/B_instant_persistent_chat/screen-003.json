@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "RUNNING",
-  "owner": "p3-b-persistent-worker-screen-003",
+  "status": "WAITING_EXTERNAL",
+  "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -152,6 +152,36 @@
       ],
       "reasoning_summary": "E_isolate_r2 independently replicates the regional isolation improvement, so further identical regional replication has lower discriminating value. Request the coupled-residual retry-state reset intervention to test whether retained cross-region retry state is the mechanism linking the regional effects.",
       "experiment_id": "E_global_retry_reset"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q004",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_desynchronize_timers"
+      ],
+      "reasoning_summary": "Global retry-state reset normalizes latency and retries, strongly supporting retained cross-region retry feedback. Request timer desynchronization next as the direct competing coupled-mechanism discriminator; a capacity control and the six-cycle minimum remain outstanding.",
+      "experiment_id": "E_desynchronize_timers"
     }
   ],
   "events": [
@@ -227,9 +257,21 @@
       "worker_id": "p3-b-persistent-worker-screen-003",
       "resume_from": "E_global_retry_reset",
       "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-004",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_desynchronize_timers",
+      "experiment_id": "E_desynchronize_timers"
     }
   ],
-  "pending_external": null,
+  "pending_external": {
+    "request_id": "screening-v1-P3-B-003-exp-004",
+    "kind": "experiment",
+    "experiment_id": "E_desynchronize_timers",
+    "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_desynchronize_timers"
+  },
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-B-003-exp-001",
@@ -301,13 +343,20 @@
       "evidence_refs": [
         "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
       ]
+    },
+    {
+      "id": "F5",
+      "statement": "Resetting retry state at every cross-region boundary while preserving failover and pooling collapses the regression globally: all-region p95 latency is 215–235 ms and mean retries 0.9–1.1. This is direct coupled evidence that retained cross-region retry state is a causal mechanism.",
+      "evidence_refs": [
+        "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+      ]
     }
   ],
   "open_hypotheses": [
     {
       "id": "H_retry_feedback",
-      "status": "SUPPORTED_PENDING_COUPLED_TEST",
-      "reason": "Two independent regional isolation probes materially improve latency/retries when cross-region propagation is blocked; retained retry state remains to be discriminated from synchronized timers."
+      "status": "STRONGLY_SUPPORTED",
+      "reason": "Two regional isolation effects plus global normalization under cross-region retry-state reset directly support retained retry-state positive feedback."
     },
     {
       "id": "H_clock_sync",
@@ -321,9 +370,9 @@
     }
   ],
   "unresolved_questions": [
-    "Does resetting retry state at every cross-region boundary collapse the coupled regression?",
-    "If needed, does timer desynchronization provide a competing coupled-mechanism result?",
-    "Does a global capacity/load control reject capacity as the primary mechanism?"
+    "Does timer desynchronization independently collapse the regression, or does the effect persist, discriminating H_clock_sync from retry-state feedback?",
+    "Does a global capacity/load control reject capacity as the primary mechanism?",
+    "Additional experiment cycles are required before terminal submission."
   ],
   "evidence_refs": [
     "O1",
@@ -331,7 +380,8 @@
     "O3",
     "O4",
     "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
-    "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+    "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+    "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
   ],
   "candidate_actions": [
     {
@@ -363,12 +413,12 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "Interpret only the published E_global_retry_reset result and request exactly one next experiment if needed.",
+  "next_safe_action": "STOP. Wait for the control evaluator to publish the exact result for E_desynchronize_timers and set READY_TO_RESUME; do not poll.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
-    "reasoning_invocations": 3,
-    "experiment_requests": 3,
+    "reasoning_invocations": 4,
+    "experiment_requests": 4,
     "retries": 0,
     "decomposition_count": 0,
     "decomposition_depth": 0,
