@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -408,15 +408,16 @@
       "generation": 0,
       "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_desynchronize_timers",
       "experiment_id": "E_desynchronize_timers"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-A-003-E_desynchronize_timers-006",
+      "generation": 0,
+      "experiment_id": "E_desynchronize_timers",
+      "result_hash": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P3-A-003-E_desynchronize_timers-006",
-    "kind": "EXPERIMENT",
-    "payload_ref": "fixture:research-iterate-cross-region-feedback-p3-v1#experiment/E_desynchronize_timers",
-    "experiment_id": "E_desynchronize_timers",
-    "intervention": "Add randomized jitter to timeout scheduling and use independent monotonic timer epochs per region."
-  },
+  "pending_external": null,
   "external_results": {
     "E_isolate_r1": {
       "request_id": "screening-v1-P3-A-003-E_isolate_r1-001",
@@ -480,6 +481,22 @@
         ]
       },
       "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "publication_scope": "requested experiment only"
+    },
+    "E_desynchronize_timers": {
+      "request_id": "screening-v1-P3-A-003-E_desynchronize_timers-006",
+      "experiment_id": "E_desynchronize_timers",
+      "result": {
+        "all_regions_p95_ms_range": [
+          425,
+          462
+        ],
+        "mean_retries_range": [
+          2.7,
+          3.2
+        ]
+      },
+      "result_hash": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
       "publication_scope": "requested experiment only"
     }
   },
@@ -617,7 +634,7 @@
       "reason": "O2/O3 plus propagation-isolation and retry-reset evidence already distinguish capacity as a secondary load effect; reserve only if timer evidence leaves material ambiguity."
     }
   ],
-  "next_safe_action": "STOP. Await control-published result for E_desynchronize_timers in this assigned run-state file; do not poll. Resume this same persistent GPT-5.6 Sol High chat only after status becomes READY_TO_RESUME.",
+  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol High chat. Re-read durable state, consume only E_desynchronize_timers, and if the public terminal contract is satisfied persist a protocol-valid TERMINAL_CANDIDATE; otherwise continue only to the next required boundary. Mutate only the assigned run-state path and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -636,9 +653,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P3-A-003-E_global_retry_reset-005",
-    "last_experiment_id": "E_global_retry_reset",
-    "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+    "last_request_id": "screening-v1-P3-A-003-E_desynchronize_timers-006",
+    "last_experiment_id": "E_desynchronize_timers",
+    "result_hash": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
