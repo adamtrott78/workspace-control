@@ -29,8 +29,8 @@
     "PR comments containing evaluator results"
   ],
   "generation": 0,
-  "status": "READY_TO_RESUME",
-  "owner": null,
+  "status": "RUNNING",
+  "owner": "p3-b-persistent-worker-screen-003",
   "executor_identity": {
     "provider": "OpenAI",
     "reported_model": "GPT-5.6 Sol",
@@ -373,6 +373,13 @@
       "generation": 0,
       "experiment_id": "E_isolate_r3",
       "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_isolate_r3",
+      "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
     }
   ],
   "pending_external": null,
@@ -579,7 +586,7 @@
       "purpose": "Competing-mechanism control for capacity saturation."
     }
   ],
-  "next_safe_action": "Resume this SAME persistent GPT-5.6 Sol Instant chat. Re-read durable state, consume only E_isolate_r3, continue until the next protocol-required boundary, persist state, and stop. Do not refresh, replace, delete, branch, or sign out of this chat while persistent continuity is required.",
+  "next_safe_action": "Interpret only E_isolate_r3 and, if all terminal gates are satisfied, persist TERMINAL_CANDIDATE and stop for control validation.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
