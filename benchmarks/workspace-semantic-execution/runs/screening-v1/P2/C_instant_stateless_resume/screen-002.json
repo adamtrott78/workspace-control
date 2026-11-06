@@ -29,7 +29,7 @@
     "PR comments containing evaluator results"
   ],
   "generation": 1,
-  "status": "WAITING_EXTERNAL",
+  "status": "READY_TO_RESUME",
   "owner": null,
   "executor_identity": {
     "provider": "OpenAI",
@@ -170,13 +170,16 @@
       "request_id": "screening-v1-P2-C-002-q1-E_disable_pool_reuse",
       "generation": 1,
       "payload_ref": "fixture:E_disable_pool_reuse"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-C-002-q1-E_disable_pool_reuse",
+      "generation": 1,
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
     }
   ],
-  "pending_external": {
-    "request_id": "screening-v1-P2-C-002-q1-E_disable_pool_reuse",
-    "experiment_id": "E_disable_pool_reuse",
-    "payload_ref": "fixture:E_disable_pool_reuse"
-  },
+  "pending_external": null,
   "external_results": {
     "E_force_retry_reset": {
       "request_id": "screening-v1-P2-C-002-q0-E_force_retry_reset",
@@ -186,6 +189,16 @@
         "mean_retries": 1
       },
       "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "publication_scope": "requested experiment only"
+    },
+    "E_disable_pool_reuse": {
+      "request_id": "screening-v1-P2-C-002-q1-E_disable_pool_reuse",
+      "experiment_id": "E_disable_pool_reuse",
+      "result": {
+        "p95_latency_ms": 228,
+        "mean_retries": 1.1
+      },
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
       "publication_scope": "requested experiment only"
     }
   },
@@ -267,7 +280,7 @@
       "rationale": "Direct queue intervention; O3 and the retry-reset result make it lower priority."
     }
   ],
-  "next_safe_action": "Wait for control to publish only the requested E_disable_pool_reuse result. Then launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled; re-read durable state only, consume that published result, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
+  "next_safe_action": "Launch a BRAND-NEW regular GPT-5.6 Sol Instant chat with Memory disabled before launch and GitHub enabled for the next stateless quantum. Re-read durable state only, consume E_disable_pool_reuse, perform exactly one bounded reasoning quantum, persist continuation state, and stop at the next protocol-required boundary.",
   "terminal_submission": null,
   "validator_results": [],
   "metrics": {
@@ -286,9 +299,9 @@
   },
   "control_evaluator": {
     "status": "EXTERNAL_RESULT_PUBLISHED",
-    "last_request_id": "screening-v1-P2-C-002-q0-E_force_retry_reset",
-    "last_experiment_id": "E_force_retry_reset",
-    "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "last_request_id": "screening-v1-P2-C-002-q1-E_disable_pool_reuse",
+    "last_experiment_id": "E_disable_pool_reuse",
+    "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
     "note": "Published only the requested worker-visible experiment measurements."
   },
   "allowed_mutation_paths": [
