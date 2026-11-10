@@ -13,7 +13,9 @@ param(
 
   [switch]$SkipColdStart,
 
-  [switch]$PreflightOnly
+  [switch]$PreflightOnly,
+
+  [string]$DiagnosticsDirectory = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -60,6 +62,51 @@ $fakeWorker = $null
 $runner = $null
 $coldRunner = $null
 $firefox = $null
+$collectorSucceeded = $false
+$ownedFirefoxIds = [System.Collections.Generic.HashSet[int]]::new()
+
+function Update-OwnedFirefoxIds {
+  if ($ownedFirefoxIds.Count -eq 0) { return }
+  $rows = @(Get-CimInstance Win32_Process -Filter "Name='firefox.exe'" -ErrorAction SilentlyContinue)
+  $changed = $true
+  while ($changed) {
+    $changed = $false
+    foreach ($row in $rows) {
+      $pidValue = [int]$row.ProcessId
+      $parentValue = [int]$row.ParentProcessId
+      if ($ownedFirefoxIds.Contains($parentValue) -and -not $ownedFirefoxIds.Contains($pidValue)) {
+        [void]$ownedFirefoxIds.Add($pidValue)
+        $changed = $true
+      }
+    }
+  }
+}
+
+function Write-BoundedTextDiagnostic {
+  param([string]$Source, [string]$Destination)
+  if (-not (Test-Path -LiteralPath $Source -PathType Leaf)) { return }
+  $lines = @(Get-Content -LiteralPath $Source -Tail 200 -ErrorAction SilentlyContinue)
+  [System.IO.File]::WriteAllLines($Destination, [string[]]$lines)
+}
+
+function Get-BoundedFirefoxProcessMetadata {
+  $rows = @(Get-CimInstance Win32_Process -Filter "Name='firefox.exe'" -ErrorAction SilentlyContinue | Select-Object -First 16)
+  $items = @()
+  foreach ($row in $rows) {
+    $sessionId = $null
+    try {
+      $sessionId = (Get-Process -Id ([int]$row.ProcessId) -ErrorAction Stop).SessionId
+    } catch {
+    }
+    $items += [ordered]@{
+      process_id = [int]$row.ProcessId
+      parent_process_id = [int]$row.ParentProcessId
+      session_id = $sessionId
+      owned_by_collector = $ownedFirefoxIds.Contains([int]$row.ProcessId)
+    }
+  }
+  return @($items)
+}
 
 try {
   $fakeWorker = Start-Process -FilePath "python" -ArgumentList @(
@@ -109,9 +156,18 @@ try {
   $firefox = Start-Process -FilePath $FirefoxPath -ArgumentList @(
     "-P", $FirefoxProfile, "-no-remote"
   ) -PassThru
+  [void]$ownedFirefoxIds.Add([int]$firefox.Id)
+  Update-OwnedFirefoxIds
 
   $runnerTimeoutMs = $(if ($PreflightOnly) { 60000 } else { 1800000 })
-  if (-not $runner.WaitForExit($runnerTimeoutMs)) {
+  $runnerDeadline = (Get-Date).AddMilliseconds($runnerTimeoutMs)
+  while (-not $runner.HasExited -and (Get-Date) -lt $runnerDeadline) {
+    Update-OwnedFirefoxIds
+    Start-Sleep -Milliseconds 100
+    $runner.Refresh()
+  }
+  Update-OwnedFirefoxIds
+  if (-not $runner.HasExited) {
     Stop-Process -Id $runner.Id -Force -ErrorAction SilentlyContinue
     throw $(if ($PreflightOnly) { "Target Firefox adapter preflight timed out." } else { "Target Firefox collector exceeded the bounded 30-minute execution window." })
   }
@@ -131,6 +187,7 @@ try {
       throw "Target Firefox adapter preflight emitted invalid evidence."
     }
     $steadyResult | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ResultPath -Encoding UTF8
+    $collectorSucceeded = $true
     Write-Host "STAGE09_TARGET_ADAPTER_PREFLIGHT=PASS"
     return
   }
@@ -210,6 +267,7 @@ try {
     ) | Where-Object { $_ }
   } | ConvertTo-Json -Depth 20 | Set-Content $ResultPath -Encoding UTF8
 
+  $collectorSucceeded = $true
   Write-Host "STAGE09_TARGET_FIREFOX_PARTIAL=PASS"
   Get-Content $ResultPath
 }
@@ -220,19 +278,83 @@ finally {
   if ($coldRunner -and -not $coldRunner.HasExited) {
     Stop-Process -Id $coldRunner.Id -Force -ErrorAction SilentlyContinue
   }
-  if ($firefox -and -not $firefox.HasExited) {
-    Stop-Process -Id $firefox.Id -Force -ErrorAction SilentlyContinue
+  Update-OwnedFirefoxIds
+  foreach ($ownedId in @($ownedFirefoxIds | Sort-Object -Descending)) {
+    try {
+      $ownedProcess = Get-Process -Id $ownedId -ErrorAction Stop
+      if ($ownedProcess.ProcessName -eq "firefox") {
+        Stop-Process -Id $ownedId -Force -ErrorAction SilentlyContinue
+      }
+    } catch {
+    }
   }
+
+  $ownedCleanupDeadline = (Get-Date).AddSeconds(10)
+  while ((Get-Date) -lt $ownedCleanupDeadline) {
+    $ownedRemaining = @($ownedFirefoxIds | Where-Object {
+      Get-Process -Id $_ -ErrorAction SilentlyContinue
+    })
+    if ($ownedRemaining.Count -eq 0) { break }
+    Start-Sleep -Milliseconds 100
+  }
+
   if ($fakeWorker -and -not $fakeWorker.HasExited) {
     Stop-Process -Id $fakeWorker.Id -Force -ErrorAction SilentlyContinue
   }
 
-  # Only the process started by this collector is explicitly stopped above.
-  # Any remaining Firefox process makes the target run invalid rather than
-  # being killed or adopted.
-  if (Get-Process firefox -ErrorAction SilentlyContinue) {
-    Write-Warning "Firefox remains running after collector cleanup; reject this target run."
+  $remainingFirefox = @(Get-BoundedFirefoxProcessMetadata)
+  $cleanupFailed = $remainingFirefox.Count -gt 0
+
+  if ($PreflightOnly -and -not $collectorSucceeded) {
+    $diagnosticRoot = if ([string]::IsNullOrWhiteSpace($DiagnosticsDirectory)) {
+      [System.IO.Path]::GetFullPath($ResultPath + ".diagnostics")
+    } else {
+      [System.IO.Path]::GetFullPath($DiagnosticsDirectory)
+    }
+    New-Item -ItemType Directory -Path $diagnosticRoot -Force | Out-Null
+    Write-BoundedTextDiagnostic -Source $runnerOut -Destination (Join-Path $diagnosticRoot "runner.out.log")
+    Write-BoundedTextDiagnostic -Source $runnerErr -Destination (Join-Path $diagnosticRoot "runner.err.log")
+    Write-BoundedTextDiagnostic -Source $fakeWorkerOut -Destination (Join-Path $diagnosticRoot "fake-worker.out.log")
+    Write-BoundedTextDiagnostic -Source $fakeWorkerErr -Destination (Join-Path $diagnosticRoot "fake-worker.err.log")
+    if (Test-Path -LiteralPath $steadyResultPath -PathType Leaf) {
+      Copy-Item -LiteralPath $steadyResultPath -Destination (Join-Path $diagnosticRoot "adapter-preflight-result.json") -Force
+    }
+
+    $launcherHasExited = $null
+    if ($firefox) {
+      try {
+        $firefox.Refresh()
+        $launcherHasExited = [bool]$firefox.HasExited
+      } catch {
+      }
+    }
+    [ordered]@{
+      schema_version = 1
+      evidence_class = "TARGET_ADAPTER_PREFLIGHT_DIAGNOSTICS"
+      content_policy = "CONTENT_FREE"
+      launcher_pid = $(if ($firefox) { [int]$firefox.Id } else { $null })
+      launcher_has_exited = $launcherHasExited
+      tracked_owned_firefox_ids = @($ownedFirefoxIds | Sort-Object)
+      remaining_firefox_process_count = $remainingFirefox.Count
+      remaining_firefox_processes = $remainingFirefox
+      captured_files = @(
+        "runner.out.log",
+        "runner.err.log",
+        "fake-worker.out.log",
+        "fake-worker.err.log",
+        $(if (Test-Path -LiteralPath $steadyResultPath -PathType Leaf) { "adapter-preflight-result.json" } else { $null })
+      ) | Where-Object { $_ }
+    } | ConvertTo-Json -Depth 8 |
+      Set-Content -LiteralPath (Join-Path $diagnosticRoot "process-summary.json") -Encoding UTF8
+  }
+
+  if ($cleanupFailed) {
+    Write-Warning "Firefox remains running after collector-owned cleanup; reject this target run without adopting or killing unowned processes."
   }
 
   Remove-Item $work -Recurse -Force -ErrorAction SilentlyContinue
+
+  if ($collectorSucceeded -and $cleanupFailed) {
+    throw "Target Firefox cleanup did not reach a clean owned-process baseline."
+  }
 }
