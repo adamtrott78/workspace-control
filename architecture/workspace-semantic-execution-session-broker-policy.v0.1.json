@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-session-broker-policy-v0.1",
+  "status": "UX_04_DESIGN_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "core_invariants": [
+    "CHAT_SESSION_IS_DISPOSABLE_CACHE",
+    "DURABLE_STATE_IS_RECOVERY_SOURCE",
+    "UNKNOWN_OR_LOST_CONTINUITY_IS_NEVER_REUSED",
+    "SESSION_GENERATION_IS_MONOTONIC_AND_NEVER_REUSED",
+    "UNRELATED_TASKS_DO_NOT_SHARE_ONE_PERSISTENT_CHAT_WITHOUT_EXPLICIT_POLICY",
+    "BROWSER_TAB_ID_IS_NOT_SESSION_IDENTITY",
+    "PENDING_UNACKNOWLEDGED_ACTIONS_ARE_RECONCILED_BEFORE_ROTATION_RETRY",
+    "AUTH_REFRESH_INVALIDATION_IS_PROFILE_SCOPED"
+  ],
+  "default_pool": {
+    "general_persistent_slots": {
+      "target_live_count": 2,
+      "slot_name_pattern": "instant-general-{n}",
+      "note": "Design target only; UX-09 may revise based on memory measurements."
+    },
+    "role_isolated_slots": {
+      "allocation": "ON_DEMAND",
+      "examples": [
+        "critic",
+        "synthesizer"
+      ],
+      "note": "Role names are workflow metadata, not closed core enums."
+    },
+    "fresh_per_quantum_slots": {
+      "allocation": "ON_DEMAND",
+      "note": "Used only when workflow/benchmark/isolation policy explicitly requires freshness."
+    }
+  },
+  "session_classes": {
+    "GENERAL_PERSISTENT": {
+      "intended_use": "Multiple compatible reasoning quanta for one task affinity epoch.",
+      "cross_task_reuse": false,
+      "cross_process_reuse": true,
+      "role_reuse": "ONLY_WHEN_ISOLATION_SCOPE_ALLOWS",
+      "default_when": "Production Instant work without explicit isolation requirement."
+    },
+    "ROLE_ISOLATED_PERSISTENT": {
+      "intended_use": "Multiple compatible quanta for one isolated role within a task.",
+      "cross_task_reuse": false,
+      "cross_process_reuse": "ONLY_WITHIN_SAME_ROLE_AND_TASK",
+      "role_reuse": "SAME_ROLE_ONLY",
+      "default_when": "Critic/synthesizer/other role isolation is required but fresh-per-quantum is not."
+    },
+    "FRESH_PER_QUANTUM": {
+      "intended_use": "One reasoning quantum per new conversation.",
+      "cross_task_reuse": false,
+      "cross_process_reuse": false,
+      "role_reuse": false,
+      "default_when": "Frozen benchmark treatment or explicit contamination/isolation policy."
+    },
+    "EPHEMERAL_RECOVERY": {
+      "intended_use": "Temporary replacement during continuity recovery; may later be promoted or retired.",
+      "cross_task_reuse": false,
+      "cross_process_reuse": false,
+      "role_reuse": "EXACT_RECOVERY_TARGET_ONLY",
+      "default_when": "Session continuity cannot be trusted and recovery policy requires replacement."
+    }
+  },
+  "compatibility_requirements": [
+    "session continuity_state == TRUSTED",
+    "session status in [ACTIVE, IDLE, DISCARDED]",
+    "session generation is current",
+    "no ROTATE_REQUIRED or RETIRE_REQUIRED lifecycle intent",
+    "executor_requirement_ref is compatible with requested executor requirement",
+    "role/isolation constraints are satisfied",
+    "task affinity matches current affinity epoch",
+    "reasoning-process affinity satisfies isolation scope",
+    "no policy_fresh_required flag",
+    "no unresolved local binding ambiguity that blocks safe target preparation"
+  ],
+  "task_affinity_policy": {
+    "default": "PIN_PERSISTENT_CHAT_TO_ONE_TASK_AFFINITY_EPOCH",
+    "rationale": "Avoid cross-task conversational contamination even though durable packets are reconstructable.",
+    "reassign_to_new_unrelated_task": "ROTATE_TO_NEW_GENERATION"
+  },
+  "isolation_scope_semantics": {
+    "NONE": "Session may serve compatible sibling reasoning processes within the same task affinity epoch.",
+    "ROLE": "Session may serve only the same role within the same task.",
+    "PROCESS": "Session may serve only the same reasoning process.",
+    "TASK": "Session may serve compatible work anywhere within the same task but not outside it.",
+    "FRESH_QUANTUM": "Every quantum requires a new session generation/conversation."
+  },
+  "hard_rotate_conditions": [
+    "continuity_state in [UNKNOWN, LOST]",
+    "executor model/surface/toolset requirement became incompatible",
+    "policy requires fresh conversation",
+    "role/process isolation would be violated by reuse",
+    "authentication refresh invalidated the browser-profile continuity domain",
+    "user explicitly requests rotation",
+    "old local tab is missing and binding cannot be proven/restored safely"
+  ],
+  "soft_rotate_conditions": [
+    "context pressure reaches configured soft threshold at a safe quantum boundary",
+    "consecutive validator repair threshold reached",
+    "task/process affinity is changing in a way that would increase contamination risk",
+    "session resource policy prefers replacement over keeping a long-lived tab"
+  ],
+  "context_pressure": {
+    "inputs": [
+      "reasoning_quanta",
+      "cumulative_packet_token_estimate",
+      "cumulative_durable_output_token_estimate",
+      "consecutive_validator_repairs"
+    ],
+    "forbidden_inputs": [
+      "scraped ChatGPT conversation length",
+      "hidden ChatGPT token counters",
+      "DOM-derived completion state"
+    ],
+    "policy": "EXECUTOR_PROFILE_CALIBRATED",
+    "provisional_seed": {
+      "soft_quanta_observation_threshold": 12,
+      "hard_quanta_fallback_threshold": 24,
+      "consecutive_validator_repairs_soft_rotate": 2
+    },
+    "note": "These are calibration seeds, not production acceptance thresholds. UX-11 and GPT-6 calibration may revise them."
+  },
+  "browser_binding_policy": {
+    "authoritative_identity": "worker_slot_id + generation",
+    "local_binding": "Firefox managed tab/window mapping",
+    "restart_rule": "If exact reviewed binding proof can be re-established, RESTORE may be eligible; otherwise continuity becomes UNKNOWN and rotation/recreation is required.",
+    "title_routing": false,
+    "arbitrary_tab_adoption": false
+  },
+  "auth_refresh_policy": {
+    "scope": "ALL_LOGICAL_SESSIONS_BOUND_TO_WORKSPACEWORKERS_AUTH_DOMAIN",
+    "signal_source": "DEFERRED_TO_UX_07",
+    "on_signal": [
+      "mark affected continuity_state UNKNOWN",
+      "prevent new SERVICE_EXISTING/RESTORE_AND_SERVICE claims on affected generations",
+      "re-read authoritative durable state once for every outstanding action",
+      "complete actions whose durable ack already exists",
+      "supersede unresolved old-generation actions",
+      "advance affected session generations",
+      "create replacement/recovery sessions from last acknowledged durable checkpoints",
+      "treat old tabs as untrusted local remnants until explicitly retired"
+    ],
+    "late_old_generation_ack": "PRESERVE_AS_EVIDENCE_BUT_DO_NOT_ADVANCE_CURRENT_STATE"
+  },
+  "discard_policy": {
+    "eligible_when": [
+      "continuity_state == TRUSTED",
+      "status == IDLE",
+      "no outstanding action requires immediate local access",
+      "not selected for imminent service",
+      "browser adapter supports safe discard"
+    ],
+    "effect": "status DISCARDED; logical session/generation remains reusable.",
+    "restore": "RESTORE_AND_SERVICE when selected."
+  },
+  "retire_policy": {
+    "eligible_when": [
+      "session generation has been replaced",
+      "task affinity epoch completed",
+      "session is no longer compatible with any planned work",
+      "resource policy chooses retirement",
+      "user explicitly requests retirement"
+    ],
+    "effect": "status RETIRED; generation never reused."
+  },
+  "allocation_priority": [
+    "REUSE trusted compatible active/idle session",
+    "RESTORE trusted compatible discarded session",
+    "CREATE in available compatible logical slot",
+    "ROTATE incompatible/pressure/continuity-lost session if policy allows",
+    "BLOCK or OPEN_RECOVERY when safe automated local preparation is impossible"
+  ]
+}
