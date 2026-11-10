@@ -39,6 +39,9 @@ if (Get-Process firefox -ErrorAction SilentlyContinue) {
 $repo = [System.IO.Path]::GetFullPath($RepositoryRoot)
 $profile = [System.IO.Path]::GetFullPath($ProfileRoot)
 $xpi = [System.IO.Path]::GetFullPath($SignedXpiPath)
+$canonicalXpi = [System.IO.Path]::GetFullPath(
+    (Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage09\workspace-control-operator-performance-signed.xpi")
+)
 $sourceSha = (& git -C $repo rev-parse HEAD).Trim().ToLowerInvariant()
 if ($LASTEXITCODE -ne 0 -or $sourceSha -notmatch "^[0-9a-f]{40}$") {
     throw "Stage 09 profile preparation requires an exact Git source SHA."
@@ -137,6 +140,11 @@ else {
 if ($InteractiveInstall) {
     if ($VerifyOnly) {
         throw "-InteractiveInstall and -VerifyOnly are mutually exclusive."
+    }
+    New-Item -ItemType Directory -Path (Split-Path -Parent $canonicalXpi) -Force | Out-Null
+    if ($xpi -ne $canonicalXpi) {
+        Copy-Item -LiteralPath $xpi -Destination $canonicalXpi -Force
+        $xpi = $canonicalXpi
     }
     Start-Process -FilePath $FirefoxPath -ArgumentList @(
         "-P", $ProfileName, "-no-remote", ('"' + $xpi + '"')
