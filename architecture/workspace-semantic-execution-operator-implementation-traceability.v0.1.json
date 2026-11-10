@@ -462,10 +462,12 @@
     },
     "impl_07_recovery_and_fault_closure": {
       "status": "VALIDATED",
-      "checkpoint": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e",
+      "checkpoint": "5166fdf44af3548ae1f9bc3e773f948f22f212e1",
       "validations": [
-        "Operator Bridge Validation #29 SUCCESS",
-        "Workspace Control Validation #2407 SUCCESS"
+        "Operator Bridge Validation #30 SUCCESS on promotion head",
+        "Workspace Control Validation #2408 SUCCESS on promotion head",
+        "Operator Bridge Validation #29 SUCCESS on implementation head",
+        "Workspace Control Validation #2407 SUCCESS on implementation head"
       ],
       "implementation": [
         "operator-bridge/src/WorkspaceOperator/Application/RecoveryContracts.cs",
@@ -553,7 +555,8 @@
           "interpretation": "CI smoke only; UX-09 target-machine measurement remains authoritative"
         }
       },
-      "claim": "Stage-07 recovery/fault closure validated through deterministic, real-helper, and real-Firefox fake-worker layers without real-account access or authority duplication."
+      "claim": "Stage-07 recovery/fault closure is exact-head clean at the durable promotion head; Stage 08 packaging/install/update/rollback is the next authorized stage.",
+      "implementation_head": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e"
     }
   }
 }

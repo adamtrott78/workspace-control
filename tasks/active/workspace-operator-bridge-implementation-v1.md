@@ -24,7 +24,7 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 7d8bd99bbd23eafa834a0a676d86156382ad8c1e
+- Remote checkpoint: 5166fdf44af3548ae1f9bc3e773f948f22f212e1
 - Remote verified: true
 
 ## Next safe action
