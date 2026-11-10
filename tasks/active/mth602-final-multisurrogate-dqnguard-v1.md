@@ -29,19 +29,19 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-After the parent live upgrade reports LOCAL_TASK_AUTHORITY=PASS, verify this task through ChatGPT Workspace Shell and verify PADataset exact HEAD 17e1147614f27702e43565089d618182ff71c5af. Only then begin Stage 00 read-only provenance recovery from the clean execution snapshot and untouched historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
+Continue Stage 00 read-only provenance recovery from PADataset@17e1147614f27702e43565089d618182ff71c5af and the untouched historical evidence checkout mounted at local_artifacts/evidence. Start with docs/experiments/multisurrogate_dqnguard/TASK.md, then recover baseline CSV/evaluator/run/config/checkpoint/cache/calibration identities. Do not begin Stage 01 until the provenance gate closes.
 
 ## Remaining work
 
-- Apply the validated parent authority refresh and prove this task is visible through Workspace Shell.
-- Verify clean PADataset execution HEAD is 17e1147614f27702e43565089d618182ff71c5af and historical evidence is mounted read-only.
+- Read the canonical scientific task and recover fixed-Scan DQNGuard baseline provenance.
+- Recover the full 20-cell target-surrogate matrix provenance and VarMax surrogate-all evidence chains.
 - Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings.
-- Persist machine-readable Stage 00 provenance in PADataset and update its authoritative task.
-- Proceed to Stage 01 only after the provenance gate closes.
+- Record inaccessible historical subdirectories explicitly if legacy permissions block read-only traversal.
+- Persist a machine-readable Stage 00 provenance artifact and update the authoritative PADataset task only after evidence recovery is complete.
 
 ## Blockers / gates
 
-- Parent Workspace Shell implementation is validated at execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, but this task still returns TASK_NOT_FOUND through the live trusted authority snapshot. No PADataset read or research execution is permitted until the authority refresh completes.
+- None.
 
 ## Fresh-chat initialization
 
