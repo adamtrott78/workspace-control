@@ -24,16 +24,15 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 8bf4c2b6d13dc9d917ee831828c718fbca57648a
+- Remote checkpoint: 8c0f97f23e181b850728b2b42c970b71d93c3991
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_06_integrated_local_bridge_e2e from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Integrate the real Windows helper application services, Stage-03 Native Messaging/local IPC boundary, Stage-04 Firefox BrowserPort adapter, and Stage-05 fake-worker environment through the required UX-10 L2/L3 scenarios. Create the bounded local integration runner and Firefox test-profile setup needed for fake-worker testing only. Preserve the human boundary: no synthetic interaction with ChatGPT and no simulator-only control in production paths. Required exit evidence includes all required CORE/AUTHORITY/ACK/INPUT/IDENTITY L2/L3 tests, zero background focus/clipboard mutation, no duplicate local effects, content-free L2/L3 traces, and an adapter-parity result schema. Do not perform real-account calibration.
+Execute impl_07_recovery_and_fault_closure from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the recovery coordinator, restart/reinventory handling, auth-domain freeze/reconcile/generation-advance flow, and content-free recovery traces using the validated real helper/browser adapters plus deterministic fault injection. Required exit evidence: every frozen UX-10 recovery/crash/generation fixture at its required implemented layer passes; each recovery_id advances generation at most once; late old-generation evidence cannot advance current state; cold restart never replays stale local cache; and Ctrl+B during blocking recovery cannot stage a worker packet or mutate the clipboard. Preserve all UX-07/UX-08 authority and privacy boundaries. Do not widen into packaging, UX-09 performance acceptance, UX-11 usability trials, WebView2 promotion, or real-account calibration.
 
 ## Remaining work
 
-- impl_06_integrated_local_bridge_e2e: Real helper + Firefox + fake-worker integration
 - impl_07_recovery_and_fault_closure: Crash, auth-domain, stale-generation, restart, and recovery closure
 - impl_08_packaging_install_update_rollback: Per-user packaging, signed-extension flow, install/uninstall, and rollback
 - impl_09_performance_benchmark_execution: Execute UX-09 performance/resource benchmark

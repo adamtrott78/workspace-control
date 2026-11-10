@@ -362,6 +362,103 @@
         "recovery_idempotency": "same recovery ID advances generation at most once"
       },
       "claim": "Stage-05 deterministic fake-world implementation validated without ChatGPT account access; real OS/browser integration begins in Stage 06."
+    },
+    "impl_06_integrated_local_bridge_e2e": {
+      "status": "VALIDATED",
+      "checkpoint": "8c0f97f23e181b850728b2b42c970b71d93c3991",
+      "validations": [
+        "Operator Bridge Validation #24 SUCCESS",
+        "Workspace Control Validation #2402 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/WorkspaceOperatorBridge.Integration.slnx",
+        "operator-bridge/integration/**",
+        "operator-bridge/tests/LocalBridgeE2E.Tests/**",
+        "operator-bridge/simulator/Scenarios/stage06-l2-l3-catalog.json",
+        "operator-bridge/simulator/Scenarios/adapter-parity-result.schema.json",
+        "operator-bridge/simulator/FirefoxProfile/**",
+        "operator-bridge/tools/run-stage06-firefox.ps1",
+        "operator-bridge/src/WorkspaceOperator/Application/**",
+        "operator-bridge/src/WorkspaceOperator/Ipc/**",
+        "operator-bridge/src/FirefoxAdapter/adapter_core.js",
+        "tests/test_workspace_semantic_execution_operator_bridge_integration.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "evidence": {
+        "frozen_l2_l3_required_gate_subset": {
+          "required": 11,
+          "covered": 11
+        },
+        "firefox_mocked_browser_tests": {
+          "passed": 14,
+          "failed": 0
+        },
+        "simulator_tests": {
+          "passed": 38,
+          "failed": 0
+        },
+        "production_tests": {
+          "protocol": {
+            "passed": 8,
+            "failed": 0
+          },
+          "workspace_operator": {
+            "passed": 20,
+            "failed": 0
+          },
+          "integration": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "layer2_real_helper": {
+          "passed": 5,
+          "failed": 0,
+          "real_os_clipboard": true,
+          "real_ctrl_b_register_hotkey": true
+        },
+        "layer3_firefox": {
+          "firefox_version": "159.0.1",
+          "web_ext_version": "10.8.0",
+          "native_messaging_connected": true,
+          "result": "PASS",
+          "fake_worker_origin": "http://127.0.0.1:8765",
+          "trace_sha256": "4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477",
+          "predicates": {
+            "unmanaged_lookalike_not_adopted": true,
+            "managed_surface_created_instead": true,
+            "binding_ambiguity_fails_closed": true,
+            "service_existing": true,
+            "create_worker": true,
+            "restore_discarded": true,
+            "executor_identity_unproven_fails_closed": true,
+            "adapter_parity": true,
+            "no_background_clipboard_mutation": true,
+            "no_background_helper_browser_effect": true
+          },
+          "restore_detail": {
+            "seed": "APPLIED",
+            "discard": "APPLIED",
+            "dispatch": "LOCAL_PREPARED",
+            "simulator_human_submit": true,
+            "restore_delta": 1,
+            "generation_before": 0,
+            "generation_after": 0
+          }
+        },
+        "adapter_parity": {
+          "in_memory": "COMPLETED/TRUSTED",
+          "firefox": "COMPLETED/TRUSTED",
+          "local_binding_ids_in_authoritative_state": false
+        },
+        "helper_idle_ci_smoke": {
+          "duration_seconds": 6.377,
+          "max_working_set_mib": 42.355,
+          "cpu_percent_one_logical_cpu_mean": 0.245,
+          "interpretation": "CI smoke only; UX-09 target-machine measurement remains authoritative"
+        }
+      },
+      "claim": "Stage-06 real-helper + real-Firefox integration validated against fake workers with no ChatGPT account access; recovery/fault closure begins in Stage 07."
     }
   }
 }

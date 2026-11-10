@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "stage": "impl_06_integrated_local_bridge_e2e",
+  "layer": "L3_FIREFOX_EXTENSION_FAKE_WORKER",
+  "source_sha": "8c0f97f23e181b850728b2b42c970b71d93c3991",
+  "workflow": {
+    "name": "Operator Bridge Validation",
+    "run_id": 42767850738,
+    "run_number": 24,
+    "conclusion": "SUCCESS"
+  },
+  "environment": {
+    "firefox_version": "159.0.1",
+    "web_ext_version": "10.8.0",
+    "fake_worker_origin": "http://127.0.0.1:8765"
+  },
+  "result": "PASS",
+  "predicates": {
+    "native_messaging_connected": true,
+    "SIM-025_unmanaged_lookalike_not_adopted": true,
+    "SIM-025_managed_surface_created_instead": true,
+    "SIM-026_binding_ambiguity_fails_closed": true,
+    "seed_existing_binding": true,
+    "SIM-001_service_existing": true,
+    "SIM-002_create_worker": true,
+    "SIM-003_restore_discarded": true,
+    "SIM-027_executor_identity_unproven": true,
+    "adapter_parity_terminal_predicate": true,
+    "no_background_clipboard_mutation": true,
+    "no_background_helper_browser_effect": true
+  },
+  "details": {
+    "SIM-003_restore_discarded": {
+      "seed": "Applied",
+      "discard": "Applied",
+      "discard_error": null,
+      "dispatch": "LocalPrepared",
+      "submit": true,
+      "restore_delta": 1,
+      "generation_before": 0,
+      "generation_after": 0
+    },
+    "firefox_inventory_count": 6,
+    "clipboard_write_count": 3,
+    "browser_event_count": 12,
+    "trace_sha256": "4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477",
+    "adapter_parity": {
+      "schema_version": 1,
+      "fixture": "SIM-001",
+      "authoritative_terminal_state_in_memory": "COMPLETED/TRUSTED",
+      "authoritative_terminal_state_firefox": "COMPLETED/TRUSTED",
+      "local_binding_ids_in_authoritative_state": false
+    }
+  },
+  "content_policy": "CONTENT_FREE"
+}
