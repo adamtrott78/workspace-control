@@ -55,16 +55,18 @@ output remains non-target evidence and cannot complete Stage 09.
 
 ## Opt-in self-hosted target execution
 
-The existing `Operator Bridge Validation` workflow also exposes an explicit
-workflow-dispatch target job. It never runs on pull requests or ordinary
-workflow dispatches unless `run_target_benchmark=true`.
+The `Operator Bridge Validation` workflow exposes two explicit target
+triggers: workflow dispatch with `run_target_benchmark=true`, and the
+one-shot `stage09-target` label event on PR #590. Ordinary synchronize/open
+pull-request runs never schedule the target job.
 
 The target workstation must first be registered by the operator as a GitHub
 self-hosted Windows x64 runner with the additional label
 `workspace-operator-target`. The runner must be started interactively under
-the same Windows user that owns the `WorkspaceWorkers` Firefox profile and
-Stage-08 HKCU Native Messaging registration; a Session-0/service runner is
-rejected.
+the same Windows user that owns the Stage-09 `WorkspaceWorkers` benchmark
+profile; a Session-0/service runner is rejected. The matrix may temporarily
+create the per-user Native Messaging key when no prior registration exists and
+removes it again during cleanup.
 
 Dispatch also requires explicit `confirm_ac_power=true` and
 `confirm_chrome_memory_saver_disabled=true`. The target job depends on the
@@ -73,9 +75,9 @@ the full matrix, and uploads `stage09-target-evidence.json` even when a frozen
 budget fails.
 
 During the target run, the matrix temporarily points the dedicated HKCU Native
-Messaging host key at the exact checked-out Release helper, then restores the
-prior Stage-08 registration in its cleanup path. No Firefox profile files,
-credentials, cookies, tokens, or ChatGPT content are copied or inspected.
+Messaging host key at the exact checked-out Release helper. If a prior value
+exists it is restored exactly; if no key existed the temporary key is removed.
+No credentials, cookies, tokens, or ChatGPT content are copied or inspected.
 
 ## Firefox partial target collector
 
@@ -131,10 +133,15 @@ not target-ready until Mozilla signs it. The signed result is placed at:
 `%LOCALAPPDATA%\WorkspaceControl\OperatorBridge\Stage09\workspace-control-operator-performance-signed.xpi`
 
 Before any measured target run, `prepare-stage09-target-profile.ps1` verifies
-the signed XPI payload against the exact checked-out repo source, rejects any
-production ChatGPT worker URL, and prepares only the Stage-09-owned
-`WorkspaceWorkers` profile. It refuses to mutate an existing profile without
-the Stage-09 ownership marker.
+the signed XPI payload against the exact checked-out repo source and rejects any
+production ChatGPT worker URL. Firefox 74+ does not permit another desktop
+application to silently sideload an extension, so profile setup intentionally
+uses the normal Firefox install UI: run the prep script with
+`-InteractiveInstall`, approve the signed add-on in the dedicated
+`WorkspaceWorkers` profile, and close Firefox. Target execution then runs the
+same script with `-VerifyOnly` and performs the native HELLO preflight. The
+script refuses to mutate an existing profile without the Stage-09 ownership
+marker.
 
 The helper additionally fences the adapter during the native-messaging HELLO.
 The target harness accepts only `FIREFOX_EXTENSION / 0.1.9-perf`; a production,
