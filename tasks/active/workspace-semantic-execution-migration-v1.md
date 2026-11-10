@@ -68,13 +68,17 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 - Remote checkpoint: aba8c2e87dd4bb50ba414206270f592e8ca841a4
 - Remote verified: true
 
+## Current stage
+
+operator_ux_design
+
 ## Next safe action
 
-P3 A screen-003 and B screen-003 are COMPLETED with passing research_iterate_objective_v1 score 1.0. Continue the remaining P3 arms from durable state: C screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant stateless quantum-5 chat after control-published E_global_retry_reset; D screen-002 is READY_TO_RESUME for a BRAND-NEW GPT-5.6 Sol Instant leaf_worker chat for process region-3 only; E screen-002 is FAILED due WAITING_EXTERNAL_STATUS_MISSING and MUST NOT be resumed, while clean replacement E screen-003 is READY for a BRAND-NEW GPT-5.6 Sol Instant lower-tier chat. High for E remains NOT AUTHORIZED unless durable control state explicitly changes escalation_status to APPROVED_TO_LAUNCH. The next control executor should give the operator C, D, and E worker prompts, each in its own separate copy/paste block with the title outside the block and no title text inside the copy/paste block.
+Begin UX-00 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define the authoritative operator UX requirements baseline and quantitative success metrics. Treat the existing operator UX/state-machine documents as design candidates to refine, not frozen implementation contracts. Do not begin native-helper or Firefox-extension implementation until the required UX design slices and gates are satisfied.
 
 ## Remaining work
 
-- Complete P3 C screen-002, D screen-002, and replacement E screen-003 from their current durable boundaries; preserve failed E screen-002 as protocol evidence. After clean P3 screening, do not make claim-bearing equivalence conclusions until evaluator runtime-store isolation and replicated scoring gates are satisfied.
+- Preserve completed P0-P3 screening as non-claim-bearing protocol evidence. Complete evaluator-runtime isolation and claim-bearing replicated scoring/calibration separately; do not repeat the manual screening matrix unless a material frozen-protocol change requires it.
 - Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
 - After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
 - Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
@@ -82,7 +86,7 @@ P3 A screen-003 and B screen-003 are COMPLETED with passing research_iterate_obj
 - Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.
 - Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.
 - Freeze and implement the smallest stable semantic core, versioned domain/workflow extension contract, durable ReasoningProcess, executor/provider/model/surface/harness capability model, resource/quota router, task-tree/lease/CAS semantics, and evidence-based escalation policy.
-- Design the human-in-the-loop orchestration surface so launching/resuming many temporary Instant workers is trivial for the operator while all real scheduling/ownership/recovery state remains durable and machine-managed; browser/tab mechanics are a transport concern, not the durable scheduler.
+- Execute the operator UX design workstream UX-00 through UX-13. Produce requirements/metrics, journeys, architecture/ADRs, typed OperatorAction and session contracts, hotkey/clipboard semantics, tray/console IA, recovery/FMEA, security review, RAM/performance budgets, simulator, usability benchmark, implementation-stack ADRs, and an integrated design-freeze review before coding the bridge.
 - Migrate representative workflows incrementally across: automated research/evaluate/iterate loops; systems engineering and coding; data science/ML experiments; PADataset/research-engine; paper drafting/evidence/citation pipelines; slide/presentation creation; tutoring and homework/assignment generation for MTH602/EAS501/CIS560; generic document/artifact production; GitRunner/Lambda operations; Workspace Shell maintenance; and future workflows not known today.
 - Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.
 - Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation.
