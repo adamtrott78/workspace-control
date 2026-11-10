@@ -282,6 +282,7 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertEqual("0.1.9", manifest["version"])
+        self.assertLessEqual(len(manifest["name"]), 45)
         self.assertIn('const ADAPTER_VERSION = "0.1.9-perf";', background)
         self.assertIn("ADAPTER_IDENTITY_REJECTED", hub)
         self.assertIn('"adapter-preflight"', harness)
