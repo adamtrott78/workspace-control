@@ -698,4 +698,13 @@ UX-05 is complete at the interaction-contract level with:
 
 The contract fixes Ctrl+B as the preferred configurable global command, single-flight dispatch, held-key repeat suppression, busy/double-press semantics, last-safe-moment clipboard staging, no automatic previous-clipboard snapshot/restore in v0, no-work/judgment/recovery behavior, cold-start rules, local-only action draining, and focus/packet-integrity invariants.
 
-The next execution slice is **UX-06 Tray indicator and operator-console information architecture**.
+UX-06 is complete at the information-architecture level with:
+
+- `architecture/workspace-semantic-execution-operator-console-ia.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-console-wireframes.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-display-state-table.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-notification-policy.v0.1.md`
+
+The persistent indicator now has one primary semantic: `READY_MANUAL_CYCLES`, meaning the number of Ctrl+B → Ctrl+V → Enter cycles serviceable now. Secondary counts separate NEW, REUSE, ROTATE/RETIRE, SENT/UNCONFIRMED, GATES, RECOVERY, and BLOCKED. Routine ready work is silent/pull-oriented; judgment, recovery, bridge-blocking failures, and critical local integrity issues may request attention.
+
+The next execution slice is **UX-07 Error, interruption, and recovery UX**.
