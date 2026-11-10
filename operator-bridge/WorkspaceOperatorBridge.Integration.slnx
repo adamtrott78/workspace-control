@@ -3,5 +3,6 @@
   <Project Path="src/WorkspaceOperator/WorkspaceOperator.csproj" />
   <Project Path="simulator/WorkspaceOperator.Simulator.csproj" />
   <Project Path="integration/WorkspaceOperator.IntegrationHarness.csproj" />
+  <Project Path="performance/WorkspaceOperator.PerformanceHarness.csproj" />
   <Project Path="tests/LocalBridgeE2E.Tests/LocalBridgeE2E.Tests.csproj" />
 </Solution>
