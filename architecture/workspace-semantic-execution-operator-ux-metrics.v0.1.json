@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-ux-metrics-v0.1",
+  "status": "UX_00_BASELINE_DESIGN_TARGETS_NOT_YET_MEASURED",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "requirements_ref": "architecture/workspace-semantic-execution-operator-ux-requirements.v0.1.md",
+  "measurement_semantics": {
+    "acceptance_threshold": "A v0 requirement that must be satisfied before operator-UX design/promotion can pass the relevant gate.",
+    "provisional_budget": "A numerical design target to be measured and potentially revised by UX-09 before design freeze.",
+    "measurement_only": "Collect evidence; no threshold frozen yet."
+  },
+  "routine_interaction": {
+    "primary_hotkey_candidate": "Ctrl+B",
+    "manual_sequence": [
+      "GLOBAL_SCHEDULER_HOTKEY",
+      "CTRL_V",
+      "ENTER"
+    ],
+    "max_required_operator_steps_per_packet": {
+      "value": 3,
+      "class": "acceptance_threshold"
+    },
+    "manual_tab_searches_per_packet": {
+      "value": 0,
+      "class": "acceptance_threshold"
+    },
+    "manual_prompt_edits_per_packet": {
+      "value": 0,
+      "class": "acceptance_threshold"
+    },
+    "manual_state_relay_events_per_workflow": {
+      "value": 0,
+      "class": "acceptance_threshold"
+    },
+    "manual_worker_selection_decisions_per_routine_cycle": {
+      "value": 0,
+      "class": "acceptance_threshold"
+    }
+  },
+  "correctness_and_safety": {
+    "wrong_worker_dispatches_in_20_cycle_mixed_trial": {
+      "max": 0,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11"
+    },
+    "automatic_resend_without_durable_ack": {
+      "allowed": false,
+      "class": "acceptance_threshold"
+    },
+    "background_clipboard_mutations_without_hotkey": {
+      "allowed": false,
+      "class": "acceptance_threshold"
+    },
+    "background_focus_steals_without_operator_action": {
+      "allowed": false,
+      "class": "acceptance_threshold"
+    },
+    "chatgpt_page_content_automation_v0": {
+      "allowed": false,
+      "class": "acceptance_threshold"
+    },
+    "unknown_continuity_behavior": {
+      "required": "FAIL_CLOSED",
+      "class": "acceptance_threshold"
+    }
+  },
+  "latency_targets_ms": {
+    "reuse_existing_worker_ready_for_paste": {
+      "p50_max": 250,
+      "p95_max": 750,
+      "provisional_hard_ceiling": 1500,
+      "class": "provisional_budget",
+      "owner_slice": "UX-09"
+    },
+    "create_new_worker_when_firefox_running": {
+      "p95_max": 2000,
+      "class": "provisional_budget",
+      "owner_slice": "UX-09"
+    },
+    "cold_firefox_start_to_ready": {
+      "p95_max": 8000,
+      "class": "provisional_budget",
+      "owner_slice": "UX-09"
+    }
+  },
+  "resource_targets": {
+    "native_helper_plus_extension_steady_state_mib_max": {
+      "value": 150,
+      "class": "provisional_budget",
+      "owner_slice": "UX-09"
+    },
+    "idle_cpu_percent_of_one_logical_cpu_average_max": {
+      "value": 1,
+      "class": "provisional_budget",
+      "owner_slice": "UX-09"
+    },
+    "firefox_worker_profile_two_live_chat_tabs_mib_max": {
+      "value": 1536,
+      "class": "provisional_budget",
+      "owner_slice": "UX-09"
+    },
+    "four_live_chat_tabs": {
+      "policy": "BENCHMARK_ONLY_UNTIL_MEASURED",
+      "class": "provisional_budget",
+      "owner_slice": "UX-09"
+    }
+  },
+  "session_efficiency_measurements": {
+    "existing_session_reuse_fraction": {
+      "class": "measurement_only",
+      "owner_slice": "UX-04/UX-11"
+    },
+    "new_chat_creations_per_workflow": {
+      "class": "measurement_only"
+    },
+    "session_rotations_per_workflow": {
+      "class": "measurement_only"
+    },
+    "forced_login_recoveries_per_workflow": {
+      "class": "measurement_only",
+      "owner_slice": "UX-07"
+    },
+    "sent_unconfirmed_peak": {
+      "class": "measurement_only"
+    }
+  },
+  "operator_attention_measurements": {
+    "mechanical_cycles_per_workflow": {
+      "class": "measurement_only"
+    },
+    "judgment_gates_per_workflow": {
+      "class": "measurement_only"
+    },
+    "time_spent_interpreting_scheduler_state_seconds": {
+      "target": 0,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11"
+    },
+    "wrong_tab_manual_recovery_events": {
+      "target": 0,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11"
+    }
+  },
+  "telemetry_allowlist": [
+    "operator_action_id",
+    "operator_action_type",
+    "worker_slot_id",
+    "generation",
+    "hotkey_timestamp",
+    "local_prepare_duration_ms",
+    "browser_operation_result",
+    "clipboard_write_result",
+    "durable_ack_latency_ms",
+    "bridge_toggle_event",
+    "recovery_classification",
+    "explicit_performance_trial_resource_metrics"
+  ],
+  "telemetry_denylist": [
+    "arbitrary_clipboard_contents",
+    "chatgpt_response_text_scraped_from_page",
+    "passwords_or_authentication_secrets",
+    "keystroke_streams",
+    "mouse_trajectories",
+    "unrelated_browsing_history"
+  ],
+  "known_recovery_requirements": [
+    {
+      "id": "SESSION_AUTH_REFRESH_ALL_TABS",
+      "description": "Creating or using a new ChatGPT tab may trigger reauthentication, and login may refresh or invalidate existing worker tabs.",
+      "required_outcome": "Recover from durable state and re-establish worker sessions without manual scheduler-state reconstruction.",
+      "detailed_design_owner": "UX-07",
+      "session_policy_owner": "UX-04"
+    }
+  ]
+}
