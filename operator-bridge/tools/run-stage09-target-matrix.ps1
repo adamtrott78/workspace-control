@@ -12,6 +12,8 @@ param(
 
   [string]$FirefoxProfile = "WorkspaceWorkers",
 
+  [string]$PerformanceSignedXpiPath = (Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage09\workspace-control-operator-performance-signed.xpi"),
+
   [switch]$ConfirmAcPower,
 
   [switch]$ConfirmChromeMemorySaverDisabled,
@@ -116,6 +118,7 @@ foreach ($name in @("firefox", "chrome", "WorkspaceOperator")) {
 $bridgeRoot = Join-Path $repo "operator-bridge"
 $helperExe = Join-Path $bridgeRoot "src\WorkspaceOperator\bin\Release\net10.0-windows\WorkspaceOperator.exe"
 $targetFirefoxScript = Join-Path $bridgeRoot "tools\run-stage09-target-firefox.ps1"
+$profilePrepScript = Join-Path $bridgeRoot "performance\prepare-stage09-target-profile.ps1"
 $validator = Join-Path $bridgeRoot "performance\validate-stage09-target.py"
 $fakeWorkerRoot = Join-Path $bridgeRoot "simulator\FirefoxProfile\extension"
 if (-not (Test-Path -LiteralPath $targetFirefoxScript -PathType Leaf)) {
@@ -124,25 +127,35 @@ if (-not (Test-Path -LiteralPath $targetFirefoxScript -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
   throw "Target evidence validator is missing."
 }
+if (-not (Test-Path -LiteralPath $profilePrepScript -PathType Leaf)) {
+  throw "Stage 09 target-profile preparation script is missing."
+}
+if (-not (Test-Path -LiteralPath $PerformanceSignedXpiPath -PathType Leaf)) {
+  throw "Stage 09 requires the Mozilla-signed fake-worker performance XPI at: $PerformanceSignedXpiPath"
+}
 
 & dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.Integration.slnx") --configuration Release
 if ($LASTEXITCODE -ne 0) {
   throw "Stage 09 target matrix build failed."
 }
 
+& $profilePrepScript -RepositoryRoot $repo -SignedXpiPath $PerformanceSignedXpiPath -FirefoxPath $FirefoxPath -ProfileName $FirefoxProfile
+if ($LASTEXITCODE -ne 0) {
+  throw "Stage 09 target Firefox profile preparation failed."
+}
+
 $work = Join-Path $env:TEMP ("workspace-operator-stage09-matrix-" + [Guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $work -Force | Out-Null
 $chromeFakeWorker = $null
 $nativeRegPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\com.workspacecontrol.operator_bridge"
+$nativeRegExisted = Test-Path -LiteralPath $nativeRegPath
 $nativeHostOverridden = $false
 $originalNativeHostPath = $null
-
-if (-not (Test-Path -LiteralPath $nativeRegPath)) {
-  throw "Stage-08 per-user native-host registration is required before target measurement."
-}
-$originalNativeHostPath = (Get-Item -LiteralPath $nativeRegPath).GetValue("")
-if ([string]::IsNullOrWhiteSpace([string]$originalNativeHostPath)) {
-  throw "Stage-08 native-host registration is empty."
+if ($nativeRegExisted) {
+  $originalNativeHostPath = (Get-Item -LiteralPath $nativeRegPath).GetValue("")
+  if ([string]::IsNullOrWhiteSpace([string]$originalNativeHostPath)) {
+    throw "Existing native-host registration is empty; refusing to overwrite ambiguous state."
+  }
 }
 if (-not (Test-Path -LiteralPath $helperExe -PathType Leaf)) {
   throw "Exact-head helper build is missing after target matrix build."
@@ -156,8 +169,20 @@ $targetNativeManifest = Join-Path $work "native-host-exact-head.json"
   type = "stdio"
   allowed_extensions = @("workspace-control-operator@adamtrott78.local")
 } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $targetNativeManifest -Encoding UTF8
-Set-Item -LiteralPath $nativeRegPath -Value $targetNativeManifest
-$nativeHostOverridden = $true
+
+$chromePolicyPath = "HKCU:\Software\Policies\Google\Chrome"
+$chromeMemorySaverPolicy = "HighEfficiencyModeEnabled"
+$chromePolicyKeyExisted = Test-Path -LiteralPath $chromePolicyPath
+$chromePolicyValueExisted = $false
+$originalChromeMemorySaverPolicy = $null
+$chromePolicyOverridden = $false
+if ($chromePolicyKeyExisted) {
+  $chromePolicy = Get-ItemProperty -LiteralPath $chromePolicyPath -ErrorAction Stop
+  if ($chromePolicy.PSObject.Properties.Name -contains $chromeMemorySaverPolicy) {
+    $chromePolicyValueExisted = $true
+    $originalChromeMemorySaverPolicy = [int]$chromePolicy.$chromeMemorySaverPolicy
+  }
+}
 
 function Get-Percentile {
   param([double[]]$Values, [double]$P)
@@ -514,6 +539,26 @@ function New-BudgetCheck {
 }
 
 try {
+  New-Item -ItemType Directory -Path $nativeRegPath -Force | Out-Null
+  Set-Item -LiteralPath $nativeRegPath -Value $targetNativeManifest
+  $nativeHostOverridden = $true
+
+  New-Item -ItemType Directory -Path $chromePolicyPath -Force | Out-Null
+  New-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -PropertyType DWord -Value 0 -Force | Out-Null
+  $chromePolicyOverridden = $true
+
+  $preflightPath = Join-Path $work "stage09-adapter-preflight.json"
+  & $targetFirefoxScript -RepositoryRoot $repo -ResultPath $preflightPath -FirefoxPath $FirefoxPath -FirefoxProfile $FirefoxProfile -PreflightOnly
+  if ($LASTEXITCODE -ne 0) {
+    throw "Stage 09 performance-adapter identity preflight failed."
+  }
+  $preflight = Get-Content -LiteralPath $preflightPath -Raw | ConvertFrom-Json
+  if ($preflight.evidence_class -ne "TARGET_ADAPTER_PREFLIGHT" -or
+      $preflight.status -ne "PASS" -or
+      $preflight.adapter_version -ne "0.1.9-perf") {
+    throw "Stage 09 target refused a non-performance Firefox adapter."
+  }
+
   $chromeFakeWorker = Start-Process -FilePath "python" -ArgumentList @(
     "-m", "http.server", "8766", "--bind", "127.0.0.1", "--directory", ('"' + $fakeWorkerRoot + '"')
   ) -PassThru -WindowStyle Hidden
@@ -721,8 +766,22 @@ finally {
   }
   try { Stop-OwnedProcessName -Name "chrome" } catch {}
   try { Stop-OwnedProcessName -Name "firefox" } catch {}
+  if ($chromePolicyOverridden) {
+    if ($chromePolicyValueExisted) {
+      New-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -PropertyType DWord -Value $originalChromeMemorySaverPolicy -Force | Out-Null
+    } else {
+      Remove-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -ErrorAction SilentlyContinue
+      if (-not $chromePolicyKeyExisted) {
+        Remove-Item -LiteralPath $chromePolicyPath -Force -ErrorAction SilentlyContinue
+      }
+    }
+  }
   if ($nativeHostOverridden) {
-    Set-Item -LiteralPath $nativeRegPath -Value $originalNativeHostPath
+    if ($nativeRegExisted) {
+      Set-Item -LiteralPath $nativeRegPath -Value $originalNativeHostPath
+    } else {
+      Remove-Item -LiteralPath $nativeRegPath -Recurse -Force -ErrorAction SilentlyContinue
+    }
   }
   Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue
 }
