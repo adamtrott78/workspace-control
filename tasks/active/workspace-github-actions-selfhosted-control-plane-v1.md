@@ -36,19 +36,22 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-After fresh independent review acceptance, execute exactly one bounded Lambda operator transaction: verify controller SHA256=9a262495d8c52877ad79d852dbd2a8987961dd0470c895cb39b45eb896590ed9; controller unit SHA256=76a6d05139cc38c43f474ea823cfd88514d127b9cacaf783f46a251410ad7831; maintenance service SHA256=6f37085b0b619768ef927e16c4d5e42e01090b71a7a32305b19b6e5a4cfb167c; provisioner Git blob=f0173ec2e8749699a5c94abea6d2270aa19a4387; runtime Git blob=5803ba1fedbcd66e3c9058b9d3cd32740596baad; workspace-control CPU inactive, research-engine CPU/GPU inactive, PADataset CPU/GPU active, provisioner and maintenance active, and no active transient execution; then start only workspace-ci-controller@workspace-control-cpu.service. No reset/reconcile/retrigger/research-engine mutation is authorized.
+After corrected-head independent review acceptance, execute exactly one bounded Lambda operator transaction. Before any start, require controller SHA256=9a262495d8c52877ad79d852dbd2a8987961dd0470c895cb39b45eb896590ed9; controller unit SHA256=76a6d05139cc38c43f474ea823cfd88514d127b9cacaf783f46a251410ad7831; maintenance service SHA256=6f37085b0b619768ef927e16c4d5e42e01090b71a7a32305b19b6e5a4cfb167c; provisioner Git blob=f0173ec2e8749699a5c94abea6d2270aa19a4387; runtime Git blob=5803ba1fedbcd66e3c9058b9d3cd32740596baad; root admission policy lambda_ci_multirepo.py Git blob=cf534343119ebde2a338ea592369ce36374a88b3; workspace-control CPU inactive/dead; research-engine CPU/GPU inactive; PADataset CPU/GPU active; provisioner and maintenance active; no active transient execution. Any mismatch aborts before start and must be reported as observed evidence. If and only if every predicate passes, start only workspace-ci-controller@workspace-control-cpu.service. No reset/reconcile/retrigger/research-engine mutation is authorized.
 
 ## Remaining work
 
-- Obtain fresh authority-sensitive review of the exact 2026-11-10 start-only recovery boundary.
-- On Lambda, run one fail-closed preflight that verifies known-good installed identities and service/lane state, then start only workspace-ci-controller@workspace-control-cpu.service.
+- Validate the corrected PR #597 head.
+- Obtain fresh independent authority-sensitive corrected-head re-review.
+- Only after acceptance, run one fail-closed Lambda preflight that hashes every authority-bearing installed component including lambda_ci_multirepo.py and verifies supporting service/lane state.
+- If every predicate passes, start only workspace-ci-controller@workspace-control-cpu.service.
 - Use Workspace Shell unit_state and GitHub Actions evidence to verify controller health and run #389 acquisition/completion.
-- Do not reset/reconcile/recreate scale sets, touch research-engine recovery state, or widen admission/capacity.
+- Do not reset/reconcile/recreate scale sets, touch research-engine recovery state, widen admission/capacity, or retrigger workflows.
 
 ## Blockers / gates
 
-- Fresh authority-sensitive review is required before today’s start-only controller mutation; historical recovery authority is retained as evidence but is not treated as perpetual execution authority.
-- Operator preflight must prove exact known-good installed controller/unit/maintenance identities, control-small provisioner/runtime identities, healthy supporting services, required inactive research lanes, and no active transient execution before starting workspace-control CPU.
+- Fresh corrected-head authority-sensitive re-review is required after BF-1/BF-2 corrections.
+- Operator preflight must prove exact known-good controller/unit/maintenance identities; provisioner blob f0173ec2e8749699a5c94abea6d2270aa19a4387; runtime blob 5803ba1fedbcd66e3c9058b9d3cd32740596baad; and root admission-policy blob cf534343119ebde2a338ea592369ce36374a88b3. Any mismatch aborts before start.
+- If lambda_ci_multirepo.py is not cf534343119ebde2a338ea592369ce36374a88b3, do not infer that 1edc048f259f86ddbf750a5534449606119b2eca is authorized; record the actual identity and open a separate provenance/installation gate.
 
 ## Fresh-chat initialization
 
