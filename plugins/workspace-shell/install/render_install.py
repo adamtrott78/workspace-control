@@ -167,6 +167,7 @@ def render(args):
         fail("output directory must be empty")
 
     source_root = "/srv/workspace-shell/workspace-control"
+    padataset_root = "/srv/workspace-shell/PADataset"
     receipt_root = "/var/lib/workspace-shell/receipts"
     control_root = "/run/workspace-shell-control"
     runtime_root = "/opt/workspace-shell/runtime/plugins/workspace-shell"
@@ -197,7 +198,7 @@ def render(args):
         "worker_uid": worker_uid,
         "worker_gid": worker_gid,
         "profile_manifest": "/etc/workspace-shell/profiles.v1.json",
-        "source_roots": {"workspace-control": source_root},
+        "source_roots": {"workspace-control": source_root, "PADataset": padataset_root},
         "scratch_root": "/var/lib/workspace-shell/jobs",
         "receipt_root": receipt_root,
         "bwrap_path": "/usr/bin/bwrap",
@@ -214,7 +215,7 @@ def render(args):
         "design_authority_sha": authority_sha,
         "policy_artifact_path": "/etc/workspace-shell/policy/workspace-shell-mcp-authority-v2.json",
         "policy_artifact_sha256": policy_digest,
-        "source_roots": {"workspace-control": source_root},
+        "source_roots": {"workspace-control": source_root, "PADataset": padataset_root},
     }
 
     broker = {
