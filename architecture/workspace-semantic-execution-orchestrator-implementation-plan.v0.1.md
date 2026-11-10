@@ -70,7 +70,175 @@ Until OpenAI documents a supported programmatic invocation path for ordinary Cha
 Relevant OpenAI Terms:
 - https://openai.com/policies/terms-of-use/
 
-## 5. Target control loop
+## 5. Semantic/ontology graph integration
+
+The semantic graph is the shared meaning/provenance layer above the deterministic orchestrator. It is not the execution authority and it is not initially a separate graph database.
+
+Authoritative project/task/workflow records are projected into the open-world semantic core defined by `workspace-semantic-execution-core.v0.1.json`.
+
+The projection represents, among other things:
+
+- goals, requirements, constraints, questions, findings and unresolved alternatives;
+- work items, dependencies, decomposition and produced artifacts;
+- evidence, provenance, contradiction and supersession;
+- capabilities, reasoning/context/resource requirements;
+- candidate actions;
+- authority references and policy-derived gates;
+- executors, sessions, attempts, results and validation.
+
+The graph answers the questions needed by the orchestrator and packet compiler:
+
+- WHAT_IS_CURRENT_OBJECTIVE
+- WHAT_REMAINS_UNRESOLVED
+- WHAT_WORK_DEPENDS_ON_THIS
+- WHAT_IS_READY
+- WHAT_IS_BLOCKED_AND_WHY
+- WHAT_AUTHORITY_APPLIES
+- WHAT_EXECUTOR_CAPABILITIES_ARE_REQUIRED
+- WHY_WAS_THIS_EXECUTOR_SELECTED
+- TRACE_ARTIFACT_TO_SOURCES_AND_ATTEMPTS
+
+The control flow is therefore:
+
+```text
+project-local authoritative records
+        ↓
+rebuildable semantic/ontology projection
+        ↓
+bounded semantic slice for one ReasoningProcess
+        ↓
+deterministic authority + eligibility evaluation
+        ↓
+router / session broker
+        ↓
+executor
+        ↓
+result / evidence / artifact / validation
+        ↓
+authoritative record update where permitted
+        ↓
+projection refresh
+        ↺
+```
+
+Critical boundary:
+
+- semantic/model inference may create findings, alternatives, decomposition, requirements and CandidateActions;
+- it may NOT create Permission, remove Prohibition, satisfy ReviewRequirement, or manufacture execution authority;
+- AuthorityDecision remains deterministic/source-derived;
+- the semantic graph can explain why an action is ready or blocked but cannot make itself authorized.
+
+For v0, use a rebuildable JSON/JSONL or in-memory projection and existing durable stores. Do not add a graph database until measured query/context/routing needs justify one.
+
+### Semantic packet compiler
+
+The packet compiler should query the semantic projection rather than dumping task history.
+
+For each worker it should select only the smallest relevant neighborhood:
+
+- current ReasoningProcess;
+- parent objective and inherited constraints;
+- live findings/hypotheses/questions;
+- direct dependencies and blockers;
+- exact evidence refs;
+- authority/gate refs;
+- required capabilities and validator;
+- recent superseding events;
+- next safe boundary.
+
+This is the mechanism that makes persistent Instant sessions optional rather than necessary.
+
+## 6. Operator UX and manual Chat Instant bridge
+
+The human-operated portion of Chat Instant MUST be designed as a low-attention mechanical bridge, not as an expert operator workflow.
+
+Primary UX objective:
+
+> Minimize human decisions, typing, navigation, state interpretation and repeated copy/paste while staying inside supported ChatGPT interaction boundaries.
+
+The orchestrator should automate everything outside the consumer ChatGPT UI:
+
+- decide which worker/session is next;
+- decide whether to reuse or rotate a session;
+- construct the exact packet;
+- place the packet on the clipboard or expose one-copy UI;
+- show the assigned worker/session label;
+- show only one next action;
+- detect durable worker output through GitHub/state changes;
+- validate the result;
+- prepare the next packet automatically;
+- maintain counters, progress and blockers;
+- never require the human to relay SHAs, JSON, logs, experiment results or state manually.
+
+The manual bridge should ideally require only:
+
+1. open/select the indicated existing ChatGPT Instant conversation, or create one when rotation is required;
+2. paste the already-prepared packet;
+3. submit it;
+4. return to the orchestrator when notified that the durable state changed.
+
+Target operator interactions:
+- zero manual transcription;
+- zero manual state interpretation;
+- zero manual prompt editing;
+- zero manual model-selection decisions during a run after session setup;
+- one clipboard paste + one submit per required Chat turn;
+- reuse persistent sessions for multiple quanta where isolation is not required;
+- new chat creation only on explicit rotation conditions.
+
+### Operator console
+
+Build a small operator console/CLI/UI that presents:
+
+- task name;
+- worker/session label;
+- model/config required;
+- reuse existing session vs create new session;
+- one-click/copy packet;
+- concise status: READY / SENT / WAITING / RESULT DETECTED / ROTATE / DONE;
+- human-launch count;
+- remaining estimated manual turns;
+- last durable checkpoint;
+- any real authority or judgment gate.
+
+The console should hide ordinary control-plane detail unless expanded.
+
+### Session slot model
+
+Use stable logical slots such as:
+
+- instant-general-1
+- instant-general-2
+- critic-1
+- synthesizer-1
+
+A slot persists across many quanta and is mapped to a Chat conversation by the human once. The orchestrator records only non-secret session metadata and durable checkpoint affinity; it does not scrape or control the consumer UI.
+
+Rotation reasons must be explicit and machine-generated:
+- CONTEXT_LIMIT;
+- ROLE_ISOLATION;
+- CONTINUITY_LOST;
+- MODEL_CHANGED;
+- TOOLSET_CHANGED;
+- VALIDATOR_FAILURE_LOOP;
+- POLICY_REQUIRES_FRESH;
+- USER_REQUESTED.
+
+### UX acceptance metrics
+
+Measure:
+- manual launches per completed workflow;
+- manual pastes/submits per completed workflow;
+- percentage of turns reusing an existing session;
+- operator decisions required;
+- manual transcription count;
+- time spent interpreting control state;
+- accidental wrong-session rate;
+- continuity-loss recovery effort.
+
+A production-worthy bridge should make repeated Instant use feel like servicing a queue, not operating the control plane.
+
+## 7. Target control loop
 
 ```text
 authoritative task/workflow state
@@ -99,7 +267,7 @@ validator / external wait / next ready work
 
 No model owns the loop.
 
-## 6. Implementation phases
+## 8. Implementation phases
 
 ### Phase 0 — Close benchmark stage and synchronize authority
 
@@ -356,7 +524,7 @@ Freeze only after:
 - rollback proof;
 - shadow + bounded autonomous pilot success.
 
-## 7. Immediate build order
+## 9. Immediate build order
 
 The first implementation slice should be deliberately small:
 
@@ -364,14 +532,16 @@ The first implementation slice should be deliberately small:
 2. create state-machine schemas;
 3. implement transition validator + CAS/generation fencing;
 4. implement deterministic event/wait loop;
-5. implement executor registry;
-6. implement packet compiler;
-7. implement session broker;
-8. wire one machine executor and one human-launched Chat Instant bridge;
-9. replay P3 from recorded evidence with no manual control-plane decisions;
-10. then calibrate GPT-6 Sol / Instant.
+5. implement semantic projection/query layer over existing durable state;
+6. implement executor registry;
+7. implement semantic packet compiler;
+8. implement persistent session broker;
+9. implement the low-attention operator console and human-launched Chat Instant bridge;
+10. wire one fully machine-invoked executor;
+11. replay P3 from recorded evidence with no manual control-plane decisions and minimal human Chat interaction;
+12. then calibrate GPT-6 Sol / Instant.
 
-## 8. Non-goals for v0
+## 10. Non-goals for v0
 
 Do not:
 - build a graph database;
@@ -383,7 +553,7 @@ Do not:
 - optimize every workflow family at once;
 - make strong Instant-vs-frontier equivalence claims from screening data.
 
-## 9. Success criterion
+## 11. Success criterion
 
 The v0 orchestrator is successful when a user can submit one durable task and the system can:
 
