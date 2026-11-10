@@ -712,7 +712,8 @@
             "Routine UX acceptance requires zero manual tab searches, zero manual worker-selection decisions, zero manual durable-state relay, zero routine scheduler-state interpretation events, and zero abandoned cycles in the 20-action mixed trial.",
             "Ctrl+B is explicitly provisional at the physical-binding level. Retain it only if representative work produces zero unintended scheduler dispatches, zero required application-local shortcut collisions, and <=2/7 interference; otherwise rebind and rerun the hotkey-sensitive trials without changing scheduler semantics.",
             "architecture/workspace-semantic-execution-operator-usability-test-script.v0.1.md defines the operator procedure and recovery/judgment trial semantics; architecture/workspace-semantic-execution-operator-usability-feedback-checklist.v0.1.md defines bounded objective counters and 1-7 ratings without collecting packet/page/keystroke content.",
-            "architecture/workspace-semantic-execution-operator-ux-metrics.v0.1.json is updated from UX-00 provisional ownership to frozen UX-11 usability thresholds while empirical results remain NOT_RUN until the UX-10/UX-12 implementation exists."
+            "architecture/workspace-semantic-execution-operator-ux-metrics.v0.1.json is updated from UX-00 provisional ownership to frozen UX-11 usability thresholds while empirical results remain NOT_RUN until the UX-10/UX-12 implementation exists.",
+            "PR #590 exact UX-11 content head 1c6e42f0c369d96e2ffcf7768dd5efbafbde7595 passed Workspace Control Validation run 42754342618 / #2371 SUCCESS, including changed task-contract, unit-regression, pinned Lambda controller, and full integration-contract checks."
           ]
         }
       ],
