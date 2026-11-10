@@ -739,7 +739,8 @@
             "architecture/workspace-semantic-execution-operator-ux-freeze.v0.1.json freezes interaction, authority, session, security, implementation, performance-budget, usability-gate, browser-selection, and promotion-boundary contracts in machine-readable form.",
             "UX-13 resolved the only material cross-slice wording conflict: UX-M013 now requires a dedicated managed worker environment rather than Firefox specifically. Firefox WorkspaceWorkers remains the frozen v0 production baseline and WebView2 remains a conditional replaceable adapter.",
             "UX-00 performance wording is converged to the frozen UX-09 budgets while empirical performance remains NOT_RUN.",
-            "No code implementation authority is inferred from design completion. Current task mutation scope does not include the proposed helper/extension code tree; design freeze records this as the exact implementation blocker."
+            "No code implementation authority is inferred from design completion. Current task mutation scope does not include the proposed helper/extension code tree; design freeze records this as the exact implementation blocker.",
+            "PR #590 exact UX-13 design-freeze content head 339340944fb77cb5a9279c237b60556ae27db4f9 passed Workspace Control Validation run 42755951840 / #2375 SUCCESS, including changed task-contract, unit-regression, pinned Lambda controller, and full integration-contract checks."
           ]
         }
       ],
