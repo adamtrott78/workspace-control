@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "impl_05_simulator_and_fake_worker",
+  "current_stage": "impl_06_integrated_local_bridge_e2e",
   "acceptance_criteria": [
     "Implementation remains traceable to the UX-13 freeze at exact workspace-control SHA 0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
     "Every stage has explicit dependencies, outputs, validation, and exact-head durable evidence before promotion.",
@@ -49,7 +49,7 @@
       "base_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436",
+        "checkpoint_sha": "8bf4c2b6d13dc9d917ee831828c718fbca57648a",
         "verified": true
       },
       "local": null,
@@ -247,7 +247,7 @@
     },
     {
       "id": "impl_05_simulator_and_fake_worker",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
@@ -262,14 +262,34 @@
         "fault injection",
         "trace hashing"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 05 deterministic simulator and fake worker",
+          "result": "PASS",
+          "evidence": [
+            "Stage-05 deterministic simulator validated at workspace-control@8bf4c2b6d13dc9d917ee831828c718fbca57648a.",
+            "Operator Bridge Validation run 42763800602 / #15 SUCCESS on the exact Stage-05 code head.",
+            "Workspace Control Validation run 42763800575 / #2393 SUCCESS on the exact Stage-05 code head.",
+            "The simulator solution is physically separated from the production WorkspaceOperatorBridge.slnx; production project references do not include WorkspaceOperator.Simulator or Simulator.Tests.",
+            "Frozen UX-10 L0/L1 coverage is machine-checked: stage05-l0-l1-catalog.json covers exactly all 36 E2E tests whose frozen matrix includes L0 or L1.",
+            "Simulator.Tests passed 38/38: 36 deterministic scenario rows plus virtual-clock and catalog integrity tests.",
+            "Every scenario is executed twice and must produce the same content-free SHA-256 trace, proving deterministic replay for the Stage-05 fixture set.",
+            "Fake state includes OperatorAction-like queue/claim/terminal transitions, logical session generation/continuity, durable-event deduplication/fencing, virtual time, fault injection, fake worker service, and a simulator-only fake worker surface.",
+            "SIM_HUMAN_SUBMIT exists only in the WorkspaceOperator.Simulator assembly. Static release-boundary tests prove the production source tree and frozen production protocol contain neither SIM_HUMAN_SUBMIT nor FaultInjector.",
+            "Payload-hash mismatch produces only a simulator diagnostic trace and cannot append a valid durable event or advance the waiting action.",
+            "Late/wrong-generation durable events are preserved as stale evidence but cannot advance current generation; duplicate durable events are idempotent.",
+            "Recovery generation advancement is keyed by recovery ID and cannot advance the same logical session twice.",
+            "The production Firefox mocked-browser suite and production .NET suites remained green after adding the simulator."
+          ]
+        }
+      ],
       "resume_condition": "Full deterministic fake-worker environment exists without a ChatGPT account."
     },
     {
       "id": "impl_06_integrated_local_bridge_e2e",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
+      "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
       "inputs": [
         "validated stage impl_05_simulator_and_fake_worker"
@@ -424,11 +444,11 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436",
+      "identity": "8bf4c2b6d13dc9d917ee831828c718fbca57648a",
       "required_for_resume": true,
       "evidence": [
-        "Stage 04 Firefox MV3 adapter validated by Operator Bridge Validation #12 and Workspace Control Validation #2390.",
-        "Next active stage is impl_05_simulator_and_fake_worker."
+        "Stage 05 deterministic simulator/fake worker validated by Operator Bridge Validation #15 and Workspace Control Validation #2393.",
+        "Next active stage is impl_06_integrated_local_bridge_e2e."
       ]
     },
     {
@@ -483,6 +503,17 @@
         "Operator Bridge Validation #12 SUCCESS.",
         "Workspace Control Validation #2390 SUCCESS.",
         "Stage 04 Firefox BrowserPort adapter validated with mocked browser APIs and frozen least-privilege permissions."
+      ]
+    },
+    {
+      "id": "impl-05-simulator-fake-worker",
+      "kind": "git_commit",
+      "identity": "8bf4c2b6d13dc9d917ee831828c718fbca57648a",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #15 SUCCESS.",
+        "Workspace Control Validation #2393 SUCCESS.",
+        "Stage 05 simulator solution passed 38/38 deterministic tests and exact frozen L0/L1 coverage check."
       ]
     }
   ],
@@ -643,6 +674,43 @@
       "evidence": [
         "10 tests PASS / 0 FAIL in Operator Bridge Validation #12."
       ]
+    },
+    {
+      "path": "operator-bridge/WorkspaceOperatorBridge.Simulator.slnx",
+      "state": "STAGE_05_VALIDATED",
+      "role": "separate simulator-only build graph that cannot be linked by the production solution",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by simulator/integration stages",
+      "review_requirement": "Production solution/package must remain free of simulator project references and test-only control endpoints.",
+      "evidence": [
+        "Operator Bridge Validation #15 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/simulator/**",
+      "state": "STAGE_05_VALIDATED",
+      "role": "deterministic fake actions/sessions/durable events, virtual clock, fault injection, fake worker service/surface, scenario controller, and content-free trace hashing",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by simulator/integration/recovery stages",
+      "review_requirement": "Simulator-only controls must never become reachable from production BrowserPort, Native Messaging, helper packaging, or production protocol.",
+      "evidence": [
+        "Simulator.Tests 38/38 PASS.",
+        "Frozen L0/L1 catalog coverage 36/36."
+      ]
+    },
+    {
+      "path": "operator-bridge/tests/Simulator.Tests/**",
+      "state": "STAGE_05_VALIDATED",
+      "role": "deterministic UX-10 L0/L1 scenario and virtual-time tests",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "extend only as frozen simulator obligations are implemented",
+      "review_requirement": "Scenario PASS must be based on state predicates and deterministic trace evidence, not hard-coded success.",
+      "evidence": [
+        "38 tests PASS / 0 FAIL in Operator Bridge Validation #15."
+      ]
     }
   ],
   "validation": [
@@ -708,11 +776,18 @@
         "Operator Bridge Validation #12 and Workspace Control Validation #2390 both passed at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436.",
         "Stage 04 exit criterion satisfied: Firefox BrowserPort implementation exists inside the UX-08 least-privilege boundary and remains content-blind/account-independent."
       ]
+    },
+    {
+      "check": "Stage 05 exact-head simulator validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #15 and Workspace Control Validation #2393 both passed at 8bf4c2b6d13dc9d917ee831828c718fbca57648a.",
+        "Stage 05 exit criterion satisfied: the complete deterministic fake-worker environment exists without a ChatGPT account and all frozen UX-10 L0/L1 obligations are represented and green."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "impl_05_simulator_and_fake_worker: Deterministic simulator and local fake worker",
     "impl_06_integrated_local_bridge_e2e: Real helper + Firefox + fake-worker integration",
     "impl_07_recovery_and_fault_closure: Crash, auth-domain, stale-generation, restart, and recovery closure",
     "impl_08_packaging_install_update_rollback: Per-user packaging, signed-extension flow, install/uninstall, and rollback",
@@ -722,8 +797,8 @@
     "impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration",
     "impl_13_production_readiness_review: Integrated implementation review and promotion decision"
   ],
-  "next_safe_action": "Execute impl_05_simulator_and_fake_worker from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the UX-10 deterministic fake-worker environment only: fake OperatorAction/session/durable-event stores, fake worker surface/service, Scenario Controller, virtual clock, fault injector, SIM_HUMAN_SUBMIT test-only boundary, content-free trace hashing, and explicit production/simulator build separation. Exercise the required L0/L1 simulator fixtures first. Do not integrate with a real ChatGPT account, and do not make SIM_HUMAN_SUBMIT or fault controls reachable from production Native Messaging/helper runtime. Required exit evidence includes simulator-only endpoint absence from production package/protocol, payload-hash mismatch cannot acknowledge, generation fencing/idempotency, deterministic virtual-time behavior, and required UX-10 L0/L1 scenario passes.",
+  "next_safe_action": "Execute impl_06_integrated_local_bridge_e2e from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Integrate the real Windows helper application services, Stage-03 Native Messaging/local IPC boundary, Stage-04 Firefox BrowserPort adapter, and Stage-05 fake-worker environment through the required UX-10 L2/L3 scenarios. Create the bounded local integration runner and Firefox test-profile setup needed for fake-worker testing only. Preserve the human boundary: no synthetic interaction with ChatGPT and no simulator-only control in production paths. Required exit evidence includes all required CORE/AUTHORITY/ACK/INPUT/IDENTITY L2/L3 tests, zero background focus/clipboard mutation, no duplicate local effects, content-free L2/L3 traces, and an adapter-parity result schema. Do not perform real-account calibration.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
-  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active.\n\n2026-11-10 STAGE 04 COMPLETE: Firefox MV3 BrowserPort adapter validated at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436. Operator Bridge Validation #12 and Workspace Control Validation #2390 passed SUCCESS. Node 24 mocked-browser suite passed 10/10, proving managed-only lifecycle, fixed reviewed worker URL, content-free sessions metadata, duplicate-command idempotency, generation fencing, discard safety, and raw-URL-to-origin-enum reduction. Stage 05 deterministic simulator/fake worker is active; no real-account behavior is claimed."
+  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active.\n\n2026-11-10 STAGE 04 COMPLETE: Firefox MV3 BrowserPort adapter validated at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436. Operator Bridge Validation #12 and Workspace Control Validation #2390 passed SUCCESS. Node 24 mocked-browser suite passed 10/10, proving managed-only lifecycle, fixed reviewed worker URL, content-free sessions metadata, duplicate-command idempotency, generation fencing, discard safety, and raw-URL-to-origin-enum reduction. Stage 05 deterministic simulator/fake worker is active; no real-account behavior is claimed.\n\n2026-11-10 STAGE 05 COMPLETE: Deterministic simulator/fake worker validated at 8bf4c2b6d13dc9d917ee831828c718fbca57648a. Operator Bridge Validation #15 and Workspace Control Validation #2393 passed SUCCESS. The simulator build graph is separate from production, all 36 frozen UX-10 L0/L1 E2E obligations are catalog-covered, Simulator.Tests passed 38/38, traces are deterministic SHA-256, payload mismatch cannot ack, and generation/durable-event idempotency is enforced. Stage 06 real-helper + Firefox + fake-worker integration is active; no real ChatGPT account is authorized."
 }

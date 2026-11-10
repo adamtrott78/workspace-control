@@ -24,16 +24,15 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436
+- Remote checkpoint: 8bf4c2b6d13dc9d917ee831828c718fbca57648a
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_05_simulator_and_fake_worker from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the UX-10 deterministic fake-worker environment only: fake OperatorAction/session/durable-event stores, fake worker surface/service, Scenario Controller, virtual clock, fault injector, SIM_HUMAN_SUBMIT test-only boundary, content-free trace hashing, and explicit production/simulator build separation. Exercise the required L0/L1 simulator fixtures first. Do not integrate with a real ChatGPT account, and do not make SIM_HUMAN_SUBMIT or fault controls reachable from production Native Messaging/helper runtime. Required exit evidence includes simulator-only endpoint absence from production package/protocol, payload-hash mismatch cannot acknowledge, generation fencing/idempotency, deterministic virtual-time behavior, and required UX-10 L0/L1 scenario passes.
+Execute impl_06_integrated_local_bridge_e2e from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Integrate the real Windows helper application services, Stage-03 Native Messaging/local IPC boundary, Stage-04 Firefox BrowserPort adapter, and Stage-05 fake-worker environment through the required UX-10 L2/L3 scenarios. Create the bounded local integration runner and Firefox test-profile setup needed for fake-worker testing only. Preserve the human boundary: no synthetic interaction with ChatGPT and no simulator-only control in production paths. Required exit evidence includes all required CORE/AUTHORITY/ACK/INPUT/IDENTITY L2/L3 tests, zero background focus/clipboard mutation, no duplicate local effects, content-free L2/L3 traces, and an adapter-parity result schema. Do not perform real-account calibration.
 
 ## Remaining work
 
-- impl_05_simulator_and_fake_worker: Deterministic simulator and local fake worker
 - impl_06_integrated_local_bridge_e2e: Real helper + Firefox + fake-worker integration
 - impl_07_recovery_and_fault_closure: Crash, auth-domain, stale-generation, restart, and recovery closure
 - impl_08_packaging_install_update_rollback: Per-user packaging, signed-extension flow, install/uninstall, and rollback

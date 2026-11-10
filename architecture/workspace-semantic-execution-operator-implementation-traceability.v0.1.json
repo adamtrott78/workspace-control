@@ -331,6 +331,37 @@
         "generation_fencing": "expected binding generation mismatch rejects lifecycle mutation"
       },
       "claim": "Stage-04 Firefox BrowserPort adapter validated with mocked browser APIs; no simulator worker or real-account behavior claimed."
+    },
+    "impl_05_simulator_and_fake_worker": {
+      "status": "VALIDATED",
+      "checkpoint": "8bf4c2b6d13dc9d917ee831828c718fbca57648a",
+      "validations": [
+        "Operator Bridge Validation #15 SUCCESS",
+        "Workspace Control Validation #2393 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/WorkspaceOperatorBridge.Simulator.slnx",
+        "operator-bridge/simulator/**",
+        "operator-bridge/tests/Simulator.Tests/**",
+        "tests/test_workspace_semantic_execution_operator_bridge_simulator.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "evidence": {
+        "frozen_l0_l1_coverage": {
+          "required": 36,
+          "covered": 36
+        },
+        "simulator_tests": {
+          "passed": 38,
+          "failed": 0
+        },
+        "deterministic_replay": "every scenario run twice with identical content-free SHA-256 trace",
+        "production_separation": "production solution excludes simulator projects; production source/protocol exclude SIM_HUMAN_SUBMIT and FaultInjector",
+        "integrity": "payload hash mismatch cannot append durable transition or acknowledge action",
+        "fencing": "late/wrong-generation events cannot advance current state; duplicate events idempotent",
+        "recovery_idempotency": "same recovery ID advances generation at most once"
+      },
+      "claim": "Stage-05 deterministic fake-world implementation validated without ChatGPT account access; real OS/browser integration begins in Stage 06."
     }
   }
 }
