@@ -171,11 +171,31 @@ case ",$MOUNT_OPTIONS," in
   *) fail "PADataset evidence bind is not read-only: $MOUNT_OPTIONS" ;;
 esac
 
-sudo rm -rf /opt/workspace-shell/runtime/plugins/workspace-shell
+RUNTIME_PLUGIN="/opt/workspace-shell/runtime/plugins/workspace-shell"
+BACKUP_RUNTIME_PLUGIN="$BACKUP/opt__workspace-shell__runtime__plugins__workspace-shell"
+BACKUP_NODE_MODULES="$BACKUP_RUNTIME_PLUGIN/node_modules"
+
+for dep in "@modelcontextprotocol/sdk" "@modelcontextprotocol/ext-apps" "zod"; do
+  sudo test -e "$BACKUP_NODE_MODULES/$dep" || fail "backup runtime dependency closure is missing $dep"
+done
+
+sudo rm -rf "$RUNTIME_PLUGIN"
 sudo mkdir -p /opt/workspace-shell/runtime/plugins
-sudo cp -a "$ROOT/plugins/workspace-shell" /opt/workspace-shell/runtime/plugins/workspace-shell
-sudo chown -R root:root /opt/workspace-shell/runtime/plugins/workspace-shell
-sudo chmod -R go-w /opt/workspace-shell/runtime/plugins/workspace-shell
+sudo cp -a "$ROOT/plugins/workspace-shell" "$RUNTIME_PLUGIN"
+sudo cp -a "$BACKUP_NODE_MODULES" "$RUNTIME_PLUGIN/node_modules"
+sudo chown -R root:root "$RUNTIME_PLUGIN"
+sudo chmod -R go-w "$RUNTIME_PLUGIN"
+
+(
+  cd "$RUNTIME_PLUGIN"
+  sudo -u workspace-shell-mcp env \
+    HOME=/var/lib/workspace-shell \
+    OPENSSL_CONF=/opt/workspace-shell/node/ssl/openssl.cnf \
+    /opt/workspace-shell/node/bin/node --input-type=module -e \
+    "await import('@modelcontextprotocol/ext-apps/server'); await import('@modelcontextprotocol/sdk/server/mcp.js'); await import('zod');"
+)
+echo "RUNTIME_NODE_DEPENDENCIES=PASS"
+
 sudo install -o root -g root -m 0644 "$ROOT/plugins/workspace-shell/config/profiles.v1.json" /etc/workspace-shell/profiles.v1.json
 
 sudo python3 - <<'PY'
