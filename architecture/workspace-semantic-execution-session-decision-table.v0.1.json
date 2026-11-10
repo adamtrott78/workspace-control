@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-session-decision-table-v0.1",
+  "status": "UX_04_DESIGN_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "decisions": [
+    {
+      "case": "trusted_compatible_active",
+      "conditions": [
+        "continuity=TRUSTED",
+        "status in [ACTIVE,IDLE]",
+        "compatibility=true",
+        "hard_rotate=false"
+      ],
+      "decision": "REUSE",
+      "operator_action": "SERVICE_EXISTING"
+    },
+    {
+      "case": "trusted_compatible_discarded",
+      "conditions": [
+        "continuity=TRUSTED",
+        "status=DISCARDED",
+        "compatibility=true",
+        "hard_rotate=false"
+      ],
+      "decision": "RESTORE",
+      "operator_action": "RESTORE_AND_SERVICE"
+    },
+    {
+      "case": "no_session_available",
+      "conditions": [
+        "no compatible current-generation session exists",
+        "policy permits new session"
+      ],
+      "decision": "CREATE",
+      "operator_action": "CREATE_AND_SERVICE"
+    },
+    {
+      "case": "fresh_per_quantum",
+      "conditions": [
+        "requested isolation_scope=FRESH_QUANTUM OR session_class=FRESH_PER_QUANTUM"
+      ],
+      "decision": "CREATE_NEW_GENERATION",
+      "operator_action": "CREATE_AND_SERVICE"
+    },
+    {
+      "case": "role_isolation_conflict",
+      "conditions": [
+        "existing session role incompatible with requested isolation"
+      ],
+      "decision": "ROTATE_OR_ALLOCATE_ISOLATED_SLOT",
+      "operator_action": "CREATE_AND_SERVICE"
+    },
+    {
+      "case": "task_affinity_change",
+      "conditions": [
+        "persistent session task_affinity differs from requested task"
+      ],
+      "decision": "ROTATE",
+      "operator_action": "RETIRE_SESSION then fresh CREATE_AND_SERVICE via requery"
+    },
+    {
+      "case": "soft_context_pressure",
+      "conditions": [
+        "soft rotate condition true",
+        "current quantum boundary safe",
+        "replacement capacity available"
+      ],
+      "decision": "ROTATE_AT_BOUNDARY",
+      "operator_action": "RETIRE_SESSION then CREATE_AND_SERVICE via requery"
+    },
+    {
+      "case": "hard_context_or_policy_rotation",
+      "conditions": [
+        "hard rotate condition true",
+        "continuity still known enough to retire local target safely"
+      ],
+      "decision": "ROTATE_NOW",
+      "operator_action": "RETIRE_SESSION then CREATE_AND_SERVICE via requery"
+    },
+    {
+      "case": "local_binding_missing_provable_continuity_not_available",
+      "conditions": [
+        "tab mapping missing",
+        "exact binding cannot be proven"
+      ],
+      "decision": "CONTINUITY_UNKNOWN_ROTATE",
+      "operator_action": "OPEN_RECOVERY or CREATE_AND_SERVICE after generation advance"
+    },
+    {
+      "case": "auth_refresh_all_tabs",
+      "conditions": [
+        "profile-scoped auth refresh signal received"
+      ],
+      "decision": "INVALIDATE_PROFILE_CONTINUITY_AND_REBUILD",
+      "operator_action": "OPEN_RECOVERY followed by replacement actions generated from durable checkpoints"
+    },
+    {
+      "case": "awaiting_ack_before_auth_refresh",
+      "conditions": [
+        "old action status=AWAITING_DURABLE_ACK",
+        "auth refresh signal received"
+      ],
+      "decision": "ONE_DURABLE_RECHECK_THEN_SUPERSEDE_IF_UNACKNOWLEDGED",
+      "operator_action": "no blind resend; replacement only after generation advance"
+    },
+    {
+      "case": "late_ack_old_generation",
+      "conditions": [
+        "durable event references older session generation"
+      ],
+      "decision": "RECORD_STALE_EVIDENCE_ONLY",
+      "operator_action": "NONE"
+    },
+    {
+      "case": "validator_repair_streak",
+      "conditions": [
+        "consecutive validator repairs >= configured threshold",
+        "continuity otherwise trusted"
+      ],
+      "decision": "SOFT_ROTATE",
+      "operator_action": "retire/rotate at safe boundary"
+    },
+    {
+      "case": "bridge_off",
+      "conditions": [
+        "local bridge master toggle OFF"
+      ],
+      "decision": "NO_LOCAL_ACTION",
+      "operator_action": "NONE",
+      "note": "Session broker may still update durable lifecycle intent."
+    }
+  ]
+}
