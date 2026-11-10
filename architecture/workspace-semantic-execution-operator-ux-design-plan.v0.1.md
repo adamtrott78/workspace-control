@@ -680,4 +680,14 @@ UX-03 is complete at the design-contract level with:
 
 Key refinement: durable OperatorActions are atomic. A single Ctrl+B dispatch may drain local-only actions and then claim one fresh human-service action, preserving the one-hotkey experience without hiding partial failures in an opaque composite action.
 
-The next execution slice is **UX-04 Session-slot and tab-lifecycle design**.
+UX-04 is complete at the design-policy level with:
+
+- `architecture/workspace-semantic-execution-operator-session-schema.v0.2.json`
+- `architecture/workspace-semantic-execution-session-broker-policy.v0.1.json`
+- `architecture/workspace-semantic-execution-session-decision-table.v0.1.json`
+- `architecture/workspace-semantic-execution-session-broker.v0.1.md`
+- `architecture/workspace-semantic-execution-session-lifecycle.v0.1.md`
+
+The session broker now defines persistent/general, role-isolated, fresh-per-quantum, and recovery session classes; task/role/process affinity; TRUSTED/UNKNOWN/LOST continuity; one-outstanding-packet-per-chat default; context-pressure rotation; discard versus retire; browser-binding recovery; and profile-wide auth-refresh invalidation with old-generation fencing.
+
+The next execution slice is **UX-05 Global hotkey and clipboard interaction contract**.
