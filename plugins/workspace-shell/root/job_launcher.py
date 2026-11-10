@@ -318,6 +318,31 @@ def verify_source_tree(source_root, worker_uid):
     return source_root
 
 
+def verify_evidence_mount(evidence_root, worker_uid):
+    root = Path(evidence_root).resolve()
+    if not root.is_dir():
+        fail("EVIDENCE_ROOT_INVALID", "configured evidence root missing")
+    st = os.lstat(root)
+    if st.st_mode & 0o022:
+        fail("EVIDENCE_WRITABLE_BY_UNTRUSTED", "evidence mount root is group/world writable")
+    if st.st_uid == worker_uid and st.st_mode & 0o200:
+        fail("EVIDENCE_WRITABLE_BY_WORKER", "worker owns writable evidence root")
+
+    mountpoint = str(root)
+    mounted_ro = False
+    try:
+        for line in Path("/proc/self/mountinfo").read_text(encoding="utf-8").splitlines():
+            fields = line.split()
+            if len(fields) >= 6 and fields[4] == mountpoint:
+                mounted_ro = "ro" in fields[5].split(",")
+                break
+    except OSError as exc:
+        fail("EVIDENCE_MOUNT_INSPECTION_FAILED", str(exc))
+    if not mounted_ro:
+        fail("EVIDENCE_NOT_READ_ONLY_MOUNT", "evidence root must be an exact read-only mount")
+    return root
+
+
 def chown_tree(root, uid, gid):
     for current, dirs, files in os.walk(root, topdown=False, followlinks=False):
         for name in files + dirs:
@@ -329,7 +354,7 @@ def chown_tree(root, uid, gid):
     os.lchown(root, uid, gid)
 
 
-def build_bwrap_command(cfg, workspace_path, cwd, resolved):
+def build_bwrap_command(cfg, workspace_path, cwd, resolved, evidence_root=None):
     bwrap = cfg.get("bwrap_path", "/usr/bin/bwrap")
     if not Path(bwrap).is_file():
         fail("SANDBOX_BACKEND_MISSING", f"required bubblewrap binary missing: {bwrap}")
@@ -358,6 +383,15 @@ def build_bwrap_command(cfg, workspace_path, cwd, resolved):
         "--chdir",
         "/workspace" if cwd == "." else f"/workspace/{cwd}",
     ]
+    if evidence_root is not None:
+        evidence_dest = Path(workspace_path) / "local_artifacts" / "evidence"
+        if not evidence_dest.is_dir():
+            fail("EVIDENCE_MOUNTPOINT_MISSING", "workspace lacks local_artifacts/evidence mountpoint")
+        cmd.extend([
+            "--ro-bind",
+            str(evidence_root),
+            "/workspace/local_artifacts/evidence",
+        ])
     for host_path in ("/usr", "/bin", "/lib", "/lib64"):
         if Path(host_path).exists():
             cmd.extend(["--ro-bind", host_path, host_path])
@@ -609,6 +643,13 @@ def run_request(cfg, manifest, request, cancel_check=None):
     worker_gid = int(cfg["worker_gid"])
     source_root = verify_source_tree(source_root, worker_uid)
 
+    evidence_root = None
+    configured_evidence = cfg.get("evidence_roots", {}).get(request["target"])
+    if configured_evidence is not None:
+        if not isinstance(configured_evidence, str):
+            fail("EVIDENCE_ROOT_UNTRUSTED", "target evidence root is not pinned by launcher config")
+        evidence_root = verify_evidence_mount(configured_evidence, worker_uid)
+
     observed_sha = hardened_git(source_root, ["rev-parse", "HEAD"])
     observed_tree = hardened_git(source_root, ["rev-parse", "HEAD^{tree}"])
     dirty = hardened_git(
@@ -635,7 +676,13 @@ def run_request(cfg, manifest, request, cancel_check=None):
         scratch_path = job_root
 
     unit = f"workspace-shell-job-{receipt_id[4:20]}"
-    bwrap_cmd = build_bwrap_command(cfg, workspace_path, cwd, resolved)
+    bwrap_cmd = build_bwrap_command(
+        cfg,
+        workspace_path,
+        cwd,
+        resolved,
+        evidence_root=evidence_root,
+    )
     command = build_systemd_run_command(cfg, unit, bwrap_cmd, worker_uid, worker_gid, scratch_path)
 
     started = time.time()
