@@ -1,15 +1,17 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WorkspaceControl.OperatorBridge.Contracts;
 
 namespace WorkspaceControl.OperatorBridge.Integration.Tests;
 
 [TestClass]
-public sealed class StageOneBoundaryTests
+public sealed class StageTwoBoundaryTests
 {
     [TestMethod]
-    public void SkeletonExposesOnlyFrozenProtocolIdentity()
+    public void HelperKernelStageIsExplicit()
     {
-        Assert.AreEqual("IMPL_01_SKELETON_ONLY", BootstrapState.Stage);
-        Assert.AreEqual("1.0", BrowserAdapterProtocol.Version);
+        Assert.IsTrue(
+            string.Equals(
+                "IMPL_02_HELPER_KERNEL",
+                BootstrapState.Stage,
+                StringComparison.Ordinal));
     }
 }

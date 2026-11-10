@@ -37,6 +37,7 @@ public sealed class DiagnosticsTests
         var normalized = ErrorNormalizer.FromException(error);
 
         Assert.AreEqual("InvalidOperationException", normalized);
-        StringAssert.DoesNotContain(normalized, "SECRET");
+        Assert.IsFalse(
+            normalized.Contains("SECRET", StringComparison.Ordinal));
     }
 }

@@ -99,7 +99,8 @@ public sealed class SingleFlightDispatchCoordinatorTests
             Environment.NewLine,
             fixture.Diagnostics.Events.Select(e =>
                 System.Text.Json.JsonSerializer.Serialize(e)));
-        StringAssert.DoesNotContain(joined, "PACKET-SECRET-CONTENT");
+        Assert.IsFalse(
+            joined.Contains("PACKET-SECRET-CONTENT", StringComparison.Ordinal));
     }
 
     private sealed class Fixture

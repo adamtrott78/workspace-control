@@ -38,10 +38,18 @@ public sealed class WindowsHotkeyRegistrarTests
         };
         var registrar = new WindowsHotkeyRegistrar((nint)123, native);
 
-        var error = Assert.ThrowsException<HotkeyRegistrationException>(
-            registrar.Register);
+        HotkeyRegistrationException? caught = null;
+        try
+        {
+            registrar.Register();
+        }
+        catch (HotkeyRegistrationException exception)
+        {
+            caught = exception;
+        }
 
-        Assert.AreEqual(1409, error.NativeError);
+        Assert.IsNotNull(caught);
+        Assert.AreEqual(1409, caught.NativeError);
         Assert.IsFalse(registrar.IsRegistered);
         Assert.AreEqual(0, native.UnregisterCalls);
     }

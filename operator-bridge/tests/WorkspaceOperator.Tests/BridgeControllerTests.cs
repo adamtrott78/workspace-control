@@ -37,9 +37,17 @@ public sealed class BridgeControllerTests
         var diagnostics = new CaptureDiagnostics();
         var controller = new BridgeController(state, hotkey, diagnostics);
 
-        Assert.ThrowsException<InvalidOperationException>(() =>
-            controller.SetEnabled(true));
+        InvalidOperationException? caught = null;
+        try
+        {
+            controller.SetEnabled(true);
+        }
+        catch (InvalidOperationException exception)
+        {
+            caught = exception;
+        }
 
+        Assert.IsNotNull(caught);
         Assert.IsFalse(controller.IsEnabled);
         Assert.IsFalse(hotkey.IsRegistered);
         Assert.AreEqual("REJECTED", diagnostics.Events[^1].Outcome);
