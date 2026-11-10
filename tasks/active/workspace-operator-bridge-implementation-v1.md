@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: c2e06d8b5efdffc3e35f17879651d0f058281463
+- Remote checkpoint: 832777a8015d6ef9ee2bdedf22553e28a6549553
 - Remote verified: true
 
 ## Next safe action
 
-Run the validated Stage-09 target-workstation benchmark from checkpoint c2e06d8b5efdffc3e35f17879651d0f058281463 on an authorized connected Windows operator workstation. Use operator-bridge/performance/TARGET-RUN.md, operator-bridge/performance/stage09-target-evidence.schema.json, and operator-bridge/tools/run-stage09-target-firefox.ps1 as bounded inputs; complete the mandatory Firefox/Chrome three-replicate parity matrix, Chrome Memory Saver control, five discard/restore replicates, exact latency repetition counts including 10 cold starts, and aggregate frozen-budget evaluation. Do not begin impl_10 UX-11 usability trials, impl_11 WebView2 comparison/promotion, impl_12 real-account calibration, or impl_13 readiness review until Stage 09 is durably validated.
+Explicitly register/connect the actual Windows operator workstation as an interactive GitHub self-hosted Windows x64 runner with additional label workspace-operator-target. Then workflow-dispatch .github/workflows/operator-bridge-validation.yml at exact checkpoint 832777a8015d6ef9ee2bdedf22553e28a6549553 with run_target_benchmark=true, confirm_ac_power=true, and confirm_chrome_memory_saver_disabled=true. After the target-performance job finishes, retrieve operator-bridge-stage09-target-832777a8015d6ef9ee2bdedf22553e28a6549553, evaluate stage09-target-evidence.json, correct or explicitly escalate any failing frozen budget, and only then promote Stage 09. Do not begin impl_10, impl_11, impl_12, or impl_13 before Stage 09 is durably validated.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ Run the validated Stage-09 target-workstation benchmark from checkpoint c2e06d8b
 
 ## Blockers / gates
 
-- Stage 09 target-machine acceptance is blocked because no authorized connected target Windows operator workstation or self-hosted target runner is available to this executor. GitHub windows-latest is explicitly non-target evidence. Before Stage 10, execute the frozen UX-09 target matrix on the real operator workstation: 60s warm-up + 120s 1Hz steady-state windows, three Firefox/Chrome resource replicates with order alternation, Chrome Memory Saver disabled/recorded, five discard/restore replicates, and latency counts reuse=50, restore=30, create=30, cold-start=10, local-primitives=100; then evaluate every frozen budget and correct or explicitly escalate any failure.
+- Stage 09 target-machine acceptance is blocked only on explicit connection of the real Windows operator workstation to the already-validated GitHub target path. The workstation must be registered as a self-hosted Windows x64 runner with additional label workspace-operator-target and started interactively under the Windows user that owns the WorkspaceWorkers Firefox profile and Stage-08 HKCU Native Messaging registration. After registration, dispatch Operator Bridge Validation on exact Stage-09 checkpoint 832777a8015d6ef9ee2bdedf22553e28a6549553 with run_target_benchmark=true, confirm_ac_power=true, and confirm_chrome_memory_saver_disabled=true. The target job will run exact-head validation first, execute the frozen full matrix, and upload stage09-target-evidence.json. Stage 10 remains blocked until that evidence is evaluated and every failing mechanical budget is corrected or explicitly escalated.
 
 ## Fresh-chat initialization
 

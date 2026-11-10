@@ -618,15 +618,16 @@
     },
     "impl_09_performance_benchmark_execution": {
       "status": "IN_PROGRESS",
-      "checkpoint": "c2e06d8b5efdffc3e35f17879651d0f058281463",
+      "checkpoint": "832777a8015d6ef9ee2bdedf22553e28a6549553",
       "validations": [
-        "Operator Bridge Validation #45 SUCCESS on validated infrastructure checkpoint",
-        "Workspace Control Validation #2423 SUCCESS on validated infrastructure checkpoint"
+        "Operator Bridge Validation #50 SUCCESS on full target-matrix/self-hosted workflow checkpoint",
+        "Workspace Control Validation #2428 SUCCESS on full target-matrix/self-hosted workflow checkpoint"
       ],
       "implementation": [
         "operator-bridge/performance/**",
         "operator-bridge/tools/run-stage09-ci.ps1",
         "operator-bridge/tools/run-stage09-target-firefox.ps1",
+        "operator-bridge/tools/run-stage09-target-matrix.ps1",
         "operator-bridge/src/WorkspaceOperator/Ports/IWorkerEnvironmentLauncher.cs",
         "operator-bridge/src/WorkspaceOperator/Application/LaunchingBrowserPort.cs",
         "operator-bridge/src/WorkspaceOperator/Windows/Firefox/FirefoxWorkerEnvironmentLauncher.cs",
@@ -639,11 +640,22 @@
         "ci_regression": {
           "evidence_class": "GITHUB_HOSTED_WINDOWS_CI",
           "target_contract_complete": false,
-          "artifact_id": 13751099107,
-          "interpretation": "Regression signal only; not UX-09 target acceptance."
+          "artifact_id": 13753443601,
+          "artifact_name": "operator-bridge-stage09-ci-832777a8015d6ef9ee2bdedf22553e28a6549553",
+          "plan_only_target_matrix": "PASS",
+          "interpretation": "Regression and executable target-plan signal only; not UX-09 target acceptance."
         },
         "target_contract": {
-          "state": "NOT_RUN",
+          "state": "READY_NOT_RUN",
+          "canonical_runner": "operator-bridge/tools/run-stage09-target-matrix.ps1",
+          "self_hosted_workflow_job": "target-performance",
+          "required_runner_labels": [
+            "self-hosted",
+            "windows",
+            "x64",
+            "workspace-operator-target"
+          ],
+          "required_interactive_user_session": true,
           "required_windows": {
             "warmup_seconds": 60,
             "steady_state_seconds": 120,
@@ -658,8 +670,13 @@
             "cold_start": 10,
             "local_primitives": 100
           },
+          "browser_order": [
+            "firefox->chrome",
+            "chrome->firefox",
+            "firefox->chrome"
+          ],
           "chrome_memory_saver_disabled_and_recorded": true,
-          "firefox_chrome_order_alternation_required": true
+          "exact_head_native_host_binding_with_restore": true
         },
         "cold_start": {
           "production_launch_path": "VALIDATED",
@@ -677,8 +694,8 @@
           "real_chatgpt_account": false
         }
       },
-      "claim": "Stage-09 benchmark infrastructure and cold-start capability are exact-head validated, but UX-09 target-machine acceptance is NOT_RUN. Stage 10 remains blocked.",
-      "blocker": "No authorized connected target Windows operator workstation/self-hosted target runner is available to execute the frozen complete target benchmark."
+      "claim": "Stage-09 benchmark infrastructure, full target matrix, and opt-in self-hosted execution path are exact-head validated. UX-09 target-machine acceptance remains NOT_RUN; Stage 10 remains blocked.",
+      "blocker": "The actual Windows operator workstation is not yet explicitly registered/connected as the interactive GitHub self-hosted runner labeled workspace-operator-target."
     }
   }
 }
