@@ -4,6 +4,8 @@ Status: **PROPOSED / NON-AUTHORITATIVE UX DESIGN**
 
 Parent task: `workspace-semantic-execution-migration-v1`
 
+Operator state machine: `architecture/workspace-semantic-execution-operator-state-machine.v0.1.md`
+
 ## 1. UX objective
 
 The human-operated Chat Instant bridge should require essentially no interpretation.
