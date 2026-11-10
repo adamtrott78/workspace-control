@@ -2,6 +2,7 @@ name: Operator Bridge Validation
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
     branches:
       - main
     paths:
@@ -202,7 +203,15 @@ jobs:
           Write-Host "OPERATOR_BRIDGE_IDLE_MEASUREMENT=$json"
   target-performance:
     name: target-performance
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_target_benchmark }}
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && inputs.run_target_benchmark) ||
+        (github.event_name == 'pull_request' &&
+         github.event.action == 'labeled' &&
+         github.event.label.name == 'stage09-target' &&
+         github.event.pull_request.number == 590 &&
+         github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1')
+      }}
     needs: validation
     runs-on: [self-hosted, windows, x64, workspace-operator-target]
     timeout-minutes: 300
@@ -211,7 +220,7 @@ jobs:
       - name: Checkout exact target benchmark head
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up .NET 10 LTS
         uses: actions/setup-dotnet@v6
@@ -228,16 +237,22 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $head = (git rev-parse HEAD).Trim()
-          if ($head -ne "${{ github.sha }}") {
-            throw "Target runner checkout is not bound to github.sha."
+          $expectedHead = "${{ github.event.pull_request.head.sha || github.sha }}"
+          if ($head -ne $expectedHead) {
+            throw "Target runner checkout is not bound to the exact requested source SHA."
           }
           if (-not [Environment]::UserInteractive) {
             throw "Target runner must be launched interactively in the WorkspaceWorkers Windows user session."
           }
-          if ("${{ inputs.confirm_ac_power }}" -ne "true") {
+          $isPrLabelTrigger = (
+            "${{ github.event_name }}" -eq "pull_request" -and
+            "${{ github.event.action }}" -eq "labeled" -and
+            "${{ github.event.label.name }}" -eq "stage09-target"
+          )
+          if (-not $isPrLabelTrigger -and "${{ inputs.confirm_ac_power }}" -ne "true") {
             throw "Target benchmark requires explicit AC-power confirmation."
           }
-          if ("${{ inputs.confirm_chrome_memory_saver_disabled }}" -ne "true") {
+          if (-not $isPrLabelTrigger -and "${{ inputs.confirm_chrome_memory_saver_disabled }}" -ne "true") {
             throw "Target benchmark requires explicit Chrome Memory Saver disabled confirmation."
           }
           foreach ($name in @("firefox", "chrome", "WorkspaceOperator")) {
@@ -260,7 +275,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: operator-bridge-stage09-target-${{ github.sha }}
+          name: operator-bridge-stage09-target-${{ github.event.pull_request.head.sha || github.sha }}
           path: benchmarks/workspace-semantic-execution/operator_bridge/stage09-target-evidence.json
           if-no-files-found: warn
           retention-days: 30
