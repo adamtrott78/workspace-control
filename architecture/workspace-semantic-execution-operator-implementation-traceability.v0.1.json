@@ -560,8 +560,10 @@
     },
     "impl_08_packaging_install_update_rollback": {
       "status": "VALIDATED",
-      "checkpoint": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175",
+      "checkpoint": "26284233edb00c4a7005dac3d5c52b2add814156",
       "validations": [
+        "Operator Bridge Validation #36 SUCCESS on promotion head",
+        "Workspace Control Validation #2414 SUCCESS on promotion head",
         "Operator Bridge Validation #34 SUCCESS on implementation head",
         "Workspace Control Validation #2412 SUCCESS on implementation head"
       ],
@@ -611,7 +613,7 @@
         },
         "repair": "Operator Bridge #33 exposed a stale staging-path native-host manifest; final-release manifest regeneration fixed the defect and strict rollback validation passed unchanged in #34."
       },
-      "claim": "Stage-08 implementation is exact-head validated; promotion metadata head must itself pass both validators before Stage 09 work begins.",
+      "claim": "Stage-08 packaging/install/update/rollback is exact-head clean at the durable promotion head; Stage 09 performance benchmark execution is the next authorized stage.",
       "implementation_head": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175"
     }
   }

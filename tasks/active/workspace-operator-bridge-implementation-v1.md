@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: cac009bd18960c01f9dc4d2a20bac34eb6a0a175
+- Remote checkpoint: 26284233edb00c4a7005dac3d5c52b2add814156
 - Remote verified: true
 
 ## Next safe action
 
-Validate the Stage-08 durable promotion head exactly with Operator Bridge Validation and Workspace Control Validation. Do not execute impl_09_performance_benchmark_execution until that promotion head is green. After promotion verification, execute impl_09 from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json: collect the UX-09 content-free target-machine latency/resource benchmark set and budget pass/fail findings without beginning UX-11 usability trials, WebView2 promotion/comparison, real-account calibration, or production readiness review.
+Execute impl_09_performance_benchmark_execution from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Collect the UX-09 content-free target-machine latency/resource benchmark set and budget pass/fail findings. Correct or explicitly escalate any failing mechanical budget before usability or promotion. Do not begin impl_10 UX-11 human usability trials, impl_11 WebView2 promotion/comparison beyond the Stage-09 contract, impl_12 real-account calibration, or impl_13 production readiness review.
 
 ## Remaining work
 
