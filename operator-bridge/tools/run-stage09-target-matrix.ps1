@@ -1,0 +1,699 @@
+[CmdletBinding()]
+param(
+  [Parameter(Mandatory = $true)]
+  [string]$RepositoryRoot,
+
+  [Parameter(Mandatory = $true)]
+  [string]$ResultPath,
+
+  [string]$FirefoxPath = "C:\Program Files\Mozilla Firefox\firefox.exe",
+
+  [string]$ChromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe",
+
+  [string]$FirefoxProfile = "WorkspaceWorkers",
+
+  [switch]$ConfirmAcPower,
+
+  [switch]$ConfirmChromeMemorySaverDisabled,
+
+  [switch]$PlanOnly
+)
+
+$ErrorActionPreference = "Stop"
+
+$WarmupSeconds = 60
+$SteadySeconds = 120
+$SampleRateHz = 1
+$BrowserResourceRepetitions = 3
+$DiscardRestoreRepetitions = 5
+$ReuseRepetitions = 50
+$RestoreRepetitions = 30
+$CreateRepetitions = 30
+$ColdStartRepetitions = 10
+$PrimitiveRepetitions = 100
+$BackgroundCpuRejectPercent = 20
+$BrowserOrder = @(
+  @("firefox", "chrome"),
+  @("chrome", "firefox"),
+  @("firefox", "chrome")
+)
+
+$repo = [System.IO.Path]::GetFullPath($RepositoryRoot)
+$resultPathFull = [System.IO.Path]::GetFullPath($ResultPath)
+$resultDir = Split-Path -Parent $resultPathFull
+New-Item -ItemType Directory -Path $resultDir -Force | Out-Null
+
+$sourceSha = (& git -C $repo rev-parse HEAD).Trim().ToLowerInvariant()
+if ($LASTEXITCODE -ne 0 -or $sourceSha -notmatch "^[0-9a-f]{40}$") {
+  throw "Stage 09 target matrix requires an exact Git source SHA."
+}
+
+$plan = [ordered]@{
+  schema_version = 1
+  stage = "impl_09_performance_benchmark_execution"
+  evidence_class = "TARGET_MATRIX_PLAN_ONLY"
+  source_sha = $sourceSha
+  target_contract_complete = $false
+  measurement = [ordered]@{
+    warmup_seconds = $WarmupSeconds
+    steady_state_seconds = $SteadySeconds
+    sample_rate_hz = $SampleRateHz
+    browser_order = $BrowserOrder
+  }
+  repetitions = [ordered]@{
+    browser_resource = $BrowserResourceRepetitions
+    discard_restore = $DiscardRestoreRepetitions
+    reuse = $ReuseRepetitions
+    restore = $RestoreRepetitions
+    create = $CreateRepetitions
+    cold_start = $ColdStartRepetitions
+    local_primitives = $PrimitiveRepetitions
+  }
+  target_requirements = @(
+    "AC power explicitly confirmed",
+    "Chrome Memory Saver explicitly confirmed disabled",
+    "no pre-existing Firefox/Chrome/WorkspaceOperator process",
+    "unrelated CPU mean <= 20 percent of total CPU during measured windows",
+    "content-free OS process telemetry only"
+  )
+}
+
+if ($PlanOnly) {
+  $plan | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $resultPathFull -Encoding UTF8
+  Write-Host "STAGE09_TARGET_MATRIX_PLAN=PASS"
+  Get-Content -LiteralPath $resultPathFull
+  return
+}
+
+if (-not $ConfirmAcPower) {
+  throw "Target matrix requires explicit -ConfirmAcPower."
+}
+if (-not $ConfirmChromeMemorySaverDisabled) {
+  throw "Target matrix requires explicit -ConfirmChromeMemorySaverDisabled."
+}
+if ($FirefoxProfile -ne "WorkspaceWorkers") {
+  throw "Target matrix requires the frozen WorkspaceWorkers Firefox profile."
+}
+
+if (-not (Test-Path -LiteralPath $FirefoxPath -PathType Leaf)) {
+  throw "Firefox executable not found at the reviewed path."
+}
+if (-not (Test-Path -LiteralPath $ChromePath -PathType Leaf)) {
+  $alternateChrome = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
+  if (Test-Path -LiteralPath $alternateChrome -PathType Leaf) {
+    $ChromePath = $alternateChrome
+  } else {
+    throw "Chrome executable not found at a reviewed path."
+  }
+}
+
+foreach ($name in @("firefox", "chrome", "WorkspaceOperator")) {
+  if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+    throw "Target measurement rejected: pre-existing $name process is present."
+  }
+}
+
+$bridgeRoot = Join-Path $repo "operator-bridge"
+$targetFirefoxScript = Join-Path $bridgeRoot "tools\run-stage09-target-firefox.ps1"
+$validator = Join-Path $bridgeRoot "performance\validate-stage09-target.py"
+$fakeWorkerRoot = Join-Path $bridgeRoot "simulator\FirefoxProfile\extension"
+if (-not (Test-Path -LiteralPath $targetFirefoxScript -PathType Leaf)) {
+  throw "Target Firefox collector is missing."
+}
+if (-not (Test-Path -LiteralPath $validator -PathType Leaf)) {
+  throw "Target evidence validator is missing."
+}
+
+& dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.Integration.slnx") --configuration Release
+if ($LASTEXITCODE -ne 0) {
+  throw "Stage 09 target matrix build failed."
+}
+
+$work = Join-Path $env:TEMP ("workspace-operator-stage09-matrix-" + [Guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $work -Force | Out-Null
+$chromeFakeWorker = $null
+
+function Get-Percentile {
+  param([double[]]$Values, [double]$P)
+  if ($Values.Count -eq 0) { return 0.0 }
+  $sorted = @($Values | Sort-Object)
+  $index = [Math]::Max(0, [Math]::Min($sorted.Count - 1, [Math]::Ceiling($P * $sorted.Count) - 1))
+  return [double]$sorted[$index]
+}
+
+function Get-Summary {
+  param([double[]]$Values)
+  if ($Values.Count -eq 0) {
+    return [ordered]@{ p50 = 0.0; p95 = 0.0; max = 0.0; mean = 0.0 }
+  }
+  return [ordered]@{
+    p50 = Get-Percentile $Values 0.50
+    p95 = Get-Percentile $Values 0.95
+    max = [double](($Values | Measure-Object -Maximum).Maximum)
+    mean = [double](($Values | Measure-Object -Average).Average)
+  }
+}
+
+function Get-DescendantProcessIds {
+  param([int]$RootPid)
+  $rows = @(Get-CimInstance Win32_Process | Select-Object ProcessId, ParentProcessId)
+  $seen = [System.Collections.Generic.HashSet[int]]::new()
+  [void]$seen.Add($RootPid)
+  $changed = $true
+  while ($changed) {
+    $changed = $false
+    foreach ($row in $rows) {
+      $pidValue = [int]$row.ProcessId
+      $parent = [int]$row.ParentProcessId
+      if ($seen.Contains($parent) -and -not $seen.Contains($pidValue)) {
+        [void]$seen.Add($pidValue)
+        $changed = $true
+      }
+    }
+  }
+  return @($seen)
+}
+
+function Get-CpuSnapshot {
+  param([int[]]$ProcessIds)
+  $map = @{}
+  foreach ($pidValue in $ProcessIds) {
+    try {
+      $p = Get-Process -Id $pidValue -ErrorAction Stop
+      $map[$pidValue] = [double]$p.TotalProcessorTime.TotalSeconds
+    } catch {
+    }
+  }
+  return $map
+}
+
+function Get-ProcessNameCpuSnapshot {
+  param([string]$Name)
+  $map = @{}
+  $session = (Get-Process -Id $PID).SessionId
+  foreach ($p in @(Get-Process -Name $Name -ErrorAction SilentlyContinue)) {
+    try {
+      if ($p.SessionId -eq $session) {
+        $map[$p.Id] = [double]$p.TotalProcessorTime.TotalSeconds
+      }
+    } catch {
+    }
+  }
+  return $map
+}
+
+function Get-CpuDeltaSeconds {
+  param($Before, $After)
+  $sum = 0.0
+  foreach ($entry in $After.GetEnumerator()) {
+    if ($Before.ContainsKey($entry.Key)) {
+      $sum += [Math]::Max(0.0, [double]$entry.Value - [double]$Before[$entry.Key])
+    }
+  }
+  return $sum
+}
+
+function Get-TotalCpuPercent {
+  try {
+    return [double](Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor -Filter "Name='_Total'").PercentProcessorTime
+  } catch {
+    return 0.0
+  }
+}
+
+function Assert-NamedProcessesOwned {
+  param([string]$Name)
+  $owned = [System.Collections.Generic.HashSet[int]]::new()
+  foreach ($id in @(Get-DescendantProcessIds -RootPid $PID)) {
+    [void]$owned.Add([int]$id)
+  }
+  $session = (Get-Process -Id $PID).SessionId
+  foreach ($p in @(Get-Process -Name $Name -ErrorAction SilentlyContinue)) {
+    try {
+      if ($p.SessionId -eq $session -and -not $owned.Contains($p.Id)) {
+        throw "Target measurement rejected: unowned $Name process appeared during measurement."
+      }
+    } catch [System.Management.Automation.RuntimeException] {
+      throw
+    } catch {
+    }
+  }
+}
+
+function Measure-ProcessGroup {
+  param(
+    [string]$ProcessName,
+    [string]$ScenarioId,
+    [int]$Repetition,
+    [Nullable[int]]$LiveTabs
+  )
+
+  Start-Sleep -Seconds $WarmupSeconds
+  Assert-NamedProcessesOwned -Name $ProcessName
+
+  $working = [System.Collections.Generic.List[double]]::new()
+  $private = [System.Collections.Generic.List[double]]::new()
+  $cpu = [System.Collections.Generic.List[double]]::new()
+  $unrelated = [System.Collections.Generic.List[double]]::new()
+
+  $targetBefore = Get-ProcessNameCpuSnapshot -Name $ProcessName
+  $ownedBefore = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+  $wallBefore = Get-Date
+
+  for ($i = 0; $i -lt $SteadySeconds; $i++) {
+    Start-Sleep -Seconds 1
+    Assert-NamedProcessesOwned -Name $ProcessName
+
+    $session = (Get-Process -Id $PID).SessionId
+    $processes = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $session })
+    if ($processes.Count -eq 0) {
+      throw "No $ProcessName process available for $ScenarioId."
+    }
+
+    $workingMiB = [double](($processes | Measure-Object -Property WorkingSet64 -Sum).Sum) / 1MB
+    $privateMiB = [double](($processes | Measure-Object -Property PrivateMemorySize64 -Sum).Sum) / 1MB
+    $targetAfter = Get-ProcessNameCpuSnapshot -Name $ProcessName
+    $ownedAfter = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+    $wallAfter = Get-Date
+    $wallSeconds = [Math]::Max(0.001, ($wallAfter - $wallBefore).TotalSeconds)
+
+    $targetCpuOneLogical = (Get-CpuDeltaSeconds $targetBefore $targetAfter) / $wallSeconds * 100.0
+    $ownedCpuTotal = (Get-CpuDeltaSeconds $ownedBefore $ownedAfter) / $wallSeconds / [Environment]::ProcessorCount * 100.0
+    $unrelatedCpu = [Math]::Max(0.0, (Get-TotalCpuPercent) - $ownedCpuTotal)
+
+    $working.Add($workingMiB)
+    $private.Add($privateMiB)
+    $cpu.Add($targetCpuOneLogical)
+    $unrelated.Add($unrelatedCpu)
+
+    $targetBefore = $targetAfter
+    $ownedBefore = $ownedAfter
+    $wallBefore = $wallAfter
+  }
+
+  $unrelatedSummary = Get-Summary ([double[]]$unrelated.ToArray())
+  if ([double]$unrelatedSummary.mean -gt $BackgroundCpuRejectPercent) {
+    throw "Target measurement rejected: sustained unrelated CPU exceeded 20 percent."
+  }
+
+  return [ordered]@{
+    scenario_id = $ScenarioId
+    repetition = $Repetition
+    live_tabs = $LiveTabs
+    working_set_mib_samples = @($working)
+    private_memory_mib_samples = @($private)
+    cpu_one_logical_cpu_percent_samples = @($cpu)
+    unrelated_cpu_total_percent_samples = @($unrelated)
+    working_set = Get-Summary ([double[]]$working.ToArray())
+    private_memory = Get-Summary ([double[]]$private.ToArray())
+    cpu_one_logical_cpu_percent = Get-Summary ([double[]]$cpu.ToArray())
+    unrelated_cpu_total_percent = $unrelatedSummary
+  }
+}
+
+function Stop-OwnedProcessName {
+  param([string]$Name)
+  $owned = [System.Collections.Generic.HashSet[int]]::new()
+  foreach ($id in @(Get-DescendantProcessIds -RootPid $PID)) {
+    [void]$owned.Add([int]$id)
+  }
+  foreach ($p in @(Get-Process -Name $Name -ErrorAction SilentlyContinue)) {
+    if ($owned.Contains($p.Id)) {
+      Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+    }
+  }
+  $deadline = (Get-Date).AddSeconds(15)
+  while ((Get-Process -Name $Name -ErrorAction SilentlyContinue) -and (Get-Date) -lt $deadline) {
+    Start-Sleep -Milliseconds 200
+  }
+  if (Get-Process -Name $Name -ErrorAction SilentlyContinue) {
+    throw "Target measurement rejected: $Name process attribution/cleanup was lost."
+  }
+}
+
+function Invoke-FirefoxNoExtensionBaseline {
+  param([int]$Repetition)
+  if (Get-Process firefox -ErrorAction SilentlyContinue) {
+    throw "Firefox no-extension baseline requires zero pre-existing Firefox processes."
+  }
+  $profile = Join-Path $work ("firefox-no-extension-" + $Repetition)
+  New-Item -ItemType Directory -Path $profile -Force | Out-Null
+  Start-Process -FilePath $FirefoxPath -ArgumentList @("-profile", ('"' + $profile + '"'), "-no-remote", "about:blank") | Out-Null
+  try {
+    return Measure-ProcessGroup -ProcessName "firefox" -ScenarioId "FIREFOX_0_WORKERS_NO_EXTENSION" -Repetition $Repetition -LiveTabs 0
+  } finally {
+    Stop-OwnedProcessName -Name "firefox"
+  }
+}
+
+function Invoke-ChromeReplicate {
+  param([int]$Repetition)
+  if (Get-Process chrome -ErrorAction SilentlyContinue) {
+    throw "Chrome replicate requires zero pre-existing Chrome processes."
+  }
+
+  $profile = Join-Path $work ("chrome-profile-" + $Repetition)
+  New-Item -ItemType Directory -Path $profile -Force | Out-Null
+  $profileArg = '--user-data-dir="' + $profile + '"'
+  $baseArgs = @(
+    $profileArg,
+    "--no-first-run",
+    "--disable-extensions",
+    "--disable-default-apps",
+    "--disable-background-networking"
+  )
+
+  Start-Process -FilePath $ChromePath -ArgumentList @($baseArgs + @("about:blank")) | Out-Null
+  try {
+    $runs = [System.Collections.Generic.List[object]]::new()
+    $runs.Add((Measure-ProcessGroup -ProcessName "chrome" -ScenarioId "CHROME_0_WORKERS" -Repetition $Repetition -LiveTabs 0))
+
+    $opened = 0
+    foreach ($targetCount in @(1, 2, 4)) {
+      while ($opened -lt $targetCount) {
+        $opened++
+        $url = "http://127.0.0.1:8766/fake-worker.html?slot=$opened"
+        Start-Process -FilePath $ChromePath -ArgumentList @($baseArgs + @($url)) | Out-Null
+        Start-Sleep -Milliseconds 750
+      }
+      $runs.Add((Measure-ProcessGroup -ProcessName "chrome" -ScenarioId ("CHROME_" + $targetCount + "_WORKERS") -Repetition $Repetition -LiveTabs $targetCount))
+    }
+
+    return [ordered]@{
+      repetition = $Repetition
+      resource_runs = @($runs)
+    }
+  } finally {
+    Stop-OwnedProcessName -Name "chrome"
+  }
+}
+
+function Invoke-FirefoxReplicate {
+  param(
+    [int]$Repetition,
+    [switch]$SkipLatency,
+    [switch]$SkipColdStart
+  )
+
+  if (Get-Process firefox -ErrorAction SilentlyContinue) {
+    throw "Firefox replicate requires zero pre-existing Firefox processes."
+  }
+
+  $repResult = Join-Path $work ("firefox-rep-" + $Repetition + ".json")
+  $stdout = Join-Path $work ("firefox-rep-" + $Repetition + ".out.log")
+  $stderr = Join-Path $work ("firefox-rep-" + $Repetition + ".err.log")
+  $shellPath = (Get-Process -Id $PID).Path
+  $args = @(
+    "-NoProfile",
+    "-File", ('"' + $targetFirefoxScript + '"'),
+    "-RepositoryRoot", ('"' + $repo + '"'),
+    "-ResultPath", ('"' + $repResult + '"'),
+    "-FirefoxPath", ('"' + $FirefoxPath + '"'),
+    "-FirefoxProfile", $FirefoxProfile
+  )
+  if ($SkipLatency) { $args += "-SkipLatency" }
+  if ($SkipColdStart) { $args += "-SkipColdStart" }
+
+  $child = Start-Process -FilePath $shellPath -ArgumentList $args -RedirectStandardOutput $stdout -RedirectStandardError $stderr -PassThru
+  $noise = [System.Collections.Generic.List[double]]::new()
+  $ownedBefore = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+  $wallBefore = Get-Date
+
+  while (-not $child.HasExited) {
+    Start-Sleep -Seconds 1
+    Assert-NamedProcessesOwned -Name "firefox"
+    $ownedAfter = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+    $wallAfter = Get-Date
+    $wallSeconds = [Math]::Max(0.001, ($wallAfter - $wallBefore).TotalSeconds)
+    $ownedCpuTotal = (Get-CpuDeltaSeconds $ownedBefore $ownedAfter) / $wallSeconds / [Environment]::ProcessorCount * 100.0
+    $noise.Add([Math]::Max(0.0, (Get-TotalCpuPercent) - $ownedCpuTotal))
+    $ownedBefore = $ownedAfter
+    $wallBefore = $wallAfter
+    $child.Refresh()
+  }
+
+  if ($child.ExitCode -ne 0) {
+    if (Test-Path $stdout) { Get-Content $stdout }
+    if (Test-Path $stderr) { Get-Content $stderr }
+    if (Test-Path $repResult) { Get-Content $repResult }
+    throw "Firefox target replicate $Repetition failed."
+  }
+
+  if (Get-Process firefox -ErrorAction SilentlyContinue) {
+    throw "Firefox target replicate $Repetition left an unattributed process."
+  }
+
+  $noiseSummary = Get-Summary ([double[]]$noise.ToArray())
+  if ([double]$noiseSummary.mean -gt $BackgroundCpuRejectPercent) {
+    throw "Target measurement rejected: sustained unrelated CPU exceeded 20 percent during Firefox replicate $Repetition."
+  }
+
+  return [ordered]@{
+    repetition = $Repetition
+    unrelated_cpu_total_percent = $noiseSummary
+    result = Get-Content -LiteralPath $repResult -Raw | ConvertFrom-Json
+  }
+}
+
+function Get-FirefoxRun {
+  param($Replicate, [string]$ScenarioId)
+  return @($Replicate.result.steady_state.firefox_resource_runs | Where-Object { $_.ScenarioId -eq $ScenarioId })[0]
+}
+
+function Max-Value {
+  param([object[]]$Values)
+  return [double](($Values | Measure-Object -Maximum).Maximum)
+}
+
+function Min-Value {
+  param([object[]]$Values)
+  return [double](($Values | Measure-Object -Minimum).Minimum)
+}
+
+function New-BudgetCheck {
+  param(
+    [string]$Id,
+    [double]$Actual,
+    [string]$Operator,
+    [double]$Limit
+  )
+  $pass = if ($Operator -eq "<=") { $Actual -le $Limit } else { $Actual -ge $Limit }
+  return [ordered]@{
+    id = $Id
+    actual = $Actual
+    operator = $Operator
+    limit = $Limit
+    pass_fail = $(if ($pass) { "PASS" } else { "FAIL" })
+  }
+}
+
+try {
+  $chromeFakeWorker = Start-Process -FilePath "python" -ArgumentList @(
+    "-m", "http.server", "8766", "--bind", "127.0.0.1", "--directory", ('"' + $fakeWorkerRoot + '"')
+  ) -PassThru -WindowStyle Hidden
+  Start-Sleep -Seconds 1
+
+  $firefoxReplicates = @{}
+  $chromeReplicates = @{}
+  $firefoxNoExtension = @{}
+
+  for ($rep = 1; $rep -le $BrowserResourceRepetitions; $rep++) {
+    foreach ($browser in $BrowserOrder[$rep - 1]) {
+      if ($browser -eq "firefox") {
+        $firefoxNoExtension[$rep] = Invoke-FirefoxNoExtensionBaseline -Repetition $rep
+        $firefoxReplicates[$rep] = Invoke-FirefoxReplicate -Repetition $rep -SkipLatency:($rep -ne 1) -SkipColdStart:($rep -ne 1)
+      } else {
+        $chromeReplicates[$rep] = Invoke-ChromeReplicate -Repetition $rep
+      }
+    }
+  }
+
+  for ($rep = 4; $rep -le $DiscardRestoreRepetitions; $rep++) {
+    $firefoxReplicates[$rep] = Invoke-FirefoxReplicate -Repetition $rep -SkipLatency -SkipColdStart
+  }
+
+  $full = $firefoxReplicates[1].result
+  if ($null -eq $full.steady_state.latency -or $null -eq $full.steady_state.hotkey_queue_to_callback_proxy) {
+    throw "Full Firefox replicate is missing exact latency evidence."
+  }
+  if ($null -eq $full.cold_start -or $full.cold_start.cold_firefox_start.count -ne $ColdStartRepetitions) {
+    throw "Full Firefox replicate is missing the exact 10 cold-start trials."
+  }
+
+  $ffFirstThree = @(1..3 | ForEach-Object { $firefoxReplicates[$_] })
+  $ffAllFive = @(1..5 | ForEach-Object { $firefoxReplicates[$_] })
+
+  $helperWs = Max-Value @($ffFirstThree | ForEach-Object { [double]$_.result.steady_state.helper_idle.WorkingSet.P95 })
+  $helperCpu = Max-Value @($ffFirstThree | ForEach-Object { [double]$_.result.steady_state.helper_idle.CpuOneLogicalCpuPercent.Mean })
+  $ffTwoWs = Max-Value @($ffFirstThree | ForEach-Object { [double]((Get-FirefoxRun $_ "FIREFOX_2_WORKERS").WorkingSet.P95) })
+  $ffFourWs = Max-Value @($ffFirstThree | ForEach-Object { [double]((Get-FirefoxRun $_ "FIREFOX_4_WORKERS").WorkingSet.P95) })
+  $ffTwoCpu = Max-Value @($ffFirstThree | ForEach-Object { [double]((Get-FirefoxRun $_ "FIREFOX_2_WORKERS").CpuOneLogicalCpuPercent.Mean) })
+  $discardMin = Min-Value @($ffAllFive | ForEach-Object { [double]$_.result.steady_state.discard_three_of_four_p95_reduction_percent })
+
+  $extensionIncrementals = @()
+  for ($rep = 1; $rep -le 3; $rep++) {
+    $withExtension = [double](Get-FirefoxRun $firefoxReplicates[$rep] "FIREFOX_0_WORKERS").WorkingSet.P95
+    $withoutExtension = [double]$firefoxNoExtension[$rep].working_set.p95
+    $helper = [double]$firefoxReplicates[$rep].result.steady_state.helper_idle.WorkingSet.P95
+    $extensionIncrementals += $helper + [Math]::Max(0.0, $withExtension - $withoutExtension)
+  }
+  $helperPlusExtension = Max-Value $extensionIncrementals
+
+  $hotkey = $full.steady_state.hotkey_queue_to_callback_proxy
+  if ($hotkey.Status -ne "PASS" -or $null -eq $hotkey.Latency) {
+    throw "Target hotkey recognition metric is invalid."
+  }
+  $hotkeyMax = [double]$hotkey.Latency.Max
+  $latency = $full.steady_state.latency
+  $cold = $full.cold_start.cold_firefox_start.latency_ms
+
+  $reuseP50Bound = [double]$latency.ReuseReady.P50 + $hotkeyMax
+  $reuseP95Bound = [double]$latency.ReuseReady.P95 + $hotkeyMax
+  $reuseHardBound = [double]$latency.ReuseReady.Max + $hotkeyMax
+  $restoreP95Bound = [double]$latency.RestoreReady.P95 + $hotkeyMax
+  $createP95Bound = [double]$latency.CreateReady.P95 + $hotkeyMax
+  $coldP95Bound = [double]$cold.P95 + $hotkeyMax
+  $noWorkP95Bound = [double]$latency.NoWork.P95 + $hotkeyMax
+
+  $checks = @(
+    (New-BudgetCheck "hotkey_recognition_p95_ms" ([double]$hotkey.Latency.P95) "<=" 50)
+    (New-BudgetCheck "clipboard_write_p95_ms" ([double]$latency.ClipboardWrite.P95) "<=" 50)
+    (New-BudgetCheck "existing_tab_activate_p95_ms" ([double]$latency.ExistingTabActivate.P95) "<=" 300)
+    (New-BudgetCheck "reuse_ready_p50_composed_upper_bound_ms" $reuseP50Bound "<=" 250)
+    (New-BudgetCheck "reuse_ready_p95_composed_upper_bound_ms" $reuseP95Bound "<=" 750)
+    (New-BudgetCheck "reuse_ready_observed_max_composed_upper_bound_ms" $reuseHardBound "<=" 1500)
+    (New-BudgetCheck "restore_ready_p95_composed_upper_bound_ms" $restoreP95Bound "<=" 2500)
+    (New-BudgetCheck "create_ready_p95_composed_upper_bound_ms" $createP95Bound "<=" 2000)
+    (New-BudgetCheck "cold_start_p95_composed_upper_bound_ms" $coldP95Bound "<=" 8000)
+    (New-BudgetCheck "no_work_p95_composed_upper_bound_ms" $noWorkP95Bound "<=" 250)
+    (New-BudgetCheck "native_helper_working_set_mib_p95" $helperWs "<=" 100)
+    (New-BudgetCheck "native_helper_plus_extension_incremental_mib_p95" $helperPlusExtension "<=" 150)
+    (New-BudgetCheck "helper_idle_cpu_percent_one_logical_cpu_mean" $helperCpu "<=" 1)
+    (New-BudgetCheck "firefox_two_live_worker_tabs_working_set_mib_p95" $ffTwoWs "<=" 1536)
+    (New-BudgetCheck "firefox_four_live_worker_tabs_working_set_mib_p95" $ffFourWs "<=" 2560)
+    (New-BudgetCheck "firefox_two_live_idle_tabs_cpu_percent_one_logical_cpu_mean" $ffTwoCpu "<=" 5)
+    (New-BudgetCheck "discard_three_of_four_tabs_working_set_reduction_percent" $discardMin ">=" 25)
+  )
+
+  $allPass = (@($checks | Where-Object { $_.pass_fail -ne "PASS" }).Count -eq 0)
+
+  $chromeTwo = Max-Value @(1..3 | ForEach-Object {
+    [double](@($chromeReplicates[$_].resource_runs | Where-Object { $_.scenario_id -eq "CHROME_2_WORKERS" })[0].working_set.p95)
+  })
+  $firefoxToChromeTwoRatio = if ($chromeTwo -gt 0) { $ffTwoWs / $chromeTwo } else { $null }
+
+  $os = Get-CimInstance Win32_OperatingSystem
+  $cpuInfo = Get-CimInstance Win32_Processor | Select-Object -First 1
+  $computer = Get-CimInstance Win32_ComputerSystem
+  $descriptor = "$($os.Version)|$($os.BuildNumber)|$($cpuInfo.Name)|$($computer.TotalPhysicalMemory)"
+  $hashBytes = [System.Security.Cryptography.SHA256]::HashData([System.Text.Encoding]::UTF8.GetBytes($descriptor))
+  $machineFingerprint = [Convert]::ToHexString($hashBytes).ToLowerInvariant()
+  $powerMode = ((& powercfg /GETACTIVESCHEME 2>$null) -join " ").Trim()
+  $firefoxVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($FirefoxPath).FileVersion
+  $chromeVersion = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($ChromePath).FileVersion
+
+  $evidence = [ordered]@{
+    schema_version = 1
+    stage = "impl_09_performance_benchmark_execution"
+    evidence_class = "TARGET_WINDOWS_OPERATOR_WORKSTATION"
+    source_sha = $sourceSha
+    target_contract_complete = $true
+    environment = [ordered]@{
+      machine_fingerprint = $machineFingerprint
+      os_build = "$($os.Version).$($os.BuildNumber)"
+      power_mode = $powerMode
+      firefox_version = $firefoxVersion
+      chrome_version = $chromeVersion
+      chrome_memory_saver_disabled = $true
+      same_name_process_isolation_valid = $true
+      background_noise_valid = $true
+    }
+    measurement = [ordered]@{
+      warmup_seconds = $WarmupSeconds
+      steady_state_seconds = $SteadySeconds
+      sample_rate_hz = $SampleRateHz
+      browser_order_alternated = $true
+    }
+    repetitions = [ordered]@{
+      browser_resource = $BrowserResourceRepetitions
+      discard_restore = $DiscardRestoreRepetitions
+      reuse = $ReuseRepetitions
+      restore = $RestoreRepetitions
+      create = $CreateRepetitions
+      cold_start = $ColdStartRepetitions
+      local_primitives = $PrimitiveRepetitions
+    }
+    results = [ordered]@{
+      firefox = [ordered]@{
+        resource_replicates = @(1..3 | ForEach-Object { $firefoxReplicates[$_] })
+        no_extension_baselines = @(1..3 | ForEach-Object { $firefoxNoExtension[$_] })
+        discard_restore_replicates = @(1..5 | ForEach-Object {
+          [ordered]@{
+            repetition = $_
+            reduction_percent = [double]$firefoxReplicates[$_].result.steady_state.discard_three_of_four_p95_reduction_percent
+          }
+        })
+      }
+      chrome = [ordered]@{
+        resource_replicates = @(1..3 | ForEach-Object { $chromeReplicates[$_] })
+        comparison_to_firefox = [ordered]@{
+          firefox_two_worker_p95_mib = $ffTwoWs
+          chrome_two_worker_p95_mib = $chromeTwo
+          firefox_to_chrome_two_worker_p95_ratio = $firefoxToChromeTwoRatio
+        }
+      }
+      latency = [ordered]@{
+        hotkey_queue_to_callback = $hotkey
+        dispatch = $latency
+        cold_start = $full.cold_start
+        composed_upper_bounds = [ordered]@{
+          reuse_p50_ms = $reuseP50Bound
+          reuse_p95_ms = $reuseP95Bound
+          reuse_observed_max_ms = $reuseHardBound
+          restore_p95_ms = $restoreP95Bound
+          create_p95_ms = $createP95Bound
+          cold_start_p95_ms = $coldP95Bound
+          no_work_p95_ms = $noWorkP95Bound
+          method = "dispatch statistic plus observed maximum WM_HOTKEY queue-to-callback latency; conservative upper bound"
+        }
+      }
+      budget_evaluation = [ordered]@{
+        all_pass = $allPass
+        checks = $checks
+      }
+    }
+    security = [ordered]@{
+      dom_or_page_content_collected = $false
+      raw_urls_collected = $false
+      screenshots_collected = $false
+      credentials_or_tokens_collected = $false
+      synthetic_paste_enter_send_or_mouse = $false
+    }
+    blockers = @()
+  }
+
+  $evidence | ConvertTo-Json -Depth 40 | Set-Content -LiteralPath $resultPathFull -Encoding UTF8
+  & python $validator $resultPathFull
+  if ($LASTEXITCODE -ne 0) {
+    throw "Stage 09 target evidence failed local schema/contract validation."
+  }
+
+  if ($allPass) {
+    Write-Host "STAGE09_TARGET_MATRIX=PASS"
+  } else {
+    Write-Host "STAGE09_TARGET_MATRIX=BUDGET_FAILURE"
+  }
+  Get-Content -LiteralPath $resultPathFull
+
+  if (-not $allPass) {
+    throw "Stage 09 target matrix completed but one or more frozen budgets failed."
+  }
+}
+finally {
+  if ($chromeFakeWorker -and -not $chromeFakeWorker.HasExited) {
+    Stop-Process -Id $chromeFakeWorker.Id -Force -ErrorAction SilentlyContinue
+  }
+  try { Stop-OwnedProcessName -Name "chrome" } catch {}
+  try { Stop-OwnedProcessName -Name "firefox" } catch {}
+  Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue
+}
