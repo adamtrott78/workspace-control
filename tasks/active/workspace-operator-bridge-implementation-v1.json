@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "impl_00_program_authority_and_contract_freeze",
+  "current_stage": "impl_01_repository_bootstrap_and_contract_harness",
   "acceptance_criteria": [
     "Implementation remains traceable to the UX-13 freeze at exact workspace-control SHA 0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
     "Every stage has explicit dependencies, outputs, validation, and exact-head durable evidence before promotion.",
@@ -49,7 +49,7 @@
       "base_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+        "checkpoint_sha": "2ff35d02ec823744937dc8fdd82d69c44bb3cb69",
         "verified": true
       },
       "local": null,
@@ -69,9 +69,9 @@
   "stages": [
     {
       "id": "impl_00_program_authority_and_contract_freeze",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
+      "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
       "inputs": [
         "UX-13 design freeze workspace-control@0a110b570410d6d3310afc8ef4591e4aa383c0b8",
@@ -86,9 +86,12 @@
       "validation": [
         {
           "check": "Implementation program/task bootstrap",
-          "result": "NOT_RUN",
+          "result": "PASS",
           "evidence": [
-            "Await exact-head repository validation after child capsule/program artifacts are committed."
+            "Stage-00 content committed at workspace-control@2ff35d02ec823744937dc8fdd82d69c44bb3cb69.",
+            "Workspace Control Validation run 42757555992 / #2377 SUCCESS on the exact Stage-00 content head, including changed task-contract, unit-regression, pinned Lambda controller, and full integration-contract checks.",
+            "The child capsule authorizes only its own task/program artifacts, operator-bridge/**, one dedicated operator-bridge CI workflow, bounded operator-bridge benchmark results, and bounded bridge tests.",
+            "The parent UX-13 design freeze remains pinned at workspace-control@0a110b570410d6d3310afc8ef4591e4aa383c0b8."
           ]
         }
       ],
@@ -96,9 +99,9 @@
     },
     {
       "id": "impl_01_repository_bootstrap_and_contract_harness",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
+      "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
       "inputs": [
         "validated stage impl_00_program_authority_and_contract_freeze"
@@ -350,11 +353,21 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+      "identity": "2ff35d02ec823744937dc8fdd82d69c44bb3cb69",
       "required_for_resume": true,
       "evidence": [
-        "Child implementation task is being bootstrapped from the exact UX-13 freeze head.",
-        "No implementation code exists yet under this child task."
+        "Stage 00 implementation-program/authority checkpoint validated by Workspace Control Validation #2377.",
+        "Next active stage is impl_01_repository_bootstrap_and_contract_harness; no operator-bridge implementation code exists yet."
+      ]
+    },
+    {
+      "id": "impl-00-program-authority-freeze",
+      "kind": "git_commit",
+      "identity": "2ff35d02ec823744937dc8fdd82d69c44bb3cb69",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Control Validation #2377 SUCCESS.",
+        "Implementation program, staged plan, traceability matrix, child capsule, and derived handoff are durable."
       ]
     }
   ],
@@ -419,6 +432,14 @@
         "Child mutation scope names only its task/program artifacts, operator-bridge code tree, one dedicated CI workflow, operator-bridge benchmark results, and bounded bridge tests.",
         "Frozen UX design artifacts and unrelated workspace-control/research/course/runtime surfaces are excluded from child mutation authority."
       ]
+    },
+    {
+      "check": "Stage 00 exact-head validation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation #2377 SUCCESS at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69.",
+        "Child JSON/Markdown synchronization and repository regressions passed."
+      ]
     }
   ],
   "blockers": [],
@@ -437,8 +458,8 @@
     "impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration",
     "impl_13_production_readiness_review: Integrated implementation review and promotion decision"
   ],
-  "next_safe_action": "Validate the child task/program creation at the exact repository head. If Workspace Control Validation passes, mark impl_00_program_authority_and_contract_freeze VALIDATED, refresh restore-point:latest to that validated head, and begin impl_01_repository_bootstrap_and_contract_harness. Do not create implementation code before the Stage 00 authority/program checkpoint is validated.",
+  "next_safe_action": "Execute impl_01_repository_bootstrap_and_contract_harness from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json: create the operator-bridge solution/project skeleton, dedicated path-filtered validation workflow, implementation copy/check of the frozen Browser Adapter protocol, initial .NET test projects, Firefox manifest/security static-test scaffolding, and minimal README/build instructions. Keep behavior skeletal: Stage 01 proves build/test/contract infrastructure, not helper/browser functionality. Validate dotnet restore/build/test, protocol drift, no-account-secret CI, and exact task scope before promoting Stage 02.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
-  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins."
+  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet."
 }

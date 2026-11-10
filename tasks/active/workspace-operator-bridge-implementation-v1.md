@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 0a110b570410d6d3310afc8ef4591e4aa383c0b8
+- Remote checkpoint: 2ff35d02ec823744937dc8fdd82d69c44bb3cb69
 - Remote verified: true
 
 ## Next safe action
 
-Validate the child task/program creation at the exact repository head. If Workspace Control Validation passes, mark impl_00_program_authority_and_contract_freeze VALIDATED, refresh restore-point:latest to that validated head, and begin impl_01_repository_bootstrap_and_contract_harness. Do not create implementation code before the Stage 00 authority/program checkpoint is validated.
+Execute impl_01_repository_bootstrap_and_contract_harness from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json: create the operator-bridge solution/project skeleton, dedicated path-filtered validation workflow, implementation copy/check of the frozen Browser Adapter protocol, initial .NET test projects, Firefox manifest/security static-test scaffolding, and minimal README/build instructions. Keep behavior skeletal: Stage 01 proves build/test/contract infrastructure, not helper/browser functionality. Validate dotnet restore/build/test, protocol drift, no-account-secret CI, and exact task scope before promoting Stage 02.
 
 ## Remaining work
 
