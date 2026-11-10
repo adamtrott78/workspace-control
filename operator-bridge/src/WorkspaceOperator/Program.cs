@@ -9,7 +9,8 @@ internal static class Program
     {
         ApplicationConfiguration.Initialize();
         var idleProbeMilliseconds = ParseIdleProbe(args);
-        Application.Run(new TrayApplicationContext(idleProbeMilliseconds));
+        System.Windows.Forms.Application.Run(
+            new TrayApplicationContext(idleProbeMilliseconds));
     }
 
     private static int? ParseIdleProbe(string[] args)
