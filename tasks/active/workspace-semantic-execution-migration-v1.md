@@ -74,7 +74,7 @@ operator_ux_design
 
 ## Next safe action
 
-Begin UX-07 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define recovery UX and FMEA for Firefox/helper/extension crashes, orchestrator unreachable, lost tabs, authentication/login refresh invalidating all worker tabs, packet prepared but never acknowledged, stale worker replies, clipboard interruption, sleep/reboot, hotkey during recovery, and other single-component failures. Preserve the goal that after unavoidable recovery interaction the operator returns to Ctrl+B -> Ctrl+V -> Enter without manual task-state reconstruction.
+Begin UX-08 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: produce the operator-bridge threat model, exact native-helper/WebExtension permission matrix, local data handling rules, browser-navigation/auth-signal privacy review, security review checklist, and ADR forbidding ChatGPT DOM/content automation in v0. Re-check current OpenAI terms/product guidance and relevant Firefox extension capabilities before freezing any browser-facing permission.
 
 ## Remaining work
 
