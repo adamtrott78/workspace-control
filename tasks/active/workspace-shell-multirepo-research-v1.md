@@ -36,21 +36,20 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Restore the accepted node_modules closure from the retained 20261110T174933Z upgrade backup into /opt/workspace-shell/runtime/plugins/workspace-shell/node_modules, restart workspace-shell-mcp.service, verify a listener on 127.0.0.1:8797, then use Manage -> Refresh tools. The durable upgrade operator has been patched to preserve and verify the dependency closure; exact-head validation is running for 857bc13bf00d785f7af4be462c12b0ffea62ebfd.
+Start a fresh ChatGPT conversation with Workspace Shell connected. First inspect the model-visible Workspace Shell schema and confirm workspace_shell_exec target includes PADataset and profile includes file-list/file-read/file-hash/research-bounded. Then test live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1. If visible, begin Stage 00 read-only PADataset provenance recovery; if TASK_NOT_FOUND persists, diagnose the live frontend authority_root before any execution.
 
 ## Remaining work
 
-- Capture concise workspace-shell-mcp.service startup exception; do not collect additional tunnel logs unless the MCP frontend becomes healthy but discovery still fails.
-- Implement and exact-head validate the smallest MCP frontend crash fix without changing the frozen external MCP schema.
-- Deploy the server-side fix and verify 127.0.0.1:8797 is listening and the MCP service is active.
-- Use Manage -> Refresh tools on the existing Workspace Shell app and verify PADataset plus file-list/file-read/file-hash/research-bounded in the model-visible schema.
+- Fresh-chat remount of refreshed Workspace Shell tool schema.
+- Verify new task-capsule visibility in the live authority root.
 - Run live positive and negative Workspace Shell acceptance for PADataset.
-- Hand control back to the MTH602 Stage 00 provenance recovery task.
+- Begin MTH602 Stage 00 provenance recovery from clean execution SHA 17e1147614f27702e43565089d618182ff71c5af plus read-only historical evidence mount leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
 - Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
 
 ## Blockers / gates
 
-- Live workspace-shell-mcp.service crash-loop root cause identified: multirepo upgrade replaced the runtime plugin directory with Git-tracked source but did not restore the accepted node_modules dependency closure. server.js therefore fails at startup with ERR_MODULE_NOT_FOUND for @modelcontextprotocol/ext-apps. Tunnel remains healthy and resolves main to 127.0.0.1:8797.
+- Current ChatGPT conversation retains the old mounted Workspace Shell function schema even after successful app tool refresh. Live app transport is healthy. Start a fresh ChatGPT conversation so Workspace Shell is remounted with the refreshed PADataset/research-bounded schema.
+- After fresh-chat remount, verify the newer durable task capsules are visible through the live authority root before Stage 00. Old task workspace-shell-mcp-v1 is visible; newer task IDs returned TASK_NOT_FOUND in this stale-schema conversation and require recheck from the refreshed session.
 
 ## Fresh-chat initialization
 
