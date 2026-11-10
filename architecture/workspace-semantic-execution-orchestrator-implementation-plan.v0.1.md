@@ -6,6 +6,8 @@ Parent task: `workspace-semantic-execution-migration-v1`
 
 Operator UX companion: `architecture/workspace-semantic-execution-operator-ux.v0.1.md`
 
+Operator state machine: `architecture/workspace-semantic-execution-operator-state-machine.v0.1.md`
+
 Branch: `workspace-semantic-execution-migration-v1`
 
 ## 1. Objective
