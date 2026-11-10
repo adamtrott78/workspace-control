@@ -731,4 +731,15 @@ The exact v0 Firefox WebExtension permission set is `nativeMessaging` + `tabs` +
 
 UX-07 browser-chrome authentication/navigation sensing is security-approved only as a metadata-only candidate: for already-managed tabs, URL metadata is reduced immediately to CHATGPT_ORIGIN/OFF_CHATGPT_ORIGIN/UNKNOWN and raw URLs are not persisted. Origin return is not continuity proof. UX-12 still owns exact Firefox/API/package validation and a fresh OpenAI policy review before any real-account test.
 
-The next execution slice is **UX-09 Performance and RAM budget**.
+UX-09 is complete at the performance-contract design level with:
+
+- `benchmarks/workspace-semantic-execution/operator_ux_performance_v1.json`
+- `architecture/workspace-semantic-execution-operator-performance-budget.v0.1.md`
+
+The benchmark contract defines Windows process-level RAM/CPU measurement, matched Firefox-vs-Chrome 0/1/2/4-live-tab scenarios, helper/extension overhead, discard/restore measurement, cold/warm interaction-latency trials, repetition counts, invalid-run rules, and a content-free result schema. OS process metrics are the cross-browser source of truth; browser task managers are diagnostic only.
+
+The v0 default is now frozen at **two live GENERAL_PERSISTENT worker tabs**, with an **absolute four-live-managed-tab burst ceiling** for role isolation/benchmark/recovery needs. Frozen targets include 1536 MiB p95 for two live Firefox workers, 2560 MiB p95 for four, <=750 ms p95 existing-worker service, <=2000 ms p95 new-tab service with Firefox running, <=2500 ms p95 discarded-tab restore, and <=8000 ms p95 cold start.
+
+UX-09 does not fabricate actual browser measurements before the helper/extension and deterministic worker workload exist. Empirical results are explicitly NOT_RUN and become mandatory downstream evidence: UX-10 supplies the deterministic simulator workload, UX-12 supplies the implementation spike, and real ChatGPT calibration remains gated by the UX-08/OpenAI-policy review before UX-13 production design freeze.
+
+The next execution slice is **UX-10 Fake-ChatGPT simulation and prototype contract**.

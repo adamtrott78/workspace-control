@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Begin UX-09 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define the operator UX performance/RAM benchmark spec and budget. Measure Firefox vs the relevant baseline, helper/extension overhead, 1/2/4 live ChatGPT worker tabs, discarded-tab savings, browser startup/focus latency, clipboard/hotkey latency, and derive the active-session cap. Preserve the UX-08 permission/content boundary while measuring.
+Begin UX-10 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: design the fake-ChatGPT simulation harness and prototype contract. Define the fake worker webpage, fake durable worker endpoint/ack model, fake scheduler actions, deterministic scenario catalog, observability, and end-to-end cases for normal service, slow workers, lost tabs, auth-refresh/logout, helper/browser/extension crashes, stale completions, and concurrent ready workers. The simulator must exercise the UX-09 performance instrumentation while preserving the UX-08 no-content/no-synthetic-submit boundary.
 
 ## Remaining work
 

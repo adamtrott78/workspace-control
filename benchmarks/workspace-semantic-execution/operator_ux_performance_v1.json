@@ -1,0 +1,252 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-ux-performance-v1",
+  "status": "UX_09_BENCHMARK_CONTRACT_NOT_YET_EXECUTED",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Measure operator-bridge RAM, CPU, and local interaction latency reproducibly on the target Windows operator workstation without weakening the UX-08 no-content boundary.",
+  "design_acceptance": "The benchmark contract and budgets are sufficient to proceed to UX-10. Empirical target-machine results remain mandatory before UX-13 production design freeze and before raising the default active-session cap.",
+  "security_invariants": [
+    "No ChatGPT DOM, response text, accessibility tree, screenshots, raw URLs, cookies, tokens, or page-content telemetry may be collected.",
+    "No synthetic paste, typing, Enter, Send, or mouse automation is introduced for measurement.",
+    "Real-account calibration, when eventually run, remains manual at Ctrl+V + Enter and is gated by the UX-08/UX-12 OpenAI policy review.",
+    "Primary resource telemetry is OS process telemetry; browser-internal process managers are diagnostic only and are not persisted with page labels."
+  ],
+  "evidence_basis": [
+    {
+      "source": "Mozilla MDN tabs.discard",
+      "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/discard",
+      "relevance": "Firefox can unload inactive tabs while retaining tabstrip/session state; active tabs cannot be discarded."
+    },
+    {
+      "source": "Mozilla Firefox Process Manager",
+      "url": "https://support.mozilla.org/en-US/kb/task-manager-tabs-or-extensions-are-slowing-firefox",
+      "relevance": "Firefox exposes rough per-process memory/CPU diagnostics through about:processes; primary cross-browser benchmark still uses OS metrics."
+    },
+    {
+      "source": "Microsoft Get-Process",
+      "url": "https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/get-process",
+      "relevance": "Windows process objects expose working-set and pageable/private memory metrics suitable for external collection."
+    },
+    {
+      "source": "Google Chrome performance / Memory Saver",
+      "url": "https://support.google.com/chrome/answer/12929150",
+      "relevance": "Chrome may deactivate inactive tabs; live-tab comparison disables Memory Saver for parity and records its state."
+    }
+  ],
+  "target_environment": {
+    "os": "target Windows operator workstation; exact edition/build recorded per run",
+    "power_mode": "AC power; fixed Windows power mode recorded",
+    "network": "same network path for compared latency trials; browser-memory trials do not use response-content timing",
+    "browser_versions": "record exact Firefox and Chrome versions",
+    "display": "record monitor count/scaling only as context; no screen capture",
+    "reboot_policy": "preferred fresh login or confirmed quiescent browser state before each complete replicate",
+    "background_noise": "record top-level system available memory and CPU load; reject sample windows with sustained unrelated CPU load above 20% of total CPU"
+  },
+  "process_measurement": {
+    "isolation_rule": "No unrelated Firefox or Chrome instances may run in the benchmark Windows user session. This makes all same-name browser processes attributable to the benchmark profile without page inspection.",
+    "primary_memory_metric": {
+      "id": "browser_working_set_mib",
+      "definition": "sum WorkingSet64 across all benchmark browser executable processes in the user session, converted to MiB",
+      "rationale": "approximates resident physical memory pressure"
+    },
+    "secondary_memory_metric": {
+      "id": "browser_private_memory_mib",
+      "definition": "sum PrivateMemorySize64 across all benchmark browser executable processes in the user session, converted to MiB",
+      "rationale": "captures private committed memory and helps diagnose working-set trimming"
+    },
+    "helper_metrics": [
+      "helper WorkingSet64 MiB",
+      "helper PrivateMemorySize64 MiB",
+      "helper CPU delta normalized to one logical CPU"
+    ],
+    "browser_cpu_metric": "CPU-time delta over sample interval normalized as percent of one logical CPU",
+    "sample_rate_hz": 1,
+    "warmup_seconds": 60,
+    "steady_state_sample_seconds": 120,
+    "reported_statistics": [
+      "p50",
+      "p95",
+      "max",
+      "mean"
+    ],
+    "diagnostic_only": [
+      "Firefox about:processes",
+      "Chrome Task Manager"
+    ]
+  },
+  "workload_profiles": {
+    "simulator_profile": {
+      "availability_owner": "UX-10",
+      "role": "deterministic primary regression workload once fake-ChatGPT simulator exists",
+      "content_collection": false
+    },
+    "real_chatgpt_calibration": {
+      "availability_owner": "UX-12/UX-13",
+      "role": "target-machine calibration only after real-account policy/product gate",
+      "procedure": "Human authenticates and establishes standardized bounded worker chats manually. Resource collector observes processes only; it does not inspect page content.",
+      "content_collection": false,
+      "required_before_production_freeze": true
+    }
+  },
+  "browser_comparison": {
+    "firefox_profile": "fresh/dedicated WorkspaceWorkers benchmark profile; only reviewed bridge extension enabled when testing extension overhead",
+    "chrome_profile": "fresh temporary benchmark profile; no unrelated extensions",
+    "live_tab_parity": "Chrome Memory Saver disabled for 0/1/2/4 live-tab comparison; its state is recorded",
+    "comparison_metrics": [
+      "absolute browser working-set p50/p95",
+      "incremental working set above 0-worker-tab browser baseline",
+      "private-memory p50/p95",
+      "idle CPU"
+    ],
+    "review_trigger": "Reopen the dedicated-Firefox ADR if two-live-tab Firefox p95 exceeds both the frozen 1536 MiB budget and Chrome two-tab p95 by more than 25%, or if it exceeds Chrome by more than 25% and 256 MiB absolute."
+  },
+  "scenario_groups": [
+    {
+      "id": "MEM_BROWSER_BASELINES",
+      "repetitions": 3,
+      "scenarios": [
+        "Firefox profile open with zero worker tabs",
+        "Firefox with 1 live worker tab",
+        "Firefox with 2 live worker tabs",
+        "Firefox with 4 live worker tabs",
+        "Chrome baseline profile with zero worker tabs",
+        "Chrome with 1 live worker tab",
+        "Chrome with 2 live worker tabs",
+        "Chrome with 4 live worker tabs"
+      ],
+      "order_policy": "Alternate browser order between complete replicates; within a browser, run 0 -> 1 -> 2 -> 4 tabs."
+    },
+    {
+      "id": "MEM_BRIDGE_OVERHEAD",
+      "repetitions": 3,
+      "scenarios": [
+        "native helper idle with browser closed",
+        "Firefox zero-worker-tab profile without bridge extension",
+        "Firefox zero-worker-tab profile with bridge extension connected",
+        "Firefox two-live-tab profile with helper + extension connected"
+      ]
+    },
+    {
+      "id": "MEM_DISCARD",
+      "repetitions": 5,
+      "scenarios": [
+        "Start with 4 live managed worker tabs; leave one active and discard the other 3 through reviewed Firefox tabs.discard mechanics; sample after settle.",
+        "Restore one discarded tab and resample.",
+        "Restore all discarded tabs and resample."
+      ],
+      "note": "The active tab is never passed to tabs.discard because Firefox does not discard the active tab."
+    },
+    {
+      "id": "LATENCY_REUSE",
+      "repetitions": 50,
+      "metric": "hotkey edge -> LOCAL_PREPARED / exact target focused and clipboard write confirmed",
+      "precondition": "Firefox running; target trusted managed tab already live"
+    },
+    {
+      "id": "LATENCY_RESTORE",
+      "repetitions": 30,
+      "metric": "hotkey edge -> LOCAL_PREPARED",
+      "precondition": "Firefox running; target trusted managed tab discarded"
+    },
+    {
+      "id": "LATENCY_CREATE",
+      "repetitions": 30,
+      "metric": "hotkey edge -> LOCAL_PREPARED",
+      "precondition": "Firefox running; new managed tab required"
+    },
+    {
+      "id": "LATENCY_COLD_START",
+      "repetitions": 10,
+      "metric": "hotkey edge -> LOCAL_PREPARED",
+      "precondition": "Firefox WorkspaceWorkers not running"
+    },
+    {
+      "id": "LATENCY_LOCAL_PRIMITIVES",
+      "repetitions": 100,
+      "scenarios": [
+        "hotkey edge -> helper callback entered",
+        "clipboard write call begin -> success result",
+        "browser activate command -> extension success receipt",
+        "no-work hotkey edge -> quiet no-action completion"
+      ]
+    }
+  ],
+  "frozen_budgets": {
+    "latency_ms": {
+      "hotkey_recognition_p95_max": 50,
+      "clipboard_write_p95_max": 50,
+      "existing_tab_activate_p95_max": 300,
+      "reuse_existing_worker_ready_for_paste_p50_max": 250,
+      "reuse_existing_worker_ready_for_paste_p95_max": 750,
+      "reuse_existing_worker_provisional_hard_ceiling": 1500,
+      "restore_discarded_worker_ready_for_paste_p95_max": 2500,
+      "create_new_worker_when_firefox_running_p95_max": 2000,
+      "cold_firefox_start_to_ready_p95_max": 8000,
+      "no_work_hotkey_completion_p95_max": 250
+    },
+    "resource": {
+      "native_helper_working_set_mib_p95_max": 100,
+      "native_helper_plus_extension_incremental_mib_p95_max": 150,
+      "helper_idle_cpu_percent_of_one_logical_cpu_mean_max": 1,
+      "firefox_two_live_worker_tabs_working_set_mib_p95_max": 1536,
+      "firefox_four_live_worker_tabs_working_set_mib_p95_max": 2560,
+      "firefox_two_live_idle_tabs_cpu_percent_of_one_logical_cpu_mean_max": 5,
+      "discard_three_of_four_tabs_total_working_set_reduction_percent_min": 25
+    }
+  },
+  "active_session_policy": {
+    "default_live_general_worker_cap": 2,
+    "rationale": "Preserves the UX-04 two-general-slot design, permits one SENT/UNCONFIRMED worker plus one independently serviceable worker, and bounds browser memory before empirical calibration.",
+    "absolute_v0_live_managed_tab_cap": 4,
+    "burst_cap_conditions": [
+      "Only workflow-required role isolation or explicit benchmark scenario may exceed the default of 2.",
+      "No default cap increase above 2 until real target-machine measurements pass the four-tab resource budget.",
+      "Idle trusted sessions above the default live cap should be candidates for DISCARD rather than retirement when continuity remains safe."
+    ],
+    "reopen_conditions": [
+      "two-live-tab Firefox p95 exceeds 1536 MiB",
+      "four-live-tab Firefox p95 exceeds 2560 MiB",
+      "discarding 3 of 4 tabs reclaims less than 25% total working set",
+      "restore p95 exceeds 2500 ms enough to make discard ergonomically counterproductive",
+      "Firefox comparison review trigger fires"
+    ]
+  },
+  "trial_validity": {
+    "reject_if": [
+      "browser auto-update/restart occurs during sample",
+      "authentication/recovery incident occurs during resource window",
+      "unrelated same-name browser process is present",
+      "sustained unrelated CPU exceeds environment threshold",
+      "collector cannot attribute helper/browser processes without page inspection",
+      "security boundary would need to be weakened to collect a metric"
+    ],
+    "do_not_reject_for": [
+      "normal small run-to-run browser process-count variation",
+      "absence of page-content telemetry"
+    ]
+  },
+  "result_record_shape": {
+    "run_id": "string",
+    "timestamp_utc": "RFC3339",
+    "machine_fingerprint": "non-secret hash of recorded hardware/OS descriptor",
+    "os_build": "string",
+    "browser_name": "firefox|chrome|none",
+    "browser_version": "string|null",
+    "scenario_id": "string",
+    "repetition": "integer",
+    "live_tabs": "integer|null",
+    "discarded_tabs": "integer|null",
+    "working_set_mib_samples": "array<number>",
+    "private_memory_mib_samples": "array<number>",
+    "cpu_one_logical_cpu_percent_samples": "array<number>",
+    "latency_ms": "number|null",
+    "pass_fail": "PASS|FAIL|INVALID",
+    "invalid_reason": "string|null",
+    "notes": "redacted non-content text|null"
+  },
+  "execution_state": {
+    "empirical_results": "NOT_RUN",
+    "blocker": "The v0 helper/extension and deterministic fake-worker workload do not exist yet. Real ChatGPT calibration is also gated by UX-12 implementation and a fresh OpenAI policy/product review.",
+    "next_measurement_owner": "UX-10 simulator + UX-12 implementation spike, with final calibration before UX-13 design freeze"
+  }
+}
