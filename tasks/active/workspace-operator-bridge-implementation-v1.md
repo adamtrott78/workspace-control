@@ -24,16 +24,15 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 0fabe069aa39914f84b00ac78a2f26f57238ef4c
+- Remote checkpoint: 82e5463587efcaaf8471f352a3ad3eb5a3b70537
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_02_windows_helper_kernel from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the primary .NET helper kernel only: tray/master ON-OFF state, Win32 RegisterHotKey adapter, STA write-only clipboard adapter, single-flight dispatch coordinator, content-free structured diagnostics, monotonic timing, and fake application/BrowserPort boundaries. Do not implement Native Messaging, named pipes, Firefox lifecycle, simulator worker behavior, or real-account interaction in Stage 02. Required exit evidence includes hotkey register/unregister/conflict behavior, bridge-OFF no-side-effect behavior, held-repeat/single-flight suppression, last-safe-moment clipboard tests using fake BrowserPort, logging denylist tests, and a recorded helper idle-resource measurement.
+Execute impl_03_native_messaging_and_local_ipc from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement protocol-v1 framing/validation, the helper native-host proxy mode, CurrentUserOnly named-pipe server/client, HELLO/HELLO_ACK version negotiation, request correlation/idempotency, bounded reconnect/disconnect behavior, and per-user native-host manifest generation/registration helpers. Preserve the Stage-02 helper lifetime: browser/native-host proxy disconnect must not terminate the primary tray helper. Do not implement Firefox tab lifecycle or ChatGPT interaction in Stage 03. Required exit evidence includes wrong-version fail-closed, malformed/oversize-frame fail-closed, duplicate request idempotency, same-user/elevation boundary behavior, helper-survives-proxy-disconnect, and protocol-content denylist tests.
 
 ## Remaining work
 
-- impl_02_windows_helper_kernel: Windows helper kernel
 - impl_03_native_messaging_and_local_ipc: Native Messaging proxy and same-user local IPC
 - impl_04_firefox_mv3_adapter: Firefox Manifest V3 browser adapter
 - impl_05_simulator_and_fake_worker: Deterministic simulator and local fake worker

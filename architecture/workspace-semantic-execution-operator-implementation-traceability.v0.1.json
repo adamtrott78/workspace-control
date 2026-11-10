@@ -230,6 +230,37 @@
         ".github/workflows/operator-bridge-validation.yml"
       ],
       "claim": "Build/test/security-contract infrastructure validated; no Stage-02+ runtime behavior claimed."
+    },
+    "impl_02_windows_helper_kernel": {
+      "status": "VALIDATED",
+      "checkpoint": "82e5463587efcaaf8471f352a3ad3eb5a3b70537",
+      "validations": [
+        "Operator Bridge Validation #6 SUCCESS",
+        "Workspace Control Validation #2384 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/src/WorkspaceOperator/Application/**",
+        "operator-bridge/src/WorkspaceOperator/Ports/**",
+        "operator-bridge/src/WorkspaceOperator/Diagnostics/**",
+        "operator-bridge/src/WorkspaceOperator/Windows/**",
+        "operator-bridge/src/WorkspaceOperator/Bootstrap/**",
+        "operator-bridge/tests/WorkspaceOperator.Tests/**",
+        "tests/test_workspace_semantic_execution_operator_bridge_contracts.py"
+      ],
+      "evidence": {
+        "hotkey": "Ctrl+B RegisterHotKey with MOD_NOREPEAT; conflict and unregister behavior unit-tested",
+        "bridge_off": "zero claim/browser/clipboard side effects",
+        "single_flight": "concurrent second dispatch returns BUSY without second claim",
+        "clipboard_order": "prepare -> revalidate -> clipboard -> focus -> LOCAL_PREPARED",
+        "diagnostics": "packet text and exception message content excluded",
+        "idle_ci_smoke": {
+          "duration_seconds": 7.305,
+          "max_working_set_mib": 43.293,
+          "cpu_percent_one_logical_cpu_mean": 1.4973,
+          "interpretation": "CI smoke only; UX-09 target-machine measurement remains authoritative"
+        }
+      },
+      "claim": "Stage-02 local Windows helper kernel validated; no Native Messaging, named pipe, Firefox lifecycle, simulator, or real-account behavior claimed."
     }
   }
 }
