@@ -499,7 +499,8 @@ Potential candidates:
 - Python helper + pystray/global-hotkey library;
 - .NET helper;
 - Rust helper;
-- WebExtension JavaScript/TypeScript.
+- WebExtension JavaScript/TypeScript;
+- purpose-built Windows worker browser/shell, with WebView2 as the first bounded candidate and Electron/CEF or another maintained engine only if they survive security/authentication/maintenance review.
 
 Do not select solely from familiarity; consider startup cost, packaging, RAM, Windows integration, maintainability, and security.
 
@@ -736,10 +737,10 @@ UX-09 is complete at the performance-contract design level with:
 - `benchmarks/workspace-semantic-execution/operator_ux_performance_v1.json`
 - `architecture/workspace-semantic-execution-operator-performance-budget.v0.1.md`
 
-The benchmark contract defines Windows process-level RAM/CPU measurement, matched Firefox-vs-Chrome 0/1/2/4-live-tab scenarios, helper/extension overhead, discard/restore measurement, cold/warm interaction-latency trials, repetition counts, invalid-run rules, and a content-free result schema. OS process metrics are the cross-browser source of truth; browser task managers are diagnostic only.
+The benchmark contract defines Windows process-level RAM/CPU measurement, matched Firefox-vs-Chrome 0/1/2/4-live-tab scenarios plus an optional identically measured custom-worker-shell candidate, helper/extension overhead, discard/restore measurement, cold/warm interaction-latency trials, repetition counts, invalid-run rules, and a content-free result schema. OS process metrics are the cross-browser source of truth; browser task managers are diagnostic only.
 
 The v0 default is now frozen at **two live GENERAL_PERSISTENT worker tabs**, with an **absolute four-live-managed-tab burst ceiling** for role isolation/benchmark/recovery needs. Frozen targets include 1536 MiB p95 for two live Firefox workers, 2560 MiB p95 for four, <=750 ms p95 existing-worker service, <=2000 ms p95 new-tab service with Firefox running, <=2500 ms p95 discarded-tab restore, and <=8000 ms p95 cold start.
 
-UX-09 does not fabricate actual browser measurements before the helper/extension and deterministic worker workload exist. Empirical results are explicitly NOT_RUN and become mandatory downstream evidence: UX-10 supplies the deterministic simulator workload, UX-12 supplies the implementation spike, and real ChatGPT calibration remains gated by the UX-08/OpenAI-policy review before UX-13 production design freeze.
+UX-09 does not fabricate actual browser measurements before the helper/extension and deterministic worker workload exist. Empirical results are explicitly NOT_RUN and become mandatory downstream evidence: UX-10 supplies the deterministic simulator workload, UX-12 supplies the implementation spike and compares the Firefox adapter against a bounded custom-worker-shell candidate, and real ChatGPT calibration remains gated by the UX-08/OpenAI-policy review before UX-13 production design freeze.
 
 The next execution slice is **UX-10 Fake-ChatGPT simulation and prototype contract**.

@@ -31,19 +31,29 @@
       "source": "Google Chrome performance / Memory Saver",
       "url": "https://support.google.com/chrome/answer/12929150",
       "relevance": "Chrome may deactivate inactive tabs; live-tab comparison disables Memory Saver for parity and records its state."
+    },
+    {
+      "source": "Microsoft WebView2 process model / performance guidance",
+      "url": "https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/process-model",
+      "relevance": "A custom Windows worker shell can embed the Edge/WebView2 runtime; it remains multi-process, and sharing one CoreWebView2Environment across tab-like views is the documented memory-efficient pattern."
+    },
+    {
+      "source": "Google OAuth 2.0 embedded user-agent policy",
+      "url": "https://developers.google.com/identity/protocols/oauth2/policies",
+      "relevance": "Embedded user-agents can be disallowed for Google OAuth. Any custom worker browser that cannot complete the user's normal ChatGPT authentication flow without bypasses is non-viable."
     }
   ],
   "target_environment": {
     "os": "target Windows operator workstation; exact edition/build recorded per run",
     "power_mode": "AC power; fixed Windows power mode recorded",
     "network": "same network path for compared latency trials; browser-memory trials do not use response-content timing",
-    "browser_versions": "record exact Firefox and Chrome versions",
+    "browser_versions": "record exact Firefox, Chrome, and any selected custom-shell engine/runtime version",
     "display": "record monitor count/scaling only as context; no screen capture",
     "reboot_policy": "preferred fresh login or confirmed quiescent browser state before each complete replicate",
     "background_noise": "record top-level system available memory and CPU load; reject sample windows with sustained unrelated CPU load above 20% of total CPU"
   },
   "process_measurement": {
-    "isolation_rule": "No unrelated Firefox or Chrome instances may run in the benchmark Windows user session. This makes all same-name browser processes attributable to the benchmark profile without page inspection.",
+    "isolation_rule": "For each adapter trial, no unrelated processes using the same browser/runtime identity may run in the benchmark Windows user session unless the collector has a reviewed process-group attribution mechanism that requires no page inspection.",
     "primary_memory_metric": {
       "id": "browser_working_set_mib",
       "definition": "sum WorkingSet64 across all benchmark browser executable processes in the user session, converted to MiB",
@@ -98,7 +108,32 @@
       "private-memory p50/p95",
       "idle CPU"
     ],
-    "review_trigger": "Reopen the dedicated-Firefox ADR if two-live-tab Firefox p95 exceeds both the frozen 1536 MiB budget and Chrome two-tab p95 by more than 25%, or if it exceeds Chrome by more than 25% and 256 MiB absolute."
+    "review_trigger": "Reopen the dedicated-Firefox ADR if Firefox fails its frozen budgets, materially trails Chrome, or a viable custom worker shell beats Firefox by at least 20% on two-worker p95 working set or by at least 25% on cold-start/reuse latency without weakening security, authentication, maintainability, or recovery.",
+    "custom_worker_browser_candidate": {
+      "status": "OPEN_FOR_UX_12_SELECTION",
+      "objective": "Allow a purpose-built worker shell to compete with Firefox rather than assuming a general-purpose browser is permanently optimal.",
+      "initial_windows_candidate": "WebView2-based shell sharing one CoreWebView2Environment across worker views",
+      "secondary_candidates": [
+        "Electron/Chromium shell",
+        "CEF/Chromium shell",
+        "other maintained browser engine with explicit Windows embedding support"
+      ],
+      "required_properties": [
+        "Preserve manual Ctrl+V + Enter and UX-08 no-content boundary.",
+        "Expose browser lifecycle/focus/navigation-origin metadata without DOM/output inspection.",
+        "Provide isolated persistent user-data/profile state for WorkspaceWorkers.",
+        "Support multiple logical worker views with deterministic slot/generation binding.",
+        "Support unload/suspend/close semantics sufficient for the two-live/default and four-live/burst policies.",
+        "Complete normal ChatGPT authentication manually without cookie copying, token extraction, private endpoint use, or safeguard bypass.",
+        "Remain maintainable and securely updatable."
+      ],
+      "hard_rejection_conditions": [
+        "Normal authentication is blocked by the embedded user-agent and would require cookie/session transfer or product-policy circumvention.",
+        "The shell requires ChatGPT DOM/content automation to recover or route sessions.",
+        "Security patch/update burden is materially worse than the Firefox-extension design without a compensating measured benefit."
+      ],
+      "benchmark_rule": "If UX-12 produces a viable custom shell, run the same 0/1/2/4-worker, cold-start, reuse, restore/suspend, and helper-overhead scenarios before UX-13."
+    }
   },
   "scenario_groups": [
     {
@@ -112,9 +147,13 @@
         "Chrome baseline profile with zero worker tabs",
         "Chrome with 1 live worker tab",
         "Chrome with 2 live worker tabs",
-        "Chrome with 4 live worker tabs"
+        "Chrome with 4 live worker tabs",
+        "If UX-12 selects a viable custom worker shell: custom shell open with zero worker views",
+        "If selected: custom shell with 1 live worker view",
+        "If selected: custom shell with 2 live worker views",
+        "If selected: custom shell with 4 live worker views"
       ],
-      "order_policy": "Alternate browser order between complete replicates; within a browser, run 0 -> 1 -> 2 -> 4 tabs."
+      "order_policy": "Firefox and Chrome remain mandatory baselines. If a custom shell exists, rotate all three adapter orders across replicates; within each adapter run 0 -> 1 -> 2 -> 4 live workers."
     },
     {
       "id": "MEM_BRIDGE_OVERHEAD",
@@ -230,8 +269,8 @@
     "timestamp_utc": "RFC3339",
     "machine_fingerprint": "non-secret hash of recorded hardware/OS descriptor",
     "os_build": "string",
-    "browser_name": "firefox|chrome|none",
-    "browser_version": "string|null",
+    "browser_name": "firefox|chrome|custom_shell|none",
+    "browser_version": "browser or embedded runtime version string|null",
     "scenario_id": "string",
     "repetition": "integer",
     "live_tabs": "integer|null",
@@ -246,7 +285,7 @@
   },
   "execution_state": {
     "empirical_results": "NOT_RUN",
-    "blocker": "The v0 helper/extension and deterministic fake-worker workload do not exist yet. Real ChatGPT calibration is also gated by UX-12 implementation and a fresh OpenAI policy/product review.",
+    "blocker": "The v0 helper/extension, deterministic fake-worker workload, and any custom-shell spike do not exist yet. Real ChatGPT calibration is also gated by UX-12 implementation and a fresh OpenAI policy/product review.",
     "next_measurement_owner": "UX-10 simulator + UX-12 implementation spike, with final calibration before UX-13 design freeze"
   }
 }

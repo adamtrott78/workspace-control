@@ -17,7 +17,7 @@ Therefore:
 
 - numerical budgets are frozen now;
 - the default live-worker policy is frozen now;
-- actual target-machine Firefox/Chrome results are explicitly **NOT RUN**;
+- actual target-machine Firefox/Chrome results are explicitly **NOT RUN**; any UX-12-selected custom worker shell is also unmeasured;
 - those results are mandatory before UX-13 can treat the operator bridge as production-ready.
 
 This satisfies the UX-09 design acceptance gate without pretending unmeasured numbers are evidence.
@@ -79,6 +79,29 @@ or when Firefox exceeds Chrome by both:
 - more than 256 MiB absolute.
 
 This is a review trigger, not an automatic architecture reversal. Isolation, security, extension capability, and recovery behavior still matter.
+
+### Custom worker browser candidate
+
+The browser adapter remains replaceable. A purpose-built Windows worker shell is now an explicit UX-12 candidate rather than an out-of-scope idea.
+
+The first bounded candidate is a **WebView2-based worker shell** using one shared `CoreWebView2Environment` for all worker views. Microsoft documents that WebView2 uses an Edge-like multi-process model and recommends sharing one environment across controls to reduce duplicated process/resource overhead:
+https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/process-model
+https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/performance
+
+Other maintained candidates such as Electron/Chromium or CEF may be compared, but a custom shell is not automatically "lighter" merely because it removes browser chrome. Electron also inherits Chromium's multi-process architecture.
+
+The hard gate is **authentication compatibility without bypasses**. Google explicitly disallows OAuth requests in embedded user-agents under developer control. Because ChatGPT authentication may involve external identity providers, UX-12 must test the ordinary manual login path. If a shell cannot authenticate normally without cookie copying, token extraction, request replay, private endpoints, or safeguard circumvention, it is rejected:
+https://developers.google.com/identity/protocols/oauth2/policies
+
+If a viable custom shell exists, it must run the same 0/1/2/4-worker resource and latency matrix as Firefox and Chrome. It becomes a preferred replacement candidate only if it materially improves measured performance while preserving:
+- manual Ctrl+V + Enter;
+- UX-08 no-content/no-synthetic-input boundary;
+- secure updates;
+- session isolation;
+- recovery/generation fencing;
+- maintainable browser-engine lifecycle.
+
+A custom shell beating Firefox by at least 20% on two-worker p95 working set or at least 25% on cold-start/reuse latency is sufficient to trigger a browser-adapter architecture review, not automatic adoption.
 
 ## 4. Frozen latency budgets
 
@@ -229,7 +252,7 @@ Before UX-13 production freeze:
 - measure only OS/browser process metrics;
 - never inspect or collect response content.
 
-This calibration answers the roadmap's "actual Firefox vs Chrome memory under this workload" question.
+This calibration answers the roadmap's browser-adapter memory question. Firefox and Chrome are mandatory baselines; any viable UX-12-selected custom worker shell is measured under the same workload.
 
 ## 11. Fail/reopen conditions
 
@@ -243,7 +266,8 @@ UX-13 must reopen the relevant architecture/session decision if any of these per
 - cold-start p95 > 8 seconds;
 - discard reclaims <25% of four-tab working set;
 - restore p95 > 2500 ms;
-- Firefox-vs-Chrome review trigger fires.
+- Firefox-vs-Chrome review trigger fires;
+- a viable custom worker shell meets the material-improvement review trigger.
 
 A measurement must never be "fixed" by widening UX-08 permissions or adding ChatGPT content automation.
 
