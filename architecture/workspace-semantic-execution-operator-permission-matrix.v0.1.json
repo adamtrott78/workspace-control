@@ -98,10 +98,10 @@
     ]
   },
   "native_messaging_host_manifest": {
-    "name": "fixed package identifier; literal selected in UX-12",
+    "name": "com.workspacecontrol.operator_bridge",
     "path": "fixed installed helper executable path",
     "type": "stdio",
-    "allowed_extensions": "exact packaged Firefox extension ID only; no wildcard",
+    "allowed_extensions": "workspace-control-operator@adamtrott78.local only",
     "helper_message_policy": "extension may report browser results/events tied to outstanding request IDs; it may not originate authority-affecting commands"
   },
   "dedicated_profile": {
@@ -115,18 +115,35 @@
       "bridge does not parse profile databases",
       "arbitrary non-managed ChatGPT tabs are not adopted"
     ],
-    "exact_launch_flags_validation_owner": "UX-12"
+    "exact_launch_flags_validation_owner": "UX-12 implementation smoke test; named-profile and explicit-profile-path forms must be tested on target Windows host before release"
   },
   "permission_change_gate": {
     "rule": "Any new WebExtension/host permission, content script, helper OS privilege, page-content access, network listener, or synthetic-input capability requires new security review and ADR.",
     "fail_closed": true
   },
   "ux12_validation_required": [
-    "target Firefox Manifest/API compatibility",
-    "tabs.onUpdated behavior on ChatGPT/auth flows",
-    "sessions tab-value recovery",
-    "Native Messaging host installation/allowlist on Windows",
-    "dedicated-profile coexistence flags",
-    "fresh OpenAI terms/product review before real-account test"
-  ]
+    "IMPLEMENTATION SMOKE: target Firefox loads signed MV3 extension and event-page background",
+    "IMPLEMENTATION SMOKE: tabs.onUpdated managed-origin reduction emits no raw URL",
+    "IMPLEMENTATION SMOKE: sessions tab-value recovery across expected restart/restore",
+    "IMPLEMENTATION SMOKE: Native Messaging host install/allowlist/protocol handshake",
+    "IMPLEMENTATION SMOKE: dedicated-profile launch/coexistence behavior on target host",
+    "PRE-REAL-ACCOUNT: fresh OpenAI terms/product review",
+    "PRE-CUSTOM-SHELL-PROMOTION: normal manual ChatGPT authentication without workaround"
+  ],
+  "ux12_validation": {
+    "reviewed_on": "2026-11-09",
+    "firefox_minimum": "ESR 153.0",
+    "manifest_version": 3,
+    "background_model": "background.scripts event page; Firefox extension service_worker not used",
+    "extension_id": "workspace-control-operator@adamtrott78.local",
+    "native_host_name": "com.workspacecontrol.operator_bridge",
+    "native_host_install": "per-user HKCU Mozilla NativeMessagingHosts registration with absolute installed helper path",
+    "local_ipc": "CurrentUserOnly asynchronous named pipe; same user and elevation level required",
+    "protocol_ref": "architecture/workspace-semantic-execution-operator-native-messaging-protocol.v0.1.json",
+    "frame_cap_bytes": 65536,
+    "signed_distribution": "AMO-signed unlisted/self-distributed XPI; no unsigned production bypass",
+    "custom_shell": "WebView2 spike only; normal authentication + security/performance/usability gates required before promotion",
+    "openai_boundary": "rechecked; automatic/programmatic Output extraction and safeguard/restriction circumvention remain prohibited",
+    "result": "PASS_FOR_IMPLEMENTATION_DESIGN"
+  }
 }

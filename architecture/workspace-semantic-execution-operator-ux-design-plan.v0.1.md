@@ -772,4 +772,22 @@ Ctrl+B is now explicitly provisional as a **physical binding**, not as scheduler
 
 Empirical usability results remain NOT_RUN until the UX-10 simulator and UX-12 implementation spike exist.
 
-The next execution slice is **UX-12 Implementation stack and prototype plan**.
+UX-12 is complete at the implementation-contract design level with:
+
+- `architecture/workspace-semantic-execution-operator-implementation-stack-comparison.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-adr-dotnet-helper.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-adr-browser-adapter-stack.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-native-messaging-protocol.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-implementation-plan.v0.1.md`
+
+The selected v0 local stack is .NET 10 LTS/C# + WinForms for the Windows helper, using Win32 RegisterHotKey, STA write-only Clipboard, NotifyIcon, and a CurrentUserOnly named pipe. The helper is published self-contained/single-file for win-x64 and installed per-user. Firefox Native Messaging launches a bounded proxy mode of the same helper executable; the primary tray helper remains independent of Firefox lifetime.
+
+The selected production browser baseline is Firefox ESR 153+ with a plain-JavaScript Manifest V3 extension using only nativeMessaging, tabs, and sessions. Firefox MV3 uses a background.scripts event page, not an extension service worker. The extension has no host permissions/content scripts and immediately reduces managed-tab URL metadata to CHATGPT_ORIGIN/OFF_CHATGPT_ORIGIN/UNKNOWN.
+
+The browser protocol is frozen at v1.0 with a 64 KiB frame cap, request/idempotency/generation identity, typed commands/results/events, no arbitrary URL command, no packet body, no raw URL, and fail-closed unknown-version/message semantics.
+
+A .NET 10 + Evergreen WebView2 custom worker shell remains a first-class bounded spike behind the same BrowserPort. It cannot replace Firefox unless normal manual ChatGPT authentication works without cookie/token import, user-agent evasion, private endpoints, or other bypasses and it materially wins the frozen performance/usability gates.
+
+Packaging is explicit and auditable: signed unlisted Firefox XPI, per-user helper/native-host installation, no administrator requirement, and no unattended auto-updater in v0. Current OpenAI Terms were re-checked and the UX-08 no-extraction/no-circumvention boundary remains unchanged.
+
+The next execution slice is **UX-13 Integrated design review and UX design freeze**.

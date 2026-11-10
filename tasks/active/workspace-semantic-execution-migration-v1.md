@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Begin UX-12 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: perform the implementation-stack spike/design. Compare native helper options (including .NET/Rust/Python as bounded candidates), Firefox WebExtension implementation, Native Messaging/local IPC, packaging/install/update, diagnostics, and the custom worker-browser candidate introduced in UX-09. Validate exact target Firefox APIs/permissions and custom-shell authentication feasibility, choose the smallest maintainable stack, define versioned Native Messaging/browser-adapter protocol schemas, simulator implementation boundaries, and a prototype plan. Do not change the manual Ctrl+V + Enter boundary or broaden ChatGPT page access.
+Begin UX-13 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: perform the integrated design review across requirements, journeys, architecture, action/session state machines, hotkey/clipboard, console/recovery, UX-08 security boundary, UX-09 budgets, UX-10 simulator, UX-11 usability gates, and UX-12 implementation stack/protocol. Produce the operator UX design review, resolved/open findings ledger, and design-freeze checkpoint. Distinguish design blockers from implementation/measurement gates: UX-09 empirical browser/RAM results, UX-11 human-in-loop results, WebView2 authentication feasibility, and real-account calibration remain future evidence and must not be marked complete merely because their contracts are frozen.
 
 ## Remaining work
 
