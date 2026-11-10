@@ -36,22 +36,20 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-After corrected-head independent review acceptance, execute exactly one bounded Lambda operator transaction. Before any start, require controller SHA256=9a262495d8c52877ad79d852dbd2a8987961dd0470c895cb39b45eb896590ed9; controller unit SHA256=76a6d05139cc38c43f474ea823cfd88514d127b9cacaf783f46a251410ad7831; maintenance service SHA256=6f37085b0b619768ef927e16c4d5e42e01090b71a7a32305b19b6e5a4cfb167c; provisioner Git blob=f0173ec2e8749699a5c94abea6d2270aa19a4387; runtime Git blob=5803ba1fedbcd66e3c9058b9d3cd32740596baad; root admission policy lambda_ci_multirepo.py Git blob=cf534343119ebde2a338ea592369ce36374a88b3; workspace-control CPU inactive/dead; research-engine CPU/GPU inactive; PADataset CPU/GPU active; provisioner and maintenance active; no active transient execution. Any mismatch aborts before start and must be reported as observed evidence. If and only if every predicate passes, start only workspace-ci-controller@workspace-control-cpu.service. No reset/reconcile/retrigger/research-engine mutation is authorized.
+Execute the exact reviewed root-only preflight from PR #597 head 1db6e45c8fb6d03e470aebbddf27d31790a3f801. Require controller SHA256 9a262495d8c52877ad79d852dbd2a8987961dd0470c895cb39b45eb896590ed9; controller-unit SHA256 76a6d05139cc38c43f474ea823cfd88514d127b9cacaf783f46a251410ad7831; maintenance SHA256 6f37085b0b619768ef927e16c4d5e42e01090b71a7a32305b19b6e5a4cfb167c; provisioner Git blob f0173ec2e8749699a5c94abea6d2270aa19a4387; runtime Git blob 5803ba1fedbcd66e3c9058b9d3cd32740596baad; root-policy Git blob cf534343119ebde2a338ea592369ce36374a88b3; workspace-control CPU inactive/dead; research-engine CPU/GPU inactive; PADataset CPU/GPU active/running; provisioner and maintenance active/running; and no active transient project execution. Abort on any mismatch. If all pass, start only workspace-ci-controller@workspace-control-cpu.service. No reset/reconcile/recreate/retrigger/research-engine mutation.
 
 ## Remaining work
 
-- Validate the corrected PR #597 head.
-- Obtain fresh independent authority-sensitive corrected-head re-review.
-- Only after acceptance, run one fail-closed Lambda preflight that hashes every authority-bearing installed component including lambda_ci_multirepo.py and verifies supporting service/lane state.
-- If every predicate passes, start only workspace-ci-controller@workspace-control-cpu.service.
-- Use Workspace Shell unit_state and GitHub Actions evidence to verify controller health and run #389 acquisition/completion.
-- Do not reset/reconcile/recreate scale sets, touch research-engine recovery state, widen admission/capacity, or retrigger workflows.
+- Run the reviewed fail-closed root preflight on Lambda.
+- If and only if every exact identity/state predicate passes, start only workspace-ci-controller@workspace-control-cpu.service.
+- Immediately verify the controller through Workspace Shell and observe run #389 for runner acquisition/completion.
+- Record the live recovery receipt and disposition in durable task state.
 
 ## Blockers / gates
 
-- Fresh corrected-head authority-sensitive re-review is required after BF-1/BF-2 corrections.
-- Operator preflight must prove exact known-good controller/unit/maintenance identities; provisioner blob f0173ec2e8749699a5c94abea6d2270aa19a4387; runtime blob 5803ba1fedbcd66e3c9058b9d3cd32740596baad; and root admission-policy blob cf534343119ebde2a338ea592369ce36374a88b3. Any mismatch aborts before start.
-- If lambda_ci_multirepo.py is not cf534343119ebde2a338ea592369ce36374a88b3, do not infer that 1edc048f259f86ddbf750a5534449606119b2eca is authorized; record the actual identity and open a separate provenance/installation gate.
+- Root-only live preflight remains required before start: exact installed controller/unit/maintenance SHA256 identities; provisioner/runtime/root-policy Git blobs; required sibling lane/service states; and no active transient execution.
+- Connected Workspace Shell can directly prove workspace-control CPU is loaded/inactive/dead/MainPID=0 and maintenance is active/running, but intentionally cannot read /opt provisioner/controller files or sibling controller units; those predicates must be proved in the reviewed operator transaction.
+- Any live identity/state mismatch aborts before controller start. No reset/reconcile/recreate/retrigger/research-engine mutation is authorized.
 
 ## Fresh-chat initialization
 
