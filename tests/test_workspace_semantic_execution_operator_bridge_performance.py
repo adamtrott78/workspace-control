@@ -321,6 +321,8 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("STAGE09_TARGET_PREFLIGHT_ONLY=PASS", matrix)
         self.assertIn("stage09-preflight-diagnostics", matrix)
         self.assertIn("$PreflightOnly", collector)
+        self.assertIn("preflight produced no result evidence", collector)
+        self.assertIn("preflight emitted failing or invalid evidence", collector)
 
     def test_stage09_target_bootstrap_restores_machine_state(self):
         matrix = (
