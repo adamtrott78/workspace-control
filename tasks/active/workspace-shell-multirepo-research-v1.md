@@ -36,20 +36,21 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Validate the current PR #595 head, whose implementation checkpoint is c8eca3ddc7915b6bc5ce1e40bc0f8866c8d7be89 and whose following commit is derived state synchronization only. Do not run the live upgrade until that exact PR head passes the Workspace Shell/PADataset Python contract suite. Then run the upgrade from the exact validated head; it must clone PADataset execution source at 17e1147614f27702e43565089d618182ff71c5af and bind the untouched historical checkout read-only under /srv/workspace-shell/PADataset-evidence.
+Read only the concise workspace-shell-mcp.service crash excerpt from the Lambda journal, identify the startup exception, patch and exact-head validate the smallest server-side fix, deploy it without changing the already-frozen external MCP schema, then use the canonical plugin workflow's Refresh tools step.
 
 ## Remaining work
 
-- Run exact-head repository validation for the historical-evidence redesign and fix any regressions.
-- Execute the live upgrade from the validated head; preserve the 107 GB historical checkout in place and expose it only by read-only bind mount.
-- Reinstall/re-register the Workspace Shell plugin once so ChatGPT discovers the frozen PADataset/research-bounded tool schema.
+- Capture concise workspace-shell-mcp.service startup exception; do not collect additional tunnel logs unless the MCP frontend becomes healthy but discovery still fails.
+- Implement and exact-head validate the smallest MCP frontend crash fix without changing the frozen external MCP schema.
+- Deploy the server-side fix and verify 127.0.0.1:8797 is listening and the MCP service is active.
+- Use Manage -> Refresh tools on the existing Workspace Shell app and verify PADataset plus file-list/file-read/file-hash/research-bounded in the model-visible schema.
 - Run live positive and negative Workspace Shell acceptance for PADataset.
 - Hand control back to the MTH602 Stage 00 provenance recovery task.
 - Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
 
 ## Blockers / gates
 
-- None.
+- Live workspace-shell-mcp.service is crash-looping after the validated multirepo deployment. workspace-shell-tunnel.service remains active and resolves main to 127.0.0.1:8797 with mTLS, but no local listener exists on 8797; ChatGPT Refresh tools therefore fails.
 
 ## Fresh-chat initialization
 
