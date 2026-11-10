@@ -707,4 +707,13 @@ UX-06 is complete at the information-architecture level with:
 
 The persistent indicator now has one primary semantic: `READY_MANUAL_CYCLES`, meaning the number of Ctrl+B → Ctrl+V → Enter cycles serviceable now. Secondary counts separate NEW, REUSE, ROTATE/RETIRE, SENT/UNCONFIRMED, GATES, RECOVERY, and BLOCKED. Routine ready work is silent/pull-oriented; judgment, recovery, bridge-blocking failures, and critical local integrity issues may request attention.
 
-The next execution slice is **UX-07 Error, interruption, and recovery UX**.
+UX-07 is complete at the recovery-design level with:
+
+- `architecture/workspace-semantic-execution-operator-recovery.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-recovery-signal-catalog.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-recovery-fmea.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-recovery-state-machine.v0.1.md`
+
+The recovery design defines ACTION, SESSION, AUTH_DOMAIN, and LOCAL_BRIDGE scopes; blocking vs nonblocking recovery; Ctrl+B behavior during recovery; helper/Firefox/extension/orchestrator failures; lost tabs; unconfirmed/restaged packets; stale old-generation replies; sleep/reboot; wrong profile; executor mismatch; and idempotent recovery incidents. Authentication refresh is explicitly profile-scoped: affected sessions become UNKNOWN, durable acknowledgments are reconciled once, unresolved old-generation actions are superseded, generations advance, and replacement sessions rebuild from durable checkpoints. Browser-chrome auth/navigation signals are a design candidate only and remain subject to UX-08 permission/security review and UX-12 API validation.
+
+The next execution slice is **UX-08 Security, privacy, and OpenAI interaction-boundary review**.
