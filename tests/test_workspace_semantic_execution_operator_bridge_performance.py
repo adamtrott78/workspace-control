@@ -324,6 +324,9 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         )
         self.assertIn("$originalChromeMemorySaverPolicy", matrix)
         self.assertIn("PSExecutionPolicyPreference: Bypass", workflow)
+        target_block = workflow.split("  target-performance:", 1)[1]
+        self.assertIn("shell: powershell", target_block)
+        self.assertNotIn("shell: pwsh", target_block)
         self.assertIn("stage09-performance-unsigned.xpi", workflow)
 
 
