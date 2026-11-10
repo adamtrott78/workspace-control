@@ -102,12 +102,13 @@ try {
   $webExtArgs = @(
     "run",
     "--source-dir=$extensionStage",
-    "--firefox=$firefox",
+    "--firefox=\`"$firefox\`"",
     "--no-reload",
     "--no-input",
     "--arg=-headless",
     "--arg=-no-remote"
   )
+  Write-Host ("STAGE06_WEB_EXT_ARGS=" + ($webExtArgs -join " "))
   $webExtProcess = Start-Process -FilePath $webExt -ArgumentList $webExtArgs -RedirectStandardOutput $webExtOut -RedirectStandardError $webExtErr -PassThru
 
   if (-not $runner.WaitForExit(90000)) {
