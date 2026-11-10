@@ -32,6 +32,8 @@ jobs:
     steps:
       - name: Checkout tested tree
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up .NET 10 LTS
         uses: actions/setup-dotnet@v6
@@ -100,6 +102,26 @@ jobs:
         with:
           name: operator-bridge-stage07-${{ github.sha }}
           path: benchmarks/workspace-semantic-execution/operator_bridge/stage07-firefox-result.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Run Stage 08 per-user packaging/install/upgrade/rollback smoke
+        shell: pwsh
+        env:
+          OPERATOR_BRIDGE_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/packaging/stage08-smoke.ps1 -RepositoryRoot "${{ github.workspace }}" -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage08-packaging-evidence.json"
+
+      - name: Upload Stage 08 content-free packaging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage08-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            benchmarks/workspace-semantic-execution/operator_bridge/stage08-packaging-evidence.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage08-package-a.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage08-package-b.json
           if-no-files-found: ignore
           retention-days: 14
 
