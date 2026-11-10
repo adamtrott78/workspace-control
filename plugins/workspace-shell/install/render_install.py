@@ -168,6 +168,7 @@ def render(args):
 
     source_root = "/srv/workspace-shell/workspace-control"
     padataset_root = "/srv/workspace-shell/PADataset"
+    padataset_evidence_root = "/srv/workspace-shell/PADataset-evidence"
     receipt_root = "/var/lib/workspace-shell/receipts"
     control_root = "/run/workspace-shell-control"
     runtime_root = "/opt/workspace-shell/runtime/plugins/workspace-shell"
@@ -199,6 +200,7 @@ def render(args):
         "worker_gid": worker_gid,
         "profile_manifest": "/etc/workspace-shell/profiles.v1.json",
         "source_roots": {"workspace-control": source_root, "PADataset": padataset_root},
+        "evidence_roots": {"PADataset": padataset_evidence_root},
         "scratch_root": "/var/lib/workspace-shell/jobs",
         "receipt_root": receipt_root,
         "bwrap_path": "/usr/bin/bwrap",
