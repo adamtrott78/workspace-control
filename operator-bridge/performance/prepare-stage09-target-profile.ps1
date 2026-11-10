@@ -78,17 +78,40 @@ function Remove-StaleOwnedProfileRegistration {
     }
 
     $match = $matches[0]
-    if ($match.IsRelative -ne "0") {
-        throw "Refusing to remove a relative WorkspaceWorkers Firefox profile registration."
-    }
     if ([string]::IsNullOrWhiteSpace([string]$match.Path)) {
         throw "Stage 09 WorkspaceWorkers Firefox profile registration is missing its path."
     }
 
-    $registeredPath = [System.IO.Path]::GetFullPath([string]$match.Path)
     $expectedPath = [System.IO.Path]::GetFullPath($ExpectedProfilePath)
-    if ($registeredPath -ne $expectedPath) {
-        throw "Refusing to remove a WorkspaceWorkers Firefox profile registration outside the owned Stage 09 path."
+    if ($match.IsRelative -eq "0") {
+        $registeredPath = [System.IO.Path]::GetFullPath([string]$match.Path)
+        if ($registeredPath -ne $expectedPath) {
+            throw "Refusing to remove an absolute WorkspaceWorkers Firefox profile registration outside the owned Stage 09 path."
+        }
+    } elseif ($match.IsRelative -eq "1") {
+        # Firefox Refresh may replace the dedicated custom-path profile with a
+        # same-name relative profile under Firefox's normal Profiles root.
+        # Reconcile only the registration; never delete the refreshed profile
+        # files. The frozen WorkspaceWorkers name remains reserved for Stage 09.
+        $firefoxRoot = [System.IO.Path]::GetFullPath(
+            (Join-Path $env:APPDATA "Mozilla\Firefox")
+        )
+        $profilesRoot = [System.IO.Path]::GetFullPath(
+            (Join-Path $firefoxRoot "Profiles")
+        )
+        $registeredPath = [System.IO.Path]::GetFullPath(
+            (Join-Path $firefoxRoot ([string]$match.Path))
+        )
+        $profilesPrefix = $profilesRoot.TrimEnd([char]92) + [char]92
+        if (-not $registeredPath.StartsWith(
+            $profilesPrefix,
+            [System.StringComparison]::OrdinalIgnoreCase
+        )) {
+            throw "Refusing to remove a relative WorkspaceWorkers registration outside Firefox Profiles."
+        }
+        Write-Host "STAGE09_TARGET_PROFILE_REFRESH_REGISTRATION_RECONCILED=PASS"
+    } else {
+        throw "Stage 09 WorkspaceWorkers profile registration has an invalid IsRelative value."
     }
 
     $remaining = [System.Collections.Generic.List[string]]::new()
