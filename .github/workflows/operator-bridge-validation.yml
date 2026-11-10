@@ -148,6 +148,13 @@ jobs:
           New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
           ./operator-bridge/tools/run-stage09-ci.ps1 -RepositoryRoot "${{ github.workspace }}" -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-performance.json"
 
+      - name: Build Stage 09 fake-worker Mozilla signing input
+        shell: pwsh
+        run: |
+          ./operator-bridge/performance/build-stage09-performance-xpi.ps1 `
+            -RepositoryRoot "${{ github.workspace }}" `
+            -OutputPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage09-performance-unsigned.xpi"
+
       - name: Upload Stage 09 non-target content-free performance evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -156,6 +163,8 @@ jobs:
           path: |
             benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-performance.json
             benchmarks/workspace-semantic-execution/operator_bridge/stage09-target-plan.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-performance-unsigned.xpi
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-performance-unsigned.xpi.json
           if-no-files-found: ignore
           retention-days: 14
 
@@ -215,6 +224,8 @@ jobs:
     needs: validation
     runs-on: [self-hosted, windows, x64, workspace-operator-target]
     timeout-minutes: 300
+    env:
+      PSExecutionPolicyPreference: Bypass
 
     steps:
       - name: Checkout exact target benchmark head
