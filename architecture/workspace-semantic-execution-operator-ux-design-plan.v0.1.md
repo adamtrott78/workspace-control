@@ -643,4 +643,11 @@ UX-00 is complete at the design-baseline level with:
 
 The forced-login/all-tabs-refresh condition is recorded as mandatory recoverability requirement `SESSION_AUTH_REFRESH_ALL_TABS`, with detailed recovery owned by UX-07 and session-policy implications owned by UX-04.
 
-The next execution slice is **UX-01 Operator journey and task-flow inventory**.
+UX-01 is complete at the design-baseline level with:
+
+- `architecture/workspace-semantic-execution-operator-journeys.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-flow-catalog.v0.1.json`
+
+The catalog covers 42 operator-visible journeys across normal service, session maintenance, authentication/continuity, acknowledgment/retry, helper/browser lifecycle, clipboard/focus races, scheduler/authority gates, executor mismatch, resource pressure and batch completion.
+
+The next execution slice is **UX-02 System context and architecture boundary design**.
