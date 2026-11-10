@@ -51,3 +51,17 @@ Validate the final PR #598 head. If green, request fresh authority-sensitive rev
 - Fresh authority-sensitive review is required on the final PR #598 head after this task-state binding and on the bounded one-file live repair transaction.
 - Live installed manifest must semantically equal the exact pre-repair base manifest before replacement; any drift aborts.
 - Any live identity/state mismatch aborts before mutation. No reconcile, provisioner restart, sibling mutation, scale-set operation, workflow cancel/retrigger, or admission/capacity widening is authorized.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
