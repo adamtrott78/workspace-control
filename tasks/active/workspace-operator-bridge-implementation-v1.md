@@ -24,16 +24,15 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: c001bbda287f05ce3f2ceae7e003e3552903fd9c
+- Remote checkpoint: ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_04_firefox_mv3_adapter from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the Firefox MV3 BrowserPort adapter using only nativeMessaging/tabs/sessions: HELLO/HELLO_ACK connection, exact managed binding metadata in sessions, create/activate/reload-or-restore/discard/close/inventory operations, immediate raw-URL-to-origin-enum reduction, adapter events, request/result correlation, and idempotent duplicate command handling. Keep the extension content-blind: no host permissions, content scripts, activeTab, scripting, webNavigation, webRequest, cookies, clipboard permissions, DOM/page/output access, or automatic input. Do not implement simulator worker behavior or real ChatGPT account calibration. Required exit evidence includes exact permission allowlist, no raw URL over IPC, no packet/credential metadata in bindings, managed-only lifecycle, duplicate-command idempotency, and unmanaged-tab adoption rejection.
+Execute impl_05_simulator_and_fake_worker from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the UX-10 deterministic fake-worker environment only: fake OperatorAction/session/durable-event stores, fake worker surface/service, Scenario Controller, virtual clock, fault injector, SIM_HUMAN_SUBMIT test-only boundary, content-free trace hashing, and explicit production/simulator build separation. Exercise the required L0/L1 simulator fixtures first. Do not integrate with a real ChatGPT account, and do not make SIM_HUMAN_SUBMIT or fault controls reachable from production Native Messaging/helper runtime. Required exit evidence includes simulator-only endpoint absence from production package/protocol, payload-hash mismatch cannot acknowledge, generation fencing/idempotency, deterministic virtual-time behavior, and required UX-10 L0/L1 scenario passes.
 
 ## Remaining work
 
-- impl_04_firefox_mv3_adapter: Firefox Manifest V3 browser adapter
 - impl_05_simulator_and_fake_worker: Deterministic simulator and local fake worker
 - impl_06_integrated_local_bridge_e2e: Real helper + Firefox + fake-worker integration
 - impl_07_recovery_and_fault_closure: Crash, auth-domain, stale-generation, restart, and recovery closure

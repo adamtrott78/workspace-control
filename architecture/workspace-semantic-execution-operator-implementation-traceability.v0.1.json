@@ -298,6 +298,39 @@
         }
       },
       "claim": "Stage-03 transport boundary validated; no Firefox tab lifecycle, simulator, or real-account behavior claimed."
+    },
+    "impl_04_firefox_mv3_adapter": {
+      "status": "VALIDATED",
+      "checkpoint": "ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436",
+      "validations": [
+        "Operator Bridge Validation #12 SUCCESS",
+        "Workspace Control Validation #2390 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/src/FirefoxAdapter/manifest.json",
+        "operator-bridge/src/FirefoxAdapter/adapter_core.js",
+        "operator-bridge/src/FirefoxAdapter/background.js",
+        "operator-bridge/tests/FirefoxAdapter.Tests/firefox_adapter.test.js",
+        "tests/test_workspace_semantic_execution_operator_bridge_firefox.py"
+      ],
+      "evidence": {
+        "node_mocked_browser_tests": {
+          "tests": 10,
+          "pass": 10,
+          "fail": 0
+        },
+        "permissions": [
+          "nativeMessaging",
+          "tabs",
+          "sessions"
+        ],
+        "managed_identity": "sessions metadata only; unmanaged ChatGPT tabs are never adopted",
+        "navigation": "fixed https://chatgpt.com/ start URL; no command-supplied arbitrary URL",
+        "url_boundary": "raw URL reduced locally to CHATGPT_ORIGIN/OFF_CHATGPT_ORIGIN/UNKNOWN before IPC",
+        "idempotency": "duplicate same request/key returns cached result; conflicting key rejected",
+        "generation_fencing": "expected binding generation mismatch rejects lifecycle mutation"
+      },
+      "claim": "Stage-04 Firefox BrowserPort adapter validated with mocked browser APIs; no simulator worker or real-account behavior claimed."
     }
   }
 }

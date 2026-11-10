@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "impl_04_firefox_mv3_adapter",
+  "current_stage": "impl_05_simulator_and_fake_worker",
   "acceptance_criteria": [
     "Implementation remains traceable to the UX-13 freeze at exact workspace-control SHA 0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
     "Every stage has explicit dependencies, outputs, validation, and exact-head durable evidence before promotion.",
@@ -49,7 +49,7 @@
       "base_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "c001bbda287f05ce3f2ceae7e003e3552903fd9c",
+        "checkpoint_sha": "ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436",
         "verified": true
       },
       "local": null,
@@ -206,7 +206,7 @@
     },
     {
       "id": "impl_04_firefox_mv3_adapter",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
@@ -221,14 +221,35 @@
         "sessions binding metadata",
         "managed-origin classification"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 04 Firefox MV3 browser adapter",
+          "result": "PASS",
+          "evidence": [
+            "Stage-04 Firefox adapter implementation validated at workspace-control@ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436.",
+            "Operator Bridge Validation run 42762550362 / #12 SUCCESS on the exact Stage-04 code head.",
+            "Workspace Control Validation run 42762550131 / #2390 SUCCESS on the exact Stage-04 code head.",
+            "The dedicated Node 24 test gate ran 10 mocked-browser tests with 10 PASS / 0 FAIL.",
+            "Firefox manifest permissions remain exactly nativeMessaging, tabs, sessions; no host_permissions, content_scripts, activeTab, scripting, webNavigation, webRequest, cookies, or clipboard permissions are present.",
+            "Managed tabs are recognized only through the extension-owned sessions metadata key workspaceControlOperatorBindingV1; an unmanaged ChatGPT tab is never adopted based on URL.",
+            "CREATE/ENSURE uses a fixed reviewed https://chatgpt.com/ start URL and accepts no arbitrary command-supplied URL.",
+            "Session metadata is limited to managed, binding_ref, binding_generation, worker_slot_id, session_generation and contains no packet, clipboard, URL, credential, token, cookie, or password data.",
+            "Adapter operations implement ensure/create/activate/reload-or-restore/discard/close/inventory with worker-slot/session-generation matching and optional binding-generation fencing.",
+            "Duplicate request_id + identical idempotency_key returns the cached result without repeating browser effects; a different key for the same request is rejected as IDEMPOTENCY_CONFLICT.",
+            "Active managed tabs fail closed for discard, and close/activate/reload can act only on matching managed bindings.",
+            "Raw tab URL/navigation metadata is reduced immediately to CHATGPT_ORIGIN/OFF_CHATGPT_ORIGIN/UNKNOWN before events/results are emitted; mocked tests prove raw origins/paths/query text do not appear in emitted payloads.",
+            "Background transport performs HELLO/HELLO_ACK before accepting BROWSER_COMMAND, returns correlated BROWSER_RESULT, emits content-free BROWSER_EVENT, and reconnects Native Messaging after bounded disconnect.",
+            "The existing .NET suite also remained green: 8 Protocol.Tests, 18 WorkspaceOperator.Tests, 1 Integration.Tests."
+          ]
+        }
+      ],
       "resume_condition": "Firefox BrowserPort implementation exists and remains inside UX-08 least-privilege boundary."
     },
     {
       "id": "impl_05_simulator_and_fake_worker",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
+      "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
       "inputs": [
         "validated stage impl_04_firefox_mv3_adapter"
@@ -403,11 +424,11 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "c001bbda287f05ce3f2ceae7e003e3552903fd9c",
+      "identity": "ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436",
       "required_for_resume": true,
       "evidence": [
-        "Stage 03 Native Messaging/local IPC validated by Operator Bridge Validation #10 and Workspace Control Validation #2388.",
-        "Next active stage is impl_04_firefox_mv3_adapter."
+        "Stage 04 Firefox MV3 adapter validated by Operator Bridge Validation #12 and Workspace Control Validation #2390.",
+        "Next active stage is impl_05_simulator_and_fake_worker."
       ]
     },
     {
@@ -451,6 +472,17 @@
         "Operator Bridge Validation #10 SUCCESS.",
         "Workspace Control Validation #2388 SUCCESS.",
         "Stage 03 protocol/native-host/named-pipe boundary validated; Firefox tab lifecycle remains unimplemented."
+      ]
+    },
+    {
+      "id": "impl-04-firefox-mv3-adapter",
+      "kind": "git_commit",
+      "identity": "ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #12 SUCCESS.",
+        "Workspace Control Validation #2390 SUCCESS.",
+        "Stage 04 Firefox BrowserPort adapter validated with mocked browser APIs and frozen least-privilege permissions."
       ]
     }
   ],
@@ -575,6 +607,42 @@
         "Operator Bridge Validation #10 SUCCESS.",
         "Workspace Control Validation #2388 SUCCESS."
       ]
+    },
+    {
+      "path": "operator-bridge/src/FirefoxAdapter/adapter_core.js",
+      "state": "STAGE_04_VALIDATED",
+      "role": "content-blind managed Firefox BrowserPort lifecycle core",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by browser-adapter implementation stages",
+      "review_requirement": "Any new browser API, permission, arbitrary navigation target, content access, or authority-bearing field requires security/design review.",
+      "evidence": [
+        "Node 24 mocked-browser tests 10/10 PASS in Operator Bridge Validation #12."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/FirefoxAdapter/background.js",
+      "state": "STAGE_04_VALIDATED",
+      "role": "Native Messaging handshake/result/event transport and browser event wiring",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by browser-adapter implementation stages",
+      "review_requirement": "Must remain content-blind and preserve HELLO gate before browser-command execution.",
+      "evidence": [
+        "Operator Bridge Validation #12 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/tests/FirefoxAdapter.Tests/firefox_adapter.test.js",
+      "state": "STAGE_04_VALIDATED",
+      "role": "mocked-browser behavioral test suite for managed lifecycle, idempotency, fencing, and URL reduction",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "extend as browser-adapter behavior expands",
+      "review_requirement": "Tests must remain account-independent and must not require real ChatGPT access.",
+      "evidence": [
+        "10 tests PASS / 0 FAIL in Operator Bridge Validation #12."
+      ]
     }
   ],
   "validation": [
@@ -632,11 +700,18 @@
         "Operator Bridge Validation #10 and Workspace Control Validation #2388 both passed at c001bbda287f05ce3f2ceae7e003e3552903fd9c.",
         "Stage 03 exit criterion satisfied: the browser adapter can connect through bounded typed Native Messaging/named-pipe transport without granting execution authority; actual Firefox BrowserPort lifecycle begins in Stage 04."
       ]
+    },
+    {
+      "check": "Stage 04 exact-head Firefox adapter validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #12 and Workspace Control Validation #2390 both passed at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436.",
+        "Stage 04 exit criterion satisfied: Firefox BrowserPort implementation exists inside the UX-08 least-privilege boundary and remains content-blind/account-independent."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "impl_04_firefox_mv3_adapter: Firefox Manifest V3 browser adapter",
     "impl_05_simulator_and_fake_worker: Deterministic simulator and local fake worker",
     "impl_06_integrated_local_bridge_e2e: Real helper + Firefox + fake-worker integration",
     "impl_07_recovery_and_fault_closure: Crash, auth-domain, stale-generation, restart, and recovery closure",
@@ -647,8 +722,8 @@
     "impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration",
     "impl_13_production_readiness_review: Integrated implementation review and promotion decision"
   ],
-  "next_safe_action": "Execute impl_04_firefox_mv3_adapter from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the Firefox MV3 BrowserPort adapter using only nativeMessaging/tabs/sessions: HELLO/HELLO_ACK connection, exact managed binding metadata in sessions, create/activate/reload-or-restore/discard/close/inventory operations, immediate raw-URL-to-origin-enum reduction, adapter events, request/result correlation, and idempotent duplicate command handling. Keep the extension content-blind: no host permissions, content scripts, activeTab, scripting, webNavigation, webRequest, cookies, clipboard permissions, DOM/page/output access, or automatic input. Do not implement simulator worker behavior or real ChatGPT account calibration. Required exit evidence includes exact permission allowlist, no raw URL over IPC, no packet/credential metadata in bindings, managed-only lifecycle, duplicate-command idempotency, and unmanaged-tab adoption rejection.",
+  "next_safe_action": "Execute impl_05_simulator_and_fake_worker from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the UX-10 deterministic fake-worker environment only: fake OperatorAction/session/durable-event stores, fake worker surface/service, Scenario Controller, virtual clock, fault injector, SIM_HUMAN_SUBMIT test-only boundary, content-free trace hashing, and explicit production/simulator build separation. Exercise the required L0/L1 simulator fixtures first. Do not integrate with a real ChatGPT account, and do not make SIM_HUMAN_SUBMIT or fault controls reachable from production Native Messaging/helper runtime. Required exit evidence includes simulator-only endpoint absence from production package/protocol, payload-hash mismatch cannot acknowledge, generation fencing/idempotency, deterministic virtual-time behavior, and required UX-10 L0/L1 scenario passes.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
-  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active."
+  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active.\n\n2026-11-10 STAGE 04 COMPLETE: Firefox MV3 BrowserPort adapter validated at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436. Operator Bridge Validation #12 and Workspace Control Validation #2390 passed SUCCESS. Node 24 mocked-browser suite passed 10/10, proving managed-only lifecycle, fixed reviewed worker URL, content-free sessions metadata, duplicate-command idempotency, generation fencing, discard safety, and raw-URL-to-origin-enum reduction. Stage 05 deterministic simulator/fake worker is active; no real-account behavior is claimed."
 }
