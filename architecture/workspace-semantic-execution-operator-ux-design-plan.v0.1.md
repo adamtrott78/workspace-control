@@ -690,4 +690,12 @@ UX-04 is complete at the design-policy level with:
 
 The session broker now defines persistent/general, role-isolated, fresh-per-quantum, and recovery session classes; task/role/process affinity; TRUSTED/UNKNOWN/LOST continuity; one-outstanding-packet-per-chat default; context-pressure rotation; discard versus retire; browser-binding recovery; and profile-wide auth-refresh invalidation with old-generation fencing.
 
-The next execution slice is **UX-05 Global hotkey and clipboard interaction contract**.
+UX-05 is complete at the interaction-contract level with:
+
+- `architecture/workspace-semantic-execution-hotkey-clipboard-contract.v0.1.md`
+- `architecture/workspace-semantic-execution-hotkey-dispatch-sequence.v0.1.md`
+- `architecture/workspace-semantic-execution-hotkey-clipboard-test-matrix.v0.1.json`
+
+The contract fixes Ctrl+B as the preferred configurable global command, single-flight dispatch, held-key repeat suppression, busy/double-press semantics, last-safe-moment clipboard staging, no automatic previous-clipboard snapshot/restore in v0, no-work/judgment/recovery behavior, cold-start rules, local-only action draining, and focus/packet-integrity invariants.
+
+The next execution slice is **UX-06 Tray indicator and operator-console information architecture**.
