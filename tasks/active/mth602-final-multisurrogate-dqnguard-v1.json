@@ -4,7 +4,7 @@
   "title": "MTH 602 final project / PADataset multi-surrogate DQNGuard",
   "status": "IN_PROGRESS",
   "goal": "Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard project so Stage 00 can recover canonical MILCOM baseline/runtime provenance directly from the prepared Lambda checkout before architecture implementation.",
-  "execution_topology": "local",
+  "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
   "current_stage": "workspace_shell_bootstrap",
   "acceptance_criteria": [
