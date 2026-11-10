@@ -650,4 +650,22 @@ UX-01 is complete at the design-baseline level with:
 
 The catalog covers 42 operator-visible journeys across normal service, session maintenance, authentication/continuity, acknowledgment/retry, helper/browser lifecycle, clipboard/focus races, scheduler/authority gates, executor mismatch, resource pressure and batch completion.
 
-The next execution slice is **UX-02 System context and architecture boundary design**.
+UX-02 is complete at the design-baseline level with:
+
+- `architecture/workspace-semantic-execution-operator-context.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-interface-ownership.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-adr-native-helper-firefox-split.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-adr-dedicated-firefox-profile.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-adr-durable-state-local-cache.v0.1.md`
+
+The architecture establishes:
+- ports-and-adapters dependency direction;
+- explicit state ownership;
+- logical session/generation ownership in durable Workspace Control;
+- Firefox tab/window identity as non-authoritative local cache;
+- native helper ownership of global hotkey/tray/clipboard;
+- WebExtension ownership of browser chrome only;
+- semantic projection as rebuildable read model, never permission authority;
+- durable worker acknowledgment as the only completion signal.
+
+The next execution slice is **UX-03 OperatorAction and state-machine contract**.
