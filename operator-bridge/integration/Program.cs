@@ -136,6 +136,9 @@ internal static class Program
                 world.Sessions.Get("slot-create")!.Continuity ==
                     SimContinuity.Trusted;
 
+            var focusAway = await ipc.FocusTargetAsync(
+                new BrowserTarget("lookalike-slot", 0),
+                CancellationToken.None);
             var discard = await ipc.DiscardTargetAsync(
                 new BrowserTarget("slot-existing", 0),
                 CancellationToken.None);
@@ -150,6 +153,7 @@ internal static class Program
             var restoreDispatch = await coordinator.DispatchAsync();
             var restoreSubmit = world.HumanSubmit(restore);
             predicates["SIM-003_restore_discarded"] =
+                focusAway.IsApplied &&
                 discard.IsApplied &&
                 restoreDispatch.Outcome == DispatchOutcome.LocalPrepared &&
                 restoreSubmit &&
@@ -171,13 +175,7 @@ internal static class Program
                 0);
             var incompatiblePort =
                 new SimulatorOperatorActionPort(incompatibleWorld);
-            var browserEffectsBefore =
-                browser.EnsureCount +
-                browser.CreateCount +
-                browser.RestoreCount +
-                browser.ActivateCount +
-                browser.DiscardCount +
-                browser.CloseCount;
+            var browserEffectsBefore = BrowserEffectTotal(browser);
             var incompatibleCoordinator =
                 new SingleFlightDispatchCoordinator(
                     bridgeState,
@@ -188,13 +186,7 @@ internal static class Program
                     diagnostics);
             var incompatibleDispatch =
                 await incompatibleCoordinator.DispatchAsync();
-            var browserEffectsAfter =
-                browser.EnsureCount +
-                browser.CreateCount +
-                browser.RestoreCount +
-                browser.ActivateCount +
-                browser.DiscardCount +
-                browser.CloseCount;
+            var browserEffectsAfter = BrowserEffectTotal(browser);
             predicates["SIM-027_executor_identity_unproven"] =
                 incompatibleDispatch.Outcome == DispatchOutcome.NoAction &&
                 browserEffectsAfter == browserEffectsBefore;
@@ -208,12 +200,12 @@ internal static class Program
                     SimContinuity.Trusted;
 
             var quietClipboard = clipboard.WriteCount;
-            var quietBrowser = browserEffectsAfter;
+            var quietBrowser = BrowserEffectTotal(browser);
             await Task.Delay(500);
             predicates["no_background_clipboard_mutation"] =
                 clipboard.WriteCount == quietClipboard;
             predicates["no_background_helper_browser_effect"] =
-                browserEffectsAfter == quietBrowser;
+                BrowserEffectTotal(browser) == quietBrowser;
 
             details["firefox_inventory_count"] =
                 (await ipc.InventoryAsync()).Count;
@@ -306,6 +298,15 @@ internal static class Program
 
         return passed ? 0 : 1;
     }
+
+    private static int BrowserEffectTotal(
+        RecordingBrowserPort browser) =>
+        browser.EnsureCount +
+        browser.CreateCount +
+        browser.RestoreCount +
+        browser.ActivateCount +
+        browser.DiscardCount +
+        browser.CloseCount;
 
     private static string? GetArgument(
         string[] args,

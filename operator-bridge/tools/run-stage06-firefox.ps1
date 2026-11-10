@@ -46,28 +46,27 @@ $extensionStage = Join-Path $work "extension"
 Copy-Item $extensionSource $extensionStage -Recurse
 Copy-Item (Join-Path $bridgeRoot "src/FirefoxAdapter/adapter_core.js") (Join-Path $extensionStage "adapter_core.js")
 
-$xpiZip = Join-Path $work "simulator-extension.zip"
-$xpi = Join-Path $work "workspace-control-operator@adamtrott78.local.xpi"
-Compress-Archive -Path (Join-Path $extensionStage "*") -DestinationPath $xpiZip
-Move-Item $xpiZip $xpi
-
-$profile = Join-Path $work "firefox-profile"
-$extensions = Join-Path $profile "extensions"
-New-Item $extensions -ItemType Directory -Force | Out-Null
-Copy-Item $xpi (Join-Path $extensions "workspace-control-operator@adamtrott78.local.xpi")
-
-@'
-user_pref("xpinstall.signatures.required", false);
-user_pref("extensions.autoDisableScopes", 0);
-user_pref("extensions.enabledScopes", 15);
-user_pref("extensions.startupScanScopes", 15);
-user_pref("browser.shell.checkDefaultBrowser", false);
-user_pref("browser.tabs.warnOnClose", false);
-user_pref("app.update.auto", false);
-user_pref("datareporting.policy.dataSubmissionEnabled", false);
-user_pref("datareporting.healthreport.uploadEnabled", false);
-user_pref("toolkit.telemetry.enabled", false);
-'@ | Set-Content -Path (Join-Path $profile "user.js") -Encoding UTF8
+$webExtRoot = Join-Path $work "web-ext-tool"
+New-Item $webExtRoot -ItemType Directory | Out-Null
+Push-Location $webExtRoot
+try {
+  & npm.cmd init -y | Out-Null
+  if ($LASTEXITCODE -ne 0) {
+    throw "npm init failed for the Stage 06 test-only web-ext tool."
+  }
+  & npm.cmd install --no-audit --no-fund --save-exact web-ext@10.8.0
+  if ($LASTEXITCODE -ne 0) {
+    throw "Pinned web-ext@10.8.0 installation failed."
+  }
+}
+finally {
+  Pop-Location
+}
+$webExt = Join-Path $webExtRoot "node_modules\.bin\web-ext.cmd"
+if (-not (Test-Path $webExt)) {
+  throw "Pinned web-ext executable was not installed."
+}
+Write-Host "STAGE06_WEB_EXT_VERSION=10.8.0"
 
 $nativeManifest = Join-Path $work "native-host.json"
 $manifestObject = [ordered]@{
@@ -85,10 +84,10 @@ Set-Item -Path $regPath -Value $nativeManifest
 
 $runnerOut = Join-Path $work "runner.out.log"
 $runnerErr = Join-Path $work "runner.err.log"
-$firefoxOut = Join-Path $work "firefox.out.log"
-$firefoxErr = Join-Path $work "firefox.err.log"
+$webExtOut = Join-Path $work "web-ext.out.log"
+$webExtErr = Join-Path $work "web-ext.err.log"
 $runner = $null
-$firefoxProcess = $null
+$webExtProcess = $null
 
 try {
   $runnerArgs = @(
@@ -100,7 +99,16 @@ try {
 
   Start-Sleep -Seconds 2
 
-  $firefoxProcess = Start-Process -FilePath $firefox -ArgumentList @("-headless","-no-remote","-profile",$profile,"about:blank") -RedirectStandardOutput $firefoxOut -RedirectStandardError $firefoxErr -PassThru
+  $webExtArgs = @(
+    "run",
+    "--source-dir=$extensionStage",
+    "--firefox=$firefox",
+    "--no-reload",
+    "--no-input",
+    "--arg=-headless",
+    "--arg=-no-remote"
+  )
+  $webExtProcess = Start-Process -FilePath $webExt -ArgumentList $webExtArgs -RedirectStandardOutput $webExtOut -RedirectStandardError $webExtErr -PassThru
 
   if (-not $runner.WaitForExit(90000)) {
     Stop-Process -Id $runner.Id -Force -ErrorAction SilentlyContinue
@@ -110,7 +118,8 @@ try {
   if ($runner.ExitCode -ne 0) {
     if (Test-Path $runnerOut) { Get-Content $runnerOut }
     if (Test-Path $runnerErr) { Get-Content $runnerErr }
-    if (Test-Path $firefoxErr) { Get-Content $firefoxErr }
+    if (Test-Path $webExtOut) { Get-Content $webExtOut }
+    if (Test-Path $webExtErr) { Get-Content $webExtErr }
     if (Test-Path $ResultPath) { Get-Content $ResultPath }
     throw "Stage 06 Firefox integration runner failed with exit code $($runner.ExitCode)."
   }
@@ -125,8 +134,8 @@ try {
   Get-Content $ResultPath
 }
 finally {
-  if ($firefoxProcess -and -not $firefoxProcess.HasExited) {
-    Stop-Process -Id $firefoxProcess.Id -Force -ErrorAction SilentlyContinue
+  if ($webExtProcess -and -not $webExtProcess.HasExited) {
+    Stop-Process -Id $webExtProcess.Id -Force -ErrorAction SilentlyContinue
   }
   if ($runner -and -not $runner.HasExited) {
     Stop-Process -Id $runner.Id -Force -ErrorAction SilentlyContinue

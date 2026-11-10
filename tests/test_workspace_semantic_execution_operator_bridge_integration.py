@@ -10,6 +10,7 @@ INTEGRATION_SOLUTION = ROOT / "operator-bridge/WorkspaceOperatorBridge.Integrati
 SIM_MANIFEST = ROOT / "operator-bridge/simulator/FirefoxProfile/extension/manifest.json"
 SIM_BACKGROUND = ROOT / "operator-bridge/simulator/FirefoxProfile/extension/background.js"
 PROD_BACKGROUND = ROOT / "operator-bridge/src/FirefoxAdapter/background.js"
+STAGE06_SCRIPT = ROOT / "operator-bridge/tools/run-stage06-firefox.ps1"
 
 
 class StageSixIntegrationBoundaryTests(unittest.TestCase):
@@ -56,6 +57,13 @@ class StageSixIntegrationBoundaryTests(unittest.TestCase):
         self.assertIn("workerStartUrl: fakeWorkerUrl", simulator)
         self.assertNotIn("workerStartUrl", production)
         self.assertNotIn("chatgpt.com", simulator.lower())
+
+    def test_stage06_web_ext_is_exactly_pinned_and_test_only(self):
+        script = STAGE06_SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("web-ext@10.8.0", script)
+        self.assertIn("STAGE06_WEB_EXT_VERSION=10.8.0", script)
+        production_solution = PRODUCTION_SOLUTION.read_text(encoding="utf-8")
+        self.assertNotIn("web-ext", production_solution.lower())
 
     def test_simulator_background_has_no_dom_or_synthetic_input_automation(self):
         source = SIM_BACKGROUND.read_text(encoding="utf-8")
