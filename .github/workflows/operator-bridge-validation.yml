@@ -15,6 +15,22 @@ on:
       - 'benchmarks/workspace-semantic-execution/operator_bridge/**'
       - 'tests/test_workspace_semantic_execution_operator_bridge*.py'
   workflow_dispatch:
+    inputs:
+      run_target_benchmark:
+        description: 'Run Stage-09 target benchmark on the registered interactive Windows target runner'
+        required: false
+        default: false
+        type: boolean
+      confirm_ac_power:
+        description: 'Operator confirms target workstation is on AC power'
+        required: false
+        default: false
+        type: boolean
+      confirm_chrome_memory_saver_disabled:
+        description: 'Operator confirms Chrome Memory Saver is disabled'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -184,3 +200,68 @@ jobs:
           }
           $json = $measurement | ConvertTo-Json -Compress
           Write-Host "OPERATOR_BRIDGE_IDLE_MEASUREMENT=$json"
+  target-performance:
+    name: target-performance
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_target_benchmark }}
+    needs: validation
+    runs-on: [self-hosted, windows, x64, workspace-operator-target]
+    timeout-minutes: 300
+
+    steps:
+      - name: Checkout exact target benchmark head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up .NET 10 LTS
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Set up Python for content-free target tooling
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate interactive target-runner preconditions
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $head = (git rev-parse HEAD).Trim()
+          if ($head -ne "${{ github.sha }}") {
+            throw "Target runner checkout is not bound to github.sha."
+          }
+          if (-not [Environment]::UserInteractive) {
+            throw "Target runner must be launched interactively in the WorkspaceWorkers Windows user session."
+          }
+          if ("${{ inputs.confirm_ac_power }}" -ne "true") {
+            throw "Target benchmark requires explicit AC-power confirmation."
+          }
+          if ("${{ inputs.confirm_chrome_memory_saver_disabled }}" -ne "true") {
+            throw "Target benchmark requires explicit Chrome Memory Saver disabled confirmation."
+          }
+          foreach ($name in @("firefox", "chrome", "WorkspaceOperator")) {
+            if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+              throw "Target benchmark requires no pre-existing $name process."
+            }
+          }
+
+      - name: Execute frozen Stage 09 target matrix
+        shell: pwsh
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/tools/run-stage09-target-matrix.ps1 `
+            -RepositoryRoot "${{ github.workspace }}" `
+            -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage09-target-evidence.json" `
+            -ConfirmAcPower `
+            -ConfirmChromeMemorySaverDisabled
+
+      - name: Upload Stage 09 target-workstation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage09-target-${{ github.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage09-target-evidence.json
+          if-no-files-found: warn
+          retention-days: 30
+

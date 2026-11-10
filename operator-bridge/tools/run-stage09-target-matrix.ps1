@@ -114,6 +114,7 @@ foreach ($name in @("firefox", "chrome", "WorkspaceOperator")) {
 }
 
 $bridgeRoot = Join-Path $repo "operator-bridge"
+$helperExe = Join-Path $bridgeRoot "src\WorkspaceOperator\bin\Release\net10.0-windows\WorkspaceOperator.exe"
 $targetFirefoxScript = Join-Path $bridgeRoot "tools\run-stage09-target-firefox.ps1"
 $validator = Join-Path $bridgeRoot "performance\validate-stage09-target.py"
 $fakeWorkerRoot = Join-Path $bridgeRoot "simulator\FirefoxProfile\extension"
@@ -132,6 +133,31 @@ if ($LASTEXITCODE -ne 0) {
 $work = Join-Path $env:TEMP ("workspace-operator-stage09-matrix-" + [Guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $work -Force | Out-Null
 $chromeFakeWorker = $null
+$nativeRegPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\com.workspacecontrol.operator_bridge"
+$nativeHostOverridden = $false
+$originalNativeHostPath = $null
+
+if (-not (Test-Path -LiteralPath $nativeRegPath)) {
+  throw "Stage-08 per-user native-host registration is required before target measurement."
+}
+$originalNativeHostPath = (Get-Item -LiteralPath $nativeRegPath).GetValue("")
+if ([string]::IsNullOrWhiteSpace([string]$originalNativeHostPath)) {
+  throw "Stage-08 native-host registration is empty."
+}
+if (-not (Test-Path -LiteralPath $helperExe -PathType Leaf)) {
+  throw "Exact-head helper build is missing after target matrix build."
+}
+
+$targetNativeManifest = Join-Path $work "native-host-exact-head.json"
+[ordered]@{
+  name = "com.workspacecontrol.operator_bridge"
+  description = "Workspace Control Operator Stage 09 Exact-Head Native Host"
+  path = $helperExe
+  type = "stdio"
+  allowed_extensions = @("workspace-control-operator@adamtrott78.local")
+} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $targetNativeManifest -Encoding UTF8
+Set-Item -LiteralPath $nativeRegPath -Value $targetNativeManifest
+$nativeHostOverridden = $true
 
 function Get-Percentile {
   param([double[]]$Values, [double]$P)
@@ -695,5 +721,8 @@ finally {
   }
   try { Stop-OwnedProcessName -Name "chrome" } catch {}
   try { Stop-OwnedProcessName -Name "firefox" } catch {}
+  if ($nativeHostOverridden) {
+    Set-Item -LiteralPath $nativeRegPath -Value $originalNativeHostPath
+  }
   Remove-Item -LiteralPath $work -Recurse -Force -ErrorAction SilentlyContinue
 }

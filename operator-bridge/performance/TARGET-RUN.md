@@ -53,6 +53,30 @@ execution authority.
 this mode to syntax-check the orchestrator and freeze its order/counts, but that
 output remains non-target evidence and cannot complete Stage 09.
 
+## Opt-in self-hosted target execution
+
+The existing `Operator Bridge Validation` workflow also exposes an explicit
+workflow-dispatch target job. It never runs on pull requests or ordinary
+workflow dispatches unless `run_target_benchmark=true`.
+
+The target workstation must first be registered by the operator as a GitHub
+self-hosted Windows x64 runner with the additional label
+`workspace-operator-target`. The runner must be started interactively under
+the same Windows user that owns the `WorkspaceWorkers` Firefox profile and
+Stage-08 HKCU Native Messaging registration; a Session-0/service runner is
+rejected.
+
+Dispatch also requires explicit `confirm_ac_power=true` and
+`confirm_chrome_memory_saver_disabled=true`. The target job depends on the
+normal exact-head validation job, checks out exactly `github.sha`, executes
+the full matrix, and uploads `stage09-target-evidence.json` even when a frozen
+budget fails.
+
+During the target run, the matrix temporarily points the dedicated HKCU Native
+Messaging host key at the exact checked-out Release helper, then restores the
+prior Stage-08 registration in its cleanup path. No Firefox profile files,
+credentials, cookies, tokens, or ChatGPT content are copied or inspected.
+
 ## Firefox partial target collector
 
 `../tools/run-stage09-target-firefox.ps1` executes the Firefox/helper portion

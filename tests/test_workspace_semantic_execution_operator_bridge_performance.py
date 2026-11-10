@@ -163,6 +163,27 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("STAGE09_TARGET_MATRIX_PLAN_SMOKE=PASS", script)
         self.assertIn("stage09-target-plan.json", workflow)
 
+    def test_target_matrix_temporarily_binds_exact_head_native_host_and_restores_it(self):
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage09-target-matrix.ps1"
+        ).read_text(encoding="utf-8")
+        self.assertIn("native-host-exact-head.json", script)
+        self.assertIn("path = $helperExe", script)
+        self.assertIn("$originalNativeHostPath", script)
+        self.assertIn("Set-Item -LiteralPath $nativeRegPath -Value $targetNativeManifest", script)
+        self.assertIn("Set-Item -LiteralPath $nativeRegPath -Value $originalNativeHostPath", script)
+
+    def test_workflow_has_opt_in_exact_head_self_hosted_target_job(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("run_target_benchmark:", workflow)
+        self.assertIn("confirm_ac_power:", workflow)
+        self.assertIn("confirm_chrome_memory_saver_disabled:", workflow)
+        self.assertIn("runs-on: [self-hosted, windows, x64, workspace-operator-target]", workflow)
+        self.assertIn("needs: validation", workflow)
+        self.assertIn("github.event_name == 'workflow_dispatch' && inputs.run_target_benchmark", workflow)
+        self.assertIn("Target runner must be launched interactively", workflow)
+        self.assertIn("operator-bridge-stage09-target-", workflow)
+
     def test_target_evidence_schema_requires_exact_frozen_execution_shape(self):
         schema = json.loads(
             (PERF / "stage09-target-evidence.schema.json").read_text(encoding="utf-8")
