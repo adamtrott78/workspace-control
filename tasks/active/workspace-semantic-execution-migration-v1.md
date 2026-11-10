@@ -68,10 +68,6 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 - Remote checkpoint: aba8c2e87dd4bb50ba414206270f592e8ca841a4
 - Remote verified: true
 
-## Current stage
-
-operator_ux_design
-
 ## Next safe action
 
 Begin UX-08 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: produce the operator-bridge threat model, exact native-helper/WebExtension permission matrix, local data handling rules, browser-navigation/auth-signal privacy review, security review checklist, and ADR forbidding ChatGPT DOM/content automation in v0. Re-check current OpenAI terms/product guidance and relevant Firefox extension capabilities before freezing any browser-facing permission.
