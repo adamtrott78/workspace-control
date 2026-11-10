@@ -116,6 +116,14 @@ $nativeManifestPath = Join-Path $releasePath "native-host.json"
 $helperPath = Join-Path $releasePath "payload\helper\WorkspaceOperator.exe"
 $xpiPath = Join-Path $releasePath "payload\extension\workspace-control-operator.xpi"
 
+[ordered]@{
+    name = $ExpectedNativeHost
+    description = "Workspace Control Operator Browser Adapter"
+    path = $helperPath
+    type = "stdio"
+    allowed_extensions = @($ExpectedExtensionId)
+} | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $nativeManifestPath -Encoding UTF8
+
 $hadRegistryKey = Test-Path -LiteralPath $RegistryPath
 $oldRegistryValue = $null
 if ($hadRegistryKey) { $oldRegistryValue = (Get-Item -LiteralPath $RegistryPath).GetValue("") }
