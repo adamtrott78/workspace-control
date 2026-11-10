@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "stage": "impl_09_performance_benchmark_execution",
+  "evidence_class": "MOZILLA_SIGNED_XPI_VERIFICATION",
+  "source_sha": "96be6cf95706f784f7f20c3a5a61a7671b36fa27",
+  "signed_xpi": {
+    "filename": "aca9455038574026b65d-0.1.9.xpi",
+    "sha256": "0eafc6017352f7081e5445ebe602b03a112fa0924a8ee8e199d82cf1de2bf50f",
+    "size_bytes": 13159,
+    "extension_id": "workspace-control-operator@adamtrott78.local",
+    "extension_version": "0.1.9",
+    "adapter_version": "0.1.9-perf"
+  },
+  "payload_verification": {
+    "background_js_byte_identical_to_submitted": true,
+    "adapter_core_js_byte_identical_to_submitted": true,
+    "manifest_semantically_identical_to_submitted": true,
+    "manifest_difference": "Mozilla signing output removed only the final newline.",
+    "fake_worker_url_present": true,
+    "production_chatgpt_worker_url_absent": true
+  },
+  "mozilla_signature": {
+    "signature_metadata_present": true,
+    "files": [
+      "META-INF/cose.manifest",
+      "META-INF/cose.sig",
+      "META-INF/manifest.mf",
+      "META-INF/mozilla.sf",
+      "META-INF/mozilla.rsa"
+    ],
+    "signer_subject": "C=US, ST=CA, L=Mountain View, O=Addons, OU=Production, CN=workspace-control-operator@adamtrott78.local",
+    "signer_issuer": "C=US, O=Mozilla Corporation, OU=Mozilla AMO Production Signing Service, CN=signingca1.addons.mozilla.org, emailAddress=foxsec@mozilla.com"
+  },
+  "result": "PASS"
+}
