@@ -7,7 +7,11 @@ param(
 
   [string]$FirefoxPath = "C:\Program Files\Mozilla Firefox\firefox.exe",
 
-  [string]$FirefoxProfile = "WorkspaceWorkers"
+  [string]$FirefoxProfile = "WorkspaceWorkers",
+
+  [switch]$SkipLatency,
+
+  [switch]$SkipColdStart
 )
 
 $ErrorActionPreference = "Stop"
@@ -60,7 +64,7 @@ try {
     "-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", $fakeWorkerRoot
   ) -RedirectStandardOutput $fakeWorkerOut -RedirectStandardError $fakeWorkerErr -PassThru
 
-  $runner = Start-Process -FilePath "dotnet" -ArgumentList @(
+  $runnerArgs = @(
     $runnerDll,
     "--result=$steadyResultPath",
     "--helper=$helperExe",
@@ -71,7 +75,11 @@ try {
     "--sample-interval-ms=1000",
     "--latency-scale=1",
     "--timeout-seconds=120"
-  ) -RedirectStandardOutput $runnerOut -RedirectStandardError $runnerErr -PassThru
+  )
+  if ($SkipLatency) {
+    $runnerArgs += "--skip-latency"
+  }
+  $runner = Start-Process -FilePath "dotnet" -ArgumentList $runnerArgs -RedirectStandardOutput $runnerOut -RedirectStandardError $runnerErr -PassThru
 
   # The harness performs the full helper-idle 60s/120s window before exposing
   # the browser-server ready marker.
@@ -112,51 +120,54 @@ try {
     throw "Target Firefox evidence must remain content-free."
   }
 
-  if ($firefox -and -not $firefox.HasExited) {
-    Stop-Process -Id $firefox.Id -Force -ErrorAction SilentlyContinue
-    $firefox.WaitForExit(10000) | Out-Null
-  }
-  $firefox = $null
+  $coldResult = $null
+  if (-not $SkipColdStart) {
+    if ($firefox -and -not $firefox.HasExited) {
+      Stop-Process -Id $firefox.Id -Force -ErrorAction SilentlyContinue
+      $firefox.WaitForExit(10000) | Out-Null
+    }
+    $firefox = $null
 
-  $closeDeadline = (Get-Date).AddSeconds(10)
-  while ((Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $closeDeadline) {
-    Start-Sleep -Milliseconds 100
-  }
-  if (Get-Process firefox -ErrorAction SilentlyContinue) {
-    throw "Target measurement rejected: Firefox did not reach the required cold-start baseline."
-  }
+    $closeDeadline = (Get-Date).AddSeconds(10)
+    while ((Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $closeDeadline) {
+      Start-Sleep -Milliseconds 100
+    }
+    if (Get-Process firefox -ErrorAction SilentlyContinue) {
+      throw "Target measurement rejected: Firefox did not reach the required cold-start baseline."
+    }
 
-  $coldRunner = Start-Process -FilePath "dotnet" -ArgumentList @(
-    $runnerDll,
-    "--result=$coldResultPath",
-    "--helper=$helperExe",
-    "--mode=cold-target",
-    "--cold-count=10",
-    "--timeout-seconds=120"
-  ) -RedirectStandardOutput $coldRunnerOut -RedirectStandardError $coldRunnerErr -PassThru
+    $coldRunner = Start-Process -FilePath "dotnet" -ArgumentList @(
+      $runnerDll,
+      "--result=$coldResultPath",
+      "--helper=$helperExe",
+      "--mode=cold-target",
+      "--cold-count=10",
+      "--timeout-seconds=120"
+    ) -RedirectStandardOutput $coldRunnerOut -RedirectStandardError $coldRunnerErr -PassThru
 
-  if (-not $coldRunner.WaitForExit(300000)) {
-    Stop-Process -Id $coldRunner.Id -Force -ErrorAction SilentlyContinue
-    throw "Target cold-start collector exceeded the bounded 5-minute execution window."
-  }
-  if ($coldRunner.ExitCode -ne 0) {
-    if (Test-Path $coldRunnerOut) { Get-Content $coldRunnerOut }
-    if (Test-Path $coldRunnerErr) { Get-Content $coldRunnerErr }
-    if (Test-Path $coldResultPath) { Get-Content $coldResultPath }
-    throw "Target cold-start collector failed."
-  }
+    if (-not $coldRunner.WaitForExit(300000)) {
+      Stop-Process -Id $coldRunner.Id -Force -ErrorAction SilentlyContinue
+      throw "Target cold-start collector exceeded the bounded 5-minute execution window."
+    }
+    if ($coldRunner.ExitCode -ne 0) {
+      if (Test-Path $coldRunnerOut) { Get-Content $coldRunnerOut }
+      if (Test-Path $coldRunnerErr) { Get-Content $coldRunnerErr }
+      if (Test-Path $coldResultPath) { Get-Content $coldResultPath }
+      throw "Target cold-start collector failed."
+    }
 
-  $coldResult = Get-Content $coldResultPath -Raw | ConvertFrom-Json
-  if ($coldResult.evidence_class -ne "TARGET_COLD_FIREFOX_PARTIAL") {
-    throw "Target cold-start collector emitted an unexpected evidence class."
-  }
-  if ($coldResult.target_contract_complete -ne $false) {
-    throw "Cold-start partial evidence must not claim complete UX-09 acceptance."
-  }
-  if ($coldResult.cold_firefox_start.count -ne 10) {
-    throw "Target cold-start collector did not execute the frozen 10 trials."
-  }
+    $coldResult = Get-Content $coldResultPath -Raw | ConvertFrom-Json
+    if ($coldResult.evidence_class -ne "TARGET_COLD_FIREFOX_PARTIAL") {
+      throw "Target cold-start collector emitted an unexpected evidence class."
+    }
+    if ($coldResult.target_contract_complete -ne $false) {
+      throw "Cold-start partial evidence must not claim complete UX-09 acceptance."
+    }
+    if ($coldResult.cold_firefox_start.count -ne 10) {
+      throw "Target cold-start collector did not execute the frozen 10 trials."
+    }
 
+  }
   [ordered]@{
     schema_version = 1
     stage = "impl_09_performance_benchmark_execution"
@@ -169,8 +180,10 @@ try {
       "three complete Firefox/Chrome resource replicates with order alternation",
       "Chrome Memory Saver disabled and recorded",
       "five discard/restore resource replicates",
+      $(if ($SkipLatency) { "exact 50/30/30/100 steady-state latency counts" } else { $null }),
+      $(if ($SkipColdStart) { "exact 10-trial cold-start latency count" } else { $null }),
       "complete aggregate budget evaluation"
-    )
+    ) | Where-Object { $_ }
   } | ConvertTo-Json -Depth 20 | Set-Content $ResultPath -Encoding UTF8
 
   Write-Host "STAGE09_TARGET_FIREFOX_PARTIAL=PASS"

@@ -37,6 +37,7 @@ internal static class Program
         var sampleIntervalMs = IntArgument(args, "--sample-interval-ms", mode == "target" ? 1000 : 200);
         var latencyScale = IntArgument(args, "--latency-scale", mode == "target" ? 1 : 10);
         var timeoutSeconds = IntArgument(args, "--timeout-seconds", 90);
+        var skipLatency = HasFlag(args, "--skip-latency");
 
         var counts = new TrialCounts(
             Reuse: Math.Max(1, 50 / latencyScale),
@@ -207,16 +208,21 @@ internal static class Program
                 sampleMs,
                 sampleIntervalMs));
 
-            var latency = await MeasureLatenciesAsync(
-                ipc,
-                bridgeState,
-                clipboard,
-                diagnostics,
-                liveTargets[0],
-                liveTargets[1],
-                counts);
+            LatencyReport? latency = null;
+            HotkeyMeasurement? hotkey = null;
+            if (!skipLatency)
+            {
+                latency = await MeasureLatenciesAsync(
+                    ipc,
+                    bridgeState,
+                    clipboard,
+                    diagnostics,
+                    liveTargets[0],
+                    liveTargets[1],
+                    counts);
 
-            var hotkey = MeasureHotkeyQueueToCallback(counts.Primitive);
+                hotkey = MeasureHotkeyQueueToCallback(counts.Primitive);
+            }
 
             var fourLive = resourceRuns.Single(x =>
                 x.ScenarioId == "FIREFOX_4_WORKERS");
@@ -1085,6 +1091,9 @@ internal static class Program
                 x.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             ?[prefix.Length..];
     }
+
+    private static bool HasFlag(string[] args, string name) =>
+        args.Any(x => x.Equals(name, StringComparison.OrdinalIgnoreCase));
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool PostMessage(
