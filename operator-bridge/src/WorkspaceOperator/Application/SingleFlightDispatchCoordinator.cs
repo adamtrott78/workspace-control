@@ -142,20 +142,38 @@ public sealed class SingleFlightDispatchCoordinator
 
             if (!prepared.IsApplied)
             {
-                await RecordFailureAsync(
-                    action,
-                    prepared.NormalizedError ?? "BROWSER_PREPARE_FAILED",
-                    cancellationToken);
+                var error = prepared.NormalizedError ??
+                    (prepared.Outcome == BrowserOutcome.Unknown
+                        ? "BROWSER_OUTCOME_UNKNOWN"
+                        : "BROWSER_PREPARE_FAILED");
+
+                if (prepared.Outcome == BrowserOutcome.Unknown)
+                {
+                    await _actions.RecordBlockedAsync(
+                        action.Identity,
+                        error,
+                        cancellationToken);
+                }
+                else
+                {
+                    await RecordFailureAsync(
+                        action,
+                        error,
+                        cancellationToken);
+                }
+
                 Write(
                     "dispatch",
-                    "BROWSER_PREPARE_FAILED",
+                    prepared.Outcome == BrowserOutcome.Unknown
+                        ? "BROWSER_OUTCOME_UNKNOWN"
+                        : "BROWSER_PREPARE_FAILED",
                     action,
                     started,
-                    prepared.NormalizedError);
+                    error);
                 return new DispatchResult(
                     DispatchOutcome.BrowserPrepareFailed,
                     action.Identity.ActionId,
-                    prepared.NormalizedError);
+                    error);
             }
 
             if (!await _actions.RevalidateAsync(

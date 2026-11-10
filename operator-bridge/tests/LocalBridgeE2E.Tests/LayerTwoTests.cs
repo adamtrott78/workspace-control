@@ -247,6 +247,62 @@ public sealed class LayerTwoTests
     }
 
     [TestMethod]
+    public async Task SIM022_UnknownCreateFailsClosedAndCannotDuplicate()
+    {
+        var world = new SimulatorWorld();
+        world.Sessions.Add(
+            "slot-1",
+            0,
+            SimContinuity.NotEstablished,
+            bindingPresent: false);
+        var action = world.Queue(
+            "unknown-create",
+            "CREATE_AND_SERVICE");
+        var browser = new UnknownCreateOnceBrowserPort();
+        var clipboard = new StaClipboard();
+        var surface = new RecordingOperatorSurface();
+        var coordinator = CreateCoordinator(
+            world,
+            browser,
+            clipboard,
+            surface);
+
+        var first = await coordinator.DispatchAsync();
+        var second = await coordinator.DispatchAsync();
+
+        Assert.AreEqual(
+            DispatchOutcome.BrowserPrepareFailed,
+            first.Outcome);
+        Assert.AreEqual(
+            "CREATE_OUTCOME_UNKNOWN",
+            first.NormalizedError);
+        Assert.AreEqual(SimActionStatus.Blocked, action.Status);
+        Assert.AreEqual(1, browser.CreateAttempts);
+        Assert.AreEqual(1, browser.EffectCount);
+        Assert.AreEqual(0, clipboard.WriteCount);
+        Assert.AreEqual(DispatchOutcome.NoAction, second.Outcome);
+        Assert.AreEqual(1, browser.CreateAttempts);
+
+        var authority = new SimulatorRecoveryAuthorityPort(world);
+        var recovery = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority,
+            browser,
+            new CaptureDiagnostics());
+        await recovery.BeginAsync(
+            "l2-unknown-create",
+            RecoveryScope.SessionScoped,
+            RecoverySignal.BindingAmbiguous,
+            [new RecoverySessionRef("slot-1", 0)]);
+        var ready = await recovery.ReconcileAsync();
+
+        Assert.AreEqual(RecoveryStatus.ReadyToResume, ready.Status);
+        Assert.AreEqual(1, browser.CreateAttempts);
+        Assert.AreEqual(1, authority.AdvanceCount);
+        Assert.AreEqual(1, world.Sessions.Get("slot-1")!.Generation);
+    }
+
+    [TestMethod]
     public async Task SIM023_ClipboardSideEffectNeverImpliesSubmitAfterRestart()
     {
         var world = new SimulatorWorld();

@@ -99,6 +99,24 @@ public sealed class SimulatorOperatorActionPort : IOperatorActionPort
         return Task.CompletedTask;
     }
 
+    public Task RecordBlockedAsync(
+        ActionIdentity identity,
+        string normalizedError,
+        CancellationToken cancellationToken)
+    {
+        var action = Find(identity) ??
+            throw new InvalidOperationException("Synthetic action missing.");
+        action.Status = SimActionStatus.Blocked;
+        _world.Trace.Record(
+            "integration_action_port",
+            "BLOCKED",
+            action.ActionId,
+            action.WorkerSlotId,
+            action.SessionGeneration,
+            normalizedReason: normalizedError);
+        return Task.CompletedTask;
+    }
+
     public Task RecordLocalCompletedAsync(
         ActionIdentity identity,
         CancellationToken cancellationToken)
@@ -496,4 +514,72 @@ public sealed class RecordingManagedBrowserInventory :
         InventoryCount++;
         return await _inner.InventoryAsync(cancellationToken);
     }
+}
+
+
+public sealed class UnknownCreateOnceBrowserPort :
+    IBrowserPort,
+    IManagedBrowserInventory
+{
+    private readonly InMemoryBrowserPort _inner = new();
+    private bool _returnedUnknown;
+
+    public int CreateAttempts { get; private set; }
+
+    public int EffectCount => _inner.EffectCount;
+
+    public Task<BrowserResult> PrepareTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken) =>
+        _inner.PrepareTargetAsync(target, cancellationToken);
+
+    public Task<BrowserResult> FocusTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken) =>
+        _inner.FocusTargetAsync(target, cancellationToken);
+
+    public async Task<BrowserResult> CreateTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        CreateAttempts++;
+        if (!_returnedUnknown)
+        {
+            _returnedUnknown = true;
+            var applied = await _inner.CreateTargetAsync(
+                target,
+                cancellationToken);
+            if (!applied.IsApplied)
+            {
+                return applied;
+            }
+
+            return new BrowserResult(
+                BrowserOutcome.Unknown,
+                "CREATE_OUTCOME_UNKNOWN");
+        }
+
+        return await _inner.CreateTargetAsync(
+            target,
+            cancellationToken);
+    }
+
+    public Task<BrowserResult> RestoreTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken) =>
+        _inner.RestoreTargetAsync(target, cancellationToken);
+
+    public Task<BrowserResult> DiscardTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken) =>
+        _inner.DiscardTargetAsync(target, cancellationToken);
+
+    public Task<BrowserResult> CloseTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken) =>
+        _inner.CloseTargetAsync(target, cancellationToken);
+
+    public Task<IReadOnlyList<BrowserInventoryEntry>> InventoryAsync(
+        CancellationToken cancellationToken = default) =>
+        _inner.InventoryAsync(cancellationToken);
 }

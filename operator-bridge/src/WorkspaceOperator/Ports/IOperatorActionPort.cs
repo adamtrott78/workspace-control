@@ -19,6 +19,15 @@ public interface IOperatorActionPort
         string normalizedError,
         CancellationToken cancellationToken);
 
+    Task RecordBlockedAsync(
+        ActionIdentity identity,
+        string normalizedError,
+        CancellationToken cancellationToken) =>
+        RecordLocalFailureAsync(
+            identity,
+            normalizedError,
+            cancellationToken);
+
     Task RecordLocalCompletedAsync(
         ActionIdentity identity,
         CancellationToken cancellationToken) =>
