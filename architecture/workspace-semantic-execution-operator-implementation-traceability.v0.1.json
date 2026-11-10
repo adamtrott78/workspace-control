@@ -459,6 +459,101 @@
         }
       },
       "claim": "Stage-06 real-helper + real-Firefox integration validated against fake workers with no ChatGPT account access; recovery/fault closure begins in Stage 07."
+    },
+    "impl_07_recovery_and_fault_closure": {
+      "status": "VALIDATED",
+      "checkpoint": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e",
+      "validations": [
+        "Operator Bridge Validation #29 SUCCESS",
+        "Workspace Control Validation #2407 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/src/WorkspaceOperator/Application/RecoveryContracts.cs",
+        "operator-bridge/src/WorkspaceOperator/Application/RecoveryCoordinator.cs",
+        "operator-bridge/src/WorkspaceOperator/Ports/IRecoveryPorts.cs",
+        "operator-bridge/src/WorkspaceOperator/Windows/JsonRecoveryStateStore.cs",
+        "operator-bridge/src/WorkspaceOperator/Application/SingleFlightDispatchCoordinator.cs",
+        "operator-bridge/integration/**",
+        "operator-bridge/tests/WorkspaceOperator.Tests/RecoveryCoordinatorTests.cs",
+        "operator-bridge/tests/LocalBridgeE2E.Tests/LayerTwoTests.cs",
+        "operator-bridge/simulator/Scenarios/stage07-recovery-catalog.json",
+        "operator-bridge/tools/run-stage07-firefox.ps1",
+        "tests/test_workspace_semantic_execution_operator_bridge_integration.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "evidence": {
+        "frozen_recovery_catalog": {
+          "required": 14,
+          "covered": 14
+        },
+        "firefox_mocked_browser_tests": {
+          "passed": 14,
+          "failed": 0
+        },
+        "simulator_tests": {
+          "passed": 38,
+          "failed": 0
+        },
+        "production_tests": {
+          "protocol": {
+            "passed": 8,
+            "failed": 0
+          },
+          "workspace_operator": {
+            "passed": 24,
+            "failed": 0
+          },
+          "integration": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "layer2_real_helper": {
+          "total_suite": {
+            "passed": 12,
+            "failed": 0
+          },
+          "stage07_fixtures": [
+            "SIM-008",
+            "SIM-021",
+            "SIM-022",
+            "SIM-023",
+            "SIM-024",
+            "SIM-033",
+            "SIM-034"
+          ],
+          "blocking_recovery_before_claim": true,
+          "unknown_create_blocked_no_duplicate": true
+        },
+        "layer3_firefox": {
+          "firefox_version": "159.0.1",
+          "web_ext_version": "10.8.0",
+          "native_messaging_connected": true,
+          "result": "PASS",
+          "predicates": {
+            "sim018_tab_closed_before_submit": true,
+            "sim019_browser_crash": true,
+            "sim020_adapter_disconnect_reinventory": true,
+            "sim022_unknown_create_no_duplicate": true,
+            "sim028_metadata_only_auth_entry": true,
+            "sim029_auth_refresh_all_tabs": true,
+            "sim033_cold_restart_no_stale_replay": true,
+            "no_background_clipboard_mutation": true,
+            "no_background_helper_browser_effect": true
+          },
+          "authority_reconcile_once_each": true,
+          "auth_generation_advances": 2,
+          "cold_restart_claim_count": 1,
+          "trace_sha256": "4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477"
+        },
+        "helper_idle_ci_smoke": {
+          "duration_seconds": 6.392,
+          "max_working_set_mib": 42.426,
+          "cpu_percent_one_logical_cpu_mean": 0.2444,
+          "interpretation": "CI smoke only; UX-09 target-machine measurement remains authoritative"
+        }
+      },
+      "claim": "Stage-07 recovery/fault closure validated through deterministic, real-helper, and real-Firefox fake-worker layers without real-account access or authority duplication."
     }
   }
 }

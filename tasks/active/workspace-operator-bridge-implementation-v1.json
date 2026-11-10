@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "impl_07_recovery_and_fault_closure",
+  "current_stage": "impl_08_packaging_install_update_rollback",
   "acceptance_criteria": [
     "Implementation remains traceable to the UX-13 freeze at exact workspace-control SHA 0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
     "Every stage has explicit dependencies, outputs, validation, and exact-head durable evidence before promotion.",
@@ -49,7 +49,7 @@
       "base_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "8c0f97f23e181b850728b2b42c970b71d93c3991",
+        "checkpoint_sha": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e",
         "verified": true
       },
       "local": null,
@@ -324,7 +324,7 @@
     },
     {
       "id": "impl_07_recovery_and_fault_closure",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
@@ -337,14 +337,38 @@
         "auth-domain freeze/reconcile/generation-advance implementation",
         "content-free recovery traces"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 07 recovery and fault closure",
+          "result": "PASS",
+          "evidence": [
+            "Stage-07 recovery/fault implementation validated at workspace-control@7d8bd99bbd23eafa834a0a676d86156382ad8c1e.",
+            "Operator Bridge Validation run 42770472988 / #29 SUCCESS on the exact Stage-07 code head.",
+            "Workspace Control Validation run 42770473076 / #2407 SUCCESS on the exact Stage-07 code head.",
+            "Frozen recovery/crash/auth/generation/control-plane catalog covers exactly 14 UX-10 fixtures at all required implemented L0-L3 layers.",
+            "Simulator.Tests passed 38/38, preserving L0/L1 generation-fencing, stale-evidence, auth-recovery, restart, and idempotency contracts.",
+            "Production tests passed: Protocol.Tests 8/8, WorkspaceOperator.Tests 24/24, Integration.Tests 1/1.",
+            "Layer-2 real-helper suite passed 12/12 total, including explicit Stage-07 SIM-008, SIM-021, SIM-022, SIM-023, SIM-024, SIM-033, and SIM-034 recovery/crash coverage.",
+            "SIM-022 Layer-2 proves an unknown CREATE side-effect outcome becomes BLOCKED/recovery, performs exactly one create effect, writes no clipboard packet, and cannot create a duplicate on a second dispatch.",
+            "Blocking recovery is checked before ClaimNext: Ctrl+B opens/focuses recovery only, with zero action claim, browser effect, packet staging, or clipboard mutation.",
+            "Recovery state is content-free and durable; completed freeze/reconcile/generation steps survive helper restart and are not replayed.",
+            "Scoped recovery ignores unrelated ambiguous bindings; ambiguity is evaluated only for affected/replacement session generations.",
+            "Real Firefox 159.0.1 + Native Messaging Stage-07 Layer-3 integration PASS with web-ext 10.8.0.",
+            "Layer-3 recovery predicates PASS for managed-tab loss, browser loss, adapter disconnect/reinventory, unknown-create no-duplicate, metadata-only auth entry, profile-wide auth refresh, and cold restart/no stale replay.",
+            "Auth refresh reconciled once and advanced exactly two affected session generations once each; manual auth return did not restore TRUSTED continuity.",
+            "Cold restart retained the outstanding action claim count at exactly 1; stale local cache was not replayed.",
+            "No background clipboard mutation or helper browser effect occurred during the quiet interval.",
+            "No real ChatGPT account, DOM/accessibility/page-content inspection, credential/token access, synthetic paste/Enter, or authentication automation was used."
+          ]
+        }
+      ],
       "resume_condition": "Single-component and auth-domain failures have bounded tested recovery with no authority duplication."
     },
     {
       "id": "impl_08_packaging_install_update_rollback",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
+      "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
       "inputs": [
         "validated stage impl_07_recovery_and_fault_closure"
@@ -464,11 +488,11 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "8c0f97f23e181b850728b2b42c970b71d93c3991",
+      "identity": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e",
       "required_for_resume": true,
       "evidence": [
-        "Stage 06 real-helper + Firefox + fake-worker integration validated by Operator Bridge Validation #24 and Workspace Control Validation #2402.",
-        "Next active stage is impl_07_recovery_and_fault_closure."
+        "Stage 07 recovery/fault closure validated by Operator Bridge Validation #29 and Workspace Control Validation #2407.",
+        "Next active stage is impl_08_packaging_install_update_rollback."
       ]
     },
     {
@@ -545,6 +569,17 @@
         "Operator Bridge Validation #24 SUCCESS.",
         "Workspace Control Validation #2402 SUCCESS.",
         "Layer-2 real-helper mechanics 5/5 PASS; real Firefox/native-host Layer-3 integration PASS."
+      ]
+    },
+    {
+      "id": "impl-07-recovery-and-fault-closure",
+      "kind": "git_commit",
+      "identity": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #29 SUCCESS.",
+        "Workspace Control Validation #2407 SUCCESS.",
+        "All frozen Stage-07 recovery/crash/auth/generation obligations passed at required implemented layers."
       ]
     }
   ],
@@ -814,6 +849,66 @@
       "evidence": [
         "Operator Bridge Validation #24; trace SHA-256 4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477."
       ]
+    },
+    {
+      "path": "operator-bridge/src/WorkspaceOperator/Application/RecoveryCoordinator.cs",
+      "state": "STAGE_07_VALIDATED",
+      "role": "content-free recovery state machine coordinating freeze, durable reconciliation, generation fencing, manual-auth return, reinventory, and READY_TO_RESUME",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by recovery/packaging stages",
+      "review_requirement": "Must never create authority; all supersession/generation advancement remains delegated to IRecoveryAuthorityPort.",
+      "evidence": [
+        "Operator Bridge Validation #29 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/JsonRecoveryStateStore.cs",
+      "state": "STAGE_07_VALIDATED",
+      "role": "per-user atomic content-free recovery incident persistence",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by recovery/packaging stages",
+      "review_requirement": "Persist recovery metadata only; never packet/clipboard/page/URL/credential content.",
+      "evidence": [
+        "WorkspaceOperator recovery persistence tests PASS in Operator Bridge Validation #29."
+      ]
+    },
+    {
+      "path": "operator-bridge/simulator/Scenarios/stage07-recovery-catalog.json",
+      "state": "STAGE_07_VALIDATED",
+      "role": "exact 14-fixture frozen UX-10 recovery/crash/auth/generation implementation catalog",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only if frozen recovery contract changes under separate authority",
+      "review_requirement": "Must remain exact against frozen UX-10 matrix.",
+      "evidence": [
+        "Static recovery catalog contract PASS in Operator Bridge Validation #29."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage07-l2-recovery-validation.7d8bd99b.json",
+      "state": "STAGE_07_VALIDATED",
+      "role": "durable content-free Stage-07 real-helper L2 recovery validation summary",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only from exact validated Stage-07 run evidence",
+      "review_requirement": "Bind exact code SHA and workflow run.",
+      "evidence": [
+        "Operator Bridge Validation #29."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage07-l3-firefox-result.7d8bd99b.json",
+      "state": "STAGE_07_VALIDATED",
+      "role": "durable content-free Stage-07 real-Firefox recovery terminal summary",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only from exact validated Stage-07 run evidence",
+      "review_requirement": "No packet, clipboard, page, raw URL, credential, token, or account content.",
+      "evidence": [
+        "Operator Bridge Validation #29."
+      ]
     }
   ],
   "validation": [
@@ -895,11 +990,18 @@
         "Operator Bridge Validation #24 and Workspace Control Validation #2402 both passed at 8c0f97f23e181b850728b2b42c970b71d93c3991.",
         "Stage 06 exit criterion satisfied: routine bridge mechanics operate end-to-end against fake workers through real Windows helper services, real Native Messaging/local IPC, and real Firefox lifecycle APIs without a ChatGPT account."
       ]
+    },
+    {
+      "check": "Stage 07 exact-head recovery/fault validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #29 and Workspace Control Validation #2407 both passed at 7d8bd99bbd23eafa834a0a676d86156382ad8c1e.",
+        "Stage 07 exit criterion satisfied: single-component, auth-domain, stale-generation, helper-restart, and browser-recovery failures have bounded tested recovery without authority duplication."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "impl_07_recovery_and_fault_closure: Crash, auth-domain, stale-generation, restart, and recovery closure",
     "impl_08_packaging_install_update_rollback: Per-user packaging, signed-extension flow, install/uninstall, and rollback",
     "impl_09_performance_benchmark_execution: Execute UX-09 performance/resource benchmark",
     "impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials",
@@ -907,8 +1009,8 @@
     "impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration",
     "impl_13_production_readiness_review: Integrated implementation review and promotion decision"
   ],
-  "next_safe_action": "Execute impl_07_recovery_and_fault_closure from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the recovery coordinator, restart/reinventory handling, auth-domain freeze/reconcile/generation-advance flow, and content-free recovery traces using the validated real helper/browser adapters plus deterministic fault injection. Required exit evidence: every frozen UX-10 recovery/crash/generation fixture at its required implemented layer passes; each recovery_id advances generation at most once; late old-generation evidence cannot advance current state; cold restart never replays stale local cache; and Ctrl+B during blocking recovery cannot stage a worker packet or mutate the clipboard. Preserve all UX-07/UX-08 authority and privacy boundaries. Do not widen into packaging, UX-09 performance acceptance, UX-11 usability trials, WebView2 promotion, or real-account calibration.",
+  "next_safe_action": "Execute impl_08_packaging_install_update_rollback from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Produce a self-contained win-x64 per-user helper package, bounded install/uninstall scripts, native-host registration, reviewed signed-XPI installation procedure, and explicit update/rollback flow. Required exit evidence: clean install smoke PASS; uninstall removes only operator-owned files and registry entries; upgrade smoke PASS; rollback to the previous helper/XPI PASS; no administrator authority required; and no unrelated Firefox/profile data mutation. Preserve the frozen Firefox permissions/native-host identity, recovery-state privacy boundary, and simulator/production separation. Do not widen into UX-09 target-machine performance acceptance, UX-11 human usability trials, WebView2 promotion, or real-account calibration.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
-  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active.\n\n2026-11-10 STAGE 04 COMPLETE: Firefox MV3 BrowserPort adapter validated at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436. Operator Bridge Validation #12 and Workspace Control Validation #2390 passed SUCCESS. Node 24 mocked-browser suite passed 10/10, proving managed-only lifecycle, fixed reviewed worker URL, content-free sessions metadata, duplicate-command idempotency, generation fencing, discard safety, and raw-URL-to-origin-enum reduction. Stage 05 deterministic simulator/fake worker is active; no real-account behavior is claimed.\n\n2026-11-10 STAGE 05 COMPLETE: Deterministic simulator/fake worker validated at 8bf4c2b6d13dc9d917ee831828c718fbca57648a. Operator Bridge Validation #15 and Workspace Control Validation #2393 passed SUCCESS. The simulator build graph is separate from production, all 36 frozen UX-10 L0/L1 E2E obligations are catalog-covered, Simulator.Tests passed 38/38, traces are deterministic SHA-256, payload mismatch cannot ack, and generation/durable-event idempotency is enforced. Stage 06 real-helper + Firefox + fake-worker integration is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 06 COMPLETE: Real helper + Firefox + fake-worker integration validated at 8c0f97f23e181b850728b2b42c970b71d93c3991. Operator Bridge Validation #24 and Workspace Control Validation #2402 passed SUCCESS. Layer-2 real-helper Windows tests passed 5/5 with actual clipboard and Ctrl+B registration; Firefox mocked-browser tests passed 14/14; the real Firefox 159.0.1 Native Messaging Layer-3 run passed every Stage-06 predicate, including create/reuse/discard/restore, managed identity fail-closed behavior, adapter parity, and zero background clipboard/browser effects. The Firefox tabs.discard return-semantics defect found by the real-browser run was corrected and regression-tested. Stage 07 recovery/fault closure is active; no real ChatGPT account is authorized."
+  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active.\n\n2026-11-10 STAGE 04 COMPLETE: Firefox MV3 BrowserPort adapter validated at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436. Operator Bridge Validation #12 and Workspace Control Validation #2390 passed SUCCESS. Node 24 mocked-browser suite passed 10/10, proving managed-only lifecycle, fixed reviewed worker URL, content-free sessions metadata, duplicate-command idempotency, generation fencing, discard safety, and raw-URL-to-origin-enum reduction. Stage 05 deterministic simulator/fake worker is active; no real-account behavior is claimed.\n\n2026-11-10 STAGE 05 COMPLETE: Deterministic simulator/fake worker validated at 8bf4c2b6d13dc9d917ee831828c718fbca57648a. Operator Bridge Validation #15 and Workspace Control Validation #2393 passed SUCCESS. The simulator build graph is separate from production, all 36 frozen UX-10 L0/L1 E2E obligations are catalog-covered, Simulator.Tests passed 38/38, traces are deterministic SHA-256, payload mismatch cannot ack, and generation/durable-event idempotency is enforced. Stage 06 real-helper + Firefox + fake-worker integration is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 06 COMPLETE: Real helper + Firefox + fake-worker integration validated at 8c0f97f23e181b850728b2b42c970b71d93c3991. Operator Bridge Validation #24 and Workspace Control Validation #2402 passed SUCCESS. Layer-2 real-helper Windows tests passed 5/5 with actual clipboard and Ctrl+B registration; Firefox mocked-browser tests passed 14/14; the real Firefox 159.0.1 Native Messaging Layer-3 run passed every Stage-06 predicate, including create/reuse/discard/restore, managed identity fail-closed behavior, adapter parity, and zero background clipboard/browser effects. The Firefox tabs.discard return-semantics defect found by the real-browser run was corrected and regression-tested. Stage 07 recovery/fault closure is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 07 COMPLETE: Recovery/fault closure validated at 7d8bd99bbd23eafa834a0a676d86156382ad8c1e. Operator Bridge Validation #29 and Workspace Control Validation #2407 passed SUCCESS. The frozen 14-fixture recovery/crash/auth/generation catalog is covered at all required implemented L0-L3 layers. Layer-2 real-helper tests passed 12/12 total, including explicit unknown-create fail-closed/no-duplicate coverage; real Firefox 159.0.1 Native Messaging recovery integration passed tab/browser/adapter loss, auth refresh, unknown-create, and cold-restart predicates. Recovery state persists content-free completed steps, generation advancement is exact-once, stale old-generation evidence cannot advance current state, cold restart does not replay local cache, and Ctrl+B during blocking recovery cannot claim or stage a worker packet. Stage 08 per-user packaging/install/update/rollback is active; no real ChatGPT account is authorized."
 }

@@ -24,16 +24,15 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 8c0f97f23e181b850728b2b42c970b71d93c3991
+- Remote checkpoint: 7d8bd99bbd23eafa834a0a676d86156382ad8c1e
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_07_recovery_and_fault_closure from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the recovery coordinator, restart/reinventory handling, auth-domain freeze/reconcile/generation-advance flow, and content-free recovery traces using the validated real helper/browser adapters plus deterministic fault injection. Required exit evidence: every frozen UX-10 recovery/crash/generation fixture at its required implemented layer passes; each recovery_id advances generation at most once; late old-generation evidence cannot advance current state; cold restart never replays stale local cache; and Ctrl+B during blocking recovery cannot stage a worker packet or mutate the clipboard. Preserve all UX-07/UX-08 authority and privacy boundaries. Do not widen into packaging, UX-09 performance acceptance, UX-11 usability trials, WebView2 promotion, or real-account calibration.
+Execute impl_08_packaging_install_update_rollback from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Produce a self-contained win-x64 per-user helper package, bounded install/uninstall scripts, native-host registration, reviewed signed-XPI installation procedure, and explicit update/rollback flow. Required exit evidence: clean install smoke PASS; uninstall removes only operator-owned files and registry entries; upgrade smoke PASS; rollback to the previous helper/XPI PASS; no administrator authority required; and no unrelated Firefox/profile data mutation. Preserve the frozen Firefox permissions/native-host identity, recovery-state privacy boundary, and simulator/production separation. Do not widen into UX-09 target-machine performance acceptance, UX-11 human usability trials, WebView2 promotion, or real-account calibration.
 
 ## Remaining work
 
-- impl_07_recovery_and_fault_closure: Crash, auth-domain, stale-generation, restart, and recovery closure
 - impl_08_packaging_install_update_rollback: Per-user packaging, signed-extension flow, install/uninstall, and rollback
 - impl_09_performance_benchmark_execution: Execute UX-09 performance/resource benchmark
 - impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials
