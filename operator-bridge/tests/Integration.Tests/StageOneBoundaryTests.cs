@@ -3,14 +3,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace WorkspaceControl.OperatorBridge.Integration.Tests;
 
 [TestClass]
-public sealed class StageThreeBoundaryTests
+public sealed class StageFourBoundaryTests
 {
     [TestMethod]
-    public void NativeMessagingIpcStageIsExplicit()
+    public void FirefoxMv3AdapterStageIsExplicit()
     {
         Assert.IsTrue(
             string.Equals(
-                "IMPL_03_NATIVE_MESSAGING_IPC",
+                "IMPL_04_FIREFOX_MV3_ADAPTER",
                 BootstrapState.Stage,
                 StringComparison.Ordinal));
     }

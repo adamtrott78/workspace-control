@@ -9,6 +9,7 @@
   ],
   "background": {
     "scripts": [
+      "adapter_core.js",
       "background.js"
     ],
     "persistent": false

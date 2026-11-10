@@ -43,6 +43,15 @@ jobs:
         run: |
           python -m unittest discover -s tests -p "test_workspace_semantic_execution_operator_bridge*.py" -v
 
+      - name: Set up Node 24 for Firefox adapter tests
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Test Firefox adapter with mocked browser APIs
+        shell: pwsh
+        run: node --test operator-bridge/tests/FirefoxAdapter.Tests/firefox_adapter.test.js
+
       - name: Restore
         shell: pwsh
         run: dotnet restore operator-bridge/WorkspaceOperatorBridge.slnx
