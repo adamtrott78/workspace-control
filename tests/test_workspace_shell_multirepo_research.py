@@ -117,6 +117,17 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
                 self.assertEqual(cp.returncode, 0, cp.stdout + cp.stderr)
                 self.assertEqual(handoff.read_text(), rendered.read_text())
 
+    def test_upgrade_operator_shell_syntax(self):
+        upgrade = PLUGIN / "install" / "upgrade_multirepo_padataset_v1.sh"
+        cp = subprocess.run(
+            ["/usr/bin/bash", "-n", str(upgrade)],
+            cwd=ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(cp.returncode, 0, cp.stdout + cp.stderr)
+
     def test_install_and_upgrade_separate_clean_execution_from_historical_evidence(self):
         render = (PLUGIN / "install" / "render_install.py").read_text()
         self.assertIn('padataset_root = "/srv/workspace-shell/PADataset"', render)
