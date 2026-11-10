@@ -123,6 +123,39 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("stage09-ci-performance.json", workflow)
         self.assertIn("non-target content-free performance evidence", workflow)
 
+    def test_target_evidence_schema_requires_exact_frozen_execution_shape(self):
+        schema = json.loads(
+            (PERF / "stage09-target-evidence.schema.json").read_text(encoding="utf-8")
+        )
+        props = schema["properties"]
+        self.assertEqual("TARGET_WINDOWS_OPERATOR_WORKSTATION", props["evidence_class"]["const"])
+        self.assertTrue(props["target_contract_complete"]["const"])
+        self.assertEqual(60, props["measurement"]["properties"]["warmup_seconds"]["const"])
+        self.assertEqual(120, props["measurement"]["properties"]["steady_state_seconds"]["const"])
+        reps = props["repetitions"]["properties"]
+        self.assertEqual(3, reps["browser_resource"]["const"])
+        self.assertEqual(5, reps["discard_restore"]["const"])
+        self.assertEqual(50, reps["reuse"]["const"])
+        self.assertEqual(30, reps["restore"]["const"])
+        self.assertEqual(30, reps["create"]["const"])
+        self.assertEqual(10, reps["cold_start"]["const"])
+        self.assertEqual(100, reps["local_primitives"]["const"])
+        self.assertEqual(0, props["blockers"]["maxItems"])
+
+    def test_target_firefox_collector_fails_closed_and_never_claims_completion(self):
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage09-target-firefox.ps1"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Target measurement rejected: unrelated same-name Firefox process is present.", script)
+        self.assertIn("--mode=target", script)
+        self.assertIn("--warmup-ms=60000", script)
+        self.assertIn("--sample-ms=120000", script)
+        self.assertIn("--sample-interval-ms=1000", script)
+        self.assertIn("--latency-scale=1", script)
+        self.assertIn('"TARGET_MODE_PARTIAL"', script)
+        self.assertIn("must not claim complete UX-09 acceptance", script)
+        self.assertNotIn("Stop-Process -Name firefox", script)
+
 
 if __name__ == "__main__":
     unittest.main()
