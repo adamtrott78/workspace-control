@@ -236,6 +236,7 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("TARGET_ADAPTER_PREFLIGHT_DIAGNOSTICS", script)
         self.assertIn("tracked_owned_firefox_ids", script)
         self.assertIn("runner_exit_code", script)
+        self.assertIn("CloseMainWindow", script)
         self.assertIn("owned_by_collector", script)
         self.assertIn("runner.out.log", script)
         self.assertIn("fake-worker.err.log", script)
@@ -264,6 +265,8 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("new FirefoxWorkerEnvironmentLauncher()", source)
         self.assertIn("recordingLauncher.LastProcessId", source)
         self.assertIn("TerminateOwnedFirefoxAsync(processId)", source)
+        self.assertIn("CloseMainWindow()", source)
+        self.assertIn("TimeSpan.FromSeconds(8)", source)
         self.assertIn('"TARGET_COLD_FIREFOX_PARTIAL"', source)
         self.assertNotIn('"IMPLEMENTATION_GAP"', source)
 
