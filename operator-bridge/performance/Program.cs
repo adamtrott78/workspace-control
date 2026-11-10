@@ -18,6 +18,8 @@ namespace WorkspaceControl.OperatorBridge.PerformanceHarness;
 internal static class Program
 {
     private const string FirefoxProcessName = "firefox";
+    private const string PerformanceAdapterKind = "FIREFOX_EXTENSION";
+    private const string PerformanceAdapterVersion = "0.1.9-perf";
 
     [STAThread]
     private static async Task<int> Main(string[] args)
@@ -26,10 +28,10 @@ internal static class Program
         var helperPath = RequiredArgument(args, "--helper");
         var readyFile = GetArgument(args, "--ready-file");
         var mode = (GetArgument(args, "--mode") ?? "ci").ToLowerInvariant();
-        if (mode is not ("ci" or "target" or "cold-target"))
+        if (mode is not ("ci" or "target" or "cold-target" or "adapter-preflight"))
         {
             throw new ArgumentException(
-                "--mode must be ci, target, or cold-target.");
+                "--mode must be ci, target, cold-target, or adapter-preflight.");
         }
 
         var warmupMs = IntArgument(args, "--warmup-ms", mode == "target" ? 60000 : 250);
@@ -46,6 +48,14 @@ internal static class Program
             Primitive: Math.Max(1, 100 / latencyScale));
 
         var diagnostics = new CaptureDiagnostics();
+        if (mode == "adapter-preflight")
+        {
+            return await RunAdapterPreflightAsync(
+                resultPath,
+                readyFile,
+                timeoutSeconds,
+                diagnostics);
+        }
         if (mode == "cold-target")
         {
             var coldCount = IntArgument(args, "--cold-count", 10);
@@ -68,7 +78,11 @@ internal static class Program
             diagnostics);
         bridgeController.SetEnabled(true);
 
-        var hub = new BrowserCommandHub(bridgeState, diagnostics);
+        var hub = new BrowserCommandHub(
+            bridgeState,
+            diagnostics,
+            PerformanceAdapterKind,
+            PerformanceAdapterVersion);
         var pipeName = ElevationScope.PipeName(ElevationScope.Current());
         using var cancellation = new CancellationTokenSource();
         var serverTask = new LocalIpcServer(
@@ -326,6 +340,97 @@ internal static class Program
         }
     }
 
+    private static async Task<int> RunAdapterPreflightAsync(
+        string resultPath,
+        string? readyFile,
+        int timeoutSeconds,
+        IDiagnosticsSink diagnostics)
+    {
+        var bridgeState = new BridgeState();
+        var bridgeController = new BridgeController(
+            bridgeState,
+            new NoopHotkeyRegistrar(),
+            diagnostics);
+        bridgeController.SetEnabled(true);
+
+        var hub = new BrowserCommandHub(
+            bridgeState,
+            diagnostics,
+            PerformanceAdapterKind,
+            PerformanceAdapterVersion);
+        var pipeName = ElevationScope.PipeName(ElevationScope.Current());
+        using var cancellation = new CancellationTokenSource();
+        var serverTask = new LocalIpcServer(
+            pipeName,
+            hub,
+            diagnostics).RunAsync(cancellation.Token);
+
+        if (!string.IsNullOrWhiteSpace(readyFile))
+        {
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(Path.GetFullPath(readyFile))!);
+            await File.WriteAllTextAsync(readyFile, "SERVER_READY");
+        }
+
+        try
+        {
+            var connected = await hub.WaitForConnectionAsync(
+                TimeSpan.FromSeconds(timeoutSeconds));
+            if (!connected)
+            {
+                throw new InvalidOperationException(
+                    "Stage 09 performance adapter did not connect with the required identity.");
+            }
+
+            var evidence = new
+            {
+                schema_version = 1,
+                evidence_class = "TARGET_ADAPTER_PREFLIGHT",
+                target_contract_complete = false,
+                adapter_kind = PerformanceAdapterKind,
+                adapter_version = PerformanceAdapterVersion,
+                status = "PASS"
+            };
+            await File.WriteAllTextAsync(
+                resultPath,
+                JsonSerializer.Serialize(
+                    evidence,
+                    new JsonSerializerOptions { WriteIndented = true }));
+            Console.WriteLine("STAGE09_TARGET_ADAPTER_PREFLIGHT=PASS");
+            return 0;
+        }
+        catch (Exception exception)
+        {
+            var failure = new
+            {
+                schema_version = 1,
+                evidence_class = "TARGET_ADAPTER_PREFLIGHT",
+                target_contract_complete = false,
+                adapter_kind = PerformanceAdapterKind,
+                adapter_version = PerformanceAdapterVersion,
+                status = "FAIL",
+                error_type = exception.GetType().Name
+            };
+            await File.WriteAllTextAsync(
+                resultPath,
+                JsonSerializer.Serialize(
+                    failure,
+                    new JsonSerializerOptions { WriteIndented = true }));
+            return 1;
+        }
+        finally
+        {
+            cancellation.Cancel();
+            try
+            {
+                await serverTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+    }
+
     private static async Task<int> RunColdStartTargetAsync(
         string resultPath,
         int coldCount,
@@ -338,7 +443,11 @@ internal static class Program
             diagnostics);
         bridgeController.SetEnabled(true);
 
-        var hub = new BrowserCommandHub(bridgeState, diagnostics);
+        var hub = new BrowserCommandHub(
+            bridgeState,
+            diagnostics,
+            PerformanceAdapterKind,
+            PerformanceAdapterVersion);
         var pipeName = ElevationScope.PipeName(ElevationScope.Current());
         using var cancellation = new CancellationTokenSource();
         var serverTask = new LocalIpcServer(
