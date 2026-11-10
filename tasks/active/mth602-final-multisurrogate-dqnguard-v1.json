@@ -6,7 +6,7 @@
   "goal": "Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard project so Stage 00 can recover canonical MILCOM baseline/runtime provenance directly from the prepared Lambda checkout before architecture implementation.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "stage00_baseline_provenance_recovery",
+  "current_stage": "stage01_evidence_partition_design",
   "acceptance_criteria": [
     "Workspace Shell can inspect PADataset at the exact task-bound source SHA without changing the historical checkout.",
     "Stage 00 recovers the fixed-Scan DQNGuard, full 20-cell target-surrogate matrix, and VarMax surrogate-all evidence chains with machine-readable provenance.",
@@ -67,7 +67,7 @@
     },
     {
       "id": "stage00_baseline_provenance_recovery",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "workspace-shell",
@@ -78,12 +78,23 @@
         "machine-readable baseline provenance artifact",
         "updated authoritative PADataset TASK.md"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 00 baseline provenance freeze",
+          "result": "PASS",
+          "evidence": [
+            "PADataset commit 025f73632609891ee5292880b0efe25f5d50df04 adds docs/experiments/multisurrogate_dqnguard/stage00_baseline_provenance.json and marks Stage 00 complete in the authoritative TASK.md.",
+            "All 20 Target-Surrogate evaluator unknown_f1 values exactly match the accepted rendered matrix.",
+            "B0/B2 four-fold evaluator/config/checkpoint identities and the shared 16,384 OTA cache lineage are SHA-256 pinned.",
+            "Missing historical aggregate-input CSVs are explicitly recorded as absent and were not regenerated."
+          ]
+        }
+      ],
       "resume_condition": "workspace_shell_bootstrap validated."
     },
     {
       "id": "stage01_evidence_partition_design",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -125,6 +136,15 @@
         "Lambda read-only preflight observed this checkout and its dirty working tree.",
         "The 107 GB checkout contains the ignored/local MILCOM-era artifacts needed for Stage 00 and must not be cleaned, switched, reset, stashed, or copied wholesale."
       ]
+    },
+    {
+      "id": "stage00-provenance-freeze",
+      "kind": "git_commit",
+      "identity": "025f73632609891ee5292880b0efe25f5d50df04",
+      "required_for_resume": true,
+      "evidence": [
+        "Adds Stage 00 baseline provenance artifact and marks scientific Stage 00 complete."
+      ]
     }
   ],
   "artifacts": [],
@@ -139,19 +159,20 @@
     },
     {
       "check": "Stage 00 baseline provenance artifact",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "PADataset scientific commit 025f73632609891ee5292880b0efe25f5d50df04 contains the machine-readable Stage 00 artifact and authoritative task update."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Read the canonical scientific task and recover fixed-Scan DQNGuard baseline provenance.",
-    "Recover the full 20-cell target-surrogate matrix provenance and VarMax surrogate-all evidence chains.",
-    "Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings.",
-    "Record inaccessible historical subdirectories explicitly if legacy permissions block read-only traversal.",
-    "Persist a machine-readable Stage 00 provenance artifact and update the authoritative PADataset task only after evidence recovery is complete."
+    "Write explicit A/B/C evidence partitions with backbone taxonomy, DQN-fit evidence, deterministic-guard evidence, normalization/aggregation evidence, known-threshold evidence, untouched target-test evidence, score definitions, and shared-vs-surrogate-specific state.",
+    "Check taxonomy integrity and no-target-leakage for each architecture.",
+    "Select C as the first implementation only if the completed evidence-partition design does not invalidate it.",
+    "Do not implement architecture code until Stage 01 design is reviewed and frozen."
   ],
-  "next_safe_action": "Continue Stage 00 read-only provenance recovery from PADataset@17e1147614f27702e43565089d618182ff71c5af and the untouched historical evidence checkout mounted at local_artifacts/evidence. Start with docs/experiments/multisurrogate_dqnguard/TASK.md, then recover baseline CSV/evaluator/run/config/checkpoint/cache/calibration identities. Do not begin Stage 01 until the provenance gate closes.",
+  "next_safe_action": "Use the PADataset scientific contexts and Stage 00 provenance freeze at 025f73632609891ee5292880b0efe25f5d50df04 to write the Stage 01 A/B/C evidence-partition design. No architecture implementation yet.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."
