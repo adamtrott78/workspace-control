@@ -74,7 +74,7 @@ operator_ux_design
 
 ## Next safe action
 
-Begin UX-00 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define the authoritative operator UX requirements baseline and quantitative success metrics. Treat the existing operator UX/state-machine documents as design candidates to refine, not frozen implementation contracts. Do not begin native-helper or Firefox-extension implementation until the required UX design slices and gates are satisfied.
+Begin UX-01 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: enumerate every operator-visible journey and produce the human-readable journey catalog plus machine-readable typed flow catalog. Include the known case where new-tab reauthentication refreshes/invalidates all worker tabs, but leave its detailed recovery algorithm for UX-07.
 
 ## Remaining work
 
