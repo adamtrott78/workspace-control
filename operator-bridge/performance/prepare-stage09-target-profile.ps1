@@ -4,7 +4,9 @@ param(
     [Parameter(Mandatory = $true)][string]$SignedXpiPath,
     [string]$FirefoxPath = "C:\Program Files\Mozilla Firefox\firefox.exe",
     [string]$ProfileName = "WorkspaceWorkers",
-    [string]$ProfileRoot = (Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage09\FirefoxProfiles\WorkspaceWorkers")
+    [string]$ProfileRoot = (Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage09\FirefoxProfiles\WorkspaceWorkers"),
+    [switch]$InteractiveInstall,
+    [switch]$VerifyOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -103,6 +105,9 @@ if (Test-Path -LiteralPath $profile) {
     }
 }
 else {
+    if ($VerifyOnly) {
+        throw "Stage 09 owned WorkspaceWorkers profile has not been prepared yet."
+    }
     New-Item -ItemType Directory -Path (Split-Path -Parent $profile) -Force | Out-Null
     $createArgs = @("-CreateProfile", ('"' + $ProfileName + ' ' + $profile + '"'))
     $create = Start-Process -FilePath $FirefoxPath -ArgumentList $createArgs -PassThru -Wait
@@ -115,10 +120,6 @@ else {
         profile_name = $ProfileName
     } | ConvertTo-Json | Set-Content -LiteralPath $ownerPath -Encoding UTF8
 }
-
-$extensions = Join-Path $profile "extensions"
-New-Item -ItemType Directory -Path $extensions -Force | Out-Null
-Copy-Item -LiteralPath $xpi -Destination (Join-Path $extensions ($ExpectedExtensionId + ".xpi")) -Force
 
 [ordered]@{
     schema_version = 1
@@ -133,4 +134,16 @@ Copy-Item -LiteralPath $xpi -Destination (Join-Path $extensions ($ExpectedExtens
 } | ConvertTo-Json -Depth 5 |
     Set-Content -LiteralPath (Join-Path $profile "stage09-profile-state.json") -Encoding UTF8
 
-Write-Host "STAGE09_TARGET_PROFILE_PREPARED=PASS"
+if ($InteractiveInstall) {
+    if ($VerifyOnly) {
+        throw "-InteractiveInstall and -VerifyOnly are mutually exclusive."
+    }
+    Start-Process -FilePath $FirefoxPath -ArgumentList @(
+        "-P", $ProfileName, "-no-remote", ('"' + $xpi + '"')
+    ) | Out-Null
+    Write-Host "STAGE09_TARGET_PROFILE_INSTALL_UI_OPENED=PASS"
+    Write-Host "Complete the normal Firefox signed-add-on confirmation, then close Firefox before target execution."
+    return
+}
+
+Write-Host "STAGE09_TARGET_PROFILE_VERIFIED=PASS"
