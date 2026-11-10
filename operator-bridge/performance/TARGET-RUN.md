@@ -110,3 +110,46 @@ fails closed rather than killing or adopting it.
 Stage 10 usability work and later promotion remain blocked until the complete
 target result exists and every failing mechanical budget is corrected or
 explicitly accepted through the owning review authority.
+
+
+## Stage-09 fake-worker target adapter gate
+
+Target-machine Stage 09 remains **account-free and fake-worker-only**. Real ChatGPT
+calibration remains deferred to `impl_12_real_account_calibration`.
+
+The target benchmark MUST use the distinct Mozilla-signed performance adapter:
+
+- extension ID: `workspace-control-operator@adamtrott78.local`
+- extension version: `0.1.9`
+- native HELLO adapter version: `0.1.9-perf`
+- worker URL: `http://127.0.0.1:8765/fake-worker.html`
+
+Hosted validation builds `stage09-performance-unsigned.xpi` as the exact Mozilla
+signing input and publishes its source-SHA/hash manifest beside it. That XPI is
+not target-ready until Mozilla signs it. The signed result is placed at:
+
+`%LOCALAPPDATA%\WorkspaceControl\OperatorBridge\Stage09\workspace-control-operator-performance-signed.xpi`
+
+Before any measured target run, `prepare-stage09-target-profile.ps1` verifies
+the signed XPI payload against the exact checked-out repo source, rejects any
+production ChatGPT worker URL, and prepares only the Stage-09-owned
+`WorkspaceWorkers` profile. It refuses to mutate an existing profile without
+the Stage-09 ownership marker.
+
+The helper additionally fences the adapter during the native-messaging HELLO.
+The target harness accepts only `FIREFOX_EXTENSION / 0.1.9-perf`; a production,
+stale, or unknown adapter receives `ADAPTER_IDENTITY_REJECTED` before it can
+receive a browser command. A short adapter preflight runs before the long
+measurement matrix.
+
+Target setup also temporarily:
+
+- binds the HKCU native-messaging registration to the exact checked-out helper;
+- enforces Chrome `HighEfficiencyModeEnabled=0` for the clean Chrome benchmark
+  profile; and
+- restores/removes both values to their exact pre-run state in cleanup.
+
+The self-hosted workflow uses process-scoped PowerShell execution-policy bypass
+only for the runner job so GitHub's Python tool setup can execute on machines
+whose persistent Windows PowerShell policy blocks scripts. No persistent
+execution-policy setting is changed.
