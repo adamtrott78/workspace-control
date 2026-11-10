@@ -1,0 +1,218 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-shell-multirepo-research-v1",
+  "title": "Workspace Shell multi-repo PADataset research access v1",
+  "status": "IN_PROGRESS",
+  "goal": "Extend the live Workspace Shell v1 lineage with a first-class PADataset target that supports exact-SHA/task-bound Git provenance, bounded read-only evidence inspection, and sandboxed network-denied research execution without exposing a generic shell or making the historical PADataset checkout writable.",
+  "execution_topology": "local",
+  "parent_execution_owner": "workspace-shell-mcp-v1",
+  "current_stage": "implementation_and_validation",
+  "acceptance_criteria": [
+    "PADataset is an explicit Workspace Shell target authorized only by an IN_PROGRESS durable task capsule with an exact repository checkpoint SHA.",
+    "Read-only PADataset evidence inspection supports bounded recursive file listing, bounded byte reads, SHA-256 hashing, and existing hardened Git inspection without arbitrary shell execution.",
+    "research-bounded executes only approved PADataset Python research paths in the existing hostile-worker bubblewrap sandbox with network denied, credentials absent, and a disposable writable source copy.",
+    "Dirty/untracked PADataset state may be inspected by read-only profiles but may not be executed by research-bounded.",
+    "The historical PADataset checkout is never switched, reset, cleaned, stashed, deleted, or directly written by Workspace Shell.",
+    "Live upgrade is exact-head gated, snapshots PADataset read-only under /srv/workspace-shell, preserves rollback evidence, and leaves the four Workspace Shell services healthy.",
+    "Unauthorized targets, target/profile combinations, path traversal, oversized reads, arbitrary Python paths, and generic shell/interpreter escape shapes fail closed."
+  ],
+  "constraints": [
+    "Do not weaken the existing distinct frontend/worker/tunnel/root-broker identities or credential isolation.",
+    "Do not expose /home to the hostile worker; PADataset reaches the worker only through a root-owned /srv snapshot.",
+    "Do not add unrestricted bash, sh, python -c, arbitrary executable lookup, PTY, background process, Docker socket, SSH agent, or outbound network access.",
+    "Do not mutate the historical PADataset checkout during bootstrap or Stage 00.",
+    "Bind the initial PADataset target to exact expected SHA 17e1147614f27702e43565089d618182ff71c5af and fail closed if the Lambda checkout differs.",
+    "Privileged helper trust stores remain empty/fail-closed; this task does not authorize privileged helper execution."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
+      "remote": {
+        "branch": "workspace-shell-multirepo-research-v1",
+        "checkpoint_sha": "a7986e2c5fd97b544b4107296a28d10930134ae2",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-shell-multirepo-research-v1.json",
+        "tasks/active/workspace-shell-multirepo-research-v1.md",
+        "tasks/active/mth602-final-multisurrogate-dqnguard-v1.json",
+        "tasks/active/mth602-final-multisurrogate-dqnguard-v1.md",
+        "plugins/workspace-shell/**",
+        "tests/test_workspace_shell*.py"
+      ]
+    },
+    {
+      "name": "PADataset",
+      "intent": "read",
+      "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
+      "remote": {
+        "branch": "mth602-final-multisurrogate-dqnguard-v1",
+        "checkpoint_sha": "17e1147614f27702e43565089d618182ff71c5af",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "target_contract",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-shell-mcp-v1 accepted live runtime",
+        "PADataset project handoff"
+      ],
+      "outputs": [
+        "PADataset target/profile contract"
+      ],
+      "validation": [
+        {
+          "check": "Least-privilege target design",
+          "result": "PASS",
+          "evidence": [
+            "PADataset gains git/file-read/file-hash/file-list and research-bounded only; generic shell remains absent.",
+            "research-bounded uses write_scratch=true and network=deny."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "implementation_and_validation",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "target_contract"
+      ],
+      "outputs": [
+        "Workspace Shell source changes",
+        "multirepo regression tests",
+        "live upgrade operator"
+      ],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "live_upgrade",
+      "status": "PLANNED",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": "operator",
+      "selected_surface": "lambda+workspace-shell",
+      "inputs": [
+        "validated implementation head"
+      ],
+      "outputs": [
+        "root-owned PADataset snapshot",
+        "updated live Workspace Shell runtime",
+        "live acceptance receipts"
+      ],
+      "validation": [],
+      "resume_condition": "implementation_and_validation passes exact-head CI."
+    },
+    {
+      "id": "stage00_handoff",
+      "status": "PLANNED",
+      "execution_owner": "mth602-final-multisurrogate-dqnguard-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "workspace-shell",
+      "inputs": [
+        "live_upgrade"
+      ],
+      "outputs": [
+        "direct PADataset Stage 00 access"
+      ],
+      "validation": [],
+      "resume_condition": "Live PADataset git/file inspection succeeds at the exact task-bound SHA."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "workspace-shell-v1-repaired-lineage",
+      "kind": "git_commit",
+      "identity": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
+      "required_for_resume": true,
+      "evidence": [
+        "Upgrade branch was created from the repaired Workspace Shell current-main lineage."
+      ]
+    },
+    {
+      "id": "padataset-initial-authority",
+      "kind": "git_commit",
+      "identity": "17e1147614f27702e43565089d618182ff71c5af",
+      "required_for_resume": true,
+      "evidence": [
+        "Initial MTH602 research branch head supplied by the authoritative project handoff; live upgrade must verify the local checkout matches before mutation."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "plugins/workspace-shell/install/upgrade_multirepo_padataset_v1.sh",
+      "state": "IMPLEMENTED_UNVALIDATED",
+      "role": "live upgrade/rollback operator",
+      "origin": "this task",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "exact-head validation before Lambda execution",
+      "evidence": [
+        "Fails before runtime mutation when PADataset HEAD differs from the expected exact SHA.",
+        "Snapshots both authority source and PADataset under /srv and retains a rollback backup."
+      ]
+    },
+    {
+      "path": "tests/test_workspace_shell_multirepo_research.py",
+      "state": "IMPLEMENTED_UNVALIDATED",
+      "role": "multirepo contract regression",
+      "origin": "this task",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "CI",
+      "evidence": [
+        "Covers target/profile matrix, evidence bounds, research sandbox profile, install root, and upgrade fail-closed markers."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Repository implementation tests",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Workspace Control integration validation",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Live PADataset exact-SHA inspection",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Live negative target/profile/path tests",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Run exact-head repository validation and fix any regressions.",
+    "Update the task checkpoint to the validated implementation head and synchronize derived handoff.",
+    "Execute the live upgrade operator on Lambda only from the validated clean workspace-control head.",
+    "Verify the historical PADataset checkout exact branch/head/status without mutating it; abort if the expected SHA binding is wrong.",
+    "Run live positive and negative Workspace Shell acceptance for PADataset.",
+    "Hand control back to the MTH602 Stage 00 provenance recovery task."
+  ],
+  "next_safe_action": "Validate the current workspace-shell-multirepo-research-v1 head with repository tests/Workspace Control CI. Do not execute the live upgrade operator until an exact head passes validation. After validation, run the upgrade against the prepared Lambda checkout with expected PADataset SHA 17e1147614f27702e43565089d618182ff71c5af; fail closed on any mismatch.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+workspace-shell",
+  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here."
+}
