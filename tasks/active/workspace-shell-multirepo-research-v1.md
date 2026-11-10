@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 - Intent: mutate
 - Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 0dda3817a943ec41d3f1d1453c9e0f53dfe8b55d
+- Remote checkpoint: c8eca3ddc7915b6bc5ce1e40bc0f8866c8d7be89
 - Remote verified: true
 
 ### PADataset
@@ -36,7 +36,7 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Validate the current PR #595 head after the historical-evidence redesign. Do not run the live upgrade until that exact head passes the Workspace Shell/PADataset Python contract suite. Then run the upgrade from the exact validated head; it must clone PADataset execution source at 17e1147614f27702e43565089d618182ff71c5af and bind the untouched historical checkout read-only under /srv/workspace-shell/PADataset-evidence.
+Validate the current PR #595 head, whose implementation checkpoint is c8eca3ddc7915b6bc5ce1e40bc0f8866c8d7be89 and whose following commit is derived state synchronization only. Do not run the live upgrade until that exact PR head passes the Workspace Shell/PADataset Python contract suite. Then run the upgrade from the exact validated head; it must clone PADataset execution source at 17e1147614f27702e43565089d618182ff71c5af and bind the untouched historical checkout read-only under /srv/workspace-shell/PADataset-evidence.
 
 ## Remaining work
 
