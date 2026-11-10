@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-ux-freeze-v0.1",
+  "status": "IMPLEMENTATION_DESIGN_FROZEN",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "freeze_scope": "v0 human-operated Chat Instant operator bridge",
+  "reviewed_source_head": "b4ad400fa3784bb1420c2869fb89434a3337c86c",
+  "production_ready": false,
+  "prototype_implementation_authorized": false,
+  "decision": "PASS_FOR_IMPLEMENTATION_DESIGN_FREEZE",
+  "frozen_interaction": {
+    "routine_sequence": [
+      "GLOBAL_SCHEDULER_HOTKEY",
+      "CTRL_V",
+      "ENTER"
+    ],
+    "initial_hotkey_candidate": "CTRL+B",
+    "hotkey_rebindable": true,
+    "bridge_master_toggle": true,
+    "background_clipboard_mutation": false,
+    "background_focus_steal": false,
+    "automatic_submit": false,
+    "automatic_resend_without_durable_ack": false
+  },
+  "frozen_authority_invariants": [
+    "Durable Workspace Control state is authoritative; browser/helper state is non-authoritative cache.",
+    "Model/semantic inference cannot create or widen execution authority.",
+    "Local preparation cannot imply submission or durable acknowledgment.",
+    "Only matching durable events advance worker-service completion.",
+    "Unknown continuity fails closed.",
+    "Old-generation acknowledgments cannot advance current state.",
+    "Browser adapter cannot claim OperatorActions."
+  ],
+  "frozen_session_policy": {
+    "default_live_general_workers": 2,
+    "absolute_v0_live_managed_workers": 4,
+    "persistent_reuse_preferred": true,
+    "one_outstanding_packet_per_conversation_default": true,
+    "continuity_required_for_reuse": "TRUSTED",
+    "browser_identity_authoritative": false
+  },
+  "frozen_security_boundary": {
+    "manual_human_actions": [
+      "CTRL_V",
+      "ENTER",
+      "AUTHENTICATION",
+      "SUBSTANTIVE_JUDGMENT"
+    ],
+    "forbidden": [
+      "CHATGPT_DOM_CONTENT_READ",
+      "OUTPUT_EXTRACTION",
+      "SYNTHETIC_INPUT",
+      "AUTO_SEND",
+      "PRIVATE_CONSUMER_ENDPOINT",
+      "COOKIE_OR_TOKEN_EXTRACTION",
+      "SAFEGUARD_CIRCUMVENTION"
+    ],
+    "firefox_permissions": [
+      "nativeMessaging",
+      "tabs",
+      "sessions"
+    ],
+    "firefox_host_permissions": [],
+    "content_scripts": false
+  },
+  "frozen_implementation_baseline": {
+    "native_helper": ".NET 10 LTS / C# / WinForms",
+    "hotkey": "Win32 RegisterHotKey",
+    "clipboard": "WinForms write-only STA",
+    "tray": "WinForms NotifyIcon",
+    "local_ipc": "CurrentUserOnly named pipe",
+    "firefox": "Firefox ESR 153+ MV3 plain JavaScript",
+    "native_messaging_host": "com.workspacecontrol.operator_bridge",
+    "protocol": "workspace-semantic-execution-operator-native-messaging-protocol-v0.1 / v1.0",
+    "packaging": "per-user self-contained win-x64 helper + signed unlisted XPI",
+    "auto_update": false
+  },
+  "browser_selection": {
+    "required_environment": "dedicated managed worker environment isolated from ordinary browsing",
+    "production_baseline": "Firefox WorkspaceWorkers",
+    "conditional_candidate": "WebView2 custom worker shell",
+    "custom_candidate_is_blocking": false
+  },
+  "frozen_performance_budgets": {
+    "helper_working_set_mib_p95_max": 100,
+    "helper_plus_extension_incremental_mib_p95_max": 150,
+    "helper_idle_cpu_one_logical_cpu_percent_mean_max": 1,
+    "firefox_two_live_working_set_mib_p95_max": 1536,
+    "firefox_four_live_working_set_mib_p95_max": 2560,
+    "discard_three_of_four_working_set_reduction_percent_min": 25,
+    "reuse_ready_ms_p95_max": 750,
+    "restore_ready_ms_p95_max": 2500,
+    "create_ready_ms_p95_max": 2000,
+    "cold_start_ready_ms_p95_max": 8000,
+    "empirical_state": "NOT_RUN"
+  },
+  "frozen_usability_gates": {
+    "wrong_worker_dispatches_max": 0,
+    "wrong_packet_dispatches_max": 0,
+    "routine_interpretation_events_in_20_action_trial_max": 0,
+    "manual_tab_searches_in_20_action_trial_max": 0,
+    "manual_state_relay_events_max": 0,
+    "abandoned_cycles_in_20_action_trial_max": 0,
+    "empirical_state": "NOT_RUN"
+  },
+  "implementation_gate": {
+    "status": "BLOCKED_BY_AUTHORITY_SCOPE",
+    "reason": "Current task mutation scope does not authorize the proposed operator helper/extension code paths.",
+    "next_safe_action": "Obtain an authority-owned implementation capsule/scope; then execute UX-12 build slices against fake-worker simulator only."
+  },
+  "real_account_gates": [
+    "built Firefox/helper target-host API smoke passes",
+    "signed extension/native host installed",
+    "UX-08 implementation security checklist passes",
+    "fresh OpenAI terms/product review passes",
+    "normal manual authentication works",
+    "authorized production OperatorBridge transport is bound"
+  ],
+  "production_promotion_gates": [
+    "UX-09 empirical performance/resource results pass or trigger reviewed redesign",
+    "UX-11 human-in-loop trials pass with zero hard failures",
+    "real-account bounded calibration passes",
+    "install/update/rollback smoke passes"
+  ],
+  "deferred": [
+    "WebView2 promotion unless it proves auth/security/performance/usability advantage",
+    "TypeScript extension build chain",
+    "Rust helper fallback",
+    "automatic updater",
+    "nonessential visual polish"
+  ],
+  "parent_task_blockers_unchanged": true
+}

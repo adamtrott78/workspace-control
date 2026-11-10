@@ -1,8 +1,13 @@
 # ADR — Dedicated Firefox WorkspaceWorkers Profile v0.1
 
-Status: **ACCEPTED FOR UX DESIGN BASELINE / PERFORMANCE SUBJECT TO UX-09**
+Status: **HISTORICAL UX-02 BASELINE / IMPLEMENTATION SELECTION SUPERSEDED BY UX-12**
 
 Parent: `workspace-semantic-execution-migration-v1`
+
+Implementation-selection successor:
+`architecture/workspace-semantic-execution-operator-adr-browser-adapter-stack.v0.1.md`
+
+UX-13 integrated rule: a dedicated managed worker environment remains mandatory. Firefox WorkspaceWorkers is the frozen v0 baseline, but a custom shell may replace it only through the UX-12 promotion gates.
 
 ## Context
 

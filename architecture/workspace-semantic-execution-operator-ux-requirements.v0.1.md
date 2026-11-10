@@ -1,6 +1,6 @@
 # Workspace Semantic Execution Operator UX Requirements v0.1
 
-Status: **UX-00 REQUIREMENTS BASELINE / DESIGN CANDIDATE**
+Status: **UX-13 INTEGRATED REQUIREMENTS / IMPLEMENTATION DESIGN FROZEN**
 
 Parent task: `workspace-semantic-execution-migration-v1`
 
@@ -113,7 +113,7 @@ The Windows native helper system tray MUST own one authoritative local master to
 When OFF:
 - the global hotkey is unregistered;
 - clipboard is untouched;
-- Firefox is not focused/created/closed/discarded by the bridge;
+- the managed worker browser/shell is not focused/created/closed/discarded by the bridge;
 - machine/deterministic orchestrator work may continue;
 - pending manual actions may accumulate.
 
@@ -150,14 +150,18 @@ A substantive authority or judgment gate MUST open a distinct operator-console p
 
 ## 4. Browser and session requirements
 
-### UX-M013 — Dedicated worker browser environment
+### UX-M013 — Dedicated managed worker environment
 
-Chrome remains the user's normal/default browser.
+The user's normal/default browser remains outside operator-bridge management.
 
-Chat Instant worker sessions MUST use a dedicated Firefox profile, provisionally named:
+Chat Instant worker sessions MUST use a dedicated managed worker environment isolated from ordinary browsing.
+
+The frozen v0 production baseline is a dedicated Firefox profile named:
 `WorkspaceWorkers`
 
-The worker profile is an isolated execution appliance rather than the user's general browsing environment.
+A purpose-built custom worker shell MAY replace Firefox only if it implements the same BrowserPort semantics and passes the UX-08 security, UX-09 performance, UX-10 adapter-parity, UX-11 usability, and normal-authentication promotion gates.
+
+The dedicated environment is an isolated execution appliance rather than the user's general browsing environment.
 
 ### UX-M014 — Persistent workers are preferred
 
@@ -174,14 +178,15 @@ New chats SHOULD be created only for explicit reasons such as:
 
 ### UX-M015 — Bounded live-session pool
 
-The v0 system SHOULD target a small worker pool rather than unbounded live tabs.
+The v0 system MUST use a bounded worker pool rather than unbounded live tabs/views.
 
-Initial design target:
-- 2 general Instant sessions;
-- critic only when required;
-- synthesizer only when required.
+Frozen UX-09 policy:
+- default live GENERAL_PERSISTENT worker cap: 2;
+- absolute v0 live managed worker burst ceiling: 4;
+- role-isolated workers are allocated only when workflow/recovery requirements justify the burst;
+- trusted idle sessions above the default cap SHOULD be discarded/unloaded rather than retired when safe.
 
-The exact cap is provisional until UX-09 performance measurement.
+The default cap MUST NOT be raised above 2 until target-machine measurements pass the four-live resource budget.
 
 ### UX-M016 — Inactive-session memory control
 
@@ -199,7 +204,7 @@ Visible ChatGPT tab titles MUST NOT be used as authoritative worker identity.
 
 ### UX-M018 — Local component restart recovery
 
-Native helper restart, Firefox restart, extension restart, and tab loss MUST NOT destroy durable workflow state.
+Native helper restart, managed browser/adapter restart, Firefox extension restart, and managed tab/view loss MUST NOT destroy durable workflow state.
 
 The bridge MUST rebuild local mappings from durable scheduler/session state plus current browser inventory.
 
@@ -241,13 +246,15 @@ The v0 bridge MUST NOT:
 
 ### UX-M023 — Browser automation is chrome-level only
 
-The Firefox adapter MAY:
-- launch/focus the dedicated worker profile/window;
-- create tabs;
-- activate tabs;
-- close tabs;
-- discard/reload tabs;
-- maintain local tab/window mapping.
+The managed browser adapter MAY:
+- launch/focus the dedicated worker environment;
+- create managed tabs/views;
+- activate managed tabs/views;
+- close managed tabs/views;
+- discard/unload/reload managed tabs/views;
+- maintain local non-authoritative binding mappings.
+
+The Firefox baseline implements these operations with supported WebExtension browser-chrome APIs.
 
 ### UX-M024 — Worker completion comes from durable state
 
@@ -311,7 +318,7 @@ The operator bridge, session broker, semantic packet compiler, Firefox extension
 
 ## 9. Performance and responsiveness requirements
 
-The following are **v0 design targets**, not measured facts. UX-09 MUST benchmark and may revise them before design freeze.
+The following are the **frozen UX-09 v0 acceptance budgets**. They remain design requirements, not measured facts. Empirical target-machine evidence is still NOT_RUN and blocks production promotion, not implementation design freeze.
 
 ### UX-P001 — Routine focus/clipboard preparation
 
@@ -335,26 +342,28 @@ When the worker profile is stopped:
 
 Cold start may exceed routine-path budgets and is not expected for every service cycle.
 
-### UX-P004 — Helper idle CPU
+### UX-P004 — Helper/browser idle CPU
 
 With bridge ON and no operator action:
-
-- target native-helper + extension background CPU: effectively idle;
-- provisional average target: < 1% of one logical CPU over a representative idle window.
+- native helper idle CPU mean MUST remain <= 1% of one logical CPU;
+- Firefox with two live idle workers MUST remain <= 5% of one logical CPU mean.
 
 ### UX-P005 — Helper/extension memory
 
-Provisional combined local-control-plane target excluding Firefox content processes:
-- <= 150 MiB steady-state.
+Frozen local-control-plane budgets:
+- native helper Working Set p95 <= 100 MiB;
+- helper + Firefox extension incremental Working Set p95 <= 150 MiB.
 
 ### UX-P006 — Worker Firefox memory
 
-Provisional target:
-- dedicated Firefox worker profile with 2 live ChatGPT sessions and ordinary bridge state SHOULD remain <= 1.5 GiB working-set class on the target laptop;
-- discarded/parked sessions SHOULD not cause unbounded growth;
-- 4-live-tab operation is benchmark-only until UX-09 proves acceptable.
+Frozen baseline budgets:
+- Firefox with 2 live worker tabs Working Set p95 <= 1536 MiB;
+- Firefox with 4 live worker tabs Working Set p95 <= 2560 MiB;
+- discarding 3 of 4 idle tabs SHOULD reduce total Working Set by at least 25%.
 
-These are provisional budgets, not acceptance facts, until measured on the user's actual machine.
+If a custom shell is considered, it runs the same measurement matrix and may replace Firefox only through the frozen UX-09 review trigger.
+
+These are acceptance budgets, not acceptance facts, until measured on the target machine.
 
 ## 10. Operator-effort metrics
 
@@ -451,33 +460,34 @@ v0 does NOT aim to:
 - guarantee provider policies never change;
 - build final visual polish before behavior is correct.
 
-## 14. Deferred design items
+## 14. Integrated design resolution and remaining empirical gates
 
-These are required but intentionally deferred to their owning slices:
+UX-01 through UX-12 have completed their design responsibilities and UX-13 has integrated them.
 
-### UX-01
-Complete scenario/journey enumeration.
+No unresolved v0 architecture/security/interaction design item remains before fake-worker implementation.
 
-### UX-04
-Session reuse/rotation/continuity policy.
+Remaining gates are evidence/execution gates rather than deferred design:
 
-### UX-05
-Exact Ctrl+B collision and clipboard-restore behavior.
+### Implementation authority
+The current task does not authorize new helper/extension code paths. A separate authority-owned implementation scope is required before coding.
 
-### UX-06
-Tray iconography, wireframes, notification UX.
+### UX-09 empirical evidence
+Run the frozen performance/resource benchmarks after implementation. Real ChatGPT page memory is calibrated only after the real-account security/policy gate.
 
-### UX-07
-Forced-login/all-tabs-refresh recovery, crashes, no-ack recovery, sleep/reboot, lost mappings.
+### UX-11 empirical evidence
+Run the required human-in-loop simulator trials. Production promotion requires zero hard correctness/safety failures.
 
-### UX-08
-Threat model and final permissions.
+### Real-account gate
+Before any real-account test:
+- pass implementation security checklist;
+- pass Firefox/native-host target-host smoke tests;
+- use signed extension/install state;
+- re-review current OpenAI Terms/product guidance;
+- verify normal manual authentication;
+- bind only to an explicitly authorized Workspace Control transport.
 
-### UX-09
-Measured RAM/CPU/latency budgets on target hardware.
-
-### UX-11
-Final usability thresholds and hotkey ergonomics acceptance.
+### Conditional custom shell
+WebView2 authentication/performance evidence blocks only custom-shell promotion. Firefox remains the production baseline if the shell is incompatible or not materially better.
 
 ## 15. UX-00 acceptance decision
 

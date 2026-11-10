@@ -1,6 +1,6 @@
 # Workspace Semantic Execution Operator UX Design Plan v0.1
 
-Status: **PROPOSED / EXECUTION ROADMAP**
+Status: **UX-13 DESIGN ROADMAP COMPLETE / IMPLEMENTATION DESIGN FROZEN**
 
 Parent task: `workspace-semantic-execution-migration-v1`
 
@@ -790,4 +790,16 @@ A .NET 10 + Evergreen WebView2 custom worker shell remains a first-class bounded
 
 Packaging is explicit and auditable: signed unlisted Firefox XPI, per-user helper/native-host installation, no administrator requirement, and no unattended auto-updater in v0. Current OpenAI Terms were re-checked and the UX-08 no-extraction/no-circumvention boundary remains unchanged.
 
-The next execution slice is **UX-13 Integrated design review and UX design freeze**.
+UX-13 is complete with:
+
+- `architecture/workspace-semantic-execution-operator-ux-design-review.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-ux-findings-ledger.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-ux-freeze.v0.1.json`
+- converged `architecture/workspace-semantic-execution-operator-ux-requirements.v0.1.md`
+- supersession note in the historical dedicated-Firefox ADR
+
+The integrated review found **zero unresolved design blockers**. The v0 operator UX is frozen for implementation: one scheduler command + Ctrl+V + Enter, durable acknowledgment separation, fail-closed generation/continuity recovery, dedicated managed worker environment, no ChatGPT content automation, browser-adapter replaceability, .NET 10 helper, Firefox ESR 153+ MV3 baseline, protocol v1.0, UX-09 budgets, UX-10 deterministic simulator contract, and UX-11 zero-error usability gates.
+
+The review also prevents false closure. Empirical UX-09 results, UX-11 human-in-loop results, implementation security checklist, Firefox target-host smoke, fresh OpenAI policy review, normal real-account authentication, and bounded real-account calibration remain NOT_RUN. WebView2 auth/performance evidence blocks only custom-shell promotion.
+
+The next boundary is not another UX design slice. **Implementation is blocked on durable mutation authority for the proposed helper/extension code paths.** Once an authority-owned implementation scope exists, execute UX-12 build slices against the fake-worker simulator before any real-account testing.

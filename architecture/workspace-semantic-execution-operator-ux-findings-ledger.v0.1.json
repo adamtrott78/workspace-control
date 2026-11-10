@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-ux-findings-ledger-v0.1",
+  "status": "UX_13_REVIEW_COMPLETE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "reviewed_head": "b4ad400fa3784bb1420c2869fb89434a3337c86c",
+  "finding_classes": [
+    "RESOLVED_DESIGN",
+    "BLOCKS_IMPLEMENTATION",
+    "BLOCKS_REAL_ACCOUNT_CALIBRATION",
+    "BLOCKS_PRODUCTION_PROMOTION",
+    "BLOCKS_CUSTOM_SHELL_PROMOTION",
+    "DEFERRED_ENHANCEMENT"
+  ],
+  "findings": [
+    {
+      "id": "UX13-F001",
+      "title": "UX-00 Firefox MUST wording conflicted with later browser replaceability",
+      "class": "RESOLVED_DESIGN",
+      "severity": "MEDIUM",
+      "resolution": "Requirement UX-M013 is converged to a dedicated managed worker environment. Firefox WorkspaceWorkers is the frozen v0 baseline; a custom shell may replace it only via the UX-12 promotion gates.",
+      "evidence": [
+        "architecture/workspace-semantic-execution-operator-ux-requirements.v0.1.md",
+        "architecture/workspace-semantic-execution-operator-adr-browser-adapter-stack.v0.1.md"
+      ]
+    },
+    {
+      "id": "UX13-F002",
+      "title": "UX-00 performance language still described budgets as pre-UX-09 provisional",
+      "class": "RESOLVED_DESIGN",
+      "severity": "LOW",
+      "resolution": "Requirements are converged to the frozen UX-09 budgets while retaining explicit empirical NOT_RUN status.",
+      "evidence": [
+        "architecture/workspace-semantic-execution-operator-ux-requirements.v0.1.md",
+        "architecture/workspace-semantic-execution-operator-performance-budget.v0.1.md"
+      ]
+    },
+    {
+      "id": "UX13-F003",
+      "title": "Current task cannot authorize proposed implementation code paths",
+      "class": "BLOCKS_IMPLEMENTATION",
+      "severity": "HIGH",
+      "blocker": "Current allowed mutation scope is limited to task handoff, architecture/workspace-semantic-execution-*.md/json, benchmarks/workspace-semantic-execution/**, and tests/test_workspace_semantic_execution*.py; it does not include a new operator helper/extension code tree.",
+      "smallest_next_action": "Create or authorize an authority-owned implementation capsule/scope for the selected operator-bridge code paths. Do not self-widen this task.",
+      "design_impact": "NONE; design freeze remains valid."
+    },
+    {
+      "id": "UX13-F004",
+      "title": "Firefox implementation/API smoke evidence not yet executed",
+      "class": "BLOCKS_REAL_ACCOUNT_CALIBRATION",
+      "severity": "HIGH",
+      "blocker": "No built/signed extension/helper exists yet to prove target-host MV3, Native Messaging, sessions tab-value, tabs.onUpdated reduction, discard, profile launch, and native-host behavior.",
+      "smallest_next_action": "Implement UX-12 slices A-C and pass the fake-worker/target-host smoke suite.",
+      "design_impact": "NONE unless an API behaves contrary to the frozen contract."
+    },
+    {
+      "id": "UX13-F005",
+      "title": "UX-08 implementation security checklist remains unexecuted",
+      "class": "BLOCKS_REAL_ACCOUNT_CALIBRATION",
+      "severity": "HIGH",
+      "blocker": "Security design is reviewed, but the checklist must be applied to actual binaries/manifest/install state.",
+      "smallest_next_action": "Run every MUST checklist item against the built helper/extension before real-account testing."
+    },
+    {
+      "id": "UX13-F006",
+      "title": "UX-09 empirical performance/resource evidence is NOT_RUN",
+      "class": "BLOCKS_PRODUCTION_PROMOTION",
+      "severity": "HIGH",
+      "blocker": "Frozen budgets have no target-machine helper/Firefox/real-ChatGPT measurement yet.",
+      "smallest_next_action": "Run simulator mechanical benchmarks after implementation, then target-machine real-account calibration only after the security/policy gate."
+    },
+    {
+      "id": "UX13-F007",
+      "title": "UX-11 human-in-loop usability evidence is NOT_RUN",
+      "class": "BLOCKS_PRODUCTION_PROMOTION",
+      "severity": "HIGH",
+      "blocker": "The 5-action/20-action/recovery/hotkey trials are specified but not executed.",
+      "smallest_next_action": "Run the required human-in-loop simulator trials after the local bridge exists; zero hard failures are permitted."
+    },
+    {
+      "id": "UX13-F008",
+      "title": "Fresh OpenAI policy/product review required before real-account test",
+      "class": "BLOCKS_REAL_ACCOUNT_CALIBRATION",
+      "severity": "HIGH",
+      "blocker": "Provider rules can change; UX-08/UX-12 explicitly require a fresh review immediately before testing.",
+      "smallest_next_action": "Re-check current Terms/product guidance at the real-account boundary and stop if the product disallows the planned interaction."
+    },
+    {
+      "id": "UX13-F009",
+      "title": "Normal ChatGPT authentication and profile behavior not yet validated",
+      "class": "BLOCKS_REAL_ACCOUNT_CALIBRATION",
+      "severity": "HIGH",
+      "blocker": "Dedicated Firefox login/refresh behavior must be observed with the actual built adapter without scraping or auth automation.",
+      "smallest_next_action": "After security/policy smoke gates, perform the smallest manual-auth calibration and validate the UX-07 recovery signals."
+    },
+    {
+      "id": "UX13-F010",
+      "title": "Production OperatorBridge transport is intentionally not selected by local UX design",
+      "class": "BLOCKS_REAL_ACCOUNT_CALIBRATION",
+      "severity": "MEDIUM",
+      "blocker": "The helper must connect only through a transport already authorized by Workspace Control; UX-12 refuses to invent credentials/listeners.",
+      "smallest_next_action": "Bind OperatorBridgeClient to the implementation task's authorized control-plane transport."
+    },
+    {
+      "id": "UX13-F011",
+      "title": "WebView2 authentication feasibility and material performance advantage unknown",
+      "class": "BLOCKS_CUSTOM_SHELL_PROMOTION",
+      "severity": "MEDIUM",
+      "blocker": "Embedded identity-provider flows may reject WebView2 and no measured advantage exists yet.",
+      "smallest_next_action": "Run fake-worker adapter parity first; only then run the bounded manual auth feasibility test if security review permits.",
+      "production_baseline_impact": "NONE; Firefox remains selected."
+    },
+    {
+      "id": "UX13-F012",
+      "title": "Automatic updater",
+      "class": "DEFERRED_ENHANCEMENT",
+      "severity": "LOW",
+      "disposition": "v0 uses explicit reviewed update/rollback; do not add silent update authority."
+    },
+    {
+      "id": "UX13-F013",
+      "title": "TypeScript extension toolchain",
+      "class": "DEFERRED_ENHANCEMENT",
+      "severity": "LOW",
+      "disposition": "Plain JavaScript remains smaller until adapter complexity justifies build tooling."
+    },
+    {
+      "id": "UX13-F014",
+      "title": "Rust helper fallback",
+      "class": "DEFERRED_ENHANCEMENT",
+      "severity": "LOW",
+      "disposition": "Reopen only if measured .NET resource behavior fails UX-09 after bounded optimization."
+    }
+  ],
+  "summary": {
+    "unresolved_design_blockers": 0,
+    "blocks_implementation": 1,
+    "blocks_real_account_calibration": 5,
+    "blocks_production_promotion": 2,
+    "blocks_custom_shell_promotion": 1,
+    "deferred_enhancements": 3
+  }
+}
