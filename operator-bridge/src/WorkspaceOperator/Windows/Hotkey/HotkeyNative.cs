@@ -21,18 +21,18 @@ internal sealed class Win32HotkeyNativeApi : IHotkeyNativeApi
 
     public int GetLastError() => Marshal.GetLastWin32Error();
 
-    private static partial class NativeMethods
+    private static class NativeMethods
     {
-        [LibraryImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static partial bool RegisterHotKey(
+        internal static extern bool RegisterHotKey(
             nint hWnd,
             int id,
             uint fsModifiers,
             uint vk);
 
-        [LibraryImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static partial bool UnregisterHotKey(nint hWnd, int id);
+        internal static extern bool UnregisterHotKey(nint hWnd, int id);
     }
 }
