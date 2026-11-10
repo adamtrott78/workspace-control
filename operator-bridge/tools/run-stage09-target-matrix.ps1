@@ -139,7 +139,7 @@ if ($LASTEXITCODE -ne 0) {
   throw "Stage 09 target matrix build failed."
 }
 
-& $profilePrepScript -RepositoryRoot $repo -SignedXpiPath $PerformanceSignedXpiPath -FirefoxPath $FirefoxPath -ProfileName $FirefoxProfile
+& $profilePrepScript -RepositoryRoot $repo -SignedXpiPath $PerformanceSignedXpiPath -FirefoxPath $FirefoxPath -ProfileName $FirefoxProfile -VerifyOnly
 if ($LASTEXITCODE -ne 0) {
   throw "Stage 09 target Firefox profile preparation failed."
 }
