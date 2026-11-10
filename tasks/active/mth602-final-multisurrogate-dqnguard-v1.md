@@ -29,7 +29,7 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-After the parent validated live upgrade reports LOCAL_TASK_AUTHORITY=PASS, verify this task through ChatGPT Workspace Shell and verify PADataset exact HEAD 17e1147614f27702e43565089d618182ff71c5af. Only then begin Stage 00 read-only provenance recovery from the clean execution snapshot and untouched historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
+After the parent live upgrade reports LOCAL_TASK_AUTHORITY=PASS, verify this task through ChatGPT Workspace Shell and verify PADataset exact HEAD 17e1147614f27702e43565089d618182ff71c5af. Only then begin Stage 00 read-only provenance recovery from the clean execution snapshot and untouched historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ After the parent validated live upgrade reports LOCAL_TASK_AUTHORITY=PASS, verif
 
 ## Blockers / gates
 
-- Parent Workspace Shell implementation is repository-validated, but this task still returns TASK_NOT_FOUND through the live trusted authority snapshot. No PADataset read or research execution is permitted until the validated authority refresh is applied and this task becomes visible.
+- Parent Workspace Shell implementation is validated at execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, but this task still returns TASK_NOT_FOUND through the live trusted authority snapshot. No PADataset read or research execution is permitted until the authority refresh completes.
 
 ## Fresh-chat initialization
 
