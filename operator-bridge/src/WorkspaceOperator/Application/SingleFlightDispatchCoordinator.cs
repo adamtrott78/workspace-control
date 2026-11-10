@@ -12,6 +12,7 @@ public sealed class SingleFlightDispatchCoordinator
     private readonly IMonotonicClock _clock;
     private readonly IDiagnosticsSink _diagnostics;
     private readonly IOperatorSurfacePort _surface;
+    private readonly IRecoveryGate _recoveryGate;
     private int _inFlight;
 
     public SingleFlightDispatchCoordinator(
@@ -21,7 +22,8 @@ public sealed class SingleFlightDispatchCoordinator
         IClipboardWriter clipboard,
         IMonotonicClock clock,
         IDiagnosticsSink diagnostics,
-        IOperatorSurfacePort? surface = null)
+        IOperatorSurfacePort? surface = null,
+        IRecoveryGate? recoveryGate = null)
     {
         _bridgeState = bridgeState;
         _actions = actions;
@@ -30,6 +32,7 @@ public sealed class SingleFlightDispatchCoordinator
         _clock = clock;
         _diagnostics = diagnostics;
         _surface = surface ?? new NullOperatorSurfacePort();
+        _recoveryGate = recoveryGate ?? NullRecoveryGate.Instance;
     }
 
     public async Task<DispatchResult> DispatchAsync(
@@ -38,6 +41,16 @@ public sealed class SingleFlightDispatchCoordinator
         if (!_bridgeState.IsEnabled)
         {
             return new DispatchResult(DispatchOutcome.Disabled);
+        }
+
+        if (_recoveryGate.BlocksDispatch)
+        {
+            await _recoveryGate.OnBlockingOperatorPressAsync(
+                cancellationToken);
+            await _surface.OpenRecoveryAsync(cancellationToken);
+            return new DispatchResult(
+                DispatchOutcome.RecoveryOpened,
+                NormalizedError: "BLOCKING_RECOVERY");
         }
 
         if (Interlocked.CompareExchange(ref _inFlight, 1, 0) != 0)

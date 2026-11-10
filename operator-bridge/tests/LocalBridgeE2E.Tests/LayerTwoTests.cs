@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WorkspaceControl.OperatorBridge.Application;
 using WorkspaceControl.OperatorBridge.IntegrationHarness;
+using WorkspaceControl.OperatorBridge.Ports;
 using WorkspaceControl.OperatorBridge.Simulator.Scenarios;
 using WorkspaceControl.OperatorBridge.Simulator.State;
 using WorkspaceControl.OperatorBridge.Windows;
@@ -172,12 +173,232 @@ public sealed class LayerTwoTests
         Assert.AreEqual(1, clipboard.WriteCount);
     }
 
+
+    [TestMethod]
+    public async Task SIM008_BlockingRecoveryCtrlBStagesNoWorkerPacket()
+    {
+        var world = new SimulatorWorld();
+        world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, true);
+        var action = world.Queue("blocked-by-recovery", "SERVICE_EXISTING");
+        var browser = new InMemoryBrowserPort();
+        browser.Seed("slot-1", 0);
+        var clipboard = new StaClipboard();
+        clipboard.WriteText("RECOVERY_SENTINEL");
+        var baselineWrites = clipboard.WriteCount;
+        var surface = new RecordingOperatorSurface();
+        var stateStore = new InMemoryRecoveryStateStore();
+        var authority = new SimulatorRecoveryAuthorityPort(world);
+        var recovery = new RecoveryCoordinator(
+            stateStore,
+            authority,
+            browser,
+            new CaptureDiagnostics());
+        await recovery.BeginAsync(
+            "l2-recovery-gate",
+            RecoveryScope.LocalBridgeGlobal,
+            RecoverySignal.HelperInstanceRestarted,
+            [new RecoverySessionRef("slot-1", 0)]);
+
+        var coordinator = CreateCoordinator(
+            world,
+            browser,
+            clipboard,
+            surface,
+            recoveryGate: recovery);
+        var result = await coordinator.DispatchAsync();
+
+        Assert.AreEqual(DispatchOutcome.RecoveryOpened, result.Outcome);
+        Assert.AreEqual(0, action.ClaimCount);
+        Assert.AreEqual(0, browser.EffectCount);
+        Assert.AreEqual(baselineWrites, clipboard.WriteCount);
+        Assert.AreEqual("RECOVERY_SENTINEL", clipboard.ReadTextForTestOnly());
+        Assert.AreEqual(1, surface.RecoveryCount);
+    }
+
+    [TestMethod]
+    public async Task SIM021_HelperRestartSupersedesRatherThanResettingClaim()
+    {
+        var world = new SimulatorWorld();
+        world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, true);
+        var action = world.Queue("crash-before", "SERVICE_EXISTING");
+        action.Status = SimActionStatus.ClaimedLocal;
+        action.ClaimCount = 1;
+        var browser = new InMemoryBrowserPort();
+        browser.Seed("slot-1", 0);
+        var authority = new SimulatorRecoveryAuthorityPort(world);
+        var recovery = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority,
+            browser,
+            new CaptureDiagnostics());
+
+        await recovery.BeginAsync(
+            "l2-helper-restart",
+            RecoveryScope.SessionScoped,
+            RecoverySignal.HelperInstanceRestarted,
+            [new RecoverySessionRef("slot-1", 0)]);
+        var result = await recovery.ReconcileAsync();
+
+        Assert.AreEqual(RecoveryStatus.ReadyToResume, result.Status);
+        Assert.AreEqual(SimActionStatus.Superseded, action.Status);
+        Assert.AreEqual(1, world.Sessions.Get("slot-1")!.Generation);
+        Assert.AreEqual(1, action.ClaimCount);
+        Assert.AreEqual(1, authority.AdvanceCount);
+    }
+
+    [TestMethod]
+    public async Task SIM023_ClipboardSideEffectNeverImpliesSubmitAfterRestart()
+    {
+        var world = new SimulatorWorld();
+        world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, true);
+        var action = world.Queue("clip-crash", "SERVICE_EXISTING");
+        action.Status = SimActionStatus.ClaimedLocal;
+        action.ClaimCount = 1;
+        var clipboard = new StaClipboard();
+        clipboard.WriteText("WORKSPACE_SIM_PACKET_V1");
+        var baselineWrites = clipboard.WriteCount;
+        var browser = new InMemoryBrowserPort();
+        browser.Seed("slot-1", 0);
+        var authority = new SimulatorRecoveryAuthorityPort(world);
+        var recovery = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority,
+            browser,
+            new CaptureDiagnostics());
+
+        await recovery.BeginAsync(
+            "l2-clipboard-restart",
+            RecoveryScope.SessionScoped,
+            RecoverySignal.HelperInstanceRestarted,
+            [new RecoverySessionRef("slot-1", 0)]);
+        await recovery.ReconcileAsync();
+
+        Assert.AreEqual(0, world.DurableEvents.Events.Count);
+        Assert.AreEqual(SimActionStatus.Superseded, action.Status);
+        Assert.AreEqual(baselineWrites, clipboard.WriteCount);
+    }
+
+    [TestMethod]
+    public async Task SIM024_OrchestratorOutageExecutesNoStaleLocalQueue()
+    {
+        var world = new SimulatorWorld
+        {
+            OrchestratorAvailable = false
+        };
+        world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, true);
+        var action = world.Queue("orchestrator-down", "SERVICE_EXISTING");
+        var browser = new InMemoryBrowserPort();
+        browser.Seed("slot-1", 0);
+        var clipboard = new StaClipboard();
+        var coordinator = CreateCoordinator(
+            world,
+            browser,
+            clipboard,
+            new RecordingOperatorSurface());
+
+        var result = await coordinator.DispatchAsync();
+
+        Assert.AreEqual(DispatchOutcome.NoAction, result.Outcome);
+        Assert.AreEqual(0, action.ClaimCount);
+        Assert.AreEqual(0, browser.EffectCount);
+        Assert.AreEqual(0, clipboard.WriteCount);
+    }
+
+    [TestMethod]
+    public async Task SIM033_ColdRestartRehydratesBlockingRecoveryWithoutReplay()
+    {
+        var world = new SimulatorWorld();
+        world.Sessions.Add("slot-1", 2, SimContinuity.Trusted, true);
+        var action = world.Queue(
+            "restart-pending",
+            "SERVICE_EXISTING",
+            "slot-1",
+            2);
+        action.Status = SimActionStatus.AwaitingDurableAck;
+        action.ClaimCount = 1;
+        var browser = new InMemoryBrowserPort();
+        browser.Seed("slot-1", 2);
+        var stateStore = new InMemoryRecoveryStateStore();
+        var authority = new SimulatorRecoveryAuthorityPort(world);
+        var first = new RecoveryCoordinator(
+            stateStore,
+            authority,
+            browser,
+            new CaptureDiagnostics());
+        await first.BeginAsync(
+            "l2-cold-restart",
+            RecoveryScope.LocalBridgeGlobal,
+            RecoverySignal.SystemResumeOrHelperColdStart,
+            [new RecoverySessionRef("slot-1", 2)]);
+
+        var restarted = new RecoveryCoordinator(
+            stateStore,
+            authority,
+            browser,
+            new CaptureDiagnostics());
+        await restarted.InitializeAsync();
+
+        var clipboard = new StaClipboard();
+        var coordinator = CreateCoordinator(
+            world,
+            browser,
+            clipboard,
+            new RecordingOperatorSurface(),
+            recoveryGate: restarted);
+        var blocked = await coordinator.DispatchAsync();
+
+        Assert.AreEqual(DispatchOutcome.RecoveryOpened, blocked.Outcome);
+        Assert.AreEqual(1, action.ClaimCount);
+        Assert.AreEqual(0, clipboard.WriteCount);
+
+        var ready = await restarted.ReconcileAsync();
+        Assert.AreEqual(RecoveryStatus.ReadyToResume, ready.Status);
+        Assert.AreEqual(1, authority.AdvanceCount);
+    }
+
+    [TestMethod]
+    public async Task SIM034_ReenteredRecoveryAdvancesGenerationOnlyOnce()
+    {
+        var world = new SimulatorWorld();
+        world.Sessions.Add("slot-1", 0, SimContinuity.Unknown, true);
+        var action = world.Queue("recovery-old", "SERVICE_EXISTING");
+        action.Status = SimActionStatus.AwaitingDurableAck;
+        var browser = new InMemoryBrowserPort();
+        browser.Seed("slot-1", 0);
+        var authority = new SimulatorRecoveryAuthorityPort(world);
+        var stateStore = new InMemoryRecoveryStateStore();
+        var recovery = new RecoveryCoordinator(
+            stateStore,
+            authority,
+            browser,
+            new CaptureDiagnostics());
+
+        await recovery.BeginAsync(
+            "same-recovery",
+            RecoveryScope.SessionScoped,
+            RecoverySignal.ManagedTabClosed,
+            [new RecoverySessionRef("slot-1", 0)]);
+        await recovery.BeginAsync(
+            "same-recovery",
+            RecoveryScope.SessionScoped,
+            RecoverySignal.ManagedTabClosed,
+            [new RecoverySessionRef("slot-1", 0)]);
+        await recovery.ReconcileAsync();
+        await recovery.ReconcileAsync();
+
+        Assert.AreEqual(1, authority.FreezeCount);
+        Assert.AreEqual(1, authority.ReconcileCount);
+        Assert.AreEqual(1, authority.AdvanceCount);
+        Assert.AreEqual(1, world.Sessions.Get("slot-1")!.Generation);
+    }
+
     private static SingleFlightDispatchCoordinator CreateCoordinator(
         SimulatorWorld world,
         WorkspaceControl.OperatorBridge.Ports.IBrowserPort browser,
         WorkspaceControl.OperatorBridge.Ports.IClipboardWriter clipboard,
         RecordingOperatorSurface surface,
-        SimulatorOperatorActionPort? actionPort = null)
+        SimulatorOperatorActionPort? actionPort = null,
+        IRecoveryGate? recoveryGate = null)
     {
         var state = new BridgeState();
         var diagnostics = new CaptureDiagnostics();
@@ -193,7 +414,8 @@ public sealed class LayerTwoTests
             clipboard,
             new SystemMonotonicClock(),
             diagnostics,
-            surface);
+            surface,
+            recoveryGate);
     }
 
     private static void AssertActualCtrlBRegistration()

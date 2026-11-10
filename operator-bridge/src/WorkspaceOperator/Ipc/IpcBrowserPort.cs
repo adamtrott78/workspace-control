@@ -4,16 +4,7 @@ using WorkspaceControl.OperatorBridge.Ports;
 
 namespace WorkspaceControl.OperatorBridge.Ipc;
 
-public sealed record BrowserInventoryEntry(
-    string WorkerSlotId,
-    long SessionGeneration,
-    string BindingRef,
-    long BindingGeneration,
-    string? OriginClassification,
-    bool Discarded,
-    bool Active);
-
-public sealed class IpcBrowserPort : IBrowserPort
+public sealed class IpcBrowserPort : IBrowserPort, IManagedBrowserInventory
 {
     private readonly BrowserCommandHub _hub;
 

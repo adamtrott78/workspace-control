@@ -205,7 +205,7 @@ public sealed class RecordingBrowserPort : IBrowserPort
     }
 }
 
-public sealed class InMemoryBrowserPort : IBrowserPort
+public sealed class InMemoryBrowserPort : IBrowserPort, IManagedBrowserInventory
 {
     private readonly Dictionary<string, (long Generation, bool Discarded)> _bindings =
         new(StringComparer.Ordinal);
@@ -297,6 +297,22 @@ public sealed class InMemoryBrowserPort : IBrowserPort
     public void Seed(string slot, long generation) =>
         _bindings[slot] = (generation, false);
 
+    public Task<IReadOnlyList<BrowserInventoryEntry>> InventoryAsync(
+        CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<BrowserInventoryEntry> entries = _bindings
+            .Select(pair => new BrowserInventoryEntry(
+                pair.Key,
+                pair.Value.Generation,
+                "in-memory-" + pair.Key,
+                1,
+                "CHATGPT_ORIGIN",
+                pair.Value.Discarded,
+                false))
+            .ToArray();
+        return Task.FromResult(entries);
+    }
+
     private bool Exists(BrowserTarget target) =>
         _bindings.TryGetValue(target.WorkerSlotId, out var binding) &&
         binding.Generation == target.SessionGeneration;
@@ -336,4 +352,148 @@ public sealed class NoopHotkeyRegistrar : IHotkeyRegistrar
     public void Register() => IsRegistered = true;
 
     public void Unregister() => IsRegistered = false;
+}
+
+
+public sealed class InMemoryRecoveryStateStore : IRecoveryStateStore
+{
+    public RecoveryIncident? Incident { get; private set; }
+
+    public Task<RecoveryIncident?> LoadAsync(
+        CancellationToken cancellationToken) =>
+        Task.FromResult(Incident);
+
+    public Task SaveAsync(
+        RecoveryIncident incident,
+        CancellationToken cancellationToken)
+    {
+        Incident = incident;
+        return Task.CompletedTask;
+    }
+
+    public Task ClearAsync(CancellationToken cancellationToken)
+    {
+        Incident = null;
+        return Task.CompletedTask;
+    }
+}
+
+public sealed class SimulatorRecoveryAuthorityPort : IRecoveryAuthorityPort
+{
+    private readonly SimulatorWorld _world;
+    private readonly HashSet<string> _advanced =
+        new(StringComparer.Ordinal);
+
+    public SimulatorRecoveryAuthorityPort(SimulatorWorld world)
+    {
+        _world = world;
+    }
+
+    public int FreezeCount { get; private set; }
+    public int ReconcileCount { get; private set; }
+    public int AdvanceCount { get; private set; }
+
+    public Task FreezeAsync(
+        RecoveryIncident incident,
+        CancellationToken cancellationToken)
+    {
+        FreezeCount++;
+        foreach (var session in incident.AffectedSessions)
+        {
+            _world.Sessions.MarkUnknown(
+                session.WorkerSlotId,
+                incident.TriggerSignal);
+        }
+        _world.Trace.Record(
+            "recovery_authority",
+            "SESSIONS_FROZEN",
+            normalizedReason: incident.RecoveryId);
+        return Task.CompletedTask;
+    }
+
+    public Task<RecoveryReconciliationResult> ReconcileAsync(
+        RecoveryIncident incident,
+        CancellationToken cancellationToken)
+    {
+        ReconcileCount++;
+        var unresolved = incident.AffectedSessions
+            .Where(session => _world.Actions.Actions.Any(action =>
+                action.WorkerSlotId == session.WorkerSlotId &&
+                action.SessionGeneration == session.SessionGeneration &&
+                action.Status is
+                    SimActionStatus.ClaimedLocal or
+                    SimActionStatus.AwaitingDurableAck or
+                    SimActionStatus.Blocked))
+            .ToArray();
+
+        _world.Trace.Record(
+            "recovery_authority",
+            "DURABLE_RECONCILED",
+            normalizedReason: incident.RecoveryId);
+        return Task.FromResult(
+            new RecoveryReconciliationResult(unresolved));
+    }
+
+    public Task<RecoveryAdvanceResult>
+        SupersedeAndAdvanceGenerationAsync(
+            string recoveryId,
+            RecoverySessionRef session,
+            CancellationToken cancellationToken)
+    {
+        var key = recoveryId + "|" +
+            session.WorkerSlotId + "|" +
+            session.SessionGeneration;
+
+        if (!_advanced.Add(key))
+        {
+            var current = _world.Sessions.Get(
+                session.WorkerSlotId)?.Generation ??
+                session.SessionGeneration;
+            return Task.FromResult(
+                new RecoveryAdvanceResult(false, current));
+        }
+
+        foreach (var action in _world.Actions.Actions.Where(action =>
+                     action.WorkerSlotId == session.WorkerSlotId &&
+                     action.SessionGeneration ==
+                        session.SessionGeneration))
+        {
+            _world.Actions.Supersede(action);
+        }
+
+        var applied = _world.Sessions.AdvanceGenerationOnce(
+            session.WorkerSlotId,
+            recoveryId);
+        if (applied)
+        {
+            AdvanceCount++;
+        }
+        var generation = _world.Sessions.Get(
+            session.WorkerSlotId)?.Generation ??
+            session.SessionGeneration;
+
+        return Task.FromResult(
+            new RecoveryAdvanceResult(applied, generation));
+    }
+}
+
+public sealed class RecordingManagedBrowserInventory :
+    IManagedBrowserInventory
+{
+    private readonly IManagedBrowserInventory _inner;
+
+    public RecordingManagedBrowserInventory(
+        IManagedBrowserInventory inner)
+    {
+        _inner = inner;
+    }
+
+    public int InventoryCount { get; private set; }
+
+    public async Task<IReadOnlyList<BrowserInventoryEntry>> InventoryAsync(
+        CancellationToken cancellationToken = default)
+    {
+        InventoryCount++;
+        return await _inner.InventoryAsync(cancellationToken);
+    }
 }

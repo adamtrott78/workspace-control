@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "stage": "impl_07_recovery_and_fault_closure",
+  "source_matrix": "architecture/workspace-semantic-execution-operator-simulator-e2e-test-matrix.v0.1.json",
+  "tests": [
+    {
+      "id": "E2E-015",
+      "fixture": "SIM-018",
+      "layers": [
+        "L1",
+        "L3"
+      ]
+    },
+    {
+      "id": "E2E-016",
+      "fixture": "SIM-019",
+      "layers": [
+        "L1",
+        "L3"
+      ]
+    },
+    {
+      "id": "E2E-017",
+      "fixture": "SIM-020",
+      "layers": [
+        "L1",
+        "L3"
+      ]
+    },
+    {
+      "id": "E2E-018",
+      "fixture": "SIM-021",
+      "layers": [
+        "L1",
+        "L2"
+      ]
+    },
+    {
+      "id": "E2E-019",
+      "fixture": "SIM-022",
+      "layers": [
+        "L1",
+        "L2",
+        "L3"
+      ]
+    },
+    {
+      "id": "E2E-020",
+      "fixture": "SIM-023",
+      "layers": [
+        "L1",
+        "L2"
+      ]
+    },
+    {
+      "id": "E2E-021",
+      "fixture": "SIM-024",
+      "layers": [
+        "L1",
+        "L2"
+      ]
+    },
+    {
+      "id": "E2E-024",
+      "fixture": "SIM-028",
+      "layers": [
+        "L1",
+        "L3"
+      ]
+    },
+    {
+      "id": "E2E-025",
+      "fixture": "SIM-029",
+      "layers": [
+        "L1",
+        "L3"
+      ]
+    },
+    {
+      "id": "E2E-026",
+      "fixture": "SIM-030",
+      "layers": [
+        "L0",
+        "L1"
+      ]
+    },
+    {
+      "id": "E2E-028",
+      "fixture": "SIM-032",
+      "layers": [
+        "L0",
+        "L1"
+      ]
+    },
+    {
+      "id": "E2E-029",
+      "fixture": "SIM-033",
+      "layers": [
+        "L1",
+        "L2",
+        "L3"
+      ]
+    },
+    {
+      "id": "E2E-030",
+      "fixture": "SIM-034",
+      "layers": [
+        "L1",
+        "L2"
+      ]
+    },
+    {
+      "id": "E2E-037",
+      "fixture": "SIM-008",
+      "layers": [
+        "L1",
+        "L2"
+      ]
+    }
+  ]
+}

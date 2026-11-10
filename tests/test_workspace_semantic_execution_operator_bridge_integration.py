@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MATRIX = ROOT / "architecture/workspace-semantic-execution-operator-simulator-e2e-test-matrix.v0.1.json"
 CATALOG = ROOT / "operator-bridge/simulator/Scenarios/stage06-l2-l3-catalog.json"
+RECOVERY_CATALOG = ROOT / "operator-bridge/simulator/Scenarios/stage07-recovery-catalog.json"
 PRODUCTION_SOLUTION = ROOT / "operator-bridge/WorkspaceOperatorBridge.slnx"
 INTEGRATION_SOLUTION = ROOT / "operator-bridge/WorkspaceOperatorBridge.Integration.slnx"
 SIM_MANIFEST = ROOT / "operator-bridge/simulator/FirefoxProfile/extension/manifest.json"
@@ -29,6 +30,30 @@ class StageSixIntegrationBoundaryTests(unittest.TestCase):
 
         self.assertEqual(expected, actual)
         self.assertEqual(11, len(actual))
+
+    def test_stage07_recovery_catalog_matches_frozen_contract(self):
+        matrix = json.loads(MATRIX.read_text(encoding="utf-8"))
+        catalog = json.loads(RECOVERY_CATALOG.read_text(encoding="utf-8"))
+        gates = {
+            "RECOVERY",
+            "CRASH",
+            "AUTH_RECOVERY",
+            "GENERATION_FENCING",
+            "CONTROL_PLANE",
+        }
+        expected = {
+            item["id"]: [
+                layer for layer in item["layers"] if layer != "L4"
+            ]
+            for item in matrix["tests"]
+            if item["gate"] in gates
+        }
+        actual = {
+            item["id"]: item["layers"]
+            for item in catalog["tests"]
+        }
+        self.assertEqual(expected, actual)
+        self.assertEqual(14, len(actual))
 
     def test_production_solution_remains_simulator_free(self):
         production = PRODUCTION_SOLUTION.read_text(encoding="utf-8")

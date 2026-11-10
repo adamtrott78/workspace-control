@@ -215,6 +215,15 @@ internal static class Program
                 world.Sessions.Get("slot-existing")!.Continuity ==
                     SimContinuity.Trusted;
 
+            await RunStageSevenRecoveryAsync(
+                predicates,
+                details,
+                bridgeState,
+                ipc,
+                browser,
+                clipboard,
+                diagnostics);
+
             var quietClipboard = clipboard.WriteCount;
             var quietBrowser = BrowserEffectTotal(browser);
             await Task.Delay(500);
@@ -286,8 +295,8 @@ internal static class Program
         var report = new
         {
             schema_version = 1,
-            stage = "impl_06_integrated_local_bridge_e2e",
-            layer = "L3_FIREFOX_EXTENSION_FAKE_WORKER",
+            stage = "impl_07_recovery_and_fault_closure",
+            layer = "L3_FIREFOX_EXTENSION_RECOVERY_FAKE_WORKER",
             result = passed ? "PASS" : "FAIL",
             predicates,
             details,
@@ -313,6 +322,325 @@ internal static class Program
         }
 
         return passed ? 0 : 1;
+    }
+
+
+    private static async Task RunStageSevenRecoveryAsync(
+        Dictionary<string, bool> predicates,
+        Dictionary<string, object?> details,
+        BridgeState bridgeState,
+        IpcBrowserPort ipc,
+        RecordingBrowserPort browser,
+        RecordingClipboardWriter clipboard,
+        CaptureDiagnostics diagnostics)
+    {
+        var recoveryDetails =
+            new Dictionary<string, object?>(StringComparer.Ordinal);
+
+        // SIM-018: real managed binding is lost before submit.
+        var world18 = new SimulatorWorld();
+        world18.Sessions.Add(
+            "slot-r18",
+            0,
+            SimContinuity.Trusted,
+            bindingPresent: true);
+        var action18 = world18.Queue(
+            "r18-old",
+            "SERVICE_EXISTING",
+            "slot-r18",
+            0);
+        action18.Status = SimActionStatus.AwaitingDurableAck;
+        action18.ClaimCount = 1;
+        var seed18 = await ipc.CreateTargetAsync(
+            new BrowserTarget("slot-r18", 0),
+            CancellationToken.None);
+        var close18 = await ipc.CloseTargetAsync(
+            new BrowserTarget("slot-r18", 0),
+            CancellationToken.None);
+        var authority18 = new SimulatorRecoveryAuthorityPort(world18);
+        var inventory18 = new RecordingManagedBrowserInventory(ipc);
+        var recovery18 = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority18,
+            inventory18,
+            diagnostics);
+        await recovery18.BeginAsync(
+            "l3-r18",
+            RecoveryScope.SessionScoped,
+            RecoverySignal.ManagedTabClosed,
+            [new RecoverySessionRef("slot-r18", 0)]);
+        var result18 = await recovery18.ReconcileAsync();
+        predicates["SIM-018_tab_closed_before_submit"] =
+            seed18.IsApplied &&
+            close18.IsApplied &&
+            authority18.ReconcileCount == 1 &&
+            authority18.AdvanceCount == 1 &&
+            inventory18.InventoryCount == 1 &&
+            action18.Status == SimActionStatus.Superseded &&
+            world18.Sessions.Get("slot-r18")!.Generation == 1 &&
+            result18.Status == RecoveryStatus.ReadyToResume;
+
+        // SIM-019: global browser-loss signal freezes all browser-dependent dispatch.
+        var world19 = new SimulatorWorld();
+        world19.Sessions.Add("slot-r19", 0, SimContinuity.Trusted, true);
+        var action19 = world19.Queue("r19", "SERVICE_EXISTING", "slot-r19", 0);
+        var authority19 = new SimulatorRecoveryAuthorityPort(world19);
+        var inventory19 = new RecordingManagedBrowserInventory(ipc);
+        var recovery19 = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority19,
+            inventory19,
+            diagnostics);
+        await recovery19.BeginAsync(
+            "l3-r19",
+            RecoveryScope.LocalBridgeGlobal,
+            RecoverySignal.FirefoxConnectionLost,
+            [new RecoverySessionRef("slot-r19", 0)]);
+        var surface19 = new RecordingOperatorSurface();
+        var coordinator19 = new SingleFlightDispatchCoordinator(
+            bridgeState,
+            new SimulatorOperatorActionPort(world19),
+            browser,
+            clipboard,
+            new SystemMonotonicClock(),
+            diagnostics,
+            surface19,
+            recovery19);
+        var clipboard19 = clipboard.WriteCount;
+        var effects19 = BrowserEffectTotal(browser);
+        var blocked19 = await coordinator19.DispatchAsync();
+        var ready19 = await recovery19.ReconcileAsync();
+        predicates["SIM-019_browser_crash"] =
+            blocked19.Outcome == DispatchOutcome.RecoveryOpened &&
+            action19.ClaimCount == 0 &&
+            clipboard.WriteCount == clipboard19 &&
+            BrowserEffectTotal(browser) == effects19 &&
+            world19.Sessions.Get("slot-r19")!.Continuity ==
+                SimContinuity.Unknown &&
+            inventory19.InventoryCount == 1 &&
+            ready19.Status == RecoveryStatus.ReadyToResume;
+
+        // SIM-020: adapter disconnect is a blocking signal until reinventory.
+        var world20 = new SimulatorWorld();
+        world20.Sessions.Add("slot-r20", 0, SimContinuity.Trusted, true);
+        var seed20 = await ipc.CreateTargetAsync(
+            new BrowserTarget("slot-r20", 0),
+            CancellationToken.None);
+        var action20 = world20.Queue("r20", "SERVICE_EXISTING", "slot-r20", 0);
+        var authority20 = new SimulatorRecoveryAuthorityPort(world20);
+        var inventory20 = new RecordingManagedBrowserInventory(ipc);
+        var recovery20 = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority20,
+            inventory20,
+            diagnostics);
+        await recovery20.BeginAsync(
+            "l3-r20",
+            RecoveryScope.LocalBridgeGlobal,
+            RecoverySignal.FirefoxConnectionLost,
+            [new RecoverySessionRef("slot-r20", 0)]);
+        var coordinator20 = new SingleFlightDispatchCoordinator(
+            bridgeState,
+            new SimulatorOperatorActionPort(world20),
+            browser,
+            clipboard,
+            new SystemMonotonicClock(),
+            diagnostics,
+            new RecordingOperatorSurface(),
+            recovery20);
+        var blocked20 = await coordinator20.DispatchAsync();
+        var ready20 = await recovery20.ReconcileAsync();
+        var dispatch20 = await coordinator20.DispatchAsync();
+        predicates["SIM-020_adapter_disconnect_reinventory"] =
+            seed20.IsApplied &&
+            blocked20.Outcome == DispatchOutcome.RecoveryOpened &&
+            ready20.Status == RecoveryStatus.ReadyToResume &&
+            inventory20.InventoryCount == 1 &&
+            dispatch20.Outcome == DispatchOutcome.LocalPrepared &&
+            action20.ClaimCount == 1;
+
+        // SIM-022: create effect is real but its receipt is treated as unknown.
+        var world22 = new SimulatorWorld();
+        world22.Sessions.Add(
+            "slot-r22",
+            0,
+            SimContinuity.NotEstablished,
+            bindingPresent: true);
+        var action22 = world22.Queue(
+            "r22-unknown-create",
+            "CREATE_AND_SERVICE",
+            "slot-r22",
+            0);
+        action22.Status = SimActionStatus.Blocked;
+        var create22Before = browser.CreateCount;
+        var create22 = await browser.CreateTargetAsync(
+            new BrowserTarget("slot-r22", 0),
+            CancellationToken.None);
+        var create22AfterEffect = browser.CreateCount;
+        var authority22 = new SimulatorRecoveryAuthorityPort(world22);
+        var inventory22 = new RecordingManagedBrowserInventory(ipc);
+        var recovery22 = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority22,
+            inventory22,
+            diagnostics);
+        await recovery22.BeginAsync(
+            "l3-r22",
+            RecoveryScope.SessionScoped,
+            RecoverySignal.BindingAmbiguous,
+            [new RecoverySessionRef("slot-r22", 0)]);
+        var result22 = await recovery22.ReconcileAsync();
+        predicates["SIM-022_unknown_create_no_duplicate"] =
+            create22.IsApplied &&
+            create22AfterEffect - create22Before == 1 &&
+            browser.CreateCount == create22AfterEffect &&
+            inventory22.InventoryCount == 1 &&
+            result22.Status == RecoveryStatus.ReadyToResume;
+
+        // SIM-028: real browser inventory supplies only origin classification.
+        var world28 = new SimulatorWorld();
+        world28.Sessions.Add("slot-r28", 0, SimContinuity.Trusted, true);
+        var seed28 = await ipc.CreateTargetAsync(
+            new BrowserTarget("slot-r28", 0),
+            CancellationToken.None);
+        await Task.Delay(250);
+        var inventoryBefore28 = await ipc.InventoryAsync();
+        var offOrigin28 = inventoryBefore28.Any(item =>
+            item.WorkerSlotId == "slot-r28" &&
+            item.OriginClassification == "OFF_CHATGPT_ORIGIN");
+        var authority28 = new SimulatorRecoveryAuthorityPort(world28);
+        var recovery28 = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority28,
+            new RecordingManagedBrowserInventory(ipc),
+            diagnostics);
+        await recovery28.BeginAsync(
+            "l3-r28",
+            RecoveryScope.AuthDomainScoped,
+            RecoverySignal.AuthNavigationDetected,
+            [new RecoverySessionRef("slot-r28", 0)]);
+        var waiting28 = await recovery28.ReconcileAsync();
+        predicates["SIM-028_metadata_only_auth_entry"] =
+            seed28.IsApplied &&
+            offOrigin28 &&
+            waiting28.Status == RecoveryStatus.AwaitingManualAuth &&
+            world28.Sessions.Get("slot-r28")!.Continuity ==
+                SimContinuity.Unknown &&
+            world28.AuthAutomationCount == 0;
+
+        // SIM-029: all-tab auth recovery reconciles once and advances once.
+        var world29 = new SimulatorWorld();
+        foreach (var slot in new[] { "slot-r29a", "slot-r29b" })
+        {
+            world29.Sessions.Add(slot, 0, SimContinuity.Trusted, true);
+            var action = world29.Queue(
+                "action-" + slot,
+                "SERVICE_EXISTING",
+                slot,
+                0);
+            action.Status = SimActionStatus.AwaitingDurableAck;
+            action.ClaimCount = 1;
+            await ipc.CreateTargetAsync(
+                new BrowserTarget(slot, 0),
+                CancellationToken.None);
+        }
+        var authority29 = new SimulatorRecoveryAuthorityPort(world29);
+        var inventory29 = new RecordingManagedBrowserInventory(ipc);
+        var recovery29 = new RecoveryCoordinator(
+            new InMemoryRecoveryStateStore(),
+            authority29,
+            inventory29,
+            diagnostics);
+        await recovery29.BeginAsync(
+            "l3-r29",
+            RecoveryScope.AuthDomainScoped,
+            RecoverySignal.OperatorReportedAuthRefresh,
+            [
+                new RecoverySessionRef("slot-r29a", 0),
+                new RecoverySessionRef("slot-r29b", 0)
+            ]);
+        var waiting29 = await recovery29.ReconcileAsync();
+        var ready29 = await recovery29.MarkManualAuthReturnedAsync();
+        await recovery29.ReconcileAsync();
+        predicates["SIM-029_auth_refresh_all_tabs"] =
+            waiting29.Status == RecoveryStatus.AwaitingManualAuth &&
+            ready29.Status == RecoveryStatus.ReadyToResume &&
+            authority29.FreezeCount == 1 &&
+            authority29.ReconcileCount == 1 &&
+            authority29.AdvanceCount == 2 &&
+            world29.Sessions.Get("slot-r29a")!.Generation == 1 &&
+            world29.Sessions.Get("slot-r29b")!.Generation == 1 &&
+            world29.Sessions.Get("slot-r29a")!.Continuity ==
+                SimContinuity.Unknown &&
+            world29.Sessions.Get("slot-r29b")!.Continuity ==
+                SimContinuity.Unknown;
+
+        // SIM-033: helper cold-start rehydrates the same incident and blocks replay.
+        var world33 = new SimulatorWorld();
+        world33.Sessions.Add("slot-r33", 2, SimContinuity.Trusted, true);
+        var action33 = world33.Queue(
+            "r33-pending",
+            "SERVICE_EXISTING",
+            "slot-r33",
+            2);
+        action33.Status = SimActionStatus.AwaitingDurableAck;
+        action33.ClaimCount = 1;
+        await ipc.CreateTargetAsync(
+            new BrowserTarget("slot-r33", 2),
+            CancellationToken.None);
+        var state33 = new InMemoryRecoveryStateStore();
+        var authority33 = new SimulatorRecoveryAuthorityPort(world33);
+        var inventory33 = new RecordingManagedBrowserInventory(ipc);
+        var first33 = new RecoveryCoordinator(
+            state33,
+            authority33,
+            inventory33,
+            diagnostics);
+        await first33.BeginAsync(
+            "l3-r33",
+            RecoveryScope.LocalBridgeGlobal,
+            RecoverySignal.SystemResumeOrHelperColdStart,
+            [new RecoverySessionRef("slot-r33", 2)]);
+        var restarted33 = new RecoveryCoordinator(
+            state33,
+            authority33,
+            inventory33,
+            diagnostics);
+        var loaded33 = await restarted33.InitializeAsync();
+        var coordinator33 = new SingleFlightDispatchCoordinator(
+            bridgeState,
+            new SimulatorOperatorActionPort(world33),
+            browser,
+            clipboard,
+            new SystemMonotonicClock(),
+            diagnostics,
+            new RecordingOperatorSurface(),
+            restarted33);
+        var blocked33 = await coordinator33.DispatchAsync();
+        var ready33 = await restarted33.ReconcileAsync();
+        predicates["SIM-033_cold_restart_no_stale_replay"] =
+            loaded33 is not null &&
+            blocked33.Outcome == DispatchOutcome.RecoveryOpened &&
+            action33.ClaimCount == 1 &&
+            ready33.Status == RecoveryStatus.ReadyToResume &&
+            authority33.AdvanceCount == 1 &&
+            inventory33.InventoryCount == 1;
+
+        recoveryDetails["authority_reconcile_counts"] = new
+        {
+            sim018 = authority18.ReconcileCount,
+            sim019 = authority19.ReconcileCount,
+            sim020 = authority20.ReconcileCount,
+            sim022 = authority22.ReconcileCount,
+            sim028 = authority28.ReconcileCount,
+            sim029 = authority29.ReconcileCount,
+            sim033 = authority33.ReconcileCount
+        };
+        recoveryDetails["auth_generation_advances"] =
+            authority29.AdvanceCount;
+        recoveryDetails["cold_restart_claim_count"] =
+            action33.ClaimCount;
+        details["stage07_recovery"] = recoveryDetails;
     }
 
     private static int BrowserEffectTotal(
