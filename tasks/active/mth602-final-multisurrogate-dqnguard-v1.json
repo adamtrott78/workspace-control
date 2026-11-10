@@ -6,7 +6,7 @@
   "goal": "Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard project so Stage 00 can recover canonical MILCOM baseline/runtime provenance directly from the prepared Lambda checkout before architecture implementation.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "stage01_evidence_partition_design",
+  "current_stage": "stage02_common_evaluation_provenance_contract",
   "acceptance_criteria": [
     "Workspace Shell can inspect PADataset at the exact task-bound source SHA without changing the historical checkout.",
     "Stage 00 recovers the fixed-Scan DQNGuard, full 20-cell target-surrogate matrix, and VarMax surrogate-all evidence chains with machine-readable provenance.",
@@ -93,8 +93,24 @@
       "resume_condition": "workspace_shell_bootstrap validated."
     },
     {
-      "id": "stage01_evidence_partition_design",
+      "id": "stage02_common_evaluation_provenance_contract",
       "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "stage01_evidence_partition_design"
+      ],
+      "outputs": [
+        "common result schema",
+        "deterministic smoke/provenance contract"
+      ],
+      "validation": [],
+      "resume_condition": "Stage 01 complete."
+    },
+    {
+      "id": "stage01_evidence_partition_design",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -104,7 +120,17 @@
       "outputs": [
         "exact A/B/C evidence partition designs"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 01 evidence partition design",
+          "result": "PASS",
+          "evidence": [
+            "PADataset commit 6a3c62a229beb81fa8644d979b2198f46f6f0255 adds STAGE01_EVIDENCE_PARTITIONS.md and records Stage 01 complete in the authoritative TASK.md.",
+            "Design enforces target quarantine, known-only backbone checkpoint selection, disjoint calibration roles, known-only 5% final thresholding, and explicit A/B/C shared-vs-surrogate-specific state.",
+            "Architecture C is selected as first implementation candidate; implementation remains blocked until Stage 02 common result/provenance contract is frozen."
+          ]
+        }
+      ],
       "resume_condition": "Stage 00 complete."
     }
   ],
@@ -145,6 +171,15 @@
       "evidence": [
         "Adds Stage 00 baseline provenance artifact and marks scientific Stage 00 complete."
       ]
+    },
+    {
+      "id": "stage01-evidence-partition-freeze",
+      "kind": "git_commit",
+      "identity": "6a3c62a229beb81fa8644d979b2198f46f6f0255",
+      "required_for_resume": true,
+      "evidence": [
+        "Adds frozen A/B/C evidence partition design and selects C as first implementation candidate."
+      ]
     }
   ],
   "artifacts": [],
@@ -167,12 +202,11 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Write explicit A/B/C evidence partitions with backbone taxonomy, DQN-fit evidence, deterministic-guard evidence, normalization/aggregation evidence, known-threshold evidence, untouched target-test evidence, score definitions, and shared-vs-surrogate-specific state.",
-    "Check taxonomy integrity and no-target-leakage for each architecture.",
-    "Select C as the first implementation only if the completed evidence-partition design does not invalidate it.",
-    "Do not implement architecture code until Stage 01 design is reviewed and frozen."
+    "Define one result schema for B0/A/B/C covering calibration identity, score definition, normalization, aggregation, threshold, realized known rejection, unknown metrics, fallback/feasibility, and provenance.",
+    "Define deterministic smoke fixtures and comparison adapter/reducer contract.",
+    "Do not implement architecture C until the Stage 02 contract is frozen."
   ],
-  "next_safe_action": "Use the PADataset scientific contexts and Stage 00 provenance freeze at 025f73632609891ee5292880b0efe25f5d50df04 to write the Stage 01 A/B/C evidence-partition design. No architecture implementation yet.",
+  "next_safe_action": "Continue Stage 02 only: define the common result/provenance schema and deterministic smoke contract on PADataset commit 6a3c62a229beb81fa8644d979b2198f46f6f0255. Architecture C implementation remains gated.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."
