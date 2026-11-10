@@ -120,6 +120,66 @@ def validate_workspace_control(argv):
         i += 1
 
 
+def validate_file_list(argv):
+    if len(argv) not in (6, 8):
+        fail("PROFILE_ARGV_DENIED", "file-list grammar mismatch")
+    safe_relative(argv[0], "find root")
+    if argv[1] != "-maxdepth" or not argv[2].isdigit() or not 1 <= int(argv[2]) <= 12:
+        fail("PROFILE_ARGV_DENIED", "file-list requires -maxdepth 1..12")
+    if argv[3:5] != ["-type", "f"]:
+        fail("PROFILE_ARGV_DENIED", "file-list exposes regular files only")
+    if len(argv) == 6:
+        if argv[5] != "-print":
+            fail("PROFILE_ARGV_DENIED", "file-list must end with -print")
+        return
+    if argv[5] != "-name" or not argv[6] or len(argv[6]) > 128 or "/" in argv[6]:
+        fail("PROFILE_ARGV_DENIED", "file-list -name pattern invalid")
+    if argv[7] != "-print":
+        fail("PROFILE_ARGV_DENIED", "file-list must end with -print")
+
+
+def validate_file_read(argv):
+    if len(argv) != 4 or argv[0] != "-c" or argv[2] != "--":
+        fail("PROFILE_ARGV_DENIED", "file-read grammar is head -c N -- path")
+    if not argv[1].isdigit() or not 1 <= int(argv[1]) <= 65536:
+        fail("PROFILE_ARGV_DENIED", "file-read byte limit must be 1..65536")
+    safe_relative(argv[3], "file path")
+
+
+def validate_file_hash(argv):
+    if not 1 <= len(argv) <= 16:
+        fail("PROFILE_ARGV_DENIED", "file-hash accepts 1..16 paths")
+    for item in argv:
+        safe_relative(item, "file path")
+
+
+def validate_research(argv):
+    if not argv:
+        fail("PROFILE_ARGV_DENIED", "research-bounded requires a Python script")
+    script = safe_relative(argv[0], "research script").replace("\\", "/")
+    top_level = {
+        "cacheBuild.py", "discriminate.py", "dqn_osr.py", "evaluate.py",
+        "manifestBuild.py", "osr_core.py", "prepData.py", "varmax_osr.py",
+    }
+    allowed = (
+        script in top_level
+        or script.startswith("experiments/")
+        or script.startswith("scripts/")
+        or script.startswith("tools/")
+    )
+    if not allowed or not script.endswith(".py"):
+        fail("PROFILE_ARGV_DENIED", "research-bounded script is outside PADataset research code paths")
+
+
+def assert_target_profile(target, profile):
+    allowed = {
+        "workspace-control": {"git-read", "pytest-bounded", "validation-bounded", "file-list", "file-read", "file-hash"},
+        "PADataset": {"git-read", "file-list", "file-read", "file-hash", "research-bounded"},
+    }
+    if target not in allowed or profile not in allowed[target]:
+        fail("TARGET_PROFILE_DENIED", f"profile {profile} is not authorized for target {target}")
+
+
 def resolve_profile(manifest, profile, argv):
     validate_argv_shape(argv)
     entry = manifest.get("profiles", {}).get(profile)
@@ -130,6 +190,10 @@ def resolve_profile(manifest, profile, argv):
         "git-read": ("/usr/bin/git", False),
         "pytest-bounded": ("/usr/bin/python3", True),
         "validation-bounded": ("/usr/bin/python3", True),
+        "file-list": ("/usr/bin/find", False),
+        "file-read": ("/usr/bin/head", False),
+        "file-hash": ("/usr/bin/sha256sum", False),
+        "research-bounded": ("/usr/bin/python3", True),
     }
     if profile not in expected:
         fail("PROFILE_NOT_AUTHORIZED", "profile absent from frozen launcher grammar")
@@ -161,10 +225,29 @@ def resolve_profile(manifest, profile, argv):
             "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
             "PYTHONDONTWRITEBYTECODE": "1",
         }
-    else:
+    elif profile == "validation-bounded":
         validate_workspace_control(argv)
         resolved = ["scripts/workspace_control.py", *argv]
         env = {"PYTHONDONTWRITEBYTECODE": "1"}
+    elif profile == "file-list":
+        validate_file_list(argv)
+        resolved = argv
+        env = {}
+    elif profile == "file-read":
+        validate_file_read(argv)
+        resolved = argv
+        env = {}
+    elif profile == "file-hash":
+        validate_file_hash(argv)
+        resolved = argv
+        env = {}
+    else:
+        validate_research(argv)
+        resolved = ["-B", *argv]
+        env = {
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONNOUSERSITE": "1",
+        }
 
     return {
         "executable": entry["executable"],
@@ -504,14 +587,15 @@ def run_request(cfg, manifest, request, cancel_check=None):
         fail("JOB_SCHEMA_INVALID", "unexpected job request schema")
     if request.get("operation") != "exec":
         fail("JOB_OPERATION_DENIED", "v1 launcher accepts exec only")
-    if request.get("target") != "workspace-control":
-        fail("TARGET_NOT_AUTHORIZED", "v1 launcher target is workspace-control only")
+    if request.get("target") not in ("workspace-control", "PADataset"):
+        fail("TARGET_NOT_AUTHORIZED", "launcher target is not in the frozen target allowlist")
 
     expected_sha = request.get("expected_sha")
     if not isinstance(expected_sha, str) or not expected_sha.islower() or len(expected_sha) != 40 or any(c not in "0123456789abcdef" for c in expected_sha):
         fail("INVALID_SHA", "expected_sha must be full lowercase Git SHA")
 
     profile = request.get("profile")
+    assert_target_profile(request.get("target"), profile)
     resolved = resolve_profile(manifest, profile, request.get("argv"))
     cwd = safe_relative(request.get("cwd"), "cwd")
     timeout_ms = int(request.get("timeout_ms"))
