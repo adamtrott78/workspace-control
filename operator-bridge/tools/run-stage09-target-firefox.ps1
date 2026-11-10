@@ -195,6 +195,13 @@ try {
     throw $(if ($PreflightOnly) { "Target Firefox adapter preflight timed out." } else { "Target Firefox collector exceeded the bounded 30-minute execution window." })
   }
 
+  # Polling above is required to retain Firefox process ancestry while the
+  # harness runs. Finalize the Process object before reading ExitCode;
+  # Start-Process -PassThru may otherwise expose a null exit code even after
+  # HasExited becomes true, which PowerShell compares as non-zero.
+  $runner.WaitForExit()
+  $runner.Refresh()
+
   if ($runner.ExitCode -ne 0) {
     if (Test-Path $runnerOut) { Get-Content $runnerOut }
     if (Test-Path $runnerErr) { Get-Content $runnerErr }
