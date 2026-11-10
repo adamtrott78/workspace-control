@@ -29,19 +29,19 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Wait for the parent workspace-shell-multirepo-research-v1 authority refresh to validate and deploy. Then verify this task through the live Workspace Shell task gate and begin Stage 00 using clean PADataset execution source 17e1147614f27702e43565089d618182ff71c5af plus the untouched historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
+After the parent validated live upgrade reports LOCAL_TASK_AUTHORITY=PASS, verify this task through ChatGPT Workspace Shell and verify PADataset exact HEAD 17e1147614f27702e43565089d618182ff71c5af. Only then begin Stage 00 read-only provenance recovery from the clean execution snapshot and untouched historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
 
 ## Remaining work
 
-- Complete exact-head validation and live authority refresh under workspace-shell-multirepo-research-v1.
-- Verify this task is visible through Workspace Shell and clean PADataset execution HEAD is 17e1147614f27702e43565089d618182ff71c5af.
-- Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings from the read-only historical evidence mount.
+- Apply the validated parent authority refresh and prove this task is visible through Workspace Shell.
+- Verify clean PADataset execution HEAD is 17e1147614f27702e43565089d618182ff71c5af and historical evidence is mounted read-only.
+- Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings.
 - Persist machine-readable Stage 00 provenance in PADataset and update its authoritative task.
 - Proceed to Stage 01 only after the provenance gate closes.
 
 ## Blockers / gates
 
-- Workspace Shell schema now exposes PADataset and research-bounded, but this task is not yet visible through the live trusted authority snapshot: live inspection returns TASK_NOT_FOUND. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db repairs independent authority refresh; no PADataset execution is permitted until that gate passes.
+- Parent Workspace Shell implementation is repository-validated, but this task still returns TASK_NOT_FOUND through the live trusted authority snapshot. No PADataset read or research execution is permitted until the validated authority refresh is applied and this task becomes visible.
 
 ## Fresh-chat initialization
 

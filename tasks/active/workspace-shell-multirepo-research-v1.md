@@ -36,20 +36,20 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Validate the current PR head after this authority-state normalization. If the Workspace Shell/PADataset repository suite passes, freeze that head as the independent authority snapshot and deploy execution candidate ce19452c644599bda23f6e3766c9390fa0d906db with PADataset 17e1147614f27702e43565089d618182ff71c5af using the corrected rollback-capable upgrade operator. Then re-test both durable task IDs before any PADataset Stage 00 read.
+Apply the validated rollback-capable multirepo upgrade from the exact authority-state branch head, with workspace-control execution candidate ce19452c644599bda23f6e3766c9390fa0d906db and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. The upgrade must refresh /etc/workspace-shell/authority separately from /srv/workspace-shell/workspace-control and must report LOCAL_TASK_AUTHORITY=PASS. Immediately afterward, re-test both durable task IDs through the ChatGPT Workspace Shell connector before any PADataset Stage 00 read.
 
 ## Remaining work
 
-- Validate the authority-state head that binds workspace-control execution candidate ce19452c644599bda23f6e3766c9390fa0d906db.
-- Deploy the corrected multirepo upgrade with separate authority and execution snapshots; do not bypass the live task gate.
-- Verify live visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1, then run positive/negative PADataset acceptance.
-- Begin MTH602 Stage 00 provenance recovery from clean PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af plus the untouched historical evidence checkout.
+- Deploy the validated multirepo upgrade using the exact authority-state branch head, workspace-control execution candidate ce19452c644599bda23f6e3766c9390fa0d906db, and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af.
+- Verify live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1.
+- Run positive and negative PADataset Workspace Shell acceptance at exact SHA 17e1147614f27702e43565089d618182ff71c5af.
+- Begin MTH602 Stage 00 provenance recovery from the clean execution snapshot plus the untouched read-only historical evidence checkout.
 - Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
 
 ## Blockers / gates
 
-- The refreshed Workspace Shell schema and transport are healthy, but the live trusted authority snapshot is stale: both new task IDs return TASK_NOT_FOUND. No PADataset execution is permitted until the independent authority snapshot is refreshed and both task IDs pass the live gate.
-- Exact-head repository validation must be rerun after normalizing the task-capsule result fields and binding workspace-control execution to candidate ce19452c644599bda23f6e3766c9390fa0d906db.
+- Live trusted task authority is still stale: workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND. This is now the sole execution gate before PADataset Stage 00.
+- The live authority refresh is a host mutation outside the currently visible task authority. It must be applied through the validated operator upgrade path; do not bypass with workspace-shell-mcp-v1 or touch PADataset first.
 
 ## Fresh-chat initialization
 
