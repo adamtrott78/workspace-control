@@ -36,36 +36,18 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Hold all scientific GPU execution. Capture one bounded read-only research-engine/gpu controller journal snapshot to classify the exact crash-loop error while implementing controller-reliability-hardening-v1 on branch controller-reliability-hardening-v1. No live restart/reset/reconcile/controller installation is authorized until the implementation batch passes full validation and the activation boundary is reviewed.
+Validate the final PR #598 head. If green, request fresh authority-sensitive review of the exact head plus the bounded live transaction already described on PR #598: source-attest exact reviewed head/base; prove installed manifest semantic equality to the exact base manifest; preserve exact installed controller/unit/maintenance/provisioner/runtime/root-policy identities and sibling states; stop only workspace-control CPU; atomically replace only /etc/workspace-ci/projects/workspace-control.json with the reviewed target manifest; do not restart provisioner; reset-failed/start only workspace-control CPU if needed; require stable running with unchanged InvocationID/NRestarts across the bounded observation window and unchanged sibling semantic snapshots; allow existing run #389 to proceed without cancel/retrigger; rollback by restoring only the old manifest and leaving workspace-control CPU stopped on any post-backup failure.
 
 ## Remaining work
 
-- Complete controller reliability hardening v1 before resuming the local-reasoner GPU bakeoff.
-- Classify the exact current research-engine/gpu crash-loop error from a bounded read-only journal snapshot and freeze it as regression evidence.
-- Implement and validate admission ordering, recovery-state lifecycle, state-file ownership, stable restart certification, and restart-storm containment.
-- Run full workspace-control validation on the complete hardening batch.
-- Perform the owning workflow's final authority-sensitive activation review only once the implementation batch is stable; do not reintroduce iterative independent-review loops during ordinary implementation.
-- Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
-- After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
-- Then remove routine hosted-runner dependence only after private-repository steady-state CI is proven under reviewed boundaries.
-- Leave GitHub organization migration, capacity widening, maintenance-command widening, and workspace-shell-mcp-v1 paused until their own gates.
+- Validate the final PR #598 head containing manifest repair, regression, and durable task binding.
+- Obtain fresh authority-sensitive review of the exact head and bounded one-file live installed-manifest transaction.
+- Stop only workspace-control CPU, atomically replace only /etc/workspace-ci/projects/workspace-control.json, then start only workspace-control CPU.
+- Prove bounded stable-running controller health and exact sibling semantic-state preservation.
+- Observe existing run #389 naturally acquire a runner and complete; do not retrigger it.
 
 ## Blockers / gates
 
-- No live controller/runtime mutation is authorized by review_automation closure or dogfood.
-- The next stage must remain separately reviewed before any automatic reconcile-controller startup, P2 admission widening, hosted-runner dependency removal, maintenance widening, capacity widening, or organization migration.
-- The merged review automation must prove end-to-end request creation and disposition consumption on this state-only closure PR before routine reliance.
-
-## Fresh-chat initialization
-
-@GitHub
-
-https://github.com/adamtrott78/workspace-control
-
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+- Fresh authority-sensitive review is required on the final PR #598 head after this task-state binding and on the bounded one-file live repair transaction.
+- Live installed manifest must semantically equal the exact pre-repair base manifest before replacement; any drift aborts.
+- Any live identity/state mismatch aborts before mutation. No reconcile, provisioner restart, sibling mutation, scale-set operation, workflow cancel/retrigger, or admission/capacity widening is authorized.
