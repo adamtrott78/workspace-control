@@ -244,7 +244,7 @@ jobs:
           python-version: '3.13'
 
       - name: Validate interactive target-runner preconditions
-        shell: pwsh
+        shell: powershell
         run: |
           $ErrorActionPreference = "Stop"
           $head = (git rev-parse HEAD).Trim()
@@ -273,7 +273,7 @@ jobs:
           }
 
       - name: Execute frozen Stage 09 target matrix
-        shell: pwsh
+        shell: powershell
         run: |
           New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
           ./operator-bridge/tools/run-stage09-target-matrix.ps1 `
