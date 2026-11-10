@@ -125,6 +125,21 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+      - name: Run Stage 09 account-free CI performance smoke
+        shell: pwsh
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/tools/run-stage09-ci.ps1 -RepositoryRoot "${{ github.workspace }}" -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-performance.json"
+
+      - name: Upload Stage 09 non-target content-free performance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage09-ci-${{ github.event.pull_request.head.sha || github.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-performance.json
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Measure helper idle resource sample
         shell: pwsh
         run: |
