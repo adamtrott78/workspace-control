@@ -202,19 +202,30 @@ try {
   $runner.WaitForExit()
   $runner.Refresh()
 
-  if ($runner.ExitCode -ne 0) {
+  if (-not $PreflightOnly -and $runner.ExitCode -ne 0) {
     if (Test-Path $runnerOut) { Get-Content $runnerOut }
     if (Test-Path $runnerErr) { Get-Content $runnerErr }
     if (Test-Path $steadyResultPath) { Get-Content $steadyResultPath }
-    throw $(if ($PreflightOnly) { "Target Firefox adapter identity preflight failed." } else { "Target Firefox steady-state collector failed." })
+    throw "Target Firefox steady-state collector failed."
+  }
+
+  if (-not (Test-Path -LiteralPath $steadyResultPath -PathType Leaf)) {
+    if (Test-Path $runnerOut) { Get-Content $runnerOut }
+    if (Test-Path $runnerErr) { Get-Content $runnerErr }
+    throw $(if ($PreflightOnly) { "Target Firefox adapter preflight produced no result evidence." } else { "Target Firefox steady-state collector produced no result evidence." })
   }
 
   $steadyResult = Get-Content $steadyResultPath -Raw | ConvertFrom-Json
   if ($PreflightOnly) {
+    # PowerShell's live Process.ExitCode property can remain null briefly even
+    # after HasExited/WaitForExit on this Windows runner. The harness-written
+    # bounded result is authoritative for adapter preflight success/failure.
     if ($steadyResult.evidence_class -ne "TARGET_ADAPTER_PREFLIGHT" -or
         $steadyResult.status -ne "PASS" -or
         $steadyResult.adapter_version -ne "0.1.9-perf") {
-      throw "Target Firefox adapter preflight emitted invalid evidence."
+      if (Test-Path $runnerOut) { Get-Content $runnerOut }
+      if (Test-Path $runnerErr) { Get-Content $runnerErr }
+      throw "Target Firefox adapter preflight emitted failing or invalid evidence."
     }
     $steadyResult | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ResultPath -Encoding UTF8
     $collectorSucceeded = $true
