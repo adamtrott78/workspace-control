@@ -36,7 +36,7 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Read only the concise workspace-shell-mcp.service crash excerpt from the Lambda journal, identify the startup exception, patch and exact-head validate the smallest server-side fix, deploy it without changing the already-frozen external MCP schema, then use the canonical plugin workflow's Refresh tools step.
+Restore the accepted node_modules closure from the retained 20261110T174933Z upgrade backup into /opt/workspace-shell/runtime/plugins/workspace-shell/node_modules, restart workspace-shell-mcp.service, verify a listener on 127.0.0.1:8797, then use Manage -> Refresh tools. The durable upgrade operator has been patched to preserve and verify the dependency closure; exact-head validation is running for 857bc13bf00d785f7af4be462c12b0ffea62ebfd.
 
 ## Remaining work
 
@@ -50,7 +50,7 @@ Read only the concise workspace-shell-mcp.service crash excerpt from the Lambda 
 
 ## Blockers / gates
 
-- Live workspace-shell-mcp.service is crash-looping after the validated multirepo deployment. workspace-shell-tunnel.service remains active and resolves main to 127.0.0.1:8797 with mTLS, but no local listener exists on 8797; ChatGPT Refresh tools therefore fails.
+- Live workspace-shell-mcp.service crash-loop root cause identified: multirepo upgrade replaced the runtime plugin directory with Git-tracked source but did not restore the accepted node_modules dependency closure. server.js therefore fails at startup with ERR_MODULE_NOT_FOUND for @modelcontextprotocol/ext-apps. Tunnel remains healthy and resolves main to 127.0.0.1:8797.
 
 ## Fresh-chat initialization
 
