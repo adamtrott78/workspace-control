@@ -339,6 +339,7 @@ finally {
       content_policy = "CONTENT_FREE"
       launcher_pid = $(if ($firefox) { [int]$firefox.Id } else { $null })
       launcher_has_exited = $launcherHasExited
+      runner_exit_code = $(if ($runner -and $runner.HasExited) { [int]$runner.ExitCode } else { $null })
       tracked_owned_firefox_ids = @($ownedFirefoxIds | Sort-Object)
       remaining_firefox_process_count = $remainingFirefox.Count
       remaining_firefox_processes = $remainingFirefox
