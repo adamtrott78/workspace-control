@@ -1,0 +1,56 @@
+name: Operator Bridge Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'operator-bridge/**'
+      - '.github/workflows/operator-bridge-validation.yml'
+      - 'tasks/active/workspace-operator-bridge-implementation-v1.json'
+      - 'tasks/active/workspace-operator-bridge-implementation-v1.md'
+      - 'architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md'
+      - 'architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json'
+      - 'architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json'
+      - 'benchmarks/workspace-semantic-execution/operator_bridge/**'
+      - 'tests/test_workspace_semantic_execution_operator_bridge*.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: operator-bridge-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validation:
+    name: validation
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout tested tree
+        uses: actions/checkout@v6
+
+      - name: Set up .NET 10 LTS
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Validate frozen protocol, authority scope, and Firefox security baseline
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p "test_workspace_semantic_execution_operator_bridge*.py" -v
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore operator-bridge/WorkspaceOperatorBridge.slnx
+
+      - name: Build
+        shell: pwsh
+        run: dotnet build operator-bridge/WorkspaceOperatorBridge.slnx --configuration Release --no-restore
+
+      - name: Test
+        shell: pwsh
+        run: dotnet test operator-bridge/WorkspaceOperatorBridge.slnx --configuration Release --no-build

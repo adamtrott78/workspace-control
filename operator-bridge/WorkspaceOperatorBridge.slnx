@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/SharedContracts/SharedContracts.csproj" />
+  <Project Path="src/WorkspaceOperator/WorkspaceOperator.csproj" />
+  <Project Path="tests/WorkspaceOperator.Tests/WorkspaceOperator.Tests.csproj" />
+  <Project Path="tests/Protocol.Tests/Protocol.Tests.csproj" />
+  <Project Path="tests/Integration.Tests/Integration.Tests.csproj" />
+</Solution>
