@@ -82,6 +82,29 @@ function Update-OwnedFirefoxIds {
   }
 }
 
+function Stop-TrackedFirefoxProcesses {
+  Update-OwnedFirefoxIds
+  foreach ($ownedId in @($ownedFirefoxIds | Sort-Object -Descending)) {
+    try {
+      $ownedProcess = Get-Process -Id $ownedId -ErrorAction Stop
+      if ($ownedProcess.ProcessName -eq "firefox") {
+        Stop-Process -Id $ownedId -Force -ErrorAction SilentlyContinue
+      }
+    } catch {
+    }
+  }
+
+  $deadline = (Get-Date).AddSeconds(10)
+  while ((Get-Date) -lt $deadline) {
+    Update-OwnedFirefoxIds
+    $ownedRemaining = @($ownedFirefoxIds | Where-Object {
+      Get-Process -Id $_ -ErrorAction SilentlyContinue
+    })
+    if ($ownedRemaining.Count -eq 0) { break }
+    Start-Sleep -Milliseconds 100
+  }
+}
+
 function Write-BoundedTextDiagnostic {
   param([string]$Source, [string]$Destination)
   if (-not (Test-Path -LiteralPath $Source -PathType Leaf)) { return }
@@ -203,18 +226,11 @@ try {
 
   $coldResult = $null
   if (-not $SkipColdStart) {
-    if ($firefox -and -not $firefox.HasExited) {
-      Stop-Process -Id $firefox.Id -Force -ErrorAction SilentlyContinue
-      $firefox.WaitForExit(10000) | Out-Null
-    }
+    Stop-TrackedFirefoxProcesses
     $firefox = $null
 
-    $closeDeadline = (Get-Date).AddSeconds(10)
-    while ((Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $closeDeadline) {
-      Start-Sleep -Milliseconds 100
-    }
     if (Get-Process firefox -ErrorAction SilentlyContinue) {
-      throw "Target measurement rejected: Firefox did not reach the required cold-start baseline."
+      throw "Target measurement rejected: Firefox did not reach the required cold-start baseline without adopting or killing unowned processes."
     }
 
     $coldRunner = Start-Process -FilePath "dotnet" -ArgumentList @(
@@ -278,25 +294,7 @@ finally {
   if ($coldRunner -and -not $coldRunner.HasExited) {
     Stop-Process -Id $coldRunner.Id -Force -ErrorAction SilentlyContinue
   }
-  Update-OwnedFirefoxIds
-  foreach ($ownedId in @($ownedFirefoxIds | Sort-Object -Descending)) {
-    try {
-      $ownedProcess = Get-Process -Id $ownedId -ErrorAction Stop
-      if ($ownedProcess.ProcessName -eq "firefox") {
-        Stop-Process -Id $ownedId -Force -ErrorAction SilentlyContinue
-      }
-    } catch {
-    }
-  }
-
-  $ownedCleanupDeadline = (Get-Date).AddSeconds(10)
-  while ((Get-Date) -lt $ownedCleanupDeadline) {
-    $ownedRemaining = @($ownedFirefoxIds | Where-Object {
-      Get-Process -Id $_ -ErrorAction SilentlyContinue
-    })
-    if ($ownedRemaining.Count -eq 0) { break }
-    Start-Sleep -Milliseconds 100
-  }
+  Stop-TrackedFirefoxProcesses
 
   if ($fakeWorker -and -not $fakeWorker.HasExited) {
     Stop-Process -Id $fakeWorker.Id -Force -ErrorAction SilentlyContinue
