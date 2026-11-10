@@ -674,7 +674,8 @@
             "Firefox evidence supports a least-privilege v0 WebExtension permission set of nativeMessaging + tabs + sessions, with no host permissions, content scripts, activeTab, scripting, webNavigation, webRequest, cookies, or clipboard permissions.",
             "Authentication/navigation sensing is security-approved only as managed-tab browser-chrome metadata: raw URL is reduced immediately to CHATGPT_ORIGIN/OFF_CHATGPT_ORIGIN/UNKNOWN and is never persisted. Origin return is not continuity proof; operator-report fallback remains required.",
             "The native helper remains standard-user, clipboard-write-only, no synthetic input/UI Automation, no browser credential/profile database access, and no ability to derive execution authority from extension/model state.",
-            "Six UX-08 artifacts define the threat model, exact permission matrix, local data-handling rules, auth-signal review, security checklist, and accepted ADR forbidding ChatGPT DOM/content automation in v0. UX-12 retains exact API/package validation and pre-real-account policy re-check ownership."
+            "Six UX-08 artifacts define the threat model, exact permission matrix, local data-handling rules, auth-signal review, security checklist, and accepted ADR forbidding ChatGPT DOM/content automation in v0. UX-12 retains exact API/package validation and pre-real-account policy re-check ownership.",
+            "PR #590 exact UX-08 content head a5e6b8af2b69e9215f7379e5c1a70d62b553a2c2 passed Workspace Control Validation run 42752500953 / #2364 SUCCESS, including changed task-contract, unit-regression, pinned Lambda controller, and full integration-contract checks."
           ]
         }
       ],
