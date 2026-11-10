@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-display-state-table-v0.1",
+  "status": "UX_06_DESIGN_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "primary_metric": "READY_MANUAL_CYCLES",
+  "tray_state_precedence": [
+    "HELPER_ERROR",
+    "RECOVERY_REQUIRED",
+    "JUDGMENT_REQUIRED",
+    "BLOCKED_ONLY",
+    "READY",
+    "WAITING_UNCONFIRMED",
+    "IDLE",
+    "BRIDGE_OFF"
+  ],
+  "states": [
+    {
+      "state": "BRIDGE_OFF",
+      "condition": "bridge=OFF",
+      "badge": "NONE_OR_READY_WAITING_COUNT_AS_SECONDARY",
+      "tooltip": "Bridge OFF; Ctrl+B normal; show ready waiting count",
+      "ctrl_b_hint": false,
+      "focus_policy": "NONE"
+    },
+    {
+      "state": "IDLE",
+      "condition": "bridge=ON and ready=0 and unconfirmed=0 and gates=0 and recovery=0 and blocked=0",
+      "badge": "0_OR_NONE",
+      "tooltip": "Nothing needs service",
+      "ctrl_b_hint": false
+    },
+    {
+      "state": "READY",
+      "condition": "bridge=ON and ready>0 and no higher-precedence exceptional state",
+      "badge": "READY_COUNT",
+      "tooltip": "Ready now: N; Ctrl+B to service next",
+      "ctrl_b_hint": true
+    },
+    {
+      "state": "WAITING_UNCONFIRMED",
+      "condition": "ready=0 and sent_unconfirmed>0 and no gate/recovery/error",
+      "badge": "NONE_OR_WAIT_SYMBOL",
+      "tooltip": "Waiting for durable acknowledgments",
+      "ctrl_b_hint": false
+    },
+    {
+      "state": "JUDGMENT_REQUIRED",
+      "condition": "judgment_gates>0 and recovery=0 and helper_error=false",
+      "badge": "EXCEPTION_SYMBOL",
+      "tooltip": "Decision required",
+      "primary_console_screen": "JUDGMENT"
+    },
+    {
+      "state": "RECOVERY_REQUIRED",
+      "condition": "recovery>0 and helper_error=false",
+      "badge": "EXCEPTION_SYMBOL",
+      "tooltip": "Recovery required",
+      "primary_console_screen": "RECOVERY"
+    },
+    {
+      "state": "BLOCKED_ONLY",
+      "condition": "ready=0 and blocked>0 and recovery=0 and gates=0",
+      "badge": "EXCEPTION_SYMBOL",
+      "tooltip": "Blocked: open console for smallest next action",
+      "primary_console_screen": "BLOCKED"
+    },
+    {
+      "state": "HELPER_ERROR",
+      "condition": "local helper cannot safely provide bridge service",
+      "badge": "ERROR_SYMBOL",
+      "tooltip": "Operator helper error",
+      "primary_console_screen": "BLOCKED_OR_DIAGNOSTICS"
+    }
+  ],
+  "counters": {
+    "READY_MANUAL_CYCLES": {
+      "includes": [
+        "serviceable worker cycles"
+      ],
+      "excludes": [
+        "sent_unconfirmed",
+        "judgment",
+        "recovery",
+        "blocked",
+        "external_waits",
+        "machine_only_work"
+      ]
+    },
+    "NEW": {
+      "meaning": "ready cycles expected to create a new worker conversation"
+    },
+    "REUSE": {
+      "meaning": "ready cycles expected to use a trusted existing worker"
+    },
+    "ROTATE_RETIRE": {
+      "meaning": "local maintenance pending; not necessarily extra manual cycles"
+    },
+    "SENT_UNCONFIRMED": {
+      "meaning": "local preparation complete; no durable worker acknowledgment yet"
+    },
+    "GATES": {
+      "meaning": "substantive user judgment/authority decisions"
+    },
+    "RECOVERY": {
+      "meaning": "recovery interactions requiring attention"
+    },
+    "BLOCKED": {
+      "meaning": "work cannot safely progress under current state/authority"
+    }
+  },
+  "hidden_by_default": [
+    "action_id",
+    "git_sha",
+    "payload_hash",
+    "raw_json",
+    "tab_id",
+    "window_id",
+    "claim_id",
+    "subsecond_timestamps",
+    "internal_policy_scores"
+  ]
+}
