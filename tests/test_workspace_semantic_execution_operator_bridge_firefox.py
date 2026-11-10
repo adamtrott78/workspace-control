@@ -29,11 +29,17 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
 
     def test_fixed_worker_start_url_is_not_command_supplied(self):
         source = CORE.read_text(encoding="utf-8")
+        background = BACKGROUND.read_text(encoding="utf-8")
         self.assertIn(
             'const WORKER_START_URL = "https://chatgpt.com/";',
             source,
         )
-        self.assertIn("url: WORKER_START_URL", source)
+        self.assertIn(
+            "this.workerStartUrl = options.workerStartUrl || WORKER_START_URL",
+            source,
+        )
+        self.assertIn("url: this.workerStartUrl", source)
+        self.assertNotIn("workerStartUrl", background)
         self.assertNotRegex(
             source,
             re.compile(r"url\s*:\s*payload\.", re.IGNORECASE),

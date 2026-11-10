@@ -2,7 +2,16 @@ namespace WorkspaceControl.OperatorBridge.Ipc;
 
 public static class RuntimeModeDetector
 {
-    public static bool IsNativeHostProxy(string[] args)
+    public static bool IsNativeHostProxy(string[] args) =>
+        IsNativeHostProxy(
+            args,
+            Console.IsInputRedirected,
+            Console.IsOutputRedirected);
+
+    internal static bool IsNativeHostProxy(
+        string[] args,
+        bool inputRedirected,
+        bool outputRedirected)
     {
         if (args.Any(arg =>
                 string.Equals(
@@ -21,8 +30,6 @@ public static class RuntimeModeDetector
             return false;
         }
 
-        return args.Length == 0 &&
-               Console.IsInputRedirected &&
-               Console.IsOutputRedirected;
+        return inputRedirected && outputRedirected;
     }
 }

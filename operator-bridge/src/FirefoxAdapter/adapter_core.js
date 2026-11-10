@@ -85,6 +85,7 @@
       this.browser = browserApi;
       this.emit = options.emit || (() => {});
       this.idFactory = options.idFactory || (() => crypto.randomUUID());
+      this.workerStartUrl = options.workerStartUrl || WORKER_START_URL;
       this.commandCache = new Map();
       this.managedCache = new Map();
       this.lastOriginByTab = new Map();
@@ -196,6 +197,13 @@
       }
 
       const existing = await this.findManagedBinding(payload);
+      if (existing?.ambiguous) {
+        return createResult(resultOperation, "REJECTED", {
+          normalized_error: "BINDING_AMBIGUOUS",
+          worker_slot_id: payload.worker_slot_id,
+          session_generation: payload.session_generation
+        });
+      }
       if (existing) {
         return this.resultFor(
           resultOperation,
@@ -212,7 +220,7 @@
           : 1;
 
       const tab = await this.browser.tabs.create({
-        url: WORKER_START_URL,
+        url: this.workerStartUrl,
         active: false
       });
 
@@ -335,6 +343,15 @@
       }
 
       const match = await this.findManagedBinding(payload);
+      if (match?.ambiguous) {
+        return {
+          result: createResult(operation, "REJECTED", {
+            normalized_error: "BINDING_AMBIGUOUS",
+            worker_slot_id: payload.worker_slot_id,
+            session_generation: payload.session_generation
+          })
+        };
+      }
       if (!match) {
         return {
           result: createResult(operation, "REJECTED", {
@@ -364,10 +381,14 @@
 
     async findManagedBinding(payload) {
       const inventory = await this.collectManagedTabs();
-      return inventory.find(item =>
+      const matches = inventory.filter(item =>
         item.metadata.worker_slot_id === payload.worker_slot_id &&
         item.metadata.session_generation === payload.session_generation
-      ) || null;
+      );
+      if (matches.length > 1) {
+        return { ambiguous: true };
+      }
+      return matches[0] || null;
     }
 
     async inventoryManagedBindings() {

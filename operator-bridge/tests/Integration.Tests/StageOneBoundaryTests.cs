@@ -3,14 +3,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace WorkspaceControl.OperatorBridge.Integration.Tests;
 
 [TestClass]
-public sealed class StageFiveBoundaryTests
+public sealed class StageSixBoundaryTests
 {
     [TestMethod]
-    public void SimulatorFakeWorkerStageIsExplicit()
+    public void IntegratedLocalBridgeE2EStageIsExplicit()
     {
         Assert.IsTrue(
             string.Equals(
-                "IMPL_05_SIMULATOR_FAKE_WORKER",
+                "IMPL_06_INTEGRATED_LOCAL_BRIDGE_E2E",
                 BootstrapState.Stage,
                 StringComparison.Ordinal));
     }

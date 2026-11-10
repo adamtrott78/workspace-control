@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "scope": "impl_06 CORE/AUTHORITY/ACK/INPUT/IDENTITY obligations at frozen L2/L3 layers",
+  "tests": [
+    {"id":"E2E-001","fixture":"SIM-001","layer":"L3","gate":"CORE"},
+    {"id":"E2E-002","fixture":"SIM-002","layer":"L3","gate":"CORE"},
+    {"id":"E2E-003","fixture":"SIM-003","layer":"L3","gate":"CORE"},
+    {"id":"E2E-004","fixture":"SIM-004","layer":"L2","gate":"CORE"},
+    {"id":"E2E-006","fixture":"SIM-006","layer":"L2","gate":"CORE"},
+    {"id":"E2E-007","fixture":"SIM-007","layer":"L2","gate":"AUTHORITY"},
+    {"id":"E2E-013","fixture":"SIM-015","layer":"L2","gate":"INPUT"},
+    {"id":"E2E-014","fixture":"SIM-016","layer":"L2","gate":"INPUT"},
+    {"id":"E2E-022","fixture":"SIM-025","layer":"L3","gate":"IDENTITY"},
+    {"id":"E2E-023","fixture":"SIM-026","layer":"L3","gate":"IDENTITY"},
+    {"id":"E2E-036","fixture":"SIM-027","layer":"L3","gate":"IDENTITY"}
+  ]
+}

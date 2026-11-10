@@ -27,7 +27,7 @@ jobs:
   validation:
     name: validation
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
 
     steps:
       - name: Checkout tested tree
@@ -64,17 +64,44 @@ jobs:
         shell: pwsh
         run: dotnet test operator-bridge/WorkspaceOperatorBridge.Simulator.slnx --configuration Release --no-build
 
-      - name: Restore
+      - name: Restore production solution
         shell: pwsh
         run: dotnet restore operator-bridge/WorkspaceOperatorBridge.slnx
 
-      - name: Build
+      - name: Build production solution
         shell: pwsh
         run: dotnet build operator-bridge/WorkspaceOperatorBridge.slnx --configuration Release --no-restore
 
-      - name: Test
+      - name: Test production solution
         shell: pwsh
         run: dotnet test operator-bridge/WorkspaceOperatorBridge.slnx --configuration Release --no-build
+
+      - name: Restore Stage 06 integration solution
+        shell: pwsh
+        run: dotnet restore operator-bridge/WorkspaceOperatorBridge.Integration.slnx
+
+      - name: Build Stage 06 integration solution
+        shell: pwsh
+        run: dotnet build operator-bridge/WorkspaceOperatorBridge.Integration.slnx --configuration Release --no-restore
+
+      - name: Test Stage 06 Layer 2 real-helper mechanics
+        shell: pwsh
+        run: dotnet test operator-bridge/tests/LocalBridgeE2E.Tests/LocalBridgeE2E.Tests.csproj --configuration Release --no-build
+
+      - name: Run Stage 06 Layer 3 Firefox and fake-worker integration
+        shell: pwsh
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/tools/run-stage06-firefox.ps1 -RepositoryRoot "${{ github.workspace }}" -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage06-firefox-result.json"
+
+      - name: Upload Stage 06 content-free integration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage06-${{ github.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage06-firefox-result.json
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Measure helper idle resource sample
         shell: pwsh

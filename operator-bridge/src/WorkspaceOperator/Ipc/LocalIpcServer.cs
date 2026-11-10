@@ -9,10 +9,14 @@ namespace WorkspaceControl.OperatorBridge.Ipc;
 public sealed class LocalIpcServer
 {
     private readonly string _pipeName;
-    private readonly LocalIpcSessionProcessor _processor;
+    private readonly LocalIpcSessionProcessor? _processor;
+    private readonly BrowserCommandHub? _commandHub;
     private readonly IDiagnosticsSink _diagnostics;
 
-    public LocalIpcServer(string pipeName, BridgeState bridgeState, IDiagnosticsSink diagnostics)
+    public LocalIpcServer(
+        string pipeName,
+        BridgeState bridgeState,
+        IDiagnosticsSink diagnostics)
     {
         _pipeName = pipeName;
         _diagnostics = diagnostics;
@@ -20,6 +24,16 @@ public sealed class LocalIpcServer
             bridgeState,
             Guid.NewGuid().ToString("N"),
             diagnostics);
+    }
+
+    public LocalIpcServer(
+        string pipeName,
+        BrowserCommandHub commandHub,
+        IDiagnosticsSink diagnostics)
+    {
+        _pipeName = pipeName;
+        _diagnostics = diagnostics;
+        _commandHub = commandHub;
     }
 
     public async Task RunAsync(CancellationToken cancellationToken)
@@ -31,22 +45,44 @@ public sealed class LocalIpcServer
             {
                 await server.WaitForConnectionAsync(cancellationToken);
                 _diagnostics.Write(new DiagnosticEvent(
-                    DateTimeOffset.UtcNow, "local_ipc", "proxy_connected", "APPLIED"));
-                await _processor.ProcessAsync(server, cancellationToken);
+                    DateTimeOffset.UtcNow,
+                    "local_ipc",
+                    "proxy_connected",
+                    "APPLIED"));
+
+                if (_commandHub is not null)
+                {
+                    await _commandHub.RunConnectionAsync(
+                        server,
+                        cancellationToken);
+                }
+                else
+                {
+                    await _processor!.ProcessAsync(
+                        server,
+                        cancellationToken);
+                }
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            catch (OperationCanceledException)
+                when (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
             catch (IOException)
             {
                 _diagnostics.Write(new DiagnosticEvent(
-                    DateTimeOffset.UtcNow, "local_ipc", "proxy_disconnected", "NOT_APPLIED",
+                    DateTimeOffset.UtcNow,
+                    "local_ipc",
+                    "proxy_disconnected",
+                    "NOT_APPLIED",
                     NormalizedError: "IOException"));
             }
             finally
             {
-                if (server.IsConnected) server.Disconnect();
+                if (server.IsConnected)
+                {
+                    server.Disconnect();
+                }
             }
         }
     }

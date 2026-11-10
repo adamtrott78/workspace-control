@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workspace Operator Adapter Parity Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "fixture",
+    "authoritative_terminal_state_in_memory",
+    "authoritative_terminal_state_firefox",
+    "local_binding_ids_in_authoritative_state"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "fixture": {"type": "string"},
+    "authoritative_terminal_state_in_memory": {"type": "string"},
+    "authoritative_terminal_state_firefox": {"type": "string"},
+    "local_binding_ids_in_authoritative_state": {"const": false}
+  }
+}

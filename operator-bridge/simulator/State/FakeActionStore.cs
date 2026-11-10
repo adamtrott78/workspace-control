@@ -61,6 +61,23 @@ public sealed class FakeActionStore
         return true;
     }
 
+    public bool MarkLocalCompleted(SimAction action)
+    {
+        if (action.Status != SimActionStatus.ClaimedLocal)
+        {
+            return false;
+        }
+
+        action.Status = SimActionStatus.Completed;
+        _trace.Record(
+            "action_store",
+            "COMPLETED_LOCAL",
+            action.ActionId,
+            action.WorkerSlotId,
+            action.SessionGeneration);
+        return true;
+    }
+
     public void MarkFailedLocal(SimAction action, string reason)
     {
         action.Status = SimActionStatus.FailedLocal;

@@ -19,6 +19,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly System.Windows.Forms.Timer? _idleProbeTimer;
     private readonly CancellationTokenSource _ipcCancellation = new();
     private readonly Task _ipcTask;
+    private readonly BrowserCommandHub _browserCommandHub;
     private int _hotkeyDispatching;
 
     public TrayApplicationContext(int? idleProbeMilliseconds = null)
@@ -33,10 +34,14 @@ public sealed class TrayApplicationContext : ApplicationContext
             hotkey,
             _diagnostics);
 
+        _browserCommandHub = new BrowserCommandHub(
+            bridgeState,
+            _diagnostics);
+
         _dispatch = new SingleFlightDispatchCoordinator(
             bridgeState,
             new NoWorkOperatorActionPort(),
-            new NoopBrowserPort(),
+            new IpcBrowserPort(_browserCommandHub),
             new WinFormsClipboardWriter(),
             new SystemMonotonicClock(),
             _diagnostics);
@@ -44,7 +49,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         var pipeName = ElevationScope.PipeName(ElevationScope.Current());
         _ipcTask = new LocalIpcServer(
             pipeName,
-            bridgeState,
+            _browserCommandHub,
             _diagnostics).RunAsync(_ipcCancellation.Token);
 
         _toggleItem = new ToolStripMenuItem("Bridge: OFF");

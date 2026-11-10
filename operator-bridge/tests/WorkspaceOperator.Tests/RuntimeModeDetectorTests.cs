@@ -21,4 +21,28 @@ public sealed class RuntimeModeDetectorTests
             RuntimeModeDetector.IsNativeHostProxy(
                 new[] { "--idle-probe-ms=7000" }));
     }
+
+    [TestMethod]
+    public void FirefoxOriginArgumentsStillSelectProxyWithRedirectedStdio()
+    {
+        Assert.IsTrue(
+            RuntimeModeDetector.IsNativeHostProxy(
+                new[]
+                {
+                    "moz-extension://workspace-control-operator/",
+                    "--parent-window=123"
+                },
+                inputRedirected: true,
+                outputRedirected: true));
+    }
+
+    [TestMethod]
+    public void BrowserArgumentsWithoutNativeStdioFailClosed()
+    {
+        Assert.IsFalse(
+            RuntimeModeDetector.IsNativeHostProxy(
+                new[] { "moz-extension://workspace-control-operator/" },
+                inputRedirected: false,
+                outputRedirected: false));
+    }
 }

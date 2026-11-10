@@ -18,4 +18,9 @@ public interface IOperatorActionPort
         ActionIdentity identity,
         string normalizedError,
         CancellationToken cancellationToken);
+
+    Task RecordLocalCompletedAsync(
+        ActionIdentity identity,
+        CancellationToken cancellationToken) =>
+        Task.CompletedTask;
 }

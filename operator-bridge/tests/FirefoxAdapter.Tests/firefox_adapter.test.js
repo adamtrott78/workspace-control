@@ -350,3 +350,68 @@ test("close operation can only close a managed matching binding", async () => {
   assert.equal(browser.tabsById.has(10), true);
   assert.equal(browser.tabsById.has(11), false);
 });
+
+
+test("ensure existing binding does not activate before explicit focus", async () => {
+  const browser = new MockBrowser([
+    { id: 12, url: "https://chatgpt.com/", active: false }
+  ]);
+  browser.seedManaged(12, managedMetadata("binding-ensure"));
+  const adapter = new FirefoxAdapterCore(browser);
+
+  const result = await adapter.handleCommand(command(
+    "req-10",
+    "ENSURE_WORKER_SURFACE",
+    { worker_slot_id: "slot-1", session_generation: 7 }
+  ));
+
+  assert.equal(result.outcome, "APPLIED");
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.update").length,
+    0);
+});
+
+test("ambiguous managed bindings fail closed", async () => {
+  const browser = new MockBrowser([
+    { id: 13, url: "https://chatgpt.com/", active: false },
+    { id: 14, url: "https://chatgpt.com/", active: false }
+  ]);
+  browser.seedManaged(13, managedMetadata("binding-a"));
+  browser.seedManaged(14, managedMetadata("binding-b"));
+  const adapter = new FirefoxAdapterCore(browser);
+
+  const result = await adapter.handleCommand(command(
+    "req-11",
+    "ENSURE_WORKER_SURFACE",
+    { worker_slot_id: "slot-1", session_generation: 7 }
+  ));
+
+  assert.equal(result.outcome, "REJECTED");
+  assert.equal(result.normalized_error, "BINDING_AMBIGUOUS");
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.update").length,
+    0);
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.create").length,
+    0);
+});
+
+test("simulator-only constructor override can target local fake worker", async () => {
+  const browser = new MockBrowser();
+  const adapter = new FirefoxAdapterCore(browser, {
+    idFactory: () => "binding-sim",
+    workerStartUrl: "moz-extension://simulator/fake-worker.html"
+  });
+
+  const result = await adapter.handleCommand(command(
+    "req-12",
+    "CREATE_WORKER_BINDING",
+    { worker_slot_id: "slot-sim", session_generation: 1 }
+  ));
+
+  assert.equal(result.outcome, "APPLIED");
+  const createCall = browser.calls.find(call => call[0] === "tabs.create");
+  assert.equal(
+    createCall[1].url,
+    "moz-extension://simulator/fake-worker.html");
+});

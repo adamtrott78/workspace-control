@@ -5,11 +5,23 @@ public sealed record ActionIdentity(
     string WorkerSlotId,
     long SessionGeneration);
 
+public enum OperatorActionType
+{
+    ServiceExisting,
+    CreateAndService,
+    RestoreAndService,
+    DiscardSession,
+    RetireSession,
+    OpenJudgmentGate,
+    OpenRecovery
+}
+
 public sealed record OperatorAction(
     ActionIdentity Identity,
     string PacketText,
     string PayloadRef,
-    string PayloadSha256);
+    string PayloadSha256,
+    OperatorActionType ActionType = OperatorActionType.ServiceExisting);
 
 public sealed record BrowserTarget(
     string WorkerSlotId,
@@ -38,10 +50,14 @@ public enum DispatchOutcome
     Busy,
     NoAction,
     BrowserPrepareFailed,
+    BrowserMaintenanceFailed,
     Stale,
     ClipboardFailed,
     BrowserFocusFailed,
     LocalPrepared,
+    LocalCompleted,
+    JudgmentGateOpened,
+    RecoveryOpened,
     Failed
 }
 

@@ -52,6 +52,34 @@ public static class ProtocolMessageFactory
                 related_message_id = relatedMessageId
             });
 
+    public static ProtocolEnvelope BrowserCommand(
+        string helperInstanceId,
+        string requestId,
+        string correlationId,
+        string operation,
+        string idempotencyKey,
+        BrowserTarget target,
+        long? expectedBindingGeneration) =>
+        new()
+        {
+            ProtocolVersion = BrowserAdapterProtocol.Version,
+            MessageType = "BROWSER_COMMAND",
+            MessageId = Guid.NewGuid().ToString("N"),
+            RequestId = requestId,
+            CorrelationId = correlationId,
+            SentAtMonotonicMs =
+                Stopwatch.GetTimestamp() * 1000.0 / Stopwatch.Frequency,
+            HelperInstanceId = helperInstanceId,
+            Payload = ProtocolJson.Payload(new
+            {
+                operation,
+                idempotency_key = idempotencyKey,
+                worker_slot_id = target.WorkerSlotId,
+                session_generation = target.SessionGeneration,
+                expected_binding_generation = expectedBindingGeneration
+            })
+        };
+
     private static ProtocolEnvelope Create(
         string messageType,
         string? correlationId,
