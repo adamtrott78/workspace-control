@@ -11,7 +11,9 @@ param(
 
   [switch]$SkipLatency,
 
-  [switch]$SkipColdStart
+  [switch]$SkipColdStart,
+
+  [switch]$PreflightOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -64,26 +66,37 @@ try {
     "-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", $fakeWorkerRoot
   ) -RedirectStandardOutput $fakeWorkerOut -RedirectStandardError $fakeWorkerErr -PassThru
 
-  $runnerArgs = @(
-    $runnerDll,
-    "--result=$steadyResultPath",
-    "--helper=$helperExe",
-    "--ready-file=$readyFile",
-    "--mode=target",
-    "--warmup-ms=60000",
-    "--sample-ms=120000",
-    "--sample-interval-ms=1000",
-    "--latency-scale=1",
-    "--timeout-seconds=120"
-  )
-  if ($SkipLatency) {
+  $runnerArgs = if ($PreflightOnly) {
+    @(
+      $runnerDll,
+      "--result=$steadyResultPath",
+      "--helper=$helperExe",
+      "--ready-file=$readyFile",
+      "--mode=adapter-preflight",
+      "--timeout-seconds=30"
+    )
+  } else {
+    @(
+      $runnerDll,
+      "--result=$steadyResultPath",
+      "--helper=$helperExe",
+      "--ready-file=$readyFile",
+      "--mode=target",
+      "--warmup-ms=60000",
+      "--sample-ms=120000",
+      "--sample-interval-ms=1000",
+      "--latency-scale=1",
+      "--timeout-seconds=120"
+    )
+  }
+  if ($SkipLatency -and -not $PreflightOnly) {
     $runnerArgs += "--skip-latency"
   }
   $runner = Start-Process -FilePath "dotnet" -ArgumentList $runnerArgs -RedirectStandardOutput $runnerOut -RedirectStandardError $runnerErr -PassThru
 
-  # The harness performs the full helper-idle 60s/120s window before exposing
-  # the browser-server ready marker.
-  $readyDeadline = (Get-Date).AddMinutes(4)
+  # Full target mode performs helper-idle measurement before readiness;
+  # adapter-preflight publishes readiness immediately and sends no browser command.
+  $readyDeadline = (Get-Date).AddMinutes($(if ($PreflightOnly) { 1 } else { 4 }))
   while (-not (Test-Path $readyFile) -and (Get-Date) -lt $readyDeadline) {
     if ($runner.HasExited) { break }
     Start-Sleep -Milliseconds 250
@@ -97,19 +110,30 @@ try {
     "-P", $FirefoxProfile, "-no-remote"
   ) -PassThru
 
-  if (-not $runner.WaitForExit(1800000)) {
+  $runnerTimeoutMs = $(if ($PreflightOnly) { 60000 } else { 1800000 })
+  if (-not $runner.WaitForExit($runnerTimeoutMs)) {
     Stop-Process -Id $runner.Id -Force -ErrorAction SilentlyContinue
-    throw "Target Firefox collector exceeded the bounded 30-minute execution window."
+    throw $(if ($PreflightOnly) { "Target Firefox adapter preflight timed out." } else { "Target Firefox collector exceeded the bounded 30-minute execution window." })
   }
 
   if ($runner.ExitCode -ne 0) {
     if (Test-Path $runnerOut) { Get-Content $runnerOut }
     if (Test-Path $runnerErr) { Get-Content $runnerErr }
     if (Test-Path $steadyResultPath) { Get-Content $steadyResultPath }
-    throw "Target Firefox steady-state collector failed."
+    throw $(if ($PreflightOnly) { "Target Firefox adapter identity preflight failed." } else { "Target Firefox steady-state collector failed." })
   }
 
   $steadyResult = Get-Content $steadyResultPath -Raw | ConvertFrom-Json
+  if ($PreflightOnly) {
+    if ($steadyResult.evidence_class -ne "TARGET_ADAPTER_PREFLIGHT" -or
+        $steadyResult.status -ne "PASS" -or
+        $steadyResult.adapter_version -ne "0.1.9-perf") {
+      throw "Target Firefox adapter preflight emitted invalid evidence."
+    }
+    $steadyResult | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ResultPath -Encoding UTF8
+    Write-Host "STAGE09_TARGET_ADAPTER_PREFLIGHT=PASS"
+    return
+  }
   if ($steadyResult.evidence_class -ne "TARGET_MODE_PARTIAL") {
     throw "Target Firefox steady-state collector emitted an unexpected evidence class."
   }
