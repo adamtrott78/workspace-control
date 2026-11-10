@@ -94,8 +94,31 @@ else
   echo "  status=clean"
 fi
 
+EVIDENCE_MOUNT_PREEXISTING=0
+verify_existing_evidence_mount() {
+  sudo mountpoint -q "$EVIDENCE_MOUNT" || fail "$EVIDENCE_MOUNT is not a mountpoint"
+  local source_identity mount_identity options
+  source_identity="$(stat -Lc '%d:%i' "$PAD_EVIDENCE_ROOT")"
+  mount_identity="$(sudo stat -Lc '%d:%i' "$EVIDENCE_MOUNT")"
+  [[ "$mount_identity" == "$source_identity" ]]     || fail "$EVIDENCE_MOUNT is mounted from an unexpected source"
+  options="$(sudo findmnt -n -o OPTIONS --target "$EVIDENCE_MOUNT")"
+  case ",$options," in
+    *,ro,*) ;;
+    *) fail "$EVIDENCE_MOUNT existing bind is not read-only: $options" ;;
+  esac
+  for required in nosuid nodev noexec; do
+    case ",$options," in
+      *,"$required",*) ;;
+      *) fail "$EVIDENCE_MOUNT existing bind is missing $required: $options" ;;
+    esac
+  done
+  printf '%s\n' "$options"
+}
+
 if sudo mountpoint -q "$EVIDENCE_MOUNT"; then
-  fail "$EVIDENCE_MOUNT is already a mountpoint; refusing to replace an unknown evidence mount"
+  MOUNT_OPTIONS="$(verify_existing_evidence_mount)"
+  EVIDENCE_MOUNT_PREEXISTING=1
+  echo "PADataset evidence mount already present and verified safe; reusing it."
 fi
 
 WC_FETCH="$(mktemp -d /tmp/workspace-control-exec.XXXXXX)"
@@ -227,17 +250,15 @@ sudo mv "$AUTH_NEXT" "$AUTHORITY_ROOT"
 sudo mv "$WC_NEXT" /srv/workspace-shell/workspace-control
 sudo mv "$PAD_NEXT" /srv/workspace-shell/PADataset
 
-sudo mkdir -p "$EVIDENCE_MOUNT"
-sudo chown root:root "$EVIDENCE_MOUNT"
-sudo chmod 0755 "$EVIDENCE_MOUNT"
-sudo mount --bind "$PAD_EVIDENCE_ROOT" "$EVIDENCE_MOUNT"
-EVIDENCE_MOUNT_CREATED=1
-sudo mount -o remount,bind,ro,nosuid,nodev,noexec "$EVIDENCE_MOUNT"
-MOUNT_OPTIONS="$(sudo findmnt -n -o OPTIONS --target "$EVIDENCE_MOUNT")"
-case ",$MOUNT_OPTIONS," in
-  *,ro,*) ;;
-  *) fail "PADataset evidence bind is not read-only: $MOUNT_OPTIONS" ;;
-esac
+if [[ "$EVIDENCE_MOUNT_PREEXISTING" == "0" ]]; then
+  sudo mkdir -p "$EVIDENCE_MOUNT"
+  sudo chown root:root "$EVIDENCE_MOUNT"
+  sudo chmod 0755 "$EVIDENCE_MOUNT"
+  sudo mount --bind "$PAD_EVIDENCE_ROOT" "$EVIDENCE_MOUNT"
+  EVIDENCE_MOUNT_CREATED=1
+  sudo mount -o remount,bind,ro,nosuid,nodev,noexec "$EVIDENCE_MOUNT"
+fi
+MOUNT_OPTIONS="$(verify_existing_evidence_mount)"
 
 RUNTIME_PLUGIN="/opt/workspace-shell/runtime/plugins/workspace-shell"
 BACKUP_RUNTIME_PLUGIN="$BACKUP/opt__workspace-shell__runtime__plugins__workspace-shell"
