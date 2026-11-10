@@ -291,6 +291,9 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("must not retain the production ChatGPT worker URL", builder)
         self.assertIn("Refusing to mutate an existing Firefox profile not owned by Stage 09", prep)
         self.assertIn("Signed Stage 09 XPI retains the production ChatGPT worker URL", prep)
+        self.assertIn("$InteractiveInstall", prep)
+        self.assertIn("STAGE09_TARGET_PROFILE_INSTALL_UI_OPENED=PASS", prep)
+        self.assertNotIn("Copy-Item -LiteralPath $xpi -Destination", prep)
         self.assertIn("PerformanceSignedXpiPath", matrix)
         self.assertIn("prepare-stage09-target-profile.ps1", matrix)
         self.assertIn("TARGET_ADAPTER_PREFLIGHT", matrix)
@@ -302,7 +305,9 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         workflow = WORKFLOW.read_text(encoding="utf-8")
 
-        try_index = matrix.index("try {\n  New-Item -ItemType Directory -Path $nativeRegPath")
+        try_index = matrix.index(
+            'try {\n  New-Item -Path "HKCU:\\Software\\Mozilla\\NativeMessagingHosts"'
+        )
         native_set_index = matrix.index(
             "Set-Item -LiteralPath $nativeRegPath -Value $targetNativeManifest"
         )
