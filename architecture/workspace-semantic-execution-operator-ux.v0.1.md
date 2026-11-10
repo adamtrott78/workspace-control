@@ -372,3 +372,55 @@ A workflow qualifies for the low-attention bridge when:
 The desired operator experience is:
 
 > I see that several workers need service. I repeatedly press one hotkey, then Ctrl+V and Enter. Workspace Control decides whether that hotkey focuses an existing worker, creates a new worker, rotates a worker, or retires an obsolete tab. I do not read tab titles, edit prompts, relay state, or manage the queue. When the count reaches zero, I return to what I was doing.
+
+
+## 16. Dedicated Firefox worker profile
+
+Chrome remains the user's normal/default browser.
+
+Firefox is a dedicated Workspace worker appliance with a separate profile, for example `WorkspaceWorkers`.
+
+Reasons:
+- isolates worker extensions, tabs and settings from normal browsing;
+- allows aggressive worker-specific tab discard/session policies;
+- avoids polluting the normal browser with many ChatGPT worker sessions;
+- makes worker-window discovery deterministic;
+- permits a stripped-down profile with minimal extensions and startup content;
+- makes it easy to benchmark RAM impact independently.
+
+Do not assume Firefox is always lower-RAM than Chrome. Measure the actual worker workload (2-4 ChatGPT tabs, discarded idle tabs, extension enabled) and retain Firefox only if it satisfies the memory/latency target.
+
+Mozilla supports explicit profile creation/selection through the Firefox Profile Manager (`firefox.exe -P` on Windows).
+
+## 17. Default global hotkey: Ctrl+B
+
+Preferred initial binding: `Ctrl+B`.
+
+Ergonomic rationale:
+- left Ctrl can remain held with the left pinky;
+- B is immediately adjacent to V;
+- the user's next manual action is Ctrl+V, so the physical transition is minimal;
+- one repeated three-step rhythm becomes:
+  - Ctrl+B
+  - Ctrl+V
+  - Enter
+
+Important collision:
+- Firefox itself currently binds Ctrl+B to the Bookmarks sidebar.
+- many desktop applications also assign Ctrl+B to an app-specific action.
+
+Because the native helper owns the system-global hotkey, enabling this binding intentionally reserves Ctrl+B for Workspace service while the helper is active. Applications underneath will not receive their normal Ctrl+B action.
+
+Requirements:
+- hotkey MUST be configurable;
+- tray menu MUST include Enable/Disable Workspace Hotkey;
+- disabling the helper immediately restores normal application Ctrl+B behavior;
+- helper startup state should be user-configurable;
+- never synthesize Ctrl+B into Firefox/ChatGPT; consume it locally and perform the typed scheduler action directly.
+
+Suggested v0 default:
+- global hotkey: Ctrl+B
+- service rhythm: Ctrl+B -> Ctrl+V -> Enter
+- tray toggle: Workspace Hotkey ON/OFF
+
+Before finalizing, test the binding for one normal workday to detect collisions with VS Code, terminals, editors, browser shortcuts, or accessibility software. If collisions are annoying, preserve the one-hotkey abstraction and swap only the physical binding.
