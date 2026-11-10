@@ -136,29 +136,34 @@ internal static class Program
                 world.Sessions.Get("slot-create")!.Continuity ==
                     SimContinuity.Trusted;
 
-            var focusAway = await ipc.FocusTargetAsync(
-                new BrowserTarget("lookalike-slot", 0),
+            world.Sessions.Add(
+                "slot-restore",
+                0,
+                SimContinuity.Trusted,
+                bindingPresent: true);
+            var restoreSeed = await ipc.CreateTargetAsync(
+                new BrowserTarget("slot-restore", 0),
                 CancellationToken.None);
             var discard = await ipc.DiscardTargetAsync(
-                new BrowserTarget("slot-existing", 0),
+                new BrowserTarget("slot-restore", 0),
                 CancellationToken.None);
             var restore = world.Queue(
                 "l3-restore",
                 "RESTORE_AND_SERVICE",
-                "slot-existing",
+                "slot-restore",
                 0);
             var restoreBefore = browser.RestoreCount;
             var generationBefore =
-                world.Sessions.Get("slot-existing")!.Generation;
+                world.Sessions.Get("slot-restore")!.Generation;
             var restoreDispatch = await coordinator.DispatchAsync();
             var restoreSubmit = world.HumanSubmit(restore);
             predicates["SIM-003_restore_discarded"] =
-                focusAway.IsApplied &&
+                restoreSeed.IsApplied &&
                 discard.IsApplied &&
                 restoreDispatch.Outcome == DispatchOutcome.LocalPrepared &&
                 restoreSubmit &&
                 browser.RestoreCount - restoreBefore == 1 &&
-                world.Sessions.Get("slot-existing")!.Generation ==
+                world.Sessions.Get("slot-restore")!.Generation ==
                     generationBefore;
 
             var incompatibleWorld = new SimulatorWorld();
