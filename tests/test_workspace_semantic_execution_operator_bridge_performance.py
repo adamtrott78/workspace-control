@@ -121,6 +121,10 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
     def test_ci_workflow_runs_and_uploads_stage09_evidence(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("Run Stage 09 account-free CI performance smoke", workflow)
+        self.assertIn("Parse Stage 09 PowerShell target tooling", workflow)
+        self.assertIn("prepare-stage09-target-profile.ps1", workflow)
+        self.assertIn("run-stage09-target-firefox.ps1", workflow)
+        self.assertIn("run-stage09-target-matrix.ps1", workflow)
         self.assertIn("stage09-ci-performance.json", workflow)
         self.assertIn("non-target content-free performance evidence", workflow)
 
