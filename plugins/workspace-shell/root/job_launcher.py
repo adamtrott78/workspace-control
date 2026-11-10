@@ -617,7 +617,8 @@ def run_request(cfg, manifest, request, cancel_check=None):
     )
     if observed_sha != expected_sha:
         fail("SOURCE_SHA_MISMATCH", "observed source HEAD differs from expected_sha")
-    if dirty and profile != "git-read":
+    read_only_profiles = {"git-read", "file-list", "file-read", "file-hash"}
+    if dirty and profile not in read_only_profiles:
         fail("SOURCE_DIRTY", "executable profiles require a clean source checkout")
 
     receipt_id = f"job-{uuid.uuid4()}"
