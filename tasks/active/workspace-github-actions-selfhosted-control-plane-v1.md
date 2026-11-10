@@ -36,36 +36,16 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Hold all scientific GPU execution. Capture one bounded read-only research-engine/gpu controller journal snapshot to classify the exact crash-loop error while implementing controller-reliability-hardening-v1 on branch controller-reliability-hardening-v1. No live restart/reset/reconcile/controller installation is authorized until the implementation batch passes full validation and the activation boundary is reviewed.
+After fresh corrected-head review acceptance, execute one bounded Lambda transaction. Require exact controller/unit/maintenance/provisioner/runtime/root-policy identities already frozen. Require workspace-control CPU inactive/dead and research-engine CPU/GPU inactive/dead. Require provisioner and maintenance active/running and no active transient project execution. For each PADataset CPU/GPU controller, accept only either (a) active/running, ExecMainStatus=0, MainPID>0, or (b) inactive/dead, ExecMainStatus=0, MainPID=0; reject failed, activating, deactivating, or any nonzero ExecMainStatus. Persist the exact pre-start PADataset CPU/GPU systemctl-show snapshots. If and only if all predicates pass, start only workspace-ci-controller@workspace-control-cpu.service. After start, require workspace-control CPU active/running and require both PADataset snapshots to match their pre-start values exactly. Do not mutate PADataset, research-engine, scale sets, reconciliation, admission, capacity, or workflow trigger state.
 
 ## Remaining work
 
-- Complete controller reliability hardening v1 before resuming the local-reasoner GPU bakeoff.
-- Classify the exact current research-engine/gpu crash-loop error from a bounded read-only journal snapshot and freeze it as regression evidence.
-- Implement and validate admission ordering, recovery-state lifecycle, state-file ownership, stable restart certification, and restart-storm containment.
-- Run full workspace-control validation on the complete hardening batch.
-- Perform the owning workflow's final authority-sensitive activation review only once the implementation batch is stable; do not reintroduce iterative independent-review loops during ordinary implementation.
-- Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
-- After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
-- Then remove routine hosted-runner dependence only after private-repository steady-state CI is proven under reviewed boundaries.
-- Leave GitHub organization migration, capacity widening, maintenance-command widening, and workspace-shell-mcp-v1 paused until their own gates.
+- Run the reviewed root preflight with PADataset stable-state snapshot capture.
+- If every predicate passes, start only workspace-ci-controller@workspace-control-cpu.service.
+- Verify workspace-control CPU active/running and PADataset CPU/GPU full snapshots unchanged.
+- Observe run #389 for runner acquisition/completion and record recovery receipt.
 
 ## Blockers / gates
 
-- No live controller/runtime mutation is authorized by review_automation closure or dogfood.
-- The next stage must remain separately reviewed before any automatic reconcile-controller startup, P2 admission widening, hosted-runner dependency removal, maintenance widening, capacity widening, or organization migration.
-- The merged review automation must prove end-to-end request creation and disposition consumption on this state-only closure PR before routine reliance.
-
-## Fresh-chat initialization
-
-@GitHub
-
-https://github.com/adamtrott78/workspace-control
-
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+- Only the reviewed root-only operator transaction remains. Connected Workspace Shell cannot inspect sibling PADataset/research-engine/provisioner units or /opt authority-bearing files because they are outside its root-owned allowlist/sandbox.
+- Any live identity/state mismatch aborts before start. No reset/reconcile/recreate/retrigger/PADataset/research-engine mutation is authorized.
