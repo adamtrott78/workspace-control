@@ -99,17 +99,14 @@ try {
 
   Start-Sleep -Seconds 2
 
-  $webExtArgs = @(
-    "run",
-    "--source-dir=$extensionStage",
-    "--firefox=\`"$firefox\`"",
-    "--no-reload",
-    "--no-input",
-    "--arg=-headless",
-    "--arg=-no-remote"
-  )
-  Write-Host ("STAGE06_WEB_EXT_ARGS=" + ($webExtArgs -join " "))
-  $webExtProcess = Start-Process -FilePath $webExt -ArgumentList $webExtArgs -RedirectStandardOutput $webExtOut -RedirectStandardError $webExtErr -PassThru
+  $webExtLauncher = Join-Path $work "run-web-ext.cmd"
+  @"
+@echo off
+call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-reload --no-input --arg=-headless --arg=-no-remote
+"@ | Set-Content -Path $webExtLauncher -Encoding ASCII
+
+  Write-Host "STAGE06_WEB_EXT_LAUNCHER=$webExtLauncher"
+  $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d", "/c", $webExtLauncher) -RedirectStandardOutput $webExtOut -RedirectStandardError $webExtErr -PassThru
 
   if (-not $runner.WaitForExit(90000)) {
     Stop-Process -Id $runner.Id -Force -ErrorAction SilentlyContinue
