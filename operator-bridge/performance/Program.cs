@@ -372,6 +372,7 @@ internal static class Program
             await File.WriteAllTextAsync(readyFile, "SERVER_READY");
         }
 
+        var exitCode = 1;
         try
         {
             var connected = await hub.WaitForConnectionAsync(
@@ -397,7 +398,7 @@ internal static class Program
                     evidence,
                     new JsonSerializerOptions { WriteIndented = true }));
             Console.WriteLine("STAGE09_TARGET_ADAPTER_PREFLIGHT=PASS");
-            return 0;
+            exitCode = 0;
         }
         catch (Exception exception)
         {
@@ -438,7 +439,7 @@ internal static class Program
                 JsonSerializer.Serialize(
                     failure,
                     new JsonSerializerOptions { WriteIndented = true }));
-            return 1;
+            exitCode = 1;
         }
         finally
         {
@@ -450,7 +451,33 @@ internal static class Program
             catch (OperationCanceledException)
             {
             }
+            catch (Exception exception)
+            {
+                var captured = diagnostics is CaptureDiagnostics capture
+                    ? capture.Snapshot
+                    : Array.Empty<DiagnosticEvent>();
+                var failure = new
+                {
+                    schema_version = 1,
+                    evidence_class = "TARGET_ADAPTER_PREFLIGHT",
+                    target_contract_complete = false,
+                    adapter_kind = PerformanceAdapterKind,
+                    adapter_version = PerformanceAdapterVersion,
+                    status = "FAIL",
+                    error_type = exception.GetType().Name,
+                    normalized_failure = "IPC_SERVER_TEARDOWN_FAILED",
+                    diagnostics = captured
+                };
+                await File.WriteAllTextAsync(
+                    resultPath,
+                    JsonSerializer.Serialize(
+                        failure,
+                        new JsonSerializerOptions { WriteIndented = true }));
+                exitCode = 1;
+            }
         }
+
+        return exitCode;
     }
 
     private static async Task<int> RunColdStartTargetAsync(
