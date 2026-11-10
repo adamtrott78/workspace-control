@@ -105,6 +105,7 @@ Enumerate every operator-visible scenario, including:
 - worker durable result arrives;
 - worker never acknowledges;
 - ChatGPT session logged out;
+- creating a new ChatGPT tab triggers reauthentication and successful login refreshes/invalidates multiple or all worker tabs;
 - model/configuration mismatch;
 - multiple ready workers;
 - judgment gate;
@@ -635,4 +636,11 @@ They contain the initial product hypothesis:
 - no ChatGPT page-content automation;
 - durable acknowledgment from Workspace Control state.
 
-The next execution slice is **UX-00 Requirements baseline and UX success metrics**.
+UX-00 is complete at the design-baseline level with:
+
+- `architecture/workspace-semantic-execution-operator-ux-requirements.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-ux-metrics.v0.1.json`
+
+The forced-login/all-tabs-refresh condition is recorded as mandatory recoverability requirement `SESSION_AUTH_REFRESH_ALL_TABS`, with detailed recovery owned by UX-07 and session-policy implications owned by UX-04.
+
+The next execution slice is **UX-01 Operator journey and task-flow inventory**.
