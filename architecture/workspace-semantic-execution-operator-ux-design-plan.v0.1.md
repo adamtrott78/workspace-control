@@ -757,4 +757,19 @@ The fixture catalog contains 38 scenarios covering normal reuse/create/restore, 
 
 UX-09 performance instrumentation is built into the simulator contract for mechanical regression measurements; fake-worker memory is explicitly not a substitute for real ChatGPT page memory.
 
-The next execution slice is **UX-11 Usability test design**.
+UX-11 is complete at the usability-test design level with:
+
+- `benchmarks/workspace-semantic-execution/operator_ux_usability_v1.json`
+- `architecture/workspace-semantic-execution-operator-usability-test-script.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-usability-feedback-checklist.v0.1.md`
+- updated `architecture/workspace-semantic-execution-operator-ux-metrics.v0.1.json`
+
+The primary usability gate is the 20-action mixed human-in-loop trial: zero wrong-worker dispatches, zero wrong-packet dispatches, zero manual tab searches, zero manual worker-selection decisions, zero manual durable-state relay, zero routine scheduler-state interpretation events, and zero abandoned cycles. Wrong-worker/wrong-packet, stale-generation advancement, automatic resend, background focus steal, or background clipboard mutation are hard failures rather than metrics that may average out.
+
+The trial suite also covers a five-action clean batch, 20-cycle motor-rhythm drill, interruptions between cycles, multiple SENT/UNCONFIRMED workers, judgment gates, tab-loss/auth-refresh/helper/browser recovery, no-work/background acknowledgments, bridge-OFF behavior, and a 60-minute representative normal-work hotkey collision trial.
+
+Ctrl+B is now explicitly provisional as a **physical binding**, not as scheduler semantics. It is retained only if the representative-work trial records zero unintended scheduler dispatches, zero required application-local shortcut collisions, and <=2/7 interference. If it fails, the operator chooses a new configurable binding and reruns the hotkey-sensitive trials; the one-hotkey scheduler command and Ctrl+V -> Enter rhythm remain unchanged.
+
+Empirical usability results remain NOT_RUN until the UX-10 simulator and UX-12 implementation spike exist.
+
+The next execution slice is **UX-12 Implementation stack and prototype plan**.

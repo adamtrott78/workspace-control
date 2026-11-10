@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Begin UX-11 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: create the operator usability benchmark contract, trial script, and feedback/checklist. Cover 5-action and 20-action batches, mixed create/reuse/restore/retire/recovery work, interruptions between cycles, Ctrl+B collisions during normal Chrome/VS Code/Jupyter use, judgment/recovery transitions, wrong-worker/wrong-packet errors, operator interpretation time, and hotkey-retention criteria. Use the UX-10 fake-worker simulator for safe trials and keep the production interaction boundary manual Ctrl+V + Enter.
+Begin UX-12 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: perform the implementation-stack spike/design. Compare native helper options (including .NET/Rust/Python as bounded candidates), Firefox WebExtension implementation, Native Messaging/local IPC, packaging/install/update, diagnostics, and the custom worker-browser candidate introduced in UX-09. Validate exact target Firefox APIs/permissions and custom-shell authentication feasibility, choose the smallest maintainable stack, define versioned Native Messaging/browser-adapter protocol schemas, simulator implementation boundaries, and a prototype plan. Do not change the manual Ctrl+V + Enter boundary or broaden ChatGPT page access.
 
 ## Remaining work
 

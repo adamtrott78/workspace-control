@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "design_id": "workspace-semantic-execution-operator-ux-metrics-v0.1",
-  "status": "UX_00_BASELINE_DESIGN_TARGETS_NOT_YET_MEASURED",
+  "status": "UX_11_USABILITY_THRESHOLDS_FROZEN_EMPIRICAL_RESULTS_NOT_YET_RUN",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "requirements_ref": "architecture/workspace-semantic-execution-operator-ux-requirements.v0.1.md",
   "measurement_semantics": {
@@ -41,7 +41,8 @@
     "wrong_worker_dispatches_in_20_cycle_mixed_trial": {
       "max": 0,
       "class": "acceptance_threshold",
-      "owner_slice": "UX-11"
+      "owner_slice": "UX-11",
+      "trial_ref": "UT-02"
     },
     "automatic_resend_without_durable_ack": {
       "allowed": false,
@@ -62,6 +63,12 @@
     "unknown_continuity_behavior": {
       "required": "FAIL_CLOSED",
       "class": "acceptance_threshold"
+    },
+    "wrong_packet_dispatches_in_20_cycle_mixed_trial": {
+      "max": 0,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11",
+      "trial_ref": "UT-02"
     }
   },
   "latency_targets_ms": {
@@ -133,13 +140,32 @@
     },
     "time_spent_interpreting_scheduler_state_seconds": {
       "target": 0,
+      "interpretation": "Routine service must require zero intentional scheduler-state interpretation events; measured by event count rather than trying to infer cognitive time from keystrokes.",
       "class": "acceptance_threshold",
-      "owner_slice": "UX-11"
+      "owner_slice": "UX-11",
+      "trial_ref": "UT-02"
     },
     "wrong_tab_manual_recovery_events": {
       "target": 0,
       "class": "acceptance_threshold",
-      "owner_slice": "UX-11"
+      "owner_slice": "UX-11",
+      "trial_refs": [
+        "UT-06",
+        "UT-07",
+        "UT-08"
+      ]
+    },
+    "manual_tab_searches_in_20_action_trial": {
+      "target": 0,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11",
+      "trial_ref": "UT-02"
+    },
+    "abandoned_cycles_in_20_action_trial": {
+      "target": 0,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11",
+      "trial_ref": "UT-02"
     }
   },
   "telemetry_allowlist": [
@@ -172,5 +198,38 @@
       "detailed_design_owner": "UX-07",
       "session_policy_owner": "UX-04"
     }
-  ]
+  ],
+  "hotkey_usability": {
+    "configured_candidate": "Ctrl+B",
+    "semantic_command": "GLOBAL_SCHEDULER_HOTKEY",
+    "unintended_scheduler_dispatches_in_representative_work_trial": {
+      "max": 0,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11",
+      "trial_ref": "UT-09"
+    },
+    "required_native_shortcut_collisions_in_representative_work_trial": {
+      "max": 0,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11",
+      "trial_ref": "UT-09"
+    },
+    "interference_rating_7_max": {
+      "value": 2,
+      "class": "acceptance_threshold",
+      "owner_slice": "UX-11",
+      "trial_ref": "UT-09"
+    },
+    "retention_rule": "Retain the physical binding only if unintended dispatches=0, required native shortcut collisions=0, and interference<=2/7. Otherwise rebind and rerun UT-01/02/03/09/10; scheduler semantics do not change."
+  },
+  "usability_subjective_thresholds": {
+    "routine_rhythm_friction_7_max": 2,
+    "worker_selection_confidence_7_min": 6,
+    "recovery_clarity_7_min": 6,
+    "scheduler_state_clarity_7_min": 6,
+    "clipboard_disruption_7_max": 2,
+    "hotkey_interference_7_max": 2,
+    "class": "acceptance_threshold",
+    "owner_slice": "UX-11"
+  }
 }
