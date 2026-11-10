@@ -539,11 +539,13 @@ function New-BudgetCheck {
 }
 
 try {
-  New-Item -ItemType Directory -Path $nativeRegPath -Force | Out-Null
+  New-Item -Path "HKCU:\Software\Mozilla\NativeMessagingHosts" -Force | Out-Null
+  New-Item -Path $nativeRegPath -Force | Out-Null
   Set-Item -LiteralPath $nativeRegPath -Value $targetNativeManifest
   $nativeHostOverridden = $true
 
-  New-Item -ItemType Directory -Path $chromePolicyPath -Force | Out-Null
+  New-Item -Path "HKCU:\Software\Policies\Google" -Force | Out-Null
+  New-Item -Path $chromePolicyPath -Force | Out-Null
   New-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -PropertyType DWord -Value 0 -Force | Out-Null
   $chromePolicyOverridden = $true
 
