@@ -175,7 +175,12 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
 
     def test_workflow_has_opt_in_exact_head_self_hosted_target_job(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("run_target_preflight:", workflow)
         self.assertIn("run_target_benchmark:", workflow)
+        self.assertIn("stage09-preflight", workflow)
+        self.assertIn("target-preflight:", workflow)
+        self.assertIn("-PreflightOnly", workflow)
+        self.assertIn("stage09-preflight-diagnostics/**", workflow)
         self.assertIn("confirm_ac_power:", workflow)
         self.assertIn("confirm_chrome_memory_saver_disabled:", workflow)
         self.assertIn("runs-on: [self-hosted, windows, x64, workspace-operator-target]", workflow)
@@ -221,6 +226,12 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("--cold-count=10", script)
         self.assertIn('"TARGET_COLD_FIREFOX_PARTIAL"', script)
         self.assertIn("must not claim complete UX-09 acceptance", script)
+        self.assertIn("$DiagnosticsDirectory", script)
+        self.assertIn("TARGET_ADAPTER_PREFLIGHT_DIAGNOSTICS", script)
+        self.assertIn("tracked_owned_firefox_ids", script)
+        self.assertIn("owned_by_collector", script)
+        self.assertIn("runner.out.log", script)
+        self.assertIn("fake-worker.err.log", script)
         self.assertNotIn("Stop-Process -Name firefox", script)
 
     def test_cold_start_launcher_is_fixed_profile_chrome_level_only(self):
@@ -287,6 +298,10 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("ADAPTER_IDENTITY_REJECTED", hub)
         self.assertIn('"adapter-preflight"', harness)
         self.assertIn('"0.1.9-perf"', harness)
+        self.assertIn('"ADAPTER_IDENTITY_REJECTED"', harness)
+        self.assertIn('"ADAPTER_CONNECTION_NOT_OBSERVED"', harness)
+        self.assertIn("CaptureDiagnostics", harness)
+        self.assertIn("Snapshot", harness)
         self.assertIn("UNSIGNED_MOZILLA_SIGNING_INPUT", builder)
         self.assertIn('https://chatgpt.com/', builder)
         self.assertIn("must not retain the production ChatGPT worker URL", builder)
@@ -300,6 +315,9 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("PerformanceSignedXpiPath", matrix)
         self.assertIn("prepare-stage09-target-profile.ps1", matrix)
         self.assertIn("TARGET_ADAPTER_PREFLIGHT", matrix)
+        self.assertIn("$PreflightOnly", matrix)
+        self.assertIn("STAGE09_TARGET_PREFLIGHT_ONLY=PASS", matrix)
+        self.assertIn("stage09-preflight-diagnostics", matrix)
         self.assertIn("$PreflightOnly", collector)
 
     def test_stage09_target_bootstrap_restores_machine_state(self):
