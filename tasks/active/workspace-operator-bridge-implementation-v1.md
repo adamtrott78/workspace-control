@@ -24,16 +24,15 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 82e5463587efcaaf8471f352a3ad3eb5a3b70537
+- Remote checkpoint: c001bbda287f05ce3f2ceae7e003e3552903fd9c
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_03_native_messaging_and_local_ipc from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement protocol-v1 framing/validation, the helper native-host proxy mode, CurrentUserOnly named-pipe server/client, HELLO/HELLO_ACK version negotiation, request correlation/idempotency, bounded reconnect/disconnect behavior, and per-user native-host manifest generation/registration helpers. Preserve the Stage-02 helper lifetime: browser/native-host proxy disconnect must not terminate the primary tray helper. Do not implement Firefox tab lifecycle or ChatGPT interaction in Stage 03. Required exit evidence includes wrong-version fail-closed, malformed/oversize-frame fail-closed, duplicate request idempotency, same-user/elevation boundary behavior, helper-survives-proxy-disconnect, and protocol-content denylist tests.
+Execute impl_04_firefox_mv3_adapter from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the Firefox MV3 BrowserPort adapter using only nativeMessaging/tabs/sessions: HELLO/HELLO_ACK connection, exact managed binding metadata in sessions, create/activate/reload-or-restore/discard/close/inventory operations, immediate raw-URL-to-origin-enum reduction, adapter events, request/result correlation, and idempotent duplicate command handling. Keep the extension content-blind: no host permissions, content scripts, activeTab, scripting, webNavigation, webRequest, cookies, clipboard permissions, DOM/page/output access, or automatic input. Do not implement simulator worker behavior or real ChatGPT account calibration. Required exit evidence includes exact permission allowlist, no raw URL over IPC, no packet/credential metadata in bindings, managed-only lifecycle, duplicate-command idempotency, and unmanaged-tab adoption rejection.
 
 ## Remaining work
 
-- impl_03_native_messaging_and_local_ipc: Native Messaging proxy and same-user local IPC
 - impl_04_firefox_mv3_adapter: Firefox Manifest V3 browser adapter
 - impl_05_simulator_and_fake_worker: Deterministic simulator and local fake worker
 - impl_06_integrated_local_bridge_e2e: Real helper + Firefox + fake-worker integration

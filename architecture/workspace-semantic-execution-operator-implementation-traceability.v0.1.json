@@ -261,6 +261,43 @@
         }
       },
       "claim": "Stage-02 local Windows helper kernel validated; no Native Messaging, named pipe, Firefox lifecycle, simulator, or real-account behavior claimed."
+    },
+    "impl_03_native_messaging_and_local_ipc": {
+      "status": "VALIDATED",
+      "checkpoint": "c001bbda287f05ce3f2ceae7e003e3552903fd9c",
+      "validations": [
+        "Operator Bridge Validation #10 SUCCESS",
+        "Workspace Control Validation #2388 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/src/SharedContracts/Protocol/**",
+        "operator-bridge/src/WorkspaceOperator/Ipc/**",
+        "operator-bridge/src/WorkspaceOperator/Program.cs",
+        "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+        "operator-bridge/tests/Protocol.Tests/**",
+        "operator-bridge/tests/WorkspaceOperator.Tests/LocalIpcServerTests.cs",
+        "operator-bridge/tests/WorkspaceOperator.Tests/NativeHostRegistrationTests.cs",
+        "operator-bridge/tests/WorkspaceOperator.Tests/RuntimeModeDetectorTests.cs"
+      ],
+      "evidence": {
+        "framing": "uint32 little-endian + UTF-8 JSON; 65536-byte ceiling",
+        "fail_closed": [
+          "wrong version",
+          "unknown message/field",
+          "malformed JSON",
+          "oversize/truncated frame",
+          "forbidden content fields"
+        ],
+        "idempotency": "request_id/idempotency_key FIRST/DUPLICATE_SAME/CONFLICT",
+        "local_security": "PipeOptions.CurrentUserOnly plus standard/elevated pipe-name separation",
+        "reconnect": "primary helper server accepted a second client after first disconnect",
+        "tests": {
+          "protocol": 8,
+          "workspace_operator": 18,
+          "integration": 1
+        }
+      },
+      "claim": "Stage-03 transport boundary validated; no Firefox tab lifecycle, simulator, or real-account behavior claimed."
     }
   }
 }
