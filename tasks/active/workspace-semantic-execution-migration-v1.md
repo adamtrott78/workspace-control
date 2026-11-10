@@ -74,7 +74,7 @@ operator_ux_design
 
 ## Next safe action
 
-Begin UX-02 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define the operator subsystem system context and component/container architecture, assign single ownership for durable vs local state, specify ports/adapters and dependency direction, and write ADRs for the native-helper + Firefox WebExtension split, dedicated Firefox worker profile, and durable scheduler state vs local browser cache.
+Begin UX-03 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: turn the operator state-machine candidate into implementable OperatorAction/session schemas with exact action types, priorities, claim/generation/idempotency rules, LOCAL_PREPARED vs durable acknowledgment semantics, composite-action handling, retry rules, transition truth table, and invalid-transition catalog.
 
 ## Remaining work
 
