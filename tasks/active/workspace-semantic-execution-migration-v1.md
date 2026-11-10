@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Begin UX-08 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: produce the operator-bridge threat model, exact native-helper/WebExtension permission matrix, local data handling rules, browser-navigation/auth-signal privacy review, security review checklist, and ADR forbidding ChatGPT DOM/content automation in v0. Re-check current OpenAI terms/product guidance and relevant Firefox extension capabilities before freezing any browser-facing permission.
+Begin UX-09 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define the operator UX performance/RAM benchmark spec and budget. Measure Firefox vs the relevant baseline, helper/extension overhead, 1/2/4 live ChatGPT worker tabs, discarded-tab savings, browser startup/focus latency, clipboard/hotkey latency, and derive the active-session cap. Preserve the UX-08 permission/content boundary while measuring.
 
 ## Remaining work
 

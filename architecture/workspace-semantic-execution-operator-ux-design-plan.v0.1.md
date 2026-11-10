@@ -716,4 +716,19 @@ UX-07 is complete at the recovery-design level with:
 
 The recovery design defines ACTION, SESSION, AUTH_DOMAIN, and LOCAL_BRIDGE scopes; blocking vs nonblocking recovery; Ctrl+B behavior during recovery; helper/Firefox/extension/orchestrator failures; lost tabs; unconfirmed/restaged packets; stale old-generation replies; sleep/reboot; wrong profile; executor mismatch; and idempotent recovery incidents. Authentication refresh is explicitly profile-scoped: affected sessions become UNKNOWN, durable acknowledgments are reconciled once, unresolved old-generation actions are superseded, generations advance, and replacement sessions rebuild from durable checkpoints. Browser-chrome auth/navigation signals are a design candidate only and remain subject to UX-08 permission/security review and UX-12 API validation.
 
-The next execution slice is **UX-08 Security, privacy, and OpenAI interaction-boundary review**.
+UX-08 is complete at the security-review design level with:
+
+- `architecture/workspace-semantic-execution-operator-threat-model.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-permission-matrix.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-local-data-handling.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-auth-signal-security-review.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-security-review-checklist.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-adr-no-chatgpt-dom-content-automation.v0.1.md`
+
+The security boundary is explicit. Current OpenAI Terms/product guidance were re-checked on 2026-11-09; v0 does not read or extract ChatGPT content/Output, does not synthesize paste/typing/clicks/Send, does not call private consumer endpoints, and does not circumvent product safeguards or limits. The human remains responsible for Ctrl+V + Enter and authentication.
+
+The exact v0 Firefox WebExtension permission set is `nativeMessaging` + `tabs` + `sessions`. There are no host permissions, content scripts, `activeTab`, `scripting`, `webNavigation`, `webRequest`, `cookies`, or extension clipboard permissions. The native helper owns write-only clipboard/hotkey/tray/profile-launch mechanics as a standard user and has no synthetic-input or browser-credential access.
+
+UX-07 browser-chrome authentication/navigation sensing is security-approved only as a metadata-only candidate: for already-managed tabs, URL metadata is reduced immediately to CHATGPT_ORIGIN/OFF_CHATGPT_ORIGIN/UNKNOWN and raw URLs are not persisted. Origin return is not continuity proof. UX-12 still owns exact Firefox/API/package validation and a fresh OpenAI policy review before any real-account test.
+
+The next execution slice is **UX-09 Performance and RAM budget**.

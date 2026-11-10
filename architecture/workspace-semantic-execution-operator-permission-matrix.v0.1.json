@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-permission-matrix-v0.1",
+  "status": "UX_08_SECURITY_REVIEW_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "reviewed_on": "2026-11-09",
+  "firefox_webextension": {
+    "manifest_permissions_required_v0": [
+      {
+        "permission": "nativeMessaging",
+        "purpose": "typed bridge communication with exact native helper",
+        "constraint": "host allowed_extensions contains only packaged extension ID"
+      },
+      {
+        "permission": "tabs",
+        "purpose": "managed-tab inventory/lifecycle plus URL metadata for origin-only auth/navigation risk classification",
+        "constraint": "do not read/persist title or favicon; raw URL reduced immediately to enum for managed tabs only"
+      },
+      {
+        "permission": "sessions",
+        "purpose": "non-authoritative slot/generation metadata across tab restore/restart",
+        "constraint": "no packet body, content, credential, token, or durable authority"
+      }
+    ],
+    "host_permissions_required_v0": [],
+    "optional_host_permissions_required_v0": [],
+    "content_scripts_v0": [],
+    "permissions_explicitly_forbidden_v0": [
+      "activeTab",
+      "scripting",
+      "webNavigation",
+      "webRequest",
+      "webRequestBlocking",
+      "cookies",
+      "clipboardRead",
+      "clipboardWrite",
+      "history",
+      "bookmarks",
+      "downloads",
+      "management",
+      "proxy",
+      "debugger",
+      "<all_urls>"
+    ],
+    "manifest_keys_forbidden_v0": [
+      "content_scripts",
+      "host_permissions with any origin",
+      "optional_host_permissions with any origin",
+      "externally_connectable"
+    ],
+    "note": "webNavigation is unnecessary in v0 because tabs.onUpdated plus the already-required tabs permission can observe managed-tab URL changes."
+  },
+  "browser_navigation_metadata": {
+    "managed_tabs_only": true,
+    "retained_values": [
+      "CHATGPT_ORIGIN",
+      "OFF_CHATGPT_ORIGIN",
+      "UNKNOWN",
+      "tab binding ID",
+      "slot ID",
+      "generation",
+      "timestamp",
+      "recovery incident ID"
+    ],
+    "prohibited_values": [
+      "full URL",
+      "URL path",
+      "URL query",
+      "URL fragment",
+      "page title",
+      "favicon URL",
+      "DOM/text",
+      "response/output content"
+    ]
+  },
+  "native_helper": {
+    "privilege_level": "standard interactive user; no administrator/root requirement",
+    "allowed_capabilities": [
+      "register/unregister configured hotkey",
+      "write scheduler-selected packet to clipboard",
+      "launch/focus configured Firefox WorkspaceWorkers profile",
+      "tray/local console",
+      "user-scoped redacted config/receipts",
+      "typed Native Messaging",
+      "configured OperatorBridge connection if UX-12 selects network transport"
+    ],
+    "forbidden_capabilities": [
+      "clipboard read",
+      "global keystroke logging",
+      "synthetic keyboard/mouse input",
+      "UI Automation/accessibility scraping",
+      "browser profile/cookie/token/password DB access",
+      "arbitrary command execution",
+      "arbitrary model/task-sourced URL launch",
+      "unauthenticated non-loopback listener",
+      "credential storage",
+      "authority creation/widening"
+    ]
+  },
+  "native_messaging_host_manifest": {
+    "name": "fixed package identifier; literal selected in UX-12",
+    "path": "fixed installed helper executable path",
+    "type": "stdio",
+    "allowed_extensions": "exact packaged Firefox extension ID only; no wildcard",
+    "helper_message_policy": "extension may report browser results/events tied to outstanding request IDs; it may not originate authority-affecting commands"
+  },
+  "dedicated_profile": {
+    "required": true,
+    "supported_mechanism_evidence": [
+      "Firefox Profile Manager / -P profile_name",
+      "Firefox -profile profile_path"
+    ],
+    "constraints": [
+      "profile name/path from reviewed local config, never packet",
+      "bridge does not parse profile databases",
+      "arbitrary non-managed ChatGPT tabs are not adopted"
+    ],
+    "exact_launch_flags_validation_owner": "UX-12"
+  },
+  "permission_change_gate": {
+    "rule": "Any new WebExtension/host permission, content script, helper OS privilege, page-content access, network listener, or synthetic-input capability requires new security review and ADR.",
+    "fail_closed": true
+  },
+  "ux12_validation_required": [
+    "target Firefox Manifest/API compatibility",
+    "tabs.onUpdated behavior on ChatGPT/auth flows",
+    "sessions tab-value recovery",
+    "Native Messaging host installation/allowlist on Windows",
+    "dedicated-profile coexistence flags",
+    "fresh OpenAI terms/product review before real-account test"
+  ]
+}
