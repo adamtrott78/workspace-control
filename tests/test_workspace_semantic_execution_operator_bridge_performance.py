@@ -317,12 +317,13 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertGreater(native_set_index, try_index)
         self.assertIn("$nativeRegExisted", matrix)
         self.assertIn("Remove-Item -LiteralPath $nativeRegPath -Recurse -Force", matrix)
-        self.assertIn("HighEfficiencyModeEnabled", matrix)
-        self.assertIn(
-            "New-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -PropertyType DWord -Value 0",
-            matrix,
-        )
-        self.assertIn("$originalChromeMemorySaverPolicy", matrix)
+        self.assertNotIn("HKCU:\\Software\\Policies\\Google", matrix)
+        self.assertNotIn("HighEfficiencyModeEnabled", matrix)
+        self.assertIn("Initialize-ChromeBenchmarkProfile", matrix)
+        self.assertIn("performance_tuning", matrix)
+        self.assertIn("high_efficiency_mode", matrix)
+        self.assertIn("state = 0", matrix)
+        self.assertIn('method = "fresh-user-data-local-state"', matrix)
         self.assertIn("PSExecutionPolicyPreference: Bypass", workflow)
         target_block = workflow.split("  target-performance:", 1)[1]
         self.assertIn("shell: powershell", target_block)
