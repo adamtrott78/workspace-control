@@ -9,7 +9,7 @@ using WorkspaceControl.OperatorBridge.Ports;
 
 namespace WorkspaceControl.OperatorBridge.Ipc;
 
-public sealed class BrowserCommandHub
+public sealed class BrowserCommandHub : IBrowserAdapterConnection
 {
     private readonly BridgeState _bridgeState;
     private readonly string _helperInstanceId;

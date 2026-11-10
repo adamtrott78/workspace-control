@@ -156,6 +156,23 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("must not claim complete UX-09 acceptance", script)
         self.assertNotIn("Stop-Process -Name firefox", script)
 
+    def test_cold_start_launcher_is_fixed_profile_chrome_level_only(self):
+        launcher = (
+            ROOT / "operator-bridge" / "src" / "WorkspaceOperator" / "Windows" / "Firefox" / "FirefoxWorkerEnvironmentLauncher.cs"
+        ).read_text(encoding="utf-8")
+        tray = (
+            ROOT / "operator-bridge" / "src" / "WorkspaceOperator" / "Windows" / "TrayApplicationContext.cs"
+        ).read_text(encoding="utf-8")
+        self.assertIn('ProfileName = "WorkspaceWorkers"', launcher)
+        self.assertIn('ArgumentList.Add("-P")', launcher)
+        self.assertIn("ArgumentList.Add(ProfileName)", launcher)
+        self.assertIn('ArgumentList.Add("-no-remote")', launcher)
+        self.assertNotIn("chatgpt.com", launcher.lower())
+        self.assertNotIn("http://", launcher.lower())
+        self.assertNotIn("https://", launcher.lower())
+        self.assertIn("new FirefoxWorkerEnvironmentLauncher()", tray)
+        self.assertIn("TimeSpan.FromSeconds(8)", tray)
+
 
 if __name__ == "__main__":
     unittest.main()

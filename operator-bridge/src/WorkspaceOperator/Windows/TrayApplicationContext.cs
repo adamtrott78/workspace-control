@@ -5,6 +5,7 @@ using WorkspaceControl.OperatorBridge.Ipc;
 using WorkspaceControl.OperatorBridge.Ports;
 using WorkspaceControl.OperatorBridge.Windows.Clipboard;
 using WorkspaceControl.OperatorBridge.Windows.Hotkey;
+using WorkspaceControl.OperatorBridge.Windows.Firefox;
 
 namespace WorkspaceControl.OperatorBridge.Windows;
 
@@ -38,10 +39,16 @@ public sealed class TrayApplicationContext : ApplicationContext
             bridgeState,
             _diagnostics);
 
+        var browserPort = new LaunchingBrowserPort(
+            new IpcBrowserPort(_browserCommandHub),
+            _browserCommandHub,
+            new FirefoxWorkerEnvironmentLauncher(),
+            TimeSpan.FromSeconds(8));
+
         _dispatch = new SingleFlightDispatchCoordinator(
             bridgeState,
             new NoWorkOperatorActionPort(),
-            new IpcBrowserPort(_browserCommandHub),
+            browserPort,
             new WinFormsClipboardWriter(),
             new SystemMonotonicClock(),
             _diagnostics);
