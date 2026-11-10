@@ -29,19 +29,20 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Finish and live-validate workspace-shell-multirepo-research-v1. Then call Workspace Shell against target PADataset with expected SHA 17e1147614f27702e43565089d618182ff71c5af and begin Stage 00 read-only provenance recovery.
+Finish exact-head validation and live deployment of workspace-shell-multirepo-research-v1. Reinstall/re-register Workspace Shell once, then begin Stage 00 using clean PADataset execution source at 17e1147614f27702e43565089d618182ff71c5af plus the read-only historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
 
 ## Remaining work
 
-- Complete and deploy workspace-shell-multirepo-research-v1.
-- Use Workspace Shell to establish PADataset branch, HEAD, and status read-only.
+- Complete and deploy workspace-shell-multirepo-research-v1 with separate clean execution and historical evidence roots.
+- Reinstall/re-register Workspace Shell once to refresh the frozen MCP schema.
+- Use Workspace Shell to verify clean execution HEAD 17e1147614f27702e43565089d618182ff71c5af and read the historical evidence provenance metadata/bind mount.
 - Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings.
 - Persist machine-readable Stage 00 provenance in PADataset and update its authoritative task.
 - Proceed to Stage 01 only after the provenance gate closes.
 
 ## Blockers / gates
 
-- Workspace Shell live runtime does not yet expose the PADataset target; workspace-shell-multirepo-research-v1 is implementing and validating that capability.
+- Workspace Shell live runtime does not yet expose the PADataset target; workspace-shell-multirepo-research-v1 is validating the clean-execution/read-only-evidence redesign before live upgrade and plugin reinstall.
 
 ## Fresh-chat initialization
 
