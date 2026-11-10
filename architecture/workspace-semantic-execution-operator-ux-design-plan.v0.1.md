@@ -743,4 +743,18 @@ The v0 default is now frozen at **two live GENERAL_PERSISTENT worker tabs**, wit
 
 UX-09 does not fabricate actual browser measurements before the helper/extension and deterministic worker workload exist. Empirical results are explicitly NOT_RUN and become mandatory downstream evidence: UX-10 supplies the deterministic simulator workload, UX-12 supplies the implementation spike and compares the Firefox adapter against a bounded custom-worker-shell candidate, and real ChatGPT calibration remains gated by the UX-08/OpenAI-policy review before UX-13 production design freeze.
 
-The next execution slice is **UX-10 Fake-ChatGPT simulation and prototype contract**.
+UX-10 is complete at the simulator-contract design level with:
+
+- `architecture/workspace-semantic-execution-operator-simulator.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-simulator-fixture-catalog.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-simulator-e2e-test-matrix.v0.1.json`
+
+The simulator is browser-adapter-neutral and deliberately not a fake LLM. It provides deterministic synthetic OperatorActions/sessions, a local fake worker surface, fake durable worker events, an acknowledgment observer, virtual/real clocks, named fault-injection checkpoints, and content-free traces.
+
+Two modes preserve the production boundary. HUMAN_IN_LOOP lets the operator literally use Ctrl+B -> Ctrl+V -> Enter against the local fake worker. DETERMINISTIC_CI never synthesizes browser input; instead a simulator-only SIM_HUMAN_SUBMIT event enters the fake worker service at the explicit human boundary. That event is forbidden from the production BrowserPort/Native Messaging/helper build.
+
+The fixture catalog contains 38 scenarios covering normal reuse/create/restore, independent workers, slow/missing acknowledgments, missed or overwritten paste, hotkey races, helper/browser/adapter/orchestrator failure, auth refresh, late/stale generations, restart/recovery idempotence, discard/performance policy, payload-integrity failure, simulator-production separation, and Firefox/custom-shell adapter parity. The E2E matrix maps 38 tests across pure-contract, in-memory, real-helper, real-browser/custom-shell, and physical human-in-loop layers.
+
+UX-09 performance instrumentation is built into the simulator contract for mechanical regression measurements; fake-worker memory is explicitly not a substitute for real ChatGPT page memory.
+
+The next execution slice is **UX-11 Usability test design**.

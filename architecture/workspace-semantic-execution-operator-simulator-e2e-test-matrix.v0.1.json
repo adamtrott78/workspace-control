@@ -1,0 +1,559 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-simulator-e2e-test-matrix-v0.1",
+  "status": "UX_10_E2E_CONTRACT_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "simulator_ref": "architecture/workspace-semantic-execution-operator-simulator.v0.1.md",
+  "fixture_catalog_ref": "architecture/workspace-semantic-execution-operator-simulator-fixture-catalog.v0.1.json",
+  "layers": {
+    "L0": "pure contract/state tests",
+    "L1": "in-memory adapters + virtual clock",
+    "L2": "real native helper/OS hotkey/clipboard + fake durable services",
+    "L3": "real browser adapter/custom shell + local fake worker",
+    "L4": "human-in-loop physical Ctrl+B -> Ctrl+V -> Enter"
+  },
+  "universal_forbidden_observations": [
+    "chat page DOM",
+    "worker response text",
+    "accessibility tree",
+    "screenshots/page pixels",
+    "cookies/tokens",
+    "raw authentication URL persistence",
+    "synthetic production-page submit"
+  ],
+  "tests": [
+    {
+      "id": "E2E-001",
+      "fixture": "SIM-001",
+      "layers": [
+        "L1",
+        "L3",
+        "L4"
+      ],
+      "gate": "CORE",
+      "assertions": [
+        "SERVICE_EXISTING completes only after durable ack",
+        "one activate",
+        "one clipboard write",
+        "no DOM calls"
+      ]
+    },
+    {
+      "id": "E2E-002",
+      "fixture": "SIM-002",
+      "layers": [
+        "L1",
+        "L3",
+        "L4"
+      ],
+      "gate": "CORE",
+      "assertions": [
+        "CREATE_AND_SERVICE creates one managed binding",
+        "first ack establishes TRUSTED continuity"
+      ]
+    },
+    {
+      "id": "E2E-003",
+      "fixture": "SIM-003",
+      "layers": [
+        "L1",
+        "L3",
+        "L4"
+      ],
+      "gate": "CORE",
+      "assertions": [
+        "discarded session restores without generation change",
+        "durable ack completes action"
+      ]
+    },
+    {
+      "id": "E2E-004",
+      "fixture": "SIM-004",
+      "layers": [
+        "L1",
+        "L2",
+        "L4"
+      ],
+      "gate": "CORE",
+      "assertions": [
+        "local-only maintenance drains before fresh service query",
+        "one manual cycle"
+      ]
+    },
+    {
+      "id": "E2E-005",
+      "fixture": "SIM-005",
+      "layers": [
+        "L1",
+        "L4"
+      ],
+      "gate": "CORE",
+      "assertions": [
+        "independent ready workers can both be locally prepared",
+        "acks cannot cross slots/generations"
+      ]
+    },
+    {
+      "id": "E2E-006",
+      "fixture": "SIM-006",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "CORE",
+      "assertions": [
+        "no work leaves focus/clipboard unchanged",
+        "browser not launched"
+      ]
+    },
+    {
+      "id": "E2E-007",
+      "fixture": "SIM-007",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "AUTHORITY",
+      "assertions": [
+        "judgment opens console only",
+        "no worker packet",
+        "no inferred decision"
+      ]
+    },
+    {
+      "id": "E2E-008",
+      "fixture": "SIM-009",
+      "layers": [
+        "L1",
+        "L4"
+      ],
+      "gate": "ACK",
+      "assertions": [
+        "slow ack does not trigger resend",
+        "background ack does not steal focus"
+      ]
+    },
+    {
+      "id": "E2E-009",
+      "fixture": "SIM-010",
+      "layers": [
+        "L1"
+      ],
+      "gate": "ACK",
+      "assertions": [
+        "no-ack timeout is informational",
+        "no automatic resend/generation advance"
+      ]
+    },
+    {
+      "id": "E2E-010",
+      "fixture": "SIM-011",
+      "layers": [
+        "L1",
+        "L4"
+      ],
+      "gate": "HUMAN_BOUNDARY",
+      "assertions": [
+        "local prepared does not prove submit",
+        "no durable event without submit"
+      ]
+    },
+    {
+      "id": "E2E-011",
+      "fixture": "SIM-013",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "LOCAL_FAILURE",
+      "assertions": [
+        "clipboard failure prevents final ready state/focus"
+      ]
+    },
+    {
+      "id": "E2E-012",
+      "fixture": "SIM-014",
+      "layers": [
+        "L1"
+      ],
+      "gate": "STALE",
+      "assertions": [
+        "stale revalidation prevents clipboard write/focus"
+      ]
+    },
+    {
+      "id": "E2E-013",
+      "fixture": "SIM-015",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "INPUT",
+      "assertions": [
+        "held repeat cannot create duplicate dispatch"
+      ]
+    },
+    {
+      "id": "E2E-014",
+      "fixture": "SIM-016",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "INPUT",
+      "assertions": [
+        "second press while preparing cannot claim second action"
+      ]
+    },
+    {
+      "id": "E2E-015",
+      "fixture": "SIM-018",
+      "layers": [
+        "L1",
+        "L3"
+      ],
+      "gate": "RECOVERY",
+      "assertions": [
+        "managed tab loss never guesses continuity",
+        "durable ack rechecked before replacement"
+      ]
+    },
+    {
+      "id": "E2E-016",
+      "fixture": "SIM-019",
+      "layers": [
+        "L1",
+        "L3"
+      ],
+      "gate": "RECOVERY",
+      "assertions": [
+        "browser loss freezes browser-dependent dispatch",
+        "ambiguous bindings become UNKNOWN"
+      ]
+    },
+    {
+      "id": "E2E-017",
+      "fixture": "SIM-020",
+      "layers": [
+        "L1",
+        "L3"
+      ],
+      "gate": "RECOVERY",
+      "assertions": [
+        "adapter disconnect blocks new browser effects",
+        "reconnect reinventory required"
+      ]
+    },
+    {
+      "id": "E2E-018",
+      "fixture": "SIM-021",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "CRASH",
+      "assertions": [
+        "helper crash before effect is safely reconcilable",
+        "no reset-in-place"
+      ]
+    },
+    {
+      "id": "E2E-019",
+      "fixture": "SIM-022",
+      "layers": [
+        "L1",
+        "L2",
+        "L3"
+      ],
+      "gate": "CRASH",
+      "assertions": [
+        "unknown create outcome fails closed",
+        "no duplicate tab creation"
+      ]
+    },
+    {
+      "id": "E2E-020",
+      "fixture": "SIM-023",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "CRASH",
+      "assertions": [
+        "clipboard side effect does not imply submit after helper restart"
+      ]
+    },
+    {
+      "id": "E2E-021",
+      "fixture": "SIM-024",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "CONTROL_PLANE",
+      "assertions": [
+        "orchestrator outage permits no stale local queue execution"
+      ]
+    },
+    {
+      "id": "E2E-022",
+      "fixture": "SIM-025",
+      "layers": [
+        "L1",
+        "L3"
+      ],
+      "gate": "IDENTITY",
+      "assertions": [
+        "unmanaged lookalike tabs never adopted"
+      ]
+    },
+    {
+      "id": "E2E-023",
+      "fixture": "SIM-026",
+      "layers": [
+        "L1",
+        "L3"
+      ],
+      "gate": "IDENTITY",
+      "assertions": [
+        "binding ambiguity fails closed"
+      ]
+    },
+    {
+      "id": "E2E-024",
+      "fixture": "SIM-028",
+      "layers": [
+        "L1",
+        "L3",
+        "L4"
+      ],
+      "gate": "AUTH_RECOVERY",
+      "assertions": [
+        "metadata-only off-origin signal enters auth recovery",
+        "no authentication automation"
+      ]
+    },
+    {
+      "id": "E2E-025",
+      "fixture": "SIM-029",
+      "layers": [
+        "L1",
+        "L3",
+        "L4"
+      ],
+      "gate": "AUTH_RECOVERY",
+      "assertions": [
+        "all-tab refresh reconciles once",
+        "old actions superseded",
+        "generation advances once",
+        "manual return does not restore TRUSTED"
+      ]
+    },
+    {
+      "id": "E2E-026",
+      "fixture": "SIM-030",
+      "layers": [
+        "L0",
+        "L1"
+      ],
+      "gate": "GENERATION_FENCING",
+      "assertions": [
+        "late old-generation event preserved but cannot advance current state"
+      ]
+    },
+    {
+      "id": "E2E-027",
+      "fixture": "SIM-031",
+      "layers": [
+        "L0",
+        "L1"
+      ],
+      "gate": "ACK",
+      "assertions": [
+        "duplicate durable event is idempotent"
+      ]
+    },
+    {
+      "id": "E2E-028",
+      "fixture": "SIM-032",
+      "layers": [
+        "L0",
+        "L1"
+      ],
+      "gate": "GENERATION_FENCING",
+      "assertions": [
+        "wrong-generation ack rejected for progression"
+      ]
+    },
+    {
+      "id": "E2E-029",
+      "fixture": "SIM-033",
+      "layers": [
+        "L1",
+        "L2",
+        "L3"
+      ],
+      "gate": "RECOVERY",
+      "assertions": [
+        "cold restart rehydrates from durable state",
+        "stale local cache not replayed"
+      ]
+    },
+    {
+      "id": "E2E-030",
+      "fixture": "SIM-034",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "RECOVERY",
+      "assertions": [
+        "repeated recovery commands are idempotent",
+        "generation advancement not duplicated"
+      ]
+    },
+    {
+      "id": "E2E-031",
+      "fixture": "SIM-035",
+      "layers": [
+        "L3"
+      ],
+      "gate": "PERFORMANCE_POLICY",
+      "assertions": [
+        "discard preserves logical identity",
+        "UX-09 timers/resource markers produced"
+      ]
+    },
+    {
+      "id": "E2E-032",
+      "fixture": "SIM-036",
+      "layers": [
+        "L1",
+        "L3"
+      ],
+      "gate": "ADAPTER_PARITY",
+      "assertions": [
+        "authoritative terminal state identical across adapters",
+        "local binding IDs do not leak into durable identity"
+      ]
+    },
+    {
+      "id": "E2E-033",
+      "fixture": "SIM-037",
+      "layers": [
+        "L0"
+      ],
+      "gate": "SECURITY_RELEASE",
+      "assertions": [
+        "SIM_HUMAN_SUBMIT/fault controls absent from production package/protocol"
+      ]
+    },
+    {
+      "id": "E2E-034",
+      "fixture": "SIM-038",
+      "layers": [
+        "L1",
+        "L4"
+      ],
+      "gate": "INTEGRITY",
+      "assertions": [
+        "payload mismatch cannot produce valid ack"
+      ]
+    },
+    {
+      "id": "E2E-035",
+      "fixture": "SIM-017",
+      "layers": [
+        "L1",
+        "L4"
+      ],
+      "gate": "INPUT",
+      "assertions": [
+        "new deliberate press after local return may service independent action",
+        "previous stays unconfirmed"
+      ]
+    },
+    {
+      "id": "E2E-036",
+      "fixture": "SIM-027",
+      "layers": [
+        "L1",
+        "L3"
+      ],
+      "gate": "IDENTITY",
+      "assertions": [
+        "unproven executor compatibility prevents reuse"
+      ]
+    },
+    {
+      "id": "E2E-037",
+      "fixture": "SIM-008",
+      "layers": [
+        "L1",
+        "L2"
+      ],
+      "gate": "RECOVERY",
+      "assertions": [
+        "OPEN_RECOVERY stops normal dispatch and leaves clipboard unchanged"
+      ]
+    },
+    {
+      "id": "E2E-038",
+      "fixture": "SIM-012",
+      "layers": [
+        "L4"
+      ],
+      "gate": "HUMAN_BOUNDARY",
+      "assertions": [
+        "clipboard overwrite before paste yields no completion evidence",
+        "no auto resend"
+      ]
+    }
+  ],
+  "acceptance_gates": {
+    "design_contract": {
+      "required": [
+        "all CORE tests specified",
+        "all AUTH_RECOVERY tests specified",
+        "generation fencing specified",
+        "simulator-only capability separation specified",
+        "browser adapter parity specified"
+      ],
+      "result": "PASS_BY_CONTRACT"
+    },
+    "implementation_core": {
+      "required_layers": [
+        "L0",
+        "L1"
+      ],
+      "threshold": "100% required tests pass"
+    },
+    "implementation_local_bridge": {
+      "required_layers": [
+        "L2",
+        "L3"
+      ],
+      "threshold": "100% required safety/correctness tests pass; UX-09 performance tests produce valid measurements"
+    },
+    "physical_operator": {
+      "required_layers": [
+        "L4"
+      ],
+      "threshold": "literal Ctrl+B -> Ctrl+V -> Enter completes happy path and recovery return path with zero wrong-worker dispatches"
+    },
+    "production_release": {
+      "required": [
+        "simulator-only endpoints absent",
+        "UX-08 security checklist passes",
+        "UX-09 budgets evaluated",
+        "UX-11 usability gates pass",
+        "UX-12 implementation contracts frozen"
+      ]
+    }
+  },
+  "trace_requirements": {
+    "deterministic_ci": "Every run persists content-free trace and SHA-256.",
+    "human_in_loop": "Trace may record operator boundary event timestamp but never keystroke stream or clipboard content.",
+    "failure_reproduction": "Any failed deterministic scenario must be replayable from fixture version + scenario ID + adapter ID + explicit seed if fuzzing is later used."
+  }
+}

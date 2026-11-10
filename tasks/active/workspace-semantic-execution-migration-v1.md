@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Begin UX-10 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: design the fake-ChatGPT simulation harness and prototype contract. Define the fake worker webpage, fake durable worker endpoint/ack model, fake scheduler actions, deterministic scenario catalog, observability, and end-to-end cases for normal service, slow workers, lost tabs, auth-refresh/logout, helper/browser/extension crashes, stale completions, and concurrent ready workers. Keep browser-facing contracts adapter-neutral so UX-12 can compare the Firefox/WebExtension baseline with a purpose-built custom worker shell without changing scheduler semantics. The simulator must exercise UX-09 performance instrumentation while preserving the UX-08 no-content/no-synthetic-submit boundary.
+Begin UX-11 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: create the operator usability benchmark contract, trial script, and feedback/checklist. Cover 5-action and 20-action batches, mixed create/reuse/restore/retire/recovery work, interruptions between cycles, Ctrl+B collisions during normal Chrome/VS Code/Jupyter use, judgment/recovery transitions, wrong-worker/wrong-packet errors, operator interpretation time, and hotkey-retention criteria. Use the UX-10 fake-worker simulator for safe trials and keep the production interaction boundary manual Ctrl+V + Enter.
 
 ## Remaining work
 
