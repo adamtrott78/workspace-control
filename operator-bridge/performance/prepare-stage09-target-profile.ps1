@@ -106,6 +106,37 @@ if (Test-Path -LiteralPath $profile) {
     if ($owner.owner -ne "workspace-control-stage09" -or $owner.profile_name -ne $ProfileName) {
         throw "Stage 09 Firefox profile ownership marker is invalid."
     }
+
+    if ($VerifyOnly) {
+        $extensionsStatePath = Join-Path $profile "extensions.json"
+        if (-not (Test-Path -LiteralPath $extensionsStatePath -PathType Leaf)) {
+            throw "Stage 09 WorkspaceWorkers profile is missing Firefox extensions.json runtime state."
+        }
+
+        $extensionsState = Get-Content -LiteralPath $extensionsStatePath -Raw | ConvertFrom-Json
+        $addonMatches = @($extensionsState.addons | Where-Object { $_.id -eq $ExpectedExtensionId })
+        if ($addonMatches.Count -ne 1) {
+            throw "Stage 09 performance adapter is not uniquely present in Firefox runtime add-on state."
+        }
+
+        $addon = $addonMatches[0]
+        $addonState = [ordered]@{
+            extension_id = [string]$addon.id
+            version = [string]$addon.version
+            active = [bool]$addon.active
+            user_disabled = [bool]$addon.userDisabled
+            app_disabled = [bool]$addon.appDisabled
+            signed_state = $addon.signedState
+        }
+        Write-Host ("STAGE09_TARGET_PROFILE_ADDON_STATE=" + ($addonState | ConvertTo-Json -Compress))
+
+        if ([string]$addon.version -ne $ExpectedExtensionVersion -or
+            -not [bool]$addon.active -or
+            [bool]$addon.userDisabled -or
+            [bool]$addon.appDisabled) {
+            throw "Stage 09 performance adapter is not active/enabled in the WorkspaceWorkers Firefox profile."
+        }
+    }
 }
 else {
     if ($VerifyOnly) {
