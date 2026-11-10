@@ -1,3 +1,4 @@
+using WorkspaceControl.OperatorBridge.Ipc;
 using WorkspaceControl.OperatorBridge.Windows;
 
 namespace WorkspaceControl.OperatorBridge;
@@ -5,8 +6,18 @@ namespace WorkspaceControl.OperatorBridge;
 internal static class Program
 {
     [STAThread]
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
+        if (RuntimeModeDetector.IsNativeHostProxy(args))
+        {
+            var pipeName = ElevationScope.PipeName(ElevationScope.Current());
+            await NativeHostProxy.RunAsync(
+                Console.OpenStandardInput(),
+                Console.OpenStandardOutput(),
+                pipeName);
+            return;
+        }
+
         ApplicationConfiguration.Initialize();
         var idleProbeMilliseconds = ParseIdleProbe(args);
         System.Windows.Forms.Application.Run(

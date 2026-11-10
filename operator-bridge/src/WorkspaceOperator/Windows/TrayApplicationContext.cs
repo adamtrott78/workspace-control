@@ -1,6 +1,7 @@
 using WorkspaceControl.OperatorBridge.Application;
 using WorkspaceControl.OperatorBridge.Bootstrap;
 using WorkspaceControl.OperatorBridge.Diagnostics;
+using WorkspaceControl.OperatorBridge.Ipc;
 using WorkspaceControl.OperatorBridge.Ports;
 using WorkspaceControl.OperatorBridge.Windows.Clipboard;
 using WorkspaceControl.OperatorBridge.Windows.Hotkey;
@@ -16,6 +17,8 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly HotkeyMessageWindow _hotkeyWindow;
     private readonly JsonLineDiagnosticsSink _diagnostics;
     private readonly System.Windows.Forms.Timer? _idleProbeTimer;
+    private readonly CancellationTokenSource _ipcCancellation = new();
+    private readonly Task _ipcTask;
     private int _hotkeyDispatching;
 
     public TrayApplicationContext(int? idleProbeMilliseconds = null)
@@ -38,10 +41,16 @@ public sealed class TrayApplicationContext : ApplicationContext
             new SystemMonotonicClock(),
             _diagnostics);
 
+        var pipeName = ElevationScope.PipeName(ElevationScope.Current());
+        _ipcTask = new LocalIpcServer(
+            pipeName,
+            bridgeState,
+            _diagnostics).RunAsync(_ipcCancellation.Token);
+
         _toggleItem = new ToolStripMenuItem("Bridge: OFF");
         _toggleItem.Click += ToggleClicked;
 
-        var statusItem = new ToolStripMenuItem("Stage 02 helper kernel")
+        var statusItem = new ToolStripMenuItem("Stage 03 local IPC")
         {
             Enabled = false
         };
@@ -86,7 +95,6 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
         catch (HotkeyRegistrationException)
         {
-            // BridgeController has already failed closed and logged a normalized error.
         }
 
         RefreshPresentation();
@@ -128,7 +136,15 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
         catch
         {
-            // Exit is best-effort after state was already forced OFF.
+        }
+
+        _ipcCancellation.Cancel();
+        try
+        {
+            _ipcTask.GetAwaiter().GetResult();
+        }
+        catch (OperationCanceledException)
+        {
         }
 
         _hotkeyWindow.HotkeyPressed -= HotkeyPressed;
@@ -137,6 +153,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         _notifyIcon.Dispose();
         _hotkeyWindow.Dispose();
         _diagnostics.Dispose();
+        _ipcCancellation.Dispose();
         base.ExitThreadCore();
     }
 }
