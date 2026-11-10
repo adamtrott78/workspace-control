@@ -191,11 +191,13 @@ Refine the existing operator-state-machine candidate into an implementable schem
 
 ### Artifacts
 
-1. `schemas/operator_action.schema.json`
-2. `schemas/operator_session.schema.json`
+1. `architecture/workspace-semantic-execution-operator-action-schema.v0.1.json`
+2. `architecture/workspace-semantic-execution-operator-session-schema.v0.1.json`
 3. `architecture/workspace-semantic-execution-operator-state-machine.v0.2.md`
-4. Transition truth table.
-5. Invalid-transition catalog.
+4. `architecture/workspace-semantic-execution-operator-transition-table.v0.1.json`
+5. `architecture/workspace-semantic-execution-operator-invalid-transitions.v0.1.md`
+
+The schema paths intentionally remain under the task-authorized `architecture/workspace-semantic-execution-*` mutation scope rather than widening authority to a new top-level `schemas/` directory.
 
 ### Acceptance gate
 
@@ -668,4 +670,14 @@ The architecture establishes:
 - semantic projection as rebuildable read model, never permission authority;
 - durable worker acknowledgment as the only completion signal.
 
-The next execution slice is **UX-03 OperatorAction and state-machine contract**.
+UX-03 is complete at the design-contract level with:
+
+- `architecture/workspace-semantic-execution-operator-action-schema.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-session-schema.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-transition-table.v0.1.json`
+- `architecture/workspace-semantic-execution-operator-invalid-transitions.v0.1.md`
+- `architecture/workspace-semantic-execution-operator-state-machine.v0.2.md`
+
+Key refinement: durable OperatorActions are atomic. A single Ctrl+B dispatch may drain local-only actions and then claim one fresh human-service action, preserving the one-hotkey experience without hiding partial failures in an opaque composite action.
+
+The next execution slice is **UX-04 Session-slot and tab-lifecycle design**.
