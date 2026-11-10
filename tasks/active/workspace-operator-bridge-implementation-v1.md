@@ -29,7 +29,7 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 ## Next safe action
 
-Validate the Stage-08 durable promotion head exactly with Operator Bridge Validation and Workspace Control Validation. Do not execute impl_09_performance_benchmark_execution until that promotion head is green. After promotion verification, execute impl_09 from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json and collect the UX-09 content-free target-machine latency/resource benchmark set and budget pass/fail findings. Do not begin UX-11 human usability trials, WebView2 promotion/comparison, real-account calibration, or production readiness review.
+Validate the Stage-08 durable promotion head exactly with Operator Bridge Validation and Workspace Control Validation. Do not execute impl_09_performance_benchmark_execution until that promotion head is green. After promotion verification, execute impl_09 from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json: collect the UX-09 content-free target-machine latency/resource benchmark set and budget pass/fail findings without beginning UX-11 usability trials, WebView2 promotion/comparison, real-account calibration, or production readiness review.
 
 ## Remaining work
 
