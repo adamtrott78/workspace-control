@@ -615,6 +615,70 @@
       },
       "claim": "Stage-08 packaging/install/update/rollback is exact-head clean at the durable promotion head; Stage 09 performance benchmark execution is the next authorized stage.",
       "implementation_head": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175"
+    },
+    "impl_09_performance_benchmark_execution": {
+      "status": "IN_PROGRESS",
+      "checkpoint": "c2e06d8b5efdffc3e35f17879651d0f058281463",
+      "validations": [
+        "Operator Bridge Validation #45 SUCCESS on validated infrastructure checkpoint",
+        "Workspace Control Validation #2423 SUCCESS on validated infrastructure checkpoint"
+      ],
+      "implementation": [
+        "operator-bridge/performance/**",
+        "operator-bridge/tools/run-stage09-ci.ps1",
+        "operator-bridge/tools/run-stage09-target-firefox.ps1",
+        "operator-bridge/src/WorkspaceOperator/Ports/IWorkerEnvironmentLauncher.cs",
+        "operator-bridge/src/WorkspaceOperator/Application/LaunchingBrowserPort.cs",
+        "operator-bridge/src/WorkspaceOperator/Windows/Firefox/FirefoxWorkerEnvironmentLauncher.cs",
+        "operator-bridge/tests/WorkspaceOperator.Tests/LaunchingBrowserPortTests.cs",
+        "tests/test_workspace_semantic_execution_operator_bridge_performance.py",
+        ".github/workflows/operator-bridge-validation.yml",
+        "benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-regression.339788d1.json"
+      ],
+      "evidence": {
+        "ci_regression": {
+          "evidence_class": "GITHUB_HOSTED_WINDOWS_CI",
+          "target_contract_complete": false,
+          "artifact_id": 13751099107,
+          "interpretation": "Regression signal only; not UX-09 target acceptance."
+        },
+        "target_contract": {
+          "state": "NOT_RUN",
+          "required_windows": {
+            "warmup_seconds": 60,
+            "steady_state_seconds": 120,
+            "sample_rate_hz": 1
+          },
+          "required_repetitions": {
+            "browser_resource": 3,
+            "discard_restore": 5,
+            "reuse": 50,
+            "restore": 30,
+            "create": 30,
+            "cold_start": 10,
+            "local_primitives": 100
+          },
+          "chrome_memory_saver_disabled_and_recorded": true,
+          "firefox_chrome_order_alternation_required": true
+        },
+        "cold_start": {
+          "production_launch_path": "VALIDATED",
+          "fixed_profile": "WorkspaceWorkers",
+          "connection_timeout_seconds": 8,
+          "target_probe_repetitions": 10,
+          "target_measurement": "NOT_RUN",
+          "process_cleanup": "only launcher-returned Firefox process tree"
+        },
+        "security": {
+          "content_free": true,
+          "dom_or_page_content": false,
+          "credentials_or_tokens": false,
+          "synthetic_paste_enter_send_mouse": false,
+          "real_chatgpt_account": false
+        }
+      },
+      "claim": "Stage-09 benchmark infrastructure and cold-start capability are exact-head validated, but UX-09 target-machine acceptance is NOT_RUN. Stage 10 remains blocked.",
+      "blocker": "No authorized connected target Windows operator workstation/self-hosted target runner is available to execute the frozen complete target benchmark."
     }
   }
 }

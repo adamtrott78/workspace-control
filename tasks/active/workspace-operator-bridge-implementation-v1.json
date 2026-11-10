@@ -49,7 +49,7 @@
       "base_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "26284233edb00c4a7005dac3d5c52b2add814156",
+        "checkpoint_sha": "c2e06d8b5efdffc3e35f17879651d0f058281463",
         "verified": true
       },
       "local": null,
@@ -424,7 +424,24 @@
         "latency/resource summary",
         "budget pass/fail findings"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 09 benchmark infrastructure and non-target regression evidence",
+          "result": "PASS",
+          "evidence": [
+            "Validated Stage-09 infrastructure checkpoint: workspace-control@c2e06d8b5efdffc3e35f17879651d0f058281463.",
+            "Operator Bridge Validation run 42790904946 / #45 SUCCESS on the exact checkpoint.",
+            "Workspace Control Validation run 42790905005 / #2423 SUCCESS on the exact checkpoint.",
+            "Performance harness builds only in the integration solution; the production solution/package remains simulator/performance-harness free.",
+            "Stage-09 GitHub-hosted Windows smoke passed and uploaded content-free artifact 13751099107 named operator-bridge-stage09-ci-c2e06d8b5efdffc3e35f17879651d0f058281463.",
+            "CI evidence remains explicitly GITHUB_HOSTED_WINDOWS_CI with target_contract_complete=false and is not accepted as target-machine evidence.",
+            "A strict target-evidence schema requires 60s warm-up, 120s 1Hz sampling, three Firefox/Chrome resource replicates with order alternation, Chrome Memory Saver disabled/recorded, five discard/restore replicates, and exact 50/30/30/10/100 latency counts.",
+            "A target-only Firefox collector and target-only 10-trial cold-start probe exist and fail closed on unrelated Firefox processes.",
+            "UX-P003 implementation gap was corrected: production now has a bounded chrome-level launcher for only the fixed WorkspaceWorkers profile with an 8-second adapter-connect bound, no URL/content access, and no synthetic ChatGPT input.",
+            "Cold-target measurement terminates only the Firefox process tree whose PID was returned by the reviewed production launcher."
+          ]
+        }
+      ],
       "resume_condition": "Mechanical performance is measured; any failing budget is corrected or explicitly escalated before usability/promotion."
     },
     {
@@ -515,14 +532,14 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "26284233edb00c4a7005dac3d5c52b2add814156",
+      "identity": "c2e06d8b5efdffc3e35f17879651d0f058281463",
       "required_for_resume": true,
       "evidence": [
-        "Stage 08 packaging/install/update/rollback is exact-head clean at durable promotion head 26284233edb00c4a7005dac3d5c52b2add814156.",
-        "Operator Bridge Validation #36 SUCCESS on the exact promotion head.",
-        "Workspace Control Validation #2414 SUCCESS on the exact promotion head.",
-        "Underlying Stage-08 implementation head cac009bd18960c01f9dc4d2a20bac34eb6a0a175 passed Operator Bridge Validation #34 and Workspace Control Validation #2412.",
-        "Next active stage is impl_09_performance_benchmark_execution."
+        "Stage 09 benchmark infrastructure is exact-head green at c2e06d8b5efdffc3e35f17879651d0f058281463.",
+        "Operator Bridge Validation #45 SUCCESS.",
+        "Workspace Control Validation #2423 SUCCESS.",
+        "Stage 09 remains IN_PROGRESS because the frozen complete target-workstation benchmark has not been executed.",
+        "Stage 10 is not authorized until target-machine results exist and all failing mechanical budgets are corrected or explicitly escalated."
       ]
     },
     {
@@ -621,6 +638,19 @@
         "Stage-08 implementation code was validated at cac009bd18960c01f9dc4d2a20bac34eb6a0a175 by Operator Bridge Validation #34 and Workspace Control Validation #2412.",
         "Stage-08 promotion/task-evidence head 26284233edb00c4a7005dac3d5c52b2add814156 passed Operator Bridge Validation #36 and Workspace Control Validation #2414.",
         "Clean install, bounded uninstall, upgrade, rollback, per-user/no-admin registration, frozen identity/permissions, simulator separation, and unrelated Firefox/profile non-mutation all passed."
+      ]
+    },
+    {
+      "id": "impl-09-performance-benchmark-infrastructure",
+      "kind": "git_commit",
+      "identity": "c2e06d8b5efdffc3e35f17879651d0f058281463",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #45 SUCCESS on the exact Stage-09 infrastructure/cold-probe checkpoint.",
+        "Workspace Control Validation #2423 SUCCESS on the exact Stage-09 infrastructure/cold-probe checkpoint.",
+        "GitHub-hosted Windows Stage-09 smoke PASS with content-free artifact 13751099107; explicitly non-target.",
+        "Production cold-start launcher plus target-only 10-trial cold-start probe are compiled, unit/static tested, and regression-clean.",
+        "Complete target-machine UX-09 acceptance remains NOT_RUN."
       ]
     }
   ],
@@ -976,6 +1006,59 @@
       "evidence": [
         "Static packaging/security suite passed in Operator Bridge Validation #34."
       ]
+    },
+    {
+      "path": "operator-bridge/performance/**",
+      "state": "STAGE_09_INFRASTRUCTURE_VALIDATED_TARGET_NOT_RUN",
+      "role": "account-free performance harness, strict target-evidence schema, Firefox target procedure, and target-only cold-start probe",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained only under Stage-09 performance authority",
+      "review_requirement": "Must never label GitHub-hosted Windows as target evidence or collect page/content/credential/synthetic-input telemetry.",
+      "evidence": [
+        "Operator Bridge Validation #45 SUCCESS.",
+        "Workspace Control Validation #2423 SUCCESS.",
+        "Target evidence schema requires the exact frozen UX-09 windows/counts and blockers=[] before completion."
+      ]
+    },
+    {
+      "path": "operator-bridge/tools/run-stage09-ci.ps1",
+      "state": "STAGE_09_NON_TARGET_REGRESSION_VALIDATED",
+      "role": "shortened GitHub-hosted Windows content-free regression smoke",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "rerun on operator-bridge changes",
+      "review_requirement": "Output remains GITHUB_HOSTED_WINDOWS_CI and target_contract_complete=false.",
+      "evidence": [
+        "Operator Bridge Validation #45 Stage-09 CI smoke PASS.",
+        "Artifact 13751099107 uploaded."
+      ]
+    },
+    {
+      "path": "operator-bridge/tools/run-stage09-target-firefox.ps1",
+      "state": "STAGE_09_TARGET_COLLECTOR_VALIDATED_NOT_EXECUTED",
+      "role": "strict target-Windows Firefox/helper partial collector including exact 10-trial cold-start probe",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "execute only on the authorized target Windows operator workstation",
+      "review_requirement": "Reject pre-existing/unowned Firefox; never mutate Firefox profile or claim complete UX-09 acceptance by itself.",
+      "evidence": [
+        "Static contract tests and full operator-bridge validation PASS at checkpoint.",
+        "Target execution remains NOT_RUN."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-regression.339788d1.json",
+      "state": "STAGE_09_NON_TARGET_REGRESSION_EVIDENCE",
+      "role": "durable shortened GitHub-hosted Windows performance regression sample",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "regenerate only as explicitly non-target CI evidence",
+      "review_requirement": "Values are regression signals only and must not be promoted as frozen UX-09 target acceptance facts.",
+      "evidence": [
+        "Content-free regression evidence from Operator Bridge #41.",
+        "Exact-head reruns #42/#43/#45 preserved the Stage-09 CI smoke."
+      ]
     }
   ],
   "validation": [
@@ -1076,9 +1159,20 @@
         "Stage 08 exit evidence passed for self-contained packaging, clean install, upgrade, rollback, bounded uninstall, per-user/no-admin surface, Firefox-profile non-mutation, frozen identities/permissions, simulator exclusion, and content-free state.",
         "Mozilla signing is not claimed by CI; the production flow explicitly requires manual Firefox signature verification of the reviewed signed XPI."
       ]
+    },
+    {
+      "check": "Stage 09 benchmark infrastructure checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #45 and Workspace Control Validation #2423 both passed at c2e06d8b5efdffc3e35f17879651d0f058281463.",
+        "CI regression measurement and target collector infrastructure are validated without ChatGPT account access or content collection.",
+        "Complete UX-09 target-workstation acceptance is intentionally not claimed and remains the Stage-09 exit gate."
+      ]
     }
   ],
-  "blockers": [],
+  "blockers": [
+    "Stage 09 target-machine acceptance is blocked because no authorized connected target Windows operator workstation or self-hosted target runner is available to this executor. GitHub windows-latest is explicitly non-target evidence. Before Stage 10, execute the frozen UX-09 target matrix on the real operator workstation: 60s warm-up + 120s 1Hz steady-state windows, three Firefox/Chrome resource replicates with order alternation, Chrome Memory Saver disabled/recorded, five discard/restore replicates, and latency counts reuse=50, restore=30, create=30, cold-start=10, local-primitives=100; then evaluate every frozen budget and correct or explicitly escalate any failure."
+  ],
   "remaining_work": [
     "impl_09_performance_benchmark_execution: Execute UX-09 performance/resource benchmark",
     "impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials",
@@ -1086,8 +1180,8 @@
     "impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration",
     "impl_13_production_readiness_review: Integrated implementation review and promotion decision"
   ],
-  "next_safe_action": "Execute impl_09_performance_benchmark_execution from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Collect the UX-09 content-free target-machine latency/resource benchmark set and budget pass/fail findings. Correct or explicitly escalate any failing mechanical budget before usability or promotion. Do not begin impl_10 UX-11 human usability trials, impl_11 WebView2 promotion/comparison beyond the Stage-09 contract, impl_12 real-account calibration, or impl_13 production readiness review.",
+  "next_safe_action": "Run the validated Stage-09 target-workstation benchmark from checkpoint c2e06d8b5efdffc3e35f17879651d0f058281463 on an authorized connected Windows operator workstation. Use operator-bridge/performance/TARGET-RUN.md, operator-bridge/performance/stage09-target-evidence.schema.json, and operator-bridge/tools/run-stage09-target-firefox.ps1 as bounded inputs; complete the mandatory Firefox/Chrome three-replicate parity matrix, Chrome Memory Saver control, five discard/restore replicates, exact latency repetition counts including 10 cold starts, and aggregate frozen-budget evaluation. Do not begin impl_10 UX-11 usability trials, impl_11 WebView2 comparison/promotion, impl_12 real-account calibration, or impl_13 readiness review until Stage 09 is durably validated.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
-  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active.\n\n2026-11-10 STAGE 04 COMPLETE: Firefox MV3 BrowserPort adapter validated at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436. Operator Bridge Validation #12 and Workspace Control Validation #2390 passed SUCCESS. Node 24 mocked-browser suite passed 10/10, proving managed-only lifecycle, fixed reviewed worker URL, content-free sessions metadata, duplicate-command idempotency, generation fencing, discard safety, and raw-URL-to-origin-enum reduction. Stage 05 deterministic simulator/fake worker is active; no real-account behavior is claimed.\n\n2026-11-10 STAGE 05 COMPLETE: Deterministic simulator/fake worker validated at 8bf4c2b6d13dc9d917ee831828c718fbca57648a. Operator Bridge Validation #15 and Workspace Control Validation #2393 passed SUCCESS. The simulator build graph is separate from production, all 36 frozen UX-10 L0/L1 E2E obligations are catalog-covered, Simulator.Tests passed 38/38, traces are deterministic SHA-256, payload mismatch cannot ack, and generation/durable-event idempotency is enforced. Stage 06 real-helper + Firefox + fake-worker integration is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 06 COMPLETE: Real helper + Firefox + fake-worker integration validated at 8c0f97f23e181b850728b2b42c970b71d93c3991. Operator Bridge Validation #24 and Workspace Control Validation #2402 passed SUCCESS. Layer-2 real-helper Windows tests passed 5/5 with actual clipboard and Ctrl+B registration; Firefox mocked-browser tests passed 14/14; the real Firefox 159.0.1 Native Messaging Layer-3 run passed every Stage-06 predicate, including create/reuse/discard/restore, managed identity fail-closed behavior, adapter parity, and zero background clipboard/browser effects. The Firefox tabs.discard return-semantics defect found by the real-browser run was corrected and regression-tested. Stage 07 recovery/fault closure is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 07 COMPLETE: Recovery/fault closure validated at 7d8bd99bbd23eafa834a0a676d86156382ad8c1e. Operator Bridge Validation #29 and Workspace Control Validation #2407 passed SUCCESS. The frozen 14-fixture recovery/crash/auth/generation catalog is covered at all required implemented L0-L3 layers. Layer-2 real-helper tests passed 12/12 total, including explicit unknown-create fail-closed/no-duplicate coverage; real Firefox 159.0.1 Native Messaging recovery integration passed tab/browser/adapter loss, auth refresh, unknown-create, and cold-restart predicates. Recovery state persists content-free completed steps, generation advancement is exact-once, stale old-generation evidence cannot advance current state, cold restart does not replay local cache, and Ctrl+B during blocking recovery cannot claim or stage a worker packet. Stage 08 per-user packaging/install/update/rollback is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 07 PROMOTION VERIFIED: Exact durable promotion head 5166fdf44af3548ae1f9bc3e773f948f22f212e1 passed Operator Bridge Validation #30 and Workspace Control Validation #2408. The authoritative resume checkpoint and derived handoff were corrected to this exact head. Stage 08 per-user packaging/install/update/rollback remains active.\n\n2026-11-10 STAGE 08 IMPLEMENTATION COMPLETE: Per-user packaging/install/update/rollback validated at cac009bd18960c01f9dc4d2a20bac34eb6a0a175. Operator Bridge Validation #34 and Workspace Control Validation #2412 passed SUCCESS. Self-contained win-x64 packaging, clean install, HKCU native-host registration, upgrade, previous helper/XPI rollback, owned-scope uninstall, no-admin surface, unrelated filesystem/registry/profile preservation, frozen extension/native-host identities, simulator exclusion, and content-free state all passed. CI uses an explicitly marked unsigned fixture only and does not claim Mozilla signing; the production procedure requires manual Firefox signature verification. Stage-08 durable promotion metadata is being committed; Stage 09 must not execute until that promotion head itself passes both validators.\n\n2026-11-10 STAGE 08 PROMOTION VERIFIED: Exact durable promotion head 26284233edb00c4a7005dac3d5c52b2add814156 passed Operator Bridge Validation #36 and Workspace Control Validation #2414. The authoritative restore checkpoint, Stage-08 checkpoint, traceability record, and derived handoff are corrected to this exact promotion head while preserving implementation head cac009bd18960c01f9dc4d2a20bac34eb6a0a175 and its #34/#2412 evidence. Stage 09 UX-09 performance benchmark execution is now the next authorized stage."
+  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active.\n\n2026-11-10 STAGE 04 COMPLETE: Firefox MV3 BrowserPort adapter validated at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436. Operator Bridge Validation #12 and Workspace Control Validation #2390 passed SUCCESS. Node 24 mocked-browser suite passed 10/10, proving managed-only lifecycle, fixed reviewed worker URL, content-free sessions metadata, duplicate-command idempotency, generation fencing, discard safety, and raw-URL-to-origin-enum reduction. Stage 05 deterministic simulator/fake worker is active; no real-account behavior is claimed.\n\n2026-11-10 STAGE 05 COMPLETE: Deterministic simulator/fake worker validated at 8bf4c2b6d13dc9d917ee831828c718fbca57648a. Operator Bridge Validation #15 and Workspace Control Validation #2393 passed SUCCESS. The simulator build graph is separate from production, all 36 frozen UX-10 L0/L1 E2E obligations are catalog-covered, Simulator.Tests passed 38/38, traces are deterministic SHA-256, payload mismatch cannot ack, and generation/durable-event idempotency is enforced. Stage 06 real-helper + Firefox + fake-worker integration is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 06 COMPLETE: Real helper + Firefox + fake-worker integration validated at 8c0f97f23e181b850728b2b42c970b71d93c3991. Operator Bridge Validation #24 and Workspace Control Validation #2402 passed SUCCESS. Layer-2 real-helper Windows tests passed 5/5 with actual clipboard and Ctrl+B registration; Firefox mocked-browser tests passed 14/14; the real Firefox 159.0.1 Native Messaging Layer-3 run passed every Stage-06 predicate, including create/reuse/discard/restore, managed identity fail-closed behavior, adapter parity, and zero background clipboard/browser effects. The Firefox tabs.discard return-semantics defect found by the real-browser run was corrected and regression-tested. Stage 07 recovery/fault closure is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 07 COMPLETE: Recovery/fault closure validated at 7d8bd99bbd23eafa834a0a676d86156382ad8c1e. Operator Bridge Validation #29 and Workspace Control Validation #2407 passed SUCCESS. The frozen 14-fixture recovery/crash/auth/generation catalog is covered at all required implemented L0-L3 layers. Layer-2 real-helper tests passed 12/12 total, including explicit unknown-create fail-closed/no-duplicate coverage; real Firefox 159.0.1 Native Messaging recovery integration passed tab/browser/adapter loss, auth refresh, unknown-create, and cold-restart predicates. Recovery state persists content-free completed steps, generation advancement is exact-once, stale old-generation evidence cannot advance current state, cold restart does not replay local cache, and Ctrl+B during blocking recovery cannot claim or stage a worker packet. Stage 08 per-user packaging/install/update/rollback is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 07 PROMOTION VERIFIED: Exact durable promotion head 5166fdf44af3548ae1f9bc3e773f948f22f212e1 passed Operator Bridge Validation #30 and Workspace Control Validation #2408. The authoritative resume checkpoint and derived handoff were corrected to this exact head. Stage 08 per-user packaging/install/update/rollback remains active.\n\n2026-11-10 STAGE 08 IMPLEMENTATION COMPLETE: Per-user packaging/install/update/rollback validated at cac009bd18960c01f9dc4d2a20bac34eb6a0a175. Operator Bridge Validation #34 and Workspace Control Validation #2412 passed SUCCESS. Self-contained win-x64 packaging, clean install, HKCU native-host registration, upgrade, previous helper/XPI rollback, owned-scope uninstall, no-admin surface, unrelated filesystem/registry/profile preservation, frozen extension/native-host identities, simulator exclusion, and content-free state all passed. CI uses an explicitly marked unsigned fixture only and does not claim Mozilla signing; the production procedure requires manual Firefox signature verification. Stage-08 durable promotion metadata is being committed; Stage 09 must not execute until that promotion head itself passes both validators.\n\n2026-11-10 STAGE 08 PROMOTION VERIFIED: Exact durable promotion head 26284233edb00c4a7005dac3d5c52b2add814156 passed Operator Bridge Validation #36 and Workspace Control Validation #2414. The authoritative restore checkpoint, Stage-08 checkpoint, traceability record, and derived handoff are corrected to this exact promotion head while preserving implementation head cac009bd18960c01f9dc4d2a20bac34eb6a0a175 and its #34/#2412 evidence. Stage 09 UX-09 performance benchmark execution is now the next authorized stage.\n\n2026-11-10 STAGE 09 INFRASTRUCTURE CHECKPOINT: Exact checkpoint c2e06d8b5efdffc3e35f17879651d0f058281463 passed Operator Bridge Validation #45 and Workspace Control Validation #2423. The account-free performance harness, strict target-evidence schema, non-target CI regression smoke, Firefox target collector, bounded production WorkspaceWorkers cold-start launcher, and exact 10-trial target cold-start probe are implemented and validated. GitHub-hosted Windows evidence remains explicitly non-target and cannot satisfy UX-09 acceptance. Stage 09 remains IN_PROGRESS and Stage 10 remains blocked until the complete frozen benchmark is executed on the authorized target Windows operator workstation and every mechanical budget is evaluated."
 }

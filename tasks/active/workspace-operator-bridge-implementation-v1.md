@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 26284233edb00c4a7005dac3d5c52b2add814156
+- Remote checkpoint: c2e06d8b5efdffc3e35f17879651d0f058281463
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_09_performance_benchmark_execution from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Collect the UX-09 content-free target-machine latency/resource benchmark set and budget pass/fail findings. Correct or explicitly escalate any failing mechanical budget before usability or promotion. Do not begin impl_10 UX-11 human usability trials, impl_11 WebView2 promotion/comparison beyond the Stage-09 contract, impl_12 real-account calibration, or impl_13 production readiness review.
+Run the validated Stage-09 target-workstation benchmark from checkpoint c2e06d8b5efdffc3e35f17879651d0f058281463 on an authorized connected Windows operator workstation. Use operator-bridge/performance/TARGET-RUN.md, operator-bridge/performance/stage09-target-evidence.schema.json, and operator-bridge/tools/run-stage09-target-firefox.ps1 as bounded inputs; complete the mandatory Firefox/Chrome three-replicate parity matrix, Chrome Memory Saver control, five discard/restore replicates, exact latency repetition counts including 10 cold starts, and aggregate frozen-budget evaluation. Do not begin impl_10 UX-11 usability trials, impl_11 WebView2 comparison/promotion, impl_12 real-account calibration, or impl_13 readiness review until Stage 09 is durably validated.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ Execute impl_09_performance_benchmark_execution from architecture/workspace-sema
 
 ## Blockers / gates
 
-- None.
+- Stage 09 target-machine acceptance is blocked because no authorized connected target Windows operator workstation or self-hosted target runner is available to this executor. GitHub windows-latest is explicitly non-target evidence. Before Stage 10, execute the frozen UX-09 target matrix on the real operator workstation: 60s warm-up + 120s 1Hz steady-state windows, three Firefox/Chrome resource replicates with order alternation, Chrome Memory Saver disabled/recorded, five discard/restore replicates, and latency counts reuse=50, restore=30, create=30, cold-start=10, local-primitives=100; then evaluate every frozen budget and correct or explicitly escalate any failure.
 
 ## Fresh-chat initialization
 
