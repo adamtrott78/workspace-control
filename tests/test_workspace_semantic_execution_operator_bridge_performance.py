@@ -95,6 +95,13 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn('evidence_class -ne "GITHUB_HOSTED_WINDOWS_CI"', script)
         self.assertIn("target_contract_complete", script)
         self.assertIn("web-ext@10.8.0", script)
+        self.assertIn("STAGE09_CI_PREDECESSOR_FIREFOX_CLEANUP", script)
+        self.assertIn("Stop-Process -Force", script)
+        contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
+        self.assertIn(
+            "unrelated same-name browser process is present",
+            contract["trial_validity"]["reject_if"],
+        )
 
     def test_frozen_contract_counts_and_budgets_are_unchanged(self):
         contract = json.loads(CONTRACT.read_text(encoding="utf-8"))

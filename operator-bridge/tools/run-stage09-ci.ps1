@@ -31,8 +31,17 @@ if (-not (Test-Path $firefox)) {
   }
 }
 
-if (Get-Process firefox -ErrorAction SilentlyContinue) {
-  throw "Stage 09 CI smoke requires no pre-existing Firefox process."
+$existingFirefox = @(Get-Process firefox -ErrorAction SilentlyContinue)
+Write-Host ("STAGE09_CI_PREDECESSOR_FIREFOX_CLEANUP=" + $existingFirefox.Count)
+if ($existingFirefox.Count -gt 0) {
+  $existingFirefox | Stop-Process -Force -ErrorAction SilentlyContinue
+  $cleanupDeadline = (Get-Date).AddSeconds(10)
+  while ((Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $cleanupDeadline) {
+    Start-Sleep -Milliseconds 100
+  }
+  if (Get-Process firefox -ErrorAction SilentlyContinue) {
+    throw "Unable to establish isolated Firefox CI baseline after predecessor cleanup."
+  }
 }
 
 $work = Join-Path $env:RUNNER_TEMP ("workspace-operator-stage09-" + [Guid]::NewGuid().ToString("N"))
