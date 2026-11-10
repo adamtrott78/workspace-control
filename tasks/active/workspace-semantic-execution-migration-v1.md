@@ -74,7 +74,7 @@ operator_ux_design
 
 ## Next safe action
 
-Begin UX-05 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: specify Ctrl+B as the single global scheduler command, including bridge ON/OFF behavior, rapid/double press semantics, busy/cold-start behavior, exact clipboard replacement timing, optional prior-clipboard restoration policy, no-work behavior, judgment/recovery behavior, and invariants preventing duplicate worker dispatch.
+Begin UX-06 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: design the persistent tray indicator and operator-console information architecture, including primary/secondary counts, status hierarchy, menu commands, judgment/recovery prominence, low-fidelity wireframes, notification policy, and what detail remains hidden unless debugging.
 
 ## Remaining work
 
