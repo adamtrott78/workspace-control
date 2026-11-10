@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>WorkspaceControl.OperatorBridge.Simulator</RootNamespace>
+    <AssemblyName>WorkspaceOperator.Simulator</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../src/SharedContracts/SharedContracts.csproj" />
+  </ItemGroup>
+</Project>

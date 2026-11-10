@@ -6,11 +6,11 @@ namespace WorkspaceControl.OperatorBridge.Tests;
 public sealed class BootstrapStateTests
 {
     [TestMethod]
-    public void StageFourFirefoxMv3AdapterIsActive()
+    public void StageFiveSimulatorFakeWorkerIsActive()
     {
         Assert.IsTrue(
             string.Equals(
-                "IMPL_04_FIREFOX_MV3_ADAPTER",
+                "IMPL_05_SIMULATOR_FAKE_WORKER",
                 BootstrapState.Stage,
                 StringComparison.Ordinal));
     }

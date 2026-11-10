@@ -52,6 +52,18 @@ jobs:
         shell: pwsh
         run: node --test operator-bridge/tests/FirefoxAdapter.Tests/firefox_adapter.test.js
 
+      - name: Restore simulator solution
+        shell: pwsh
+        run: dotnet restore operator-bridge/WorkspaceOperatorBridge.Simulator.slnx
+
+      - name: Build simulator solution
+        shell: pwsh
+        run: dotnet build operator-bridge/WorkspaceOperatorBridge.Simulator.slnx --configuration Release --no-restore
+
+      - name: Test deterministic simulator
+        shell: pwsh
+        run: dotnet test operator-bridge/WorkspaceOperatorBridge.Simulator.slnx --configuration Release --no-build
+
       - name: Restore
         shell: pwsh
         run: dotnet restore operator-bridge/WorkspaceOperatorBridge.slnx

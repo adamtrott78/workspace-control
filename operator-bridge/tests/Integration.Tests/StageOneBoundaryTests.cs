@@ -3,14 +3,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace WorkspaceControl.OperatorBridge.Integration.Tests;
 
 [TestClass]
-public sealed class StageFourBoundaryTests
+public sealed class StageFiveBoundaryTests
 {
     [TestMethod]
-    public void FirefoxMv3AdapterStageIsExplicit()
+    public void SimulatorFakeWorkerStageIsExplicit()
     {
         Assert.IsTrue(
             string.Equals(
-                "IMPL_04_FIREFOX_MV3_ADAPTER",
+                "IMPL_05_SIMULATOR_FAKE_WORKER",
                 BootstrapState.Stage,
                 StringComparison.Ordinal));
     }
