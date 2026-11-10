@@ -238,10 +238,20 @@
         "Patched upgrade operator restores node_modules from the pre-upgrade runtime backup and verifies ext-apps/sdk/zod before service start.",
         "Regression test added at exact candidate head 857bc13bf00d785f7af4be462c12b0ffea62ebfd; CI requested."
       ]
+    },
+    {
+      "check": "Local MCP initialize/tools discovery",
+      "result": "PASS",
+      "evidence": [
+        "Local mTLS initialize returned serverInfo name=workspace-shell version=0.1.0 with no error.",
+        "Local mTLS tools/list returned exactly workspace_shell_inspect, workspace_shell_exec, workspace_shell_run_reviewed_helper, workspace_shell_receipt.",
+        "workspace_shell_exec target enum contains workspace-control and PADataset.",
+        "workspace_shell_exec profile enum contains git-read, pytest-bounded, validation-bounded, file-list, file-read, file-hash, research-bounded."
+      ]
     }
   ],
   "blockers": [
-    "Live workspace-shell-mcp.service crash-loop root cause identified: multirepo upgrade replaced the runtime plugin directory with Git-tracked source but did not restore the accepted node_modules dependency closure. server.js therefore fails at startup with ERR_MODULE_NOT_FOUND for @modelcontextprotocol/ext-apps. Tunnel remains healthy and resolves main to 127.0.0.1:8797."
+    "ChatGPT Refresh tools still reports 'Couldn't update the app' despite a healthy local MCP frontend. Local initialize/tools-list proves the server schema is correct; remaining stale/failing layer is the OpenAI Secure MCP Tunnel/App discovery connection."
   ],
   "remaining_work": [
     "Capture concise workspace-shell-mcp.service startup exception; do not collect additional tunnel logs unless the MCP frontend becomes healthy but discovery still fails.",
@@ -252,7 +262,7 @@
     "Hand control back to the MTH602 Stage 00 provenance recovery task.",
     "Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema."
   ],
-  "next_safe_action": "Restore the accepted node_modules closure from the retained 20261110T174933Z upgrade backup into /opt/workspace-shell/runtime/plugins/workspace-shell/node_modules, restart workspace-shell-mcp.service, verify a listener on 127.0.0.1:8797, then use Manage -> Refresh tools. The durable upgrade operator has been patched to preserve and verify the dependency closure; exact-head validation is running for 857bc13bf00d785f7af4be462c12b0ffea62ebfd.",
+  "next_safe_action": "Restart only workspace-shell-tunnel.service, verify it returns active and its readiness endpoint is healthy, then retry Manage -> Refresh tools on the existing Workspace Shell app. Do not restart or reinstall the MCP frontend unless tunnel restart fails to restore discovery.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded."
