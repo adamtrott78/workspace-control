@@ -1,7 +1,9 @@
 import importlib
 import json
 from pathlib import Path
+import subprocess
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,6 +74,48 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
                 "research-bounded",
                 ["papers/not-authorized.py"],
             )
+
+    def test_task_capsules_validate_and_handoffs_match_renderer(self):
+        for stem in (
+            "workspace-shell-multirepo-research-v1",
+            "mth602-final-multisurrogate-dqnguard-v1",
+        ):
+            task = ROOT / "tasks" / "active" / f"{stem}.json"
+            handoff = task.with_suffix(".md")
+            validated = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "scripts" / "workspace_control.py"),
+                    "task-validate",
+                    "--file",
+                    str(task),
+                    "--json",
+                ],
+                cwd=ROOT,
+                check=False,
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(validated.returncode, 0, validated.stdout + validated.stderr)
+            with tempfile.TemporaryDirectory() as td:
+                rendered = Path(td) / "handoff.md"
+                cp = subprocess.run(
+                    [
+                        sys.executable,
+                        str(ROOT / "scripts" / "workspace_control.py"),
+                        "task-render",
+                        "--file",
+                        str(task),
+                        "--output",
+                        str(rendered),
+                    ],
+                    cwd=ROOT,
+                    check=False,
+                    text=True,
+                    capture_output=True,
+                )
+                self.assertEqual(cp.returncode, 0, cp.stdout + cp.stderr)
+                self.assertEqual(handoff.read_text(), rendered.read_text())
 
     def test_install_and_upgrade_pin_padataset_snapshot(self):
         render = (PLUGIN / "install" / "render_install.py").read_text()
