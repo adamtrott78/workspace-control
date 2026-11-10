@@ -14,6 +14,8 @@ public sealed class BrowserCommandHub : IBrowserAdapterConnection
     private readonly BridgeState _bridgeState;
     private readonly string _helperInstanceId;
     private readonly IDiagnosticsSink _diagnostics;
+    private readonly string? _requiredAdapterKind;
+    private readonly string? _requiredAdapterVersion;
     private readonly object _connectionGate = new();
     private readonly SemaphoreSlim _writeGate = new(1, 1);
     private readonly ConcurrentDictionary<string, TaskCompletionSource<ProtocolEnvelope>> _pending =
@@ -24,10 +26,14 @@ public sealed class BrowserCommandHub : IBrowserAdapterConnection
 
     public BrowserCommandHub(
         BridgeState bridgeState,
-        IDiagnosticsSink diagnostics)
+        IDiagnosticsSink diagnostics,
+        string? requiredAdapterKind = null,
+        string? requiredAdapterVersion = null)
     {
         _bridgeState = bridgeState;
         _diagnostics = diagnostics;
+        _requiredAdapterKind = requiredAdapterKind;
+        _requiredAdapterVersion = requiredAdapterVersion;
         _helperInstanceId = Guid.NewGuid().ToString("N");
     }
 
@@ -131,6 +137,46 @@ public sealed class BrowserCommandHub : IBrowserAdapterConnection
                         hello.MessageId,
                         hello.CorrelationId),
                     cancellationToken);
+                return;
+            }
+
+            var adapterKind = hello.Payload.Value.TryGetProperty(
+                "adapter_kind",
+                out var adapterKindProperty)
+                ? adapterKindProperty.GetString()
+                : null;
+            var adapterVersion = hello.Payload.Value.TryGetProperty(
+                "adapter_version",
+                out var adapterVersionProperty)
+                ? adapterVersionProperty.GetString()
+                : null;
+
+            if (
+                (_requiredAdapterKind is not null &&
+                 !string.Equals(
+                     adapterKind,
+                     _requiredAdapterKind,
+                     StringComparison.Ordinal)) ||
+                (_requiredAdapterVersion is not null &&
+                 !string.Equals(
+                     adapterVersion,
+                     _requiredAdapterVersion,
+                     StringComparison.Ordinal)))
+            {
+                await WriteAsync(
+                    stream,
+                    ProtocolMessageFactory.Error(
+                        _helperInstanceId,
+                        "ADAPTER_IDENTITY_REJECTED",
+                        hello.MessageId,
+                        hello.CorrelationId),
+                    cancellationToken);
+                _diagnostics.Write(new DiagnosticEvent(
+                    DateTimeOffset.UtcNow,
+                    "browser_command_hub",
+                    "adapter_identity_rejected",
+                    "REJECTED",
+                    NormalizedError: "ADAPTER_IDENTITY_REJECTED"));
                 return;
             }
 
