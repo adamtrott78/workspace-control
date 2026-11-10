@@ -3,26 +3,79 @@ set -euo pipefail
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 
-EXPECTED_UPGRADE_SHA="${1:-}"
-EXPECTED_PAD_EXEC_SHA="${2:-17e1147614f27702e43565089d618182ff71c5af}"
+EXPECTED_AUTHORITY_SHA="${1:-}"
+EXPECTED_EXEC_SHA="${2:-}"
+EXPECTED_PAD_EXEC_SHA="${3:-17e1147614f27702e43565089d618182ff71c5af}"
 PAD_EVIDENCE_ROOT="${PADATASET_CHECKOUT:-$HOME/adamArchives/Adam/varMax/PADataset}"
 PAD_EXEC_REPO_URL="https://github.com/adamtrott78/PADataset.git"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP="/var/lib/workspace-shell/upgrades/padataset-multirepo-v1-${STAMP}"
+AUTHORITY_ROOT="/etc/workspace-shell/authority"
 EVIDENCE_MOUNT="/srv/workspace-shell/PADataset-evidence"
 SERVICES=(workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service)
 
-[[ "$EXPECTED_UPGRADE_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "usage: bash upgrade_multirepo_padataset_v1.sh <expected-workspace-control-sha> [expected-padataset-execution-sha]"
+[[ "$EXPECTED_AUTHORITY_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "usage: bash upgrade_multirepo_padataset_v1.sh <expected-authority-sha> <expected-workspace-control-exec-sha> [expected-padataset-execution-sha]"
+[[ "$EXPECTED_EXEC_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "expected workspace-control execution SHA must be full lowercase SHA"
 [[ "$EXPECTED_PAD_EXEC_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "expected PADataset execution SHA must be full lowercase SHA"
 [[ -d "$ROOT/.git" || -f "$ROOT/.git" ]] || fail "upgrade script must run from a workspace-control Git checkout"
 [[ -d "$PAD_EVIDENCE_ROOT/.git" || -f "$PAD_EVIDENCE_ROOT/.git" ]] || fail "historical PADataset checkout not found at $PAD_EVIDENCE_ROOT"
 command -v mountpoint >/dev/null || fail "mountpoint is required"
 command -v findmnt >/dev/null || fail "findmnt is required"
+command -v python3 >/dev/null || fail "python3 is required"
 
-UPGRADE_SHA="$(git -C "$ROOT" rev-parse HEAD)"
-[[ "$UPGRADE_SHA" == "$EXPECTED_UPGRADE_SHA" ]] || fail "workspace-control HEAD $UPGRADE_SHA != expected $EXPECTED_UPGRADE_SHA"
-[[ -z "$(git -C "$ROOT" status --porcelain=v1 --untracked-files=normal)" ]] || fail "workspace-control upgrade checkout must be clean"
+AUTHORITY_SHA="$(git -C "$ROOT" rev-parse HEAD)"
+[[ "$AUTHORITY_SHA" == "$EXPECTED_AUTHORITY_SHA" ]] || fail "workspace-control authority HEAD $AUTHORITY_SHA != expected $EXPECTED_AUTHORITY_SHA"
+[[ -z "$(git -C "$ROOT" status --porcelain=v1 --untracked-files=normal)" ]] || fail "workspace-control authority checkout must be clean"
+
+LIVE_AUTHORITY_ROOT="$(sudo python3 - <<'PY'
+import json
+from pathlib import Path
+cfg = json.loads(Path("/etc/workspace-shell/frontend.json").read_text(encoding="utf-8"))
+value = cfg.get("authority_root")
+if not isinstance(value, str) or not value:
+    raise SystemExit("frontend authority_root missing")
+print(value)
+PY
+)"
+[[ "$LIVE_AUTHORITY_ROOT" == "$AUTHORITY_ROOT" ]] || fail "live frontend authority_root $LIVE_AUTHORITY_ROOT != expected independent authority root $AUTHORITY_ROOT"
+
+python3 - "$ROOT" "$EXPECTED_EXEC_SHA" "$EXPECTED_PAD_EXEC_SHA" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+expected_exec = sys.argv[2]
+expected_pad = sys.argv[3]
+
+def load(task_id):
+    path = root / "tasks" / "active" / f"{task_id}.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if data.get("task_id") != task_id:
+        raise SystemExit(f"{task_id}: task_id mismatch")
+    if data.get("status") != "IN_PROGRESS":
+        raise SystemExit(f"{task_id}: status must be IN_PROGRESS")
+    return data
+
+def checkpoint(task, repository):
+    for entry in task.get("repositories", []):
+        if entry.get("name") == repository:
+            value = (entry.get("remote") or {}).get("checkpoint_sha")
+            if isinstance(value, str):
+                return value
+    return None
+
+shell = load("workspace-shell-multirepo-research-v1")
+research = load("mth602-final-multisurrogate-dqnguard-v1")
+if checkpoint(shell, "workspace-control") != expected_exec:
+    raise SystemExit("workspace-shell task does not bind expected workspace-control execution SHA")
+if checkpoint(shell, "PADataset") != expected_pad:
+    raise SystemExit("workspace-shell task does not bind expected PADataset execution SHA")
+if checkpoint(research, "PADataset") != expected_pad:
+    raise SystemExit("MTH602 task does not bind expected PADataset execution SHA")
+print("DURABLE_TASK_BINDINGS=PASS")
+PY
 
 EVIDENCE_BRANCH="$(git -C "$PAD_EVIDENCE_ROOT" branch --show-current)"
 EVIDENCE_SHA="$(git -C "$PAD_EVIDENCE_ROOT" rev-parse HEAD)"
@@ -45,11 +98,19 @@ if sudo mountpoint -q "$EVIDENCE_MOUNT"; then
   fail "$EVIDENCE_MOUNT is already a mountpoint; refusing to replace an unknown evidence mount"
 fi
 
+WC_FETCH="$(mktemp -d /tmp/workspace-control-exec.XXXXXX)"
 PAD_FETCH="$(mktemp -d /tmp/padataset-exec.XXXXXX)"
 cleanup_tmp() {
-  rm -rf "$PAD_FETCH" >/dev/null 2>&1 || true
+  rm -rf "$WC_FETCH" "$PAD_FETCH" >/dev/null 2>&1 || true
 }
 trap cleanup_tmp EXIT
+
+echo "Materializing clean workspace-control execution source at exact SHA $EXPECTED_EXEC_SHA"
+git clone --no-checkout "$ROOT" "$WC_FETCH"
+git -C "$WC_FETCH" checkout --detach "$EXPECTED_EXEC_SHA"
+git -C "$WC_FETCH" remote remove origin >/dev/null 2>&1 || true
+[[ "$(git -C "$WC_FETCH" rev-parse HEAD)" == "$EXPECTED_EXEC_SHA" ]] || fail "workspace-control execution checkout SHA mismatch"
+[[ -z "$(git -C "$WC_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] || fail "workspace-control execution checkout unexpectedly dirty"
 
 echo "Materializing clean PADataset execution source at exact SHA $EXPECTED_PAD_EXEC_SHA"
 git clone --filter=blob:none --no-checkout "$PAD_EXEC_REPO_URL" "$PAD_FETCH"
@@ -92,6 +153,7 @@ sudo mkdir -p "$BACKUP"
 sudo chmod 0700 "$BACKUP"
 
 for p in \
+  "$AUTHORITY_ROOT" \
   /srv/workspace-shell/workspace-control \
   /srv/workspace-shell/PADataset \
   /opt/workspace-shell/runtime/plugins/workspace-shell \
@@ -126,6 +188,7 @@ rollback() {
     fi
   }
 
+  restore "$AUTHORITY_ROOT"
   restore /srv/workspace-shell/workspace-control
   restore /srv/workspace-shell/PADataset
   restore /opt/workspace-shell/runtime/plugins/workspace-shell
@@ -142,20 +205,25 @@ trap rollback EXIT
 
 sudo systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
 
+AUTH_NEXT="$AUTHORITY_ROOT.next.$$"
 WC_NEXT="/srv/workspace-shell/workspace-control.next.$$"
 PAD_NEXT="/srv/workspace-shell/PADataset.next.$$"
-sudo rm -rf "$WC_NEXT" "$PAD_NEXT"
-sudo mkdir -p "$WC_NEXT" "$PAD_NEXT"
-sudo cp -a --reflink=auto "$ROOT/." "$WC_NEXT/"
+sudo rm -rf "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
+sudo mkdir -p "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
+sudo cp -a --reflink=auto "$ROOT/." "$AUTH_NEXT/"
+sudo cp -a --reflink=auto "$WC_FETCH/." "$WC_NEXT/"
 sudo cp -a --reflink=auto "$PAD_FETCH/." "$PAD_NEXT/"
-sudo chown -R root:root "$WC_NEXT" "$PAD_NEXT"
-sudo chmod -R go-w "$WC_NEXT" "$PAD_NEXT"
+sudo chown -R root:root "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
+sudo chmod -R go-w "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
 
-[[ "$(sudo git -c safe.directory="$WC_NEXT" -C "$WC_NEXT" rev-parse HEAD)" == "$EXPECTED_UPGRADE_SHA" ]] || fail "workspace-control snapshot SHA mismatch"
+[[ "$(sudo git -c safe.directory="$AUTH_NEXT" -C "$AUTH_NEXT" rev-parse HEAD)" == "$EXPECTED_AUTHORITY_SHA" ]] || fail "workspace-control authority snapshot SHA mismatch"
+[[ "$(sudo git -c safe.directory="$WC_NEXT" -C "$WC_NEXT" rev-parse HEAD)" == "$EXPECTED_EXEC_SHA" ]] || fail "workspace-control execution snapshot SHA mismatch"
 [[ "$(sudo git -c safe.directory="$PAD_NEXT" -C "$PAD_NEXT" rev-parse HEAD)" == "$EXPECTED_PAD_EXEC_SHA" ]] || fail "PADataset execution snapshot SHA mismatch"
+[[ -z "$(sudo git -c safe.directory="$WC_NEXT" -C "$WC_NEXT" status --porcelain=v1 --untracked-files=normal)" ]] || fail "workspace-control execution snapshot is not clean"
 [[ -z "$(sudo git -c safe.directory="$PAD_NEXT" -C "$PAD_NEXT" status --porcelain=v1 --untracked-files=normal)" ]] || fail "PADataset execution snapshot is not clean"
 
-sudo rm -rf /srv/workspace-shell/workspace-control /srv/workspace-shell/PADataset
+sudo rm -rf "$AUTHORITY_ROOT" /srv/workspace-shell/workspace-control /srv/workspace-shell/PADataset
+sudo mv "$AUTH_NEXT" "$AUTHORITY_ROOT"
 sudo mv "$WC_NEXT" /srv/workspace-shell/workspace-control
 sudo mv "$PAD_NEXT" /srv/workspace-shell/PADataset
 
@@ -181,7 +249,7 @@ done
 
 sudo rm -rf "$RUNTIME_PLUGIN"
 sudo mkdir -p /opt/workspace-shell/runtime/plugins
-sudo cp -a "$ROOT/plugins/workspace-shell" "$RUNTIME_PLUGIN"
+sudo cp -a "$WC_FETCH/plugins/workspace-shell" "$RUNTIME_PLUGIN"
 sudo cp -a "$BACKUP_NODE_MODULES" "$RUNTIME_PLUGIN/node_modules"
 sudo chown -R root:root "$RUNTIME_PLUGIN"
 sudo chmod -R go-w "$RUNTIME_PLUGIN"
@@ -196,7 +264,7 @@ sudo chmod -R go-w "$RUNTIME_PLUGIN"
 )
 echo "RUNTIME_NODE_DEPENDENCIES=PASS"
 
-sudo install -o root -g root -m 0644 "$ROOT/plugins/workspace-shell/config/profiles.v1.json" /etc/workspace-shell/profiles.v1.json
+sudo install -o root -g root -m 0644 "$WC_FETCH/plugins/workspace-shell/config/profiles.v1.json" /etc/workspace-shell/profiles.v1.json
 
 sudo python3 - <<'PY'
 import json
@@ -237,7 +305,9 @@ done
 
 MCP_INIT="$(mktemp /tmp/workspace-shell-upgrade-init.XXXXXX.json)"
 MCP_TOOLS="$(mktemp /tmp/workspace-shell-upgrade-tools.XXXXXX.json)"
-trap 'rm -f "$MCP_INIT" "$MCP_TOOLS"; rollback' EXIT
+MCP_TASK_PRIMARY="$(mktemp /tmp/workspace-shell-upgrade-task-primary.XXXXXX.json)"
+MCP_TASK_DEPENDENT="$(mktemp /tmp/workspace-shell-upgrade-task-dependent.XXXXXX.json)"
+trap 'rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT"; rollback' EXIT
 
 sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
   --cacert /etc/workspace-shell/tunnel/ca.crt \
@@ -282,9 +352,64 @@ for value in ("file-list","file-read","file-hash","research-bounded"):
         raise SystemExit(f"workspace_shell_exec profile missing {value}")
 print("LOCAL_MCP_DISCOVERY=PASS")
 PY
-rm -f "$MCP_INIT" "$MCP_TOOLS"
+
+sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
+  --cacert /etc/workspace-shell/tunnel/ca.crt \
+  --cert /etc/workspace-shell/tunnel/client.crt \
+  --key /etc/workspace-shell/tunnel/client.key \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  --data-binary '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"workspace_shell_inspect","arguments":{"task_id":"workspace-shell-multirepo-research-v1","target":"workspace-shell","operation":"runtime_inventory"}}}' \
+  https://127.0.0.1:8797/mcp >"$MCP_TASK_PRIMARY"
+
+sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
+  --cacert /etc/workspace-shell/tunnel/ca.crt \
+  --cert /etc/workspace-shell/tunnel/client.crt \
+  --key /etc/workspace-shell/tunnel/client.key \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  --data-binary '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"workspace_shell_inspect","arguments":{"task_id":"mth602-final-multisurrogate-dqnguard-v1","target":"workspace-shell","operation":"runtime_inventory"}}}' \
+  https://127.0.0.1:8797/mcp >"$MCP_TASK_DEPENDENT"
+
+python3 - "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" <<'PY'
+import json
+import pathlib
+import sys
+
+def accepted(path, label):
+    payload = json.loads(pathlib.Path(path).read_text())
+    if payload.get("error") is not None:
+        raise SystemExit(f"{label} MCP error: {payload['error']}")
+    result = payload.get("result")
+    if not isinstance(result, dict) or result.get("isError") is True:
+        raise SystemExit(f"{label} tools/call failed: {payload}")
+    serialized = json.dumps(payload, sort_keys=True)
+    for marker in ("TASK_NOT_FOUND", "TASK_ID_MISMATCH", "AUTHORITY_READ_FAILED"):
+        if marker in serialized:
+            raise SystemExit(f"{label} authority gate failed with {marker}")
+    structured = result.get("structuredContent")
+    if isinstance(structured, dict) and structured.get("ok") is True:
+        return
+    for item in result.get("content", []):
+        if not isinstance(item, dict) or item.get("type") != "text":
+            continue
+        try:
+            value = json.loads(item.get("text", ""))
+        except Exception:
+            continue
+        if isinstance(value, dict) and value.get("ok") is True:
+            return
+    raise SystemExit(f"{label} did not return an ok=true tool result: {payload}")
+
+accepted(sys.argv[1], "workspace-shell-multirepo-research-v1")
+accepted(sys.argv[2], "mth602-final-multisurrogate-dqnguard-v1")
+print("LOCAL_TASK_AUTHORITY=PASS")
+PY
+
+rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT"
 trap rollback EXIT
 
+echo "WORKSPACE_CONTROL_AUTHORITY_SNAPSHOT=$(sudo git -c safe.directory="$AUTHORITY_ROOT" -C "$AUTHORITY_ROOT" rev-parse HEAD)"
 echo "WORKSPACE_CONTROL_SNAPSHOT=$(sudo git -c safe.directory=/srv/workspace-shell/workspace-control -C /srv/workspace-shell/workspace-control rev-parse HEAD)"
 echo "PADataset_EXECUTION_SNAPSHOT=$(sudo git -c safe.directory=/srv/workspace-shell/PADataset -C /srv/workspace-shell/PADataset rev-parse HEAD)"
 echo "PADataset_EVIDENCE_BRANCH=${EVIDENCE_BRANCH:-DETACHED}"
