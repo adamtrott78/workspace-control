@@ -4,7 +4,7 @@
   "title": "Workspace Shell multi-repo PADataset research access v1",
   "status": "IN_PROGRESS",
   "goal": "Extend the live Workspace Shell v1 lineage with a first-class PADataset target that supports exact-SHA/task-bound Git provenance, bounded read-only evidence inspection, and sandboxed network-denied research execution without exposing a generic shell or making the historical PADataset checkout writable.",
-  "execution_topology": "local",
+  "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-shell-mcp-v1",
   "current_stage": "implementation_and_validation",
   "acceptance_criteria": [
