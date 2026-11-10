@@ -74,7 +74,7 @@ operator_ux_design
 
 ## Next safe action
 
-Begin UX-01 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: enumerate every operator-visible journey and produce the human-readable journey catalog plus machine-readable typed flow catalog. Include the known case where new-tab reauthentication refreshes/invalidates all worker tabs, but leave its detailed recovery algorithm for UX-07.
+Begin UX-02 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define the operator subsystem system context and component/container architecture, assign single ownership for durable vs local state, specify ports/adapters and dependency direction, and write ADRs for the native-helper + Firefox WebExtension split, dedicated Firefox worker profile, and durable scheduler state vs local browser cache.
 
 ## Remaining work
 
