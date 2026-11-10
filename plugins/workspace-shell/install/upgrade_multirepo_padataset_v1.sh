@@ -191,7 +191,7 @@ done
 
 EVIDENCE_MOUNT_CREATED=0
 rollback() {
-  rc=$?
+  rc="$1"
   if [[ $rc -eq 0 ]]; then return; fi
   echo "Upgrade failed; attempting rollback from $BACKUP" >&2
   sudo systemctl stop "${SERVICES[@]}" >/dev/null 2>&1 || true
@@ -224,7 +224,7 @@ rollback() {
   cleanup_tmp
   exit "$rc"
 }
-trap rollback EXIT
+trap 'rollback "$?"' EXIT
 
 sudo systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
 
@@ -237,7 +237,10 @@ sudo cp -a --reflink=auto "$ROOT/." "$AUTH_NEXT/"
 sudo cp -a --reflink=auto "$WC_FETCH/." "$WC_NEXT/"
 sudo cp -a --reflink=auto "$PAD_FETCH/." "$PAD_NEXT/"
 sudo chown -R root:root "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
-sudo chmod -R go-w "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
+# mktemp creates 0700 roots and cp -a preserves those source-directory modes.
+# These snapshots are immutable inputs for unprivileged Workspace Shell principals,
+# so restore read/traverse while keeping group/other writes forbidden.
+sudo chmod -R a+rX,go-w "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
 
 [[ "$(sudo git -c safe.directory="$AUTH_NEXT" -C "$AUTH_NEXT" rev-parse HEAD)" == "$EXPECTED_AUTHORITY_SHA" ]] || fail "workspace-control authority snapshot SHA mismatch"
 [[ "$(sudo git -c safe.directory="$WC_NEXT" -C "$WC_NEXT" rev-parse HEAD)" == "$EXPECTED_EXEC_SHA" ]] || fail "workspace-control execution snapshot SHA mismatch"
@@ -328,16 +331,25 @@ MCP_INIT="$(mktemp /tmp/workspace-shell-upgrade-init.XXXXXX.json)"
 MCP_TOOLS="$(mktemp /tmp/workspace-shell-upgrade-tools.XXXXXX.json)"
 MCP_TASK_PRIMARY="$(mktemp /tmp/workspace-shell-upgrade-task-primary.XXXXXX.json)"
 MCP_TASK_DEPENDENT="$(mktemp /tmp/workspace-shell-upgrade-task-dependent.XXXXXX.json)"
-trap 'rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT"; rollback' EXIT
+trap 'rc=$?; rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT"; rollback "$rc"' EXIT
 
-sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
-  --cacert /etc/workspace-shell/tunnel/ca.crt \
-  --cert /etc/workspace-shell/tunnel/client.crt \
-  --key /etc/workspace-shell/tunnel/client.key \
-  -H 'content-type: application/json' \
-  -H 'accept: application/json, text/event-stream' \
-  --data-binary '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"workspace-shell-upgrade","version":"0.1.0"}}}' \
-  https://127.0.0.1:8797/mcp >"$MCP_INIT"
+MCP_READY=0
+for attempt in $(seq 1 20); do
+  if sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 2 \
+    --cacert /etc/workspace-shell/tunnel/ca.crt \
+    --cert /etc/workspace-shell/tunnel/client.crt \
+    --key /etc/workspace-shell/tunnel/client.key \
+    -H 'content-type: application/json' \
+    -H 'accept: application/json, text/event-stream' \
+    --data-binary '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"workspace-shell-upgrade","version":"0.1.0"}}}' \
+    https://127.0.0.1:8797/mcp >"$MCP_INIT"; then
+    MCP_READY=1
+    break
+  fi
+  sleep 1
+done
+[[ "$MCP_READY" == "1" ]] || fail "workspace-shell MCP did not become ready on 127.0.0.1:8797 after bounded startup wait"
+echo "LOCAL_MCP_READY=PASS"
 
 sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
   --cacert /etc/workspace-shell/tunnel/ca.crt \
@@ -428,7 +440,7 @@ print("LOCAL_TASK_AUTHORITY=PASS")
 PY
 
 rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT"
-trap rollback EXIT
+trap 'rollback "$?"' EXIT
 
 echo "WORKSPACE_CONTROL_AUTHORITY_SNAPSHOT=$(sudo git -c safe.directory="$AUTHORITY_ROOT" -C "$AUTHORITY_ROOT" rev-parse HEAD)"
 echo "WORKSPACE_CONTROL_SNAPSHOT=$(sudo git -c safe.directory=/srv/workspace-shell/workspace-control -C /srv/workspace-shell/workspace-control rev-parse HEAD)"
