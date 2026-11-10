@@ -175,8 +175,14 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
 
     def test_workflow_has_opt_in_exact_head_self_hosted_target_job(self):
         workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("repair_target_profile:", workflow)
         self.assertIn("run_target_preflight:", workflow)
         self.assertIn("run_target_benchmark:", workflow)
+        self.assertIn("stage09-profile-repair", workflow)
+        self.assertIn("target-profile-repair:", workflow)
+        self.assertIn("STAGE09_TARGET_PROFILE_REPAIR=PASS", workflow)
+        self.assertIn("-InteractiveInstall", workflow)
+        self.assertIn("-VerifyOnly", workflow)
         self.assertIn("stage09-preflight", workflow)
         self.assertIn("target-preflight:", workflow)
         self.assertIn("-PreflightOnly", workflow)
