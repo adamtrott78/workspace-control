@@ -36,25 +36,19 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Hold all scientific GPU execution. Capture one bounded read-only research-engine/gpu controller journal snapshot to classify the exact crash-loop error while implementing controller-reliability-hardening-v1 on branch controller-reliability-hardening-v1. No live restart/reset/reconcile/controller installation is authorized until the implementation batch passes full validation and the activation boundary is reviewed.
+After fresh independent review acceptance, execute exactly one bounded Lambda operator transaction: verify controller SHA256=9a262495d8c52877ad79d852dbd2a8987961dd0470c895cb39b45eb896590ed9; controller unit SHA256=76a6d05139cc38c43f474ea823cfd88514d127b9cacaf783f46a251410ad7831; maintenance service SHA256=6f37085b0b619768ef927e16c4d5e42e01090b71a7a32305b19b6e5a4cfb167c; provisioner Git blob=f0173ec2e8749699a5c94abea6d2270aa19a4387; runtime Git blob=5803ba1fedbcd66e3c9058b9d3cd32740596baad; workspace-control CPU inactive, research-engine CPU/GPU inactive, PADataset CPU/GPU active, provisioner and maintenance active, and no active transient execution; then start only workspace-ci-controller@workspace-control-cpu.service. No reset/reconcile/retrigger/research-engine mutation is authorized.
 
 ## Remaining work
 
-- Complete controller reliability hardening v1 before resuming the local-reasoner GPU bakeoff.
-- Classify the exact current research-engine/gpu crash-loop error from a bounded read-only journal snapshot and freeze it as regression evidence.
-- Implement and validate admission ordering, recovery-state lifecycle, state-file ownership, stable restart certification, and restart-storm containment.
-- Run full workspace-control validation on the complete hardening batch.
-- Perform the owning workflow's final authority-sensitive activation review only once the implementation batch is stable; do not reintroduce iterative independent-review loops during ordinary implementation.
-- Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
-- After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
-- Then remove routine hosted-runner dependence only after private-repository steady-state CI is proven under reviewed boundaries.
-- Leave GitHub organization migration, capacity widening, maintenance-command widening, and workspace-shell-mcp-v1 paused until their own gates.
+- Obtain fresh authority-sensitive review of the exact 2026-11-10 start-only recovery boundary.
+- On Lambda, run one fail-closed preflight that verifies known-good installed identities and service/lane state, then start only workspace-ci-controller@workspace-control-cpu.service.
+- Use Workspace Shell unit_state and GitHub Actions evidence to verify controller health and run #389 acquisition/completion.
+- Do not reset/reconcile/recreate scale sets, touch research-engine recovery state, or widen admission/capacity.
 
 ## Blockers / gates
 
-- No live controller/runtime mutation is authorized by review_automation closure or dogfood.
-- The next stage must remain separately reviewed before any automatic reconcile-controller startup, P2 admission widening, hosted-runner dependency removal, maintenance widening, capacity widening, or organization migration.
-- The merged review automation must prove end-to-end request creation and disposition consumption on this state-only closure PR before routine reliance.
+- Fresh authority-sensitive review is required before today’s start-only controller mutation; historical recovery authority is retained as evidence but is not treated as perpetual execution authority.
+- Operator preflight must prove exact known-good installed controller/unit/maintenance identities, control-small provisioner/runtime identities, healthy supporting services, required inactive research lanes, and no active transient execution before starting workspace-control CPU.
 
 ## Fresh-chat initialization
 
