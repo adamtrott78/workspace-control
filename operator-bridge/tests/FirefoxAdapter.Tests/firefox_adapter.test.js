@@ -415,3 +415,31 @@ test("simulator-only constructor override can target local fake worker", async (
     createCall[1].url,
     "moz-extension://simulator/fake-worker.html");
 });
+
+
+test("discard re-reads tab because Firefox discard resolves without a Tab", async () => {
+  const browser = new MockBrowser([
+    { id: 15, url: "https://chatgpt.com/", active: false }
+  ]);
+  browser.seedManaged(15, managedMetadata("binding-discard"));
+
+  browser.tabs.discard = async tabId => {
+    browser.calls.push(["tabs.discard", tabId]);
+    const tab = browser.requireTab(tabId);
+    tab.discarded = true;
+    return undefined;
+  };
+
+  const adapter = new FirefoxAdapterCore(browser);
+  const result = await adapter.handleCommand(command(
+    "req-13",
+    "DISCARD_WORKER_BINDING",
+    { worker_slot_id: "slot-1", session_generation: 7 }
+  ));
+
+  assert.equal(result.outcome, "APPLIED");
+  assert.equal(result.discarded, true);
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.discard").length,
+    1);
+});

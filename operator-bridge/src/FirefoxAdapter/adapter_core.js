@@ -308,8 +308,13 @@
           "ACTIVE_TAB_NOT_DISCARDABLE");
       }
 
-      const tab = await this.browser.tabs.discard(match.tabId);
-      this.emitBindingEvent("BINDING_DISCARDED", match.tabId, match.metadata, tab);
+      await this.browser.tabs.discard(match.tabId);
+      const tab = await this.browser.tabs.get(match.tabId);
+      this.emitBindingEvent(
+        "BINDING_DISCARDED",
+        match.tabId,
+        match.metadata,
+        tab);
       return this.resultFor(
         "DISCARD_WORKER_BINDING",
         "APPLIED",
