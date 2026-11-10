@@ -618,10 +618,11 @@
     },
     "impl_09_performance_benchmark_execution": {
       "status": "IN_PROGRESS",
-      "checkpoint": "832777a8015d6ef9ee2bdedf22553e28a6549553",
+      "checkpoint": "3fd98235678a7d6f0f728d82b4611eed8697152e",
       "validations": [
-        "Operator Bridge Validation #50 SUCCESS on full target-matrix/self-hosted workflow checkpoint",
-        "Workspace Control Validation #2428 SUCCESS on full target-matrix/self-hosted workflow checkpoint"
+        "Workspace Control Validation #2459 / run 42814425643 SUCCESS on exact head 3fd98235678a7d6f0f728d82b4611eed8697152e",
+        "Operator Bridge Validation #85 / run 42814425603 SUCCESS on exact head 3fd98235678a7d6f0f728d82b4611eed8697152e",
+        "Triggered Operator Bridge run 42815030650 validation SUCCESS; target-performance job 129827357688 FAIL at Firefox adapter identity preflight"
       ],
       "implementation": [
         "operator-bridge/performance/**",
@@ -646,7 +647,7 @@
           "interpretation": "Regression and executable target-plan signal only; not UX-09 target acceptance."
         },
         "target_contract": {
-          "state": "READY_NOT_RUN",
+          "state": "PREFLIGHT_BLOCKED",
           "canonical_runner": "operator-bridge/tools/run-stage09-target-matrix.ps1",
           "self_hosted_workflow_job": "target-performance",
           "required_runner_labels": [
@@ -676,7 +677,22 @@
             "firefox->chrome"
           ],
           "chrome_memory_saver_disabled_and_recorded": true,
-          "exact_head_native_host_binding_with_restore": true
+          "exact_head_native_host_binding_with_restore": true,
+          "last_target_run": {
+            "workflow_run_id": 42815030650,
+            "target_job_id": 129827357688,
+            "source_sha": "3fd98235678a7d6f0f728d82b4611eed8697152e",
+            "exact_head_checkout": "PASS",
+            "dotnet_setup": "PASS",
+            "python_setup": "PASS",
+            "interactive_preconditions": "PASS",
+            "target_profile_verification": "PASS",
+            "adapter_preflight": "FAIL",
+            "firefox_cleanup": "WARNING_REMAINING_PROCESS",
+            "target_evidence_file": "NOT_PRODUCED",
+            "full_measurement_started": false
+          },
+          "next_diagnostic": "Persist bounded content-free PreflightOnly logs/result/process-lifecycle metadata before cleanup and reproduce isolated adapter handshake against the verified WorkspaceWorkers profile; do not rerun full matrix until preflight passes."
         },
         "cold_start": {
           "production_launch_path": "VALIDATED",
@@ -694,8 +710,8 @@
           "real_chatgpt_account": false
         }
       },
-      "claim": "Stage-09 benchmark infrastructure, full target matrix, and opt-in self-hosted execution path are exact-head validated. UX-09 target-machine acceptance remains NOT_RUN; Stage 10 remains blocked.",
-      "blocker": "The actual Windows operator workstation is not yet explicitly registered/connected as the interactive GitHub self-hosted runner labeled workspace-operator-target."
+      "claim": "Stage-09 infrastructure, signed fake-worker adapter, self-hosted execution path, and target-machine bootstrap/preconditions are validated. Real target execution now reaches the Firefox adapter identity preflight and fails there before measurement; UX-09 acceptance remains incomplete and Stage 10 remains blocked.",
+      "blocker": "Firefox performance adapter identity preflight fails on the real target workstation after profile verification. Root cause is not yet isolated because current temporary preflight diagnostics are deleted during collector cleanup."
     }
   }
 }
