@@ -170,20 +170,6 @@ $targetNativeManifest = Join-Path $work "native-host-exact-head.json"
   allowed_extensions = @("workspace-control-operator@adamtrott78.local")
 } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $targetNativeManifest -Encoding UTF8
 
-$chromePolicyPath = "HKCU:\Software\Policies\Google\Chrome"
-$chromeMemorySaverPolicy = "HighEfficiencyModeEnabled"
-$chromePolicyKeyExisted = Test-Path -LiteralPath $chromePolicyPath
-$chromePolicyValueExisted = $false
-$originalChromeMemorySaverPolicy = $null
-$chromePolicyOverridden = $false
-if ($chromePolicyKeyExisted) {
-  $chromePolicy = Get-ItemProperty -LiteralPath $chromePolicyPath -ErrorAction Stop
-  if ($chromePolicy.PSObject.Properties.Name -contains $chromeMemorySaverPolicy) {
-    $chromePolicyValueExisted = $true
-    $originalChromeMemorySaverPolicy = [int]$chromePolicy.$chromeMemorySaverPolicy
-  }
-}
-
 function Get-Percentile {
   param([double[]]$Values, [double]$P)
   if ($Values.Count -eq 0) { return 0.0 }
@@ -397,6 +383,29 @@ function Invoke-FirefoxNoExtensionBaseline {
   }
 }
 
+function Initialize-ChromeBenchmarkProfile {
+  param([string]$ProfilePath)
+
+  New-Item -ItemType Directory -Path $ProfilePath -Force | Out-Null
+  $localStatePath = Join-Path $ProfilePath "Local State"
+  $localState = [ordered]@{
+    performance_tuning = [ordered]@{
+      high_efficiency_mode = [ordered]@{
+        state = 0
+        enabled = $false
+      }
+    }
+  }
+  $json = $localState | ConvertTo-Json -Depth 10 -Compress
+  $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+  [System.IO.File]::WriteAllText($localStatePath, $json, $utf8NoBom)
+
+  $verified = Get-Content -LiteralPath $localStatePath -Raw | ConvertFrom-Json
+  if ([int]$verified.performance_tuning.high_efficiency_mode.state -ne 0) {
+    throw "Chrome benchmark profile Memory Saver Local State is not disabled."
+  }
+}
+
 function Invoke-ChromeReplicate {
   param([int]$Repetition)
   if (Get-Process chrome -ErrorAction SilentlyContinue) {
@@ -404,7 +413,7 @@ function Invoke-ChromeReplicate {
   }
 
   $profile = Join-Path $work ("chrome-profile-" + $Repetition)
-  New-Item -ItemType Directory -Path $profile -Force | Out-Null
+  Initialize-ChromeBenchmarkProfile -ProfilePath $profile
   $profileArg = '--user-data-dir="' + $profile + '"'
   $baseArgs = @(
     $profileArg,
@@ -543,11 +552,6 @@ try {
   New-Item -Path $nativeRegPath -Force | Out-Null
   Set-Item -LiteralPath $nativeRegPath -Value $targetNativeManifest
   $nativeHostOverridden = $true
-
-  New-Item -Path "HKCU:\Software\Policies\Google" -Force | Out-Null
-  New-Item -Path $chromePolicyPath -Force | Out-Null
-  New-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -PropertyType DWord -Value 0 -Force | Out-Null
-  $chromePolicyOverridden = $true
 
   $preflightPath = Join-Path $work "stage09-adapter-preflight.json"
   & $targetFirefoxScript -RepositoryRoot $repo -ResultPath $preflightPath -FirefoxPath $FirefoxPath -FirefoxProfile $FirefoxProfile -PreflightOnly
@@ -708,6 +712,11 @@ try {
         })
       }
       chrome = [ordered]@{
+        memory_saver_control = [ordered]@{
+          method = "fresh-user-data-local-state"
+          pref = "performance_tuning.high_efficiency_mode.state"
+          disabled_value = 0
+        }
         resource_replicates = @(1..3 | ForEach-Object { $chromeReplicates[$_] })
         comparison_to_firefox = [ordered]@{
           firefox_two_worker_p95_mib = $ffTwoWs
@@ -768,16 +777,6 @@ finally {
   }
   try { Stop-OwnedProcessName -Name "chrome" } catch {}
   try { Stop-OwnedProcessName -Name "firefox" } catch {}
-  if ($chromePolicyOverridden) {
-    if ($chromePolicyValueExisted) {
-      New-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -PropertyType DWord -Value $originalChromeMemorySaverPolicy -Force | Out-Null
-    } else {
-      Remove-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -ErrorAction SilentlyContinue
-      if (-not $chromePolicyKeyExisted) {
-        Remove-Item -LiteralPath $chromePolicyPath -Force -ErrorAction SilentlyContinue
-      }
-    }
-  }
   if ($nativeHostOverridden) {
     if ($nativeRegExisted) {
       Set-Item -LiteralPath $nativeRegPath -Value $originalNativeHostPath
