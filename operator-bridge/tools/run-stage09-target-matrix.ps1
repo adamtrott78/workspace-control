@@ -18,7 +18,9 @@ param(
 
   [switch]$ConfirmChromeMemorySaverDisabled,
 
-  [switch]$PlanOnly
+  [switch]$PlanOnly,
+
+  [switch]$PreflightOnly
 )
 
 $ErrorActionPreference = "Stop"
@@ -87,11 +89,13 @@ if ($PlanOnly) {
   return
 }
 
-if (-not $ConfirmAcPower) {
-  throw "Target matrix requires explicit -ConfirmAcPower."
-}
-if (-not $ConfirmChromeMemorySaverDisabled) {
-  throw "Target matrix requires explicit -ConfirmChromeMemorySaverDisabled."
+if (-not $PreflightOnly) {
+  if (-not $ConfirmAcPower) {
+    throw "Target matrix requires explicit -ConfirmAcPower."
+  }
+  if (-not $ConfirmChromeMemorySaverDisabled) {
+    throw "Target matrix requires explicit -ConfirmChromeMemorySaverDisabled."
+  }
 }
 if ($FirefoxProfile -ne "WorkspaceWorkers") {
   throw "Target matrix requires the frozen WorkspaceWorkers Firefox profile."
@@ -100,7 +104,7 @@ if ($FirefoxProfile -ne "WorkspaceWorkers") {
 if (-not (Test-Path -LiteralPath $FirefoxPath -PathType Leaf)) {
   throw "Firefox executable not found at the reviewed path."
 }
-if (-not (Test-Path -LiteralPath $ChromePath -PathType Leaf)) {
+if (-not $PreflightOnly -and -not (Test-Path -LiteralPath $ChromePath -PathType Leaf)) {
   $alternateChrome = "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"
   if (Test-Path -LiteralPath $alternateChrome -PathType Leaf) {
     $ChromePath = $alternateChrome
@@ -109,7 +113,9 @@ if (-not (Test-Path -LiteralPath $ChromePath -PathType Leaf)) {
   }
 }
 
-foreach ($name in @("firefox", "chrome", "WorkspaceOperator")) {
+$preflightProcessNames = @("firefox", "WorkspaceOperator")
+$fullProcessNames = @("firefox", "chrome", "WorkspaceOperator")
+foreach ($name in $(if ($PreflightOnly) { $preflightProcessNames } else { $fullProcessNames })) {
   if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
     throw "Target measurement rejected: pre-existing $name process is present."
   }
@@ -554,7 +560,17 @@ try {
   $nativeHostOverridden = $true
 
   $preflightPath = Join-Path $work "stage09-adapter-preflight.json"
-  & $targetFirefoxScript -RepositoryRoot $repo -ResultPath $preflightPath -FirefoxPath $FirefoxPath -FirefoxProfile $FirefoxProfile -PreflightOnly
+  $preflightDiagnosticsDir = Join-Path $resultDir "stage09-preflight-diagnostics"
+  if (Test-Path -LiteralPath $preflightDiagnosticsDir) {
+    Remove-Item -LiteralPath $preflightDiagnosticsDir -Recurse -Force
+  }
+  & $targetFirefoxScript `
+    -RepositoryRoot $repo `
+    -ResultPath $preflightPath `
+    -FirefoxPath $FirefoxPath `
+    -FirefoxProfile $FirefoxProfile `
+    -PreflightOnly `
+    -DiagnosticsDirectory $preflightDiagnosticsDir
   if ($LASTEXITCODE -ne 0) {
     throw "Stage 09 performance-adapter identity preflight failed."
   }
@@ -563,6 +579,14 @@ try {
       $preflight.status -ne "PASS" -or
       $preflight.adapter_version -ne "0.1.9-perf") {
     throw "Stage 09 target refused a non-performance Firefox adapter."
+  }
+
+  if ($PreflightOnly) {
+    $preflight | ConvertTo-Json -Depth 10 |
+      Set-Content -LiteralPath $resultPathFull -Encoding UTF8
+    Write-Host "STAGE09_TARGET_PREFLIGHT_ONLY=PASS"
+    Get-Content -LiteralPath $resultPathFull
+    return
   }
 
   $chromeFakeWorker = Start-Process -FilePath "python" -ArgumentList @(
