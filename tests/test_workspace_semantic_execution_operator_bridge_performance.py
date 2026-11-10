@@ -56,7 +56,7 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn('"GITHUB_HOSTED_WINDOWS_CI"', source)
         self.assertIn("target_contract_complete = false", source)
         self.assertIn('"IMPLEMENTATION_GAP"', source)
-        self.assertIn("no valid latency sample", readme)
+        self.assertIn("fabricated timing evidence", readme)
         self.assertIn("60-second warm-up", readme)
         self.assertIn("120-second 1 Hz", readme)
 
@@ -70,10 +70,10 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
             ]
         )
         lowered = combined.lower()
+        self.assertIn("screenshots_collected = false", combined)
         for forbidden in (
             "queryselector",
             "accessibility tree",
-            "screenshot",
             "cookies.sqlite",
             "logins.json",
             "key4.db",
