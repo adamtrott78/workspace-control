@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 - Intent: mutate
 - Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 0c5a6fac66cadfdd62d2baad97a2144899704e7d
+- Remote checkpoint: 40b3dd8cddd87270bde107516022d4e4426c0671
 - Remote verified: true
 
 ### PADataset
@@ -36,7 +36,7 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Validate exact candidate checkpoint 0c5a6fac66cadfdd62d2baad97a2144899704e7d plus this state-only synchronization on PR #595. Do not execute the live upgrade operator until an exact PR head passes bounded repository validation. Then execute the operator on Lambda against PADataset expected SHA 17e1147614f27702e43565089d618182ff71c5af; fail closed on any mismatch.
+Validate the current PR #595 head, whose implementation checkpoint is 40b3dd8cddd87270bde107516022d4e4426c0671 and whose following commits are state/handoff synchronization only. Do not execute the live upgrade operator until that exact PR head passes bounded repository validation. Then execute the operator on Lambda against PADataset expected SHA 17e1147614f27702e43565089d618182ff71c5af; fail closed on any mismatch.
 
 ## Remaining work
 
