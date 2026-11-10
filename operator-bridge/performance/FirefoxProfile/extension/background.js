@@ -6,7 +6,7 @@ const {
   FirefoxAdapterCore
 } = globalThis.WorkspaceFirefoxAdapterCore;
 
-const ADAPTER_VERSION = "0.1.0-perf";
+const ADAPTER_VERSION = "0.1.9-perf";
 const ADAPTER_INSTANCE_ID = crypto.randomUUID();
 const RECONNECT_DELAY_MS = 500;
 const FAKE_WORKER_URL = "http://127.0.0.1:8765/fake-worker.html";
