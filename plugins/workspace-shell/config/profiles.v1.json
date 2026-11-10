@@ -19,6 +19,30 @@
       "write_scratch": true,
       "network": "deny",
       "max_timeout_ms": 90000
+    },
+    "file-list": {
+      "executable": "/usr/bin/find",
+      "write_scratch": false,
+      "network": "deny",
+      "max_timeout_ms": 30000
+    },
+    "file-read": {
+      "executable": "/usr/bin/head",
+      "write_scratch": false,
+      "network": "deny",
+      "max_timeout_ms": 30000
+    },
+    "file-hash": {
+      "executable": "/usr/bin/sha256sum",
+      "write_scratch": false,
+      "network": "deny",
+      "max_timeout_ms": 30000
+    },
+    "research-bounded": {
+      "executable": "/usr/bin/python3",
+      "write_scratch": true,
+      "network": "deny",
+      "max_timeout_ms": 90000
     }
   }
 }
