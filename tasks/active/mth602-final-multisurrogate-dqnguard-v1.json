@@ -6,7 +6,7 @@
   "goal": "Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard project so Stage 00 can recover canonical MILCOM baseline/runtime provenance directly from the prepared Lambda checkout before architecture implementation.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "stage02_common_evaluation_provenance_contract",
+  "current_stage": "stage03_architecture_c_smoke",
   "acceptance_criteria": [
     "Workspace Shell can inspect PADataset at the exact task-bound source SHA without changing the historical checkout.",
     "Stage 00 recovers the fixed-Scan DQNGuard, full 20-cell target-surrogate matrix, and VarMax surrogate-all evidence chains with machine-readable provenance.",
@@ -94,7 +94,7 @@
     },
     {
       "id": "stage02_common_evaluation_provenance_contract",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -105,8 +105,35 @@
         "common result schema",
         "deterministic smoke/provenance contract"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 02 common result/provenance contract",
+          "result": "PASS",
+          "evidence": [
+            "PADataset commit 7e3087b553f0ad182d45df6ffe8a1678ea64d16a adds STAGE02_RESULT_CONTRACT.md and stage02_result_schema.v1.json.",
+            "The schema fixes architecture/target/source/backbone/evidence-partition/score/threshold/metrics/provenance/status fields.",
+            "Deterministic smoke invariants cover target quarantine, disjoint calibration roles, score direction, known-only thresholding, monotone normalization, predeclared aggregation, and explicit failure/fallback state."
+          ]
+        }
+      ],
       "resume_condition": "Stage 01 complete."
+    },
+    {
+      "id": "stage03_architecture_c_smoke",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+workspace-shell",
+      "inputs": [
+        "stage02_common_evaluation_provenance_contract"
+      ],
+      "outputs": [
+        "architecture C implementation",
+        "deterministic smoke tests",
+        "one reviewed real target-fold result"
+      ],
+      "validation": [],
+      "resume_condition": "Stage 02 complete and Workspace Shell rebound to the exact implementation SHA before execution."
     },
     {
       "id": "stage01_evidence_partition_design",
@@ -180,6 +207,15 @@
       "evidence": [
         "Adds frozen A/B/C evidence partition design and selects C as first implementation candidate."
       ]
+    },
+    {
+      "id": "stage02-result-contract-freeze",
+      "kind": "git_commit",
+      "identity": "7e3087b553f0ad182d45df6ffe8a1678ea64d16a",
+      "required_for_resume": true,
+      "evidence": [
+        "Adds frozen result schema and deterministic smoke/reducer contract."
+      ]
     }
   ],
   "artifacts": [],
@@ -200,13 +236,16 @@
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Define one result schema for B0/A/B/C covering calibration identity, score definition, normalization, aggregation, threshold, realized known rejection, unknown metrics, fallback/feasibility, and provenance.",
-    "Define deterministic smoke fixtures and comparison adapter/reducer contract.",
-    "Do not implement architecture C until the Stage 02 contract is frozen."
+  "blockers": [
+    "Workspace Shell PADataset execution authority remains pinned to 17e1147614f27702e43565089d618182ff71c5af while the scientific branch is now at 7e3087b553f0ad182d45df6ffe8a1678ea64d16a. New Stage 03 code must not execute until the durable checkpoint and clean runtime snapshot are rebound to the exact implementation SHA."
   ],
-  "next_safe_action": "Continue Stage 02 only: define the common result/provenance schema and deterministic smoke contract on PADataset commit 6a3c62a229beb81fa8644d979b2198f46f6f0255. Architecture C implementation remains gated.",
+  "remaining_work": [
+    "Inspect current DQNGuard source and implement the minimal architecture C candidate consistent with the frozen Stage 01/02 contracts.",
+    "Add deterministic smoke tests that enforce target quarantine, disjoint calibration roles, monotone normalization, fixed max guard aggregation, and known-only thresholding.",
+    "Update the durable PADataset checkpoint only after the implementation candidate is committed and statically/repository validated.",
+    "Refresh the clean Workspace Shell PADataset snapshot to that exact candidate SHA, then run smoke and one reviewed real target fold."
+  ],
+  "next_safe_action": "Implement and repository-validate the smallest architecture C source/test candidate on PADataset starting from 7e3087b553f0ad182d45df6ffe8a1678ea64d16a. Do not execute it through Workspace Shell until the durable checkpoint and clean snapshot are rebound to the exact implementation SHA.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."
