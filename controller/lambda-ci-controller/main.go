@@ -710,6 +710,12 @@ func (s *scaler) loadQuarantine() error {
 			receipt.ReceiptID == "" {
 			return fmt.Errorf("controller quarantine identity mismatch")
 		}
+		// Durable quarantine dominates any older READY/ACQUIRED recovery gate.
+		// This also repairs pre-hardening live state where both receipts could
+		// coexist across a restart.
+		if err := s.invalidateReadyForSingleRetry(receipt.ReceiptID); err != nil {
+			return fmt.Errorf("reconcile recovery retry gate with durable quarantine: %w", err)
+		}
 		s.mu.Lock()
 		s.quarantined = true
 		s.quarantineID = receipt.ReceiptID

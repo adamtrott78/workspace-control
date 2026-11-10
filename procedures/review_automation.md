@@ -56,6 +56,29 @@ mismatch, duplicate
 matching dispositions, same request/reviewer principal, and authority-sensitive
 reviews without the fresh-independent-session attestation.
 
+## Operator handoff requirement
+
+When this procedure requires a fresh independent session, the authoring/executing
+chat MUST give the operator a complete ready-to-paste reviewer handoff in the
+same response that asks them to open the fresh session.
+
+The handoff SHOULD be minimal because the durable automated request is already
+exact-head / changed-blob bound. It MUST include:
+
+- repository and PR;
+- exact durable review-request comment ID;
+- instruction that the fresh session is the independent reviewer;
+- instruction to perform the review itself rather than return another handoff;
+- instruction to record the required disposition directly on the PR;
+- relevant no-merge / no-runtime-mutation boundary.
+
+A bare instruction such as "open a fresh chat and review comment X", a link
+without a pasteable prompt, or a promise to provide the handoff later is a
+workflow defect.
+
+The same requirement applies to corrected-head re-review requests after blocking
+findings.
+
 ## Runtime boundary
 
 This is GitHub-only. It does not SSH to Lambda, read controller credentials,
