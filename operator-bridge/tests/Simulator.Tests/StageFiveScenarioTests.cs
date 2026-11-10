@@ -10,7 +10,7 @@ public sealed class StageFiveScenarioTests
     public static IEnumerable<object[]> FixtureIds =>
         ScenarioController.StageFiveFixtureIds.Select(id => new object[] { id });
 
-    [DataTestMethod]
+    [TestMethod]
     [DynamicData(nameof(FixtureIds))]
     public void RequiredL0L1ScenarioPassesDeterministically(string fixtureId)
     {
