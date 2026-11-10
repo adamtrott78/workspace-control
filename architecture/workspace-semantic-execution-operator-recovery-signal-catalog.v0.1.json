@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-recovery-signal-catalog-v0.1",
+  "status": "UX_07_DESIGN_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "principle": "Signals classify local continuity risk; they never create execution authority.",
+  "signals": [
+    {
+      "id": "AUTH_NAVIGATION_DETECTED",
+      "source": "BROWSER_CHROME_METADATA",
+      "confidence": "STRONG_IF_RECOGNIZED_AUTH_ORIGIN",
+      "scope": "AUTH_DOMAIN_SCOPED",
+      "automatic_effect": [
+        "freeze WorkspaceWorkers session reuse",
+        "mark affected continuity UNKNOWN",
+        "open auth recovery incident"
+      ],
+      "requires_content_access": false,
+      "validation_owner": "UX-08/UX-12"
+    },
+    {
+      "id": "AUTH_RETURN_ORIGIN_OBSERVED",
+      "source": "BROWSER_CHROME_METADATA",
+      "confidence": "AUTH_FLOW_RETURN_ONLY_NOT_CONTINUITY_PROOF",
+      "scope": "AUTH_DOMAIN_SCOPED",
+      "automatic_effect": [
+        "resume durable reconciliation",
+        "do not restore old generations to TRUSTED"
+      ],
+      "requires_content_access": false,
+      "validation_owner": "UX-08/UX-12"
+    },
+    {
+      "id": "OPERATOR_REPORT_AUTH_REFRESH",
+      "source": "HUMAN_EXPLICIT_RECOVERY_SIGNAL",
+      "confidence": "STRONG_FOR_RECOVERY_ENTRY",
+      "scope": "AUTH_DOMAIN_SCOPED",
+      "automatic_effect": [
+        "same as AUTH_NAVIGATION_DETECTED"
+      ],
+      "fallback_for": "automatic browser-chrome detection unavailable/ambiguous"
+    },
+    {
+      "id": "MANAGED_TAB_CLOSED",
+      "source": "FIREFOX_TAB_LIFECYCLE",
+      "confidence": "STRONG_FOR_LOCAL_BINDING_LOSS",
+      "scope": "SESSION_SCOPED",
+      "automatic_effect": [
+        "mark binding MISSING",
+        "reconcile outstanding action",
+        "rotate if needed"
+      ]
+    },
+    {
+      "id": "FIREFOX_CONNECTION_LOST",
+      "source": "HELPER_OR_EXTENSION",
+      "confidence": "STRONG_FOR_BROWSER_ADAPTER_UNAVAILABLE",
+      "scope": "LOCAL_BRIDGE_GLOBAL",
+      "automatic_effect": [
+        "block new browser claims",
+        "attempt reconnect/inventory"
+      ]
+    },
+    {
+      "id": "HELPER_INSTANCE_RESTARTED",
+      "source": "NATIVE_HELPER",
+      "confidence": "STRONG",
+      "scope": "LOCAL_BRIDGE_GLOBAL",
+      "automatic_effect": [
+        "reconcile old claims",
+        "rehydrate presentation",
+        "reconnect browser",
+        "register hotkey after safe init"
+      ]
+    },
+    {
+      "id": "ORCHESTRATOR_UNREACHABLE",
+      "source": "OPERATOR_BRIDGE_PORT",
+      "confidence": "STRONG",
+      "scope": "LOCAL_BRIDGE_GLOBAL",
+      "automatic_effect": [
+        "fail closed",
+        "no action claim",
+        "no clipboard/focus"
+      ]
+    },
+    {
+      "id": "BINDING_AMBIGUOUS",
+      "source": "FIREFOX_ADAPTER",
+      "confidence": "STRONG_FOR_IDENTITY_UNCERTAINTY",
+      "scope": "SESSION_SCOPED",
+      "automatic_effect": [
+        "continuity UNKNOWN",
+        "no reuse",
+        "recovery/rotation"
+      ]
+    },
+    {
+      "id": "NO_DURABLE_ACK_INFORMATIONAL",
+      "source": "DURABLE_ACK_OBSERVER_CLOCK",
+      "confidence": "NOT_FAILURE_EVIDENCE",
+      "scope": "ACTION_SCOPED",
+      "automatic_effect": [
+        "increment/retain SENT_UNCONFIRMED display only"
+      ],
+      "forbidden_effect": [
+        "automatic resend",
+        "automatic generation advance"
+      ]
+    },
+    {
+      "id": "LATE_OLD_GENERATION_ACK",
+      "source": "DURABLE_ACK_OBSERVER",
+      "confidence": "STRONG",
+      "scope": "ACTION_SCOPED",
+      "automatic_effect": [
+        "preserve evidence",
+        "do not advance current control state"
+      ]
+    },
+    {
+      "id": "SYSTEM_RESUME_OR_HELPER_COLD_START",
+      "source": "OPERATING_SYSTEM_OR_HELPER",
+      "confidence": "STRONG",
+      "scope": "LOCAL_BRIDGE_GLOBAL",
+      "automatic_effect": [
+        "safe reinitialization",
+        "claim reconciliation",
+        "browser inventory"
+      ]
+    },
+    {
+      "id": "EXECUTOR_IDENTITY_UNPROVEN",
+      "source": "SESSION_BROKER_OR_ADAPTER",
+      "confidence": "STRONG_FOR_COMPATIBILITY_UNCERTAINTY",
+      "scope": "SESSION_SCOPED",
+      "automatic_effect": [
+        "freeze reuse",
+        "rotate or bounded setup recovery"
+      ]
+    }
+  ]
+}
