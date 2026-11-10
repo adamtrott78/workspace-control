@@ -72,7 +72,7 @@ async function seedSimulatorTabs(fakeWorkerUrl) {
 }
 
 async function main() {
-  const fakeWorkerUrl = browser.runtime.getURL("fake-worker.html");
+  const fakeWorkerUrl = "http://127.0.0.1:8765/fake-worker.html";
   await seedSimulatorTabs(fakeWorkerUrl);
 
   const adapter = new FirefoxAdapterCore(browser, {

@@ -165,6 +165,17 @@ internal static class Program
                 browser.RestoreCount - restoreBefore == 1 &&
                 world.Sessions.Get("slot-restore")!.Generation ==
                     generationBefore;
+            details["SIM-003_restore_discarded"] = new
+            {
+                seed = restoreSeed.Outcome.ToString(),
+                discard = discard.Outcome.ToString(),
+                discard_error = discard.NormalizedError,
+                dispatch = restoreDispatch.Outcome.ToString(),
+                submit = restoreSubmit,
+                restore_delta = browser.RestoreCount - restoreBefore,
+                generation_before = generationBefore,
+                generation_after = world.Sessions.Get("slot-restore")!.Generation
+            };
 
             var incompatibleWorld = new SimulatorWorld();
             var incompatibleSession = incompatibleWorld.Sessions.Add(

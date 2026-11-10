@@ -57,6 +57,7 @@ class StageSixIntegrationBoundaryTests(unittest.TestCase):
         self.assertIn("workerStartUrl: fakeWorkerUrl", simulator)
         self.assertNotIn("workerStartUrl", production)
         self.assertNotIn("chatgpt.com", simulator.lower())
+        self.assertIn("http://127.0.0.1:8765/fake-worker.html", simulator)
 
     def test_stage06_web_ext_is_exactly_pinned_and_test_only(self):
         script = STAGE06_SCRIPT.read_text(encoding="utf-8")

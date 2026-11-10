@@ -86,10 +86,30 @@ $runnerOut = Join-Path $work "runner.out.log"
 $runnerErr = Join-Path $work "runner.err.log"
 $webExtOut = Join-Path $work "web-ext.out.log"
 $webExtErr = Join-Path $work "web-ext.err.log"
+$fakeWorkerOut = Join-Path $work "fake-worker-http.out.log"
+$fakeWorkerErr = Join-Path $work "fake-worker-http.err.log"
 $runner = $null
 $webExtProcess = $null
+$fakeWorkerProcess = $null
 
 try {
+  $fakeWorkerProcess = Start-Process -FilePath "python" -ArgumentList @(
+    "-m",
+    "http.server",
+    "8765",
+    "--bind",
+    "127.0.0.1",
+    "--directory",
+    $extensionStage
+  ) -RedirectStandardOutput $fakeWorkerOut -RedirectStandardError $fakeWorkerErr -PassThru
+
+  Start-Sleep -Milliseconds 500
+  if ($fakeWorkerProcess.HasExited) {
+    if (Test-Path $fakeWorkerErr) { Get-Content $fakeWorkerErr }
+    throw "Stage 06 loopback fake-worker server failed to start."
+  }
+  Write-Host "STAGE06_FAKE_WORKER_ORIGIN=http://127.0.0.1:8765"
+
   $runnerArgs = @(
     $runnerDll,
     "--result=$ResultPath",
@@ -132,6 +152,9 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
   Get-Content $ResultPath
 }
 finally {
+  if ($fakeWorkerProcess -and -not $fakeWorkerProcess.HasExited) {
+    Stop-Process -Id $fakeWorkerProcess.Id -Force -ErrorAction SilentlyContinue
+  }
   if ($webExtProcess -and -not $webExtProcess.HasExited) {
     Stop-Process -Id $webExtProcess.Id -Force -ErrorAction SilentlyContinue
   }
