@@ -84,6 +84,35 @@ function Update-OwnedFirefoxIds {
 
 function Stop-TrackedFirefoxProcesses {
   Update-OwnedFirefoxIds
+
+  # Give the owned Firefox browser window a normal close first. Repeated
+  # Stop-Process -Force shutdowns can make Firefox mark the dedicated
+  # WorkspaceWorkers profile as crashed and surface recovery/troubleshoot UI
+  # on the next launch, which invalidates Stage-09 startup measurements.
+  foreach ($ownedId in @($ownedFirefoxIds | Sort-Object)) {
+    try {
+      $ownedProcess = Get-Process -Id $ownedId -ErrorAction Stop
+      if ($ownedProcess.ProcessName -eq "firefox" -and
+          $ownedProcess.MainWindowHandle -ne 0) {
+        [void]$ownedProcess.CloseMainWindow()
+      }
+    } catch {
+    }
+  }
+
+  $graceDeadline = (Get-Date).AddSeconds(8)
+  while ((Get-Date) -lt $graceDeadline) {
+    Update-OwnedFirefoxIds
+    $ownedRemaining = @($ownedFirefoxIds | Where-Object {
+      $candidate = Get-Process -Id $_ -ErrorAction SilentlyContinue
+      $candidate -and $candidate.ProcessName -eq "firefox"
+    })
+    if ($ownedRemaining.Count -eq 0) { return }
+    Start-Sleep -Milliseconds 100
+  }
+
+  # Fail-safe fallback is still bounded strictly to collector-owned Firefox
+  # PIDs; unrelated Firefox processes are never adopted or terminated.
   foreach ($ownedId in @($ownedFirefoxIds | Sort-Object -Descending)) {
     try {
       $ownedProcess = Get-Process -Id $ownedId -ErrorAction Stop
@@ -94,11 +123,12 @@ function Stop-TrackedFirefoxProcesses {
     }
   }
 
-  $deadline = (Get-Date).AddSeconds(10)
-  while ((Get-Date) -lt $deadline) {
+  $forceDeadline = (Get-Date).AddSeconds(10)
+  while ((Get-Date) -lt $forceDeadline) {
     Update-OwnedFirefoxIds
     $ownedRemaining = @($ownedFirefoxIds | Where-Object {
-      Get-Process -Id $_ -ErrorAction SilentlyContinue
+      $candidate = Get-Process -Id $_ -ErrorAction SilentlyContinue
+      $candidate -and $candidate.ProcessName -eq "firefox"
     })
     if ($ownedRemaining.Count -eq 0) { break }
     Start-Sleep -Milliseconds 100
