@@ -33,7 +33,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-multirepo-research-v1",
-        "checkpoint_sha": "c8eca3ddc7915b6bc5ce1e40bc0f8866c8d7be89",
+        "checkpoint_sha": "ce19452c644599bda23f6e3766c9390fa0d906db",
         "verified": true
       },
       "local": null,
@@ -175,8 +175,10 @@
       "regeneration": null,
       "review_requirement": "exact-head validation before Lambda execution",
       "evidence": [
-        "Fails before runtime mutation when PADataset HEAD differs from the expected exact SHA.",
-        "Snapshots both authority source and PADataset under /srv and retains a rollback backup."
+        "Separates exact authority SHA from exact workspace-control execution SHA and PADataset execution SHA.",
+        "Refreshes /etc/workspace-shell/authority atomically while preserving rollback and independently materializes /srv/workspace-shell/workspace-control.",
+        "Verifies both durable task bindings before mutation and probes both new task IDs locally through MCP before declaring upgrade success.",
+        "Preserves the historical PADataset checkout read-only and continues to source runtime dependencies from the retained accepted dependency closure."
       ]
     },
     {
@@ -231,12 +233,10 @@
     },
     {
       "check": "Runtime dependency preservation",
-      "result": "IN_PROGRESS",
+      "result": "PASS",
       "evidence": [
-        "Root cause reproduced from live journal: ERR_MODULE_NOT_FOUND: @modelcontextprotocol/ext-apps.",
-        "Accepted activate_live.sh explicitly staged node_modules from the accepted dependency source.",
-        "Patched upgrade operator restores node_modules from the pre-upgrade runtime backup and verifies ext-apps/sdk/zod before service start.",
-        "Regression test added at exact candidate head 857bc13bf00d785f7af4be462c12b0ffea62ebfd; CI requested."
+        "Live dependency repair restored the retained accepted node_modules closure and verified @modelcontextprotocol/ext-apps, @modelcontextprotocol/sdk, and zod imports as the Workspace Shell frontend identity.",
+        "Execution candidate ce19452c644599bda23f6e3766c9390fa0d906db retains the dependency-preservation regression and sources runtime code/config only from the separately materialized execution snapshot."
       ]
     },
     {
@@ -251,28 +251,37 @@
     },
     {
       "check": "ChatGPT app transport after refresh",
-      "result": "PASS_WITH_SESSION_SCHEMA_STALE",
+      "result": "PASS",
       "evidence": [
-        "After Refresh tools and tunnel restart, workspace_shell_inspect(runtime_inventory) succeeded through the ChatGPT Workspace Shell app using durable task workspace-shell-mcp-v1.",
-        "Live runtime inventory reports frontend uid 41010, worker uid 41011, tunnel uid 41012, launcher/broker sockets present, receipt root present, HTTPS_MTLS_REQUIRED.",
-        "Local MCP tools/list independently proves the refreshed server schema contains PADataset and research-bounded.",
-        "This existing ChatGPT conversation still exposes the pre-refresh Workspace Shell argument schema in its mounted tool metadata; fresh-chat remount is required to observe the refreshed enum schema."
+        "Fresh-conversation model-visible Workspace Shell schema exposes PADataset as a target and research-bounded as a profile.",
+        "Old-compatible workspace-shell-mcp-v1 runtime_inventory succeeds through ChatGPT App -> Secure MCP Tunnel -> MCP, proving transport remains healthy.",
+        "Both workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND before PADataset access, isolating the remaining blocker to the trusted task-authority snapshot rather than app discovery or transport."
+      ]
+    },
+    {
+      "check": "Independent authority-root task visibility",
+      "result": "FAIL",
+      "evidence": [
+        "Live calls for both new task IDs return TASK_NOT_FOUND while workspace-shell-mcp-v1 remains visible.",
+        "Accepted live lineage records an independent trusted authority snapshot at /etc/workspace-shell/authority, distinct from executable /srv/workspace-shell/workspace-control.",
+        "The deployed multirepo upgrader refreshed executable/runtime snapshots but did not refresh the independent authority snapshot.",
+        "Candidate ce19452c644599bda23f6e3766c9390fa0d906db corrects this by separately staging authority and execution SHAs with rollback and local MCP task-visibility probes."
       ]
     }
   ],
   "blockers": [
-    "Current ChatGPT conversation retains the old mounted Workspace Shell function schema even after successful app tool refresh. Live app transport is healthy. Start a fresh ChatGPT conversation so Workspace Shell is remounted with the refreshed PADataset/research-bounded schema.",
-    "After fresh-chat remount, verify the newer durable task capsules are visible through the live authority root before Stage 00. Old task workspace-shell-mcp-v1 is visible; newer task IDs returned TASK_NOT_FOUND in this stale-schema conversation and require recheck from the refreshed session."
+    "The refreshed Workspace Shell schema and transport are healthy, but the live trusted authority snapshot is stale: both new task IDs return TASK_NOT_FOUND. No PADataset execution is permitted until the independent authority snapshot is refreshed and both task IDs pass the live gate.",
+    "Exact-head repository validation must be rerun after normalizing the task-capsule result fields and binding workspace-control execution to candidate ce19452c644599bda23f6e3766c9390fa0d906db."
   ],
   "remaining_work": [
-    "Fresh-chat remount of refreshed Workspace Shell tool schema.",
-    "Verify new task-capsule visibility in the live authority root.",
-    "Run live positive and negative Workspace Shell acceptance for PADataset.",
-    "Begin MTH602 Stage 00 provenance recovery from clean execution SHA 17e1147614f27702e43565089d618182ff71c5af plus read-only historical evidence mount leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.",
+    "Validate the authority-state head that binds workspace-control execution candidate ce19452c644599bda23f6e3766c9390fa0d906db.",
+    "Deploy the corrected multirepo upgrade with separate authority and execution snapshots; do not bypass the live task gate.",
+    "Verify live visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1, then run positive/negative PADataset acceptance.",
+    "Begin MTH602 Stage 00 provenance recovery from clean PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af plus the untouched historical evidence checkout.",
     "Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema."
   ],
-  "next_safe_action": "Start a fresh ChatGPT conversation with Workspace Shell connected. First inspect the model-visible Workspace Shell schema and confirm workspace_shell_exec target includes PADataset and profile includes file-list/file-read/file-hash/research-bounded. Then test live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1. If visible, begin Stage 00 read-only PADataset provenance recovery; if TASK_NOT_FOUND persists, diagnose the live frontend authority_root before any execution.",
+  "next_safe_action": "Validate the current PR head after this authority-state normalization. If the Workspace Shell/PADataset repository suite passes, freeze that head as the independent authority snapshot and deploy execution candidate ce19452c644599bda23f6e3766c9390fa0d906db with PADataset 17e1147614f27702e43565089d618182ff71c5af using the corrected rollback-capable upgrade operator. Then re-test both durable task IDs before any PADataset Stage 00 read.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
-  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded."
+  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test."
 }

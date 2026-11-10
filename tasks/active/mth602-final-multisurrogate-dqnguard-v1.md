@@ -29,20 +29,19 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Finish exact-head validation and live deployment of workspace-shell-multirepo-research-v1. Reinstall/re-register Workspace Shell once, then begin Stage 00 using clean PADataset execution source at 17e1147614f27702e43565089d618182ff71c5af plus the read-only historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
+Wait for the parent workspace-shell-multirepo-research-v1 authority refresh to validate and deploy. Then verify this task through the live Workspace Shell task gate and begin Stage 00 using clean PADataset execution source 17e1147614f27702e43565089d618182ff71c5af plus the untouched historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.
 
 ## Remaining work
 
-- Complete and deploy workspace-shell-multirepo-research-v1 with separate clean execution and historical evidence roots.
-- Reinstall/re-register Workspace Shell once to refresh the frozen MCP schema.
-- Use Workspace Shell to verify clean execution HEAD 17e1147614f27702e43565089d618182ff71c5af and read the historical evidence provenance metadata/bind mount.
-- Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings.
+- Complete exact-head validation and live authority refresh under workspace-shell-multirepo-research-v1.
+- Verify this task is visible through Workspace Shell and clean PADataset execution HEAD is 17e1147614f27702e43565089d618182ff71c5af.
+- Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings from the read-only historical evidence mount.
 - Persist machine-readable Stage 00 provenance in PADataset and update its authoritative task.
 - Proceed to Stage 01 only after the provenance gate closes.
 
 ## Blockers / gates
 
-- Workspace Shell live runtime does not yet expose the PADataset target; workspace-shell-multirepo-research-v1 is validating the clean-execution/read-only-evidence redesign before live upgrade and plugin reinstall.
+- Workspace Shell schema now exposes PADataset and research-bounded, but this task is not yet visible through the live trusted authority snapshot: live inspection returns TASK_NOT_FOUND. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db repairs independent authority refresh; no PADataset execution is permitted until that gate passes.
 
 ## Fresh-chat initialization
 
