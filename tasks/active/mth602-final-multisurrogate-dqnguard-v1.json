@@ -19,7 +19,7 @@
     "Read-only evidence profiles may inspect a dirty checkout snapshot; research-bounded execution requires a clean source snapshot and runs only in disposable scratch.",
     "Preserve the surviving pooled-length provenance of 16384 even where the accepted manuscript says 8192.",
     "Do not use target-test labels for architecture selection, normalization, aggregation, threshold selection, or tuning.",
-    "Clean PADataset execution authority is exact SHA 17e1147614f27702e43565089d618182ff71c5af.",
+    "Clean PADataset execution authority is exact SHA 4c095352bfe128e93f794112741efdb7a66b9c38.",
     "Historical Stage 00 evidence is sourced from the untouched Lambda checkout observed at branch leaf2026-review-1571342865, local HEAD b5a09cede6680b9e2a53eac244db4fbd7eaf76ec, dirty, approximately 107 GB.",
     "Do not require the historical evidence checkout to match the clean execution branch; preserve it read-only and record provenance differences explicitly."
   ],
@@ -30,7 +30,7 @@
       "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
       "remote": {
         "branch": "mth602-final-multisurrogate-dqnguard-v1",
-        "checkpoint_sha": "17e1147614f27702e43565089d618182ff71c5af",
+        "checkpoint_sha": "4c095352bfe128e93f794112741efdb7a66b9c38",
         "verified": true
       },
       "local": null,
@@ -216,6 +216,15 @@
       "evidence": [
         "Adds frozen result schema and deterministic smoke/reducer contract."
       ]
+    },
+    {
+      "id": "stage03-architecture-c-implementation-candidate",
+      "kind": "git_commit",
+      "identity": "4c095352bfe128e93f794112741efdb7a66b9c38",
+      "required_for_resume": true,
+      "evidence": [
+        "Adds multisurrogate_dqnguard.py, pa_eval_multisurrogate_dqnguard.py, deterministic contract tests, and Stage 03 implementation note."
+      ]
     }
   ],
   "artifacts": [],
@@ -237,15 +246,15 @@
     }
   ],
   "blockers": [
-    "Workspace Shell PADataset execution authority remains pinned to 17e1147614f27702e43565089d618182ff71c5af while the scientific branch is now at 7e3087b553f0ad182d45df6ffe8a1678ea64d16a. New Stage 03 code must not execute until the durable checkpoint and clean runtime snapshot are rebound to the exact implementation SHA."
+    "Live Workspace Shell PADataset runtime remains pinned to 17e1147614f27702e43565089d618182ff71c5af; Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38 must not execute until the parent authority/runtime refresh is validated and completed."
   ],
   "remaining_work": [
-    "Inspect current DQNGuard source and implement the minimal architecture C candidate consistent with the frozen Stage 01/02 contracts.",
-    "Add deterministic smoke tests that enforce target quarantine, disjoint calibration roles, monotone normalization, fixed max guard aggregation, and known-only thresholding.",
-    "Update the durable PADataset checkpoint only after the implementation candidate is committed and statically/repository validated.",
-    "Refresh the clean Workspace Shell PADataset snapshot to that exact candidate SHA, then run smoke and one reviewed real target fold."
+    "Refresh Workspace Shell to exact PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.",
+    "Run tests/test_multisurrogate_dqnguard.py through research-bounded on that exact clean snapshot.",
+    "Prepare one known-only four-class backbone target fold with 16,384 cache lineage and no target-informed checkpoint selection.",
+    "Run architecture C smoke/small-real evaluator and validate result_record.json against the Stage 02 schema."
   ],
-  "next_safe_action": "Implement and repository-validate the smallest architecture C source/test candidate on PADataset starting from 7e3087b553f0ad182d45df6ffe8a1678ea64d16a. Do not execute it through Workspace Shell until the durable checkpoint and clean snapshot are rebound to the exact implementation SHA.",
+  "next_safe_action": "Do not execute Stage 03 code yet. After the parent runtime refresh binds Workspace Shell PADataset to 4c095352bfe128e93f794112741efdb7a66b9c38, run the deterministic contract tests first.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."

@@ -24,29 +24,31 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 - Intent: mutate
 - Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 1a9a24fc1bc6e5cda2984e296151a378138600c8
+- Remote checkpoint: 50395aad06ab719b8207d9e7d3d8270a6bb35030
 - Remote verified: true
 
 ### PADataset
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 17e1147614f27702e43565089d618182ff71c5af
+- Remote checkpoint: 4c095352bfe128e93f794112741efdb7a66b9c38
 - Remote verified: true
 
 ## Next safe action
 
-Continue the dependent mth602-final-multisurrogate-dqnguard-v1 task at Stage 00 using read-only file-list/file-read/file-hash against PADataset@17e1147614f27702e43565089d618182ff71c5af and its read-only historical evidence mount. Do not mutate the historical checkout.
+Wait only for exact-head candidate-scope validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030. Once validated, deploy the authority state produced by this task checkpoint with workspace-control exec 50395aad06ab719b8207d9e7d3d8270a6bb35030 and PADataset exec 4c095352bfe128e93f794112741efdb7a66b9c38; then verify both live task gates before Stage 03 execution.
 
 ## Remaining work
 
-- Complete MTH602 Stage 00 baseline/runtime provenance recovery using the live clean PADataset snapshot and read-only historical evidence mount.
-- Persist the machine-readable Stage 00 provenance artifact in PADataset through its own authoritative workflow once provenance is complete.
-- Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
+- Obtain exact-head candidate-scope validation for workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030.
+- Refresh the independent trusted authority and clean PADataset runtime snapshot to 4c095352bfe128e93f794112741efdb7a66b9c38 using the hardened upgrader.
+- Run deterministic Stage 03 tests through research-bounded on the exact clean snapshot.
+- Prepare one known-only four-class backbone target fold and run the reviewed architecture C small-real evaluation.
 
 ## Blockers / gates
 
-- None.
+- Workspace Shell live PADataset snapshot remains at 17e1147614f27702e43565089d618182ff71c5af while Stage 03 candidate is 4c095352bfe128e93f794112741efdb7a66b9c38.
+- Hardened workspace-control execution candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 is queued for exact-head Lambda validation; do not deploy it until candidate-scope validation evidence is available.
 
 ## Fresh-chat initialization
 

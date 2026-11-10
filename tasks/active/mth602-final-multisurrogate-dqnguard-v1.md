@@ -24,24 +24,23 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 17e1147614f27702e43565089d618182ff71c5af
+- Remote checkpoint: 4c095352bfe128e93f794112741efdb7a66b9c38
 - Remote verified: true
 
 ## Next safe action
 
-Continue Stage 00 read-only provenance recovery from PADataset@17e1147614f27702e43565089d618182ff71c5af and the untouched historical evidence checkout mounted at local_artifacts/evidence. Start with docs/experiments/multisurrogate_dqnguard/TASK.md, then recover baseline CSV/evaluator/run/config/checkpoint/cache/calibration identities. Do not begin Stage 01 until the provenance gate closes.
+Do not execute Stage 03 code yet. After the parent runtime refresh binds Workspace Shell PADataset to 4c095352bfe128e93f794112741efdb7a66b9c38, run the deterministic contract tests first.
 
 ## Remaining work
 
-- Read the canonical scientific task and recover fixed-Scan DQNGuard baseline provenance.
-- Recover the full 20-cell target-surrogate matrix provenance and VarMax surrogate-all evidence chains.
-- Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings.
-- Record inaccessible historical subdirectories explicitly if legacy permissions block read-only traversal.
-- Persist a machine-readable Stage 00 provenance artifact and update the authoritative PADataset task only after evidence recovery is complete.
+- Refresh Workspace Shell to exact PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.
+- Run tests/test_multisurrogate_dqnguard.py through research-bounded on that exact clean snapshot.
+- Prepare one known-only four-class backbone target fold with 16,384 cache lineage and no target-informed checkpoint selection.
+- Run architecture C smoke/small-real evaluator and validate result_record.json against the Stage 02 schema.
 
 ## Blockers / gates
 
-- None.
+- Live Workspace Shell PADataset runtime remains pinned to 17e1147614f27702e43565089d618182ff71c5af; Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38 must not execute until the parent authority/runtime refresh is validated and completed.
 
 ## Fresh-chat initialization
 
