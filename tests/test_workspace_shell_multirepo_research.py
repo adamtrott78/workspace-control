@@ -117,17 +117,30 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
                 self.assertEqual(cp.returncode, 0, cp.stdout + cp.stderr)
                 self.assertEqual(handoff.read_text(), rendered.read_text())
 
-    def test_install_and_upgrade_pin_padataset_snapshot(self):
+    def test_install_and_upgrade_separate_clean_execution_from_historical_evidence(self):
         render = (PLUGIN / "install" / "render_install.py").read_text()
         self.assertIn('padataset_root = "/srv/workspace-shell/PADataset"', render)
+        self.assertIn('padataset_evidence_root = "/srv/workspace-shell/PADataset-evidence"', render)
         self.assertIn('"PADataset": padataset_root', render)
+        self.assertIn('"evidence_roots": {"PADataset": padataset_evidence_root}', render)
 
         upgrade = (PLUGIN / "install" / "upgrade_multirepo_padataset_v1.sh").read_text()
         self.assertIn("17e1147614f27702e43565089d618182ff71c5af", upgrade)
-        self.assertIn('PAD_ROOT="${PADATASET_CHECKOUT:-$HOME/adamArchives/Adam/varMax/PADataset}"', upgrade)
-        self.assertIn("no runtime mutation performed", upgrade)
-        self.assertIn("/srv/workspace-shell/PADataset", upgrade)
+        self.assertIn('PAD_EVIDENCE_ROOT="${PADATASET_CHECKOUT:-$HOME/adamArchives/Adam/varMax/PADataset}"', upgrade)
+        self.assertIn('git clone --filter=blob:none --no-checkout "$PAD_EXEC_REPO_URL" "$PAD_FETCH"', upgrade)
+        self.assertIn('mount --bind "$PAD_EVIDENCE_ROOT" "$EVIDENCE_MOUNT"', upgrade)
+        self.assertIn('remount,bind,ro,nosuid,nodev,noexec', upgrade)
+        self.assertIn('"historical_checkout_mutated": False', upgrade)
+        self.assertIn('data.setdefault("evidence_roots", {})', upgrade)
+        self.assertIn("/srv/workspace-shell/PADataset-evidence", upgrade)
         self.assertIn("attempting rollback", upgrade)
+
+    def test_launcher_binds_evidence_inside_workspace_without_schema_change(self):
+        source = (PLUGIN / "root" / "job_launcher.py").read_text()
+        self.assertIn('def build_bwrap_command(cfg, workspace_path, cwd, resolved, evidence_root=None):', source)
+        self.assertIn('"/workspace/local_artifacts/evidence"', source)
+        self.assertIn('"EVIDENCE_NOT_READ_ONLY_MOUNT"', source)
+        self.assertIn('cfg.get("evidence_roots", {}).get(request["target"])', source)
 
 
 if __name__ == "__main__":
