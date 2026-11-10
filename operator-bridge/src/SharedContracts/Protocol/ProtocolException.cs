@@ -1,6 +1,6 @@
 namespace WorkspaceControl.OperatorBridge.Contracts.Protocol;
 
-public sealed class ProtocolException : InvalidDataException
+public sealed class ProtocolException : Exception
 {
     public ProtocolException(string code)
         : base(code)
