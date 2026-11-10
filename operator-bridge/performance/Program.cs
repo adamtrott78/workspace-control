@@ -680,8 +680,25 @@ internal static class Program
             using var process = Process.GetProcessById(processId);
             if (!process.HasExited)
             {
-                process.Kill(entireProcessTree: true);
-                await process.WaitForExitAsync();
+                // Prefer a normal browser-window close so Firefox does not
+                // persist crash/recovery state between frozen cold-start
+                // trials. Fall back to an owned process-tree kill only when
+                // graceful shutdown does not complete within the bound.
+                _ = process.CloseMainWindow();
+                using var gracefulTimeout = new CancellationTokenSource(
+                    TimeSpan.FromSeconds(8));
+                try
+                {
+                    await process.WaitForExitAsync(gracefulTimeout.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    if (!process.HasExited)
+                    {
+                        process.Kill(entireProcessTree: true);
+                        await process.WaitForExitAsync();
+                    }
+                }
             }
         }
         catch (ArgumentException)
