@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "impl_01_repository_bootstrap_and_contract_harness",
+  "current_stage": "impl_02_windows_helper_kernel",
   "acceptance_criteria": [
     "Implementation remains traceable to the UX-13 freeze at exact workspace-control SHA 0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
     "Every stage has explicit dependencies, outputs, validation, and exact-head durable evidence before promotion.",
@@ -49,7 +49,7 @@
       "base_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "2ff35d02ec823744937dc8fdd82d69c44bb3cb69",
+        "checkpoint_sha": "0fabe069aa39914f84b00ac78a2f26f57238ef4c",
         "verified": true
       },
       "local": null,
@@ -99,7 +99,7 @@
     },
     {
       "id": "impl_01_repository_bootstrap_and_contract_harness",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
@@ -113,14 +113,28 @@
         "initial test projects",
         "manifest/security static-test scaffolding"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 01 repository/bootstrap/contract harness",
+          "result": "PASS",
+          "evidence": [
+            "Stage-01 implementation content committed at workspace-control@0fabe069aa39914f84b00ac78a2f26f57238ef4c.",
+            "Operator Bridge Validation run 42758655547 / #1 SUCCESS on the exact Stage-01 code head: Windows .NET 10 setup, Python frozen-contract/security tests, restore, Release build, and dotnet test all passed.",
+            "Workspace Control Validation run 42758654957 / #2379 SUCCESS on the exact Stage-01 code head, including changed task contracts, repository unit regression, pinned Lambda controller, and full integration contracts.",
+            "The implementation copy operator-bridge/protocol/browser_adapter_v1.schema.json is JSON-equivalent to the UX-12 frozen protocol and enforced by a repository static test.",
+            "Firefox manifest static tests enforce MV3, exact permissions nativeMessaging/tabs/sessions, no host/content-script keys, fixed extension ID, ESR 153 minimum, and required data-collection declaration none.",
+            "The dedicated Operator Bridge Validation workflow contains no secrets.* or OpenAI/ChatGPT credential dependency and runs on windows-latest.",
+            "The .NET 10 solution skeleton, WinForms helper skeleton, SharedContracts project, three MSTest projects, Firefox adapter skeleton, README, and dedicated CI workflow are present without Stage-02+ behavior."
+          ]
+        }
+      ],
       "resume_condition": "Empty/minimal implementation compiles and CI can deterministically enforce frozen contracts."
     },
     {
       "id": "impl_02_windows_helper_kernel",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
-      "selected_executor": null,
+      "selected_executor": "gpt-5.6-sol",
       "selected_surface": "github",
       "inputs": [
         "validated stage impl_01_repository_bootstrap_and_contract_harness"
@@ -353,11 +367,11 @@
     {
       "id": "restore-point:latest",
       "kind": "recovery_restore_point",
-      "identity": "2ff35d02ec823744937dc8fdd82d69c44bb3cb69",
+      "identity": "0fabe069aa39914f84b00ac78a2f26f57238ef4c",
       "required_for_resume": true,
       "evidence": [
-        "Stage 00 implementation-program/authority checkpoint validated by Workspace Control Validation #2377.",
-        "Next active stage is impl_01_repository_bootstrap_and_contract_harness; no operator-bridge implementation code exists yet."
+        "Stage 01 repository/bootstrap/contract harness validated by Operator Bridge Validation #1 and Workspace Control Validation #2379.",
+        "Next active stage is impl_02_windows_helper_kernel."
       ]
     },
     {
@@ -368,6 +382,17 @@
       "evidence": [
         "Workspace Control Validation #2377 SUCCESS.",
         "Implementation program, staged plan, traceability matrix, child capsule, and derived handoff are durable."
+      ]
+    },
+    {
+      "id": "impl-01-bootstrap-contract-harness",
+      "kind": "git_commit",
+      "identity": "0fabe069aa39914f84b00ac78a2f26f57238ef4c",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #1 SUCCESS.",
+        "Workspace Control Validation #2379 SUCCESS.",
+        "Stage 01 build/test/contract infrastructure is validated; no helper/browser runtime behavior beyond skeleton exists."
       ]
     }
   ],
@@ -407,6 +432,54 @@
       "evidence": [
         "Frozen UX requirements mapped to construction and verification stages."
       ]
+    },
+    {
+      "path": "operator-bridge/WorkspaceOperatorBridge.slnx",
+      "state": "STAGE_01_VALIDATED",
+      "role": ".NET 10 solution skeleton for helper/contracts/tests",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by implementation stages",
+      "review_requirement": "Project/dependency additions must remain inside staged implementation authority.",
+      "evidence": [
+        "Release build and dotnet test passed in Operator Bridge Validation #1."
+      ]
+    },
+    {
+      "path": ".github/workflows/operator-bridge-validation.yml",
+      "state": "STAGE_01_VALIDATED",
+      "role": "dedicated path-filtered Windows/.NET operator bridge validation workflow",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by implementation task",
+      "review_requirement": "Must remain credential-independent until explicit real-account calibration stage.",
+      "evidence": [
+        "Operator Bridge Validation #1 SUCCESS with no account-secret dependency."
+      ]
+    },
+    {
+      "path": "operator-bridge/protocol/browser_adapter_v1.schema.json",
+      "state": "FROZEN_PROTOCOL_COPY_VALIDATED",
+      "role": "implementation-local copy of frozen Browser Adapter Protocol v1",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "copy only from reviewed architecture protocol revision",
+      "review_requirement": "Drift test must remain exact JSON-equivalence with frozen source.",
+      "evidence": [
+        "Protocol drift static test passed in Operator Bridge Validation #1."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/FirefoxAdapter/manifest.json",
+      "state": "STAGE_01_SECURITY_BASELINE_VALIDATED",
+      "role": "least-privilege Firefox MV3 manifest skeleton",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "changed only by authorized browser-adapter stages",
+      "review_requirement": "Any permission/host/content-script expansion reopens security review.",
+      "evidence": [
+        "Manifest static security tests passed in Operator Bridge Validation #1."
+      ]
     }
   ],
   "validation": [
@@ -440,11 +513,18 @@
         "Workspace Control Validation #2377 SUCCESS at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69.",
         "Child JSON/Markdown synchronization and repository regressions passed."
       ]
+    },
+    {
+      "check": "Stage 01 exact-head code validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c.",
+        "Stage 01 exit criterion satisfied: minimal implementation compiles and CI deterministically enforces frozen contracts."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "impl_01_repository_bootstrap_and_contract_harness: Repository skeleton, build, CI, and frozen-contract harness",
     "impl_02_windows_helper_kernel: Windows helper kernel",
     "impl_03_native_messaging_and_local_ipc: Native Messaging proxy and same-user local IPC",
     "impl_04_firefox_mv3_adapter: Firefox Manifest V3 browser adapter",
@@ -458,8 +538,8 @@
     "impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration",
     "impl_13_production_readiness_review: Integrated implementation review and promotion decision"
   ],
-  "next_safe_action": "Execute impl_01_repository_bootstrap_and_contract_harness from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json: create the operator-bridge solution/project skeleton, dedicated path-filtered validation workflow, implementation copy/check of the frozen Browser Adapter protocol, initial .NET test projects, Firefox manifest/security static-test scaffolding, and minimal README/build instructions. Keep behavior skeletal: Stage 01 proves build/test/contract infrastructure, not helper/browser functionality. Validate dotnet restore/build/test, protocol drift, no-account-secret CI, and exact task scope before promoting Stage 02.",
+  "next_safe_action": "Execute impl_02_windows_helper_kernel from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the primary .NET helper kernel only: tray/master ON-OFF state, Win32 RegisterHotKey adapter, STA write-only clipboard adapter, single-flight dispatch coordinator, content-free structured diagnostics, monotonic timing, and fake application/BrowserPort boundaries. Do not implement Native Messaging, named pipes, Firefox lifecycle, simulator worker behavior, or real-account interaction in Stage 02. Required exit evidence includes hotkey register/unregister/conflict behavior, bridge-OFF no-side-effect behavior, held-repeat/single-flight suppression, last-safe-moment clipboard tests using fake BrowserPort, logging denylist tests, and a recorded helper idle-resource measurement.",
   "last_executor": "gpt-5.6-sol",
   "last_surface": "github+heartbeat",
-  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet."
+  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages."
 }

@@ -209,5 +209,27 @@
         "build/contract tests and implementation review"
       ]
     }
-  ]
+  ],
+  "stage_evidence": {
+    "impl_01_repository_bootstrap_and_contract_harness": {
+      "status": "VALIDATED",
+      "checkpoint": "0fabe069aa39914f84b00ac78a2f26f57238ef4c",
+      "validations": [
+        "Operator Bridge Validation #1 SUCCESS",
+        "Workspace Control Validation #2379 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/WorkspaceOperatorBridge.slnx",
+        "operator-bridge/src/SharedContracts/**",
+        "operator-bridge/src/WorkspaceOperator/**",
+        "operator-bridge/src/FirefoxAdapter/manifest.json",
+        "operator-bridge/src/FirefoxAdapter/background.js",
+        "operator-bridge/protocol/browser_adapter_v1.schema.json",
+        "operator-bridge/tests/**",
+        "tests/test_workspace_semantic_execution_operator_bridge_contracts.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "claim": "Build/test/security-contract infrastructure validated; no Stage-02+ runtime behavior claimed."
+    }
+  }
 }

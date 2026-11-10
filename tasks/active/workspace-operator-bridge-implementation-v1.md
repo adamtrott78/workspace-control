@@ -24,16 +24,15 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 2ff35d02ec823744937dc8fdd82d69c44bb3cb69
+- Remote checkpoint: 0fabe069aa39914f84b00ac78a2f26f57238ef4c
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_01_repository_bootstrap_and_contract_harness from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json: create the operator-bridge solution/project skeleton, dedicated path-filtered validation workflow, implementation copy/check of the frozen Browser Adapter protocol, initial .NET test projects, Firefox manifest/security static-test scaffolding, and minimal README/build instructions. Keep behavior skeletal: Stage 01 proves build/test/contract infrastructure, not helper/browser functionality. Validate dotnet restore/build/test, protocol drift, no-account-secret CI, and exact task scope before promoting Stage 02.
+Execute impl_02_windows_helper_kernel from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Implement the primary .NET helper kernel only: tray/master ON-OFF state, Win32 RegisterHotKey adapter, STA write-only clipboard adapter, single-flight dispatch coordinator, content-free structured diagnostics, monotonic timing, and fake application/BrowserPort boundaries. Do not implement Native Messaging, named pipes, Firefox lifecycle, simulator worker behavior, or real-account interaction in Stage 02. Required exit evidence includes hotkey register/unregister/conflict behavior, bridge-OFF no-side-effect behavior, held-repeat/single-flight suppression, last-safe-moment clipboard tests using fake BrowserPort, logging denylist tests, and a recorded helper idle-resource measurement.
 
 ## Remaining work
 
-- impl_01_repository_bootstrap_and_contract_harness: Repository skeleton, build, CI, and frozen-contract harness
 - impl_02_windows_helper_kernel: Windows helper kernel
 - impl_03_native_messaging_and_local_ipc: Native Messaging proxy and same-user local IPC
 - impl_04_firefox_mv3_adapter: Firefox Manifest V3 browser adapter
