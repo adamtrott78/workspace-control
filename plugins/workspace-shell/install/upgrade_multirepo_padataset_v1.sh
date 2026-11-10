@@ -235,6 +235,56 @@ for svc in "${SERVICES[@]}"; do
   sudo systemctl is-active --quiet "$svc" || fail "$svc is not active after upgrade"
 done
 
+MCP_INIT="$(mktemp /tmp/workspace-shell-upgrade-init.XXXXXX.json)"
+MCP_TOOLS="$(mktemp /tmp/workspace-shell-upgrade-tools.XXXXXX.json)"
+trap 'rm -f "$MCP_INIT" "$MCP_TOOLS"; rollback' EXIT
+
+sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
+  --cacert /etc/workspace-shell/tunnel/ca.crt \
+  --cert /etc/workspace-shell/tunnel/client.crt \
+  --key /etc/workspace-shell/tunnel/client.key \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  --data-binary '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"workspace-shell-upgrade","version":"0.1.0"}}}' \
+  https://127.0.0.1:8797/mcp >"$MCP_INIT"
+
+sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
+  --cacert /etc/workspace-shell/tunnel/ca.crt \
+  --cert /etc/workspace-shell/tunnel/client.crt \
+  --key /etc/workspace-shell/tunnel/client.key \
+  -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  --data-binary '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
+  https://127.0.0.1:8797/mcp >"$MCP_TOOLS"
+
+python3 - "$MCP_INIT" "$MCP_TOOLS" <<'PY'
+import json, pathlib, sys
+init=json.loads(pathlib.Path(sys.argv[1]).read_text())
+tools=json.loads(pathlib.Path(sys.argv[2]).read_text())
+if init.get("result", {}).get("serverInfo", {}).get("name") != "workspace-shell":
+    raise SystemExit("MCP initialize response invalid")
+result=tools.get("result")
+if not isinstance(result, dict) or not isinstance(result.get("tools"), list):
+    raise SystemExit(f"MCP tools/list response invalid: {tools}")
+names={t.get("name") for t in result["tools"] if isinstance(t, dict)}
+expected={"workspace_shell_inspect","workspace_shell_exec","workspace_shell_run_reviewed_helper","workspace_shell_receipt"}
+if names != expected:
+    raise SystemExit(f"MCP tools/list names mismatch: {sorted(names)}")
+exec_tool=next(t for t in result["tools"] if t.get("name")=="workspace_shell_exec")
+schema=exec_tool.get("inputSchema", {})
+target=((schema.get("properties") or {}).get("target") or {}).get("enum") or []
+profile=((schema.get("properties") or {}).get("profile") or {}).get("enum") or []
+for value in ("workspace-control","PADataset"):
+    if value not in target:
+        raise SystemExit(f"workspace_shell_exec target missing {value}")
+for value in ("file-list","file-read","file-hash","research-bounded"):
+    if value not in profile:
+        raise SystemExit(f"workspace_shell_exec profile missing {value}")
+print("LOCAL_MCP_DISCOVERY=PASS")
+PY
+rm -f "$MCP_INIT" "$MCP_TOOLS"
+trap rollback EXIT
+
 echo "WORKSPACE_CONTROL_SNAPSHOT=$(sudo git -c safe.directory=/srv/workspace-shell/workspace-control -C /srv/workspace-shell/workspace-control rev-parse HEAD)"
 echo "PADataset_EXECUTION_SNAPSHOT=$(sudo git -c safe.directory=/srv/workspace-shell/PADataset -C /srv/workspace-shell/PADataset rev-parse HEAD)"
 echo "PADataset_EVIDENCE_BRANCH=${EVIDENCE_BRANCH:-DETACHED}"
