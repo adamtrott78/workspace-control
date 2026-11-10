@@ -91,7 +91,7 @@ jobs:
             )
             if ($errors.Count -gt 0) {
               $messages = ($errors | ForEach-Object { $_.Message }) -join "; "
-              throw "PowerShell parse failed for $target: $messages"
+              throw "PowerShell parse failed for ${target}: $messages"
             }
           }
 
