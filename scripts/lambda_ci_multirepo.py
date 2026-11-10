@@ -130,7 +130,8 @@ def parse_display_claim(display_name: Any, route_id: str, command: str) -> tuple
         raise MultiRepoPolicyError("route command is invalid")
     pattern = re.compile(
         rf"^{CLAIM_VERSION}\|workload={re.escape(route_id)}"
-        rf"\|pr=([1-9][0-9]*)\|request={re.escape(command)} ([0-9a-f]{{40}})$"
+        rf"\|pr=([1-9][0-9]*)\|request={re.escape(command)} ([0-9a-f]{{40}})"
+        rf"(?: ([a-z0-9][a-z0-9._:+/@=-]{{0,127}}))?$"
     )
     match = pattern.fullmatch(display_name)
     if match is None:

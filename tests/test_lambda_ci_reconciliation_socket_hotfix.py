@@ -21,6 +21,8 @@ class ReconciliationSocketHotfixTests(unittest.TestCase):
     def test_manifest_binds_exact_repair_sources(self):
         self.assertEqual(MANIFEST["status"], "VALIDATED_HOTFIX_INPUT")
         evolved_after_hotfix = {
+            "scripts/lambda_ci_provisioner_service.py":
+                "d728c5d26f56694507a23623ccf10d8f71eb05a0",
             "scripts/lambda_ci_reconciler.py":
                 "e58d0ccd3e11df99dc22b9069d16b1a03c4d3a2d",
         }

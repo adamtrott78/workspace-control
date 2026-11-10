@@ -30,6 +30,7 @@ import lambda_ci_runtime as runtime
 DEFAULT_SOCKET = pathlib.Path("/run/workspace-ci/provisioner.sock")
 DEFAULT_STATE = pathlib.Path("/var/lib/workspace-ci/provisioner")
 MAX_REQUEST_BYTES = 192 * 1024
+SUPPORTED_EXECUTION_PROFILES = {"cpu-test", "gpu-small", "gpu-heavy", "control-small"}
 
 
 class ServiceError(RuntimeError):
@@ -53,7 +54,7 @@ class StateStore:
         *,
         project_id: str | None = None,
     ) -> pathlib.Path:
-        if profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
+        if profile not in SUPPORTED_EXECUTION_PROFILES:
             raise ServiceError(f"unsupported lane quarantine profile: {profile}")
         if project_id is None:
             suffix = profile
@@ -448,7 +449,7 @@ class ProvisionerService:
                         policy_sha256=self.policy_sha256,
                     )
 
-                if req.profile not in {"cpu-test", "gpu-small", "gpu-heavy"}:
+                if req.profile not in SUPPORTED_EXECUTION_PROFILES:
                     raise ServiceError(
                         "admission v2 execution profile is not supported"
                     )
