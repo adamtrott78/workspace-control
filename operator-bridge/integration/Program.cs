@@ -560,10 +560,11 @@ internal static class Program
                 new RecoverySessionRef("slot-r29b", 0)
             ]);
         var waiting29 = await recovery29.ReconcileAsync();
+        var waitingStatus29 = waiting29.Status;
         var ready29 = await recovery29.MarkManualAuthReturnedAsync();
         await recovery29.ReconcileAsync();
         predicates["SIM-029_auth_refresh_all_tabs"] =
-            waiting29.Status == RecoveryStatus.AwaitingManualAuth &&
+            waitingStatus29 == RecoveryStatus.AwaitingManualAuth &&
             ready29.Status == RecoveryStatus.ReadyToResume &&
             authority29.FreezeCount == 1 &&
             authority29.ReconcileCount == 1 &&
