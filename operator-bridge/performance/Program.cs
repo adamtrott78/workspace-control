@@ -401,6 +401,26 @@ internal static class Program
         }
         catch (Exception exception)
         {
+            var captured = diagnostics is CaptureDiagnostics capture
+                ? capture.Snapshot
+                : Array.Empty<DiagnosticEvent>();
+            var normalizedFailure = captured.Any(item =>
+                    string.Equals(
+                        item.NormalizedError,
+                        "ADAPTER_IDENTITY_REJECTED",
+                        StringComparison.Ordinal))
+                ? "ADAPTER_IDENTITY_REJECTED"
+                : captured.Any(item =>
+                    string.Equals(
+                        item.Component,
+                        "local_ipc",
+                        StringComparison.Ordinal) &&
+                    string.Equals(
+                        item.EventName,
+                        "proxy_connected",
+                        StringComparison.Ordinal))
+                    ? "ADAPTER_HANDSHAKE_INCOMPLETE"
+                    : "ADAPTER_CONNECTION_NOT_OBSERVED";
             var failure = new
             {
                 schema_version = 1,
@@ -409,7 +429,9 @@ internal static class Program
                 adapter_kind = PerformanceAdapterKind,
                 adapter_version = PerformanceAdapterVersion,
                 status = "FAIL",
-                error_type = exception.GetType().Name
+                error_type = exception.GetType().Name,
+                normalized_failure = normalizedFailure,
+                diagnostics = captured
             };
             await File.WriteAllTextAsync(
                 resultPath,
@@ -1259,8 +1281,30 @@ internal sealed record HotkeyMeasurement(
 
 internal sealed class CaptureDiagnostics : IDiagnosticsSink
 {
+    private const int MaxEvents = 64;
+    private readonly object _gate = new();
+    private readonly List<DiagnosticEvent> _events = [];
+
+    public IReadOnlyList<DiagnosticEvent> Snapshot
+    {
+        get
+        {
+            lock (_gate)
+            {
+                return _events.ToArray();
+            }
+        }
+    }
+
     public void Write(DiagnosticEvent diagnosticEvent)
     {
+        lock (_gate)
+        {
+            if (_events.Count < MaxEvents)
+            {
+                _events.Add(diagnosticEvent);
+            }
+        }
     }
 }
 
