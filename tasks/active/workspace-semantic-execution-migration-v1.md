@@ -74,7 +74,7 @@ operator_ux_design
 
 ## Next safe action
 
-Begin UX-06 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: design the persistent tray indicator and operator-console information architecture, including primary/secondary counts, status hierarchy, menu commands, judgment/recovery prominence, low-fidelity wireframes, notification policy, and what detail remains hidden unless debugging.
+Begin UX-07 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define recovery UX and FMEA for Firefox/helper/extension crashes, orchestrator unreachable, lost tabs, authentication/login refresh invalidating all worker tabs, packet prepared but never acknowledged, stale worker replies, clipboard interruption, sleep/reboot, hotkey during recovery, and other single-component failures. Preserve the goal that after unavoidable recovery interaction the operator returns to Ctrl+B -> Ctrl+V -> Enter without manual task-state reconstruction.
 
 ## Remaining work
 
