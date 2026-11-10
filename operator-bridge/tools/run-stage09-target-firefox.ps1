@@ -303,7 +303,7 @@ finally {
   $remainingFirefox = @(Get-BoundedFirefoxProcessMetadata)
   $cleanupFailed = $remainingFirefox.Count -gt 0
 
-  if ($PreflightOnly -and -not $collectorSucceeded) {
+  if ($PreflightOnly -and (-not $collectorSucceeded -or $cleanupFailed)) {
     $diagnosticRoot = if ([string]::IsNullOrWhiteSpace($DiagnosticsDirectory)) {
       [System.IO.Path]::GetFullPath($ResultPath + ".diagnostics")
     } else {
