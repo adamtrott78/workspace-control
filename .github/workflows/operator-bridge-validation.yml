@@ -17,6 +17,11 @@ on:
       - 'tests/test_workspace_semantic_execution_operator_bridge*.py'
   workflow_dispatch:
     inputs:
+      repair_target_profile:
+        description: 'Recreate the owned Stage-09 WorkspaceWorkers Firefox profile and verify the reviewed signed adapter'
+        required: false
+        default: false
+        type: boolean
       run_target_preflight:
         description: 'Run only the Stage-09 Firefox adapter identity preflight on the interactive Windows target runner'
         required: false
@@ -215,6 +220,105 @@ jobs:
           }
           $json = $measurement | ConvertTo-Json -Compress
           Write-Host "OPERATOR_BRIDGE_IDLE_MEASUREMENT=$json"
+  target-profile-repair:
+    name: target-profile-repair
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && inputs.repair_target_profile) ||
+        (github.event_name == 'pull_request' &&
+         github.event.action == 'labeled' &&
+         github.event.label.name == 'stage09-profile-repair' &&
+         github.event.pull_request.number == 590 &&
+         github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1')
+      }}
+    runs-on: [self-hosted, windows, x64, workspace-operator-target]
+    timeout-minutes: 20
+    env:
+      PSExecutionPolicyPreference: Bypass
+
+    steps:
+      - name: Checkout exact profile-repair head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Validate interactive profile-repair runner
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $head = (git rev-parse HEAD).Trim()
+          $expectedHead = "${{ github.event.pull_request.head.sha || github.sha }}"
+          if ($head -ne $expectedHead) {
+            throw "Profile-repair runner checkout is not bound to the exact requested source SHA."
+          }
+          if (-not [Environment]::UserInteractive) {
+            throw "Profile repair must run interactively in the WorkspaceWorkers Windows user session."
+          }
+          foreach ($name in @("firefox", "WorkspaceOperator")) {
+            if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+              throw "Profile repair requires no pre-existing $name process."
+            }
+          }
+
+      - name: Recreate and verify owned Stage 09 Firefox profile
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $repo = "${{ github.workspace }}"
+          $signedXpi = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage09\workspace-control-operator-performance-signed.xpi"
+          $repairEvidence = Join-Path $repo "benchmarks\workspace-semantic-execution\operator_bridge\stage09-profile-repair.json"
+
+          ./operator-bridge/performance/prepare-stage09-target-profile.ps1 `
+            -RepositoryRoot $repo `
+            -SignedXpiPath $signedXpi `
+            -InteractiveInstall
+
+          $launchDeadline = (Get-Date).AddSeconds(45)
+          while (-not (Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $launchDeadline) {
+            Start-Sleep -Milliseconds 250
+          }
+          if (-not (Get-Process firefox -ErrorAction SilentlyContinue)) {
+            throw "Stage 09 profile repair did not open Firefox signed-add-on installation UI."
+          }
+
+          Write-Host "STAGE09_TARGET_PROFILE_REPAIR_WAITING_FOR_OPERATOR=TRUE"
+          Write-Host "Accept the reviewed Workspace Operator Performance Adapter installation in Firefox, then close Firefox."
+
+          $closeDeadline = (Get-Date).AddMinutes(12)
+          while ((Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $closeDeadline) {
+            Start-Sleep -Milliseconds 500
+          }
+          if (Get-Process firefox -ErrorAction SilentlyContinue) {
+            throw "Stage 09 profile repair timed out waiting for Firefox to close."
+          }
+
+          ./operator-bridge/performance/prepare-stage09-target-profile.ps1 `
+            -RepositoryRoot $repo `
+            -SignedXpiPath $signedXpi `
+            -VerifyOnly
+
+          New-Item (Split-Path -Parent $repairEvidence) -ItemType Directory -Force | Out-Null
+          [ordered]@{
+            schema_version = 1
+            evidence_class = "TARGET_PROFILE_REPAIR"
+            source_sha = (git rev-parse HEAD).Trim().ToLowerInvariant()
+            profile_name = "WorkspaceWorkers"
+            extension_id = "workspace-control-operator@adamtrott78.local"
+            extension_version = "0.1.9"
+            adapter_version = "0.1.9-perf"
+            status = "PASS"
+          } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $repairEvidence -Encoding UTF8
+          Write-Host "STAGE09_TARGET_PROFILE_REPAIR=PASS"
+
+      - name: Upload Stage 09 profile-repair evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage09-profile-repair-${{ github.event.pull_request.head.sha || github.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage09-profile-repair.json
+          if-no-files-found: ignore
+          retention-days: 30
+
   target-preflight:
     name: target-preflight
     if: >-
