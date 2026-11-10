@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 - Intent: mutate
 - Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 40b3dd8cddd87270bde107516022d4e4426c0671
+- Remote checkpoint: 0dda3817a943ec41d3f1d1453c9e0f53dfe8b55d
 - Remote verified: true
 
 ### PADataset
@@ -36,16 +36,16 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Validate the current PR #595 head, whose implementation checkpoint is 40b3dd8cddd87270bde107516022d4e4426c0671 and whose following commits are state/handoff synchronization only. Do not execute the live upgrade operator until that exact PR head passes bounded repository validation. Then execute the operator on Lambda against PADataset expected SHA 17e1147614f27702e43565089d618182ff71c5af; fail closed on any mismatch.
+Validate the current PR #595 head after the historical-evidence redesign. Do not run the live upgrade until that exact head passes the Workspace Shell/PADataset Python contract suite. Then run the upgrade from the exact validated head; it must clone PADataset execution source at 17e1147614f27702e43565089d618182ff71c5af and bind the untouched historical checkout read-only under /srv/workspace-shell/PADataset-evidence.
 
 ## Remaining work
 
-- Run exact-head repository validation and fix any regressions.
-- Update the task checkpoint to the validated implementation head and synchronize derived handoff.
-- Execute the live upgrade operator on Lambda only from the validated clean workspace-control head.
-- Verify the historical PADataset checkout exact branch/head/status without mutating it; abort if the expected SHA binding is wrong.
+- Run exact-head repository validation for the historical-evidence redesign and fix any regressions.
+- Execute the live upgrade from the validated head; preserve the 107 GB historical checkout in place and expose it only by read-only bind mount.
+- Reinstall/re-register the Workspace Shell plugin once so ChatGPT discovers the frozen PADataset/research-bounded tool schema.
 - Run live positive and negative Workspace Shell acceptance for PADataset.
 - Hand control back to the MTH602 Stage 00 provenance recovery task.
+- Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
 
 ## Blockers / gates
 
