@@ -188,7 +188,26 @@ public sealed class RecoveryCoordinator : IRecoveryGate
                     return incident;
                 }
 
+                var affected = incident.AffectedSessions
+                    .Select(item => (
+                        item.WorkerSlotId,
+                        item.SessionGeneration))
+                    .ToHashSet();
+
+                var replacement = incident.ReplacementGenerations
+                    .Select(item => (
+                        WorkerSlotId: item.Key,
+                        SessionGeneration: item.Value))
+                    .ToHashSet();
+
                 var ambiguous = browserInventory
+                    .Where(item =>
+                        affected.Contains((
+                            item.WorkerSlotId,
+                            item.SessionGeneration)) ||
+                        replacement.Contains((
+                            item.WorkerSlotId,
+                            item.SessionGeneration)))
                     .GroupBy(item => new
                     {
                         item.WorkerSlotId,

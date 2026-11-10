@@ -93,6 +93,50 @@ public sealed class RecoveryCoordinatorTests
     }
 
     [TestMethod]
+    public async Task UnrelatedAmbiguousBindingDoesNotBlockScopedRecovery()
+    {
+        var state = new MemoryRecoveryStateStore();
+        var authority = new FakeRecoveryAuthority();
+        var inventory = new FakeInventory
+        {
+            Entries =
+            [
+                new BrowserInventoryEntry(
+                    "unrelated",
+                    0,
+                    "a",
+                    1,
+                    "CHATGPT_ORIGIN",
+                    false,
+                    false),
+                new BrowserInventoryEntry(
+                    "unrelated",
+                    0,
+                    "b",
+                    2,
+                    "CHATGPT_ORIGIN",
+                    false,
+                    false)
+            ]
+        };
+        var coordinator = new RecoveryCoordinator(
+            state,
+            authority,
+            inventory,
+            new NullDiagnostics());
+
+        await coordinator.BeginAsync(
+            "scoped-1",
+            RecoveryScope.SessionScoped,
+            RecoverySignal.ManagedTabClosed,
+            [new RecoverySessionRef("slot-a", 4)]);
+
+        var result = await coordinator.ReconcileAsync();
+
+        Assert.AreEqual(RecoveryStatus.ReadyToResume, result.Status);
+    }
+
+    [TestMethod]
     public async Task JsonRecoveryStateContainsOnlyRecoveryMetadata()
     {
         var root = Path.Combine(
@@ -212,11 +256,13 @@ public sealed class RecoveryCoordinatorTests
     {
         public int InventoryCount { get; private set; }
 
+        public IReadOnlyList<BrowserInventoryEntry> Entries { get; init; } = [];
+
         public Task<IReadOnlyList<BrowserInventoryEntry>> InventoryAsync(
             CancellationToken cancellationToken = default)
         {
             InventoryCount++;
-            return Task.FromResult<IReadOnlyList<BrowserInventoryEntry>>([]);
+            return Task.FromResult(Entries);
         }
     }
 
