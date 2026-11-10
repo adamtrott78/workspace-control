@@ -217,6 +217,99 @@ function Get-DescendantProcessIds {
   return @($seen)
 }
 
+function New-ProcessOwnershipTracker {
+  param(
+    [string]$Name,
+    [int]$RootPid
+  )
+  $known = [System.Collections.Generic.HashSet[int]]::new()
+  [void]$known.Add($RootPid)
+  return [pscustomobject]@{
+    Name = $Name
+    SessionId = (Get-Process -Id $PID).SessionId
+    KnownPids = $known
+  }
+}
+
+function Add-ProcessOwnershipRoot {
+  param(
+    $Tracker,
+    [int]$RootPid
+  )
+  [void]$Tracker.KnownPids.Add($RootPid)
+}
+
+function Update-ProcessOwnershipTracker {
+  param($Tracker)
+
+  $rows = @(Get-CimInstance Win32_Process | Select-Object ProcessId, ParentProcessId)
+  $changed = $true
+  while ($changed) {
+    $changed = $false
+    foreach ($row in $rows) {
+      $pidValue = [int]$row.ProcessId
+      $parent = [int]$row.ParentProcessId
+      if ($Tracker.KnownPids.Contains($parent) -and -not $Tracker.KnownPids.Contains($pidValue)) {
+        [void]$Tracker.KnownPids.Add($pidValue)
+        $changed = $true
+      }
+    }
+  }
+
+  foreach ($p in @(Get-Process -Name $Tracker.Name -ErrorAction SilentlyContinue)) {
+    try {
+      if ($p.SessionId -eq $Tracker.SessionId -and -not $Tracker.KnownPids.Contains($p.Id)) {
+        throw "Target measurement rejected: unowned $($Tracker.Name) process appeared during measurement."
+      }
+    } catch [System.Management.Automation.RuntimeException] {
+      throw
+    } catch {
+    }
+  }
+}
+
+function Get-TrackedOwnedProcessIds {
+  param($Tracker)
+  $ids = [System.Collections.Generic.HashSet[int]]::new()
+  foreach ($id in @(Get-DescendantProcessIds -RootPid $PID)) {
+    [void]$ids.Add([int]$id)
+  }
+  if ($null -ne $Tracker) {
+    foreach ($id in $Tracker.KnownPids) {
+      if (Get-Process -Id $id -ErrorAction SilentlyContinue) {
+        [void]$ids.Add([int]$id)
+      }
+    }
+  }
+  return @($ids)
+}
+
+function Stop-TrackedProcessName {
+  param($Tracker)
+
+  Update-ProcessOwnershipTracker -Tracker $Tracker
+  $deadline = (Get-Date).AddSeconds(15)
+  while ((Get-Date) -lt $deadline) {
+    $current = @(Get-Process -Name $Tracker.Name -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $Tracker.SessionId })
+    if ($current.Count -eq 0) {
+      return
+    }
+
+    Update-ProcessOwnershipTracker -Tracker $Tracker
+    foreach ($p in $current) {
+      if (-not $Tracker.KnownPids.Contains($p.Id)) {
+        throw "Target measurement rejected: $($Tracker.Name) process attribution/cleanup was lost."
+      }
+      Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+    }
+    Start-Sleep -Milliseconds 200
+  }
+
+  if (Get-Process -Name $Tracker.Name -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $Tracker.SessionId }) {
+    throw "Target measurement rejected: $($Tracker.Name) process attribution/cleanup was lost."
+  }
+}
+
 function Get-CpuSnapshot {
   param([int[]]$ProcessIds)
   $map = @{}
@@ -288,11 +381,19 @@ function Measure-ProcessGroup {
     [string]$ProcessName,
     [string]$ScenarioId,
     [int]$Repetition,
-    [Nullable[int]]$LiveTabs
+    [Nullable[int]]$LiveTabs,
+    $OwnershipTracker = $null
   )
 
-  Start-Sleep -Seconds $WarmupSeconds
-  Assert-NamedProcessesOwned -Name $ProcessName
+  $warmupDeadline = (Get-Date).AddSeconds($WarmupSeconds)
+  while ((Get-Date) -lt $warmupDeadline) {
+    Start-Sleep -Milliseconds 250
+    if ($null -ne $OwnershipTracker) {
+      Update-ProcessOwnershipTracker -Tracker $OwnershipTracker
+    } else {
+      Assert-NamedProcessesOwned -Name $ProcessName
+    }
+  }
 
   $working = [System.Collections.Generic.List[double]]::new()
   $private = [System.Collections.Generic.List[double]]::new()
@@ -300,12 +401,16 @@ function Measure-ProcessGroup {
   $unrelated = [System.Collections.Generic.List[double]]::new()
 
   $targetBefore = Get-ProcessNameCpuSnapshot -Name $ProcessName
-  $ownedBefore = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+  $ownedBefore = Get-CpuSnapshot -ProcessIds @(Get-TrackedOwnedProcessIds -Tracker $OwnershipTracker)
   $wallBefore = Get-Date
 
   for ($i = 0; $i -lt $SteadySeconds; $i++) {
     Start-Sleep -Seconds 1
-    Assert-NamedProcessesOwned -Name $ProcessName
+    if ($null -ne $OwnershipTracker) {
+      Update-ProcessOwnershipTracker -Tracker $OwnershipTracker
+    } else {
+      Assert-NamedProcessesOwned -Name $ProcessName
+    }
 
     $session = (Get-Process -Id $PID).SessionId
     $processes = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $session })
@@ -316,7 +421,7 @@ function Measure-ProcessGroup {
     $workingMiB = [double](($processes | Measure-Object -Property WorkingSet64 -Sum).Sum) / 1MB
     $privateMiB = [double](($processes | Measure-Object -Property PrivateMemorySize64 -Sum).Sum) / 1MB
     $targetAfter = Get-ProcessNameCpuSnapshot -Name $ProcessName
-    $ownedAfter = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+    $ownedAfter = Get-CpuSnapshot -ProcessIds @(Get-TrackedOwnedProcessIds -Tracker $OwnershipTracker)
     $wallAfter = Get-Date
     $wallSeconds = [Math]::Max(0.001, ($wallAfter - $wallBefore).TotalSeconds)
 
@@ -417,11 +522,13 @@ function Invoke-FirefoxNoExtensionBaseline {
   }
   $profile = Join-Path $work ("firefox-no-extension-" + $Repetition)
   Initialize-FirefoxBaselineProfile -ProfilePath $profile
-  Start-Process -FilePath $FirefoxPath -ArgumentList @("-profile", ('"' + $profile + '"'), "-no-remote", "about:blank") | Out-Null
+  $root = Start-Process -FilePath $FirefoxPath -ArgumentList @("-profile", ('"' + $profile + '"'), "-no-remote", "about:blank") -PassThru
+  $tracker = New-ProcessOwnershipTracker -Name "firefox" -RootPid $root.Id
+  Update-ProcessOwnershipTracker -Tracker $tracker
   try {
-    return Measure-ProcessGroup -ProcessName "firefox" -ScenarioId "FIREFOX_0_WORKERS_NO_EXTENSION" -Repetition $Repetition -LiveTabs 0
+    return Measure-ProcessGroup -ProcessName "firefox" -ScenarioId "FIREFOX_0_WORKERS_NO_EXTENSION" -Repetition $Repetition -LiveTabs 0 -OwnershipTracker $tracker
   } finally {
-    Stop-OwnedProcessName -Name "firefox"
+    Stop-TrackedProcessName -Tracker $tracker
   }
 }
 
@@ -465,20 +572,24 @@ function Invoke-ChromeReplicate {
     "--disable-background-networking"
   )
 
-  Start-Process -FilePath $ChromePath -ArgumentList @($baseArgs + @("about:blank")) | Out-Null
+  $root = Start-Process -FilePath $ChromePath -ArgumentList @($baseArgs + @("about:blank")) -PassThru
+  $tracker = New-ProcessOwnershipTracker -Name "chrome" -RootPid $root.Id
+  Update-ProcessOwnershipTracker -Tracker $tracker
   try {
     $runs = [System.Collections.Generic.List[object]]::new()
-    $runs.Add((Measure-ProcessGroup -ProcessName "chrome" -ScenarioId "CHROME_0_WORKERS" -Repetition $Repetition -LiveTabs 0))
+    $runs.Add((Measure-ProcessGroup -ProcessName "chrome" -ScenarioId "CHROME_0_WORKERS" -Repetition $Repetition -LiveTabs 0 -OwnershipTracker $tracker))
 
     $opened = 0
     foreach ($targetCount in @(1, 2, 4)) {
       while ($opened -lt $targetCount) {
         $opened++
         $url = "http://127.0.0.1:8766/fake-worker.html?slot=$opened"
-        Start-Process -FilePath $ChromePath -ArgumentList @($baseArgs + @($url)) | Out-Null
+        $newRoot = Start-Process -FilePath $ChromePath -ArgumentList @($baseArgs + @($url)) -PassThru
+        Add-ProcessOwnershipRoot -Tracker $tracker -RootPid $newRoot.Id
         Start-Sleep -Milliseconds 750
+        Update-ProcessOwnershipTracker -Tracker $tracker
       }
-      $runs.Add((Measure-ProcessGroup -ProcessName "chrome" -ScenarioId ("CHROME_" + $targetCount + "_WORKERS") -Repetition $Repetition -LiveTabs $targetCount))
+      $runs.Add((Measure-ProcessGroup -ProcessName "chrome" -ScenarioId ("CHROME_" + $targetCount + "_WORKERS") -Repetition $Repetition -LiveTabs $targetCount -OwnershipTracker $tracker))
     }
 
     return [ordered]@{
@@ -486,7 +597,7 @@ function Invoke-ChromeReplicate {
       resource_runs = @($runs)
     }
   } finally {
-    Stop-OwnedProcessName -Name "chrome"
+    Stop-TrackedProcessName -Tracker $tracker
   }
 }
 
