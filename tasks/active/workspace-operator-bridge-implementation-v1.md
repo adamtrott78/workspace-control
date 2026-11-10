@@ -29,17 +29,7 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 ## Next safe action
 
-Wait only for Mozilla AMO to finish signing the accepted unlisted/self-distributed Stage-09 Firefox performance adapter submission built from validated implementation source head `96be6cf95706f784f7f20c3a5a61a7671b36fa27`.
-
-When the signed XPI is available:
-
-1. Verify its payload against the exact Stage-09 source with `operator-bridge/performance/prepare-stage09-target-profile.ps1`.
-2. Run the prep script once with `-InteractiveInstall` to create/use only the Stage-09-owned `WorkspaceWorkers` profile and complete Firefox's normal signed-add-on confirmation.
-3. Close Firefox.
-4. Re-register the Windows workstation as an interactive **ephemeral** GitHub self-hosted runner with label `workspace-operator-target`.
-5. Trigger the hardened Stage-09 target job, retrieve `stage09-target-evidence.json`, and evaluate every frozen UX-09 budget.
-
-Do not begin impl_10, impl_11, impl_12, or impl_13 before Stage 09 target evidence is durably validated.
+Wait only for Mozilla AMO to finish signing the accepted unlisted/self-distributed Stage-09 Firefox performance adapter submission built from validated implementation source head 96be6cf95706f784f7f20c3a5a61a7671b36fa27. When the signed XPI is available, verify its payload against the exact Stage-09 source using operator-bridge/performance/prepare-stage09-target-profile.ps1, run that script once with -InteractiveInstall to create/use only the Stage-09-owned WorkspaceWorkers profile and complete Firefox's normal add-on confirmation, close Firefox, then re-register the Windows workstation as an interactive ephemeral GitHub self-hosted runner with label workspace-operator-target and trigger the hardened Stage-09 target job. Do not begin impl_10+ before Stage 09 target evidence is validated.
 
 ## Remaining work
 
@@ -51,16 +41,7 @@ Do not begin impl_10, impl_11, impl_12, or impl_13 before Stage 09 target eviden
 
 ## Blockers / gates
 
-Stage 09 is externally blocked only on Mozilla AMO signature completion. The corrected AMO-compatible source head `96be6cf95706f784f7f20c3a5a61a7671b36fa27` passed:
-
-- Workspace Control Validation run `42806204793` — SUCCESS
-- Operator Bridge Validation run `42806204561` — SUCCESS
-
-AMO accepted the unlisted/self-distributed add-on plus reviewer source package and currently reports **Version Signature Pending**. No target performance result exists yet.
-
-The target path is hardened before rerun: adapter identity is fenced to `FIREFOX_EXTENSION / 0.1.9-perf`, the signed XPI payload is verified against repo source, production `chatgpt.com` worker URLs are rejected from the benchmark package, Stage-09 profile ownership is enforced, Native Messaging override cleanup is reversible, and Chrome Memory Saver is disabled through a reversible per-user policy during measurement.
-
-After the signature is available, complete the signed-add-on install into the Stage-09-owned `WorkspaceWorkers` profile, run adapter preflight, re-register the ephemeral interactive Windows runner, and execute Stage 09. Stage 10 remains blocked until every required target budget is evaluated.
+- Stage 09 target-machine acceptance is externally blocked on Mozilla AMO signature completion for the accepted unlisted/self-distributed Firefox performance adapter. The corrected source head 96be6cf95706f784f7f20c3a5a61a7671b36fa27 passed Workspace Control Validation run 42806204793 and Operator Bridge Validation run 42806204561. AMO accepted the add-on and reviewer source bundle and now reports Version Signature Pending. No target performance result exists yet. After signing, install only into the Stage-09-owned WorkspaceWorkers profile, run adapter identity preflight, then re-register the ephemeral interactive Windows runner and execute the target matrix. Stage 10 remains blocked.
 
 ## Fresh-chat initialization
 
