@@ -541,6 +541,15 @@
             "Corrected boundary requires each PADataset controller to be in one stable non-failing state before start: either active/running with ExecMainStatus=0 and MainPID>0, or inactive/dead with ExecMainStatus=0 and MainPID=0.",
             "The exact full pre-start PADataset CPU/GPU snapshots must be captured and must remain byte-for-byte equal after workspace-control CPU start. failed/activating/deactivating states are rejected before mutation."
           ]
+        },
+        {
+          "check": "PADataset sibling-preservation authority-sensitive review",
+          "result": "PASS",
+          "evidence": [
+            "PR #597 comment 6779181693 returned NO_BLOCKING_FINDING on exact head 5b0ab6d4348ffa3db04216b26ec9867167374f32.",
+            "Automated consumption receipt comment 6779185539 binds request 6778897682 / digest d41aba2317e872c89b648372f69bbf82da81445750a64aec8990e0f6d0ca1079 and disposition 6779181693.",
+            "Workspace Control Validation run 42898838037 / #2499 completed SUCCESS on exact reviewed head."
+          ]
         }
       ],
       "resume_condition": "Fresh authority-sensitive review accepts the exact start-only recovery boundary and all operator preflight predicates pass."
@@ -2328,17 +2337,14 @@
     }
   ],
   "blockers": [
-    "Fresh authority-sensitive review is required for the corrected sibling-preservation boundary before another controller-start attempt.",
-    "Root-only live preflight must still prove all exact installed identities, research-engine CPU/GPU inactive/dead, provisioner and maintenance active/running, no active transient execution, and stable PADataset CPU/GPU states.",
-    "PADataset CPU/GPU must be preserved exactly across the workspace-control start; the transaction must not start/stop/restart either PADataset controller.",
-    "Any identity/state mismatch aborts before start. No reset/reconcile/recreate/retrigger/research-engine mutation is authorized."
+    "Only the reviewed root-only operator transaction remains. Connected Workspace Shell cannot inspect sibling PADataset/research-engine/provisioner units or /opt authority-bearing files because they are outside its root-owned allowlist/sandbox.",
+    "Any live identity/state mismatch aborts before start. No reset/reconcile/recreate/retrigger/PADataset/research-engine mutation is authorized."
   ],
   "remaining_work": [
-    "Validate the corrected PR #597 head.",
-    "Obtain fresh independent authority-sensitive review of the sibling-preservation correction.",
-    "Run the corrected fail-closed root preflight; capture exact PADataset CPU/GPU snapshots.",
+    "Run the reviewed root preflight with PADataset stable-state snapshot capture.",
     "If every predicate passes, start only workspace-ci-controller@workspace-control-cpu.service.",
-    "Prove workspace-control CPU active/running and PADataset CPU/GPU snapshots unchanged; then observe run #389."
+    "Verify workspace-control CPU active/running and PADataset CPU/GPU full snapshots unchanged.",
+    "Observe run #389 for runner acquisition/completion and record recovery receipt."
   ],
   "next_safe_action": "After fresh corrected-head review acceptance, execute one bounded Lambda transaction. Require exact controller/unit/maintenance/provisioner/runtime/root-policy identities already frozen. Require workspace-control CPU inactive/dead and research-engine CPU/GPU inactive/dead. Require provisioner and maintenance active/running and no active transient project execution. For each PADataset CPU/GPU controller, accept only either (a) active/running, ExecMainStatus=0, MainPID>0, or (b) inactive/dead, ExecMainStatus=0, MainPID=0; reject failed, activating, deactivating, or any nonzero ExecMainStatus. Persist the exact pre-start PADataset CPU/GPU systemctl-show snapshots. If and only if all predicates pass, start only workspace-ci-controller@workspace-control-cpu.service. After start, require workspace-control CPU active/running and require both PADataset snapshots to match their pre-start values exactly. Do not mutate PADataset, research-engine, scale sets, reconciliation, admission, capacity, or workflow trigger state.",
   "last_executor": "chatgpt",

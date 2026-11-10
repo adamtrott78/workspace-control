@@ -40,29 +40,12 @@ After fresh corrected-head review acceptance, execute one bounded Lambda transac
 
 ## Remaining work
 
-- Validate the corrected PR #597 head.
-- Obtain fresh independent authority-sensitive review of the sibling-preservation correction.
-- Run the corrected fail-closed root preflight; capture exact PADataset CPU/GPU snapshots.
+- Run the reviewed root preflight with PADataset stable-state snapshot capture.
 - If every predicate passes, start only workspace-ci-controller@workspace-control-cpu.service.
-- Prove workspace-control CPU active/running and PADataset CPU/GPU snapshots unchanged; then observe run #389.
+- Verify workspace-control CPU active/running and PADataset CPU/GPU full snapshots unchanged.
+- Observe run #389 for runner acquisition/completion and record recovery receipt.
 
 ## Blockers / gates
 
-- Fresh authority-sensitive review is required for the corrected sibling-preservation boundary before another controller-start attempt.
-- Root-only live preflight must still prove all exact installed identities, research-engine CPU/GPU inactive/dead, provisioner and maintenance active/running, no active transient execution, and stable PADataset CPU/GPU states.
-- PADataset CPU/GPU must be preserved exactly across the workspace-control start; the transaction must not start/stop/restart either PADataset controller.
-- Any identity/state mismatch aborts before start. No reset/reconcile/recreate/retrigger/research-engine mutation is authorized.
-
-## Fresh-chat initialization
-
-@GitHub
-
-https://github.com/adamtrott78/workspace-control
-
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-github-actions-selfhosted-control-plane-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+- Only the reviewed root-only operator transaction remains. Connected Workspace Shell cannot inspect sibling PADataset/research-engine/provisioner units or /opt authority-bearing files because they are outside its root-owned allowlist/sandbox.
+- Any live identity/state mismatch aborts before start. No reset/reconcile/recreate/retrigger/PADataset/research-engine mutation is authorized.
