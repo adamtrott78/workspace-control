@@ -40,8 +40,11 @@ public sealed class FirefoxWorkerEnvironmentLauncher
                     "FIREFOX_START_FAILED"));
             }
 
+            var processId = process.Id;
             process.Dispose();
-            return Task.FromResult(new WorkerEnvironmentLaunchResult(true));
+            return Task.FromResult(new WorkerEnvironmentLaunchResult(
+                true,
+                ProcessId: processId));
         }
         catch (Exception exception)
             when (exception is System.ComponentModel.Win32Exception

@@ -42,14 +42,19 @@ The collector uses the full 60-second / 120-second windows and full repetition
 counts, but its output remains `TARGET_MODE_PARTIAL` because the full contract
 also requires the Chrome parity replicates and the cold-start requirement.
 
-## Current cold-start blocker
+## Cold-start target probe
 
 The frozen requirement UX-P003 requires Ctrl+B while the dedicated worker
-profile is stopped to reach a ready worker within 8000 ms p95. The current
-production helper does not own a reviewed worker-environment launch path, so
-that metric cannot yet be measured faithfully. The benchmark records this as
-an implementation gap rather than manufacturing a launcher inside measurement
-code.
+profile is stopped to reach a ready worker within 8000 ms p95. The production
+helper now has a bounded chrome-level launch adapter for the fixed
+`WorkspaceWorkers` profile. The target Firefox collector follows its
+steady-state run with a dedicated `cold-target` mode that executes exactly
+10 cold-start dispatch trials through that production launch adapter.
+
+The cold probe records the PID returned by the reviewed launcher and terminates
+only that owned Firefox process tree between repetitions. If any other Firefox
+process exists before a trial or remains after owned-process cleanup, the run
+fails closed rather than killing or adopting it.
 
 Stage 10 usability work and later promotion remain blocked until the complete
 target result exists and every failing mechanical budget is corrected or

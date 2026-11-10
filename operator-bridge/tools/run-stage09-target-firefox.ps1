@@ -29,6 +29,9 @@ if (-not (Test-Path $FirefoxPath -PathType Leaf)) {
 if (-not (Test-Path $regPath)) {
   throw "Stage-08 per-user native-host registration is required before target measurement."
 }
+if ($FirefoxProfile -ne "WorkspaceWorkers") {
+  throw "Target measurement requires the frozen WorkspaceWorkers Firefox profile."
+}
 if (Get-Process firefox -ErrorAction SilentlyContinue) {
   throw "Target measurement rejected: unrelated same-name Firefox process is present."
 }
@@ -41,10 +44,15 @@ $fakeWorkerOut = Join-Path $work "fake-worker.out.log"
 $fakeWorkerErr = Join-Path $work "fake-worker.err.log"
 $runnerOut = Join-Path $work "runner.out.log"
 $runnerErr = Join-Path $work "runner.err.log"
+$coldRunnerOut = Join-Path $work "cold-runner.out.log"
+$coldRunnerErr = Join-Path $work "cold-runner.err.log"
+$steadyResultPath = Join-Path $work "firefox-steady.json"
+$coldResultPath = Join-Path $work "firefox-cold.json"
 $readyFile = Join-Path $work "server.ready"
 
 $fakeWorker = $null
 $runner = $null
+$coldRunner = $null
 $firefox = $null
 
 try {
@@ -54,7 +62,7 @@ try {
 
   $runner = Start-Process -FilePath "dotnet" -ArgumentList @(
     $runnerDll,
-    "--result=$ResultPath",
+    "--result=$steadyResultPath",
     "--helper=$helperExe",
     "--ready-file=$readyFile",
     "--mode=target",
@@ -89,20 +97,81 @@ try {
   if ($runner.ExitCode -ne 0) {
     if (Test-Path $runnerOut) { Get-Content $runnerOut }
     if (Test-Path $runnerErr) { Get-Content $runnerErr }
-    if (Test-Path $ResultPath) { Get-Content $ResultPath }
-    throw "Target Firefox collector failed."
+    if (Test-Path $steadyResultPath) { Get-Content $steadyResultPath }
+    throw "Target Firefox steady-state collector failed."
   }
 
-  $result = Get-Content $ResultPath -Raw | ConvertFrom-Json
-  if ($result.evidence_class -ne "TARGET_MODE_PARTIAL") {
-    throw "Target Firefox collector emitted an unexpected evidence class."
+  $steadyResult = Get-Content $steadyResultPath -Raw | ConvertFrom-Json
+  if ($steadyResult.evidence_class -ne "TARGET_MODE_PARTIAL") {
+    throw "Target Firefox steady-state collector emitted an unexpected evidence class."
   }
-  if ($result.target_contract_complete -ne $false) {
+  if ($steadyResult.target_contract_complete -ne $false) {
     throw "Firefox-only target evidence must not claim complete UX-09 acceptance."
   }
-  if ($result.content_policy -ne "CONTENT_FREE") {
+  if ($steadyResult.content_policy -ne "CONTENT_FREE") {
     throw "Target Firefox evidence must remain content-free."
   }
+
+  if ($firefox -and -not $firefox.HasExited) {
+    Stop-Process -Id $firefox.Id -Force -ErrorAction SilentlyContinue
+    $firefox.WaitForExit(10000) | Out-Null
+  }
+  $firefox = $null
+
+  $closeDeadline = (Get-Date).AddSeconds(10)
+  while ((Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $closeDeadline) {
+    Start-Sleep -Milliseconds 100
+  }
+  if (Get-Process firefox -ErrorAction SilentlyContinue) {
+    throw "Target measurement rejected: Firefox did not reach the required cold-start baseline."
+  }
+
+  $coldRunner = Start-Process -FilePath "dotnet" -ArgumentList @(
+    $runnerDll,
+    "--result=$coldResultPath",
+    "--helper=$helperExe",
+    "--mode=cold-target",
+    "--cold-count=10",
+    "--timeout-seconds=120"
+  ) -RedirectStandardOutput $coldRunnerOut -RedirectStandardError $coldRunnerErr -PassThru
+
+  if (-not $coldRunner.WaitForExit(300000)) {
+    Stop-Process -Id $coldRunner.Id -Force -ErrorAction SilentlyContinue
+    throw "Target cold-start collector exceeded the bounded 5-minute execution window."
+  }
+  if ($coldRunner.ExitCode -ne 0) {
+    if (Test-Path $coldRunnerOut) { Get-Content $coldRunnerOut }
+    if (Test-Path $coldRunnerErr) { Get-Content $coldRunnerErr }
+    if (Test-Path $coldResultPath) { Get-Content $coldResultPath }
+    throw "Target cold-start collector failed."
+  }
+
+  $coldResult = Get-Content $coldResultPath -Raw | ConvertFrom-Json
+  if ($coldResult.evidence_class -ne "TARGET_COLD_FIREFOX_PARTIAL") {
+    throw "Target cold-start collector emitted an unexpected evidence class."
+  }
+  if ($coldResult.target_contract_complete -ne $false) {
+    throw "Cold-start partial evidence must not claim complete UX-09 acceptance."
+  }
+  if ($coldResult.cold_firefox_start.count -ne 10) {
+    throw "Target cold-start collector did not execute the frozen 10 trials."
+  }
+
+  [ordered]@{
+    schema_version = 1
+    stage = "impl_09_performance_benchmark_execution"
+    evidence_class = "TARGET_FIREFOX_PARTIAL"
+    target_contract_complete = $false
+    content_policy = "CONTENT_FREE"
+    steady_state = $steadyResult
+    cold_start = $coldResult
+    remaining_requirements = @(
+      "three complete Firefox/Chrome resource replicates with order alternation",
+      "Chrome Memory Saver disabled and recorded",
+      "five discard/restore resource replicates",
+      "complete aggregate budget evaluation"
+    )
+  } | ConvertTo-Json -Depth 20 | Set-Content $ResultPath -Encoding UTF8
 
   Write-Host "STAGE09_TARGET_FIREFOX_PARTIAL=PASS"
   Get-Content $ResultPath
@@ -110,6 +179,9 @@ try {
 finally {
   if ($runner -and -not $runner.HasExited) {
     Stop-Process -Id $runner.Id -Force -ErrorAction SilentlyContinue
+  }
+  if ($coldRunner -and -not $coldRunner.HasExited) {
+    Stop-Process -Id $coldRunner.Id -Force -ErrorAction SilentlyContinue
   }
   if ($firefox -and -not $firefox.HasExited) {
     Stop-Process -Id $firefox.Id -Force -ErrorAction SilentlyContinue

@@ -153,6 +153,9 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("--sample-interval-ms=1000", script)
         self.assertIn("--latency-scale=1", script)
         self.assertIn('"TARGET_MODE_PARTIAL"', script)
+        self.assertIn("--mode=cold-target", script)
+        self.assertIn("--cold-count=10", script)
+        self.assertIn('"TARGET_COLD_FIREFOX_PARTIAL"', script)
         self.assertIn("must not claim complete UX-09 acceptance", script)
         self.assertNotIn("Stop-Process -Name firefox", script)
 
@@ -172,6 +175,15 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertNotIn("https://", launcher.lower())
         self.assertIn("new FirefoxWorkerEnvironmentLauncher()", tray)
         self.assertIn("TimeSpan.FromSeconds(8)", tray)
+
+    def test_cold_target_probe_uses_production_launcher_and_owned_pid(self):
+        source = (PERF / "Program.cs").read_text(encoding="utf-8")
+        self.assertIn('"cold-target"', source)
+        self.assertIn("new FirefoxWorkerEnvironmentLauncher()", source)
+        self.assertIn("recordingLauncher.LastProcessId", source)
+        self.assertIn("TerminateOwnedFirefoxAsync(processId)", source)
+        self.assertIn('"TARGET_COLD_FIREFOX_PARTIAL"', source)
+        self.assertNotIn('"IMPLEMENTATION_GAP"', source)
 
 
 if __name__ == "__main__":

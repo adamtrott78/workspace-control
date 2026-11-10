@@ -2,7 +2,8 @@ namespace WorkspaceControl.OperatorBridge.Ports;
 
 public sealed record WorkerEnvironmentLaunchResult(
     bool Started,
-    string? NormalizedError = null);
+    string? NormalizedError = null,
+    int? ProcessId = null);
 
 public interface IWorkerEnvironmentLauncher
 {

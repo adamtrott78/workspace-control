@@ -11,6 +11,7 @@ using WorkspaceControl.OperatorBridge.Simulator.State;
 using WorkspaceControl.OperatorBridge.Windows;
 using WorkspaceControl.OperatorBridge.Windows.Clipboard;
 using WorkspaceControl.OperatorBridge.Windows.Hotkey;
+using WorkspaceControl.OperatorBridge.Windows.Firefox;
 
 namespace WorkspaceControl.OperatorBridge.PerformanceHarness;
 
@@ -25,9 +26,10 @@ internal static class Program
         var helperPath = RequiredArgument(args, "--helper");
         var readyFile = GetArgument(args, "--ready-file");
         var mode = (GetArgument(args, "--mode") ?? "ci").ToLowerInvariant();
-        if (mode is not ("ci" or "target"))
+        if (mode is not ("ci" or "target" or "cold-target"))
         {
-            throw new ArgumentException("--mode must be ci or target.");
+            throw new ArgumentException(
+                "--mode must be ci, target, or cold-target.");
         }
 
         var warmupMs = IntArgument(args, "--warmup-ms", mode == "target" ? 60000 : 250);
@@ -43,6 +45,15 @@ internal static class Program
             Primitive: Math.Max(1, 100 / latencyScale));
 
         var diagnostics = new CaptureDiagnostics();
+        if (mode == "cold-target")
+        {
+            var coldCount = IntArgument(args, "--cold-count", 10);
+            return await RunColdStartTargetAsync(
+                resultPath,
+                coldCount,
+                diagnostics);
+        }
+
         var helperIdle = await MeasureHelperIdleAsync(
             helperPath,
             warmupMs,
@@ -230,7 +241,7 @@ internal static class Program
                 {
                     "Firefox/Chrome three-complete-replicate order alternation is not performed by this CI harness.",
                     "Chrome Memory Saver parity control is not performed by this CI harness.",
-                    "Cold-Firefox-start Ctrl+B -> LOCAL_PREPARED is not implemented by the current helper and therefore has no valid latency sample.",
+                    "Cold-Firefox-start is collected only by the dedicated cold-target mode and is not part of this steady-state run.",
                     "GitHub-hosted Windows is not the target operator workstation."
                 },
                 content_policy = "CONTENT_FREE",
@@ -248,9 +259,9 @@ internal static class Program
                 hotkey_queue_to_callback_proxy = hotkey,
                 cold_firefox_start = new
                 {
-                    status = "IMPLEMENTATION_GAP",
-                    pass_fail = "FAIL",
-                    reason = "Current production helper has no reviewed Firefox process-launch path; no timing is fabricated."
+                    status = "NOT_MEASURED_IN_THIS_RUN",
+                    pass_fail = "INVALID",
+                    reason = "Use dedicated cold-target mode on the target workstation."
                 },
                 security = new
                 {
@@ -307,6 +318,213 @@ internal static class Program
             {
             }
         }
+    }
+
+    private static async Task<int> RunColdStartTargetAsync(
+        string resultPath,
+        int coldCount,
+        IDiagnosticsSink diagnostics)
+    {
+        var bridgeState = new BridgeState();
+        var bridgeController = new BridgeController(
+            bridgeState,
+            new NoopHotkeyRegistrar(),
+            diagnostics);
+        bridgeController.SetEnabled(true);
+
+        var hub = new BrowserCommandHub(bridgeState, diagnostics);
+        var pipeName = ElevationScope.PipeName(ElevationScope.Current());
+        using var cancellation = new CancellationTokenSource();
+        var serverTask = new LocalIpcServer(
+            pipeName,
+            hub,
+            diagnostics).RunAsync(cancellation.Token);
+
+        try
+        {
+            if (HasFirefoxProcess())
+            {
+                throw new InvalidOperationException(
+                    "Cold target run requires zero pre-existing Firefox processes.");
+            }
+
+            using var clipboard = new StaBenchmarkClipboard();
+            var recordingLauncher = new RecordingWorkerEnvironmentLauncher(
+                new FirefoxWorkerEnvironmentLauncher());
+            var browser = new LaunchingBrowserPort(
+                new IpcBrowserPort(hub),
+                hub,
+                recordingLauncher,
+                TimeSpan.FromSeconds(8));
+            var samples = new List<double>();
+
+            for (var index = 0; index < coldCount; index++)
+            {
+                if (HasFirefoxProcess())
+                {
+                    throw new InvalidOperationException(
+                        "Unowned Firefox process appeared during cold-start measurement.");
+                }
+
+                recordingLauncher.Reset();
+
+                var world = new SimulatorWorld();
+                var slot = $"perf-cold-{index}";
+                world.Sessions.Add(
+                    slot,
+                    0,
+                    SimContinuity.NotEstablished,
+                    bindingPresent: false);
+                var action = world.Queue(
+                    $"perf-cold-action-{index}",
+                    "CREATE_AND_SERVICE",
+                    slot,
+                    0);
+                var coordinator = new SingleFlightDispatchCoordinator(
+                    bridgeState,
+                    new SimulatorActionPort(world),
+                    browser,
+                    clipboard,
+                    new SystemMonotonicClock(),
+                    diagnostics);
+
+                var started = Stopwatch.GetTimestamp();
+                var result = await coordinator.DispatchAsync();
+                samples.Add(
+                    Stopwatch.GetElapsedTime(started).TotalMilliseconds);
+
+                if (result.Outcome != DispatchOutcome.LocalPrepared ||
+                    !world.HumanSubmit(action))
+                {
+                    throw new InvalidOperationException(
+                        "Cold-start performance dispatch failed.");
+                }
+
+                if (recordingLauncher.LastProcessId is not int processId)
+                {
+                    throw new InvalidOperationException(
+                        "Cold-start launcher did not return an owned process ID.");
+                }
+
+                await TerminateOwnedFirefoxAsync(processId);
+
+                var disconnectDeadline = Stopwatch.StartNew();
+                while (hub.IsConnected &&
+                       disconnectDeadline.Elapsed < TimeSpan.FromSeconds(10))
+                {
+                    await Task.Delay(100);
+                }
+
+                if (hub.IsConnected)
+                {
+                    throw new InvalidOperationException(
+                        "Firefox adapter did not disconnect after owned process exit.");
+                }
+                if (HasFirefoxProcess())
+                {
+                    throw new InvalidOperationException(
+                        "Firefox process attribution was lost after cold-start trial.");
+                }
+            }
+
+            var report = new
+            {
+                schema_version = 1,
+                stage = "impl_09_performance_benchmark_execution",
+                evidence_class = "TARGET_COLD_FIREFOX_PARTIAL",
+                target_contract_complete = false,
+                content_policy = "CONTENT_FREE",
+                cold_firefox_start = new
+                {
+                    count = coldCount,
+                    latency_ms = SummarizeLatency(samples)
+                },
+                security = new
+                {
+                    dom_or_page_content_collected = false,
+                    raw_urls_collected = false,
+                    screenshots_collected = false,
+                    credentials_or_tokens_collected = false,
+                    synthetic_paste_enter_send_or_mouse = false,
+                    only_launcher_returned_process_tree_terminated = true
+                }
+            };
+
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(Path.GetFullPath(resultPath))!);
+            await File.WriteAllTextAsync(
+                resultPath,
+                JsonSerializer.Serialize(
+                    report,
+                    new JsonSerializerOptions { WriteIndented = true }));
+            return 0;
+        }
+        catch (Exception exception)
+        {
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(Path.GetFullPath(resultPath))!);
+            var failure = new
+            {
+                schema_version = 1,
+                stage = "impl_09_performance_benchmark_execution",
+                evidence_class = "TARGET_COLD_FIREFOX_PARTIAL",
+                target_contract_complete = false,
+                result = "HARNESS_FAILURE",
+                normalized_exception = exception.GetType().Name,
+                content_policy = "CONTENT_FREE"
+            };
+            await File.WriteAllTextAsync(
+                resultPath,
+                JsonSerializer.Serialize(
+                    failure,
+                    new JsonSerializerOptions { WriteIndented = true }));
+            return 1;
+        }
+        finally
+        {
+            cancellation.Cancel();
+            try
+            {
+                await serverTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+    }
+
+    private static bool HasFirefoxProcess()
+    {
+        var processes = Process.GetProcessesByName(FirefoxProcessName);
+        try
+        {
+            return processes.Length > 0;
+        }
+        finally
+        {
+            foreach (var process in processes)
+            {
+                process.Dispose();
+            }
+        }
+    }
+
+    private static async Task TerminateOwnedFirefoxAsync(int processId)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+                await process.WaitForExitAsync();
+            }
+        }
+        catch (ArgumentException)
+        {
+        }
+
+        await Task.Delay(500);
     }
 
     private static async Task<ResourceRun> MeasureHelperIdleAsync(
@@ -925,6 +1143,30 @@ internal sealed class CaptureDiagnostics : IDiagnosticsSink
 {
     public void Write(DiagnosticEvent diagnosticEvent)
     {
+    }
+}
+
+internal sealed class RecordingWorkerEnvironmentLauncher
+    : IWorkerEnvironmentLauncher
+{
+    private readonly IWorkerEnvironmentLauncher _inner;
+
+    public RecordingWorkerEnvironmentLauncher(
+        IWorkerEnvironmentLauncher inner)
+    {
+        _inner = inner;
+    }
+
+    public int? LastProcessId { get; private set; }
+
+    public void Reset() => LastProcessId = null;
+
+    public async Task<WorkerEnvironmentLaunchResult> LaunchAsync(
+        CancellationToken cancellationToken)
+    {
+        var result = await _inner.LaunchAsync(cancellationToken);
+        LastProcessId = result.ProcessId;
+        return result;
     }
 }
 
