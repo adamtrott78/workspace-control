@@ -4,6 +4,8 @@ Status: **PROPOSED / NON-AUTHORITATIVE IMPLEMENTATION PLAN**
 
 Parent task: `workspace-semantic-execution-migration-v1`
 
+Operator UX companion: `architecture/workspace-semantic-execution-operator-ux.v0.1.md`
+
 Branch: `workspace-semantic-execution-migration-v1`
 
 ## 1. Objective
