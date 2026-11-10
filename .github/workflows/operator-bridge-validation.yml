@@ -136,7 +136,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: operator-bridge-stage09-ci-${{ github.event.pull_request.head.sha || github.sha }}
-          path: benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-performance.json
+          path: |
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-performance.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-target-plan.json
           if-no-files-found: ignore
           retention-days: 14
 

@@ -124,6 +124,45 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("stage09-ci-performance.json", workflow)
         self.assertIn("non-target content-free performance evidence", workflow)
 
+    def test_target_matrix_is_exact_fail_closed_cross_browser_contract(self):
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage09-target-matrix.ps1"
+        ).read_text(encoding="utf-8")
+        validator = (
+            PERF / "validate-stage09-target.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("$WarmupSeconds = 60", script)
+        self.assertIn("$SteadySeconds = 120", script)
+        self.assertIn("$BrowserResourceRepetitions = 3", script)
+        self.assertIn("$DiscardRestoreRepetitions = 5", script)
+        self.assertIn("$ReuseRepetitions = 50", script)
+        self.assertIn("$RestoreRepetitions = 30", script)
+        self.assertIn("$CreateRepetitions = 30", script)
+        self.assertIn("$ColdStartRepetitions = 10", script)
+        self.assertIn("$PrimitiveRepetitions = 100", script)
+        self.assertIn('@("firefox", "chrome")', script)
+        self.assertIn('@("chrome", "firefox")', script)
+        self.assertIn("-ConfirmAcPower", script)
+        self.assertIn("-ConfirmChromeMemorySaverDisabled", script)
+        self.assertIn("pre-existing $name process is present", script)
+        self.assertIn("sustained unrelated CPU exceeded 20 percent", script)
+        self.assertIn('"TARGET_WINDOWS_OPERATOR_WORKSTATION"', script)
+        self.assertIn("STAGE09_TARGET_EVIDENCE_VALID=PASS", validator)
+        self.assertNotIn("querySelector", script)
+        self.assertNotIn("cookies.sqlite", script)
+        self.assertNotIn("logins.json", script)
+
+    def test_ci_executes_target_matrix_plan_only_without_claiming_target_evidence(self):
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage09-ci.ps1"
+        ).read_text(encoding="utf-8")
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("run-stage09-target-matrix.ps1", script)
+        self.assertIn("-PlanOnly", script)
+        self.assertIn('"TARGET_MATRIX_PLAN_ONLY"', script)
+        self.assertIn("STAGE09_TARGET_MATRIX_PLAN_SMOKE=PASS", script)
+        self.assertIn("stage09-target-plan.json", workflow)
+
     def test_target_evidence_schema_requires_exact_frozen_execution_shape(self):
         schema = json.loads(
             (PERF / "stage09-target-evidence.schema.json").read_text(encoding="utf-8")

@@ -26,6 +26,33 @@ A complete result must satisfy
 `stage09-target-evidence.schema.json`. Partial collectors may emit useful
 evidence but may not set `target_contract_complete=true`.
 
+## Full target matrix runner
+
+`../tools/run-stage09-target-matrix.ps1` is the canonical Stage-09 target
+orchestrator. In full mode it:
+
+- rejects pre-existing Firefox, Chrome, or WorkspaceOperator processes;
+- requires explicit AC-power and Chrome-Memory-Saver-disabled confirmations;
+- runs three Firefox/Chrome resource replicates in F->C, C->F, F->C order;
+- runs three Firefox zero-worker baselines without the extension for bridge
+  overhead attribution;
+- runs five Firefox discard/restore replicates;
+- runs exactly one full 50/30/30/10/100 latency suite and uses resource-only
+  Firefox replicates for the remaining resource trials;
+- rejects measured windows whose mean unrelated system CPU exceeds 20%;
+- evaluates every frozen UX-09 latency/resource budget;
+- validates the final content-free result with
+  `validate-stage09-target.py` before accepting it.
+
+Full mode requires the two explicit switches
+`-ConfirmAcPower -ConfirmChromeMemorySaverDisabled`. Those switches are
+operator assertions about the benchmark environment; they do not grant bridge
+execution authority.
+
+`-PlanOnly` emits the exact target matrix without touching browsers. CI runs
+this mode to syntax-check the orchestrator and freeze its order/counts, but that
+output remains non-target evidence and cannot complete Stage 09.
+
 ## Firefox partial target collector
 
 `../tools/run-stage09-target-firefox.ps1` executes the Firefox/helper portion

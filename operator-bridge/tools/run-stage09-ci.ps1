@@ -158,6 +158,41 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
     throw "Stage 09 CI result must remain content-free."
   }
 
+  $targetPlanPath = Join-Path (Split-Path -Parent ([System.IO.Path]::GetFullPath($ResultPath))) "stage09-target-plan.json"
+  & (Join-Path $bridgeRoot "tools\run-stage09-target-matrix.ps1") -RepositoryRoot $RepositoryRoot -ResultPath $targetPlanPath -PlanOnly
+  if ($LASTEXITCODE -ne 0) {
+    throw "Stage 09 target matrix PlanOnly execution failed."
+  }
+
+  $targetPlan = Get-Content $targetPlanPath -Raw | ConvertFrom-Json
+  if ($targetPlan.evidence_class -ne "TARGET_MATRIX_PLAN_ONLY" -or $targetPlan.target_contract_complete -ne $false) {
+    throw "Stage 09 target matrix plan classification is invalid."
+  }
+  if ($targetPlan.measurement.warmup_seconds -ne 60 -or
+      $targetPlan.measurement.steady_state_seconds -ne 120 -or
+      $targetPlan.measurement.sample_rate_hz -ne 1) {
+    throw "Stage 09 target matrix measurement shape drifted."
+  }
+  if ($targetPlan.repetitions.browser_resource -ne 3 -or
+      $targetPlan.repetitions.discard_restore -ne 5 -or
+      $targetPlan.repetitions.reuse -ne 50 -or
+      $targetPlan.repetitions.restore -ne 30 -or
+      $targetPlan.repetitions.create -ne 30 -or
+      $targetPlan.repetitions.cold_start -ne 10 -or
+      $targetPlan.repetitions.local_primitives -ne 100) {
+    throw "Stage 09 target matrix repetition contract drifted."
+  }
+  if ($targetPlan.measurement.browser_order.Count -ne 3 -or
+      $targetPlan.measurement.browser_order[0][0] -ne "firefox" -or
+      $targetPlan.measurement.browser_order[0][1] -ne "chrome" -or
+      $targetPlan.measurement.browser_order[1][0] -ne "chrome" -or
+      $targetPlan.measurement.browser_order[1][1] -ne "firefox" -or
+      $targetPlan.measurement.browser_order[2][0] -ne "firefox" -or
+      $targetPlan.measurement.browser_order[2][1] -ne "chrome") {
+    throw "Stage 09 target matrix browser-order contract drifted."
+  }
+
+  Write-Host "STAGE09_TARGET_MATRIX_PLAN_SMOKE=PASS"
   Write-Host "STAGE09_CI_PERFORMANCE_SMOKE=PASS"
   Get-Content $ResultPath
 }
