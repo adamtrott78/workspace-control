@@ -31,7 +31,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-multirepo-research-v1",
-        "checkpoint_sha": "0c5a6fac66cadfdd62d2baad97a2144899704e7d",
+        "checkpoint_sha": "40b3dd8cddd87270bde107516022d4e4426c0671",
         "verified": true
       },
       "local": null,
@@ -213,7 +213,7 @@
     "Run live positive and negative Workspace Shell acceptance for PADataset.",
     "Hand control back to the MTH602 Stage 00 provenance recovery task."
   ],
-  "next_safe_action": "Validate exact candidate checkpoint 0c5a6fac66cadfdd62d2baad97a2144899704e7d plus this state-only synchronization on PR #595. Do not execute the live upgrade operator until an exact PR head passes bounded repository validation. Then execute the operator on Lambda against PADataset expected SHA 17e1147614f27702e43565089d618182ff71c5af; fail closed on any mismatch.",
+  "next_safe_action": "Validate the current PR #595 head, whose implementation checkpoint is 40b3dd8cddd87270bde107516022d4e4426c0671 and whose following commits are state/handoff synchronization only. Do not execute the live upgrade operator until that exact PR head passes bounded repository validation. Then execute the operator on Lambda against PADataset expected SHA 17e1147614f27702e43565089d618182ff71c5af; fail closed on any mismatch.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here."
