@@ -374,13 +374,49 @@ function Stop-OwnedProcessName {
   }
 }
 
+function Initialize-FirefoxBaselineProfile {
+  param([string]$ProfilePath)
+
+  New-Item -ItemType Directory -Path $ProfilePath -Force | Out-Null
+  $prefs = @(
+    'user_pref("browser.aboutwelcome.enabled", false);'
+    'user_pref("browser.preonboarding.enabled", false);'
+    'user_pref("browser.shell.checkDefaultBrowser", false);'
+    'user_pref("browser.sessionstore.resume_from_crash", false);'
+    'user_pref("browser.startup.homepage_override.mstone", "ignore");'
+    'user_pref("browser.startup.page", 0);'
+    'user_pref("startup.homepage_welcome_url", "about:blank");'
+    'user_pref("startup.homepage_welcome_url.additional", "");'
+    'user_pref("datareporting.policy.dataSubmissionPolicyBypassNotification", true);'
+    'user_pref("termsofuse.bypassNotification", true);'
+  )
+  $userJs = Join-Path $ProfilePath "user.js"
+  [System.IO.File]::WriteAllLines(
+    $userJs,
+    [string[]]$prefs,
+    [System.Text.UTF8Encoding]::new($false)
+  )
+
+  $verified = Get-Content -LiteralPath $userJs -Raw
+  foreach ($required in @(
+    'browser.aboutwelcome.enabled'
+    'browser.shell.checkDefaultBrowser'
+    'browser.sessionstore.resume_from_crash'
+    'termsofuse.bypassNotification'
+  )) {
+    if (-not $verified.Contains($required)) {
+      throw "Firefox benchmark profile initialization is incomplete: $required"
+    }
+  }
+}
+
 function Invoke-FirefoxNoExtensionBaseline {
   param([int]$Repetition)
   if (Get-Process firefox -ErrorAction SilentlyContinue) {
     throw "Firefox no-extension baseline requires zero pre-existing Firefox processes."
   }
   $profile = Join-Path $work ("firefox-no-extension-" + $Repetition)
-  New-Item -ItemType Directory -Path $profile -Force | Out-Null
+  Initialize-FirefoxBaselineProfile -ProfilePath $profile
   Start-Process -FilePath $FirefoxPath -ArgumentList @("-profile", ('"' + $profile + '"'), "-no-remote", "about:blank") | Out-Null
   try {
     return Measure-ProcessGroup -ProcessName "firefox" -ScenarioId "FIREFOX_0_WORKERS_NO_EXTENSION" -Repetition $Repetition -LiveTabs 0
