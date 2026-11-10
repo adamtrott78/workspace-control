@@ -248,21 +248,30 @@
         "workspace_shell_exec target enum contains workspace-control and PADataset.",
         "workspace_shell_exec profile enum contains git-read, pytest-bounded, validation-bounded, file-list, file-read, file-hash, research-bounded."
       ]
+    },
+    {
+      "check": "ChatGPT app transport after refresh",
+      "result": "PASS_WITH_SESSION_SCHEMA_STALE",
+      "evidence": [
+        "After Refresh tools and tunnel restart, workspace_shell_inspect(runtime_inventory) succeeded through the ChatGPT Workspace Shell app using durable task workspace-shell-mcp-v1.",
+        "Live runtime inventory reports frontend uid 41010, worker uid 41011, tunnel uid 41012, launcher/broker sockets present, receipt root present, HTTPS_MTLS_REQUIRED.",
+        "Local MCP tools/list independently proves the refreshed server schema contains PADataset and research-bounded.",
+        "This existing ChatGPT conversation still exposes the pre-refresh Workspace Shell argument schema in its mounted tool metadata; fresh-chat remount is required to observe the refreshed enum schema."
+      ]
     }
   ],
   "blockers": [
-    "ChatGPT Refresh tools still reports 'Couldn't update the app' despite a healthy local MCP frontend. Local initialize/tools-list proves the server schema is correct; remaining stale/failing layer is the OpenAI Secure MCP Tunnel/App discovery connection."
+    "Current ChatGPT conversation retains the old mounted Workspace Shell function schema even after successful app tool refresh. Live app transport is healthy. Start a fresh ChatGPT conversation so Workspace Shell is remounted with the refreshed PADataset/research-bounded schema.",
+    "After fresh-chat remount, verify the newer durable task capsules are visible through the live authority root before Stage 00. Old task workspace-shell-mcp-v1 is visible; newer task IDs returned TASK_NOT_FOUND in this stale-schema conversation and require recheck from the refreshed session."
   ],
   "remaining_work": [
-    "Capture concise workspace-shell-mcp.service startup exception; do not collect additional tunnel logs unless the MCP frontend becomes healthy but discovery still fails.",
-    "Implement and exact-head validate the smallest MCP frontend crash fix without changing the frozen external MCP schema.",
-    "Deploy the server-side fix and verify 127.0.0.1:8797 is listening and the MCP service is active.",
-    "Use Manage -> Refresh tools on the existing Workspace Shell app and verify PADataset plus file-list/file-read/file-hash/research-bounded in the model-visible schema.",
+    "Fresh-chat remount of refreshed Workspace Shell tool schema.",
+    "Verify new task-capsule visibility in the live authority root.",
     "Run live positive and negative Workspace Shell acceptance for PADataset.",
-    "Hand control back to the MTH602 Stage 00 provenance recovery task.",
+    "Begin MTH602 Stage 00 provenance recovery from clean execution SHA 17e1147614f27702e43565089d618182ff71c5af plus read-only historical evidence mount leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.",
     "Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema."
   ],
-  "next_safe_action": "Restart only workspace-shell-tunnel.service, verify it returns active and its readiness endpoint is healthy, then retry Manage -> Refresh tools on the existing Workspace Shell app. Do not restart or reinstall the MCP frontend unless tunnel restart fails to restore discovery.",
+  "next_safe_action": "Start a fresh ChatGPT conversation with Workspace Shell connected. First inspect the model-visible Workspace Shell schema and confirm workspace_shell_exec target includes PADataset and profile includes file-list/file-read/file-hash/research-bounded. Then test live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1. If visible, begin Stage 00 read-only PADataset provenance recovery; if TASK_NOT_FOUND persists, diagnose the live frontend authority_root before any execution.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded."
