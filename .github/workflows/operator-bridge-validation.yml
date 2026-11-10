@@ -72,6 +72,29 @@ jobs:
         run: |
           python -m unittest discover -s tests -p "test_workspace_semantic_execution_operator_bridge*.py" -v
 
+      - name: Parse Stage 09 PowerShell target tooling
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $targets = @(
+            "operator-bridge/performance/prepare-stage09-target-profile.ps1",
+            "operator-bridge/tools/run-stage09-target-firefox.ps1",
+            "operator-bridge/tools/run-stage09-target-matrix.ps1"
+          )
+          foreach ($target in $targets) {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $target),
+              [ref]$tokens,
+              [ref]$errors
+            )
+            if ($errors.Count -gt 0) {
+              $messages = ($errors | ForEach-Object { $_.Message }) -join "; "
+              throw "PowerShell parse failed for $target: $messages"
+            }
+          }
+
       - name: Set up Node 24 for Firefox adapter tests
         uses: actions/setup-node@v6
         with:
