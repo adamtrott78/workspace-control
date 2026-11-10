@@ -38,7 +38,7 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Validate frozen protocol, authority scope, and Firefox security baseline
+      - name: Validate frozen protocol, authority scope, and security baseline
         shell: pwsh
         run: |
           python -m unittest discover -s tests -p "test_workspace_semantic_execution_operator_bridge*.py" -v
@@ -54,3 +54,46 @@ jobs:
       - name: Test
         shell: pwsh
         run: dotnet test operator-bridge/WorkspaceOperatorBridge.slnx --configuration Release --no-build
+
+      - name: Measure helper idle resource sample
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $exe = Resolve-Path "operator-bridge/src/WorkspaceOperator/bin/Release/net10.0-windows/WorkspaceOperator.exe"
+          $process = Start-Process -FilePath $exe -ArgumentList "--idle-probe-ms=7000" -PassThru
+          Start-Sleep -Seconds 1
+          $process.Refresh()
+          $startCpu = $process.TotalProcessorTime.TotalSeconds
+          $started = Get-Date
+          $workingSets = @()
+
+          1..5 | ForEach-Object {
+            Start-Sleep -Milliseconds 900
+            if (-not $process.HasExited) {
+              $process.Refresh()
+              $workingSets += $process.WorkingSet64
+            }
+          }
+
+          $process.WaitForExit()
+          $process.Refresh()
+          $elapsed = [Math]::Max(((Get-Date) - $started).TotalSeconds, 0.001)
+          $cpuSeconds = [Math]::Max($process.TotalProcessorTime.TotalSeconds - $startCpu, 0)
+          $cpuPercentOneLogicalCpu = [Math]::Round(($cpuSeconds / $elapsed) * 100, 4)
+          $maxWorkingSetMiB = if ($workingSets.Count -gt 0) {
+            [Math]::Round((($workingSets | Measure-Object -Maximum).Maximum / 1MB), 3)
+          } else {
+            0
+          }
+
+          $measurement = [ordered]@{
+            schema_version = 1
+            measurement = "stage02_helper_idle_ci_sample"
+            duration_seconds = [Math]::Round($elapsed, 3)
+            max_working_set_mib = $maxWorkingSetMiB
+            cpu_percent_one_logical_cpu_mean = $cpuPercentOneLogicalCpu
+            runner = "windows-latest"
+            interpretation = "CI smoke measurement only; UX-09 target-machine measurement remains authoritative for production promotion."
+          }
+          $json = $measurement | ConvertTo-Json -Compress
+          Write-Host "OPERATOR_BRIDGE_IDLE_MEASUREMENT=$json"

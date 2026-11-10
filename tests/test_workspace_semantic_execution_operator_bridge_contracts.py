@@ -11,9 +11,11 @@ IMPLEMENTATION_PROTOCOL = BRIDGE / "protocol/browser_adapter_v1.schema.json"
 MANIFEST = BRIDGE / "src/FirefoxAdapter/manifest.json"
 WORKFLOW = ROOT / ".github/workflows/operator-bridge-validation.yml"
 SOLUTION = BRIDGE / "WorkspaceOperatorBridge.slnx"
+CLIPBOARD_ADAPTER = BRIDGE / "src/WorkspaceOperator/Windows/Clipboard/WinFormsClipboardWriter.cs"
+HOTKEY_ADAPTER = BRIDGE / "src/WorkspaceOperator/Windows/Hotkey/WindowsHotkeyRegistrar.cs"
 
 
-class OperatorBridgeStageOneContractTests(unittest.TestCase):
+class OperatorBridgeContractTests(unittest.TestCase):
     def test_protocol_copy_matches_frozen_contract(self):
         self.assertEqual(
             json.loads(FROZEN_PROTOCOL.read_text(encoding="utf-8")),
@@ -41,7 +43,7 @@ class OperatorBridgeStageOneContractTests(unittest.TestCase):
         self.assertEqual("153.0", gecko["strict_min_version"])
         self.assertEqual(["none"], gecko["data_collection_permissions"]["required"])
 
-    def test_solution_contains_only_stage_one_dotnet_projects(self):
+    def test_solution_contains_only_authorized_projects(self):
         tree = ET.parse(SOLUTION)
         projects = {e.attrib["Path"].replace("\\", "/") for e in tree.getroot().findall("Project")}
         self.assertEqual(
@@ -81,6 +83,18 @@ class OperatorBridgeStageOneContractTests(unittest.TestCase):
         self.assertNotIn("chatgpt", lowered)
         self.assertIn("permissions:\n  contents: read", workflow)
         self.assertIn("runs-on: windows-latest", workflow)
+
+    def test_clipboard_adapter_is_write_only(self):
+        source = CLIPBOARD_ADAPTER.read_text(encoding="utf-8")
+        self.assertIn("Clipboard.SetText", source)
+        self.assertNotIn("Clipboard.Get", source)
+        self.assertNotIn("GetText(", source)
+        self.assertNotIn("GetDataObject(", source)
+
+    def test_hotkey_adapter_enforces_no_repeat(self):
+        source = HOTKEY_ADAPTER.read_text(encoding="utf-8")
+        self.assertIn("ModControl | ModNoRepeat", source)
+        self.assertIn("VirtualKeyB", source)
 
 
 if __name__ == "__main__":

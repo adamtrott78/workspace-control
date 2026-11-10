@@ -6,8 +6,8 @@ namespace WorkspaceControl.OperatorBridge.Tests;
 public sealed class BootstrapStateTests
 {
     [TestMethod]
-    public void StageOneRemainsSkeletonOnly()
+    public void StageTwoHelperKernelIsActive()
     {
-        Assert.AreEqual("IMPL_01_SKELETON_ONLY", BootstrapState.Stage);
+        Assert.AreEqual("IMPL_02_HELPER_KERNEL", BootstrapState.Stage);
     }
 }
