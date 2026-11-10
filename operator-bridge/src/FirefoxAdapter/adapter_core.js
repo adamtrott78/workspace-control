@@ -174,13 +174,19 @@
       }
 
       const match = await this.findManagedBinding(payload);
+      if (match?.ambiguous) {
+        return createResult("ENSURE_WORKER_SURFACE", "REJECTED", {
+          normalized_error: "BINDING_AMBIGUOUS",
+          worker_slot_id: payload.worker_slot_id,
+          session_generation: payload.session_generation
+        });
+      }
       if (match) {
-        const tab = await this.browser.tabs.update(match.tabId, { active: true });
         return this.resultFor(
           "ENSURE_WORKER_SURFACE",
           "APPLIED",
           match.metadata,
-          tab);
+          match.tab);
       }
 
       return this.createWorkerBinding({
