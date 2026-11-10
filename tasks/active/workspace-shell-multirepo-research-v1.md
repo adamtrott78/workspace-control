@@ -12,31 +12,55 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - ID: workspace-shell-multirepo-research-v1
 - Title: Workspace Shell multi-repo PADataset research access v1
 - Status: IN_PROGRESS
-- Current stage: implementation_and_validation
+- Capsule schema: v2
 
 ## Goal
 
-Extend the accepted Workspace Shell v1 lineage with first-class PADataset access for exact-SHA Git provenance, bounded evidence discovery/read/hash, and sandboxed network-denied research execution without granting a generic shell or writable access to the historical PADataset checkout.
+Extend the live Workspace Shell v1 lineage with a first-class PADataset target that supports exact-SHA/task-bound Git provenance, bounded read-only evidence inspection, and sandboxed network-denied research execution without exposing a generic shell or making the historical PADataset checkout writable.
 
-## Security boundary
+## Repositories
 
-- Authorized targets: workspace-control and PADataset only.
-- PADataset read profiles: git-read, file-list, file-read, file-hash.
-- PADataset execution profile: research-bounded only.
-- research-bounded runs approved PADataset Python paths in a disposable writable copy with network denied.
-- Dirty PADataset snapshots are readable but not executable.
-- /home remains outside the hostile-worker namespace.
-- Privileged helper trust remains empty/fail-closed.
+### workspace-control
 
-## Current implementation
+- Intent: mutate
+- Remote branch: workspace-shell-multirepo-research-v1
+- Remote checkpoint: 0c5a6fac66cadfdd62d2baad97a2144899704e7d
+- Remote verified: true
 
-- Target/profile policy added to frontend and launcher.
-- Evidence profiles added to root-owned profile manifest.
-- PADataset source root added to rendered launcher/verifier configuration.
-- Fail-closed live upgrade/rollback operator added at plugins/workspace-shell/install/upgrade_multirepo_padataset_v1.sh.
-- JS and Python multirepo regression tests added.
-- MTH602 Shell authority capsule added at tasks/active/mth602-final-multisurrogate-dqnguard-v1.json.
+### PADataset
+
+- Intent: read
+- Remote branch: mth602-final-multisurrogate-dqnguard-v1
+- Remote checkpoint: 17e1147614f27702e43565089d618182ff71c5af
+- Remote verified: true
 
 ## Next safe action
 
-Validate the exact branch head with Workspace Control CI. Do not run the live upgrade operator until that exact head passes. Then execute the operator on Lambda against PADataset expected SHA 17e1147614f27702e43565089d618182ff71c5af; any mismatch must abort before runtime mutation.
+Validate exact candidate checkpoint 0c5a6fac66cadfdd62d2baad97a2144899704e7d plus this state-only synchronization on PR #595. Do not execute the live upgrade operator until an exact PR head passes bounded repository validation. Then execute the operator on Lambda against PADataset expected SHA 17e1147614f27702e43565089d618182ff71c5af; fail closed on any mismatch.
+
+## Remaining work
+
+- Run exact-head repository validation and fix any regressions.
+- Update the task checkpoint to the validated implementation head and synchronize derived handoff.
+- Execute the live upgrade operator on Lambda only from the validated clean workspace-control head.
+- Verify the historical PADataset checkout exact branch/head/status without mutating it; abort if the expected SHA binding is wrong.
+- Run live positive and negative Workspace Shell acceptance for PADataset.
+- Hand control back to the MTH602 Stage 00 provenance recovery task.
+
+## Blockers / gates
+
+- None.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-shell-multirepo-research-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
