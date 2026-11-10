@@ -74,7 +74,7 @@ operator_ux_design
 
 ## Next safe action
 
-Begin UX-03 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: turn the operator state-machine candidate into implementable OperatorAction/session schemas with exact action types, priorities, claim/generation/idempotency rules, LOCAL_PREPARED vs durable acknowledgment semantics, composite-action handling, retry rules, transition truth table, and invalid-transition catalog.
+Begin UX-04 from architecture/workspace-semantic-execution-operator-ux-design-plan.v0.1.md: define the persistent logical session-slot model and tab lifecycle, including compatibility/reuse rules, session generations, continuity states, context-budget/rotation policy, create/restore/discard/retire decisions, local tab-binding recovery, and the policy response when ChatGPT reauthentication refreshes or invalidates all worker tabs.
 
 ## Remaining work
 
