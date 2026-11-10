@@ -190,6 +190,19 @@
       "evidence": [
         "Covers target/profile matrix, evidence bounds, research sandbox profile, install root, and upgrade fail-closed markers."
       ]
+    },
+    {
+      "path": "plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md",
+      "state": "IMPLEMENTED",
+      "role": "canonical ChatGPT-side edit/reinstall/refresh workflow for owned private App-backed MCP plugins",
+      "origin": "this task",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "supersede only with a later validated operator procedure",
+      "evidence": [
+        "Procedure records the proven uninstall -> surface existing private plugin install card -> user Install -> browser refresh -> Refresh tools sequence.",
+        "Procedure distinguishes plugin/app refresh failures from live MCP frontend failures and forbids repeated reinstall while the server is unhealthy."
+      ]
     }
   ],
   "validation": [
@@ -229,5 +242,5 @@
   "next_safe_action": "Validate the current PR #595 head, whose implementation checkpoint is c8eca3ddc7915b6bc5ce1e40bc0f8866c8d7be89 and whose following commit is derived state synchronization only. Do not run the live upgrade until that exact PR head passes the Workspace Shell/PADataset Python contract suite. Then run the upgrade from the exact validated head; it must clone PADataset execution source at 17e1147614f27702e43565089d618182ff71c5af and bind the untouched historical checkout read-only under /srv/workspace-shell/PADataset-evidence.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
-  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here."
+  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded."
 }
