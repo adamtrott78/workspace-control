@@ -24,16 +24,15 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 5166fdf44af3548ae1f9bc3e773f948f22f212e1
+- Remote checkpoint: cac009bd18960c01f9dc4d2a20bac34eb6a0a175
 - Remote verified: true
 
 ## Next safe action
 
-Execute impl_08_packaging_install_update_rollback from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json. Produce a self-contained win-x64 per-user helper package, bounded install/uninstall scripts, native-host registration, reviewed signed-XPI installation procedure, and explicit update/rollback flow. Required exit evidence: clean install smoke PASS; uninstall removes only operator-owned files and registry entries; upgrade smoke PASS; rollback to the previous helper/XPI PASS; no administrator authority required; and no unrelated Firefox/profile data mutation. Preserve the frozen Firefox permissions/native-host identity, recovery-state privacy boundary, and simulator/production separation. Do not widen into UX-09 target-machine performance acceptance, UX-11 human usability trials, WebView2 promotion, or real-account calibration.
+Validate the Stage-08 durable promotion head exactly with Operator Bridge Validation and Workspace Control Validation. Do not execute impl_09_performance_benchmark_execution until that promotion head is green. After promotion verification, execute impl_09 from architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json and collect the UX-09 content-free target-machine latency/resource benchmark set and budget pass/fail findings. Do not begin UX-11 human usability trials, WebView2 promotion/comparison, real-account calibration, or production readiness review.
 
 ## Remaining work
 
-- impl_08_packaging_install_update_rollback: Per-user packaging, signed-extension flow, install/uninstall, and rollback
 - impl_09_performance_benchmark_execution: Execute UX-09 performance/resource benchmark
 - impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials
 - impl_11_webview2_comparison_spike: Conditional WebView2 custom-shell comparison

@@ -557,6 +557,62 @@
       },
       "claim": "Stage-07 recovery/fault closure is exact-head clean at the durable promotion head; Stage 08 packaging/install/update/rollback is the next authorized stage.",
       "implementation_head": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e"
+    },
+    "impl_08_packaging_install_update_rollback": {
+      "status": "VALIDATED",
+      "checkpoint": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175",
+      "validations": [
+        "Operator Bridge Validation #34 SUCCESS on implementation head",
+        "Workspace Control Validation #2412 SUCCESS on implementation head"
+      ],
+      "implementation": [
+        "operator-bridge/packaging/STAGE08.md",
+        "operator-bridge/packaging/SIGNED-XPI-INSTALL.md",
+        "operator-bridge/packaging/build-package.ps1",
+        "operator-bridge/packaging/install.ps1",
+        "operator-bridge/packaging/rollback.ps1",
+        "operator-bridge/packaging/uninstall.ps1",
+        "operator-bridge/packaging/stage08-smoke.ps1",
+        "tests/test_workspace_semantic_execution_operator_bridge_packaging.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "evidence": {
+        "package_binding": {
+          "source_sha": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175",
+          "workflow_artifact_id": 13747726653,
+          "xpi_mode": "CI_UNSIGNED_FIXTURE",
+          "signed_xpi_ci_claim": "NOT_CLAIMED",
+          "production_signed_xpi_flow": "MANUAL_FIREFOX_SIGNATURE_VERIFICATION_REQUIRED"
+        },
+        "lifecycle": {
+          "self_contained_win_x64": "PASS",
+          "clean_install_smoke": "PASS",
+          "native_host_registration": "PASS",
+          "upgrade_smoke": "PASS",
+          "rollback_previous_helper_xpi": "PASS",
+          "uninstall_owned_scope_only": "PASS"
+        },
+        "isolation": {
+          "unrelated_filesystem_unchanged": "PASS",
+          "unrelated_registry_unchanged": "PASS",
+          "unrelated_firefox_profile_unchanged": "PASS",
+          "admin_required_by_install_surface": false,
+          "automatic_self_updater": false,
+          "direct_firefox_profile_mutation": false
+        },
+        "frozen_identity": {
+          "extension_id": "workspace-control-operator@adamtrott78.local",
+          "firefox_permissions": [
+            "nativeMessaging",
+            "tabs",
+            "sessions"
+          ],
+          "native_host_name": "com.workspacecontrol.operator_bridge"
+        },
+        "repair": "Operator Bridge #33 exposed a stale staging-path native-host manifest; final-release manifest regeneration fixed the defect and strict rollback validation passed unchanged in #34."
+      },
+      "claim": "Stage-08 implementation is exact-head validated; promotion metadata head must itself pass both validators before Stage 09 work begins.",
+      "implementation_head": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175"
     }
   }
 }
