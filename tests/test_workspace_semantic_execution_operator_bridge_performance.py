@@ -250,5 +250,74 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertNotIn('"IMPLEMENTATION_GAP"', source)
 
 
+    def test_stage09_target_is_fake_worker_only_and_identity_fenced(self):
+        manifest = json.loads(
+            (PERF / "FirefoxProfile" / "extension" / "manifest.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        background = (
+            PERF / "FirefoxProfile" / "extension" / "background.js"
+        ).read_text(encoding="utf-8")
+        hub = (
+            ROOT
+            / "operator-bridge"
+            / "src"
+            / "WorkspaceOperator"
+            / "Ipc"
+            / "BrowserCommandHub.cs"
+        ).read_text(encoding="utf-8")
+        harness = (PERF / "Program.cs").read_text(encoding="utf-8")
+        builder = (PERF / "build-stage09-performance-xpi.ps1").read_text(
+            encoding="utf-8"
+        )
+        prep = (PERF / "prepare-stage09-target-profile.ps1").read_text(
+            encoding="utf-8"
+        )
+        matrix = (
+            ROOT / "operator-bridge" / "tools" / "run-stage09-target-matrix.ps1"
+        ).read_text(encoding="utf-8")
+        collector = (
+            ROOT / "operator-bridge" / "tools" / "run-stage09-target-firefox.ps1"
+        ).read_text(encoding="utf-8")
+
+        self.assertEqual("0.1.9", manifest["version"])
+        self.assertIn('const ADAPTER_VERSION = "0.1.9-perf";', background)
+        self.assertIn("ADAPTER_IDENTITY_REJECTED", hub)
+        self.assertIn('"adapter-preflight"', harness)
+        self.assertIn('"0.1.9-perf"', harness)
+        self.assertIn("UNSIGNED_MOZILLA_SIGNING_INPUT", builder)
+        self.assertIn('https://chatgpt.com/', builder)
+        self.assertIn("must not retain the production ChatGPT worker URL", builder)
+        self.assertIn("Refusing to mutate an existing Firefox profile not owned by Stage 09", prep)
+        self.assertIn("Signed Stage 09 XPI retains the production ChatGPT worker URL", prep)
+        self.assertIn("PerformanceSignedXpiPath", matrix)
+        self.assertIn("prepare-stage09-target-profile.ps1", matrix)
+        self.assertIn("TARGET_ADAPTER_PREFLIGHT", matrix)
+        self.assertIn("$PreflightOnly", collector)
+
+    def test_stage09_target_bootstrap_restores_machine_state(self):
+        matrix = (
+            ROOT / "operator-bridge" / "tools" / "run-stage09-target-matrix.ps1"
+        ).read_text(encoding="utf-8")
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+
+        try_index = matrix.index("try {\n  New-Item -ItemType Directory -Path $nativeRegPath")
+        native_set_index = matrix.index(
+            "Set-Item -LiteralPath $nativeRegPath -Value $targetNativeManifest"
+        )
+        self.assertGreater(native_set_index, try_index)
+        self.assertIn("$nativeRegExisted", matrix)
+        self.assertIn("Remove-Item -LiteralPath $nativeRegPath -Recurse -Force", matrix)
+        self.assertIn("HighEfficiencyModeEnabled", matrix)
+        self.assertIn(
+            "New-ItemProperty -LiteralPath $chromePolicyPath -Name $chromeMemorySaverPolicy -PropertyType DWord -Value 0",
+            matrix,
+        )
+        self.assertIn("$originalChromeMemorySaverPolicy", matrix)
+        self.assertIn("PSExecutionPolicyPreference: Bypass", workflow)
+        self.assertIn("stage09-performance-unsigned.xpi", workflow)
+
+
 if __name__ == "__main__":
     unittest.main()
