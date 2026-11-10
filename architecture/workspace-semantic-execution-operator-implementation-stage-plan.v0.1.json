@@ -1,0 +1,346 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-implementation-stage-plan-v0.1",
+  "status": "IMPLEMENTATION_STAGE_PLAN_FROZEN",
+  "owning_task": "workspace-operator-bridge-implementation-v1",
+  "parent_design_task": "workspace-semantic-execution-migration-v1",
+  "parent_design_freeze_head": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+  "rules": {
+    "default_execution": "SEQUENTIAL",
+    "promotion": "Required predecessor stages must be VALIDATED unless an explicit dependency says otherwise.",
+    "exact_head_validation": true,
+    "durable_evidence_required": true,
+    "architecture_change_behavior": "BLOCK_AND_REOPEN_OWNING_DESIGN; do not silently alter frozen UX contracts.",
+    "real_account_before_stage_12": false
+  },
+  "stages": [
+    {
+      "id": "impl_00_program_authority_and_contract_freeze",
+      "order": 0,
+      "title": "Implementation program, authority, and contract freeze",
+      "dependencies": [],
+      "objective": "Create the child implementation authority, program artifact, machine-readable stage plan, and requirement traceability matrix pinned to the UX-13 freeze.",
+      "deliverables": [
+        "child v2 task capsule + derived handoff",
+        "implementation program",
+        "stage plan",
+        "traceability matrix"
+      ],
+      "validation": [
+        "task capsule schema/contract validation",
+        "allowed mutation scope review",
+        "parent freeze exact SHA pin",
+        "exact-head Workspace Control Validation"
+      ],
+      "exit": "Child implementation task is handoff-safe enough to begin repository/bootstrap work and no code path is authorized outside its explicit scope."
+    },
+    {
+      "id": "impl_01_repository_bootstrap_and_contract_harness",
+      "order": 1,
+      "title": "Repository skeleton, build, CI, and frozen-contract harness",
+      "dependencies": [
+        "impl_00_program_authority_and_contract_freeze"
+      ],
+      "objective": "Create the operator-bridge solution/tree, dedicated validation workflow, protocol implementation copy/check, build/test skeleton, and invariant tests before behavior implementation.",
+      "deliverables": [
+        "operator-bridge solution/project skeleton",
+        "operator-bridge-validation GitHub Actions workflow",
+        "frozen protocol copy or generated artifact with drift check",
+        "initial test projects",
+        "manifest/security static-test scaffolding"
+      ],
+      "validation": [
+        "dotnet restore/build/test PASS",
+        "protocol drift test PASS",
+        "CI requires no ChatGPT/account secrets",
+        "scope/path validation PASS"
+      ],
+      "exit": "Empty/minimal implementation compiles and CI can deterministically enforce frozen contracts."
+    },
+    {
+      "id": "impl_02_windows_helper_kernel",
+      "order": 2,
+      "title": "Windows helper kernel",
+      "dependencies": [
+        "impl_01_repository_bootstrap_and_contract_harness"
+      ],
+      "objective": "Implement tray/master toggle, RegisterHotKey adapter, write-only clipboard adapter, single-flight dispatch coordinator, redacted diagnostics, and fake application/browser ports.",
+      "deliverables": [
+        "primary helper process",
+        "hotkey port/adapter",
+        "clipboard port/adapter",
+        "tray/operator shell",
+        "single-flight dispatch application service",
+        "content-free diagnostics"
+      ],
+      "validation": [
+        "hotkey register/unregister/conflict tests",
+        "bridge OFF no-side-effect tests",
+        "held-repeat/single-flight tests",
+        "clipboard last-safe-moment tests with fake BrowserPort",
+        "logging denylist tests",
+        "helper idle-resource measurement recorded"
+      ],
+      "exit": "Helper kernel satisfies UX-05 local behavior using fake ports; no browser dependency is required."
+    },
+    {
+      "id": "impl_03_native_messaging_and_local_ipc",
+      "order": 3,
+      "title": "Native Messaging proxy and same-user local IPC",
+      "dependencies": [
+        "impl_02_windows_helper_kernel"
+      ],
+      "objective": "Implement protocol v1 framing, helper native-host proxy mode, CurrentUserOnly named pipe, version negotiation, request correlation, idempotency, and reconnect behavior.",
+      "deliverables": [
+        "native-host proxy mode",
+        "named-pipe server/client",
+        "protocol parser/validator",
+        "native host manifest generator/registration helper"
+      ],
+      "validation": [
+        "wrong protocol version fails closed",
+        "malformed/oversize frame fails closed",
+        "duplicate request idempotency test",
+        "same-user/elevation enforcement test",
+        "proxy disconnect leaves primary helper alive",
+        "no packet body/raw URL allowed by protocol tests"
+      ],
+      "exit": "Browser adapter can communicate with helper through bounded typed IPC without authority leakage."
+    },
+    {
+      "id": "impl_04_firefox_mv3_adapter",
+      "order": 4,
+      "title": "Firefox Manifest V3 browser adapter",
+      "dependencies": [
+        "impl_03_native_messaging_and_local_ipc"
+      ],
+      "objective": "Implement the Firefox baseline adapter using only nativeMessaging/tabs/sessions, with managed binding lifecycle, origin reduction, and no content/page automation.",
+      "deliverables": [
+        "manifest.json",
+        "background event-page implementation",
+        "Native Messaging connection",
+        "create/activate/reload/discard/close/inventory operations",
+        "sessions binding metadata",
+        "managed-origin classification"
+      ],
+      "validation": [
+        "permission allowlist exact-match test",
+        "no host permissions/content scripts test",
+        "no raw URL crosses IPC test",
+        "binding metadata contains no packet/credential content",
+        "tab lifecycle unit/static tests",
+        "unmanaged tab adoption rejection test"
+      ],
+      "exit": "Firefox BrowserPort implementation exists and remains inside UX-08 least-privilege boundary."
+    },
+    {
+      "id": "impl_05_simulator_and_fake_worker",
+      "order": 5,
+      "title": "Deterministic simulator and local fake worker",
+      "dependencies": [
+        "impl_04_firefox_mv3_adapter"
+      ],
+      "objective": "Implement UX-10 scenario controller, fake worker, fake durable events/ack observer, virtual clock, fault injector, and production/simulator build separation.",
+      "deliverables": [
+        "fake worker surface/service",
+        "scenario controller",
+        "fake action/session/durable event stores",
+        "SIM_HUMAN_SUBMIT deterministic CI boundary",
+        "fault injection",
+        "trace hashing"
+      ],
+      "validation": [
+        "UX-10 L0/L1 required tests PASS",
+        "simulator-only endpoint absent from production protocol/package",
+        "payload hash mismatch cannot ack",
+        "generation fencing/idempotency tests"
+      ],
+      "exit": "Full deterministic fake-worker environment exists without a ChatGPT account."
+    },
+    {
+      "id": "impl_06_integrated_local_bridge_e2e",
+      "order": 6,
+      "title": "Real helper + Firefox + fake-worker integration",
+      "dependencies": [
+        "impl_05_simulator_and_fake_worker"
+      ],
+      "objective": "Run the real Windows helper, Native Messaging, Firefox adapter, and local fake worker through the UX-10 L2/L3 scenarios.",
+      "deliverables": [
+        "integrated local runner",
+        "Firefox test profile setup",
+        "L2/L3 trace/result artifacts"
+      ],
+      "validation": [
+        "all UX-10 CORE/AUTHORITY/ACK/INPUT/IDENTITY required L2/L3 tests PASS",
+        "no background focus/clipboard mutation",
+        "no duplicate local effects",
+        "adapter parity result schema produced"
+      ],
+      "exit": "Routine bridge mechanics work end-to-end against fake workers with real OS/browser adapters."
+    },
+    {
+      "id": "impl_07_recovery_and_fault_closure",
+      "order": 7,
+      "title": "Crash, auth-domain, stale-generation, restart, and recovery closure",
+      "dependencies": [
+        "impl_06_integrated_local_bridge_e2e"
+      ],
+      "objective": "Complete UX-07/UX-10 recovery scenarios with real helper/browser adapters and deterministic faults.",
+      "deliverables": [
+        "recovery coordinator implementation",
+        "restart/reinventory handling",
+        "auth-domain freeze/reconcile/generation-advance implementation",
+        "content-free recovery traces"
+      ],
+      "validation": [
+        "all UX-10 recovery/crash/generation fixtures at required implemented layers PASS",
+        "generation advances exactly once",
+        "late old-generation evidence cannot advance current",
+        "restart never replays stale local cache",
+        "Ctrl+B during blocking recovery cannot stage worker packet"
+      ],
+      "exit": "Single-component and auth-domain failures have bounded tested recovery with no authority duplication."
+    },
+    {
+      "id": "impl_08_packaging_install_update_rollback",
+      "order": 8,
+      "title": "Per-user packaging, signed-extension flow, install/uninstall, and rollback",
+      "dependencies": [
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "objective": "Make the baseline installable/recoverable without admin authority or credential/profile scraping.",
+      "deliverables": [
+        "self-contained win-x64 publish",
+        "per-user install/uninstall scripts",
+        "native host registration",
+        "signed-XPI installation procedure",
+        "explicit update/rollback procedure"
+      ],
+      "validation": [
+        "clean install smoke PASS",
+        "uninstall removes only owned files/registry entries",
+        "upgrade smoke PASS",
+        "rollback to previous helper/XPI PASS",
+        "no admin requirement",
+        "no unrelated Firefox/profile data mutation"
+      ],
+      "exit": "A reviewed per-user baseline can be installed, updated, and rolled back safely."
+    },
+    {
+      "id": "impl_09_performance_benchmark_execution",
+      "order": 9,
+      "title": "Execute UX-09 performance/resource benchmark",
+      "dependencies": [
+        "impl_08_packaging_install_update_rollback"
+      ],
+      "objective": "Measure helper/extension and Firefox fake-worker mechanics on target Windows hardware using the frozen UX-09 procedure.",
+      "deliverables": [
+        "content-free benchmark result set",
+        "latency/resource summary",
+        "budget pass/fail findings"
+      ],
+      "validation": [
+        "measurement procedure validity PASS",
+        "helper/extension budgets evaluated",
+        "1/2/4 worker and discard/restore measurements recorded",
+        "no fake-worker result misrepresented as real ChatGPT RAM"
+      ],
+      "exit": "Mechanical performance is measured; any failing budget is corrected or explicitly escalated before usability/promotion."
+    },
+    {
+      "id": "impl_10_usability_trial_execution",
+      "order": 10,
+      "title": "Execute UX-11 human-in-loop simulator trials",
+      "dependencies": [
+        "impl_09_performance_benchmark_execution"
+      ],
+      "objective": "Run the physical operator trials against fake workers, including 5/20-action batches, recovery, interruptions, and hotkey collision.",
+      "deliverables": [
+        "UT-01 through UT-12 result records as required",
+        "feedback/checklist results",
+        "hotkey retain/rebind decision"
+      ],
+      "validation": [
+        "zero wrong-worker dispatches",
+        "zero wrong-packet dispatches",
+        "zero stale-generation advancement",
+        "zero background focus/clipboard failures",
+        "20-action routine attention thresholds PASS",
+        "hotkey retention rule applied exactly"
+      ],
+      "exit": "Human-in-loop simulator UX passes or the affected physical binding/presentation is revised and rerun."
+    },
+    {
+      "id": "impl_11_webview2_comparison_spike",
+      "order": 11,
+      "title": "Conditional WebView2 custom-shell comparison",
+      "dependencies": [
+        "impl_10_usability_trial_execution"
+      ],
+      "objective": "Implement the smallest BrowserPort-equivalent WebView2 fake-worker spike and decide whether it merits auth testing/promotion.",
+      "deliverables": [
+        "bounded WebView2 adapter spike",
+        "UX-10 parity results",
+        "UX-09 comparison measurements",
+        "promotion/reject disposition"
+      ],
+      "validation": [
+        "fake-worker adapter parity PASS before auth test",
+        "no DOM/content automation",
+        "promotion trigger evaluated against Firefox",
+        "if real-auth feasibility is attempted, no cookie/token import or bypass"
+      ],
+      "exit": "WebView2 is REJECTED/DEFERRED or remains a promotion candidate; Firefox baseline is unaffected."
+    },
+    {
+      "id": "impl_12_real_account_calibration",
+      "order": 12,
+      "title": "Bounded real-account security/policy/authentication calibration",
+      "dependencies": [
+        "impl_10_usability_trial_execution"
+      ],
+      "objective": "Perform the smallest real ChatGPT calibration only after all explicit pre-real-account gates pass.",
+      "deliverables": [
+        "fresh policy/product review record",
+        "implementation security checklist",
+        "Firefox target-host API smoke results",
+        "manual authentication/recovery calibration",
+        "real ChatGPT latency/RAM calibration",
+        "bounded real-account verdict"
+      ],
+      "validation": [
+        "signed extension/native host installed",
+        "UX-08 implementation checklist PASS",
+        "fresh OpenAI terms/product review PASS",
+        "manual authentication works without automation/bypass",
+        "manual Ctrl+V + Enter preserved",
+        "no content/output extraction",
+        "real-account resource/latency data recorded"
+      ],
+      "exit": "Real-account baseline is explicitly PASS/BLOCKED/REVISE with no policy/security workaround."
+    },
+    {
+      "id": "impl_13_production_readiness_review",
+      "order": 13,
+      "title": "Integrated implementation review and promotion decision",
+      "dependencies": [
+        "impl_12_real_account_calibration"
+      ],
+      "objective": "Review code, test evidence, performance, usability, security, packaging, rollback, and real-account calibration before any production promotion.",
+      "deliverables": [
+        "implementation review",
+        "open findings ledger",
+        "promotion/hold/revise decision",
+        "recovery/rollback checkpoint"
+      ],
+      "validation": [
+        "all required predecessor gates resolved",
+        "zero open authority/security blocker",
+        "zero unresolved hard usability failure",
+        "installation/rollback evidence PASS",
+        "exact-head CI PASS"
+      ],
+      "exit": "Explicit PROMOTE_V0, HOLD, or REVISE decision. No implicit production promotion."
+    }
+  ]
+}

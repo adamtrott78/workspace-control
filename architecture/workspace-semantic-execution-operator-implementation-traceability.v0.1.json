@@ -1,0 +1,213 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-implementation-traceability-v0.1",
+  "status": "IMPLEMENTATION_TRACEABILITY_BASELINE",
+  "owning_task": "workspace-operator-bridge-implementation-v1",
+  "parent_freeze_head": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+  "policy": "Every frozen requirement has one or more implementation stages and verification obligations. Implementation may not mark a requirement SATISFIED without evidence from the mapped stage/tests.",
+  "requirements": [
+    {
+      "requirement": "UX-M001/UX-M002",
+      "summary": "single scheduler command; routine <= hotkey+paste+Enter",
+      "stages": [
+        "impl_02_windows_helper_kernel",
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "hotkey dispatch tests",
+        "20-cycle motor rhythm",
+        "20-action mixed trial"
+      ]
+    },
+    {
+      "requirement": "UX-M003/UX-M004/UX-M005",
+      "summary": "zero worker selection, prompt editing, manual state relay",
+      "stages": [
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "integrated routing tests",
+        "UT-02 objective counters"
+      ]
+    },
+    {
+      "requirement": "UX-M006/UX-M007",
+      "summary": "no background clipboard mutation/focus steal",
+      "stages": [
+        "impl_02_windows_helper_kernel",
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "bridge-off/no-work/background-ack tests",
+        "UT-12"
+      ]
+    },
+    {
+      "requirement": "UX-M008/UX-M009",
+      "summary": "master toggle and READY_MANUAL_CYCLES presentation",
+      "stages": [
+        "impl_02_windows_helper_kernel",
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "toggle tests",
+        "operator presentation/usability trials"
+      ]
+    },
+    {
+      "requirement": "UX-M010/UX-M020/UX-M024",
+      "summary": "local prepared != durable ack; no auto resend; durable state completion",
+      "stages": [
+        "impl_05_simulator_and_fake_worker",
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "verification": [
+        "slow/no-ack fixtures",
+        "ack observer/generation tests"
+      ]
+    },
+    {
+      "requirement": "UX-M011/UX-M014/UX-M015/UX-M016",
+      "summary": "independent batch service, reuse, bounded pool, discard",
+      "stages": [
+        "impl_05_simulator_and_fake_worker",
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_09_performance_benchmark_execution"
+      ],
+      "verification": [
+        "concurrent worker fixtures",
+        "2-live/4-burst/discard benchmark"
+      ]
+    },
+    {
+      "requirement": "UX-M013",
+      "summary": "dedicated managed worker environment; Firefox baseline; replaceable BrowserPort",
+      "stages": [
+        "impl_04_firefox_mv3_adapter",
+        "impl_11_webview2_comparison_spike"
+      ],
+      "verification": [
+        "Firefox profile/binding tests",
+        "WebView2 parity/promotion disposition"
+      ]
+    },
+    {
+      "requirement": "UX-M017/UX-M030/UX-M031",
+      "summary": "browser IDs non-authoritative; fail closed; idempotent local ops",
+      "stages": [
+        "impl_01_repository_bootstrap_and_contract_harness",
+        "impl_03_native_messaging_and_local_ipc",
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "verification": [
+        "protocol identity tests",
+        "duplicate request tests",
+        "stale/ambiguous recovery fixtures"
+      ]
+    },
+    {
+      "requirement": "UX-M018/UX-M019/UX-M021",
+      "summary": "restart/auth-refresh/reboot recovery",
+      "stages": [
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "verification": [
+        "tab loss/browser crash/helper crash/auth refresh/reboot fixtures"
+      ]
+    },
+    {
+      "requirement": "UX-M022/UX-M023/UX-M025/UX-M026",
+      "summary": "no ChatGPT content automation; chrome-level only; policy gate; least privilege",
+      "stages": [
+        "impl_04_firefox_mv3_adapter",
+        "impl_08_packaging_install_update_rollback",
+        "impl_12_real_account_calibration"
+      ],
+      "verification": [
+        "manifest static tests",
+        "security checklist",
+        "fresh policy review",
+        "real-account boundary audit"
+      ]
+    },
+    {
+      "requirement": "UX-M027/UX-M028/UX-M029/UX-M033",
+      "summary": "ports/adapters, single truth, typed state, no authority creation",
+      "stages": [
+        "impl_01_repository_bootstrap_and_contract_harness",
+        "impl_05_simulator_and_fake_worker",
+        "impl_13_production_readiness_review"
+      ],
+      "verification": [
+        "dependency tests/review",
+        "state-machine fixtures",
+        "final authority review"
+      ]
+    },
+    {
+      "requirement": "UX-P001..UX-P006",
+      "summary": "latency/resource budgets",
+      "stages": [
+        "impl_09_performance_benchmark_execution",
+        "impl_12_real_account_calibration"
+      ],
+      "verification": [
+        "UX-09 mechanical benchmark",
+        "real ChatGPT calibration"
+      ]
+    },
+    {
+      "requirement": "UX-Q001..UX-Q007",
+      "summary": "operator effort and error metrics",
+      "stages": [
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "UX-11 UT-01..UT-12"
+      ]
+    },
+    {
+      "requirement": "UX-08 security checklist",
+      "summary": "implementation security/privacy boundary",
+      "stages": [
+        "impl_01_repository_bootstrap_and_contract_harness",
+        "impl_04_firefox_mv3_adapter",
+        "impl_08_packaging_install_update_rollback",
+        "impl_12_real_account_calibration"
+      ],
+      "verification": [
+        "static permission checks",
+        "artifact checklist",
+        "install-state review"
+      ]
+    },
+    {
+      "requirement": "UX-10 simulator contract",
+      "summary": "deterministic fake worker + CI/human modes + fault matrix",
+      "stages": [
+        "impl_05_simulator_and_fake_worker",
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "verification": [
+        "required L0-L4 scenario matrix"
+      ]
+    },
+    {
+      "requirement": "UX-12 implementation stack",
+      "summary": ".NET 10/WinForms + Firefox MV3 + Native Messaging/named pipe",
+      "stages": [
+        "impl_01_repository_bootstrap_and_contract_harness",
+        "impl_02_windows_helper_kernel",
+        "impl_03_native_messaging_and_local_ipc",
+        "impl_04_firefox_mv3_adapter"
+      ],
+      "verification": [
+        "build/contract tests and implementation review"
+      ]
+    }
+  ]
+}

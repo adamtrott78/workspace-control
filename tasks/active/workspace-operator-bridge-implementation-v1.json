@@ -1,0 +1,444 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-operator-bridge-implementation-v1",
+  "title": "Workspace Operator Bridge Implementation v1",
+  "status": "IN_PROGRESS",
+  "goal": "Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-first Windows/Firefox system: .NET 10 helper, typed Native Messaging/named-pipe BrowserPort, least-privilege Firefox MV3 adapter, deterministic fake-worker simulator, recovery/fault closure, packaging/rollback, empirical performance/usability evidence, optional WebView2 comparison, and gated real-account calibration without changing the frozen manual Ctrl+V + Enter or authority/security boundaries.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-semantic-execution-migration-v1",
+  "current_stage": "impl_00_program_authority_and_contract_freeze",
+  "acceptance_criteria": [
+    "Implementation remains traceable to the UX-13 freeze at exact workspace-control SHA 0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
+    "Every stage has explicit dependencies, outputs, validation, and exact-head durable evidence before promotion.",
+    "The child task mutates only its explicit task/program/code/CI/benchmark/test paths; frozen UX design artifacts are read-only inputs.",
+    "The .NET helper and Firefox adapter preserve ports-and-adapters dependency direction and cannot create execution authority.",
+    "The production browser adapter has no ChatGPT DOM/content/output extraction, synthetic input, automatic Send, credential/token extraction, private endpoint use, or safeguard/auth bypass.",
+    "Routine operation remains one scheduler command followed by manual Ctrl+V and Enter.",
+    "Local preparation never implies durable worker acknowledgment and lack of acknowledgment never triggers automatic resend.",
+    "Unknown/stale session or generation state fails closed and old-generation evidence cannot advance current state.",
+    "CI and simulator testing do not require a ChatGPT account or account credentials.",
+    "The UX-10 simulator required contract tests pass before any real-account calibration.",
+    "The UX-09 empirical performance budget is executed and evaluated before production promotion.",
+    "The UX-11 human-in-loop usability suite passes with zero hard correctness/safety failures before production promotion.",
+    "Installation/update/rollback are per-user, bounded to owned files/registry state, and do not require routine administrator authority.",
+    "Any real-account test occurs only after built-artifact security review, target-host smoke, fresh policy/product review, signed install state, normal manual authentication, and authorized OperatorBridge transport.",
+    "Final production promotion requires an explicit Stage 13 verdict; completion of implementation alone does not imply production readiness."
+  ],
+  "constraints": [
+    "Do not mutate UX-00 through UX-13 frozen design artifacts from this child task. If implementation evidence invalidates a frozen contract, stop and reopen the owning design through a separately reviewed change.",
+    "Do not self-widen the mutation scope recorded in this capsule.",
+    "Do not use browser DOM/accessibility/screenshot/page-source/output inspection against ChatGPT.",
+    "Do not synthesize paste, typing, mouse input, Enter, or Send against ChatGPT.",
+    "Do not read arbitrary prior clipboard content or implement automatic clipboard snapshot/restore in v0.",
+    "Do not read or import browser cookies, passwords, tokens, localStorage, IndexedDB, or credential/profile databases.",
+    "Do not call undocumented/private ChatGPT consumer endpoints or replay consumer requests.",
+    "Do not evade identity-provider, product, rate-limit, CAPTCHA, auth, or safety restrictions.",
+    "No real ChatGPT account is used before impl_12_real_account_calibration and its explicit predecessor gates.",
+    "No simulator-only SIM_HUMAN_SUBMIT or fault-control capability may be reachable through production BrowserPort, Native Messaging, helper packaging, or production runtime configuration.",
+    "No unauthenticated inbound TCP/HTTP listener is introduced by the operator bridge.",
+    "No automatic self-updater is introduced in v0.",
+    "No new runtime dependency beyond the frozen stack is introduced without a bounded stage rationale, version pin, and security/maintenance review.",
+    "Do not modify unrelated workspace-control workflows, policies, schemas, controllers, GitRunner, Workspace Shell, research-engine, PADataset, or course repositories.",
+    "Cross-chat recovery uses this capsule, exact Git SHAs, and validation evidence; conversation memory is never required."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+      "remote": {
+        "branch": "workspace-semantic-execution-migration-v1",
+        "checkpoint_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-operator-bridge-implementation-v1.json",
+        "tasks/active/workspace-operator-bridge-implementation-v1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json",
+        "architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json",
+        "operator-bridge/**",
+        ".github/workflows/operator-bridge-validation.yml",
+        "benchmarks/workspace-semantic-execution/operator_bridge/**",
+        "tests/test_workspace_semantic_execution_operator_bridge*.py"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "impl_00_program_authority_and_contract_freeze",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "UX-13 design freeze workspace-control@0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+        "explicit operator authorization to create the implementation program/task"
+      ],
+      "outputs": [
+        "child v2 task capsule + derived handoff",
+        "implementation program",
+        "stage plan",
+        "traceability matrix"
+      ],
+      "validation": [
+        {
+          "check": "Implementation program/task bootstrap",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Await exact-head repository validation after child capsule/program artifacts are committed."
+          ]
+        }
+      ],
+      "resume_condition": "Child implementation task is handoff-safe enough to begin repository/bootstrap work and no code path is authorized outside its explicit scope."
+    },
+    {
+      "id": "impl_01_repository_bootstrap_and_contract_harness",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_00_program_authority_and_contract_freeze"
+      ],
+      "outputs": [
+        "operator-bridge solution/project skeleton",
+        "operator-bridge-validation GitHub Actions workflow",
+        "frozen protocol copy or generated artifact with drift check",
+        "initial test projects",
+        "manifest/security static-test scaffolding"
+      ],
+      "validation": [],
+      "resume_condition": "Empty/minimal implementation compiles and CI can deterministically enforce frozen contracts."
+    },
+    {
+      "id": "impl_02_windows_helper_kernel",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_01_repository_bootstrap_and_contract_harness"
+      ],
+      "outputs": [
+        "primary helper process",
+        "hotkey port/adapter",
+        "clipboard port/adapter",
+        "tray/operator shell",
+        "single-flight dispatch application service",
+        "content-free diagnostics"
+      ],
+      "validation": [],
+      "resume_condition": "Helper kernel satisfies UX-05 local behavior using fake ports; no browser dependency is required."
+    },
+    {
+      "id": "impl_03_native_messaging_and_local_ipc",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_02_windows_helper_kernel"
+      ],
+      "outputs": [
+        "native-host proxy mode",
+        "named-pipe server/client",
+        "protocol parser/validator",
+        "native host manifest generator/registration helper"
+      ],
+      "validation": [],
+      "resume_condition": "Browser adapter can communicate with helper through bounded typed IPC without authority leakage."
+    },
+    {
+      "id": "impl_04_firefox_mv3_adapter",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_03_native_messaging_and_local_ipc"
+      ],
+      "outputs": [
+        "manifest.json",
+        "background event-page implementation",
+        "Native Messaging connection",
+        "create/activate/reload/discard/close/inventory operations",
+        "sessions binding metadata",
+        "managed-origin classification"
+      ],
+      "validation": [],
+      "resume_condition": "Firefox BrowserPort implementation exists and remains inside UX-08 least-privilege boundary."
+    },
+    {
+      "id": "impl_05_simulator_and_fake_worker",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_04_firefox_mv3_adapter"
+      ],
+      "outputs": [
+        "fake worker surface/service",
+        "scenario controller",
+        "fake action/session/durable event stores",
+        "SIM_HUMAN_SUBMIT deterministic CI boundary",
+        "fault injection",
+        "trace hashing"
+      ],
+      "validation": [],
+      "resume_condition": "Full deterministic fake-worker environment exists without a ChatGPT account."
+    },
+    {
+      "id": "impl_06_integrated_local_bridge_e2e",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_05_simulator_and_fake_worker"
+      ],
+      "outputs": [
+        "integrated local runner",
+        "Firefox test profile setup",
+        "L2/L3 trace/result artifacts"
+      ],
+      "validation": [],
+      "resume_condition": "Routine bridge mechanics work end-to-end against fake workers with real OS/browser adapters."
+    },
+    {
+      "id": "impl_07_recovery_and_fault_closure",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_06_integrated_local_bridge_e2e"
+      ],
+      "outputs": [
+        "recovery coordinator implementation",
+        "restart/reinventory handling",
+        "auth-domain freeze/reconcile/generation-advance implementation",
+        "content-free recovery traces"
+      ],
+      "validation": [],
+      "resume_condition": "Single-component and auth-domain failures have bounded tested recovery with no authority duplication."
+    },
+    {
+      "id": "impl_08_packaging_install_update_rollback",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_07_recovery_and_fault_closure"
+      ],
+      "outputs": [
+        "self-contained win-x64 publish",
+        "per-user install/uninstall scripts",
+        "native host registration",
+        "signed-XPI installation procedure",
+        "explicit update/rollback procedure"
+      ],
+      "validation": [],
+      "resume_condition": "A reviewed per-user baseline can be installed, updated, and rolled back safely."
+    },
+    {
+      "id": "impl_09_performance_benchmark_execution",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_08_packaging_install_update_rollback"
+      ],
+      "outputs": [
+        "content-free benchmark result set",
+        "latency/resource summary",
+        "budget pass/fail findings"
+      ],
+      "validation": [],
+      "resume_condition": "Mechanical performance is measured; any failing budget is corrected or explicitly escalated before usability/promotion."
+    },
+    {
+      "id": "impl_10_usability_trial_execution",
+      "status": "PLANNED",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": null,
+      "selected_surface": "chat+github+local",
+      "inputs": [
+        "validated stage impl_09_performance_benchmark_execution"
+      ],
+      "outputs": [
+        "UT-01 through UT-12 result records as required",
+        "feedback/checklist results",
+        "hotkey retain/rebind decision"
+      ],
+      "validation": [],
+      "resume_condition": "Human-in-loop simulator UX passes or the affected physical binding/presentation is revised and rerun."
+    },
+    {
+      "id": "impl_11_webview2_comparison_spike",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_10_usability_trial_execution"
+      ],
+      "outputs": [
+        "bounded WebView2 adapter spike",
+        "UX-10 parity results",
+        "UX-09 comparison measurements",
+        "promotion/reject disposition"
+      ],
+      "validation": [],
+      "resume_condition": "WebView2 is REJECTED/DEFERRED or remains a promotion candidate; Firefox baseline is unaffected."
+    },
+    {
+      "id": "impl_12_real_account_calibration",
+      "status": "PLANNED",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": null,
+      "selected_surface": "chat+github+local",
+      "inputs": [
+        "validated stage impl_10_usability_trial_execution"
+      ],
+      "outputs": [
+        "fresh policy/product review record",
+        "implementation security checklist",
+        "Firefox target-host API smoke results",
+        "manual authentication/recovery calibration",
+        "real ChatGPT latency/RAM calibration",
+        "bounded real-account verdict"
+      ],
+      "validation": [],
+      "resume_condition": "Real-account baseline is explicitly PASS/BLOCKED/REVISE with no policy/security workaround."
+    },
+    {
+      "id": "impl_13_production_readiness_review",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_12_real_account_calibration"
+      ],
+      "outputs": [
+        "implementation review",
+        "open findings ledger",
+        "promotion/hold/revise decision",
+        "recovery/rollback checkpoint"
+      ],
+      "validation": [],
+      "resume_condition": "Explicit PROMOTE_V0, HOLD, or REVISE decision. No implicit production promotion."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "parent-ux13-freeze",
+      "kind": "git_commit",
+      "identity": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Control Validation #2376 SUCCESS at this head.",
+        "UX-00 through UX-13 operator design is frozen; implementation evidence must not silently change those contracts."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+      "required_for_resume": true,
+      "evidence": [
+        "Child implementation task is being bootstrapped from the exact UX-13 freeze head.",
+        "No implementation code exists yet under this child task."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md",
+      "state": "IMPLEMENTATION_PROGRAM_FROZEN",
+      "role": "construction principles, repository/build/test strategy, promotion discipline, real-account boundary",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "versioned implementation-program revision only after reviewed contract change",
+      "review_requirement": "Any change that alters frozen UX behavior reopens the owning UX/security design rather than silently editing this program.",
+      "evidence": [
+        "Created from UX-13 freeze at 0a110b570410d6d3310afc8ef4591e4aa383c0b8."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json",
+      "state": "IMPLEMENTATION_STAGE_PLAN_FROZEN",
+      "role": "machine-readable staged work breakdown, dependencies, deliverables, validation, exit gates",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "versioned stage-plan revision with explicit operator/review authority",
+      "review_requirement": "Stage dependency or gate weakening requires review.",
+      "evidence": [
+        "Stages impl_00 through impl_13 defined before implementation code."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json",
+      "state": "IMPLEMENTATION_TRACEABILITY_BASELINE",
+      "role": "maps frozen UX requirements/contracts to implementation stages and verification evidence",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "update only to add concrete code/test evidence without weakening frozen requirements",
+      "review_requirement": "No requirement may be marked satisfied without mapped evidence.",
+      "evidence": [
+        "Frozen UX requirements mapped to construction and verification stages."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Explicit operator authorization",
+      "result": "PASS",
+      "evidence": [
+        "Operator accepted the artifact -> staged plan -> authorized task -> staged execution workflow and explicitly instructed the system to proceed."
+      ]
+    },
+    {
+      "check": "Parent design freeze",
+      "result": "PASS",
+      "evidence": [
+        "Parent UX task is frozen/validated at workspace-control@0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
+        "Workspace Control Validation #2376 reported SUCCESS on that exact head."
+      ]
+    },
+    {
+      "check": "Scope separation",
+      "result": "PASS",
+      "evidence": [
+        "Child mutation scope names only its task/program artifacts, operator-bridge code tree, one dedicated CI workflow, operator-bridge benchmark results, and bounded bridge tests.",
+        "Frozen UX design artifacts and unrelated workspace-control/research/course/runtime surfaces are excluded from child mutation authority."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "impl_01_repository_bootstrap_and_contract_harness: Repository skeleton, build, CI, and frozen-contract harness",
+    "impl_02_windows_helper_kernel: Windows helper kernel",
+    "impl_03_native_messaging_and_local_ipc: Native Messaging proxy and same-user local IPC",
+    "impl_04_firefox_mv3_adapter: Firefox Manifest V3 browser adapter",
+    "impl_05_simulator_and_fake_worker: Deterministic simulator and local fake worker",
+    "impl_06_integrated_local_bridge_e2e: Real helper + Firefox + fake-worker integration",
+    "impl_07_recovery_and_fault_closure: Crash, auth-domain, stale-generation, restart, and recovery closure",
+    "impl_08_packaging_install_update_rollback: Per-user packaging, signed-extension flow, install/uninstall, and rollback",
+    "impl_09_performance_benchmark_execution: Execute UX-09 performance/resource benchmark",
+    "impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials",
+    "impl_11_webview2_comparison_spike: Conditional WebView2 custom-shell comparison",
+    "impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration",
+    "impl_13_production_readiness_review: Integrated implementation review and promotion decision"
+  ],
+  "next_safe_action": "Validate the child task/program creation at the exact repository head. If Workspace Control Validation passes, mark impl_00_program_authority_and_contract_freeze VALIDATED, refresh restore-point:latest to that validated head, and begin impl_01_repository_bootstrap_and_contract_harness. Do not create implementation code before the Stage 00 authority/program checkpoint is validated.",
+  "last_executor": "gpt-5.6-sol",
+  "last_surface": "github+heartbeat",
+  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins."
+}
