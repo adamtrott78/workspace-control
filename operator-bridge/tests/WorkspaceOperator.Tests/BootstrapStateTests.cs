@@ -6,8 +6,12 @@ namespace WorkspaceControl.OperatorBridge.Tests;
 public sealed class BootstrapStateTests
 {
     [TestMethod]
-    public void StageTwoHelperKernelIsActive()
+    public void StageThreeNativeMessagingIpcIsActive()
     {
-        Assert.AreEqual("IMPL_02_HELPER_KERNEL", BootstrapState.Stage);
+        Assert.IsTrue(
+            string.Equals(
+                "IMPL_03_NATIVE_MESSAGING_IPC",
+                BootstrapState.Stage,
+                StringComparison.Ordinal));
     }
 }
