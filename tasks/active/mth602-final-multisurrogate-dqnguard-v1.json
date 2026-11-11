@@ -275,16 +275,16 @@
     }
   ],
   "blockers": [
-    "Live PADataset Stage 03 source binding is now exact and clean at 4c095352bfe128e93f794112741efdb7a66b9c38.",
-    "Execution is blocked only because current research-bounded policy does not yet admit tests/test_multisurrogate_dqnguard.py; exact-path correction PR #606 head 72073976f02ca151c6ee68128175c51b069be42c is under validation #442."
+    "Stage 03 source 4c095352bfe128e93f794112741efdb7a66b9c38 is already exact and clean.",
+    "Execution waits only for operator-owned Workspace Shell policy refresh to validated workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c; connected Workspace Shell cannot perform the root mutation because no privileged helper authority is admitted."
   ],
   "remaining_work": [
-    "Wait for the exact-path research-bounded policy correction to validate and be installed live.",
+    "Wait for the parent operator-owned live policy refresh to report PASS.",
+    "Verify live PADataset exact HEAD/status/tree.",
     "Run tests/test_multisurrogate_dqnguard.py through research-bounded.",
-    "Prepare one known-only four-class backbone target fold with 16,384 cache lineage and no target-informed checkpoint selection.",
-    "Run Architecture C smoke/small-real evaluator and validate result_record.json against the Stage 02 schema."
+    "Prepare the known-only backbone and run Architecture C smoke/small-real evaluation."
   ],
-  "next_safe_action": "Do not execute Stage 03 until PR #606 policy head 72073976f02ca151c6ee68128175c51b069be42c passes exact validation and the live Workspace Shell runtime is refreshed to that policy. PADataset source 4c095352bfe128e93f794112741efdb7a66b9c38 is already verified clean and ready.",
+  "next_safe_action": "After the operator installs validated Workspace Shell execution 72073976f02ca151c6ee68128175c51b069be42c from authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da, verify PADataset 4c095352bfe128e93f794112741efdb7a66b9c38 live and immediately run the Stage 03 deterministic contract test.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."
