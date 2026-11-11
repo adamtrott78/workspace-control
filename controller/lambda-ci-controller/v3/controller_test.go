@@ -299,6 +299,44 @@ func assigned(id, runID int64) *scaleset.JobAssigned {
 	}
 }
 
+func started(id, runID int64, runnerName string) *scaleset.JobStarted {
+	return &scaleset.JobStarted{
+		RunnerName: runnerName,
+		JobMessageBase: scaleset.JobMessageBase{
+			JobMessageType: scaleset.JobMessageType{
+				MessageType: scaleset.MessageTypeJobStarted,
+			},
+			RunnerRequestID: id,
+			OwnerName:       "adamtrott78",
+			RepositoryName:  "workspace-control",
+			WorkflowRunID:   runID,
+			EventName:       "issue_comment",
+			JobWorkflowRef:  "adamtrott78/workspace-control/.github/workflows/control.yml@refs/heads/main",
+			RequestLabels:   []string{"lambda-v3-wc-control"},
+		},
+	}
+}
+
+func completed(id, runID int64, runnerName string) *scaleset.JobCompleted {
+	return &scaleset.JobCompleted{
+		RunnerName: runnerName,
+		Result:     "Failed",
+		JobMessageBase: scaleset.JobMessageBase{
+			JobMessageType: scaleset.JobMessageType{
+				MessageType: scaleset.MessageTypeJobCompleted,
+			},
+			RunnerRequestID: id,
+			OwnerName:       "adamtrott78",
+			RepositoryName:  "workspace-control",
+			WorkflowRunID:   runID,
+			EventName:       "issue_comment",
+			JobWorkflowRef:  "adamtrott78/workspace-control/.github/workflows/control.yml@refs/heads/main",
+			RequestLabels:   []string{"lambda-v3-wc-control"},
+		},
+	}
+}
+
+
 func TestProductionV3SourceDoesNotReadDisplayOrCandidateAuthority(t *testing.T) {
 	for _, path := range []string{"controller.go", "main.go"} {
 		raw, err := os.ReadFile(path)
@@ -532,6 +570,188 @@ func TestRestAttestedAssignedDemandProvisionsWithoutBrokerIDs(t *testing.T) {
 		record.WorkflowRunID != 1901 ||
 		record.SchedulerState != "REST_ATTESTED_ASSIGNED" {
 		t.Fatalf("REST-attested authority record mismatch: %#v", record)
+	}
+}
+
+func TestLifecycleRejectsDifferentWorkflowRunOnSameRunner(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	job := restDiscoveredJob(9001, 1901)
+	record, err := newJobRecord(testPolicy(), job, "ACCEPTED", time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	record.SchedulerState = "REST_ATTESTED_ASSIGNED"
+	if err := ledger.Put(record); err != nil {
+		t.Fatal(err)
+	}
+	scaler := testScaler(
+		&fakeVerifier{discoverySafe: true},
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.processLifecycle(
+		nil,
+		[]*scaleset.JobCompleted{completed(7002, 1902, record.RunnerName)},
+	); err != nil {
+		t.Fatal(err)
+	}
+	got, ok, err := ledger.Get(9001)
+	if err != nil || !ok {
+		t.Fatalf("ledger read failed: ok=%v err=%v", ok, err)
+	}
+	if got.SchedulerState != "REST_ATTESTED_ASSIGNED" || got.State != "ACCEPTED" {
+		t.Fatalf("different workflow run corrupted durable record: %#v", got)
+	}
+
+	if err := scaler.processLifecycle(
+		[]*scaleset.JobStarted{started(7001, 1901, record.RunnerName)},
+		[]*scaleset.JobCompleted{completed(7001, 1901, record.RunnerName)},
+	); err != nil {
+		t.Fatal(err)
+	}
+	got, ok, err = ledger.Get(9001)
+	if err != nil || !ok {
+		t.Fatalf("ledger read failed after exact lifecycle: ok=%v err=%v", ok, err)
+	}
+	if got.SchedulerState != "COMPLETED" {
+		t.Fatalf("exact workflow lifecycle was not accepted: %#v", got)
+	}
+}
+
+func TestQueuedUnboundRestEvidenceReopensStaleTerminalRecord(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	job := restDiscoveredJob(9001, 1901)
+	record, err := newJobRecord(
+		testPolicy(),
+		job,
+		"COMPLETED",
+		time.Date(2026, 10, 29, 23, 58, 0, 0, time.UTC),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record.SchedulerState = "COMPLETED"
+	oldRequestID := record.RequestID
+	oldRunnerName := record.RunnerName
+	if err := ledger.Put(record); err != nil {
+		t.Fatal(err)
+	}
+	verifier := &fakeVerifier{
+		discoverySafe: true,
+		discovered:    []verifiedJob{job},
+	}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	got, ok, err := ledger.Get(9001)
+	if err != nil || !ok {
+		t.Fatalf("reopened record missing: ok=%v err=%v", ok, err)
+	}
+	if got.ProvisionAttempt != 1 ||
+		got.RequestID == oldRequestID ||
+		got.RunnerName == oldRunnerName ||
+		got.SchedulerState != "REST_ATTESTED_ASSIGNED" ||
+		got.State != "PREPARING" {
+		t.Fatalf("stale terminal record was not safely reprovisioned: %#v", got)
+	}
+	if len(events) != 3 ||
+		!strings.HasPrefix(events[0], "reserve:") ||
+		!strings.HasPrefix(events[1], "jit:") ||
+		!strings.HasPrefix(events[2], "launch:") {
+		t.Fatalf("reopened record did not preserve RESERVE -> JIT -> LAUNCH: %#v", events)
+	}
+}
+
+func TestRecentTerminalRestRecordWaitsForReopenGrace(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	job := restDiscoveredJob(9001, 1901)
+	record, err := newJobRecord(
+		testPolicy(),
+		job,
+		"COMPLETED",
+		time.Date(2026, 10, 30, 0, 0, 0, 0, time.UTC),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record.SchedulerState = "COMPLETED"
+	if err := ledger.Put(record); err != nil {
+		t.Fatal(err)
+	}
+	scaler := testScaler(
+		&fakeVerifier{discoverySafe: true, discovered: []verifiedJob{job}},
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	got, ok, err := ledger.Get(9001)
+	if err != nil || !ok {
+		t.Fatalf("ledger read failed: ok=%v err=%v", ok, err)
+	}
+	if got.ProvisionAttempt != 0 || got.State != "COMPLETED" {
+		t.Fatalf("recent terminal record reopened before grace: %#v", got)
+	}
+	if len(events) != 0 {
+		t.Fatalf("recent terminal record reached root before grace: %#v", events)
+	}
+}
+
+func TestQueuedRestEvidenceRejectsConflictingDurableIdentity(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	record, err := newJobRecord(
+		testPolicy(),
+		restDiscoveredJob(9001, 1900),
+		"COMPLETED",
+		time.Date(2026, 10, 29, 23, 58, 0, 0, time.UTC),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := ledger.Put(record); err != nil {
+		t.Fatal(err)
+	}
+	scaler := testScaler(
+		&fakeVerifier{
+			discoverySafe: true,
+			discovered:    []verifiedJob{restDiscoveredJob(9001, 1901)},
+		},
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+	err = scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	})
+	if err == nil || !strings.Contains(err.Error(), "conflicts with durable identity") {
+		t.Fatalf("conflicting durable identity did not fail closed: %v", err)
+	}
+	if len(events) != 0 {
+		t.Fatalf("conflicting durable identity reached root: %#v", events)
 	}
 }
 
