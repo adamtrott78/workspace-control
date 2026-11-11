@@ -188,8 +188,8 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github+workspace-shell",
       "inputs": [
-        "workspace-control PR #602 exact head c7c45f11def0907bffb56fc4a3d56340df8bc8c1",
-        "Workspace Control Validation 43057114914 / #2537 SUCCESS",
+        "workspace-control PR #602 exact head 4196934cad14ddf3238c4637da4229b8d5e0fc60",
+        "Workspace Control Validation 43059721180 / #2542 SUCCESS",
         "queued exact-head validation run #389 / 42881495845 / job 130058639814",
         "v3 production controller class workspace-control-control-small-v1",
         "read-only v3 ledger fingerprint scheduler-130058639814.json"
@@ -230,9 +230,21 @@
             "Hosted Workspace Control Validation run 43057114914 / #2537 completed SUCCESS on the exact corrected head; disposable validation PR #603 was closed without merge.",
             "Fresh automated authority-sensitive review request comment 6801138943 binds tree fcb49dd6607524fa0846d621eeddc25119a8b888 and request digest 272b1f1dfde0d64fed4199c3c43266e51f2adc301efbc5103bcc01a29e805c1d."
           ]
+        },
+        {
+          "check": "BF-2 authority-key collision correction and fresh review request",
+          "result": "PASS",
+          "evidence": [
+            "Independent review disposition comment 6801403821 returned BLOCKING_FINDINGS against corrected request 6801138943; automated consumption receipt 6801419184 bound and consumed that disposition.",
+            "Corrected PR #602 exact head 4196934cad14ddf3238c4637da4229b8d5e0fc60 indexes durable RunnerRequestID authority keys and refuses any colliding new REST admission unless the full REST provenance tuple matches.",
+            "Corrected controller.go blob 5823ffbf922ebc367c973a921f28963ea726ffa1 and controller_test.go blob 8404791b6ffdde9a63fb70978b3403e350478bf6.",
+            "Regression coverage includes positive and zero durable GitHubJobID drift with the same RunnerRequestID and proves unchanged durable state with zero root/JIT events.",
+            "Hosted Workspace Control Validation run 43059721180 / #2542 completed SUCCESS on exact corrected head; disposable validation PR #603 was closed without merge.",
+            "Fresh automated authority-sensitive review request comment 6801484654 binds tree 19a198b8a873d96c64539aff2ff2b46e06220b58 and request digest 649c5b267f5dd2f7be995b96410c8ce3793d9c4d92e8f7168c8d050617c09ba0."
+          ]
         }
       ],
-      "resume_condition": "Fresh independent review of PR #602 corrected request comment 6801138943 returns NO_BLOCKING_FINDING and is consumed. That review remains code/state-machine only; live deployment still requires a separately bounded and independently reviewed refresh/revival transaction."
+      "resume_condition": "Fresh independent review of PR #602 corrected request comment 6801484654 returns NO_BLOCKING_FINDING and is consumed. That review remains code/state-machine only; live deployment still requires a separately bounded and independently reviewed refresh/revival transaction."
     }
   ],
   "checkpoints": [
@@ -276,14 +288,18 @@
     {
       "id": "workspace-control-v3-rest-terminal-revival-review-candidate-20261111",
       "kind": "git_commit",
-      "identity": "workspace-control#602@c7c45f11def0907bffb56fc4a3d56340df8bc8c1",
+      "identity": "workspace-control#602@4196934cad14ddf3238c4637da4229b8d5e0fc60",
       "required_for_resume": true,
       "evidence": [
         "Base fcb88281ae485bb554825fca3972d044f3b4f665 is the accepted PR #572 v3 lineage.",
         "Initial review request 6800469672 received BLOCKING_FINDINGS in comment 6800923096; automated consumption receipt 6800928540.",
         "BF-1 provenance binding correction is exact head c7c45f11def0907bffb56fc4a3d56340df8bc8c1 with controller blobs 54d01d29ad23158f1fa4f6fd3d0188deb1163e89 / 88eb88af3a0dedfe66d69024dcd6c7bb5026a8d5.",
         "Workspace Control Validation 43057114914 / #2537 SUCCESS on the corrected exact head.",
-        "Fresh review request comment 6801138943; digest 272b1f1dfde0d64fed4199c3c43266e51f2adc301efbc5103bcc01a29e805c1d."
+        "Fresh review request comment 6801138943; digest 272b1f1dfde0d64fed4199c3c43266e51f2adc301efbc5103bcc01a29e805c1d.",
+        "BF-2 authority-key collision finding 6801403821 was consumed by automated receipt 6801419184.",
+        "BF-2 correction is exact head 4196934cad14ddf3238c4637da4229b8d5e0fc60 with controller blobs 5823ffbf922ebc367c973a921f28963ea726ffa1 / 8404791b6ffdde9a63fb70978b3403e350478bf6.",
+        "Workspace Control Validation 43059721180 / #2542 SUCCESS on the BF-2 corrected exact head.",
+        "Fresh review request comment 6801484654; digest 649c5b267f5dd2f7be995b96410c8ce3793d9c4d92e8f7168c8d050617c09ba0."
       ]
     }
   ],
@@ -405,18 +421,18 @@
   ],
   "blockers": [
     "Exact-head workspace-control candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 cannot validate while v3 job 130058639814 is suppressed by the false terminal ledger record.",
-    "PR #602 corrected exact head c7c45f11def0907bffb56fc4a3d56340df8bc8c1 is validated and now waits for fresh independent authority-sensitive code review via request comment 6801138943.",
+    "PR #602 corrected exact head 4196934cad14ddf3238c4637da4229b8d5e0fc60 is validated and now waits for fresh independent authority-sensitive code review via request comment 6801484654.",
     "Even after code review acceptance, no live v3 controller deployment or ledger revival is authorized until a separate source-bound live refresh transaction is designed, validated, and independently reviewed.",
     "PADataset Stage 03 remains blocked until workspace-control exact-head validation completes and the parent runtime refresh can safely bind Workspace Shell to PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38."
   ],
   "remaining_work": [
-    "Obtain and consume independent PR #602 code/state-machine review.",
+    "Obtain and consume independent PR #602 code/state-machine review for corrected request 6801484654.",
     "Prepare and independently review a bounded live v3 production-controller refresh/revival transaction; do not touch retired v2 workspace-control controller generation.",
     "Repair/revive only the exact #389 REST terminal record under reviewed semantics and allow run #389 to validate candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030.",
     "After exact-head validation passes, refresh Workspace Shell authority/runtime to workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030 and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.",
     "Verify both live durable task gates, then resume MTH602 Stage 03 deterministic tests and architecture-C evaluation."
   ],
-  "next_safe_action": "Use PR #602 automated review request comment 6800469672 for a fresh independent authority-sensitive code/state-machine review of exact head 22727738d1dae4a0dd2962386efa5a30d99bce53. Do not merge, deploy, restart, reconcile, edit the v3 ledger, or touch the retired v2 controller. If NO_BLOCKING_FINDING is consumed, the next task is to design and separately review a bounded live v3 controller refresh plus exact #389 terminal-record revival.",
+  "next_safe_action": "Use PR #602 automated review request comment 6801484654 for a fresh independent authority-sensitive code/state-machine review of exact head 4196934cad14ddf3238c4637da4229b8d5e0fc60. Do not merge, deploy, restart, reconcile, edit the v3 ledger, or touch the retired v2 controller. If NO_BLOCKING_FINDING is consumed, the next task is to design and separately review a bounded live v3 controller refresh plus exact #389 terminal-record revival.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385."
