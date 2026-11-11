@@ -6,8 +6,8 @@
   "parent_design_task": "workspace-semantic-execution-migration-v1",
   "parent_design_freeze_head": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
   "rules": {
-    "default_execution": "SEQUENTIAL",
-    "promotion": "Required predecessor stages must be VALIDATED unless an explicit dependency says otherwise.",
+    "default_execution": "DEPENDENCY_GRAPH",
+    "promotion": "A stage may start when its explicit dependencies are VALIDATED. Deferred measurement stages may remain SUSPENDED when an explicit operator-authorized amendment preserves them as mandatory final promotion dependencies.",
     "exact_head_validation": true,
     "durable_evidence_required": true,
     "architecture_change_behavior": "BLOCK_AND_REOPEN_OWNING_DESIGN; do not silently alter frozen UX contracts.",
@@ -245,14 +245,14 @@
         "1/2/4 worker and discard/restore measurements recorded",
         "no fake-worker result misrepresented as real ChatGPT RAM"
       ],
-      "exit": "Mechanical performance is measured; any failing budget is corrected or explicitly escalated before usability/promotion."
+      "exit": "Mechanical performance is measured and every frozen UX-09 budget is evaluated before production readiness/promotion; this stage does not block intermediate usability or calibration work."
     },
     {
       "id": "impl_10_usability_trial_execution",
       "order": 10,
       "title": "Execute UX-11 human-in-loop simulator trials",
       "dependencies": [
-        "impl_09_performance_benchmark_execution"
+        "impl_08_packaging_install_update_rollback"
       ],
       "objective": "Run the physical operator trials against fake workers, including 5/20-action batches, recovery, interruptions, and hotkey collision.",
       "deliverables": [
@@ -324,7 +324,8 @@
       "order": 13,
       "title": "Integrated implementation review and promotion decision",
       "dependencies": [
-        "impl_12_real_account_calibration"
+        "impl_12_real_account_calibration",
+        "impl_09_performance_benchmark_execution"
       ],
       "objective": "Review code, test evidence, performance, usability, security, packaging, rollback, and real-account calibration before any production promotion.",
       "deliverables": [

@@ -24,24 +24,24 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: e244efad098df6559dae5874b5783782a305cf32
+- Remote checkpoint: 053816f7c9f42aed09af08997fdebd045c92d7cd
 - Remote verified: true
 
 ## Next safe action
 
-After this task/handoff checkpoint itself passes both hosted validators, prepare one fresh authoritative Stage-09 target attempt from the resulting exact durable PR head. Before triggering, confirm the interactive Windows runner labeled workspace-operator-target is listening, close pre-existing Firefox/Chrome/WorkspaceOperator processes, keep the workstation on AC power, keep Chrome Memory Saver disabled, and avoid sustained CPU-heavy work. Trigger stage09-target exactly once, then FREEZE THE PR BRANCH until target-performance reaches a terminal state. If it fails, inspect STAGE09_FIREFOX_REPLICATE_COLLECTOR_FAILURE and STAGE09_FIREFOX_REPLICATE_INCOMPLETE first; the new fail-fast boundary should expose the inner Firefox blocker immediately instead of allowing hours of later measurements. If it succeeds, retrieve and validate stage09-target-evidence.json and promote Stage 09 only if every frozen UX-09 budget passes. Do not begin impl_10, impl_11, impl_12, or impl_13 until Stage 09 is durably validated and promoted.
+Begin impl_10 usability trials against the validated packaged fake-worker baseline. Do not run another multi-hour Stage-09 target matrix during routine implementation/debug work. Continue through impl_10, conditional impl_11, and impl_12 under the existing authority/security gates. Before impl_13 production readiness, resume impl_09 from the then-current validated implementation head, preserve complete target evidence, and require every frozen UX-09 budget to pass.
 
 ## Remaining work
 
-- impl_09_performance_benchmark_execution: Execute UX-09 performance/resource benchmark
 - impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials
 - impl_11_webview2_comparison_spike: Conditional WebView2 custom-shell comparison
 - impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration
+- impl_09_performance_benchmark_execution: Deferred authoritative UX-09 performance/resource benchmark before production readiness
 - impl_13_production_readiness_review: Integrated implementation review and promotion decision
 
 ## Blockers / gates
 
-- Stage 09 remains IN_PROGRESS and Stage 10+ remain blocked. Operator Bridge run #185 / target-performance job 130715185761 on source head 819011a0e52dc6816eb5bf918e8ff63fd10fd936 is INVALID FOR ACCEPTANCE: it failed before stage09-target-evidence.json was produced. The job passed target profile verification, adapter preflight, and the early unrelated-CPU validity gate, then completed deep target resource measurement before failing with 'Full Firefox replicate is missing exact latency evidence.' The exact inner Firefox collector cause is not recoverable from #185 because child stdout/stderr were redirected and replicate temporaries were cleaned up; therefore do not claim a specific COLLECTOR_FAILURE root cause. The demonstrated harness defect was that incomplete or collector-failure TARGET_FIREFOX_PARTIAL evidence could pass the replicate boundary and fail only at final aggregation. Exact repair head e244efad098df6559dae5874b5783782a305cf32 fixes that propagation/shape gate and passed Workspace Control #2557 plus Operator Bridge #186. A fresh target run is required to expose the underlying inner Firefox blocker or produce valid complete target evidence.
+- No Stage-10 development blocker. Stage 09 is intentionally SUSPENDED as an intermediate gate after repeated multi-hour target runs. It remains mandatory before Stage 13 can pass. Run #185 physically executed deep Firefox/Chrome resource measurement, but the harness failed later on missing exact Firefox latency evidence before writing stage09-target-evidence.json. The RAM/Working Set summaries were held in temporary files/in-memory structures and were not printed to GitHub logs, so those values are not recoverable as authoritative evidence.
 
 ## Fresh-chat initialization
 

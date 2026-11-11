@@ -617,12 +617,14 @@
       "implementation_head": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175"
     },
     "impl_09_performance_benchmark_execution": {
-      "status": "IN_PROGRESS",
-      "checkpoint": "3fd98235678a7d6f0f728d82b4611eed8697152e",
+      "status": "SUSPENDED",
+      "checkpoint": "e244efad098df6559dae5874b5783782a305cf32",
       "validations": [
         "Workspace Control Validation #2459 / run 42814425643 SUCCESS on exact head 3fd98235678a7d6f0f728d82b4611eed8697152e",
         "Operator Bridge Validation #85 / run 42814425603 SUCCESS on exact head 3fd98235678a7d6f0f728d82b4611eed8697152e",
-        "Triggered Operator Bridge run 42815030650 validation SUCCESS; target-performance job 129827357688 FAIL at Firefox adapter identity preflight"
+        "Triggered Operator Bridge run 42815030650 validation SUCCESS; target-performance job 129827357688 FAIL at Firefox adapter identity preflight",
+        "Workspace Control Validation #2557 and Operator Bridge Validation #186 SUCCESS on fail-fast repair head e244efad098df6559dae5874b5783782a305cf32",
+        "Workspace Control Validation #2558 and Operator Bridge Validation #187 SUCCESS on durable run-185 diagnosis head 053816f7c9f42aed09af08997fdebd045c92d7cd"
       ],
       "implementation": [
         "operator-bridge/performance/**",
@@ -647,7 +649,7 @@
           "interpretation": "Regression and executable target-plan signal only; not UX-09 target acceptance."
         },
         "target_contract": {
-          "state": "PREFLIGHT_BLOCKED",
+          "state": "DEFERRED_FINAL_PROMOTION_GATE",
           "canonical_runner": "operator-bridge/tools/run-stage09-target-matrix.ps1",
           "self_hosted_workflow_job": "target-performance",
           "required_runner_labels": [
@@ -679,20 +681,20 @@
           "chrome_memory_saver_disabled_and_recorded": true,
           "exact_head_native_host_binding_with_restore": true,
           "last_target_run": {
-            "workflow_run_id": 42815030650,
-            "target_job_id": 129827357688,
-            "source_sha": "3fd98235678a7d6f0f728d82b4611eed8697152e",
+            "workflow_run_id": 43075229854,
+            "target_job_id": 130715185761,
+            "source_sha": "819011a0e52dc6816eb5bf918e8ff63fd10fd936",
             "exact_head_checkout": "PASS",
-            "dotnet_setup": "PASS",
-            "python_setup": "PASS",
             "interactive_preconditions": "PASS",
             "target_profile_verification": "PASS",
-            "adapter_preflight": "FAIL",
-            "firefox_cleanup": "WARNING_REMAINING_PROCESS",
+            "adapter_preflight": "PASS",
+            "early_unrelated_cpu_validity": "PASS",
+            "deep_resource_measurement": "EXECUTED_BUT_NOT_PRESERVED_AS_FINAL_EVIDENCE",
+            "terminal_failure": "Full Firefox replicate is missing exact latency evidence.",
             "target_evidence_file": "NOT_PRODUCED",
-            "full_measurement_started": false
+            "ram_summary_recoverable_from_github_logs": false
           },
-          "next_diagnostic": "Persist bounded content-free PreflightOnly logs/result/process-lifecycle metadata before cleanup and reproduce isolated adapter handshake against the verified WorkspaceWorkers profile; do not rerun full matrix until preflight passes."
+          "next_diagnostic": "Deferred until after impl_12. Before impl_13, run the authoritative target matrix from the then-current validated implementation head. The fail-fast replicate boundary must stop immediately on collector/incomplete evidence, and the final run must preserve stage09-target-evidence.json before production promotion."
         },
         "cold_start": {
           "production_launch_path": "VALIDATED",
@@ -710,8 +712,24 @@
           "real_chatgpt_account": false
         }
       },
-      "claim": "Stage-09 infrastructure, signed fake-worker adapter, self-hosted execution path, and target-machine bootstrap/preconditions are validated. Real target execution now reaches the Firefox adapter identity preflight and fails there before measurement; UX-09 acceptance remains incomplete and Stage 10 remains blocked.",
-      "blocker": "Firefox performance adapter identity preflight fails on the real target workstation after profile verification. Root cause is not yet isolated because current temporary preflight diagnostics are deleted during collector cleanup."
+      "claim": "Stage-09 infrastructure and fail-fast target harness are validated, but authoritative UX-09 acceptance is intentionally deferred. Stage 09 is SUSPENDED and does not block Stages 10-12; all frozen UX-09 budgets remain mandatory before Stage 13 production readiness.",
+      "blocker": "No intermediate development blocker. Production promotion remains blocked until the authoritative long-form UX-09 benchmark produces valid complete target evidence and every frozen budget passes."
+    },
+    "impl_10_usability_trial_execution": {
+      "status": "IN_PROGRESS",
+      "checkpoint": "053816f7c9f42aed09af08997fdebd045c92d7cd",
+      "validations": [
+        "Stage-08 packaging/install/update/rollback remains validated.",
+        "Explicit operator sequencing amendment authorizes usability work before the deferred long-form UX-09 benchmark while preserving UX-09 as a final production gate."
+      ],
+      "implementation": [],
+      "evidence": {
+        "real_chatgpt_account": false,
+        "fake_worker_only": true,
+        "stage09_required_before_production_readiness": true
+      },
+      "claim": "Stage 10 human-in-loop simulator usability trials are the active implementation stage.",
+      "blocker": "NONE"
     }
   }
 }
