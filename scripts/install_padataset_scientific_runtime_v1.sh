@@ -124,16 +124,14 @@ PY
   sudo install -o root -g root -m 0444 "$SOURCE_META" "$SOURCE_OBJECT/source.json"
 
   # Reject relocations that still point into mutable user-home content.
-  if sudo find "$RUNTIME_PATH" -type l -print0 | sudo python3 - "$RUNTIME_PATH" <<'PY'
-import os, pathlib, sys
+  if sudo python3 - "$RUNTIME_PATH" <<'PY'
+import pathlib, sys
 root=pathlib.Path(sys.argv[1]).resolve()
 allowed={pathlib.Path("/usr/bin/python3"),pathlib.Path("/usr/bin/python3.12")}
 bad=[]
-data=sys.stdin.buffer.read().split(b"\0")
-for raw in data:
-    if not raw:
+for p in root.rglob("*"):
+    if not p.is_symlink():
         continue
-    p=pathlib.Path(os.fsdecode(raw))
     target=p.resolve(strict=False)
     try:
         target.relative_to(root)
@@ -287,8 +285,8 @@ fi
 
 echo "=== FINAL VERIFY / EMIT BINDINGS ==="
 sudo test -x "$RUNTIME_PATH/bin/python" || fail "promoted runtime Python unavailable"
-sudo test ! -w "$RUNTIME_PATH" || fail "promoted runtime root is writable"
-sudo test ! -w "$DATA_DEST" || fail "promoted scientific data root is writable"
+[[ -z "$(sudo find "$RUNTIME_PATH" -xdev -perm /222 -print -quit)" ]] || fail "promoted runtime contains write bits"
+[[ -z "$(sudo find "$DATA_DEST" -xdev -perm /222 -print -quit)" ]] || fail "promoted scientific data contains write bits"
 sudo test -f "$RUNTIME_RECEIPT" || fail "runtime receipt missing"
 
 sudo python3 - "$RUNTIME_RECEIPT" "$DATA_DEST/promotion.json" <<'PY'
