@@ -228,6 +228,7 @@ function New-ProcessOwnershipTracker {
     Name = $Name
     SessionId = (Get-Process -Id $PID).SessionId
     KnownPids = $known
+    LastNamedPidSignature = ""
   }
 }
 
@@ -256,14 +257,39 @@ function Update-ProcessOwnershipTracker {
     }
   }
 
-  foreach ($p in @(Get-Process -Name $Tracker.Name -ErrorAction SilentlyContinue)) {
-    try {
-      if ($p.SessionId -eq $Tracker.SessionId -and -not $Tracker.KnownPids.Contains($p.Id)) {
-        throw "Target measurement rejected: unowned $($Tracker.Name) process appeared during measurement."
-      }
-    } catch [System.Management.Automation.RuntimeException] {
-      throw
-    } catch {
+  $namedRows = @(
+    $rows |
+      Where-Object {
+        try {
+          $proc = Get-Process -Id ([int]$_.ProcessId) -ErrorAction Stop
+          $proc.ProcessName -eq $Tracker.Name -and $proc.SessionId -eq $Tracker.SessionId
+        } catch {
+          $false
+        }
+      } |
+      Sort-Object ProcessId
+  )
+  $signature = (($namedRows | ForEach-Object { "$($_.ProcessId):$($_.ParentProcessId)" }) -join ",")
+  if ($signature -ne $Tracker.LastNamedPidSignature) {
+    $event = [ordered]@{
+      process_name = $Tracker.Name
+      named_processes = @($namedRows | ForEach-Object {
+        [ordered]@{
+          pid = [int]$_.ProcessId
+          parent_pid = [int]$_.ParentProcessId
+          historically_owned = $Tracker.KnownPids.Contains([int]$_.ProcessId)
+        }
+      })
+      historically_owned_pids = @($Tracker.KnownPids | Sort-Object)
+    }
+    Write-Host ("STAGE09_PROCESS_TRACKER_EVENT=" + ($event | ConvertTo-Json -Depth 5 -Compress))
+    $Tracker.LastNamedPidSignature = $signature
+  }
+
+  foreach ($row in $namedRows) {
+    $pidValue = [int]$row.ProcessId
+    if (-not $Tracker.KnownPids.Contains($pidValue)) {
+      throw "Target measurement rejected: unowned $($Tracker.Name) process appeared during measurement."
     }
   }
 }
@@ -415,6 +441,19 @@ function Measure-ProcessGroup {
     $session = (Get-Process -Id $PID).SessionId
     $processes = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $session })
     if ($processes.Count -eq 0) {
+      if ($null -ne $OwnershipTracker) {
+        $ownedAlive = @(
+          $OwnershipTracker.KnownPids |
+            Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue } |
+            Sort-Object
+        )
+        Write-Host ("STAGE09_PROCESS_TRACKER_ZERO=" + ([ordered]@{
+          process_name = $ProcessName
+          scenario_id = $ScenarioId
+          historically_owned_pids = @($OwnershipTracker.KnownPids | Sort-Object)
+          historically_owned_alive_pids = @($ownedAlive)
+        } | ConvertTo-Json -Depth 4 -Compress))
+      }
       throw "No $ProcessName process available for $ScenarioId."
     }
 
