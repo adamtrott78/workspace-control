@@ -46,8 +46,6 @@ internal static class UsabilityHarness
         }
 
         ApplicationConfiguration.Initialize();
-        SynchronizationContext.SetSynchronizationContext(
-            new WindowsFormsSynchronizationContext());
 
         var readyPath = GetArgument(args, "--ready")
             ?? resultPath + ".ready.json";
@@ -337,6 +335,9 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         _world = world;
         _submissions = submissions;
         _browser = browser;
+
+        SynchronizationContext.SetSynchronizationContext(
+            new WindowsFormsSynchronizationContext());
 
         _hotkeyWindow = new HotkeyMessageWindow();
         var hotkey = new WindowsHotkeyRegistrar(_hotkeyWindow.Handle);

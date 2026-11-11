@@ -730,7 +730,9 @@
         "UT-01 attempt 2 on run #198 still showed no clipboard/focus effect after [STAThread] entry-point repair. Screenshot showed three fake-worker tabs although seed creates only slot-1 and slot-3, demonstrating browser dispatch progressed far enough to create slot-2 before clipboard/focus completion.",
         "Root cause refined: Stage-10 harness lacked an explicit WindowsFormsSynchronizationContext. Async dispatch awaits browser IPC before WinFormsClipboardWriter; without a UI synchronization context the continuation can resume on a non-STA thread and fail before clipboard/focus. Harness repair preserves the real WinFormsClipboardWriter and adds fail-fast structured dispatch diagnostics.",
         "UT-01 attempt 3 / Operator Bridge run #201 was INVALID before human-trial readiness: Firefox launched, but the harness never emitted STAGE10_USABILITY_READY and no Stage-10 result artifact was produced. User Ctrl+B opened Firefox Bookmarks, confirming ordinary browser handling after the bridge harness had failed to become ready.",
-        "Repair: integration executable now uses a synchronous [STAThread] Main, all early Stage-10 startup failures are converted into structured evidence, and STAGE10_USABILITY_READY is written only after UsabilityApplicationContext construction and explicit hotkey-registration/bridge-enabled confirmation."
+        "Repair: integration executable now uses a synchronous [STAThread] Main, all early Stage-10 startup failures are converted into structured evidence, and STAGE10_USABILITY_READY is written only after UsabilityApplicationContext construction and explicit hotkey-registration/bridge-enabled confirmation.",
+        "UT-01 attempt 4 / Operator Bridge run #203 failed before READY with no structured result. The harness had installed WindowsFormsSynchronizationContext before synchronously blocking on hub.WaitForConnectionAsync(...).GetAwaiter().GetResult(), while the WinForms message loop had not started.",
+        "Repair moves WindowsFormsSynchronizationContext installation into UsabilityApplicationContext construction, after adapter connection and browser seeding, immediately before the WinForms message loop. READY remains gated on confirmed global hotkey registration."
       ],
       "implementation": [],
       "evidence": {
@@ -804,10 +806,21 @@
           },
           "blocker": "STAGE10_PRE_READY_HARNESS_EXIT",
           "rerun_required": true
+        },
+        "ut01_attempt_4": {
+          "status": "INVALIDATED",
+          "workflow_run_id": 43118642783,
+          "job_id": 130854639357,
+          "source_sha": "a10556a24aa1231f8c70b7453929045394b8e8ce",
+          "ready_marker_emitted": false,
+          "result_artifact_emitted": false,
+          "workflow_failure": "Stage 10 usability harness never reached ready state.",
+          "diagnosed_startup_risk": "WINFORMS_SYNCHRONIZATION_CONTEXT_INSTALLED_BEFORE_BLOCKING_ASYNC_ADAPTER_WAIT",
+          "rerun_required": true
         }
       },
-      "claim": "Stage 10 active. UT-11 PASS. UT-01 attempts remain invalidated by Stage-10 harness startup/threading defects; readiness is now gated on confirmed hotkey registration.",
-      "blocker": "Validate synchronous STA entry point and readiness-after-hotkey-registration repair before rerunning UT-01."
+      "claim": "Stage 10 active. UT-11 PASS. UT-01 attempts remain invalidated by Stage-10 harness startup/threading defects; synchronization context is now installed only after adapter startup and before the UI message loop.",
+      "blocker": "Validate post-adapter WinForms synchronization-context placement and readiness gate before rerunning UT-01."
     }
   }
 }

@@ -30,6 +30,14 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertNotIn("private static async Task<int> Main", integration)
         self.assertIn("WindowsFormsSynchronizationContext", harness)
         self.assertIn("SynchronizationContext.SetSynchronizationContext", harness)
+        self.assertGreater(
+            harness.index("SynchronizationContext.SetSynchronizationContext"),
+            harness.index("public UsabilityApplicationContext("),
+        )
+        self.assertGreater(
+            harness.index("SynchronizationContext.SetSynchronizationContext"),
+            harness.index("hub.WaitForConnectionAsync"),
+        )
         self.assertIn("STAGE10_HOTKEY_REGISTRATION_NOT_CONFIRMED", harness)
         self.assertIn("hotkey_registered = context.HotkeyRegistered", harness)
         self.assertIn("bridge_enabled = context.BridgeEnabled", harness)
