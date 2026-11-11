@@ -31,24 +31,25 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 694a0c828ed4c8e8d02a344eb2451905e171aaca
+- Remote checkpoint: be04a4a4428a3c57233fc1ee598b4311ece96587
 - Remote verified: true
 
 ## Next safe action
 
-Operator-only root gate: install authority f7b8a40f9f50e584974fac92e5eef4773405606b, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, and PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca. After PASS, ChatGPT must verify the live bindings and run the expanded deterministic contract test before scientific GPU training.
+Operator-only root gate: install authority 0c39bad0219d553fcd1ee8780374412ab9efab46, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, PADataset be04a4a4428a3c57233fc1ee598b4311ece96587. Then ChatGPT verifies the live state. Scientific GPU training itself remains a separate operator surface unless a new scientific execution contract is explicitly authorized.
 
 ## Remaining work
 
-- Operator installs authority f7b8a40f9f50e584974fac92e5eef4773405606b, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca.
-- Verify exact live bindings and run the expanded deterministic Stage 03 contract test.
-- Train the frozen PA2 backbone config in the DNNs PyTorch scientific environment.
-- Run Architecture C small-real evaluation and validate result_record.json.
+- Operator installs authority 0c39bad0219d553fcd1ee8780374412ab9efab46, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, and PADataset be04a4a4428a3c57233fc1ee598b4311ece96587.
+- Verify exact live bindings and rerun the 8-test deterministic Stage 03 contract.
+- Operator launches the frozen PA2 backbone in the existing DNNs scientific environment using a clean exact-SHA checkout; historical evidence checkout remains untouched.
+- After backbone completion, inspect exact artifacts, run Architecture C small-real evaluation, and validate result_record.json.
 
 ## Blockers / gates
 
-- Live Workspace Shell remains bound to PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3 until the operator installs validated authority f7b8a40f9f50e584974fac92e5eef4773405606b with PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca.
-- Connected Workspace Shell cannot perform the root-owned snapshot replacement because privileged helper trust is intentionally empty/fail-closed.
+- Live Workspace Shell remains bound to PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca until operator installs validated authority 0c39bad0219d553fcd1ee8780374412ab9efab46 with PADataset be04a4a4428a3c57233fc1ee598b4311ece96587.
+- After that refresh, connected execution still cannot perform the actual scientific GPU training: accepted PADataset gpu-ci uses gpu-single-public-ci-v1 with state_effect_class=CI_VALIDATION_ONLY, and Workspace Shell intentionally lacks the DNNs/PyTorch runtime.
+- A new scientific-training execution contract would expand privileged execution authority and requires a separate explicitly reviewed task; it cannot be inferred from the current research task.
 
 ## Fresh-chat initialization
 
