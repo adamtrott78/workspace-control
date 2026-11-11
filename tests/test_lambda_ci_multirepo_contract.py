@@ -145,7 +145,10 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
             scientific["trusted_workflow"]["path"],
             ".github/workflows/lambda-ci-scientific.yml",
         )
-        self.assertIsNone(scientific["trusted_workflow"]["blob_sha"])
+        self.assertEqual(
+            scientific["trusted_workflow"]["blob_sha"],
+            "555c2bd1f824519281f149017898d4923439d6cc",
+        )
         self.assertEqual(scientific["trigger"]["command"], "/lambda-scientific")
         self.assertEqual(
             scientific["trigger"]["allowed_actor_logins"],
