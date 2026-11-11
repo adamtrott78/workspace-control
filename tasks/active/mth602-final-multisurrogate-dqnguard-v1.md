@@ -24,24 +24,24 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 81ee9bf2a06949ce1e9477befe00f833248d8ea3
+- Remote checkpoint: 694a0c828ed4c8e8d02a344eb2451905e171aaca
 - Remote verified: true
 
 ## Next safe action
 
-After operator installs authority 157aaf72e9e5761c8d7140a96d986e2e742a5a9c, verify PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3 and rerun the deterministic contract test.
+After operator installs authority f7b8a40f9f50e584974fac92e5eef4773405606b, verify PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca and run the expanded deterministic contract test.
 
 ## Remaining work
 
 - Wait for parent operator root refresh.
-- Rerun deterministic Stage 03 test through research-bounded.
-- Prepare known-only backbone with cache_len=16384.
-- Run Architecture C small-real evaluation on sanctioned PyTorch-capable compute and validate result_record.json.
+- Run expanded tests/test_multisurrogate_dqnguard.py through research-bounded.
+- Train manifests/configs/mth602_stage03/archC_backbone_knownonly_unkPA2_c16384_seed0.json.
+- Run Architecture C small-real evaluator and validate Stage 02 result schema.
 
 ## Blockers / gates
 
-- Deterministic-smoke source 81ee9bf2a06949ce1e9477befe00f833248d8ea3 is prepared and bound in validated parent authority 157aaf72e9e5761c8d7140a96d986e2e742a5a9c but is not yet installed live.
-- Real Architecture C execution will require a sanctioned PyTorch-capable scientific compute surface; Workspace Shell remains intentionally bounded.
+- Backbone-ready source 694a0c828ed4c8e8d02a344eb2451905e171aaca is validated in parent authority f7b8a40f9f50e584974fac92e5eef4773405606b but not yet installed live.
+- Scientific GPU execution requires the DNNs PyTorch environment; Workspace Shell will first validate the expanded deterministic contract after the root refresh.
 
 ## Fresh-chat initialization
 
