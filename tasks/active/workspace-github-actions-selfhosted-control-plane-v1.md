@@ -36,25 +36,22 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Hold all scientific GPU execution. Capture one bounded read-only research-engine/gpu controller journal snapshot to classify the exact crash-loop error while implementing controller-reliability-hardening-v1 on branch controller-reliability-hardening-v1. No live restart/reset/reconcile/controller installation is authorized until the implementation batch passes full validation and the activation boundary is reviewed.
+Do not mutate Lambda or the v3 ledger. Use PR #602 automated request comment 6800469672 for fresh independent review of exact head 22727738d1dae4a0dd2962386efa5a30d99bce53. If accepted and consumed, prepare a separate reviewed live v3 refresh/revival transaction; the current review is code/state-machine only.
 
 ## Remaining work
 
-- Complete controller reliability hardening v1 before resuming the local-reasoner GPU bakeoff.
-- Classify the exact current research-engine/gpu crash-loop error from a bounded read-only journal snapshot and freeze it as regression evidence.
-- Implement and validate admission ordering, recovery-state lifecycle, state-file ownership, stable restart certification, and restart-storm containment.
-- Run full workspace-control validation on the complete hardening batch.
-- Perform the owning workflow's final authority-sensitive activation review only once the implementation batch is stable; do not reintroduce iterative independent-review loops during ordinary implementation.
-- Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
-- After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
-- Then remove routine hosted-runner dependence only after private-repository steady-state CI is proven under reviewed boundaries.
-- Leave GitHub organization migration, capacity widening, maintenance-command widening, and workspace-shell-mcp-v1 paused until their own gates.
+- Obtain and consume fresh independent review for PR #602 request 6800469672.
+- Freeze a bounded v3 production refresh/revival design that installs only reviewed v3 controller material and revives only the exact #389 REST terminal record under scheduler proof.
+- Validate and independently review that live transaction before any host mutation.
+- Execute once; prove #389 receives a fresh request/runner identity and proceeds naturally.
+- Record exact-head validation outcome for workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030 and hand control back to workspace-shell-multirepo-research-v1.
 
 ## Blockers / gates
 
-- No live controller/runtime mutation is authorized by review_automation closure or dogfood.
-- The next stage must remain separately reviewed before any automatic reconcile-controller startup, P2 admission widening, hosted-runner dependency removal, maintenance widening, capacity widening, or organization migration.
-- The merged review automation must prove end-to-end request creation and disposition consumption on this state-only closure PR before routine reliance.
+- PR #602 exact-head code review is pending; no v3 deployment is authorized.
+- Run #389 remains queued because its durable v3 ledger is falsely terminal after cross-job JIT capacity was assigned to older run #388.
+- Retired v2 workspace-control controller/scale-set must remain untouched; current production validation is served by workspace-ci-v3-controller@workspace-control-control-small-v1.service.
+- Live v3 deployment/ledger revival requires its own bounded, source-bound, independently reviewed transaction after code acceptance.
 
 ## Fresh-chat initialization
 

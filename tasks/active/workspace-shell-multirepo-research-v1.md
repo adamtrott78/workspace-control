@@ -36,19 +36,22 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Wait only for exact-head candidate-scope validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030. Once validated, deploy the authority state produced by this task checkpoint with workspace-control exec 50395aad06ab719b8207d9e7d3d8270a6bb35030 and PADataset exec 4c095352bfe128e93f794112741efdb7a66b9c38; then verify both live task gates before Stage 03 execution.
+Use PR #602 automated review request comment 6800469672 for a fresh independent authority-sensitive code/state-machine review of exact head 22727738d1dae4a0dd2962386efa5a30d99bce53. Do not merge, deploy, restart, reconcile, edit the v3 ledger, or touch the retired v2 controller. If NO_BLOCKING_FINDING is consumed, the next task is to design and separately review a bounded live v3 controller refresh plus exact #389 terminal-record revival.
 
 ## Remaining work
 
-- Obtain exact-head candidate-scope validation for workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030.
-- Refresh the independent trusted authority and clean PADataset runtime snapshot to 4c095352bfe128e93f794112741efdb7a66b9c38 using the hardened upgrader.
-- Run deterministic Stage 03 tests through research-bounded on the exact clean snapshot.
-- Prepare one known-only four-class backbone target fold and run the reviewed architecture C small-real evaluation.
+- Obtain and consume independent PR #602 code/state-machine review.
+- Prepare and independently review a bounded live v3 production-controller refresh/revival transaction; do not touch retired v2 workspace-control controller generation.
+- Repair/revive only the exact #389 REST terminal record under reviewed semantics and allow run #389 to validate candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030.
+- After exact-head validation passes, refresh Workspace Shell authority/runtime to workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030 and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
+- Verify both live durable task gates, then resume MTH602 Stage 03 deterministic tests and architecture-C evaluation.
 
 ## Blockers / gates
 
-- Workspace Shell live PADataset snapshot remains at 17e1147614f27702e43565089d618182ff71c5af while Stage 03 candidate is 4c095352bfe128e93f794112741efdb7a66b9c38.
-- Hardened workspace-control execution candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 is queued for exact-head Lambda validation; do not deploy it until candidate-scope validation evidence is available.
+- Exact-head workspace-control candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 cannot validate while v3 job 130058639814 is suppressed by the false terminal ledger record.
+- PR #602 exact head 22727738d1dae4a0dd2962386efa5a30d99bce53 is validated but still requires fresh independent authority-sensitive code review via request comment 6800469672.
+- Even after code review acceptance, no live v3 controller deployment or ledger revival is authorized until a separate source-bound live refresh transaction is designed, validated, and independently reviewed.
+- PADataset Stage 03 remains blocked until workspace-control exact-head validation completes and the parent runtime refresh can safely bind Workspace Shell to PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.
 
 ## Fresh-chat initialization
 

@@ -29,10 +29,12 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Do not execute Stage 03 code yet. After the parent runtime refresh binds Workspace Shell PADataset to 4c095352bfe128e93f794112741efdb7a66b9c38, run the deterministic contract tests first.
+Do not execute MTH602 Stage 03 yet. Parent control-plane recovery now owns the gate: obtain PR #602 code review, separately review/deploy the bounded v3 repair, complete exact-head validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030, then refresh Workspace Shell PADataset to 4c095352bfe128e93f794112741efdb7a66b9c38 before deterministic tests.
 
 ## Remaining work
 
+- Wait for parent PR #602 review and separately reviewed live v3 repair to clear run #389.
+- Wait for exact-head validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030.
 - Refresh Workspace Shell to exact PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.
 - Run tests/test_multisurrogate_dqnguard.py through research-bounded on that exact clean snapshot.
 - Prepare one known-only four-class backbone target fold with 16,384 cache lineage and no target-informed checkpoint selection.
@@ -40,7 +42,8 @@ Do not execute Stage 03 code yet. After the parent runtime refresh binds Workspa
 
 ## Blockers / gates
 
-- Live Workspace Shell PADataset runtime remains pinned to 17e1147614f27702e43565089d618182ff71c5af; Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38 must not execute until the parent authority/runtime refresh is validated and completed.
+- Parent workspace-shell-multirepo-research-v1 is blocked on workspace-control v3 REST terminal-record repair: PR #602 code review is pending and run #389 has not yet validated exact workspace-control candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030.
+- Live Workspace Shell PADataset runtime remains behind Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38; no Stage 03 execution is authorized until the parent control-plane gate clears and the runtime refresh is validated.
 
 ## Fresh-chat initialization
 
