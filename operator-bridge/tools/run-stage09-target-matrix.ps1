@@ -684,6 +684,13 @@ function Invoke-FirefoxReplicate {
     $child.Refresh()
   }
 
+  # Start-Process -PassThru can report HasExited before Windows has
+  # finalized the live ExitCode property. Finalize the Process object before
+  # evaluating success, otherwise a transient $null ExitCode compares as
+  # non-zero and falsely rejects a successful Firefox replicate.
+  $child.WaitForExit()
+  $child.Refresh()
+
   if ($child.ExitCode -ne 0) {
     if (Test-Path $stdout) { Get-Content $stdout }
     if (Test-Path $stderr) { Get-Content $stderr }
