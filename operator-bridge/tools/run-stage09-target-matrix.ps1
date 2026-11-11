@@ -755,7 +755,24 @@ function Invoke-FirefoxReplicate {
   $child.WaitForExit()
   $child.Refresh()
 
-  if ($child.ExitCode -ne 0) {
+  $childExitCode = $null
+  $exitCodeDeadline = (Get-Date).AddSeconds(5)
+  while ($null -eq $childExitCode -and (Get-Date) -lt $exitCodeDeadline) {
+    try {
+      $child.Refresh()
+      $childExitCode = $child.ExitCode
+    } catch {
+      $childExitCode = $null
+    }
+    if ($null -eq $childExitCode) {
+      Start-Sleep -Milliseconds 100
+    }
+  }
+  if ($null -eq $childExitCode) {
+    throw "Firefox target replicate $Repetition exit code did not finalize."
+  }
+
+  if ([int]$childExitCode -ne 0) {
     $repEvidenceClass = $null
     $repStatus = $null
     if (Test-Path -LiteralPath $repResult -PathType Leaf) {
@@ -772,7 +789,7 @@ function Invoke-FirefoxReplicate {
     $stderrBytes = if (Test-Path -LiteralPath $stderr -PathType Leaf) { [long](Get-Item -LiteralPath $stderr).Length } else { 0 }
     Write-Host ("STAGE09_FIREFOX_REPLICATE_FAILURE=" + ([ordered]@{
       repetition = $Repetition
-      child_exit_code = [int]$child.ExitCode
+      child_exit_code = [int]$childExitCode
       result_exists = (Test-Path -LiteralPath $repResult -PathType Leaf)
       result_evidence_class = $repEvidenceClass
       result_status = $repStatus
