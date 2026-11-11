@@ -84,7 +84,10 @@ class PADatasetAutonomousScientificExecutionTests(unittest.TestCase):
         route = PAD["routes"]["scientific-single-gpu"]
         self.assertEqual(route["activation_state"], "PLANNED_NOT_BOUND")
         self.assertEqual(route["execution_contract_id"], "scientific-single-gpu-v1")
-        self.assertIsNone(route["trusted_workflow"]["blob_sha"])
+        self.assertEqual(
+            route["trusted_workflow"]["blob_sha"],
+            "555c2bd1f824519281f149017898d4923439d6cc",
+        )
         self.assertEqual(route["trigger"]["command"], "/lambda-scientific")
         self.assertFalse(route["trigger"]["fork_pr_execution_allowed"])
         self.assertEqual(route["bindings"]["runtime_id"], "padataset-dnns-v1")
