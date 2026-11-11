@@ -383,6 +383,31 @@ function Get-TotalCpuPercent {
   }
 }
 
+function Assert-BackgroundCpuQuiet {
+  param(
+    [int]$Seconds = 10,
+    [double]$LimitPercent = $BackgroundCpuRejectPercent
+  )
+
+  $samples = [System.Collections.Generic.List[double]]::new()
+  for ($i = 0; $i -lt $Seconds; $i++) {
+    Start-Sleep -Seconds 1
+    $samples.Add((Get-TotalCpuPercent))
+  }
+
+  $summary = Get-Summary ([double[]]$samples.ToArray())
+  Write-Host ("STAGE09_BACKGROUND_CPU_PREFLIGHT=" + ([ordered]@{
+    sample_seconds = $Seconds
+    mean_total_cpu_percent = [double]$summary.mean
+    p95_total_cpu_percent = [double]$summary.p95
+    limit_percent = $LimitPercent
+  } | ConvertTo-Json -Depth 4 -Compress))
+
+  if ([double]$summary.mean -gt $LimitPercent) {
+    throw ("Target measurement rejected before benchmark: background CPU mean {0:N2}% exceeded {1:N2}%." -f [double]$summary.mean, $LimitPercent)
+  }
+}
+
 function Assert-NamedProcessesOwned {
   param([string]$Name)
   $owned = [System.Collections.Generic.HashSet[int]]::new()
@@ -480,7 +505,7 @@ function Measure-ProcessGroup {
 
   $unrelatedSummary = Get-Summary ([double[]]$unrelated.ToArray())
   if ([double]$unrelatedSummary.mean -gt $BackgroundCpuRejectPercent) {
-    throw "Target measurement rejected: sustained unrelated CPU exceeded 20 percent."
+    throw ("Target measurement rejected for {0} repetition {1}: sustained unrelated CPU mean {2:N2}% exceeded {3:N2}%." -f $ScenarioId, $Repetition, [double]$unrelatedSummary.mean, $BackgroundCpuRejectPercent)
   }
 
   return [ordered]@{
@@ -804,6 +829,8 @@ try {
     Get-Content -LiteralPath $resultPathFull
     return
   }
+
+  Assert-BackgroundCpuQuiet -Seconds 10 -LimitPercent $BackgroundCpuRejectPercent
 
   $chromeFakeWorker = Start-Process -FilePath "python" -ArgumentList @(
     "-m", "http.server", "8766", "--bind", "127.0.0.1", "--directory", ('"' + $fakeWorkerRoot + '"')
