@@ -36,22 +36,15 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Wait for Lambda CI Workspace Control Validation run #437 / 43072034606, job 130702172851, for exact reconciled head f51b4ee201529d8785e920458700affced52ffdf. No additional controller repair is authorized or required unless this new run exposes a controller-specific failure.
+No further V3 controller repair is required. Reconciled workspace-control execution head 6466ff118127af1dfcc2dbf6aa69833fe1d06c04 passed run #438, and state-only authority 3fb385039108074bef7b5d142bb4fc4781a5c9ab passed run #441. Hand off to workspace-shell-multirepo-research-v1 for live runtime refresh; keep PR #604 unmerged and retired V2 untouched.
 
 ## Remaining work
 
-- Observe exact validation outcome for PR #606 reconciliation head f51b4ee201529d8785e920458700affced52ffdf.
-- Freeze a bounded v3 production refresh/revival design that installs only reviewed v3 controller material and revives only the exact #389 REST terminal record under scheduler proof.
-- Validate and independently review that live transaction before any host mutation.
-- Execute once; prove #389 receives a fresh request/runner identity and proceeds naturally.
-- Record exact-head validation outcome for workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030 and hand control back to workspace-shell-multirepo-research-v1.
+- Hand control back to workspace-shell-multirepo-research-v1 for the already-designed live Workspace Shell/PADataset runtime refresh.
 
 ## Blockers / gates
 
-- Controller incident is closed; current gate is normal exact-head validation of PR #606 run #437, presently queued.
-- Run #389 remains queued because its durable v3 ledger is falsely terminal after cross-job JIT capacity was assigned to older run #388.
-- Retired v2 workspace-control controller/scale-set must remain untouched; current production validation is served by workspace-ci-v3-controller@workspace-control-control-small-v1.service.
-- Live v3 deployment/ledger revival requires its own bounded, source-bound, independently reviewed transaction after code acceptance.
+- None.
 
 ## Fresh-chat initialization
 
