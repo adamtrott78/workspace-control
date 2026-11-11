@@ -24,7 +24,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: c6341bbd195a0337d57e8cb4dde8d30b152aa3ff
+- Remote checkpoint: d69c5c3f3af5619c72a0a11c437a8edead4a8022
 - Remote verified: true
 
 ### PADataset
@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator-only one-time bootstrap: from active DNNs, run scripts/install_padataset_scientific_runtime_v1.sh at exact validated workspace-control head 41a0d6ac0c00d81ebb12bbca24e21b838a62370e. Return PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.
+Operator-only one-time bootstrap: from the active DNNs shell, run scripts/install_padataset_scientific_runtime_v1.sh at exact validated workspace-control head d69c5c3f3af5619c72a0a11c437a8edead4a8022. Return the final PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS lines.
 
 ## Remaining work
 
@@ -47,19 +47,5 @@ Operator-only one-time bootstrap: from active DNNs, run scripts/install_padatase
 
 ## Blockers / gates
 
-- One-time operator/root promotion must run from exact validated source head 41a0d6ac0c00d81ebb12bbca24e21b838a62370e while the DNNs Conda environment is active.
+- One-time operator/root promotion must run from exact validated source head d69c5c3f3af5619c72a0a11c437a8edead4a8022 while the DNNs Conda environment is active.
 - No routine scientific experiment can run until the emitted exact runtime/data bindings are committed, validated, activated, and reconciled.
-
-## Fresh-chat initialization
-
-@GitHub
-
-https://github.com/adamtrott78/workspace-control
-
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/padataset-autonomous-scientific-execution-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
