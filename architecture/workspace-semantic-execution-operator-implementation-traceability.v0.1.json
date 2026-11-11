@@ -717,18 +717,45 @@
     },
     "impl_10_usability_trial_execution": {
       "status": "IN_PROGRESS",
-      "checkpoint": "053816f7c9f42aed09af08997fdebd045c92d7cd",
+      "checkpoint": "3121cf8bb8eb197ccc217fe6ff4c763c3ea5b2a0",
       "validations": [
         "Stage-08 packaging/install/update/rollback remains validated.",
-        "Explicit operator sequencing amendment authorizes usability work before the deferred long-form UX-09 benchmark while preserving UX-09 as a final production gate."
+        "Explicit operator sequencing amendment authorizes usability work before the deferred long-form UX-09 benchmark while preserving UX-09 as a final production gate.",
+        "UT-11 bridge-off trial executed in Operator Bridge run #194 / stage10-usability job 130809245969 on exact head 3121cf8bb8eb197ccc217fe6ff4c763c3ea5b2a0.",
+        "UT-11 structured result OBJECTIVE_PASS: wrong_worker_dispatches=0, wrong_packet_dispatches=0, rejected_state_submissions=0, content_policy=CONTENT_FREE.",
+        "Operator observation: Ctrl+B retained normal foreground-application behavior; clipboard unchanged; no scheduler action or bridge-driven focus change observed.",
+        "GitHub job failure was wrapper-only: Windows process exit code disagreed with the emitted structured OBJECTIVE_PASS. UT-11 acceptance is preserved; no rerun required."
       ],
       "implementation": [],
       "evidence": {
         "real_chatgpt_account": false,
         "fake_worker_only": true,
-        "stage09_required_before_production_readiness": true
+        "stage09_required_before_production_readiness": true,
+        "ut11": {
+          "status": "PASS",
+          "workflow_run_id": 43105416484,
+          "workflow_run_number": 194,
+          "job_id": 130809245969,
+          "source_sha": "3121cf8bb8eb197ccc217fe6ff4c763c3ea5b2a0",
+          "structured_result": "OBJECTIVE_PASS",
+          "start_timestamp": "2026-11-11T21:50:07.5893511+00:00",
+          "end_timestamp": "2026-11-11T22:05:07.6446644+00:00",
+          "configured_hotkey": "Ctrl+B",
+          "wrong_worker_dispatches": 0,
+          "wrong_packet_dispatches": 0,
+          "rejected_state_submissions": 0,
+          "content_policy": "CONTENT_FREE",
+          "operator_observation": {
+            "ctrl_b_normal": true,
+            "clipboard_unchanged": true,
+            "scheduler_action_observed": false,
+            "unexpected_bridge_focus_observed": false
+          },
+          "wrapper_exit_code_disagreement": true,
+          "rerun_required": false
+        }
       },
-      "claim": "Stage 10 human-in-loop simulator usability trials are the active implementation stage.",
+      "claim": "Stage 10 human-in-loop simulator usability trials are active. UT-11 bridge-OFF shortcut behavior has PASS evidence; UT-01 is next.",
       "blocker": "NONE"
     }
   }

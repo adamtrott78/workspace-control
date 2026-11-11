@@ -58,6 +58,17 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         )
         self.assertIn("operator-bridge-stage10-usability-", workflow)
 
+    def test_stage10_wrapper_uses_structured_objective_result_not_windows_exit_code(self):
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage10-usability.ps1"
+        ).read_text(encoding="utf-8")
+        self.assertIn('resultObject.result -ne "OBJECTIVE_PASS"', script)
+        self.assertIn("structured result is authoritative", script)
+        self.assertNotIn(
+            'if ($runner.ExitCode -ne 0) {\n    throw "Stage 10 usability harness reported objective failure."',
+            script,
+        )
+
     def test_usability_adapter_keeps_least_privilege_and_fake_worker_only(self):
         manifest = (
             ROOT

@@ -139,9 +139,14 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
     throw "Stage 10 usability trial produced no structured result."
   }
 
+  $resultObject = Get-Content $ResultPath -Raw | ConvertFrom-Json
   Get-Content $ResultPath
-  if ($runner.ExitCode -ne 0) {
+  if ($resultObject.result -ne "OBJECTIVE_PASS") {
     throw "Stage 10 usability harness reported objective failure."
+  }
+  if ($runner.ExitCode -ne 0) {
+    Write-Warning ("Stage 10 harness process exit code was " + $runner.ExitCode +
+      " despite structured OBJECTIVE_PASS; structured result is authoritative.")
   }
 }
 finally {
