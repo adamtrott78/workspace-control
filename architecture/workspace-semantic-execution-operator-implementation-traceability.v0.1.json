@@ -728,7 +728,9 @@
         "UT-01 first interactive attempt on Operator Bridge run #196 demonstrated no Ctrl+B clipboard effect. Operator verified clipboard history remained unchanged; no paste/Enter was performed.",
         "Root cause isolated to Stage-10 integration harness entry point missing [STAThread], while production helper is [STAThread] and WinFormsClipboardWriter requires STA. First UT-01 attempt is INVALIDATED; rerun required after repair validation.",
         "UT-01 attempt 2 on run #198 still showed no clipboard/focus effect after [STAThread] entry-point repair. Screenshot showed three fake-worker tabs although seed creates only slot-1 and slot-3, demonstrating browser dispatch progressed far enough to create slot-2 before clipboard/focus completion.",
-        "Root cause refined: Stage-10 harness lacked an explicit WindowsFormsSynchronizationContext. Async dispatch awaits browser IPC before WinFormsClipboardWriter; without a UI synchronization context the continuation can resume on a non-STA thread and fail before clipboard/focus. Harness repair preserves the real WinFormsClipboardWriter and adds fail-fast structured dispatch diagnostics."
+        "Root cause refined: Stage-10 harness lacked an explicit WindowsFormsSynchronizationContext. Async dispatch awaits browser IPC before WinFormsClipboardWriter; without a UI synchronization context the continuation can resume on a non-STA thread and fail before clipboard/focus. Harness repair preserves the real WinFormsClipboardWriter and adds fail-fast structured dispatch diagnostics.",
+        "UT-01 attempt 3 / Operator Bridge run #201 was INVALID before human-trial readiness: Firefox launched, but the harness never emitted STAGE10_USABILITY_READY and no Stage-10 result artifact was produced. User Ctrl+B opened Firefox Bookmarks, confirming ordinary browser handling after the bridge harness had failed to become ready.",
+        "Repair: integration executable now uses a synchronous [STAThread] Main, all early Stage-10 startup failures are converted into structured evidence, and STAGE10_USABILITY_READY is written only after UsabilityApplicationContext construction and explicit hotkey-registration/bridge-enabled confirmation."
       ],
       "implementation": [],
       "evidence": {
@@ -787,10 +789,25 @@
           "demonstrated_progress": "BROWSER_DISPATCH_PROGRESS_INFERRED_FROM_EXTRA_SLOT2_TAB",
           "refined_blocker": "STAGE10_ASYNC_CONTINUATION_NOT_BOUND_TO_WINFORMS_SYNCHRONIZATION_CONTEXT",
           "rerun_required": true
+        },
+        "ut01_attempt_3": {
+          "status": "INVALIDATED",
+          "workflow_run_id": 43116636497,
+          "job_id": 130847896498,
+          "source_sha": "2c75c613d056b68aaf800da9d5659656142e27ec",
+          "workflow_failure": "Stage 10 usability harness never reached ready state.",
+          "ready_marker_emitted": false,
+          "result_artifact_emitted": false,
+          "operator_observation": {
+            "firefox_received_ctrl_b_as_bookmarks": true,
+            "clipboard_changed": false
+          },
+          "blocker": "STAGE10_PRE_READY_HARNESS_EXIT",
+          "rerun_required": true
         }
       },
-      "claim": "Stage 10 active. UT-11 PASS. UT-01 attempts 1-2 invalidated by Stage-10 harness threading defects; explicit WinForms synchronization-context repair is in progress.",
-      "blocker": "Stage-10 harness must preserve STA across async browser IPC continuations before UT-01 can be accepted."
+      "claim": "Stage 10 active. UT-11 PASS. UT-01 attempts remain invalidated by Stage-10 harness startup/threading defects; readiness is now gated on confirmed hotkey registration.",
+      "blocker": "Validate synchronous STA entry point and readiness-after-hotkey-registration repair before rerunning UT-01."
     }
   }
 }

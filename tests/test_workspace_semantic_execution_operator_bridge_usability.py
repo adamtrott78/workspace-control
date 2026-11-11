@@ -25,8 +25,19 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertNotIn("UsabilityHarness", production)
         self.assertIn("--usability-trial", integration)
         self.assertIn("[STAThread]", integration)
+        self.assertIn("private static int Main(string[] args)", integration)
+        self.assertIn("RunAsync(args).GetAwaiter().GetResult()", integration)
+        self.assertNotIn("private static async Task<int> Main", integration)
         self.assertIn("WindowsFormsSynchronizationContext", harness)
         self.assertIn("SynchronizationContext.SetSynchronizationContext", harness)
+        self.assertIn("STAGE10_HOTKEY_REGISTRATION_NOT_CONFIRMED", harness)
+        self.assertIn("hotkey_registered = context.HotkeyRegistered", harness)
+        self.assertIn("bridge_enabled = context.BridgeEnabled", harness)
+        self.assertLess(
+            harness.index("using var context = new UsabilityApplicationContext"),
+            harness.index('evidence_class = "STAGE10_USABILITY_READY"'),
+        )
+        self.assertIn("EARLY_STARTUP_", harness)
         self.assertIn("WinFormsClipboardWriter", harness)
         self.assertIn("clipboard_failed_dispatches", harness)
         self.assertIn("last_dispatch_outcome", harness)

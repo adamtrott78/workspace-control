@@ -16,14 +16,39 @@ internal static class UsabilityHarness
 
     public static int Run(string[] args)
     {
+        var trialId = GetArgument(args, "--usability-trial")?.ToUpperInvariant()
+            ?? "UNKNOWN";
+        var resultPath = GetArgument(args, "--result")
+            ?? Path.Combine(Environment.CurrentDirectory, $"stage10-{trialId.ToLowerInvariant()}-result.json");
+
+        try
+        {
+            return RunCore(args, trialId, resultPath);
+        }
+        catch (Exception exception)
+        {
+            WriteSetupFailure(
+                resultPath,
+                trialId,
+                "EARLY_STARTUP_" + exception.GetType().Name);
+            return 1;
+        }
+    }
+
+    private static int RunCore(
+        string[] args,
+        string trialId,
+        string resultPath)
+    {
+        if (trialId == "UNKNOWN")
+        {
+            throw new ArgumentException("--usability-trial is required.");
+        }
+
         ApplicationConfiguration.Initialize();
         SynchronizationContext.SetSynchronizationContext(
             new WindowsFormsSynchronizationContext());
 
-        var trialId = GetArgument(args, "--usability-trial")?.ToUpperInvariant()
-            ?? throw new ArgumentException("--usability-trial is required.");
-        var resultPath = GetArgument(args, "--result")
-            ?? Path.Combine(Environment.CurrentDirectory, $"stage10-{trialId.ToLowerInvariant()}-result.json");
         var readyPath = GetArgument(args, "--ready")
             ?? resultPath + ".ready.json";
         var durationSeconds = int.TryParse(GetArgument(args, "--duration-seconds"), out var parsedDuration)
@@ -85,6 +110,23 @@ internal static class UsabilityHarness
             var browser = new IpcBrowserPort(hub);
             SeedBrowser(browser, trialId);
 
+            using var context = new UsabilityApplicationContext(
+                trialId,
+                resultPath,
+                durationSeconds,
+                world,
+                submissions,
+                bridgeState,
+                browser,
+                diagnostics);
+
+            if (trialId != "UT-11" &&
+                (!context.HotkeyRegistered || !context.BridgeEnabled))
+            {
+                throw new InvalidOperationException(
+                    "STAGE10_HOTKEY_REGISTRATION_NOT_CONFIRMED");
+            }
+
             Directory.CreateDirectory(
                 Path.GetDirectoryName(Path.GetFullPath(readyPath))!);
             File.WriteAllText(
@@ -98,19 +140,12 @@ internal static class UsabilityHarness
                         adapter_version = AdapterVersion,
                         fake_worker_origin = "http://127.0.0.1:8765",
                         configured_hotkey = "Ctrl+B",
+                        hotkey_registered = context.HotkeyRegistered,
+                        bridge_enabled = context.BridgeEnabled,
                         content_policy = "CONTENT_FREE"
                     },
                     new JsonSerializerOptions { WriteIndented = true }));
 
-            using var context = new UsabilityApplicationContext(
-                trialId,
-                resultPath,
-                durationSeconds,
-                world,
-                submissions,
-                bridgeState,
-                browser,
-                diagnostics);
             System.Windows.Forms.Application.Run(context);
             return context.ExitCode;
         }
@@ -324,12 +359,22 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             _bridgeController.SetEnabled(true);
         }
 
+        HotkeyRegistered = hotkey.IsRegistered;
+        if (_trialId != "UT-11" &&
+            (!HotkeyRegistered || !_bridgeController.IsEnabled))
+        {
+            throw new InvalidOperationException(
+                "STAGE10_HOTKEY_REGISTRATION_NOT_CONFIRMED");
+        }
+
         _timer = new System.Windows.Forms.Timer { Interval = 100 };
         _timer.Tick += TimerTick;
         _timer.Start();
     }
 
     public int ExitCode { get; private set; }
+    public bool HotkeyRegistered { get; private set; }
+    public bool BridgeEnabled => _bridgeController.IsEnabled;
     public int HotkeyPresses { get; private set; }
     public int NoActionPresses { get; private set; }
     public int BusyPresses { get; private set; }

@@ -10,7 +10,7 @@ namespace WorkspaceControl.OperatorBridge.IntegrationHarness;
 internal static class Program
 {
     [STAThread]
-    private static async Task<int> Main(string[] args)
+    private static int Main(string[] args)
     {
         var usabilityTrial = GetArgument(args, "--usability-trial");
         if (!string.IsNullOrWhiteSpace(usabilityTrial))
@@ -18,6 +18,11 @@ internal static class Program
             return UsabilityHarness.Run(args);
         }
 
+        return RunAsync(args).GetAwaiter().GetResult();
+    }
+
+    private static async Task<int> RunAsync(string[] args)
+    {
         var resultPath = GetArgument(args, "--result") ??
             Path.Combine(Environment.CurrentDirectory, "stage06-firefox-result.json");
         var timeoutSeconds = int.TryParse(
