@@ -61,6 +61,10 @@ class ControlPlaneP1ContractTests(unittest.TestCase):
         )
         self.assertEqual(workflow["default_branch"], "main")
         self.assertEqual(workflow["blob_sha"], git_blob_sha(path))
+        self.assertNotEqual(
+            workflow["blob_sha"],
+            "524e01916e1a826efd1edb4792023973d7b3c73c",
+        )
 
         raw = (ROOT / path).read_text(encoding="utf-8")
         self.assertIn("github.actor == 'adamtrott78'", raw)
