@@ -31,24 +31,24 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 81ee9bf2a06949ce1e9477befe00f833248d8ea3
+- Remote checkpoint: 694a0c828ed4c8e8d02a344eb2451905e171aaca
 - Remote verified: true
 
 ## Next safe action
 
-Operator-only root gate: install authority 157aaf72e9e5761c8d7140a96d986e2e742a5a9c, workspace-control execution f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, and PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3. Connected Workspace Shell cannot mutate the root-owned runtime snapshot.
+Operator-only root gate: install authority f7b8a40f9f50e584974fac92e5eef4773405606b, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, and PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca. After PASS, ChatGPT must verify the live bindings and run the expanded deterministic contract test before scientific GPU training.
 
 ## Remaining work
 
-- Operator installs validated authority 157aaf72e9e5761c8d7140a96d986e2e742a5a9c, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, and PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3 using the existing rollback-capable upgrade.
-- Verify live exact bindings and rerun tests/test_multisurrogate_dqnguard.py through research-bounded.
-- Prepare the known-only target-fold backbone with cache_len=16384.
-- Use a sanctioned PyTorch-capable scientific compute surface for Architecture C small-real execution.
+- Operator installs authority f7b8a40f9f50e584974fac92e5eef4773405606b, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca.
+- Verify exact live bindings and run the expanded deterministic Stage 03 contract test.
+- Train the frozen PA2 backbone config in the DNNs PyTorch scientific environment.
+- Run Architecture C small-real evaluation and validate result_record.json.
 
 ## Blockers / gates
 
-- Remaining action is root-owned Workspace Shell snapshot replacement. Privileged helper trust is intentionally empty/fail-closed, so connected Workspace Shell cannot perform it.
-- Live runtime has not yet been rebound to workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7 and PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3.
+- Live Workspace Shell remains bound to PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3 until the operator installs validated authority f7b8a40f9f50e584974fac92e5eef4773405606b with PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca.
+- Connected Workspace Shell cannot perform the root-owned snapshot replacement because privileged helper trust is intentionally empty/fail-closed.
 
 ## Fresh-chat initialization
 
