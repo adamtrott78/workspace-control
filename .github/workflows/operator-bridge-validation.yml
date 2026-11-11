@@ -79,7 +79,8 @@ jobs:
           $targets = @(
             "operator-bridge/performance/prepare-stage09-target-profile.ps1",
             "operator-bridge/tools/run-stage09-target-firefox.ps1",
-            "operator-bridge/tools/run-stage09-target-matrix.ps1"
+            "operator-bridge/tools/run-stage09-target-matrix.ps1",
+            "operator-bridge/tools/run-stage10-usability.ps1"
           )
           foreach ($target in $targets) {
             $tokens = $null
@@ -406,6 +407,85 @@ jobs:
           path: |
             benchmarks/workspace-semantic-execution/operator_bridge/stage09-adapter-preflight.json
             benchmarks/workspace-semantic-execution/operator_bridge/stage09-preflight-diagnostics/**
+          if-no-files-found: warn
+          retention-days: 30
+
+  stage10-usability:
+    name: stage10-usability
+    if: >-
+      ${{
+        github.event_name == 'pull_request' &&
+        github.event.action == 'labeled' &&
+        (github.event.label.name == 'stage10-ut11' ||
+         github.event.label.name == 'stage10-ut01' ||
+         github.event.label.name == 'stage10-ut10') &&
+        github.event.pull_request.number == 590 &&
+        github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1'
+      }}
+    needs: validation
+    runs-on: [self-hosted, windows, x64, workspace-operator-target]
+    timeout-minutes: 35
+    env:
+      PSExecutionPolicyPreference: Bypass
+
+    steps:
+      - name: Checkout exact Stage 10 usability head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up .NET 10 LTS
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Set up Node 24 for temporary Firefox usability adapter
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Validate interactive Stage 10 runner
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $head = (git rev-parse HEAD).Trim()
+          $expectedHead = "${{ github.event.pull_request.head.sha }}"
+          if ($head -ne $expectedHead) {
+            throw "Stage 10 runner checkout is not bound to the exact requested source SHA."
+          }
+          if (-not [Environment]::UserInteractive) {
+            throw "Stage 10 usability runner must be launched interactively in the Windows user session."
+          }
+          foreach ($name in @("firefox", "WorkspaceOperator")) {
+            if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+              throw "Stage 10 usability trial requires no pre-existing $name process."
+            }
+          }
+
+      - name: Execute Stage 10 human-in-loop usability trial
+        shell: powershell
+        run: |
+          $label = "${{ github.event.label.name }}"
+          $trial = switch ($label) {
+            "stage10-ut11" { "UT-11" }
+            "stage10-ut01" { "UT-01" }
+            "stage10-ut10" { "UT-10" }
+            default { throw "Unsupported Stage 10 usability label: $label" }
+          }
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          $result = "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage10-$($trial.ToLowerInvariant())-result.json"
+          ./operator-bridge/tools/run-stage10-usability.ps1 `
+            -RepositoryRoot "${{ github.workspace }}" `
+            -TrialId $trial `
+            -ResultPath $result
+          Write-Host "STAGE10_USABILITY_TRIAL=$trial"
+
+      - name: Upload Stage 10 content-free usability evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage10-usability-${{ github.event.label.name }}-${{ github.event.pull_request.head.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage10-*-result.json
           if-no-files-found: warn
           retention-days: 30
 
