@@ -406,6 +406,27 @@ def verify_scheduler(token: str) -> dict[str, Any]:
     }
 
 
+def scheduler_snapshot(token: str) -> dict[str, Any]:
+    run = github_get(token, f"/repos/{REPOSITORY}/actions/runs/{WORKFLOW_RUN_ID}")
+    jobs = github_get(token, f"/repos/{REPOSITORY}/actions/runs/{WORKFLOW_RUN_ID}/jobs?filter=latest&per_page=100")
+    values = jobs.get("jobs") if isinstance(jobs, dict) else None
+    if not isinstance(run, dict) or not isinstance(values, list):
+        raise LiveRevivalError("scheduler post-revival evidence invalid")
+    matches = [job for job in values if isinstance(job, dict) and job.get("id") == GITHUB_JOB_ID]
+    if len(matches) != 1:
+        raise LiveRevivalError("scheduler post-revival job missing/ambiguous")
+    job = matches[0]
+    return {
+        "run_status": run.get("status"),
+        "run_conclusion": run.get("conclusion"),
+        "job_status": job.get("status"),
+        "job_conclusion": job.get("conclusion"),
+        "runner_id": job.get("runner_id"),
+        "runner_name": job.get("runner_name"),
+        "labels": job.get("labels"),
+    }
+
+
 def systemctl_show(unit: str) -> dict[str, str]:
     props = ("Id", "LoadState", "ActiveState", "SubState", "MainPID", "NRestarts", "InvocationID", "User", "Group")
     raw = subprocess.check_output(
@@ -781,7 +802,7 @@ def apply(
             revival = observe_first_revival(latest_raw, latest_record)
             receipt["phase"] = "REVIVAL_OBSERVED"
             receipt["revival"] = revival
-            receipt["scheduler_after_revival"] = verify_scheduler(token)
+            receipt["scheduler_after_revival"] = scheduler_snapshot(token)
             write_receipt(receipt_path, receipt)
             return receipt_path
         except Exception:
