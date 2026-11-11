@@ -17,6 +17,8 @@ internal static class UsabilityHarness
     public static int Run(string[] args)
     {
         ApplicationConfiguration.Initialize();
+        SynchronizationContext.SetSynchronizationContext(
+            new WindowsFormsSynchronizationContext());
 
         var trialId = GetArgument(args, "--usability-trial")?.ToUpperInvariant()
             ?? throw new ArgumentException("--usability-trial is required.");
@@ -335,6 +337,10 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public int WrongWorkerDispatches { get; private set; }
     public int WrongPacketDispatches { get; private set; }
     public int RejectedStateSubmissions { get; private set; }
+    public int DispatchFailures { get; private set; }
+    public int ClipboardFailedDispatches { get; private set; }
+    public string? LastDispatchOutcome { get; private set; }
+    public string? LastDispatchError { get; private set; }
 
     private async void HotkeyPressed(object? sender, EventArgs e)
     {
@@ -348,6 +354,9 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         try
         {
             var result = await _dispatch.DispatchAsync();
+            LastDispatchOutcome = result.Outcome.ToString();
+            LastDispatchError = result.NormalizedError;
+
             if (result.Outcome == DispatchOutcome.NoAction)
             {
                 NoActionPresses++;
@@ -355,6 +364,23 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             else if (result.Outcome == DispatchOutcome.Busy)
             {
                 BusyPresses++;
+            }
+            else if (result.Outcome == DispatchOutcome.ClipboardFailed)
+            {
+                ClipboardFailedDispatches++;
+                DispatchFailures++;
+                Finish();
+            }
+            else if (result.Outcome is
+                DispatchOutcome.Disabled or
+                DispatchOutcome.BrowserPrepareFailed or
+                DispatchOutcome.BrowserMaintenanceFailed or
+                DispatchOutcome.Stale or
+                DispatchOutcome.BrowserFocusFailed or
+                DispatchOutcome.Failed)
+            {
+                DispatchFailures++;
+                Finish();
             }
         }
         finally
@@ -475,7 +501,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
               WrongWorkerDispatches == 0 &&
               WrongPacketDispatches == 0 &&
               RejectedStateSubmissions == 0 &&
-              BusyPresses == 0;
+              BusyPresses == 0 &&
+              DispatchFailures == 0;
 
         Directory.CreateDirectory(
             Path.GetDirectoryName(Path.GetFullPath(_resultPath))!);
@@ -504,6 +531,10 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                     wrong_worker_dispatches = WrongWorkerDispatches,
                     wrong_packet_dispatches = WrongPacketDispatches,
                     rejected_state_submissions = RejectedStateSubmissions,
+                    dispatch_failures = DispatchFailures,
+                    clipboard_failed_dispatches = ClipboardFailedDispatches,
+                    last_dispatch_outcome = LastDispatchOutcome,
+                    last_dispatch_error = LastDispatchError,
                     trace_sha256 = _world.Trace.Sha256(),
                     content_policy = "CONTENT_FREE"
                 },
