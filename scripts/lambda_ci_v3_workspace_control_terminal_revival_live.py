@@ -342,36 +342,49 @@ def validate_bound_review_state(
 
 def verify_code_review_acceptance(token: str) -> None:
     request = issue_comment(token, CODE_REVIEW_REQUEST_COMMENT)
+    if request.get("user", {}).get("login") != "github-actions[bot]":
+        raise LiveRevivalError("accepted controller review request is not automation-authored")
     request_fields = exact_block(str(request.get("body", "")), REQUEST_START, REQUEST_END)
-    expected = {
+    require_exact_keys(request_fields, REQUEST_KEYS, "accepted controller review request")
+    verified_request_digest(request_fields)
+
+    expected_common = {
         "task_id": TASK_ID,
         "pr_number": str(CODE_REVIEW_PR),
         "head_sha": REVIEWED_CONTROLLER_HEAD,
         "review_kind": "workspace_control_v3_rest_terminal_revival_bf2_corrected_20261111",
         "sensitivity": "authority_sensitive",
     }
-    for key, value in expected.items():
+    for key, value in {**expected_common, "request_copilot": "false"}.items():
         if request_fields.get(key) != value:
             raise LiveRevivalError(f"accepted controller review request mismatch: {key}")
 
-    disp = issue_comment(token, CODE_REVIEW_DISPOSITION_COMMENT)
-    fields = exact_block(str(disp.get("body", "")), DISP_START, DISP_END)
-    if fields.get("request_comment_id") != str(CODE_REVIEW_REQUEST_COMMENT):
-        raise LiveRevivalError("accepted controller disposition request mismatch")
-    if fields.get("head_sha") != REVIEWED_CONTROLLER_HEAD:
-        raise LiveRevivalError("accepted controller disposition head mismatch")
-    if fields.get("disposition") != "NO_BLOCKING_FINDING":
-        raise LiveRevivalError("controller code review was not accepted")
+    dispositions: list[tuple[int, dict[str, str], str]] = []
+    consumptions: list[tuple[int, dict[str, str], str]] = []
+    for comment in issue_comments(token, CODE_REVIEW_PR):
+        body = str(comment.get("body", ""))
+        cid = int(comment.get("id", 0))
+        user = str(comment.get("user", {}).get("login") or "")
+        if DISP_START in body:
+            value = exact_block(body, DISP_START, DISP_END)
+            if value.get("request_comment_id") == str(CODE_REVIEW_REQUEST_COMMENT):
+                dispositions.append((cid, value, user))
+        if CONSUMED_START in body:
+            value = exact_block(body, CONSUMED_START, CONSUMED_END)
+            if value.get("request_comment_id") == str(CODE_REVIEW_REQUEST_COMMENT):
+                consumptions.append((cid, value, user))
 
-    consumed = issue_comment(token, CODE_REVIEW_CONSUMED_COMMENT)
-    fields = exact_block(str(consumed.get("body", "")), CONSUMED_START, CONSUMED_END)
-    if fields.get("request_comment_id") != str(CODE_REVIEW_REQUEST_COMMENT):
-        raise LiveRevivalError("controller review consumption request mismatch")
-    if fields.get("disposition_id") != str(CODE_REVIEW_DISPOSITION_COMMENT):
-        raise LiveRevivalError("controller review consumption disposition mismatch")
-    if fields.get("disposition") != "NO_BLOCKING_FINDING":
-        raise LiveRevivalError("controller review consumption did not accept")
-
+    accepted = validate_bound_review_state(
+        request_fields=request_fields,
+        request_comment_id=CODE_REVIEW_REQUEST_COMMENT,
+        expected_common=expected_common,
+        dispositions=dispositions,
+        consumptions=consumptions,
+    )
+    if accepted["review_disposition_comment_id"] != CODE_REVIEW_DISPOSITION_COMMENT:
+        raise LiveRevivalError("accepted controller disposition comment identity drift")
+    if accepted["review_consumption_comment_id"] != CODE_REVIEW_CONSUMED_COMMENT:
+        raise LiveRevivalError("accepted controller consumption comment identity drift")
 
 def request_bindings(body: str) -> dict[str, str]:
     bindings: dict[str, str] = {}
