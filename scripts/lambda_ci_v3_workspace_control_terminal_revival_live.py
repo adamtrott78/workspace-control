@@ -131,11 +131,12 @@ def atomic_write(path: pathlib.Path, raw: bytes, mode: int) -> None:
 
 
 def exact_block(body: str, start: str, end: str) -> dict[str, str]:
-    if body.count(start) != 1 or body.count(end) != 1:
-        raise LiveRevivalError(f"review block multiplicity invalid: {start}")
-    left = body.index(start) + len(start)
-    right = body.index(end, left)
-    lines = [line.strip() for line in body[left:right].splitlines() if line.strip()]
+    source = body.splitlines()
+    starts = [i for i, line in enumerate(source) if line.strip() == start]
+    ends = [i for i, line in enumerate(source) if line.strip() == end]
+    if len(starts) != 1 or len(ends) != 1 or starts[0] >= ends[0]:
+        raise LiveRevivalError(f"review block multiplicity/order invalid: {start}")
+    lines = [line.strip() for line in source[starts[0] + 1 : ends[0]] if line.strip()]
     result: dict[str, str] = {}
     for line in lines:
         if "=" not in line:
