@@ -392,6 +392,11 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("STAGE09_TARGET_ADAPTER_PREFLIGHT_FAILURE=", collector)
         self.assertIn("adapter_version", collector)
         self.assertIn("error_code", collector)
+        self.assertIn("STAGE09_TARGET_FIREFOX_COLLECTOR_FAILURE=", collector)
+        self.assertIn('result = "COLLECTOR_FAILURE"', collector)
+        self.assertIn("normalized_phase", collector)
+        self.assertIn("steady_result_exists", collector)
+        self.assertIn("cold_result_exists", collector)
 
     def test_stage09_target_bootstrap_restores_machine_state(self):
         matrix = (
