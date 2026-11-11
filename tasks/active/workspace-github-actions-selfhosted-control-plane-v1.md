@@ -36,21 +36,23 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the final PR #598 head. If green, request fresh authority-sensitive review of the exact head plus the bounded live transaction already described on PR #598: source-attest exact reviewed head/base; prove installed manifest semantic equality to the exact base manifest; preserve exact installed controller/unit/maintenance/provisioner/runtime/root-policy identities and sibling states; stop only workspace-control CPU; atomically replace only /etc/workspace-ci/projects/workspace-control.json with the reviewed target manifest; do not restart provisioner; reset-failed/start only workspace-control CPU if needed; require stable running with unchanged InvocationID/NRestarts across the bounded observation window and unchanged sibling semantic snapshots; allow existing run #389 to proceed without cancel/retrigger; rollback by restoring only the old manifest and leaving workspace-control CPU stopped on any post-backup failure.
+Validate the final PR #599 head. If green, request fresh authority-sensitive review of: (1) the crash-safe controller fix; and (2) a bounded live repair that source-attests the exact reviewed head, proves the installed old controller/manifest identities, proves stale quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d is workspace-control/cpu/lambda-workspace-control/scale-set 1, proves the matching recovery gate is RECOVERY_RETRY_ACQUIRED for old scale set 1 -> new scale set 3 with reset generation 40d61b30-e8b9-5559-abfc-706fb3df6c67 and job/run 125142056183/41404080844, proves that GitHub run/job terminal failure, closes only that historical gate to RECOVERY_RETRY_COMPLETED, installs only the reviewed controller binary and reviewed workspace-control manifest, starts only workspace-control CPU, and proves stable running/sibling preservation. No reset/reconcile/retrigger is authorized.
 
 ## Remaining work
 
-- Validate the final PR #598 head containing manifest repair, regression, and durable task binding.
-- Obtain fresh authority-sensitive review of the exact head and bounded one-file live installed-manifest transaction.
-- Stop only workspace-control CPU, atomically replace only /etc/workspace-ci/projects/workspace-control.json, then start only workspace-control CPU.
-- Prove bounded stable-running controller health and exact sibling semantic-state preservation.
-- Observe existing run #389 naturally acquire a runner and complete; do not retrigger it.
+- Validate final PR #599 head with durable task binding.
+- Obtain fresh independent authority-sensitive review of the controller fix and bounded live recovery-state repair.
+- Install the reviewed controller binary and reviewed workspace-control manifest binding only after exact source/installed-state preflight.
+- Close only the stale historical RECOVERY_RETRY_ACQUIRED gate after exact terminal run/job proof, then let the fixed controller retire the matching old quarantine safely.
+- Start only workspace-control CPU and prove stable running plus sibling preservation.
+- Allow existing exact-head run #389 to proceed naturally and record its result.
 
 ## Blockers / gates
 
-- Fresh authority-sensitive review is required on the final PR #598 head after this task-state binding and on the bounded one-file live repair transaction.
-- Live installed manifest must semantically equal the exact pre-repair base manifest before replacement; any drift aborts.
-- Any live identity/state mismatch aborts before mutation. No reconcile, provisioner restart, sibling mutation, scale-set operation, workflow cancel/retrigger, or admission/capacity widening is authorized.
+- Fresh exact-head validation is required after this task-state binding.
+- Fresh authority-sensitive review is required before installing the repaired controller or mutating the historical workspace-control recovery-state files.
+- Live repair must prove exact stale quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d bound to old scale set 1, exact matching recovery gate bound to new scale set 3/reset generation 40d61b30-e8b9-5559-abfc-706fb3df6c67, and exact terminal GitHub probe run/job identity before any state mutation.
+- No scale-set reset/recreation, reconciliation, provisioner restart, sibling-controller mutation, workflow cancel/retrigger, admission/capacity widening, or research-engine mutation is authorized.
 
 ## Fresh-chat initialization
 
