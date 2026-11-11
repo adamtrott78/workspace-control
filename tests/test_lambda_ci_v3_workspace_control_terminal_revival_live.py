@@ -3,6 +3,7 @@ import json
 import os
 import pathlib
 import stat
+import subprocess
 import sys
 import tempfile
 import types
@@ -188,21 +189,289 @@ END_WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1
         self.assertNotIn("LEDGER_PATH.write_", source)
         self.assertNotIn("os.replace(tmp, LEDGER_PATH", source)
 
-    def test_only_target_service_is_restarted(self):
+    def test_only_target_service_is_mutated_by_systemctl(self):
         source = SCRIPT.read_text()
-        restart_lines = [
-            line.strip()
-            for line in source.splitlines()
-            if '["systemctl", "restart"' in line
-        ]
         self.assertEqual(
-            restart_lines,
-            [
-                'subprocess.run(["systemctl", "restart", TARGET_SERVICE], check=True)',
-                'subprocess.run(["systemctl", "restart", TARGET_SERVICE], check=True)',
-            ],
+            source.count('subprocess.run(["systemctl", "restart", TARGET_SERVICE], check=True)'),
+            1,
+        )
+        self.assertEqual(
+            source.count('subprocess.run(["systemctl", "stop", TARGET_SERVICE], check=True)'),
+            1,
+        )
+        self.assertEqual(
+            source.count('subprocess.run(["systemctl", "start", TARGET_SERVICE], check=True)'),
+            1,
         )
         self.assertNotIn('restart", LEGACY_V2_SERVICE', source)
+        self.assertNotIn('start", LEGACY_V2_SERVICE', source)
+        self.assertNotIn('stop", LEGACY_V2_SERVICE', source)
+
+    def _review_request_fields(self):
+        fields = {
+            "task_id": live.TASK_ID,
+            "pr_number": "604",
+            "head_sha": "a" * 40,
+            "base_sha": "b" * 40,
+            "tree_sha": "c" * 40,
+            "review_kind": live.LIVE_REVIEW_KIND,
+            "sensitivity": "authority_sensitive",
+            "bindings_sha256": "d" * 64,
+            "request_copilot": "false",
+        }
+        fields["request_digest"] = live.sha256(live.compact_json(fields))
+        return fields
+
+    def _accepted_review_rows(self, request_fields):
+        request_id = 123
+        common = {
+            "task_id": live.TASK_ID,
+            "pr_number": "604",
+            "head_sha": request_fields["head_sha"],
+            "review_kind": live.LIVE_REVIEW_KIND,
+            "sensitivity": "authority_sensitive",
+        }
+        disposition = {
+            "request_comment_id": str(request_id),
+            "request_digest": request_fields["request_digest"],
+            **common,
+            "reviewer_attestation": "fresh_independent_session",
+            "disposition": "NO_BLOCKING_FINDING",
+        }
+        consumption = {
+            "request_comment_id": str(request_id),
+            "request_digest": request_fields["request_digest"],
+            **common,
+            "backend": "comment",
+            "disposition_id": "456",
+            "disposition": "NO_BLOCKING_FINDING",
+        }
+        return request_id, common, (456, disposition, "reviewer"), (789, consumption, "github-actions[bot]")
+
+    def test_review_authority_exact_chain_is_accepted(self):
+        request = self._review_request_fields()
+        request_id, common, disposition, consumption = self._accepted_review_rows(request)
+        result = live.validate_bound_review_state(
+            request_fields=request,
+            request_comment_id=request_id,
+            expected_common=common,
+            dispositions=[disposition],
+            consumptions=[consumption],
+        )
+        self.assertEqual(result["review_disposition_comment_id"], 456)
+        self.assertEqual(result["review_consumption_comment_id"], 789)
+
+    def test_review_authority_rejects_wrong_or_missing_request_digest(self):
+        for mode in ("wrong", "missing"):
+            with self.subTest(mode=mode):
+                request = self._review_request_fields()
+                request_id, common, disposition, consumption = self._accepted_review_rows(request)
+                if mode == "wrong":
+                    request["request_digest"] = "0" * 64
+                else:
+                    request.pop("request_digest")
+                with self.assertRaises(live.LiveRevivalError):
+                    live.validate_bound_review_state(
+                        request_fields=request,
+                        request_comment_id=request_id,
+                        expected_common=common,
+                        dispositions=[disposition],
+                        consumptions=[consumption],
+                    )
+
+    def test_review_authority_rejects_conflicting_blocking_disposition(self):
+        request = self._review_request_fields()
+        request_id, common, disposition, consumption = self._accepted_review_rows(request)
+        blocking = dict(disposition[1])
+        blocking["disposition"] = "BLOCKING_FINDINGS"
+        with self.assertRaisesRegex(live.LiveRevivalError, "exactly one bound disposition"):
+            live.validate_bound_review_state(
+                request_fields=request,
+                request_comment_id=request_id,
+                expected_common=common,
+                dispositions=[disposition, (457, blocking, "reviewer-2")],
+                consumptions=[consumption],
+            )
+
+    def test_review_authority_rejects_duplicate_acceptance(self):
+        request = self._review_request_fields()
+        request_id, common, disposition, consumption = self._accepted_review_rows(request)
+        duplicate = (457, dict(disposition[1]), "reviewer-2")
+        with self.assertRaisesRegex(live.LiveRevivalError, "exactly one bound disposition"):
+            live.validate_bound_review_state(
+                request_fields=request,
+                request_comment_id=request_id,
+                expected_common=common,
+                dispositions=[disposition, duplicate],
+                consumptions=[consumption],
+            )
+
+    def test_review_authority_rejects_stale_head_or_digest_reuse(self):
+        for mode in ("stale-head", "stale-digest", "consumption-digest"):
+            with self.subTest(mode=mode):
+                request = self._review_request_fields()
+                request_id, common, disposition, consumption = self._accepted_review_rows(request)
+                disp = (disposition[0], dict(disposition[1]), disposition[2])
+                used = (consumption[0], dict(consumption[1]), consumption[2])
+                if mode == "stale-head":
+                    disp[1]["head_sha"] = "f" * 40
+                elif mode == "stale-digest":
+                    disp[1]["request_digest"] = "e" * 64
+                else:
+                    used[1]["request_digest"] = "e" * 64
+                with self.assertRaises(live.LiveRevivalError):
+                    live.validate_bound_review_state(
+                        request_fields=request,
+                        request_comment_id=request_id,
+                        expected_common=common,
+                        dispositions=[disp],
+                        consumptions=[used],
+                    )
+
+    def test_review_authority_rejects_duplicate_consumption(self):
+        request = self._review_request_fields()
+        request_id, common, disposition, consumption = self._accepted_review_rows(request)
+        duplicate = (790, dict(consumption[1]), "github-actions[bot]")
+        with self.assertRaisesRegex(live.LiveRevivalError, "exactly one bound consumption"):
+            live.validate_bound_review_state(
+                request_fields=request,
+                request_comment_id=request_id,
+                expected_common=common,
+                dispositions=[disposition],
+                consumptions=[consumption, duplicate],
+            )
+
+    def test_untracked_go_source_or_workspace_blocks_source_preflight(self):
+        for relative in (
+            "controller/lambda-ci-controller/v3/unreviewed.go",
+            "go.work",
+        ):
+            with self.subTest(relative=relative), tempfile.TemporaryDirectory() as raw:
+                root = pathlib.Path(raw)
+                subprocess.run(["git", "init", "-q", str(root)], check=True)
+                subprocess.run(["git", "-C", str(root), "config", "user.email", "test@example.com"], check=True)
+                subprocess.run(["git", "-C", str(root), "config", "user.name", "Test"], check=True)
+                (root / "tracked.txt").write_text("tracked\n")
+                subprocess.run(["git", "-C", str(root), "add", "tracked.txt"], check=True)
+                subprocess.run(["git", "-C", str(root), "commit", "-q", "-m", "base"], check=True)
+                subprocess.run(["git", "-C", str(root), "checkout", "-q", "--detach", "HEAD"], check=True)
+                target = root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("unreviewed\n")
+                with mock.patch.object(live, "git_blob") as blob:
+                    blob.side_effect = lambda _root, _head, path: (
+                        live.REVIEWED_CONTROLLER_GO_BLOB
+                        if path.endswith("controller.go")
+                        else live.REVIEWED_CONTROLLER_TEST_BLOB
+                    )
+                    with self.assertRaisesRegex(live.LiveRevivalError, "including untracked"):
+                        live.assert_source(root)
+
+    def test_controller_build_uses_reviewed_git_archive_and_disables_workspace(self):
+        source = SCRIPT.read_text()
+        self.assertIn('"archive", "--format=tar"', source)
+        self.assertIn("REVIEWED_CONTROLLER_HEAD", source)
+        self.assertIn('build_env["GOWORK"] = "off"', source)
+        self.assertIn('build_env["GOENV"] = "off"', source)
+        self.assertIn('build_env["GOFLAGS"] = ""', source)
+        self.assertNotIn('cwd=repo_root / "controller/lambda-ci-controller"', source)
+
+    def test_rollback_quiesces_before_ledger_decision_and_retains_override_on_race(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            ledger = root / "ledger.json"
+            old_raw = b"old-ledger\n"
+            ledger.write_bytes(old_raw)
+            override_root = root / "override"
+            override_root.mkdir()
+            override_binary = override_root / "controller"
+            override_binary.write_bytes(b"accepted-controller")
+            dropin = root / "dropin.conf"
+            dropin.write_text("[Service]\n")
+            receipt_path = root / "receipt.json"
+            receipt = {}
+
+            calls = []
+            def fake_run(args, check=False, **kwargs):
+                calls.append(args)
+                if args == ["systemctl", "stop", live.TARGET_SERVICE]:
+                    ledger.write_bytes(b"revived-ledger\n")
+                return subprocess.CompletedProcess(args, 0)
+
+            with (
+                mock.patch.object(live, "LEDGER_PATH", ledger),
+                mock.patch.object(live, "OVERRIDE_ROOT", override_root),
+                mock.patch.object(live, "OVERRIDE_BINARY", override_binary),
+                mock.patch.object(live, "DROPIN_PATH", dropin),
+                mock.patch.object(live.subprocess, "run", side_effect=fake_run),
+                mock.patch.object(
+                    live,
+                    "wait_target_stopped",
+                    return_value={"ActiveState": "inactive", "SubState": "dead", "MainPID": "0"},
+                ),
+            ):
+                with self.assertRaisesRegex(live.LiveRevivalError, "ledger changed"):
+                    live.rollback_before_revival(receipt, receipt_path, old_raw)
+
+            saved = json.loads(receipt_path.read_text())
+            self.assertEqual(saved["phase"], "POST_REVIVAL_FAIL_CLOSED_NO_ROLLBACK")
+            self.assertTrue(saved["accepted_override_retained"])
+            self.assertTrue(saved["target_controller_left_quiesced"])
+            self.assertTrue(override_binary.exists())
+            self.assertTrue(dropin.exists())
+            self.assertEqual(calls, [["systemctl", "stop", live.TARGET_SERVICE]])
+
+    def test_pre_revival_rollback_stops_then_rechecks_then_restores_original(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = pathlib.Path(raw)
+            ledger = root / "ledger.json"
+            old_raw = b"old-ledger\n"
+            ledger.write_bytes(old_raw)
+            override_root = root / "override"
+            override_root.mkdir()
+            override_binary = override_root / "controller"
+            override_binary.write_bytes(b"accepted-controller")
+            dropin = root / "dropin.conf"
+            dropin.write_text("[Service]\n")
+            receipt_path = root / "receipt.json"
+            receipt = {}
+            calls = []
+
+            def fake_run(args, check=False, **kwargs):
+                calls.append(args)
+                return subprocess.CompletedProcess(args, 0)
+
+            with (
+                mock.patch.object(live, "LEDGER_PATH", ledger),
+                mock.patch.object(live, "OVERRIDE_ROOT", override_root),
+                mock.patch.object(live, "OVERRIDE_BINARY", override_binary),
+                mock.patch.object(live, "DROPIN_PATH", dropin),
+                mock.patch.object(live.subprocess, "run", side_effect=fake_run),
+                mock.patch.object(
+                    live,
+                    "wait_target_stopped",
+                    return_value={"ActiveState": "inactive", "SubState": "dead", "MainPID": "0"},
+                ),
+                mock.patch.object(
+                    live,
+                    "wait_target_active",
+                    return_value={"ActiveState": "active", "SubState": "running", "MainPID": "99"},
+                ),
+            ):
+                live.rollback_before_revival(receipt, receipt_path, old_raw)
+
+            self.assertFalse(override_binary.exists())
+            self.assertFalse(dropin.exists())
+            self.assertEqual(
+                calls,
+                [
+                    ["systemctl", "stop", live.TARGET_SERVICE],
+                    ["systemctl", "daemon-reload"],
+                    ["systemctl", "start", live.TARGET_SERVICE],
+                ],
+            )
+            saved = json.loads(receipt_path.read_text())
+            self.assertEqual(saved["phase"], "ROLLED_BACK_BEFORE_REVIVAL")
 
     def test_review_binding_paths_cover_executable_surface(self):
         self.assertEqual(
