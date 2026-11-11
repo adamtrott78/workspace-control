@@ -29,7 +29,7 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 ## Next safe action
 
-Begin impl_10 usability trials against the validated packaged fake-worker baseline. Do not run another multi-hour Stage-09 target matrix during routine implementation/debug work. Continue through impl_10, conditional impl_11, and impl_12 under the existing authority/security gates. Before impl_13 production readiness, resume impl_09 from the then-current validated implementation head, preserve complete target evidence, and require every frozen UX-09 budget to pass.
+Begin impl_10_usability_trial_execution against the validated packaged fake-worker baseline. Do not run another multi-hour Stage-09 target matrix during routine implementation/debug work. Continue through impl_10, conditional impl_11, and impl_12 under their existing authority/security gates. Before impl_13 production readiness, resume impl_09 exactly once from the then-current validated implementation head, preserve complete target evidence, evaluate every frozen UX-09 budget, and block production promotion unless Stage 09 is VALIDATED.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ Begin impl_10 usability trials against the validated packaged fake-worker baseli
 
 ## Blockers / gates
 
-- No Stage-10 development blocker. Stage 09 is intentionally SUSPENDED as an intermediate gate after repeated multi-hour target runs. It remains mandatory before Stage 13 can pass. Run #185 physically executed deep Firefox/Chrome resource measurement, but the harness failed later on missing exact Firefox latency evidence before writing stage09-target-evidence.json. The RAM/Working Set summaries were held in temporary files/in-memory structures and were not printed to GitHub logs, so those values are not recoverable as authoritative evidence.
+- No Stage-10 development blocker. The authoritative long-form UX-09 target benchmark is intentionally SUSPENDED as an intermediate gate after repeated multi-hour harness-debug runs. It remains mandatory before impl_13 production readiness can pass. Run #185 physically executed deep Firefox/Chrome resource measurement, but the harness did not preserve or print the RAM summary before a later latency-shape failure; those RAM values are therefore not admissible/recoverable from GitHub evidence.
 
 ## Fresh-chat initialization
 
