@@ -140,7 +140,15 @@ if (-not (Test-Path -LiteralPath $PerformanceSignedXpiPath -PathType Leaf)) {
   throw "Stage 09 requires the Mozilla-signed fake-worker performance XPI at: $PerformanceSignedXpiPath"
 }
 
-& dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.Integration.slnx") --configuration Release
+# The target measurement must not inherit persistent compiler/MSBuild servers
+# from its own exact-head build. They are GitHub-job-owned work, but detached
+# build servers are not reliably discoverable through the live parent/child
+# process tree used by the frozen unrelated-CPU calculation.
+& dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.Integration.slnx") `
+  --configuration Release `
+  --disable-build-servers `
+  -p:UseSharedCompilation=false `
+  -nodeReuse:false
 if ($LASTEXITCODE -ne 0) {
   throw "Stage 09 target matrix build failed."
 }
