@@ -34,7 +34,7 @@
       "base_sha": "f7ed7305e904ec24a444f7a488ca07e9bef4fdc7",
       "remote": {
         "branch": "padataset-autonomous-scientific-execution-v1",
-        "checkpoint_sha": "c6341bbd195a0337d57e8cb4dde8d30b152aa3ff",
+        "checkpoint_sha": "d69c5c3f3af5619c72a0a11c437a8edead4a8022",
         "verified": true
       },
       "local": null,
@@ -254,10 +254,29 @@
         "Promoted DNNs runtime is root-owned/no-write-bits with exact tree digest and pre/post runtime verification; Stage03 cache is separately copied root-owned/read-only.",
         "No independent-review disposition is claimed; this is the documented same-executor review path."
       ]
+    },
+    {
+      "check": "First DNNs promotion attempt failed closed before mutation",
+      "result": "PASS",
+      "evidence": [
+        "Operator ran exact previously validated head 41a0d6ac0c00d81ebb12bbca24e21b838a62370e from an interactive prompt showing (DNNs).",
+        "Installer exited immediately with `ERROR: activate the DNNs Conda environment before running this installer` before sudo/root mutation.",
+        "Root cause: bootstrap trusted only literal CONDA_DEFAULT_ENV=DNNs even though valid Conda activations may identify the active environment by prefix."
+      ]
+    },
+    {
+      "check": "Prefix-bound DNNs bootstrap correction",
+      "result": "PASS",
+      "evidence": [
+        "Installer now requires a live CONDA_PREFIX, accepts DNNs by literal label, full-prefix label, or DNNs basename, and separately proves SOURCE_PYTHON sys.prefix equals the resolved active prefix.",
+        "Validation #458 / run 43110925219 / job 130826408525 failed only because one stale regression still required the removed literal-only assertion.",
+        "Stale assertion was corrected without weakening installer authority.",
+        "Lambda CI Workspace Control Validation #459 / run 43111202546 / job 130827371107 completed SUCCESS on exact head d69c5c3f3af5619c72a0a11c437a8edead4a8022."
+      ]
     }
   ],
   "blockers": [
-    "One-time operator/root promotion must run from exact validated source head 41a0d6ac0c00d81ebb12bbca24e21b838a62370e while the DNNs Conda environment is active.",
+    "One-time operator/root promotion must run from exact validated source head d69c5c3f3af5619c72a0a11c437a8edead4a8022 while the DNNs Conda environment is active.",
     "No routine scientific experiment can run until the emitted exact runtime/data bindings are committed, validated, activated, and reconciled."
   ],
   "remaining_work": [
@@ -266,7 +285,7 @@
     "ChatGPT creates an exact Stage03 experiment PR/request, triggers autonomous scientific smoke, then full PA2 Architecture C execution.",
     "ChatGPT inspects artifacts/receipts and continues scientific analysis without operator terminal work."
   ],
-  "next_safe_action": "Operator-only one-time bootstrap: from active DNNs, run scripts/install_padataset_scientific_runtime_v1.sh at exact validated workspace-control head 41a0d6ac0c00d81ebb12bbca24e21b838a62370e. Return PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.",
+  "next_safe_action": "Operator-only one-time bootstrap: from the active DNNs shell, run scripts/install_padataset_scientific_runtime_v1.sh at exact validated workspace-control head d69c5c3f3af5619c72a0a11c437a8edead4a8022. Return the final PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS lines.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "User explicitly requested that DNNs become part of the PADataset automated execution path and that routine experiments no longer require manual terminal actions."
