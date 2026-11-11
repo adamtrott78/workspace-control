@@ -34,7 +34,7 @@
       "base_sha": "f7ed7305e904ec24a444f7a488ca07e9bef4fdc7",
       "remote": {
         "branch": "padataset-autonomous-scientific-execution-v1",
-        "checkpoint_sha": "7692508a1daa0ff4278bd08042388c2fa4f9c2cb",
+        "checkpoint_sha": "ea00901d79c512f070435345c80b55df01e47dc3",
         "verified": true
       },
       "local": null,
@@ -212,6 +212,15 @@
         "PADataset trusted-workflow candidate 8dc3a087fbad932ac1a17df7ef963b18affc4c8f",
         "No live scientific authority is enabled; route/contract remain planned and fail closed."
       ]
+    },
+    {
+      "check": "DNNs promoter hardening correction",
+      "result": "NOT_RUN",
+      "evidence": [
+        "Implementation source head advanced to ea00901d79c512f070435345c80b55df01e47dc3.",
+        "Symlink verification now walks the promoted runtime directly instead of conflicting pipe/heredoc stdin.",
+        "Final immutability checks inspect actual write permission bits rather than root access(2) semantics."
+      ]
     }
   ],
   "blockers": [
@@ -226,7 +235,7 @@
     "Bind exact runtime and trusted workflow blob, activate the scientific contract/route, validate, reconcile live.",
     "Run autonomous scientific smoke, then full Stage 03 PA2 Architecture C experiment."
   ],
-  "next_safe_action": "Open validation PRs for the exact implementation candidates. Keep scientific route/contract planned and fail-closed until validation, workflow merge, and one-time DNNs/data promotion complete.",
+  "next_safe_action": "Validate the hardened exact implementation head through workspace-control CI; keep the scientific route planned/fail-closed.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "User explicitly requested that DNNs become part of the PADataset automated execution path and that routine experiments no longer require manual terminal actions."
