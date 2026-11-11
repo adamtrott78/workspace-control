@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 544911b724aa0c943786a285a6e38213a861667e
-- Remote verified: false
+- Remote checkpoint: 0891a0fde2da7f763a0589c03ef3daf63ef5b3c7
+- Remote verified: true
 
 ## Next safe action
 
-Start or keep an interactive Windows self-hosted runner labeled workspace-operator-target listening so queued target-preflight job 129899072941 can execute on exact head 544911b724aa0c943786a285a6e38213a861667e. The profile verifier will emit only bounded content-free add-on runtime state (extension id/version/active/userDisabled/appDisabled/signedState) before launch. If the expected 0.1.9 adapter is inactive/disabled, repair the dedicated Stage-09 WorkspaceWorkers signed-add-on install state without touching unrelated Firefox/profile data, then re-run isolated preflight. If it is active/enabled yet ADAPTER_CONNECTION_NOT_OBSERVED persists, investigate Firefox MV3 background/event-page startup/wake and graceful owned-process shutdown semantics using the existing fake-worker-only profile; preserve ADAPTER_IDENTITY_REJECTED, exact-head native-host binding, process ownership, and content-free evidence. Only after isolated preflight again emits TARGET_ADAPTER_PREFLIGHT PASS with adapter_version 0.1.9-perf on the repaired exact head, run both hosted validators to SUCCESS and then trigger a fresh full frozen Stage-09 target matrix. Do not begin impl_10+.
+Keep the interactive Windows self-hosted runner labeled `workspace-operator-target` available. Normal work, including Chrome use, is allowed while Stage 09 is not actively running. For the next authoritative full Stage-09 target attempt, first enter a short controlled benchmark window: close all pre-existing Firefox, Chrome, and WorkspaceOperator processes and avoid sustained CPU-heavy foreground/background work. Trigger the `stage09-target` path on exact validated head `0891a0fde2da7f763a0589c03ef3daf63ef5b3c7`. The new 10-second `STAGE09_BACKGROUND_CPU_PREFLIGHT` must pass mean total CPU <= 20 percent before the expensive matrix proceeds. If it fails, identify the local load and retry only when quiet. If it passes, let the frozen Firefox/Chrome matrix run without interacting with benchmark-owned browser windows. Do not begin impl_10+ until `stage09-target-evidence.json` is produced, validates, and every frozen UX-09 budget passes.
 
 ## Remaining work
 
@@ -41,7 +41,12 @@ Start or keep an interactive Windows self-hosted runner labeled workspace-operat
 
 ## Blockers / gates
 
-- Stage 09 remains IN_PROGRESS. Exact head 8d50ef0b87b85480d10452d88965a0a616e2c2af passed Workspace Control Validation #2474, Operator Bridge Validation #105, and isolated target-preflight job 129889811928 / run 42833594686 with TARGET_ADAPTER_PREFLIGHT PASS, adapter_kind FIREFOX_EXTENSION, adapter_version 0.1.9-perf. A subsequent full target attempt, Operator Bridge run 42834251364 / target-performance job 129894144174, again failed before any UX-09 measurement because the same preflight emitted failing/invalid evidence. No stage09-target-evidence.json was produced. Immediately afterward, isolated preflight job 129896159398 / run 42835407614 reproduced the failure. Artifact 13773931227 shows normalized_failure ADAPTER_CONNECTION_NOT_OBSERVED, only native_helper bridge_toggle ENABLED in diagnostics, launcher_has_exited=true, runner_exit_code=0, remaining_firefox_process_count=0: Firefox launched and cleaned up, helper was ready, but the signed extension never connected. This proves the regression is persistent Firefox/profile add-on runtime state or startup/wake behavior, not adapter identity rejection, native-host identity mismatch, or leaked Firefox processes. Current diagnostic head 544911b724aa0c943786a285a6e38213a861667e adds content-free Firefox extensions.json runtime verification for the expected signed adapter. Target-preflight job 129899072941 is queued and currently blocked only on an interactive self-hosted runner labeled workspace-operator-target. Do not rerun the full matrix until this diagnostic identifies whether the installed adapter is still active/enabled.
+- Stage 09 remains IN_PROGRESS and Stage 10+ remain blocked.
+- Prior Firefox adapter/profile, browser ownership-lineage, and transient child ExitCode defects have been corrected without weakening the frozen UX-09 contract.
+- Full target run Operator Bridge #151 / target-performance job `130585620068` on exact head `c938676f999fa015d5dbc7efd2fab588d1012fd4` reached the real target matrix and failed closed only because sustained unrelated CPU exceeded the frozen 20 percent validity ceiling. No `stage09-target-evidence.json` was produced.
+- Current exact head `0891a0fde2da7f763a0589c03ef3daf63ef5b3c7` adds a 10-second early background-CPU preflight plus scenario-specific CPU rejection diagnostics while preserving the same 20 percent acceptance threshold.
+- Workspace Control Validation #2520 and Operator Bridge Validation #153 are SUCCESS on that exact head.
+- Remaining blocker is an environmental quiet-workstation window for the authoritative full target matrix, not an unresolved code defect.
 
 ## Fresh-chat initialization
 
