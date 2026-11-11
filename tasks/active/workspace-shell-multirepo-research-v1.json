@@ -33,7 +33,7 @@
       "base_sha": "4196934cad14ddf3238c4637da4229b8d5e0fc60",
       "remote": {
         "branch": "workspace-shell-multirepo-v3-reconcile-20261111",
-        "checkpoint_sha": "72073976f02ca151c6ee68128175c51b069be42c",
+        "checkpoint_sha": "ca2241d44d5563b137f4c6978b33dfc060d2a968",
         "verified": true
       },
       "local": null,
@@ -599,19 +599,30 @@
         "Validation-only PR #608 was closed without merge.",
         "Validated live refresh tuple: authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da; workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c; PADataset 4c095352bfe128e93f794112741efdb7a66b9c38."
       ]
+    },
+    {
+      "check": "Stage 03 BLAS authority-state validation",
+      "result": "PASS",
+      "evidence": [
+        "PR #609 exact authority head 1a0df02b1199a9ca02702275df73c3d1da97a271 passed Lambda CI Workspace Control Validation #448 / run 43081174909 / job 130733805509.",
+        "All admission, isolation, checkout, bounded repository validation, receipt, and artifact steps passed.",
+        "Validation-only PR #609 was closed without merge.",
+        "Validated refresh tuple: authority 1a0df02b1199a9ca02702275df73c3d1da97a271; workspace-control execution ca2241d44d5563b137f4c6978b33dfc060d2a968; PADataset 4c095352bfe128e93f794112741efdb7a66b9c38."
+      ]
     }
   ],
   "blockers": [
-    "The remaining action is root-owned Workspace Shell runtime mutation. This task explicitly keeps privileged helper trust stores empty/fail-closed, and the connected Workspace Shell frontend cannot mint the required signed root approval.",
-    "Live runtime still uses workspace-control execution 6466ff118127af1dfcc2dbf6aa69833fe1d06c04 until the operator runs the validated upgrade from authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da to execution 72073976f02ca151c6ee68128175c51b069be42c."
+    "Remaining action is root-owned Workspace Shell mutation. Privileged helper trust remains intentionally empty/fail-closed, so connected Workspace Shell cannot execute the refresh.",
+    "Live runtime remains on workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c until operator installs validated execution ca2241d44d5563b137f4c6978b33dfc060d2a968."
   ],
   "remaining_work": [
-    "Operator runs the validated rollback-capable multirepo upgrade from authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da, installing workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c while preserving PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.",
-    "After PASS, verify both live exact bindings through ChatGPT Workspace Shell.",
-    "Run tests/test_multisurrogate_dqnguard.py through research-bounded.",
-    "Prepare the known-only four-class backbone target fold and run Architecture C smoke/small-real evaluation."
+    "Operator runs validated rollback-capable upgrade from authority 1a0df02b1199a9ca02702275df73c3d1da97a271, installing workspace-control execution ca2241d44d5563b137f4c6978b33dfc060d2a968 and preserving PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.",
+    "Verify live exact workspace-control and PADataset bindings through ChatGPT Workspace Shell.",
+    "Rerun tests/test_multisurrogate_dqnguard.py through research-bounded.",
+    "Prepare one known-only four-class backbone target fold with cache_len=16384 and no target-informed checkpoint selection.",
+    "Run Architecture C smoke/small-real evaluator and validate result_record.json."
   ],
-  "next_safe_action": "Operator-only root gate: run the validated multirepo upgrade from exact authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da with workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38. Connected Workspace Shell cannot perform this mutation because privileged helper trust is intentionally empty/fail-closed.",
+  "next_safe_action": "Operator-only root gate: run the validated multirepo upgrade from exact authority 1a0df02b1199a9ca02702275df73c3d1da97a271, with workspace-control execution ca2241d44d5563b137f4c6978b33dfc060d2a968 and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38. Connected Workspace Shell cannot perform this root-owned mutation because privileged helper trust is intentionally empty/fail-closed.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385."
