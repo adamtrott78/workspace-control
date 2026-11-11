@@ -131,6 +131,12 @@ test("PADataset profiles expose bounded evidence and sandboxed research only", (
   const research = resolveProfile("research-bounded", ["experiments/pa_eval_osr_one.py", "--help"]);
   assert.equal(research.executable, "/usr/bin/python3");
   assert.deepEqual(research.argv.slice(0, 2), ["-B", "experiments/pa_eval_osr_one.py"]);
+  const contractTest = resolveProfile("research-bounded", ["tests/test_multisurrogate_dqnguard.py"]);
+  assert.deepEqual(contractTest.argv, ["-B", "tests/test_multisurrogate_dqnguard.py"]);
+  assert.throws(
+    () => resolveProfile("research-bounded", ["tests/test_other_research.py"]),
+    /PROFILE_ARGV_DENIED/,
+  );
 
   assert.throws(() => resolveProfile("file-read", ["-c", "999999", "--", "x"]), /PROFILE_ARGV_DENIED/);
   assert.throws(() => resolveProfile("file-read", ["-c", "10", "--", "../secret"]), /PATH_ESCAPE/);
