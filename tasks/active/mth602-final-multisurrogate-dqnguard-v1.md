@@ -29,18 +29,19 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Do not execute Stage 03 until the parent upgrade from authority 3fb385039108074bef7b5d142bb4fc4781a5c9ab reports PASS and live Workspace Shell confirms PADataset HEAD 4c095352bfe128e93f794112741efdb7a66b9c38.
+Do not execute Stage 03 until PR #606 policy head 72073976f02ca151c6ee68128175c51b069be42c passes exact validation and the live Workspace Shell runtime is refreshed to that policy. PADataset source 4c095352bfe128e93f794112741efdb7a66b9c38 is already verified clean and ready.
 
 ## Remaining work
 
-- Wait for the parent hardened multirepo upgrade to complete successfully.
-- Verify live PADataset HEAD 4c095352bfe128e93f794112741efdb7a66b9c38 through Workspace Shell.
+- Wait for the exact-path research-bounded policy correction to validate and be installed live.
 - Run tests/test_multisurrogate_dqnguard.py through research-bounded.
-- Prepare the known-only four-class backbone target fold and run Architecture C smoke/small-real evaluation.
+- Prepare one known-only four-class backbone target fold with 16,384 cache lineage and no target-informed checkpoint selection.
+- Run Architecture C smoke/small-real evaluator and validate result_record.json against the Stage 02 schema.
 
 ## Blockers / gates
 
-- Live Workspace Shell is not yet rebound to PADataset 4c095352bfe128e93f794112741efdb7a66b9c38; parent authority head 3fb385039108074bef7b5d142bb4fc4781a5c9ab is validated and ready for operator refresh.
+- Live PADataset Stage 03 source binding is now exact and clean at 4c095352bfe128e93f794112741efdb7a66b9c38.
+- Execution is blocked only because current research-bounded policy does not yet admit tests/test_multisurrogate_dqnguard.py; exact-path correction PR #606 head 72073976f02ca151c6ee68128175c51b069be42c is under validation #442.
 
 ## Fresh-chat initialization
 
