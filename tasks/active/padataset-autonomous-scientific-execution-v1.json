@@ -34,7 +34,7 @@
       "base_sha": "f7ed7305e904ec24a444f7a488ca07e9bef4fdc7",
       "remote": {
         "branch": "padataset-autonomous-scientific-execution-v1",
-        "checkpoint_sha": "2379e200dc3d8e7668d2651dc7e02c23190c3db1",
+        "checkpoint_sha": "313e204d7342c0c14b00c2956401783d39e02d9b",
         "verified": true
       },
       "local": null,
@@ -284,10 +284,21 @@
         "That assertion was corrected without changing runtime authority.",
         "Lambda CI Workspace Control Validation #461 / run 43112713212 / job 130832652705 completed SUCCESS on exact head 2379e200dc3d8e7668d2651dc7e02c23190c3db1."
       ]
+    },
+    {
+      "check": "Multi-source DNNs discovery recovery",
+      "result": "PASS",
+      "evidence": [
+        "Operator attempt at 2379e200dc3d8e7668d2651dc7e02c23190c3db1 failed closed before mutation because Conda's registry returned zero DNNs environments.",
+        "Bootstrap now discovers candidates from active python/python3 sys.prefix, PATH entries ending in DNNs/bin, Conda env list, and standard Conda environment locations.",
+        "Each candidate must resolve to basename DNNs, contain bin/python, and report the same resolved sys.prefix; duplicates are collapsed and exactly one unique prefix is required.",
+        "A Conda executable is still required for exact offline cloning and must successfully read the resolved prefix.",
+        "Lambda CI Workspace Control Validation #462 / run 43114175739 / job 130837733396 completed SUCCESS on exact head 313e204d7342c0c14b00c2956401783d39e02d9b."
+      ]
     }
   ],
   "blockers": [
-    "One-time operator/root DNNs + Stage03 cache promotion must run from exact validated source head 2379e200dc3d8e7668d2651dc7e02c23190c3db1.",
+    "One-time operator/root DNNs + Stage03 cache promotion must run from exact validated source head 313e204d7342c0c14b00c2956401783d39e02d9b.",
     "Routine scientific execution remains disabled until the emitted exact runtime/data bindings are committed, validated, activated, and reconciled."
   ],
   "remaining_work": [
@@ -296,7 +307,7 @@
     "ChatGPT creates an exact Stage03 experiment PR/request, triggers autonomous scientific smoke, then full PA2 Architecture C execution.",
     "ChatGPT inspects artifacts/receipts and continues scientific analysis without operator terminal work."
   ],
-  "next_safe_action": "Operator-only one-time bootstrap: run scripts/install_padataset_scientific_runtime_v1.sh from exact validated workspace-control head 2379e200dc3d8e7668d2651dc7e02c23190c3db1. Shell activation metadata is no longer required. Return PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.",
+  "next_safe_action": "Operator-only one-time bootstrap: run scripts/install_padataset_scientific_runtime_v1.sh from exact validated workspace-control head 313e204d7342c0c14b00c2956401783d39e02d9b. Return PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "User explicitly requested that DNNs become part of the PADataset automated execution path and that routine experiments no longer require manual terminal actions."
