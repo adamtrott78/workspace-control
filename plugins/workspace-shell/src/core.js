@@ -328,7 +328,8 @@ function validateResearch(argv) {
   const allowed = topLevel.has(script)
     || script.startsWith("experiments/")
     || script.startsWith("scripts/")
-    || script.startsWith("tools/");
+    || script.startsWith("tools/")
+    || script === "tests/test_multisurrogate_dqnguard.py";
   if (!allowed || !script.endsWith(".py")) {
     fail("PROFILE_ARGV_DENIED", "research-bounded script is outside PADataset research code paths");
   }
