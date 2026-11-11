@@ -55,10 +55,8 @@ TARGET_SCALE_SET = "lambda-workspace-control-control-small"
 TARGET_RUNNER_PREFIX = "lambda-workspace-control-control-small-"
 
 LEGACY_V2_SERVICE = "workspace-ci-controller@workspace-control-cpu.service"
-ROOT_SERVICES = (
-    "workspace-ci-v3-provisioner.service",
-    "workspace-ci-v3-reconciler.service",
-)
+PROVISIONER_SERVICE = "workspace-ci-v3-provisioner.service"
+RECONCILER_SERVICE = "workspace-ci-v3-reconciler.service"
 
 WORKFLOW_RUN_ID = 42881495845
 GITHUB_JOB_ID = 130058639814
@@ -545,7 +543,11 @@ def scheduler_snapshot(token: str) -> dict[str, Any]:
 
 
 def systemctl_show(unit: str) -> dict[str, str]:
-    props = ("Id", "LoadState", "ActiveState", "SubState", "MainPID", "NRestarts", "InvocationID", "User", "Group")
+    props = (
+        "Id", "LoadState", "ActiveState", "SubState", "MainPID", "NRestarts",
+        "InvocationID", "User", "Group", "Type", "RemainAfterExit",
+        "Result", "ExecMainStatus",
+    )
     raw = subprocess.check_output(
         ["systemctl", "show", unit, "--no-pager", *[f"--property={p}" for p in props]],
         text=True,
@@ -558,12 +560,32 @@ def systemctl_show(unit: str) -> dict[str, str]:
     return result
 
 
-def require_active(unit: str) -> dict[str, str]:
+def require_running_service(unit: str) -> dict[str, str]:
     value = systemctl_show(unit)
-    if value.get("LoadState") != "loaded" or value.get("ActiveState") != "active" or value.get("SubState") != "running":
-        raise LiveRevivalError(f"required service not active/running: {unit}")
-    if int(value.get("MainPID") or 0) <= 0:
-        raise LiveRevivalError(f"required service has no MainPID: {unit}")
+    if (
+        value.get("LoadState") != "loaded"
+        or value.get("ActiveState") != "active"
+        or value.get("SubState") != "running"
+        or int(value.get("MainPID") or 0) <= 0
+    ):
+        raise LiveRevivalError(f"required long-running service is not healthy: {unit}")
+    return value
+
+
+def require_verified_oneshot_service(unit: str) -> dict[str, str]:
+    value = systemctl_show(unit)
+    if value.get("LoadState") != "loaded":
+        raise LiveRevivalError(f"required oneshot verifier is not loaded: {unit}")
+    if value.get("Type") != "oneshot" or value.get("RemainAfterExit") != "yes":
+        raise LiveRevivalError(f"required reconciler unit semantics drifted: {unit}")
+    if (
+        value.get("ActiveState") != "active"
+        or value.get("SubState") != "exited"
+        or int(value.get("MainPID") or 0) != 0
+        or value.get("Result") != "success"
+        or value.get("ExecMainStatus") != "0"
+    ):
+        raise LiveRevivalError(f"required oneshot verifier is not healthy/verified: {unit}")
     return value
 
 
@@ -584,9 +606,17 @@ def snapshot_services() -> dict[str, dict[str, str]]:
 
 
 def verify_service_boundary() -> dict[str, dict[str, str]]:
-    for unit in ROOT_SERVICES:
-        require_active(unit)
-    target = require_active(TARGET_SERVICE)
+    provisioner = require_running_service(PROVISIONER_SERVICE)
+    if provisioner.get("Type") not in ("", "simple"):
+        raise LiveRevivalError("V3 provisioner unit type drift")
+    if provisioner.get("User") != "root" or provisioner.get("Group") != "root":
+        raise LiveRevivalError("V3 provisioner service identity mismatch")
+
+    reconciler = require_verified_oneshot_service(RECONCILER_SERVICE)
+    if reconciler.get("User") != "root" or reconciler.get("Group") != "root":
+        raise LiveRevivalError("V3 reconciler service identity mismatch")
+
+    target = require_running_service(TARGET_SERVICE)
     if target.get("User") != TARGET_USER or target.get("Group") != TARGET_GROUP:
         raise LiveRevivalError("target controller service identity mismatch")
     legacy = systemctl_show(LEGACY_V2_SERVICE)
