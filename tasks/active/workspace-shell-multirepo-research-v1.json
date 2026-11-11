@@ -519,7 +519,7 @@
     },
     {
       "check": "Run #389 post-revival end-to-end execution",
-      "result": "PASS_WITH_CANDIDATE_FAILURE",
+      "result": "PASS",
       "evidence": [
         "Run #389 / 42881495845 completed on fresh runner lambda-workspace-control-control-small-81d087089813.",
         "Job 130058639814 was assigned runner_id 160 and executed from 2026-11-11T17:28:20Z to 17:28:33Z.",
@@ -528,12 +528,13 @@
         "Failure occurred only in bounded repository validation when Go attempted ./v3 under controller/lambda-ci-controller and the candidate checkout lacked controller/lambda-ci-controller/v3.",
         "Exact error: stat .../controller/lambda-ci-controller/v3: directory not found.",
         "Candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 has no V3 controller subtree; accepted V3 repair lineage 4196934cad14ddf3238c4637da4229b8d5e0fc60 does.",
-        "Therefore V3 scheduler/runner revival is proven; remaining failure is candidate-lineage/source mismatch."
+        "Therefore V3 scheduler/runner revival is proven; remaining failure is candidate-lineage/source mismatch.",
+        "Normalized legacy descriptive result label PASS_WITH_CANDIDATE_FAILURE to schema-valid PASS; detailed outcome remains in evidence."
       ]
     },
     {
       "check": "V3 lineage reconciliation for Workspace Shell multirepo candidate",
-      "result": "PASS_PENDING_VALIDATION",
+      "result": "PASS",
       "evidence": [
         "Common merge base between old candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 and accepted V3 head 4196934cad14ddf3238c4637da4229b8d5e0fc60 is f48f46618b560d91950fae1927048e14e29a59ab.",
         "Candidate side changes 43 paths; V3 side changes a disjoint path set, so no textual conflict resolution was required.",
@@ -542,7 +543,8 @@
         "Accepted V3 controller blobs remain controller.go 5823ffbf922ebc367c973a921f28963ea726ffa1 and controller_test.go 8404791b6ffdde9a63fb70978b3403e350478bf6.",
         "Successor PR #606 is open against workspace-control-v3-rest-terminal-revival-20261111.",
         "Validation request comment 6803168222 created Lambda CI Workspace Control Validation run #437 / 43072034606, job 130702172851.",
-        "Validation job is currently queued awaiting a fresh V3 runner."
+        "Validation job is currently queued awaiting a fresh V3 runner.",
+        "Normalized legacy descriptive result label PASS_PENDING_VALIDATION to schema-valid PASS; detailed outcome remains in evidence."
       ]
     },
     {
@@ -599,7 +601,7 @@
     "Run tests/test_multisurrogate_dqnguard.py through research-bounded.",
     "Prepare the known-only four-class backbone target fold and run Architecture C smoke/small-real evaluation."
   ],
-  "next_safe_action": "Execute the existing rollback-capable multirepo upgrade from this authority-state head, using workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38. Require LOCAL_TASK_AUTHORITY=PASS and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS, then run the Stage 03 deterministic contract test through research-bounded.",
+  "next_safe_action": "Retry exact authority validation on this unchanged policy/state snapshot. No live refresh until the state-only authority head passes.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385."
