@@ -229,11 +229,12 @@
     {
       "id": "parent-v3-rest-terminal-revival-gate-20261111",
       "kind": "repository_artifact",
-      "identity": "workspace-control#602@22727738d1dae4a0dd2962386efa5a30d99bce53",
+      "identity": "workspace-control#602@c7c45f11def0907bffb56fc4a3d56340df8bc8c1",
       "required_for_resume": true,
       "evidence": [
-        "Parent workspace-control validation is blocked by v3 cross-job terminalization of run #389.",
-        "PR #602 validation #2534 SUCCESS; independent review pending at comment 6800469672."
+        "Parent workspace-control validation remains blocked by v3 cross-job terminalization of run #389.",
+        "Initial PR #602 review returned BLOCKING_FINDINGS in comment 6800923096 and was consumed by receipt 6800928540.",
+        "Corrected PR #602 head c7c45f11def0907bffb56fc4a3d56340df8bc8c1 passed Workspace Control Validation #2537 / run 43057114914; fresh independent review is pending at comment 6801138943."
       ]
     }
   ],
@@ -256,7 +257,7 @@
     }
   ],
   "blockers": [
-    "Parent workspace-shell-multirepo-research-v1 is blocked on workspace-control v3 REST terminal-record repair: PR #602 code review is pending and run #389 has not yet validated exact workspace-control candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030.",
+    "Parent workspace-shell-multirepo-research-v1 is blocked on fresh review of corrected workspace-control PR #602 head c7c45f11def0907bffb56fc4a3d56340df8bc8c1 via request 6801138943; run #389 has not yet validated exact workspace-control candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030.",
     "Live Workspace Shell PADataset runtime remains behind Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38; no Stage 03 execution is authorized until the parent control-plane gate clears and the runtime refresh is validated."
   ],
   "remaining_work": [
