@@ -6,7 +6,7 @@
   "goal": "Make PADataset scientific GPU experiments autonomously executable by ChatGPT through the existing self-hosted Lambda control plane using an exact root-owned DNNs runtime, exact PR-head provenance, read-only project data/cache authority, bounded experiment request schemas, durable artifacts/receipts, and no per-run operator terminal work.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-github-actions-selfhosted-control-plane-v1",
-  "current_stage": "implementation",
+  "current_stage": "dnns_runtime_promotion",
   "acceptance_criteria": [
     "Routine PADataset scientific experiments can be triggered, monitored, and interpreted by ChatGPT with no operator terminal action.",
     "Scientific jobs execute only exact open same-repository PR heads through a trusted default-branch workflow.",
@@ -98,7 +98,7 @@
     },
     {
       "id": "implementation",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -111,12 +111,22 @@
         "trusted PADataset workflow",
         "request validator"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Pre-promotion autonomous scientific implementation validation",
+          "result": "PASS",
+          "evidence": [
+            "Lambda CI Workspace Control Validation #457 / run 43109677734 / job 130822079450 passed exact head 41a0d6ac0c00d81ebb12bbca24e21b838a62370e.",
+            "Full repository validation passed after DNNs source-manifest confidentiality hardening.",
+            "Scientific route remains PLANNED_NOT_BOUND and contract remains PLANNED_NOT_ACCEPTED."
+          ]
+        }
+      ],
       "resume_condition": "Repository implementation passes exact-head validation."
     },
     {
       "id": "dnns_runtime_promotion",
-      "status": "NOT_STARTED",
+      "status": "IN_PROGRESS",
       "execution_owner": "operator+chatgpt",
       "selected_executor": "operator",
       "selected_surface": "lambda",
@@ -232,20 +242,31 @@
         "PR #13 squash-merged to PADataset main as 100888178f362094c45807817f992d2653dcb7b2.",
         "Trusted scientific workflow default-main blob is exactly 555c2bd1f824519281f149017898d4923439d6cc."
       ]
+    },
+    {
+      "check": "Same-executor authority review before root promotion",
+      "result": "PASS",
+      "evidence": [
+        "Reviewed exact mutation scope: declarative contract/resource/profile changes, planned PADataset route, trusted workflow blob binding, one-time DNNs/cache promoter, and tests only.",
+        "No V3 scheduler/controller/runtime Python source change is required for v1.",
+        "Existing gpu-ci remains CI_VALIDATION_ONLY; old gpu-small admissions remain effectively capped at 1200 seconds despite the 4h static profile ceiling.",
+        "DNNs source metadata was moved out of project trusted-cache to root-private /var/lib/workspace-ci to avoid candidate-readable package/channel metadata.",
+        "Promoted DNNs runtime is root-owned/no-write-bits with exact tree digest and pre/post runtime verification; Stage03 cache is separately copied root-owned/read-only.",
+        "No independent-review disposition is claimed; this is the documented same-executor review path."
+      ]
     }
   ],
   "blockers": [
-    "Final pre-promotion workspace-control validation must pass after binding the exact default-branch scientific workflow blob.",
-    "DNNs/runtime + Stage03 cache promotion is a one-time operator/root action; route and contract remain planned/fail-closed until exact promotion bindings are captured.",
-    "After promotion, exact runtime binding must be committed and validated before activation/reconciliation."
+    "One-time operator/root promotion must run from exact validated source head 41a0d6ac0c00d81ebb12bbca24e21b838a62370e while the DNNs Conda environment is active.",
+    "No routine scientific experiment can run until the emitted exact runtime/data bindings are committed, validated, activated, and reconciled."
   ],
   "remaining_work": [
-    "Pass exact-head validation with trusted scientific workflow blob bound while route remains planned.",
-    "Run the one-time validated DNNs/cache promoter and capture exact runtime/data bindings.",
-    "Commit exact runtime binding, activate scientific contract/route, validate and reconcile live.",
-    "Run autonomous scientific smoke, then full Stage 03 PA2 Architecture C experiment."
+    "Operator runs scripts/install_padataset_scientific_runtime_v1.sh once from exact validated source head and returns the final binding lines.",
+    "ChatGPT commits exact DNNs runtime binding, activates the scientific contract/route, validates and reconciles live.",
+    "ChatGPT creates an exact Stage03 experiment PR/request, triggers autonomous scientific smoke, then full PA2 Architecture C execution.",
+    "ChatGPT inspects artifacts/receipts and continues scientific analysis without operator terminal work."
   ],
-  "next_safe_action": "Validate the exact pre-promotion policy snapshot with workflow blob 555c2bd1f824519281f149017898d4923439d6cc bound. Route remains PLANNED_NOT_BOUND and scientific contract remains PLANNED_NOT_ACCEPTED.",
+  "next_safe_action": "Operator-only one-time bootstrap: from active DNNs, run scripts/install_padataset_scientific_runtime_v1.sh at exact validated workspace-control head 41a0d6ac0c00d81ebb12bbca24e21b838a62370e. Return PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "User explicitly requested that DNNs become part of the PADataset automated execution path and that routine experiments no longer require manual terminal actions."
