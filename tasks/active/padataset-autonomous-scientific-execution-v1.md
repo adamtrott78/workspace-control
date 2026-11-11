@@ -24,33 +24,32 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: ea00901d79c512f070435345c80b55df01e47dc3
+- Remote checkpoint: c6341bbd195a0337d57e8cb4dde8d30b152aa3ff
 - Remote verified: true
 
 ### PADataset
 
 - Intent: mutate
-- Remote branch: autonomous-scientific-execution-v1
-- Remote checkpoint: 8dc3a087fbad932ac1a17df7ef963b18affc4c8f
+- Remote branch: main
+- Remote checkpoint: 100888178f362094c45807817f992d2653dcb7b2
 - Remote verified: true
 
 ## Next safe action
 
-Validate the hardened exact implementation head through workspace-control CI; keep the scientific route planned/fail-closed.
+Validate the exact pre-promotion policy snapshot with workflow blob 555c2bd1f824519281f149017898d4923439d6cc bound. Route remains PLANNED_NOT_BOUND and scientific contract remains PLANNED_NOT_ACCEPTED.
 
 ## Remaining work
 
-- Pass workspace-control exact-head validation for planned scientific authority and installer.
-- Validate and merge the trusted PADataset scientific workflow to default main without activating the route.
+- Pass exact-head validation with trusted scientific workflow blob bound while route remains planned.
 - Run the one-time validated DNNs/cache promoter and capture exact runtime/data bindings.
-- Bind exact runtime and trusted workflow blob, activate the scientific contract/route, validate, reconcile live.
+- Commit exact runtime binding, activate scientific contract/route, validate and reconcile live.
 - Run autonomous scientific smoke, then full Stage 03 PA2 Architecture C experiment.
 
 ## Blockers / gates
 
-- Implementation requires exact-head repository validation before DNNs promotion or live activation.
-- PADataset trusted workflow must be merged to default main and exact blob-bound before route activation.
-- DNNs/runtime + Stage03 cache promotion is a one-time operator/root action after installer validation; routine scientific runs require no operator action.
+- Final pre-promotion workspace-control validation must pass after binding the exact default-branch scientific workflow blob.
+- DNNs/runtime + Stage03 cache promotion is a one-time operator/root action; route and contract remain planned/fail-closed until exact promotion bindings are captured.
+- After promotion, exact runtime binding must be committed and validated before activation/reconciliation.
 
 ## Fresh-chat initialization
 
