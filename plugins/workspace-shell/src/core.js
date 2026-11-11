@@ -177,10 +177,21 @@ export function assertTaskId(value) {
 }
 
 export function assertTarget(value) {
-  if (value !== "workspace-control") {
-    fail("TARGET_NOT_AUTHORIZED", "v1 unprivileged execution target is workspace-control only");
+  if (!["workspace-control", "PADataset"].includes(value)) {
+    fail("TARGET_NOT_AUTHORIZED", "unprivileged execution target is not in the frozen target allowlist");
   }
   return value;
+}
+
+export function assertTargetProfile(target, profile) {
+  assertTarget(target);
+  const allowed = target === "workspace-control"
+    ? new Set(["git-read", "pytest-bounded", "validation-bounded", "file-list", "file-read", "file-hash"])
+    : new Set(["git-read", "file-list", "file-read", "file-hash", "research-bounded"]);
+  if (!allowed.has(profile)) {
+    fail("TARGET_PROFILE_DENIED", `profile ${profile} is not authorized for target ${target}`);
+  }
+  return profile;
 }
 
 export function assertRelativePath(value, field = "path") {
@@ -273,6 +284,56 @@ function validateWorkspaceControl(argv) {
   }
 }
 
+function validateFileList(argv) {
+  if (![6, 8].includes(argv.length)) fail("PROFILE_ARGV_DENIED", "file-list grammar mismatch");
+  assertRelativePath(argv[0], "find root");
+  if (argv[1] !== "-maxdepth" || !/^(?:[1-9]|1[0-2])$/.test(argv[2])) {
+    fail("PROFILE_ARGV_DENIED", "file-list requires -maxdepth 1..12");
+  }
+  if (argv[3] !== "-type" || argv[4] !== "f") {
+    fail("PROFILE_ARGV_DENIED", "file-list exposes regular files only");
+  }
+  if (argv.length === 6) {
+    if (argv[5] !== "-print") fail("PROFILE_ARGV_DENIED", "file-list must end with -print");
+    return;
+  }
+  if (argv[5] !== "-name" || !argv[6] || argv[6].length > 128 || argv[6].includes("/")) {
+    fail("PROFILE_ARGV_DENIED", "file-list -name pattern is invalid");
+  }
+  if (argv[7] !== "-print") fail("PROFILE_ARGV_DENIED", "file-list must end with -print");
+}
+
+function validateFileRead(argv) {
+  if (argv.length !== 4 || argv[0] !== "-c" || argv[2] !== "--") {
+    fail("PROFILE_ARGV_DENIED", "file-read grammar is head -c N -- path");
+  }
+  if (!/^[1-9][0-9]{0,4}$/.test(argv[1]) || Number(argv[1]) > 65536) {
+    fail("PROFILE_ARGV_DENIED", "file-read byte limit must be 1..65536");
+  }
+  assertRelativePath(argv[3], "file path");
+}
+
+function validateFileHash(argv) {
+  if (argv.length < 1 || argv.length > 16) fail("PROFILE_ARGV_DENIED", "file-hash accepts 1..16 paths");
+  for (const item of argv) assertRelativePath(item, "file path");
+}
+
+function validateResearch(argv) {
+  if (argv.length < 1) fail("PROFILE_ARGV_DENIED", "research-bounded requires a Python script");
+  const script = assertRelativePath(argv[0], "research script");
+  const topLevel = new Set([
+    "cacheBuild.py", "discriminate.py", "dqn_osr.py", "evaluate.py",
+    "manifestBuild.py", "osr_core.py", "prepData.py", "varmax_osr.py",
+  ]);
+  const allowed = topLevel.has(script)
+    || script.startsWith("experiments/")
+    || script.startsWith("scripts/")
+    || script.startsWith("tools/");
+  if (!allowed || !script.endsWith(".py")) {
+    fail("PROFILE_ARGV_DENIED", "research-bounded script is outside PADataset research code paths");
+  }
+}
+
 export function resolveProfile(profile, argv) {
   assertArgvShape(argv);
   switch (profile) {
@@ -313,6 +374,26 @@ export function resolveProfile(profile, argv) {
         argv: ["scripts/workspace_control.py", ...argv],
         writeScratch: true,
         env: { PYTHONDONTWRITEBYTECODE: "1" },
+      };
+    case "file-list":
+      validateFileList(argv);
+      return { executable: "/usr/bin/find", argv, writeScratch: false, env: {} };
+    case "file-read":
+      validateFileRead(argv);
+      return { executable: "/usr/bin/head", argv, writeScratch: false, env: {} };
+    case "file-hash":
+      validateFileHash(argv);
+      return { executable: "/usr/bin/sha256sum", argv, writeScratch: false, env: {} };
+    case "research-bounded":
+      validateResearch(argv);
+      return {
+        executable: "/usr/bin/python3",
+        argv: ["-B", ...argv],
+        writeScratch: true,
+        env: {
+          PYTHONDONTWRITEBYTECODE: "1",
+          PYTHONNOUSERSITE: "1",
+        },
       };
     default:
       fail("PROFILE_NOT_AUTHORIZED", "unknown Workspace Shell v1 profile");

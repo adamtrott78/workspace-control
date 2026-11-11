@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Temporary live diagnostic for Workspace Shell transport on the Lambda host.
+"""Live diagnostic for Workspace Shell isolation on the Lambda host.
 
-Runs only on the existing bounded lambda-workspace-control runner. It performs
-read-only systemd observations and a loopback TCP reachability check; it does
-not read credentials, mutate units, or access Workspace Shell private state.
+Runs only on the bounded lambda-workspace-control runner. It performs read-only
+systemd observations and verifies that the sibling workspace-control runner
+cannot connect to the private Workspace Shell loopback frontend. The actual MCP
+transport is accepted separately through the dedicated tunnel/plugin path.
 """
 
 from __future__ import annotations
@@ -117,10 +118,12 @@ class WorkspaceShellLiveTransportDiagnostic(unittest.TestCase):
 
         try:
             with socket.create_connection(("127.0.0.1", 8797), timeout=2):
-                report["frontend_tcp_8797"] = "CONNECTED"
+                report["frontend_tcp_8797"] = "UNEXPECTEDLY_REACHABLE"
+                failures.append(
+                    "workspace-control sibling runner unexpectedly reached private Workspace Shell loopback TCP 8797"
+                )
         except OSError as exc:
-            report["frontend_tcp_8797"] = f"FAILED:{type(exc).__name__}:{exc}"
-            failures.append(f"workspace-shell MCP loopback TCP 8797 unreachable: {exc}")
+            report["frontend_tcp_8797"] = f"ISOLATED:{type(exc).__name__}:{exc}"
 
         print(
             "WORKSPACE_SHELL_LIVE_DIAGNOSTIC="

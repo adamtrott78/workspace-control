@@ -7,6 +7,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import {
   RequestAdmissionLimiter,
+  assertTargetProfile,
   authorizeTaskExecution,
   canonicalize,
   readBoundedJsonBody,
@@ -110,6 +111,30 @@ test("profile grammars reject shell/interpreter/config escape shapes", () => {
     () => resolveProfile("validation-bounded", ["preflight", "--repo", "workspace-control"]),
     /PROFILE_ARGV_DENIED/,
   );
+});
+
+test("PADataset profiles expose bounded evidence and sandboxed research only", () => {
+  assert.doesNotThrow(() => assertTargetProfile("PADataset", "git-read"));
+  assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-list"));
+  assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-read"));
+  assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-hash"));
+  assert.doesNotThrow(() => assertTargetProfile("PADataset", "research-bounded"));
+  assert.throws(() => assertTargetProfile("PADataset", "validation-bounded"), /TARGET_PROFILE_DENIED/);
+  assert.throws(() => assertTargetProfile("workspace-control", "research-bounded"), /TARGET_PROFILE_DENIED/);
+
+  const listing = resolveProfile("file-list", ["results", "-maxdepth", "4", "-type", "f", "-name", "*.csv", "-print"]);
+  assert.equal(listing.executable, "/usr/bin/find");
+  const read = resolveProfile("file-read", ["-c", "4096", "--", "results/example.csv"]);
+  assert.equal(read.executable, "/usr/bin/head");
+  const hash = resolveProfile("file-hash", ["results/example.csv"]);
+  assert.equal(hash.executable, "/usr/bin/sha256sum");
+  const research = resolveProfile("research-bounded", ["experiments/pa_eval_osr_one.py", "--help"]);
+  assert.equal(research.executable, "/usr/bin/python3");
+  assert.deepEqual(research.argv.slice(0, 2), ["-B", "experiments/pa_eval_osr_one.py"]);
+
+  assert.throws(() => resolveProfile("file-read", ["-c", "999999", "--", "x"]), /PROFILE_ARGV_DENIED/);
+  assert.throws(() => resolveProfile("file-read", ["-c", "10", "--", "../secret"]), /PATH_ESCAPE/);
+  assert.throws(() => resolveProfile("research-bounded", ["papers/not-approved.py"]), /PROFILE_ARGV_DENIED/);
 });
 
 test("task authority is read from the trusted authority root and target-bound", () => {

@@ -14,6 +14,7 @@ import {
   ShellPolicyError,
   assertRelativePath,
   assertSha,
+  assertTargetProfile,
   authorizeTaskExecution,
   buildFrontendRequest,
   canonicalDigest,
@@ -229,7 +230,7 @@ function createShellServer() {
       description: "Typed read-only inspection. Repository Git observations execute through the hostile-worker sandbox; unit observations use a fixed root-owned allowlist and fixed systemctl show properties.",
       inputSchema: {
         task_id: z.string().min(3).max(100),
-        target: z.enum(["workspace-control", "workspace-shell"]),
+        target: z.enum(["workspace-control", "PADataset", "workspace-shell"]),
         operation: z.enum([
           "git_head",
           "git_tree",
@@ -252,7 +253,7 @@ function createShellServer() {
       try {
         loadTaskCapsule(config.authority_root, args.task_id, { ownerUid: 0 });
         if (args.operation.startsWith("git_")) {
-          if (args.target !== "workspace-control") fail("TARGET_NOT_AUTHORIZED", "Git inspection target must be workspace-control");
+          if (!["workspace-control", "PADataset"].includes(args.target)) fail("TARGET_NOT_AUTHORIZED", "Git inspection target is not authorized");
           if (!args.expected_sha) fail("EXPECTED_SHA_REQUIRED", "Git inspection requires expected_sha");
           authorizeTaskExecution({
             authorityRoot: config.authority_root,
@@ -326,9 +327,9 @@ function createShellServer() {
       description: "Executes only a frozen profile grammar as the isolated hostile-worker identity. No shell, PTY, caller environment, background process, network, credential mount, or control socket is exposed.",
       inputSchema: {
         task_id: z.string().min(3).max(100),
-        target: z.literal("workspace-control"),
+        target: z.enum(["workspace-control", "PADataset"]),
         expected_sha: z.string().regex(/^[0-9a-f]{40}$/),
-        profile: z.enum(["git-read", "pytest-bounded", "validation-bounded"]),
+        profile: z.enum(["git-read", "pytest-bounded", "validation-bounded", "file-list", "file-read", "file-hash", "research-bounded"]),
         argv: z.array(z.string().max(512)).min(1).max(32),
         cwd: z.string().min(1).max(512),
         timeout_ms: z.number().int().min(1000).max(90000),
@@ -346,6 +347,7 @@ function createShellServer() {
           expectedSha: args.expected_sha,
         });
         assertRelativePath(args.cwd, "cwd");
+        assertTargetProfile(args.target, args.profile);
         resolveProfile(args.profile, args.argv);
         const response = await unixRpc(config.launcher_socket, {
           schema: "workspace-shell-job-request.v1",

@@ -1,0 +1,146 @@
+{
+  "schema_version": 2,
+  "task_id": "mth602-final-multisurrogate-dqnguard-v1",
+  "title": "MTH 602 final project / PADataset multi-surrogate DQNGuard",
+  "status": "IN_PROGRESS",
+  "goal": "Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard project so Stage 00 can recover canonical MILCOM baseline/runtime provenance directly from the prepared Lambda checkout before architecture implementation.",
+  "execution_topology": "remote_only",
+  "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
+  "current_stage": "workspace_shell_bootstrap",
+  "acceptance_criteria": [
+    "Workspace Shell can inspect PADataset at the exact task-bound source SHA without changing the historical checkout.",
+    "Stage 00 recovers the fixed-Scan DQNGuard, full 20-cell target-surrogate matrix, and VarMax surrogate-all evidence chains with machine-readable provenance.",
+    "Target labels remain evaluation-only and the final operating threshold remains known-calibration-only at the explicit 5% known-rejection budget.",
+    "Architecture implementation does not begin until Stage 00 baseline/provenance recovery is complete or a genuine evidence blocker is recorded."
+  ],
+  "constraints": [
+    "Scientific truth and experiment design remain authoritative in PADataset docs/experiments/multisurrogate_dqnguard/TASK.md; this workspace-control capsule grants Shell authority only.",
+    "Do not switch branches, reset, clean, stash, delete results, or overwrite local work in the historical Lambda checkout.",
+    "Read-only evidence profiles may inspect a dirty checkout snapshot; research-bounded execution requires a clean source snapshot and runs only in disposable scratch.",
+    "Preserve the surviving pooled-length provenance of 16384 even where the accepted manuscript says 8192.",
+    "Do not use target-test labels for architecture selection, normalization, aggregation, threshold selection, or tuning.",
+    "Clean PADataset execution authority is exact SHA 17e1147614f27702e43565089d618182ff71c5af.",
+    "Historical Stage 00 evidence is sourced from the untouched Lambda checkout observed at branch leaf2026-review-1571342865, local HEAD b5a09cede6680b9e2a53eac244db4fbd7eaf76ec, dirty, approximately 107 GB.",
+    "Do not require the historical evidence checkout to match the clean execution branch; preserve it read-only and record provenance differences explicitly."
+  ],
+  "repositories": [
+    {
+      "name": "PADataset",
+      "intent": "read",
+      "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
+      "remote": {
+        "branch": "mth602-final-multisurrogate-dqnguard-v1",
+        "checkpoint_sha": "17e1147614f27702e43565089d618182ff71c5af",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "workspace_shell_bootstrap",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-shell-multirepo-research-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "Workspace Shell v1",
+        "PADataset@17e1147614f27702e43565089d618182ff71c5af"
+      ],
+      "outputs": [
+        "live task-bound PADataset inspection"
+      ],
+      "validation": [],
+      "resume_condition": null
+    },
+    {
+      "id": "stage00_baseline_provenance_recovery",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "workspace-shell",
+      "inputs": [
+        "workspace_shell_bootstrap"
+      ],
+      "outputs": [
+        "machine-readable baseline provenance artifact",
+        "updated authoritative PADataset TASK.md"
+      ],
+      "validation": [],
+      "resume_condition": "workspace_shell_bootstrap validated."
+    },
+    {
+      "id": "stage01_evidence_partition_design",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "stage00_baseline_provenance_recovery"
+      ],
+      "outputs": [
+        "exact A/B/C evidence partition designs"
+      ],
+      "validation": [],
+      "resume_condition": "Stage 00 complete."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "padataset-project-head",
+      "kind": "git_commit",
+      "identity": "17e1147614f27702e43565089d618182ff71c5af",
+      "required_for_resume": true,
+      "evidence": [
+        "Authoritative PADataset MTH602 research branch head from project handoff."
+      ]
+    },
+    {
+      "id": "padataset-project-task",
+      "kind": "repository_artifact",
+      "identity": "docs/experiments/multisurrogate_dqnguard/TASK.md",
+      "required_for_resume": true,
+      "evidence": [
+        "Owns the scientific stage plan, no-leakage contract, known-budget semantics, and evaluation requirements."
+      ]
+    },
+    {
+      "id": "historical-evidence-checkout",
+      "kind": "runtime_git_observation",
+      "identity": "leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec",
+      "required_for_resume": true,
+      "evidence": [
+        "Lambda read-only preflight observed this checkout and its dirty working tree.",
+        "The 107 GB checkout contains the ignored/local MILCOM-era artifacts needed for Stage 00 and must not be cleaned, switched, reset, stashed, or copied wholesale."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "Live PADataset Workspace Shell binding",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Stage 00 baseline provenance artifact",
+      "result": "NOT_RUN",
+      "evidence": []
+    }
+  ],
+  "blockers": [
+    "Parent Workspace Shell implementation is validated at execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, but this task still returns TASK_NOT_FOUND through the live trusted authority snapshot. No PADataset read or research execution is permitted until the authority refresh completes."
+  ],
+  "remaining_work": [
+    "Apply the validated parent authority refresh and prove this task is visible through Workspace Shell.",
+    "Verify clean PADataset execution HEAD is 17e1147614f27702e43565089d618182ff71c5af and historical evidence is mounted read-only.",
+    "Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings.",
+    "Persist machine-readable Stage 00 provenance in PADataset and update its authoritative task.",
+    "Proceed to Stage 01 only after the provenance gate closes."
+  ],
+  "next_safe_action": "After the parent live upgrade reports LOCAL_TASK_AUTHORITY=PASS, verify this task through ChatGPT Workspace Shell and verify PADataset exact HEAD 17e1147614f27702e43565089d618182ff71c5af. Only then begin Stage 00 read-only provenance recovery from the clean execution snapshot and untouched historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+workspace-shell",
+  "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."
+}

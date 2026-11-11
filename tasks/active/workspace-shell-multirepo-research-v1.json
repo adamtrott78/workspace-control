@@ -1,0 +1,304 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-shell-multirepo-research-v1",
+  "title": "Workspace Shell multi-repo PADataset research access v1",
+  "status": "IN_PROGRESS",
+  "goal": "Extend the live Workspace Shell v1 lineage with a first-class PADataset target that supports exact-SHA/task-bound Git provenance, bounded read-only evidence inspection, and sandboxed network-denied research execution without exposing a generic shell or making the historical PADataset checkout writable.",
+  "execution_topology": "remote_only",
+  "parent_execution_owner": "workspace-shell-mcp-v1",
+  "current_stage": "live_upgrade",
+  "acceptance_criteria": [
+    "PADataset is an explicit Workspace Shell target authorized only by an IN_PROGRESS durable task capsule with an exact repository checkpoint SHA.",
+    "Read-only PADataset evidence inspection supports bounded recursive file listing, bounded byte reads, SHA-256 hashing, and existing hardened Git inspection without arbitrary shell execution.",
+    "research-bounded executes only approved PADataset Python research paths in the existing hostile-worker bubblewrap sandbox with network denied, credentials absent, and a disposable writable source copy.",
+    "Dirty/untracked PADataset state may be inspected by read-only profiles but may not be executed by research-bounded.",
+    "The historical PADataset checkout is never switched, reset, cleaned, stashed, deleted, or directly written by Workspace Shell.",
+    "Live upgrade is exact-head gated, snapshots PADataset read-only under /srv/workspace-shell, preserves rollback evidence, and leaves the four Workspace Shell services healthy.",
+    "Unauthorized targets, target/profile combinations, path traversal, oversized reads, arbitrary Python paths, and generic shell/interpreter escape shapes fail closed."
+  ],
+  "constraints": [
+    "Do not weaken the existing distinct frontend/worker/tunnel/root-broker identities or credential isolation.",
+    "Do not expose /home to the hostile worker; PADataset reaches the worker only through a root-owned /srv snapshot.",
+    "Do not add unrestricted bash, sh, python -c, arbitrary executable lookup, PTY, background process, Docker socket, SSH agent, or outbound network access.",
+    "Do not mutate the historical PADataset checkout during bootstrap or Stage 00.",
+    "Privileged helper trust stores remain empty/fail-closed; this task does not authorize privileged helper execution.",
+    "Bind the clean PADataset execution source to exact SHA 17e1147614f27702e43565089d618182ff71c5af.",
+    "Preserve the historical Lambda checkout in place as read-only evidence; do not require its branch/HEAD to match the clean execution source.",
+    "Historical evidence currently observed at branch leaf2026-review-1571342865, local HEAD b5a09cede6680b9e2a53eac244db4fbd7eaf76ec, dirty, ~107 GB. Treat that identity as runtime evidence, not as a GitHub-resolvable source authority."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
+      "remote": {
+        "branch": "workspace-shell-multirepo-research-v1",
+        "checkpoint_sha": "1a9a24fc1bc6e5cda2984e296151a378138600c8",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-shell-multirepo-research-v1.json",
+        "tasks/active/workspace-shell-multirepo-research-v1.md",
+        "tasks/active/mth602-final-multisurrogate-dqnguard-v1.json",
+        "tasks/active/mth602-final-multisurrogate-dqnguard-v1.md",
+        "plugins/workspace-shell/**",
+        "tests/test_workspace_shell*.py"
+      ]
+    },
+    {
+      "name": "PADataset",
+      "intent": "read",
+      "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
+      "remote": {
+        "branch": "mth602-final-multisurrogate-dqnguard-v1",
+        "checkpoint_sha": "17e1147614f27702e43565089d618182ff71c5af",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "target_contract",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-shell-mcp-v1 accepted live runtime",
+        "PADataset project handoff"
+      ],
+      "outputs": [
+        "PADataset target/profile contract"
+      ],
+      "validation": [
+        {
+          "check": "Least-privilege target design",
+          "result": "PASS",
+          "evidence": [
+            "PADataset gains git/file-read/file-hash/file-list and research-bounded only; generic shell remains absent.",
+            "research-bounded uses write_scratch=true and network=deny."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "implementation_and_validation",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "target_contract"
+      ],
+      "outputs": [
+        "Workspace Shell source changes",
+        "multirepo regression tests",
+        "live upgrade operator"
+      ],
+      "validation": [
+        {
+          "check": "Exact-head Workspace Shell/PADataset repository validation",
+          "result": "PASS",
+          "evidence": [
+            "Execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 was checked out exactly by Lambda validation run #385 / Actions 42880610796.",
+            "Python repository suite passed 548 tests with 1 intentional skip, including the pre-existing evidence-mount safety regression and upgrade Bash syntax.",
+            "Exact same-repository PR-head and bounded runner-isolation gates passed; live Workspace Shell transport isolation diagnostic passed.",
+            "Workflow red conclusion occurs only after the passing candidate-scope suite because the accepted Workspace Shell lineage lacks controller/lambda-ci-controller/v3."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "live_upgrade",
+      "status": "IN_PROGRESS",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": "operator",
+      "selected_surface": "lambda+workspace-shell",
+      "inputs": [
+        "validated implementation head"
+      ],
+      "outputs": [
+        "root-owned PADataset snapshot",
+        "updated live Workspace Shell runtime",
+        "live acceptance receipts"
+      ],
+      "validation": [],
+      "resume_condition": "Repository implementation is validated. Live upgrade must refresh the independent trusted authority snapshot and then prove both new task IDs through local and ChatGPT Workspace Shell calls."
+    },
+    {
+      "id": "stage00_handoff",
+      "status": "PLANNED",
+      "execution_owner": "mth602-final-multisurrogate-dqnguard-v1",
+      "selected_executor": "chatgpt",
+      "selected_surface": "workspace-shell",
+      "inputs": [
+        "live_upgrade"
+      ],
+      "outputs": [
+        "direct PADataset Stage 00 access"
+      ],
+      "validation": [],
+      "resume_condition": "Live PADataset git/file inspection succeeds at the exact task-bound SHA."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "workspace-shell-v1-repaired-lineage",
+      "kind": "git_commit",
+      "identity": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
+      "required_for_resume": true,
+      "evidence": [
+        "Upgrade branch was created from the repaired Workspace Shell current-main lineage."
+      ]
+    },
+    {
+      "id": "padataset-initial-authority",
+      "kind": "git_commit",
+      "identity": "17e1147614f27702e43565089d618182ff71c5af",
+      "required_for_resume": true,
+      "evidence": [
+        "Initial MTH602 research branch head supplied by the authoritative project handoff; live upgrade must verify the local checkout matches before mutation."
+      ]
+    },
+    {
+      "id": "padataset-historical-evidence-source",
+      "kind": "runtime_git_observation",
+      "identity": "leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec",
+      "required_for_resume": true,
+      "evidence": [
+        "Read-only preflight on Lambda observed this historical checkout identity and aborted before mutation.",
+        "Checkout is dirty and approximately 107 GB; it must be exposed by read-only bind mount rather than copied or normalized."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "plugins/workspace-shell/install/upgrade_multirepo_padataset_v1.sh",
+      "state": "VALIDATED_NOT_DEPLOYED",
+      "role": "live upgrade/rollback operator",
+      "origin": "this task",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "exact-head validation before Lambda execution",
+      "evidence": [
+        "Separates exact authority SHA from exact workspace-control execution SHA and PADataset execution SHA.",
+        "Refreshes /etc/workspace-shell/authority atomically while preserving rollback and independently materializes /srv/workspace-shell/workspace-control.",
+        "Verifies both durable task bindings before mutation and probes both new task IDs locally through MCP before declaring upgrade success.",
+        "Preserves the historical PADataset checkout read-only and continues to source runtime dependencies from the retained accepted dependency closure.",
+        "Rerun hardening at 1a9a24fc1bc6e5cda2984e296151a378138600c8 accepts an already-mounted evidence bind only when device+inode match the historical checkout and mount options contain ro,nosuid,nodev,noexec; unknown/weaker mounts fail closed."
+      ]
+    },
+    {
+      "path": "tests/test_workspace_shell_multirepo_research.py",
+      "state": "VALIDATED",
+      "role": "multirepo contract regression",
+      "origin": "this task",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "CI",
+      "evidence": [
+        "Covers target/profile matrix, evidence bounds, research sandbox profile, install root, and upgrade fail-closed markers."
+      ]
+    },
+    {
+      "path": "plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md",
+      "state": "IMPLEMENTED",
+      "role": "canonical ChatGPT-side edit/reinstall/refresh workflow for owned private App-backed MCP plugins",
+      "origin": "this task",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "supersede only with a later validated operator procedure",
+      "evidence": [
+        "Procedure records the proven uninstall -> surface existing private plugin install card -> user Install -> browser refresh -> Refresh tools sequence.",
+        "Procedure distinguishes plugin/app refresh failures from live MCP frontend failures and forbids repeated reinstall while the server is unhealthy."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Repository implementation tests",
+      "result": "PASS",
+      "evidence": [
+        "Exact execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 passed 548 Python tests with 1 intentional skip in Lambda validation run #385 / Actions 42880610796.",
+        "The idempotent evidence-mount safety regression and upgrade operator Bash syntax both passed.",
+        "The only workflow failure is the known non-applicable controller/lambda-ci-controller/v3 wrapper after candidate-scope validation completed successfully."
+      ]
+    },
+    {
+      "check": "Workspace Control integration validation",
+      "result": "PASS",
+      "evidence": [
+        "Exact same-repository PR-head gate passed for 1a9a24fc1bc6e5cda2984e296151a378138600c8.",
+        "Bounded workspace-control runner isolation and live Workspace Shell transport isolation diagnostic passed.",
+        "No controller/** change is part of this Workspace Shell candidate; the later missing ./v3 wrapper remains a validator-lineage mismatch."
+      ]
+    },
+    {
+      "check": "Live PADataset exact-SHA inspection",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Live negative target/profile/path tests",
+      "result": "NOT_RUN",
+      "evidence": []
+    },
+    {
+      "check": "Runtime dependency preservation",
+      "result": "PASS",
+      "evidence": [
+        "Live dependency repair restored the retained accepted node_modules closure and verified @modelcontextprotocol/ext-apps, @modelcontextprotocol/sdk, and zod imports as the Workspace Shell frontend identity.",
+        "Execution candidate ce19452c644599bda23f6e3766c9390fa0d906db retains the dependency-preservation regression and sources runtime code/config only from the separately materialized execution snapshot."
+      ]
+    },
+    {
+      "check": "Local MCP initialize/tools discovery",
+      "result": "PASS",
+      "evidence": [
+        "Local mTLS initialize returned serverInfo name=workspace-shell version=0.1.0 with no error.",
+        "Local mTLS tools/list returned exactly workspace_shell_inspect, workspace_shell_exec, workspace_shell_run_reviewed_helper, workspace_shell_receipt.",
+        "workspace_shell_exec target enum contains workspace-control and PADataset.",
+        "workspace_shell_exec profile enum contains git-read, pytest-bounded, validation-bounded, file-list, file-read, file-hash, research-bounded."
+      ]
+    },
+    {
+      "check": "ChatGPT app transport after refresh",
+      "result": "PASS",
+      "evidence": [
+        "Fresh-conversation model-visible Workspace Shell schema exposes PADataset as a target and research-bounded as a profile.",
+        "Old-compatible workspace-shell-mcp-v1 runtime_inventory succeeds through ChatGPT App -> Secure MCP Tunnel -> MCP, proving transport remains healthy.",
+        "Both workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND before PADataset access, isolating the remaining blocker to the trusted task-authority snapshot rather than app discovery or transport."
+      ]
+    },
+    {
+      "check": "Independent authority-root task visibility",
+      "result": "FAIL",
+      "evidence": [
+        "Live calls for both new task IDs return TASK_NOT_FOUND while workspace-shell-mcp-v1 remains visible.",
+        "Accepted live lineage records an independent trusted authority snapshot at /etc/workspace-shell/authority, distinct from executable /srv/workspace-shell/workspace-control.",
+        "The deployed multirepo upgrader refreshed executable/runtime snapshots but did not refresh the independent authority snapshot.",
+        "Candidate ce19452c644599bda23f6e3766c9390fa0d906db corrects this by separately staging authority and execution SHAs with rollback and local MCP task-visibility probes."
+      ]
+    }
+  ],
+  "blockers": [
+    "Live trusted task authority is still stale: workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND. This remains the sole execution gate before PADataset Stage 00.",
+    "The validated host upgrade must be rerun from the new authority-state head with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8. The existing evidence mount may now be reused only if the upgrader verifies its identity and read-only hardening."
+  ],
+  "remaining_work": [
+    "Deploy the validated multirepo upgrade using the final authority-state head, workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af.",
+    "Verify live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1.",
+    "Run positive and negative PADataset Workspace Shell acceptance at exact SHA 17e1147614f27702e43565089d618182ff71c5af.",
+    "Begin MTH602 Stage 00 provenance recovery from the clean execution snapshot plus the untouched read-only historical evidence checkout.",
+    "Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema."
+  ],
+  "next_safe_action": "Rerun the validated rollback-capable multirepo upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. The upgrader must verify/reuse the existing PADataset evidence mount safely, refresh /etc/workspace-shell/authority separately, and report LOCAL_TASK_AUTHORITY=PASS. Then re-test both durable task IDs through ChatGPT Workspace Shell before any Stage 00 read.",
+  "last_executor": "chatgpt",
+  "last_surface": "github+workspace-shell",
+  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385."
+}
