@@ -782,6 +782,47 @@ function Invoke-FirefoxReplicate {
     throw "Firefox target replicate $Repetition emitted invalid structured result evidence."
   }
 
+  if ($null -ne $repResultObject.result) {
+    if ($repResultObject.result -ne "COLLECTOR_FAILURE") {
+      throw "Firefox target replicate $Repetition emitted an unknown structured result status."
+    }
+    $collectorFailure = [ordered]@{
+      repetition = $Repetition
+      normalized_phase = [string]$repResultObject.normalized_phase
+      normalized_error_type = [string]$repResultObject.normalized_error_type
+      normalized_message = [string]$repResultObject.normalized_message
+      steady_result_exists = [bool]$repResultObject.steady_result_exists
+      cold_result_exists = [bool]$repResultObject.cold_result_exists
+    }
+    Write-Host ("STAGE09_FIREFOX_REPLICATE_COLLECTOR_FAILURE=" + ($collectorFailure | ConvertTo-Json -Depth 4 -Compress))
+    throw "Firefox target replicate $Repetition reported collector failure."
+  }
+
+  $latencyExists = $null -ne $repResultObject.steady_state.latency
+  $hotkeyExists = $null -ne $repResultObject.steady_state.hotkey_queue_to_callback_proxy
+  $coldCount = if ($null -ne $repResultObject.cold_start -and
+                   $null -ne $repResultObject.cold_start.cold_firefox_start) {
+    [int]$repResultObject.cold_start.cold_firefox_start.count
+  } else {
+    0
+  }
+  if ((-not $SkipLatency -and (-not $latencyExists -or -not $hotkeyExists)) -or
+      (-not $SkipColdStart -and $coldCount -ne $ColdStartRepetitions)) {
+    Write-Host ("STAGE09_FIREFOX_REPLICATE_INCOMPLETE=" + ([ordered]@{
+      repetition = $Repetition
+      latency_required = [bool](-not $SkipLatency)
+      latency_exists = $latencyExists
+      hotkey_exists = $hotkeyExists
+      cold_start_required = [bool](-not $SkipColdStart)
+      cold_start_count = $coldCount
+      cold_start_expected = $ColdStartRepetitions
+    } | ConvertTo-Json -Depth 4 -Compress))
+    if (-not $SkipLatency -and (-not $latencyExists -or -not $hotkeyExists)) {
+      throw "Firefox target replicate $Repetition is missing required exact latency evidence."
+    }
+    throw "Firefox target replicate $Repetition is missing required exact 10 cold-start trials."
+  }
+
   $noiseSummary = Get-Summary ([double[]]$noise.ToArray())
   if ([double]$noiseSummary.mean -gt $BackgroundCpuRejectPercent) {
     throw "Target measurement rejected: sustained unrelated CPU exceeded 20 percent during Firefox replicate $Repetition."
