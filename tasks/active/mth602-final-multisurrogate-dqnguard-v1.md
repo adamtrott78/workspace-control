@@ -29,11 +29,11 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Do not execute MTH602 Stage 03. Parent recovery is gated on independent review of PR #604 request 6802353544 for exact live transaction head 1a355725c7ff80434622696995fcb72c5c9812f7; after accepted/consumed review, execute the bounded transaction once, finish exact-head workspace-control validation 50395aad06ab719b8207d9e7d3d8270a6bb35030, then refresh Workspace Shell PADataset to 4c095352bfe128e93f794112741efdb7a66b9c38.
+Do not execute MTH602 Stage 03. Parent PR #604 live transaction is independently accepted/consumed, but the privileged execution transport is still blocked on a Workspace Shell reviewed-helper + external signed approval (or separate operator-local root execution). After that exact transaction runs and workspace-control candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 validates, refresh Workspace Shell PADataset to 4c095352bfe128e93f794112741efdb7a66b9c38.
 
 ## Remaining work
 
-- Wait for parent PR #604 live-transaction review request 6802353544, then the separately authorized one-time V3 repair.
+- Wait for the parent exact live V3 transaction to be executed through valid privileged authority and for run #389 exact-candidate validation evidence.
 - Wait for exact-head validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030.
 - Refresh Workspace Shell to exact PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.
 - Run tests/test_multisurrogate_dqnguard.py through research-bounded on that exact clean snapshot.
@@ -42,7 +42,7 @@ Do not execute MTH602 Stage 03. Parent recovery is gated on independent review o
 
 ## Blockers / gates
 
-- Parent workspace-shell-multirepo-research-v1 is blocked on fresh independent authority-sensitive review of PR #604 head 1a355725c7ff80434622696995fcb72c5c9812f7 via request 6802353544; no live transaction execution is authorized yet.
+- Parent live transaction review is accepted/consumed, but execution is blocked on privileged transport authority: no pre-admitted Workspace Shell helper / external single-use approval is available through the connected surface.
 - Live Workspace Shell PADataset runtime remains behind Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38; no Stage 03 execution is authorized until the parent control-plane gate clears and the runtime refresh is validated.
 
 ## Fresh-chat initialization
