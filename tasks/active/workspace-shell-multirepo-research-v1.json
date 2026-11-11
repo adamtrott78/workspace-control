@@ -261,9 +261,9 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github",
       "inputs": [
-        "workspace-control PR #604 exact head c0526aaba0942606f99fd00633281071e72d6c71",
+        "workspace-control PR #604 exact head ae9f8495fbdbe88ad48d608c8d30fe84928e5b97",
         "accepted PR #602 controller head 4196934cad14ddf3238c4637da4229b8d5e0fc60",
-        "Workspace Control Validation 43061820455 / #2546 SUCCESS",
+        "Workspace Control Validation 43064429832 / #2549 SUCCESS",
         "run #389 / job 130058639814 still queued and runner-unbound at review preparation",
         "frozen incident ledger SHA256 39c5ed5b4b3337433fc8608a82f7d2a767ebd575ab0aa507cf3bbaa70a5fb5b9"
       ],
@@ -281,9 +281,21 @@
             "Workspace Control Validation run 43061820455 / #2546 completed SUCCESS including full integration contracts.",
             "Automated authority-sensitive review request comment 6801793676 binds tree e69055006e0e875b4259729b00bbf95ee520a327 and request digest 7e58111003a7fdb67fb76307981f43154385c324e02f1e1e2a80819bf0722db2."
           ]
+        },
+        {
+          "check": "PR #604 first live-transaction review findings corrected",
+          "result": "PASS",
+          "evidence": [
+            "Independent review 6801931546 returned BLOCKING_FINDINGS for request 6801793676; automated consumption receipt 6801935499 consumed it.",
+            "Source authority now builds from a Git archive of accepted PR #602 head with complete untracked-file rejection and GOWORK=off/GOENV=off/empty GOFLAGS.",
+            "Rollback now quiesces the target controller before the ledger decision; post-quiescence ledger drift retains the accepted override and forbids rollback across scheduler state.",
+            "Review authority now recomputes request digest/bindings, requires exact key sets, and rejects duplicate/conflicting dispositions or consumptions.",
+            "Corrected PR #604 exact head ae9f8495fbdbe88ad48d608c8d30fe84928e5b97 passed Workspace Control Validation #2549 / run 43064429832 including full integration contracts.",
+            "Fresh automated review request 6802154988 binds tree a6f6838cf23b898915f05b2a303e174bb71409ca and digest 1c5ec9606b45e0cc001964fbaa04c863ea9140c3f87d8d5c7e90fe3557603ed4."
+          ]
         }
       ],
-      "resume_condition": "Fresh independent reviewer posts NO_BLOCKING_FINDING for PR #604 request 6801793676 and automated consumption succeeds. Only then may the exact reviewed transaction be executed once; no PR merge is required for live authority."
+      "resume_condition": "Fresh independent reviewer posts NO_BLOCKING_FINDING for corrected PR #604 request 6802154988 and automated consumption succeeds. Only then may the exact reviewed transaction be executed once."
     }
   ],
   "checkpoints": [
@@ -344,12 +356,15 @@
     {
       "id": "workspace-control-v3-rest-terminal-revival-live-transaction-20261111",
       "kind": "git_commit",
-      "identity": "workspace-control#604@c0526aaba0942606f99fd00633281071e72d6c71",
+      "identity": "workspace-control#604@ae9f8495fbdbe88ad48d608c8d30fe84928e5b97",
       "required_for_resume": true,
       "evidence": [
         "Base is accepted PR #602 controller head 4196934cad14ddf3238c4637da4229b8d5e0fc60.",
         "Workspace Control Validation 43061820455 / #2546 SUCCESS.",
-        "Automated review request 6801793676 / digest 7e58111003a7fdb67fb76307981f43154385c324e02f1e1e2a80819bf0722db2."
+        "Automated review request 6801793676 / digest 7e58111003a7fdb67fb76307981f43154385c324e02f1e1e2a80819bf0722db2.",
+        "Initial live review request 6801793676 -> BLOCKING_FINDINGS 6801931546 -> consumed receipt 6801935499.",
+        "Workspace Control Validation 43064429832 / #2549 SUCCESS on corrected live-transaction head.",
+        "Fresh corrected review request 6802154988 / digest 1c5ec9606b45e0cc001964fbaa04c863ea9140c3f87d8d5c7e90fe3557603ed4."
       ]
     }
   ],
@@ -471,18 +486,18 @@
   ],
   "blockers": [
     "Exact-head workspace-control candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 cannot validate while v3 job 130058639814 is suppressed by the false terminal ledger record.",
-    "PR #604 exact live-transaction head c0526aaba0942606f99fd00633281071e72d6c71 is validated and waits for fresh independent authority-sensitive review via request 6801793676; no live mutation is authorized yet.",
+    "PR #604 corrected live-transaction head ae9f8495fbdbe88ad48d608c8d30fe84928e5b97 is validated and waits for fresh independent authority-sensitive review via request 6802154988; no live mutation is authorized yet.",
     "Even after code review acceptance, no live v3 controller deployment or ledger revival is authorized until a separate source-bound live refresh transaction is designed, validated, and independently reviewed.",
     "PADataset Stage 03 remains blocked until workspace-control exact-head validation completes and the parent runtime refresh can safely bind Workspace Shell to PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38."
   ],
   "remaining_work": [
-    "Obtain and consume independent PR #604 live-transaction review request 6801793676.",
+    "Obtain and consume independent PR #604 corrected live-transaction review request 6802154988.",
     "Prepare and independently review a bounded live v3 production-controller refresh/revival transaction; do not touch retired v2 workspace-control controller generation.",
     "Repair/revive only the exact #389 REST terminal record under reviewed semantics and allow run #389 to validate candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030.",
     "After exact-head validation passes, refresh Workspace Shell authority/runtime to workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030 and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.",
     "Verify both live durable task gates, then resume MTH602 Stage 03 deterministic tests and architecture-C evaluation."
   ],
-  "next_safe_action": "Obtain fresh independent authority-sensitive review of PR #604 request 6801793676 on exact head c0526aaba0942606f99fd00633281071e72d6c71. Do not execute the live transaction, mutate Lambda, restart controllers, or edit the v3 ledger until NO_BLOCKING_FINDING is automatically consumed.",
+  "next_safe_action": "Obtain fresh independent authority-sensitive review of PR #604 request 6802154988 on exact corrected head ae9f8495fbdbe88ad48d608c8d30fe84928e5b97. Do not execute the live transaction, mutate Lambda, restart controllers, or edit the v3 ledger until NO_BLOCKING_FINDING is automatically consumed.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385."
