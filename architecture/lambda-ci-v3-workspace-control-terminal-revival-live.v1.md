@@ -23,7 +23,7 @@ The live operator itself additionally requires a **new authority-sensitive indep
 Immediately before mutation the operator requires:
 
 - production V3 service `workspace-ci-v3-controller@workspace-control-control-small-v1.service` is loaded, active/running, and runs as `ci-ctl-wc-control:ci-gh-workspace-control`;
-- V3 provisioner and reconciler are active/running;
+- V3 provisioner is loaded and active/running with a positive MainPID, while the V3 installed-generation reconciler is validated according to its declared `Type=oneshot`, `RemainAfterExit=yes` steady state: loaded, active/exited, MainPID 0, Result=success, ExecMainStatus=0;
 - retired V2 `workspace-ci-controller@workspace-control-cpu.service` is not active;
 - production controller policy binds repository `adamtrott78/workspace-control`, scale set `lambda-workspace-control-control-small`, max runners 1, and trusted workflow blob `7e361db3a8ead667c047e9dc3fe12908c10eb96a`;
 - GitHub run `42881495845` / job `130058639814` is still queued, has the target scale-set label, and is runner-unbound;
