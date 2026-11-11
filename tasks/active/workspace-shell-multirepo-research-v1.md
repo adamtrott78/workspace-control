@@ -23,33 +23,33 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 1a9a24fc1bc6e5cda2984e296151a378138600c8
+- Remote branch: workspace-shell-multirepo-v3-reconcile-20261111
+- Remote checkpoint: ca2241d44d5563b137f4c6978b33dfc060d2a968
 - Remote verified: true
 
 ### PADataset
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 17e1147614f27702e43565089d618182ff71c5af
+- Remote checkpoint: 4c095352bfe128e93f794112741efdb7a66b9c38
 - Remote verified: true
 
 ## Next safe action
 
-Rerun the validated rollback-capable multirepo upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. The upgrader must verify/reuse the existing PADataset evidence mount safely, refresh /etc/workspace-shell/authority separately, and report LOCAL_TASK_AUTHORITY=PASS. Then re-test both durable task IDs through ChatGPT Workspace Shell before any Stage 00 read.
+Validate this exact state-only authority snapshot. Do not perform another live refresh until that validation passes.
 
 ## Remaining work
 
-- Deploy the validated multirepo upgrade using the final authority-state head, workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af.
-- Verify live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1.
-- Run positive and negative PADataset Workspace Shell acceptance at exact SHA 17e1147614f27702e43565089d618182ff71c5af.
-- Begin MTH602 Stage 00 provenance recovery from the clean execution snapshot plus the untouched read-only historical evidence checkout.
-- Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
+- Validate this state-only authority snapshot binding workspace-control ca2241d44d5563b137f4c6978b33dfc060d2a968 and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
+- After PASS, operator installs workspace-control execution ca2241d44d5563b137f4c6978b33dfc060d2a968 while preserving PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
+- Verify live exact bindings and rerun tests/test_multisurrogate_dqnguard.py through research-bounded.
+- Prepare one known-only four-class backbone target fold with 16,384 cache lineage and no target-informed checkpoint selection.
+- Run Architecture C smoke/small-real evaluator and validate result_record.json.
 
 ## Blockers / gates
 
-- Live trusted task authority is still stale: workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND. This remains the sole execution gate before PADataset Stage 00.
-- The validated host upgrade must be rerun from the new authority-state head with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8. The existing evidence mount may now be reused only if the upgrader verifies its identity and read-only hardening.
+- Live Workspace Shell still uses execution 72073976f02ca151c6ee68128175c51b069be42c; validated BLAS runtime fix ca2241d44d5563b137f4c6978b33dfc060d2a968 is not installed yet.
+- The next mutation is root-owned and must use the existing rollback-capable operator upgrade after this state-only authority snapshot passes validation.
 
 ## Fresh-chat initialization
 
