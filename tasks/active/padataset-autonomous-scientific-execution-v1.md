@@ -24,7 +24,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: d69c5c3f3af5619c72a0a11c437a8edead4a8022
+- Remote checkpoint: 2379e200dc3d8e7668d2651dc7e02c23190c3db1
 - Remote verified: true
 
 ### PADataset
@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator-only one-time bootstrap: from the active DNNs shell, run scripts/install_padataset_scientific_runtime_v1.sh at exact validated workspace-control head d69c5c3f3af5619c72a0a11c437a8edead4a8022. Return the final PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS lines.
+Operator-only one-time bootstrap: run scripts/install_padataset_scientific_runtime_v1.sh from exact validated workspace-control head 2379e200dc3d8e7668d2651dc7e02c23190c3db1. Shell activation metadata is no longer required. Return PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.
 
 ## Remaining work
 
@@ -47,5 +47,5 @@ Operator-only one-time bootstrap: from the active DNNs shell, run scripts/instal
 
 ## Blockers / gates
 
-- One-time operator/root promotion must run from exact validated source head d69c5c3f3af5619c72a0a11c437a8edead4a8022 while the DNNs Conda environment is active.
-- No routine scientific experiment can run until the emitted exact runtime/data bindings are committed, validated, activated, and reconciled.
+- One-time operator/root DNNs + Stage03 cache promotion must run from exact validated source head 2379e200dc3d8e7668d2651dc7e02c23190c3db1.
+- Routine scientific execution remains disabled until the emitted exact runtime/data bindings are committed, validated, activated, and reconciled.
