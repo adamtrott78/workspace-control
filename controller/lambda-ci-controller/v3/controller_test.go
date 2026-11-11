@@ -535,6 +535,116 @@ func TestRestAttestedAssignedDemandProvisionsWithoutBrokerIDs(t *testing.T) {
 	}
 }
 
+func TestRestStillQueuedJobRevivesTerminalLocalRecordWithFreshProvisionIdentity(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	policy := testPolicy()
+	job := restDiscoveredJob(9001, 1901)
+	record, err := newJobRecord(policy, job, "COMPLETED", time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	record.SchedulerState = "COMPLETED"
+	record.LastRootStatus = "COMPLETED"
+	oldRequestID := record.RequestID
+	oldRunnerName := record.RunnerName
+	if err := ledger.Put(record); err != nil {
+		t.Fatal(err)
+	}
+
+	verifier := &fakeVerifier{
+		discoverySafe: true,
+		discovered:    []verifiedJob{job},
+	}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	current, ok, err := ledger.Get(job.GitHubJobID)
+	if err != nil || !ok {
+		t.Fatalf("revived REST job missing: ok=%v err=%v", ok, err)
+	}
+	if current.ProvisionAttempt != 1 {
+		t.Fatalf("provision attempt=%d want=1", current.ProvisionAttempt)
+	}
+	if current.RequestID == oldRequestID || current.RunnerName == oldRunnerName {
+		t.Fatalf(
+			"revival reused stale provision identity request=%s runner=%s",
+			current.RequestID,
+			current.RunnerName,
+		)
+	}
+	if current.SchedulerState != "REST_ATTESTED_QUEUED_RETRY" {
+		t.Fatalf("scheduler state=%q want REST_ATTESTED_QUEUED_RETRY", current.SchedulerState)
+	}
+	if current.State != "PREPARING" || current.LastRootStatus != "PREPARING" {
+		t.Fatalf("revived job did not re-enter launch flow: %#v", current)
+	}
+	if len(events) != 3 ||
+		!strings.HasPrefix(events[0], "reserve:") ||
+		!strings.HasPrefix(events[1], "jit:") ||
+		!strings.HasPrefix(events[2], "launch:") {
+		t.Fatalf("revived job did not execute fresh RESERVE -> JIT -> LAUNCH: %#v", events)
+	}
+}
+
+func TestRestDiscoveryDoesNotReviveTerminalNonRestAuthority(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	policy := testPolicy()
+	job := restDiscoveredJob(9001, 1901)
+	record, err := newJobRecord(policy, job, "COMPLETED", time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	record.AuthoritySource = "BROKER_JOB_AVAILABLE"
+	record.SchedulerState = "COMPLETED"
+	oldRequestID := record.RequestID
+	if err := ledger.Put(record); err != nil {
+		t.Fatal(err)
+	}
+
+	scaler := testScaler(
+		&fakeVerifier{
+			discoverySafe: true,
+			discovered:    []verifiedJob{job},
+		},
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if len(events) != 0 {
+		t.Fatalf("non-REST terminal authority was incorrectly revived: %#v", events)
+	}
+	current, ok, err := ledger.Get(job.GitHubJobID)
+	if err != nil || !ok {
+		t.Fatalf("terminal record missing: ok=%v err=%v", ok, err)
+	}
+	if current.State != "COMPLETED" ||
+		current.SchedulerState != "COMPLETED" ||
+		current.RequestID != oldRequestID ||
+		current.ProvisionAttempt != 0 {
+		t.Fatalf("non-REST terminal record changed: %#v", current)
+	}
+}
+
 func TestUnsafeRestTargetDemandNeverReachesRoot(t *testing.T) {
 	events := []string{}
 	verifier := &fakeVerifier{
