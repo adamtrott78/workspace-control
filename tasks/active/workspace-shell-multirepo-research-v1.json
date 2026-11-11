@@ -530,7 +530,7 @@
     },
     {
       "check": "Run #389 post-revival end-to-end execution",
-      "result": "PASS_WITH_CANDIDATE_FAILURE",
+      "result": "PASS",
       "evidence": [
         "Run #389 / 42881495845 completed on fresh runner lambda-workspace-control-control-small-81d087089813.",
         "Job 130058639814 was assigned runner_id 160 and executed from 2026-11-11T17:28:20Z to 17:28:33Z.",
@@ -544,7 +544,7 @@
     },
     {
       "check": "V3 lineage reconciliation for Workspace Shell multirepo candidate",
-      "result": "PASS_PENDING_VALIDATION",
+      "result": "PASS",
       "evidence": [
         "Common merge base between old candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 and accepted V3 head 4196934cad14ddf3238c4637da4229b8d5e0fc60 is f48f46618b560d91950fae1927048e14e29a59ab.",
         "Candidate side changes 43 paths; V3 side changes a disjoint path set, so no textual conflict resolution was required.",
@@ -553,7 +553,10 @@
         "Accepted V3 controller blobs remain controller.go 5823ffbf922ebc367c973a921f28963ea726ffa1 and controller_test.go 8404791b6ffdde9a63fb70978b3403e350478bf6.",
         "Successor PR #606 is open against workspace-control-v3-rest-terminal-revival-20261111.",
         "Validation request comment 6803168222 created Lambda CI Workspace Control Validation run #437 / 43072034606, job 130702172851.",
-        "Validation job is currently queued awaiting a fresh V3 runner."
+        "Validation job is currently queued awaiting a fresh V3 runner.",
+        "Successor PR #606 corrected workflow provenance at head 6466ff118127af1dfcc2dbf6aa69833fe1d06c04.",
+        "Lambda CI Workspace Control Validation run #438 / 43072324189 / job 130703176102 completed SUCCESS.",
+        "All job steps succeeded and workspace-control-p1-receipt artifact 13878952455 was uploaded."
       ]
     }
   ],
