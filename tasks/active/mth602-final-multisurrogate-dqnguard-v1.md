@@ -29,19 +29,19 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-After the operator installs validated Workspace Shell execution 72073976f02ca151c6ee68128175c51b069be42c from authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da, verify PADataset 4c095352bfe128e93f794112741efdb7a66b9c38 live and immediately run the Stage 03 deterministic contract test.
+After operator installs validated Workspace Shell execution ca2241d44d5563b137f4c6978b33dfc060d2a968 from authority 1a0df02b1199a9ca02702275df73c3d1da97a271, rerun the deterministic Stage 03 contract test on PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
 
 ## Remaining work
 
-- Wait for the parent operator-owned live policy refresh to report PASS.
-- Verify live PADataset exact HEAD/status/tree.
-- Run tests/test_multisurrogate_dqnguard.py through research-bounded.
+- Wait for parent operator-owned BLAS runtime refresh to report PASS.
+- Verify live PADataset exact binding.
+- Rerun tests/test_multisurrogate_dqnguard.py through research-bounded.
 - Prepare the known-only backbone and run Architecture C smoke/small-real evaluation.
 
 ## Blockers / gates
 
-- Stage 03 source 4c095352bfe128e93f794112741efdb7a66b9c38 is already exact and clean.
-- Execution waits only for operator-owned Workspace Shell policy refresh to validated workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c; connected Workspace Shell cannot perform the root mutation because no privileged helper authority is admitted.
+- PADataset source 4c095352bfe128e93f794112741efdb7a66b9c38 remains exact and clean.
+- The deterministic test currently waits only for operator installation of validated Workspace Shell execution ca2241d44d5563b137f4c6978b33dfc060d2a968; prior failure was pre-test NumPy BLAS loading, not a scientific assertion.
 
 ## Fresh-chat initialization
 
