@@ -610,6 +610,18 @@ func TestRestDiscoveryDoesNotReviveTerminalRestRecordWithMismatchedProvenance(t 
 			},
 		},
 		{
+			name: "github job id positive drift",
+			mutate: func(record *jobRecord) {
+				record.GitHubJobID++
+			},
+		},
+		{
+			name: "github job id zero drift",
+			mutate: func(record *jobRecord) {
+				record.GitHubJobID = 0
+			},
+		},
+		{
 			name: "workflow run id",
 			mutate: func(record *jobRecord) {
 				record.WorkflowRunID++
