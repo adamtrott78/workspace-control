@@ -341,6 +341,36 @@ try {
   Write-Host "STAGE09_TARGET_FIREFOX_PARTIAL=PASS"
   Get-Content $ResultPath
 }
+catch {
+  $normalizedMessage = [string]$_.Exception.Message
+  $normalizedPhase = if ($normalizedMessage -like "*cold-start*") {
+    "COLD_START"
+  } elseif ($normalizedMessage -like "*steady-state*" -or $normalizedMessage -like "*browser-server readiness*") {
+    "STEADY_STATE"
+  } elseif ($normalizedMessage -like "*adapter preflight*") {
+    "ADAPTER_PREFLIGHT"
+  } elseif ($normalizedMessage -like "*cleanup*") {
+    "CLEANUP"
+  } else {
+    "COLLECTOR"
+  }
+  [ordered]@{
+    schema_version = 1
+    stage = "impl_09_performance_benchmark_execution"
+    evidence_class = "TARGET_FIREFOX_PARTIAL"
+    target_contract_complete = $false
+    content_policy = "CONTENT_FREE"
+    result = "COLLECTOR_FAILURE"
+    normalized_phase = $normalizedPhase
+    normalized_error_type = [string]$_.Exception.GetType().Name
+    normalized_message = $normalizedMessage
+    steady_result_exists = (Test-Path -LiteralPath $steadyResultPath -PathType Leaf)
+    cold_result_exists = (Test-Path -LiteralPath $coldResultPath -PathType Leaf)
+  } | ConvertTo-Json -Depth 6 |
+    Set-Content -LiteralPath $ResultPath -Encoding UTF8
+  Write-Host ("STAGE09_TARGET_FIREFOX_COLLECTOR_FAILURE=" + (Get-Content -LiteralPath $ResultPath -Raw))
+  throw
+}
 finally {
   if ($runner -and -not $runner.HasExited) {
     Stop-Process -Id $runner.Id -Force -ErrorAction SilentlyContinue
