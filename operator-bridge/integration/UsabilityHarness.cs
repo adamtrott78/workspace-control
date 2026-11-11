@@ -431,7 +431,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         }
 
         var applied = _world.HumanSubmit(
-            submission.ActionId,
+            action,
             submission.PayloadSha256);
         if (applied)
         {
