@@ -23,33 +23,34 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 1a9a24fc1bc6e5cda2984e296151a378138600c8
+- Remote branch: workspace-shell-multirepo-v3-reconcile-20261111
+- Remote checkpoint: f7ed7305e904ec24a444f7a488ca07e9bef4fdc7
 - Remote verified: true
 
 ### PADataset
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 17e1147614f27702e43565089d618182ff71c5af
+- Remote checkpoint: be04a4a4428a3c57233fc1ee598b4311ece96587
 - Remote verified: true
 
 ## Next safe action
 
-Rerun the validated rollback-capable multirepo upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. The upgrader must verify/reuse the existing PADataset evidence mount safely, refresh /etc/workspace-shell/authority separately, and report LOCAL_TASK_AUTHORITY=PASS. Then re-test both durable task IDs through ChatGPT Workspace Shell before any Stage 00 read.
+Validate this exact final-quarantine authority snapshot. After PASS, perform the root-owned refresh. Do not route scientific training through the existing PADataset gpu-ci canary because its accepted state effect is CI_VALIDATION_ONLY.
 
 ## Remaining work
 
-- Deploy the validated multirepo upgrade using the final authority-state head, workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af.
-- Verify live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1.
-- Run positive and negative PADataset Workspace Shell acceptance at exact SHA 17e1147614f27702e43565089d618182ff71c5af.
-- Begin MTH602 Stage 00 provenance recovery from the clean execution snapshot plus the untouched read-only historical evidence checkout.
-- Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
+- Validate this final state-only authority snapshot binding PADataset be04a4a4428a3c57233fc1ee598b4311ece96587.
+- Operator performs one final root-owned Workspace Shell snapshot refresh.
+- Verify exact live bindings and rerun the expanded deterministic contract test.
+- Operator launches the frozen PA2 backbone in the existing DNNs scientific environment, or separately authorizes a new scientific GPU execution-contract project.
+- After the backbone completes, run Architecture C small-real evaluation and validate result_record.json.
 
 ## Blockers / gates
 
-- Live trusted task authority is still stale: workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND. This remains the sole execution gate before PADataset Stage 00.
-- The validated host upgrade must be rerun from the new authority-state head with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8. The existing evidence mount may now be reused only if the upgrader verifies its identity and read-only hardening.
+- Live Workspace Shell has not yet been rebound from PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca to final quarantine source be04a4a4428a3c57233fc1ee598b4311ece96587.
+- After the final live refresh, scientific GPU execution still cannot be launched through connected tools: the only accepted PADataset GPU execution contract is CI_VALIDATION_ONLY and Workspace Shell intentionally lacks the user's PyTorch DNNs runtime.
+- Creating a scientific-training execution contract would be a new substrate/authority capability and is outside the current accepted task authority.
 
 ## Fresh-chat initialization
 
