@@ -226,18 +226,11 @@ try {
   }
 
   # Polling above is required to retain Firefox process ancestry while the
-  # harness runs. Finalize the Process object before reading ExitCode;
-  # Start-Process -PassThru may otherwise expose a null exit code even after
-  # HasExited becomes true, which PowerShell compares as non-zero.
+  # harness runs. The harness-written structured result is the authoritative
+  # completion signal; Windows Process.ExitCode is not reliable on this
+  # runner even after HasExited/WaitForExit.
   $runner.WaitForExit()
   $runner.Refresh()
-
-  if (-not $PreflightOnly -and $runner.ExitCode -ne 0) {
-    if (Test-Path $runnerOut) { Get-Content $runnerOut }
-    if (Test-Path $runnerErr) { Get-Content $runnerErr }
-    if (Test-Path $steadyResultPath) { Get-Content $steadyResultPath }
-    throw "Target Firefox steady-state collector failed."
-  }
 
   if (-not (Test-Path -LiteralPath $steadyResultPath -PathType Leaf)) {
     if (Test-Path $runnerOut) { Get-Content $runnerOut }
@@ -294,11 +287,10 @@ try {
       Stop-Process -Id $coldRunner.Id -Force -ErrorAction SilentlyContinue
       throw "Target cold-start collector exceeded the bounded 5-minute execution window."
     }
-    if ($coldRunner.ExitCode -ne 0) {
+    if (-not (Test-Path -LiteralPath $coldResultPath -PathType Leaf)) {
       if (Test-Path $coldRunnerOut) { Get-Content $coldRunnerOut }
       if (Test-Path $coldRunnerErr) { Get-Content $coldRunnerErr }
-      if (Test-Path $coldResultPath) { Get-Content $coldResultPath }
-      throw "Target cold-start collector failed."
+      throw "Target cold-start collector produced no result evidence."
     }
 
     $coldResult = Get-Content $coldResultPath -Raw | ConvertFrom-Json
