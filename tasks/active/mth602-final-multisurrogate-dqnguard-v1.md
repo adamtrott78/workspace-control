@@ -29,11 +29,11 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Do not execute MTH602 Stage 03 yet. Parent control-plane recovery now owns the gate: obtain fresh independent review of PR #602 request 6801484654 on exact head 4196934cad14ddf3238c4637da4229b8d5e0fc60, separately review/deploy the bounded v3 repair, complete exact-head validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030, then refresh Workspace Shell PADataset to 4c095352bfe128e93f794112741efdb7a66b9c38 before deterministic tests.
+Do not execute MTH602 Stage 03. Parent recovery is now gated on independent review of PR #604 request 6801793676 for exact live transaction head c0526aaba0942606f99fd00633281071e72d6c71; after accepted/consumed review, execute the bounded transaction once, finish exact-head workspace-control validation 50395aad06ab719b8207d9e7d3d8270a6bb35030, then refresh Workspace Shell PADataset to 4c095352bfe128e93f794112741efdb7a66b9c38.
 
 ## Remaining work
 
-- Wait for parent PR #602 corrected review request 6801484654 and separately reviewed live v3 repair to clear run #389.
+- Wait for parent PR #604 live-transaction review request 6801793676, then the separately authorized one-time V3 repair.
 - Wait for exact-head validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030.
 - Refresh Workspace Shell to exact PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.
 - Run tests/test_multisurrogate_dqnguard.py through research-bounded on that exact clean snapshot.
@@ -42,7 +42,7 @@ Do not execute MTH602 Stage 03 yet. Parent control-plane recovery now owns the g
 
 ## Blockers / gates
 
-- Parent workspace-shell-multirepo-research-v1 is blocked on fresh review of corrected workspace-control PR #602 head 4196934cad14ddf3238c4637da4229b8d5e0fc60 via request 6801484654; run #389 has not yet validated exact workspace-control candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030.
+- Parent workspace-shell-multirepo-research-v1 is blocked on fresh independent authority-sensitive review of PR #604 head c0526aaba0942606f99fd00633281071e72d6c71 via request 6801793676; no live transaction execution is authorized yet.
 - Live Workspace Shell PADataset runtime remains behind Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38; no Stage 03 execution is authorized until the parent control-plane gate clears and the runtime refresh is validated.
 
 ## Fresh-chat initialization
