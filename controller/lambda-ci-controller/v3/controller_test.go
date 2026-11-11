@@ -598,6 +598,83 @@ func TestRestStillQueuedJobRevivesTerminalLocalRecordWithFreshProvisionIdentity(
 	}
 }
 
+func TestRestDiscoveryDoesNotReviveTerminalRestRecordWithMismatchedProvenance(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		mutate func(*jobRecord)
+	}{
+		{
+			name: "runner request id",
+			mutate: func(record *jobRecord) {
+				record.RunnerRequestID++
+			},
+		},
+		{
+			name: "workflow run id",
+			mutate: func(record *jobRecord) {
+				record.WorkflowRunID++
+			},
+		},
+		{
+			name: "workflow path",
+			mutate: func(record *jobRecord) {
+				record.WorkflowPath = ".github/workflows/other.yml"
+			},
+		},
+		{
+			name: "workflow blob sha",
+			mutate: func(record *jobRecord) {
+				record.WorkflowBlobSHA = strings.Repeat("d", 40)
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			events := []string{}
+			ledger := newMemoryLedger()
+			policy := testPolicy()
+			job := restDiscoveredJob(9001, 1901)
+			record, err := newJobRecord(policy, job, "COMPLETED", time.Now())
+			if err != nil {
+				t.Fatal(err)
+			}
+			record.SchedulerState = "COMPLETED"
+			record.LastRootStatus = "COMPLETED"
+			tc.mutate(&record)
+			original := record
+			if err := ledger.Put(record); err != nil {
+				t.Fatal(err)
+			}
+
+			scaler := testScaler(
+				&fakeVerifier{
+					discoverySafe: true,
+					discovered:    []verifiedJob{job},
+				},
+				ledger,
+				&fakeSession{},
+				&fakeJIT{events: &events},
+				newFakeRoot(&events),
+			)
+
+			if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+				Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+			}); err != nil {
+				t.Fatal(err)
+			}
+			if len(events) != 0 {
+				t.Fatalf("mismatched REST provenance reached root/JIT authority: %#v", events)
+			}
+			current, ok, err := ledger.Get(original.RunnerRequestID)
+			if err != nil || !ok {
+				t.Fatalf("terminal REST record missing: ok=%v err=%v", ok, err)
+			}
+			if current != original {
+				t.Fatalf("mismatched REST provenance mutated durable record:\n got=%#v\nwant=%#v", current, original)
+			}
+		})
+	}
+}
+
 func TestRestDiscoveryDoesNotReviveTerminalNonRestAuthority(t *testing.T) {
 	events := []string{}
 	ledger := newMemoryLedger()
