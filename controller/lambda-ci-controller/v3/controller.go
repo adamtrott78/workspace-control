@@ -361,6 +361,20 @@ func verifiedFromRecord(record jobRecord) verifiedJob {
 	}
 }
 
+func restRevivalProvenanceMatches(record jobRecord, job verifiedJob) bool {
+	return record.RunnerRequestID > 0 &&
+		record.RunnerRequestID == record.GitHubJobID &&
+		job.RunnerRequestID > 0 &&
+		job.RunnerRequestID == job.GitHubJobID &&
+		record.RunnerRequestID == job.RunnerRequestID &&
+		record.GitHubJobID == job.GitHubJobID &&
+		record.AuthoritySource == "REST_ACTIVE_JOB_SET" &&
+		job.AuthoritySource == "REST_ACTIVE_JOB_SET" &&
+		record.WorkflowRunID == job.WorkflowRunID &&
+		record.WorkflowPath == job.WorkflowPath &&
+		record.WorkflowBlobSHA == job.WorkflowBlobSHA
+}
+
 func resetFreshAttempt(policy controllerPolicy, record *jobRecord, now time.Time) error {
 	record.ProvisionAttempt++
 	requestID, runnerName, err := deriveProvisionIdentity(
@@ -595,10 +609,14 @@ func (s *v3Scaler) processRESTDemand(
 		return nil
 	}
 
-	existingJobs := make(map[int64]struct{}, len(records))
+	existingJobs := make(map[int64]jobRecord, len(records))
+	existingAuthorityKeys := make(map[int64]jobRecord, len(records))
 	for _, record := range records {
+		if record.RunnerRequestID > 0 {
+			existingAuthorityKeys[record.RunnerRequestID] = record
+		}
 		if record.GitHubJobID > 0 {
-			existingJobs[record.GitHubJobID] = struct{}{}
+			existingJobs[record.GitHubJobID] = record
 		}
 	}
 
@@ -610,7 +628,66 @@ func (s *v3Scaler) processRESTDemand(
 		if job.GitHubJobID <= 0 || job.WorkflowRunID <= 0 {
 			return fmt.Errorf("REST-attested job identity is incomplete")
 		}
-		if _, ok := existingJobs[job.GitHubJobID]; ok {
+		if collision, ok := existingAuthorityKeys[job.GitHubJobID]; ok {
+			if !restRevivalProvenanceMatches(collision, job) {
+				s.logger.Warn(
+					"Refusing REST admission because durable authority-key provenance differs from current REST attestation",
+					slog.Int64("durable_runner_request_id", collision.RunnerRequestID),
+					slog.Int64("durable_github_job_id", collision.GitHubJobID),
+					slog.Int64("current_runner_request_id", job.RunnerRequestID),
+					slog.Int64("current_github_job_id", job.GitHubJobID),
+					slog.Int64("durable_workflow_run_id", collision.WorkflowRunID),
+					slog.Int64("current_workflow_run_id", job.WorkflowRunID),
+				)
+				continue
+			}
+			existingJobs[job.GitHubJobID] = collision
+		}
+		if existing, ok := existingJobs[job.GitHubJobID]; ok {
+			current, err := s.currentPolicyRecord(existing)
+			if err != nil {
+				return err
+			}
+			if !current {
+				continue
+			}
+			// A REST-discovered job is still queued and unbound at GitHub.
+			// Therefore any terminal local/root outcome for the same job cannot
+			// be scheduler-terminal authority. A JIT runner created for this
+			// capacity slot may have been assigned an older compatible job in
+			// the same scale set. Revive the queued job with a fresh provision
+			// identity instead of suppressing it forever.
+			if existing.terminal() &&
+				existing.AuthoritySource == "REST_ACTIVE_JOB_SET" {
+				if !restRevivalProvenanceMatches(existing, job) {
+					s.logger.Warn(
+						"Refusing terminal REST revival because durable provenance differs from current REST attestation",
+						slog.Int64("durable_runner_request_id", existing.RunnerRequestID),
+						slog.Int64("durable_github_job_id", existing.GitHubJobID),
+						slog.Int64("current_runner_request_id", job.RunnerRequestID),
+						slog.Int64("current_github_job_id", job.GitHubJobID),
+						slog.Int64("durable_workflow_run_id", existing.WorkflowRunID),
+						slog.Int64("current_workflow_run_id", job.WorkflowRunID),
+					)
+					continue
+				}
+				if err := resetFreshAttempt(s.policy, &existing, s.now()); err != nil {
+					return err
+				}
+				existing.SchedulerState = "REST_ATTESTED_QUEUED_RETRY"
+				if err := s.ledger.Put(existing); err != nil {
+					return fmt.Errorf("revive terminal REST-attested queued job: %w", err)
+				}
+				s.logger.Warn(
+					"Revived terminal local record for still-queued REST-attested GitHub job",
+					slog.Int64("github_job_id", existing.GitHubJobID),
+					slog.Int64("workflow_run_id", existing.WorkflowRunID),
+					slog.Int("provision_attempt", existing.ProvisionAttempt),
+					slog.String("runner_name", existing.RunnerName),
+				)
+				existingJobs[job.GitHubJobID] = existing
+				needed--
+			}
 			continue
 		}
 		job.RunnerRequestID = job.GitHubJobID
@@ -630,7 +707,7 @@ func (s *v3Scaler) processRESTDemand(
 			slog.Int64("workflow_run_id", record.WorkflowRunID),
 			slog.String("workflow_path", record.WorkflowPath),
 		)
-		existingJobs[job.GitHubJobID] = struct{}{}
+		existingJobs[job.GitHubJobID] = record
 		needed--
 	}
 
