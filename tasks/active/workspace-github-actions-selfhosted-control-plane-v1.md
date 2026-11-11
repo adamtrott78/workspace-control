@@ -36,22 +36,21 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Validate the final PR #599 head. If green, request fresh authority-sensitive review of: (1) the crash-safe controller fix; and (2) a bounded live repair that source-attests the exact reviewed head, proves the installed old controller/manifest identities, proves stale quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d is workspace-control/cpu/lambda-workspace-control/scale-set 1, proves the matching recovery gate is RECOVERY_RETRY_ACQUIRED for old scale set 1 -> new scale set 3 with reset generation 40d61b30-e8b9-5559-abfc-706fb3df6c67 and job/run 125142056183/41404080844, proves that GitHub run/job terminal failure, closes only that historical gate to RECOVERY_RETRY_COMPLETED, installs only the reviewed controller binary and reviewed workspace-control manifest, starts only workspace-control CPU, and proves stable running/sibling preservation. No reset/reconcile/retrigger is authorized.
+Validate the final PR #599 head containing BF-1/BF-2 corrections plus durable task binding. If green, issue a new authority-sensitive review request superseding request 6798274468 / blocked disposition 6798416097. The bounded live transaction remains unchanged in scope, but the reviewer must verify exact integer lineage decoding and validate-before-delete semantics for reset-zero evidence before accepting.
 
 ## Remaining work
 
-- Validate final PR #599 head with durable task binding.
-- Obtain fresh independent authority-sensitive review of the controller fix and bounded live recovery-state repair.
-- Install the reviewed controller binary and reviewed workspace-control manifest binding only after exact source/installed-state preflight.
-- Close only the stale historical RECOVERY_RETRY_ACQUIRED gate after exact terminal run/job proof, then let the fixed controller retire the matching old quarantine safely.
-- Start only workspace-control CPU and prove stable running plus sibling preservation.
+- Validate the final corrected PR #599 head after this durable task binding.
+- Obtain fresh independent authority-sensitive review proving BF-1/BF-2 closure and accepting the bounded live transaction.
+- Execute the reviewed controller+manifest+historical recovery-state repair only after exact live preflight.
+- Prove workspace-control CPU stable running, stale quarantine retired by the fixed controller, recovery gate terminal, and sibling semantic state preserved.
 - Allow existing exact-head run #389 to proceed naturally and record its result.
 
 ## Blockers / gates
 
-- Fresh exact-head validation is required after this task-state binding.
-- Fresh authority-sensitive review is required before installing the repaired controller or mutating the historical workspace-control recovery-state files.
-- Live repair must prove exact stale quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d bound to old scale set 1, exact matching recovery gate bound to new scale set 3/reset generation 40d61b30-e8b9-5559-abfc-706fb3df6c67, and exact terminal GitHub probe run/job identity before any state mutation.
+- Fresh exact-head validation is required after this BF-1/BF-2 task-state binding.
+- Fresh authority-sensitive review is required on the final corrected PR #599 head before installing the controller or mutating historical workspace-control recovery state.
+- Live repair remains bound to exact historical quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, old scale set 1 -> new scale set 3, reset generation 40d61b30-e8b9-5559-abfc-706fb3df6c67, and terminal probe run/job 41404080844/125142056183.
 - No scale-set reset/recreation, reconciliation, provisioner restart, sibling-controller mutation, workflow cancel/retrigger, admission/capacity widening, or research-engine mutation is authorized.
 
 ## Fresh-chat initialization
