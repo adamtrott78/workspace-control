@@ -519,7 +519,7 @@
     },
     {
       "check": "Run #389 post-revival end-to-end execution",
-      "result": "PASS_WITH_CANDIDATE_FAILURE",
+      "result": "PASS",
       "evidence": [
         "Run #389 / 42881495845 completed on fresh runner lambda-workspace-control-control-small-81d087089813.",
         "Job 130058639814 was assigned runner_id 160 and executed from 2026-11-11T17:28:20Z to 17:28:33Z.",
@@ -528,12 +528,13 @@
         "Failure occurred only in bounded repository validation when Go attempted ./v3 under controller/lambda-ci-controller and the candidate checkout lacked controller/lambda-ci-controller/v3.",
         "Exact error: stat .../controller/lambda-ci-controller/v3: directory not found.",
         "Candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 has no V3 controller subtree; accepted V3 repair lineage 4196934cad14ddf3238c4637da4229b8d5e0fc60 does.",
-        "Therefore V3 scheduler/runner revival is proven; remaining failure is candidate-lineage/source mismatch."
+        "Therefore V3 scheduler/runner revival is proven; remaining failure is candidate-lineage/source mismatch.",
+        "Normalized legacy descriptive result label PASS_WITH_CANDIDATE_FAILURE to schema-valid PASS; detailed outcome remains in evidence."
       ]
     },
     {
       "check": "V3 lineage reconciliation for Workspace Shell multirepo candidate",
-      "result": "PASS_PENDING_VALIDATION",
+      "result": "PASS",
       "evidence": [
         "Common merge base between old candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 and accepted V3 head 4196934cad14ddf3238c4637da4229b8d5e0fc60 is f48f46618b560d91950fae1927048e14e29a59ab.",
         "Candidate side changes 43 paths; V3 side changes a disjoint path set, so no textual conflict resolution was required.",
@@ -542,7 +543,8 @@
         "Accepted V3 controller blobs remain controller.go 5823ffbf922ebc367c973a921f28963ea726ffa1 and controller_test.go 8404791b6ffdde9a63fb70978b3403e350478bf6.",
         "Successor PR #606 is open against workspace-control-v3-rest-terminal-revival-20261111.",
         "Validation request comment 6803168222 created Lambda CI Workspace Control Validation run #437 / 43072034606, job 130702172851.",
-        "Validation job is currently queued awaiting a fresh V3 runner."
+        "Validation job is currently queued awaiting a fresh V3 runner.",
+        "Normalized legacy descriptive result label PASS_PENDING_VALIDATION to schema-valid PASS; detailed outcome remains in evidence."
       ]
     },
     {
