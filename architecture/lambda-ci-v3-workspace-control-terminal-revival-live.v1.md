@@ -16,7 +16,7 @@ The transaction accepts controller semantics only from the independently accepte
 - accepted disposition: comment `6801586149`
 - automated consumption: comment `6801591386`
 
-The live operator itself additionally requires a **new authority-sensitive independent review** for the exact live-transaction PR head. The operator queries GitHub and requires the exact automated request, one `NO_BLOCKING_FINDING` disposition, and its automated consumption receipt. Caller-provided review prose is not authority.
+The live operator itself additionally requires a **new authority-sensitive independent review** for the exact live-transaction PR head. The operator recomputes the automated request digest, requires exact request key coverage, and requires exactly one bound disposition and exactly one bound automated consumption receipt. Every task/PR/head/review-kind/sensitivity/request-digest field must cross-bind exactly. Any duplicate or conflicting disposition/consumption fails closed. Caller-provided review prose is not authority.
 
 ## Exact live preconditions
 
@@ -30,9 +30,10 @@ Immediately before mutation the operator requires:
 - the run remains issue-comment run #389 at workflow path `.github/workflows/lambda-ci-workspace-control-validation.yml` and head `3bee43a810d739cb199c5091024b8d91115aa5d6`;
 - the exact target ledger bytes still hash to `39c5ed5b4b3337433fc8608a82f7d2a767ebd575ab0aa507cf3bbaa70a5fb5b9`;
 - the ledger binds the exact job/run/workflow/policy provenance and old request/runner identity recorded by the incident;
-- no prior class-specific executable/drop-in override exists.
+- no prior class-specific executable/drop-in override exists;
+- the detached transaction checkout is completely clean, including untracked files.
 
-Any drift stops before host mutation and requires fresh review.
+Any drift stops before host mutation and requires fresh review. The controller binary is **not built from the transaction working tree**: the operator materializes `controller/lambda-ci-controller` from a Git archive of the accepted PR #602 controller head and builds that isolated tree with `GOWORK=off`, `GOENV=off`, and empty `GOFLAGS`. Untracked or ambient workspace files therefore cannot influence the accepted controller binary.
 
 ## Mutation scope
 
@@ -65,9 +66,11 @@ The operator records the resulting identity in a root-owned transaction receipt.
 
 ## Rollback boundary
 
-Before any scheduler-ledger mutation, failure removes the target drop-in and class-specific executable, daemon-reloads, and restarts the original target service.
+Rollback first stops the target controller and waits until systemd proves it is fully inactive/dead with MainPID 0. **Only after that quiescence** does the operator re-read the scheduler ledger.
 
-After any ledger mutation, the operator **refuses rollback across scheduler state**. It leaves the accepted controller active and records `POST_REVIVAL_FAIL_CLOSED_NO_ROLLBACK`; it never restores old ledger bytes.
+If the ledger is still byte-identical to the pre-mutation record, rollback may remove the target drop-in and class-specific executable, daemon-reload, and start the original target service.
+
+If the ledger changed at any point before quiescence completed, the operator **refuses rollback across scheduler state**: it retains the accepted override, leaves the target controller quiesced, records `POST_REVIVAL_FAIL_CLOSED_NO_ROLLBACK`, and never restores old ledger bytes. A failure to quiesce or re-attest the ledger also retains the accepted override and fails closed.
 
 ## Explicit non-authority
 
