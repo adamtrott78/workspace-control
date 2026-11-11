@@ -36,7 +36,7 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Execute the existing rollback-capable multirepo upgrade from this authority-state head, using workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38. Require LOCAL_TASK_AUTHORITY=PASS and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS, then run the Stage 03 deterministic contract test through research-bounded.
+Retry exact authority validation on this unchanged policy/state snapshot. No live refresh until the state-only authority head passes.
 
 ## Remaining work
 
