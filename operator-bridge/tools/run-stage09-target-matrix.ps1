@@ -748,62 +748,38 @@ function Invoke-FirefoxReplicate {
     $child.Refresh()
   }
 
-  # Start-Process -PassThru can report HasExited before Windows has
-  # finalized the live ExitCode property. Finalize the Process object before
-  # evaluating success, otherwise a transient $null ExitCode compares as
-  # non-zero and falsely rejects a successful Firefox replicate.
+  # The child-written structured replicate result is the authoritative
+  # completion signal. Windows Process.ExitCode is not reliable on this
+  # runner even after HasExited/WaitForExit, so do not use it as authority.
   $child.WaitForExit()
   $child.Refresh()
 
-  $childExitCode = $null
-  $exitCodeDeadline = (Get-Date).AddSeconds(5)
-  while ($null -eq $childExitCode -and (Get-Date) -lt $exitCodeDeadline) {
-    try {
-      $child.Refresh()
-      $childExitCode = $child.ExitCode
-    } catch {
-      $childExitCode = $null
-    }
-    if ($null -eq $childExitCode) {
-      Start-Sleep -Milliseconds 100
-    }
-  }
-  if ($null -eq $childExitCode) {
-    throw "Firefox target replicate $Repetition exit code did not finalize."
+  if (Get-Process firefox -ErrorAction SilentlyContinue) {
+    throw "Firefox target replicate $Repetition left an unattributed process."
   }
 
-  if ([int]$childExitCode -ne 0) {
-    $repEvidenceClass = $null
-    $repStatus = $null
-    if (Test-Path -LiteralPath $repResult -PathType Leaf) {
-      try {
-        $repDiagnostic = Get-Content -LiteralPath $repResult -Raw | ConvertFrom-Json
-        $repEvidenceClass = [string]$repDiagnostic.evidence_class
-        if ($repDiagnostic.PSObject.Properties.Name -contains "status") {
-          $repStatus = [string]$repDiagnostic.status
-        }
-      } catch {
-      }
-    }
+  if (-not (Test-Path -LiteralPath $repResult -PathType Leaf)) {
     $stdoutBytes = if (Test-Path -LiteralPath $stdout -PathType Leaf) { [long](Get-Item -LiteralPath $stdout).Length } else { 0 }
     $stderrBytes = if (Test-Path -LiteralPath $stderr -PathType Leaf) { [long](Get-Item -LiteralPath $stderr).Length } else { 0 }
     Write-Host ("STAGE09_FIREFOX_REPLICATE_FAILURE=" + ([ordered]@{
       repetition = $Repetition
-      child_exit_code = [int]$childExitCode
-      result_exists = (Test-Path -LiteralPath $repResult -PathType Leaf)
-      result_evidence_class = $repEvidenceClass
-      result_status = $repStatus
+      result_exists = $false
       stdout_bytes = $stdoutBytes
       stderr_bytes = $stderrBytes
     } | ConvertTo-Json -Depth 4 -Compress))
     if (Test-Path $stdout) { Get-Content $stdout }
     if (Test-Path $stderr) { Get-Content $stderr }
-    if (Test-Path $repResult) { Get-Content $repResult }
-    throw "Firefox target replicate $Repetition failed."
+    throw "Firefox target replicate $Repetition produced no structured result evidence."
   }
 
-  if (Get-Process firefox -ErrorAction SilentlyContinue) {
-    throw "Firefox target replicate $Repetition left an unattributed process."
+  $repResultObject = Get-Content -LiteralPath $repResult -Raw | ConvertFrom-Json
+  if ($repResultObject.evidence_class -ne "TARGET_FIREFOX_PARTIAL" -or
+      $repResultObject.target_contract_complete -ne $false -or
+      $repResultObject.content_policy -ne "CONTENT_FREE") {
+    if (Test-Path $stdout) { Get-Content $stdout }
+    if (Test-Path $stderr) { Get-Content $stderr }
+    Get-Content $repResult
+    throw "Firefox target replicate $Repetition emitted invalid structured result evidence."
   }
 
   $noiseSummary = Get-Summary ([double[]]$noise.ToArray())
@@ -814,7 +790,7 @@ function Invoke-FirefoxReplicate {
   return [ordered]@{
     repetition = $Repetition
     unrelated_cpu_total_percent = $noiseSummary
-    result = Get-Content -LiteralPath $repResult -Raw | ConvertFrom-Json
+    result = $repResultObject
   }
 }
 
