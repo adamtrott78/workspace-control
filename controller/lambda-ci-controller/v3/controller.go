@@ -172,6 +172,8 @@ type jobRecord struct {
 	UpdatedAt                 string `json:"updated_at"`
 }
 
+const restTerminalReopenGrace = 30 * time.Second
+
 func (r jobRecord) terminal() bool {
 	switch r.State {
 	case "COMPLETED", "FAILED", "CANCELED":
@@ -595,10 +597,10 @@ func (s *v3Scaler) processRESTDemand(
 		return nil
 	}
 
-	existingJobs := make(map[int64]struct{}, len(records))
+	existingJobs := make(map[int64]jobRecord, len(records))
 	for _, record := range records {
 		if record.GitHubJobID > 0 {
-			existingJobs[record.GitHubJobID] = struct{}{}
+			existingJobs[record.GitHubJobID] = record
 		}
 	}
 
@@ -610,7 +612,56 @@ func (s *v3Scaler) processRESTDemand(
 		if job.GitHubJobID <= 0 || job.WorkflowRunID <= 0 {
 			return fmt.Errorf("REST-attested job identity is incomplete")
 		}
-		if _, ok := existingJobs[job.GitHubJobID]; ok {
+		if existing, ok := existingJobs[job.GitHubJobID]; ok {
+			if existing.ControllerPolicySHA256 != s.policy.ControllerPolicySHA256 ||
+				existing.AuthoritySource != "REST_ACTIVE_JOB_SET" ||
+				existing.RunnerRequestID != existing.GitHubJobID ||
+				existing.WorkflowRunID != job.WorkflowRunID ||
+				existing.WorkflowPath != job.WorkflowPath ||
+				existing.WorkflowBlobSHA != job.WorkflowBlobSHA {
+				return fmt.Errorf(
+					"queued unbound REST job conflicts with durable identity github_job_id=%d",
+					job.GitHubJobID,
+				)
+			}
+			if !existing.terminal() {
+				continue
+			}
+			updatedAt, err := time.Parse(time.RFC3339Nano, existing.UpdatedAt)
+			if err != nil {
+				return fmt.Errorf(
+					"parse terminal REST record updated_at github_job_id=%d: %w",
+					job.GitHubJobID,
+					err,
+				)
+			}
+			if s.now().Sub(updatedAt) < restTerminalReopenGrace {
+				s.logger.Info(
+					"Waiting before reopening terminal durable record for still-queued unbound GitHub job",
+					slog.Int64("github_job_id", job.GitHubJobID),
+					slog.Int64("workflow_run_id", job.WorkflowRunID),
+					slog.String("state", existing.State),
+				)
+				continue
+			}
+			oldRequestID := existing.RequestID
+			if err := resetFreshAttempt(s.policy, &existing, s.now()); err != nil {
+				return fmt.Errorf("reopen stale terminal REST record: %w", err)
+			}
+			existing.SchedulerState = "REST_ATTESTED_ASSIGNED"
+			if err := s.ledger.Put(existing); err != nil {
+				return fmt.Errorf("persist reopened REST scheduler authority: %w", err)
+			}
+			s.logger.Warn(
+				"Reopened stale terminal durable record because GitHub still reports the exact job queued and unbound",
+				slog.Int64("github_job_id", existing.GitHubJobID),
+				slog.Int64("workflow_run_id", existing.WorkflowRunID),
+				slog.String("old_request_id", oldRequestID),
+				slog.String("new_request_id", existing.RequestID),
+				slog.Int("provision_attempt", existing.ProvisionAttempt),
+			)
+			existingJobs[job.GitHubJobID] = existing
+			needed--
 			continue
 		}
 		job.RunnerRequestID = job.GitHubJobID
@@ -630,7 +681,7 @@ func (s *v3Scaler) processRESTDemand(
 			slog.Int64("workflow_run_id", record.WorkflowRunID),
 			slog.String("workflow_path", record.WorkflowPath),
 		)
-		existingJobs[job.GitHubJobID] = struct{}{}
+		existingJobs[job.GitHubJobID] = record
 		needed--
 	}
 
@@ -708,6 +759,36 @@ func (s *v3Scaler) processAssigned(
 	return nil
 }
 
+func (s *v3Scaler) schedulerLifecycleMatchesRecord(
+	record jobRecord,
+	message scaleset.JobMessageBase,
+) bool {
+	if message.WorkflowRunID <= 0 || message.WorkflowRunID != record.WorkflowRunID {
+		return false
+	}
+	if message.OwnerName+"/"+message.RepositoryName != s.policy.Repository {
+		return false
+	}
+	if !containsString(message.RequestLabels, s.policy.ScaleSetName) {
+		return false
+	}
+	expectedRef := ""
+	for _, workflow := range s.policy.TrustedWorkflows {
+		if workflow.Path == record.WorkflowPath {
+			expectedRef = s.policy.Repository + "/" + workflow.Path + "@refs/heads/" + workflow.DefaultBranch
+			break
+		}
+	}
+	if expectedRef == "" || message.JobWorkflowRef != expectedRef {
+		return false
+	}
+	if record.AuthoritySource == "BROKER_JOB_AVAILABLE" &&
+		message.RunnerRequestID != record.RunnerRequestID {
+		return false
+	}
+	return true
+}
+
 func (s *v3Scaler) processLifecycle(
 	started []*scaleset.JobStarted,
 	completed []*scaleset.JobCompleted,
@@ -735,6 +816,15 @@ func (s *v3Scaler) processLifecycle(
 		if !ok {
 			continue
 		}
+		if !s.schedulerLifecycleMatchesRecord(record, job.JobMessageBase) {
+			s.logger.Warn(
+				"Ignoring scheduler start for runner with mismatched durable job identity",
+				slog.String("runner_name", job.RunnerName),
+				slog.Int64("record_workflow_run_id", record.WorkflowRunID),
+				slog.Int64("message_workflow_run_id", job.WorkflowRunID),
+			)
+			continue
+		}
 		record.SchedulerState = "STARTED"
 		if record.State == "ACCEPTED" || record.State == "PREPARING" {
 			record.State = "RUNNING"
@@ -751,6 +841,15 @@ func (s *v3Scaler) processLifecycle(
 		}
 		record, ok := byRunner[job.RunnerName]
 		if !ok {
+			continue
+		}
+		if !s.schedulerLifecycleMatchesRecord(record, job.JobMessageBase) {
+			s.logger.Warn(
+				"Ignoring scheduler completion for runner with mismatched durable job identity",
+				slog.String("runner_name", job.RunnerName),
+				slog.Int64("record_workflow_run_id", record.WorkflowRunID),
+				slog.Int64("message_workflow_run_id", job.WorkflowRunID),
+			)
 			continue
 		}
 		record.SchedulerState = "COMPLETED"
