@@ -1,0 +1,44 @@
+[Unit]
+Description=Workspace Shell MCP policy frontend
+After=network.target workspace-shell-job-launcher.service workspace-shell-root-broker.service
+Requires=workspace-shell-job-launcher.service workspace-shell-root-broker.service
+Before=workspace-shell-tunnel.service
+
+[Service]
+Type=simple
+User=workspace-shell-mcp
+Group=workspace-shell-mcp
+SupplementaryGroups=
+Environment=WORKSPACE_SHELL_CONFIG=/etc/workspace-shell/frontend.json
+ExecStart=/opt/workspace-shell/node/bin/node /opt/workspace-shell/runtime/plugins/workspace-shell/server.js
+Restart=on-failure
+RestartSec=2s
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+IPAddressDeny=any
+IPAddressAllow=localhost
+ReadOnlyPaths=/etc/workspace-shell/frontend /etc/workspace-shell/frontend.json /opt/workspace-shell /srv/workspace-shell /var/lib/workspace-shell/receipts
+InaccessiblePaths=/root /home /etc/workspace-shell/approval /etc/workspace-shell/tunnel /var/lib/workspace-shell/jobs /var/lib/workspace-shell/replay /var/lib/workspace-shell/helper-cache
+TasksMax=64
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "grammar_version": "workspace-shell-profile-grammar.v1",
+  "profiles": {
+    "git-read": {
+      "executable": "/usr/bin/git",
+      "write_scratch": false,
+      "network": "deny",
+      "max_timeout_ms": 30000
+    },
+    "pytest-bounded": {
+      "executable": "/usr/bin/python3",
+      "write_scratch": true,
+      "network": "deny",
+      "max_timeout_ms": 90000
+    },
+    "validation-bounded": {
+      "executable": "/usr/bin/python3",
+      "write_scratch": true,
+      "network": "deny",
+      "max_timeout_ms": 90000
+    }
+  }
+}

@@ -16,35 +16,33 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 ## Goal
 
-Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and independently reviewable privileged authority.
+Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and separately auditable privileged authority.
 
 ## Repositories
 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-mcp-v1-design-freeze
-- Remote checkpoint: c28671e3e571cba298e8341bbce6999edc62bfd3
+- Remote branch: workspace-shell-mcp-v1-implementation
+- Remote checkpoint: d827b5d18f9920412e1f68a22264a9abf0993886
 - Remote verified: true
 
 ## Next safe action
 
-After this state-only synchronization passes validation, record a fresh immutable-head independent re-review request on PR #550 that consumes blocking review 6447046381 and cites corrected design checkpoint c28671e3e571cba298e8341bbce6999edc62bfd3 / validation run #990. Do not implement, merge, install, provision tunnel/key, create job-launcher/root-broker/helper authority, execute Lambda commands, modify Heartbeat, or mutate project controllers.
+Obtain fresh read-only Lambda host attestation for exact checkpoint d827b5d18f9920412e1f68a22264a9abf0993886 using the repository host_attest.py surface or an equivalently bounded existing Lambda execution surface. Do not request an independent reviewer. Do not install/activate Workspace Shell or provision secrets until the attestation-derived bundle is validated.
 
 ## Remaining work
 
-- Validate the BF-1/BF-2 corrected authority artifact, review procedure, task capsule and synchronized handoff on PR #550.
-- Record a fresh corrected-head independent review request consuming blocking review 6447046381 and resolve every new finding.
-- Only after design acceptance, implement repository-only policy frontend, job-launcher protocol, hostile worker sandbox, approval verifier and reviewed-helper broker with adversarial tests; no live Lambda authority yet.
-- Obtain fresh read-only Lambda host attestation before finalizing host-specific installation units/UIDs/sockets/mounts and approval trust-store placement.
-- Independently review implementation and installation/rollback boundary before provisioning a dedicated tunnel credential or live service.
-- Run isolated acceptance and later separately authorized live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched.
+- Obtain fresh read-only Lambda host attestation for exact checkpoint d827b5d18f9920412e1f68a22264a9abf0993886 without exposing secret contents.
+- Render and validate the exact host-specific installation bundle from the attestation, including UIDs/GIDs, root-owned directories, sockets, mTLS material locations, frontend signing material locations, tunnel identity/profile, rollback and emergency disable.
+- Keep privileged helper registry empty/fail-closed until an actual typed root mutation is needed; privileged helpers use operator-signed workspace-shell-approval.v2 rather than external reviewer records.
+- Run exact-head Workspace Control Validation on every resulting implementation/state checkpoint.
+- With explicit operator activation authority, install and start Workspace Shell in isolation, verify hostile-worker denials and end-to-end bounded command execution, then connect the dedicated ChatGPT plugin/tunnel.
 
 ## Blockers / gates
 
-- Fresh independent immutable-head review has not yet accepted the BF-1/BF-2 corrected authority/threat design.
-- Fresh live Lambda host attestation remains required before installation or activation; repository evidence alone is not host attestation.
-- Implementation, tunnel/key provisioning, job-launcher/root-broker/helper installation and live service activation remain prohibited until later gates.
+- Fresh read-only Lambda host attestation is required before exact host-specific UIDs/GIDs, runtime paths, tunnel-client path, bubblewrap/user-namespace behavior and systemd assumptions are accepted.
+- Live installation still requires explicit operator activation authority after the host-specific bundle passes exact-head validation.
 
 ## Fresh-chat initialization
 
