@@ -68,6 +68,22 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertTrue(resolved["write_scratch"])
         self.assertEqual(resolved["argv"][:2], ["-B", "experiments/pa_eval_osr_one.py"])
         self.assertEqual(self.manifest["profiles"]["research-bounded"]["network"], "deny")
+
+        contract_test = job_launcher.resolve_profile(
+            self.manifest,
+            "research-bounded",
+            ["tests/test_multisurrogate_dqnguard.py"],
+        )
+        self.assertEqual(
+            contract_test["argv"],
+            ["-B", "tests/test_multisurrogate_dqnguard.py"],
+        )
+        with self.assertRaisesRegex(Exception, "PROFILE_ARGV_DENIED"):
+            job_launcher.resolve_profile(
+                self.manifest,
+                "research-bounded",
+                ["tests/test_other_research.py"],
+            )
         with self.assertRaisesRegex(Exception, "PROFILE_ARGV_DENIED"):
             job_launcher.resolve_profile(
                 self.manifest,
