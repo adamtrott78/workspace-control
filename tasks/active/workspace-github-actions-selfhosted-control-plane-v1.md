@@ -36,11 +36,11 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Treat the live V3 terminal-revival incident as repaired. Build a fresh workspace-control validation candidate that preserves the PR #595 multirepo delta but includes the accepted V3 controller lineage, then validate that new exact head; do not rerun 50395aad unchanged because it cannot satisfy the current ./v3 validation contract.
+Wait for Lambda CI Workspace Control Validation run #437 / 43072034606, job 130702172851, for exact reconciled head f51b4ee201529d8785e920458700affced52ffdf. No additional controller repair is authorized or required unless this new run exposes a controller-specific failure.
 
 ## Remaining work
 
-- Produce and validate a V3-lineage successor to PR #595 candidate 50395aad.
+- Observe exact validation outcome for PR #606 reconciliation head f51b4ee201529d8785e920458700affced52ffdf.
 - Freeze a bounded v3 production refresh/revival design that installs only reviewed v3 controller material and revives only the exact #389 REST terminal record under scheduler proof.
 - Validate and independently review that live transaction before any host mutation.
 - Execute once; prove #389 receives a fresh request/runner identity and proceeds naturally.
@@ -48,7 +48,7 @@ Treat the live V3 terminal-revival incident as repaired. Build a fresh workspace
 
 ## Blockers / gates
 
-- No remaining scheduler/controller blocker. The failed #389 result is caused by candidate 50395aad lacking controller/lambda-ci-controller/v3 required by workflow blob 7e361db3a8ead667c047e9dc3fe12908c10eb96a.
+- Controller incident is closed; current gate is normal exact-head validation of PR #606 run #437, presently queued.
 - Run #389 remains queued because its durable v3 ledger is falsely terminal after cross-job JIT capacity was assigned to older run #388.
 - Retired v2 workspace-control controller/scale-set must remain untouched; current production validation is served by workspace-ci-v3-controller@workspace-control-control-small-v1.service.
 - Live v3 deployment/ledger revival requires its own bounded, source-bound, independently reviewed transaction after code acceptance.
