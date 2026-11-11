@@ -34,7 +34,7 @@
       "base_sha": "f7ed7305e904ec24a444f7a488ca07e9bef4fdc7",
       "remote": {
         "branch": "padataset-autonomous-scientific-execution-v1",
-        "checkpoint_sha": "ea00901d79c512f070435345c80b55df01e47dc3",
+        "checkpoint_sha": "c6341bbd195a0337d57e8cb4dde8d30b152aa3ff",
         "verified": true
       },
       "local": null,
@@ -56,8 +56,8 @@
       "intent": "mutate",
       "base_sha": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
       "remote": {
-        "branch": "autonomous-scientific-execution-v1",
-        "checkpoint_sha": "8dc3a087fbad932ac1a17df7ef963b18affc4c8f",
+        "branch": "main",
+        "checkpoint_sha": "100888178f362094c45807817f992d2653dcb7b2",
         "verified": true
       },
       "local": null,
@@ -221,21 +221,31 @@
         "Symlink verification now walks the promoted runtime directly instead of conflicting pipe/heredoc stdin.",
         "Final immutability checks inspect actual write permission bits rather than root access(2) semantics."
       ]
+    },
+    {
+      "check": "Planned implementation exact-head validation and trusted workflow candidate acceptance",
+      "result": "PASS",
+      "evidence": [
+        "workspace-control Lambda CI Validation #454 / run 43108023582 / job 130816357435 completed SUCCESS on the hardened planned-authority candidate.",
+        "PADataset PR #13 exact head 8dc3a087fbad932ac1a17df7ef963b18affc4c8f passed the accepted self-hosted CPU canary run 43108042174 / job 130816418407.",
+        "PR #13 changed exactly .github/workflows/lambda-ci-scientific.yml and .workspace-ci/scientific-request.schema.json.",
+        "PR #13 squash-merged to PADataset main as 100888178f362094c45807817f992d2653dcb7b2.",
+        "Trusted scientific workflow default-main blob is exactly 555c2bd1f824519281f149017898d4923439d6cc."
+      ]
     }
   ],
   "blockers": [
-    "Implementation requires exact-head repository validation before DNNs promotion or live activation.",
-    "PADataset trusted workflow must be merged to default main and exact blob-bound before route activation.",
-    "DNNs/runtime + Stage03 cache promotion is a one-time operator/root action after installer validation; routine scientific runs require no operator action."
+    "Final pre-promotion workspace-control validation must pass after binding the exact default-branch scientific workflow blob.",
+    "DNNs/runtime + Stage03 cache promotion is a one-time operator/root action; route and contract remain planned/fail-closed until exact promotion bindings are captured.",
+    "After promotion, exact runtime binding must be committed and validated before activation/reconciliation."
   ],
   "remaining_work": [
-    "Pass workspace-control exact-head validation for planned scientific authority and installer.",
-    "Validate and merge the trusted PADataset scientific workflow to default main without activating the route.",
+    "Pass exact-head validation with trusted scientific workflow blob bound while route remains planned.",
     "Run the one-time validated DNNs/cache promoter and capture exact runtime/data bindings.",
-    "Bind exact runtime and trusted workflow blob, activate the scientific contract/route, validate, reconcile live.",
+    "Commit exact runtime binding, activate scientific contract/route, validate and reconcile live.",
     "Run autonomous scientific smoke, then full Stage 03 PA2 Architecture C experiment."
   ],
-  "next_safe_action": "Validate the hardened exact implementation head through workspace-control CI; keep the scientific route planned/fail-closed.",
+  "next_safe_action": "Validate the exact pre-promotion policy snapshot with workflow blob 555c2bd1f824519281f149017898d4923439d6cc bound. Route remains PLANNED_NOT_BOUND and scientific contract remains PLANNED_NOT_ACCEPTED.",
   "last_executor": "chatgpt",
   "last_surface": "github",
   "notes": "User explicitly requested that DNNs become part of the PADataset automated execution path and that routine experiments no longer require manual terminal actions."
