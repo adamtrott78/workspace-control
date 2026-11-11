@@ -166,6 +166,7 @@ def validate_research(argv):
         or script.startswith("experiments/")
         or script.startswith("scripts/")
         or script.startswith("tools/")
+        or script == "tests/test_multisurrogate_dqnguard.py"
     )
     if not allowed or not script.endswith(".py"):
         fail("PROFILE_ARGV_DENIED", "research-bounded script is outside PADataset research code paths")
