@@ -389,22 +389,35 @@ function Assert-BackgroundCpuQuiet {
     [double]$LimitPercent = $BackgroundCpuRejectPercent
   )
 
+  # Apply the same frozen "unrelated CPU" definition used by the measured
+  # scenarios. The benchmark's own build/compiler descendants must not make
+  # the quiet-machine preflight reject itself.
   $samples = [System.Collections.Generic.List[double]]::new()
+  $ownedBefore = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+  $wallBefore = Get-Date
+
   for ($i = 0; $i -lt $Seconds; $i++) {
     Start-Sleep -Seconds 1
-    $samples.Add((Get-TotalCpuPercent))
+    $ownedAfter = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+    $wallAfter = Get-Date
+    $wallSeconds = [Math]::Max(0.001, ($wallAfter - $wallBefore).TotalSeconds)
+    $ownedCpuTotal = (Get-CpuDeltaSeconds $ownedBefore $ownedAfter) / $wallSeconds / [Environment]::ProcessorCount * 100.0
+    $unrelatedCpu = [Math]::Max(0.0, (Get-TotalCpuPercent) - $ownedCpuTotal)
+    $samples.Add($unrelatedCpu)
+    $ownedBefore = $ownedAfter
+    $wallBefore = $wallAfter
   }
 
   $summary = Get-Summary ([double[]]$samples.ToArray())
   Write-Host ("STAGE09_BACKGROUND_CPU_PREFLIGHT=" + ([ordered]@{
     sample_seconds = $Seconds
-    mean_total_cpu_percent = [double]$summary.mean
-    p95_total_cpu_percent = [double]$summary.p95
+    mean_unrelated_cpu_percent = [double]$summary.mean
+    p95_unrelated_cpu_percent = [double]$summary.p95
     limit_percent = $LimitPercent
   } | ConvertTo-Json -Depth 4 -Compress))
 
   if ([double]$summary.mean -gt $LimitPercent) {
-    throw ("Target measurement rejected before benchmark: background CPU mean {0:N2}% exceeded {1:N2}%." -f [double]$summary.mean, $LimitPercent)
+    throw ("Target measurement rejected before benchmark: unrelated background CPU mean {0:N2}% exceeded {1:N2}%." -f [double]$summary.mean, $LimitPercent)
   }
 }
 
