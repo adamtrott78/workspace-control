@@ -246,8 +246,22 @@ try {
     if ($steadyResult.evidence_class -ne "TARGET_ADAPTER_PREFLIGHT" -or
         $steadyResult.status -ne "PASS" -or
         $steadyResult.adapter_version -ne "0.1.9-perf") {
+      $preflightErrorCode = $null
+      foreach ($candidate in @("error_code", "failure_code", "reason")) {
+        if ($steadyResult.PSObject.Properties.Name -contains $candidate) {
+          $preflightErrorCode = [string]$steadyResult.$candidate
+          break
+        }
+      }
+      Write-Host ("STAGE09_TARGET_ADAPTER_PREFLIGHT_FAILURE=" + ([ordered]@{
+        evidence_class = [string]$steadyResult.evidence_class
+        status = [string]$steadyResult.status
+        adapter_version = [string]$steadyResult.adapter_version
+        error_code = $preflightErrorCode
+      } | ConvertTo-Json -Depth 4 -Compress))
       if (Test-Path $runnerOut) { Get-Content $runnerOut }
       if (Test-Path $runnerErr) { Get-Content $runnerErr }
+      if (Test-Path $steadyResultPath) { Get-Content $steadyResultPath }
       throw "Target Firefox adapter preflight emitted failing or invalid evidence."
     }
     $steadyResult | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $ResultPath -Encoding UTF8
