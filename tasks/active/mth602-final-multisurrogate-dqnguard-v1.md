@@ -24,24 +24,24 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 694a0c828ed4c8e8d02a344eb2451905e171aaca
+- Remote checkpoint: be04a4a4428a3c57233fc1ee598b4311ece96587
 - Remote verified: true
 
 ## Next safe action
 
-After operator installs authority f7b8a40f9f50e584974fac92e5eef4773405606b, verify PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca and run the expanded deterministic contract test.
+After operator installs authority 0c39bad0219d553fcd1ee8780374412ab9efab46, verify PADataset be04a4a4428a3c57233fc1ee598b4311ece96587 and rerun the deterministic contract.
 
 ## Remaining work
 
 - Wait for parent operator root refresh.
-- Run expanded tests/test_multisurrogate_dqnguard.py through research-bounded.
-- Train manifests/configs/mth602_stage03/archC_backbone_knownonly_unkPA2_c16384_seed0.json.
-- Run Architecture C small-real evaluator and validate Stage 02 result schema.
+- Rerun expanded deterministic contract.
+- Operator launches frozen PA2 backbone from a clean exact-SHA checkout in DNNs.
+- Run Architecture C final evaluator and validate Stage 02 result schema.
 
 ## Blockers / gates
 
-- Backbone-ready source 694a0c828ed4c8e8d02a344eb2451905e171aaca is validated in parent authority f7b8a40f9f50e584974fac92e5eef4773405606b but not yet installed live.
-- Scientific GPU execution requires the DNNs PyTorch environment; Workspace Shell will first validate the expanded deterministic contract after the root refresh.
+- Final target-quarantine source be04a4a4428a3c57233fc1ee598b4311ece96587 is validated in parent authority 0c39bad0219d553fcd1ee8780374412ab9efab46 but not yet installed live.
+- No currently accepted connected executor authorizes scientific PyTorch training. PADataset gpu-ci is CI-only; Workspace Shell lacks DNNs/PyTorch.
 
 ## Fresh-chat initialization
 
