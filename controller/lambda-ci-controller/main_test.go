@@ -1085,6 +1085,123 @@ func zeroScaleSetStats() *scaleset.RunnerScaleSetStatistic {
 	return &scaleset.RunnerScaleSetStatistic{}
 }
 
+func TestLoadQuarantineRetiresSupersededResetQuarantineWithMatchingReadyGate(t *testing.T) {
+	dir := t.TempDir()
+	receiptID := "11111111-2222-4333-8444-555555555555"
+	generation := "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+	if err := atomicWriteJSON(
+		filepath.Join(dir, "quarantine.json"),
+		laneQuarantineReceipt{
+			SchemaVersion: 1,
+			ReceiptID: receiptID,
+			Status: "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+			ProjectID: "workspace-control",
+			Lane: "cpu",
+			ScaleSetName: "lambda-workspace-control",
+			ScaleSetID: 77,
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	pendingPath := filepath.Join(dir, "reset-pending-"+generation+".json")
+	if err := atomicWriteJSON(
+		pendingPath,
+		laneResetPendingReceipt{
+			SchemaVersion: 1,
+			ReceiptID: receiptID,
+			Status: "RECOVERY_SCALESET_RESET_PENDING",
+			ProjectID: "workspace-control",
+			Lane: "cpu",
+			ScaleSetName: "lambda-workspace-control",
+			ScaleSetID: 77,
+			OldScaleSetID: 77,
+			ResetGeneration: generation,
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	s := &scaler{
+		scaleSetID: 88,
+		projectID: "workspace-control",
+		lane: "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir: dir,
+		logger: slog.Default(),
+	}
+	if err := atomicWriteJSON(
+		s.readyForSingleRetryPath(),
+		map[string]any{
+			"schema_version": 1,
+			"status": "READY_FOR_SINGLE_RETRY",
+			"receipt_id": receiptID,
+			"project_id": "workspace-control",
+			"lane": "cpu",
+			"scale_set_name": "lambda-workspace-control",
+			"old_scale_set_id": 77,
+			"new_scale_set_id": 88,
+			"reset_generation": generation,
+			"automatic_workflow_triggered": false,
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	if err := atomicWriteJSON(
+		s.recoveryZeroPath(),
+		recoveryZeroObservation{
+			SchemaVersion: 1,
+			ResetGeneration: generation,
+			ScaleSetID: 88,
+			ObservedAt: time.Now().UTC().Format(time.RFC3339Nano),
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := s.loadQuarantine(); err != nil {
+		t.Fatal(err)
+	}
+	if s.quarantined || s.recoveryPending {
+		t.Fatalf("superseded quarantine remained active after ready gate recovery: %#v", s)
+	}
+	for _, path := range []string{s.quarantinePath(), pendingPath, s.recoveryZeroPath()} {
+		if _, err := os.Stat(path); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("superseded recovery state remained at %s: %v", path, err)
+		}
+	}
+	if _, err := os.Stat(s.readyForSingleRetryPath()); err != nil {
+		t.Fatalf("authoritative recovery retry gate was removed: %v", err)
+	}
+}
+
+func TestLoadQuarantineRejectsOldScaleSetWithoutMatchingReadyGate(t *testing.T) {
+	dir := t.TempDir()
+	if err := atomicWriteJSON(
+		filepath.Join(dir, "quarantine.json"),
+		laneQuarantineReceipt{
+			SchemaVersion: 1,
+			ReceiptID: "11111111-2222-4333-8444-555555555555",
+			Status: "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+			ProjectID: "workspace-control",
+			Lane: "cpu",
+			ScaleSetName: "lambda-workspace-control",
+			ScaleSetID: 77,
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	s := &scaler{
+		scaleSetID: 88,
+		projectID: "workspace-control",
+		lane: "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir: dir,
+		logger: slog.Default(),
+	}
+	if err := s.loadQuarantine(); err == nil {
+		t.Fatal("old-scale-set quarantine was accepted without a matching recovery retry gate")
+	}
+}
+
 func TestResetPendingQuarantineSurvivesRecreatedScaleSetRestart(t *testing.T) {
 	dir := t.TempDir()
 	pendingPath := filepath.Join(
@@ -1158,6 +1275,20 @@ func TestResetPendingRejectsSameScaleSetIdentity(t *testing.T) {
 
 func TestResetPendingRequiresTwoSeparatedZeroObservations(t *testing.T) {
 	dir := t.TempDir()
+	if err := atomicWriteJSON(
+		filepath.Join(dir, "quarantine.json"),
+		laneQuarantineReceipt{
+			SchemaVersion: 1,
+			ReceiptID: "11111111-2222-4333-8444-555555555555",
+			Status: "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+			ProjectID: "workspace-control",
+			Lane: "cpu",
+			ScaleSetName: "lambda-workspace-control",
+			ScaleSetID: 77,
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
 	pendingPath := filepath.Join(
 		dir,
 		"reset-pending-aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee.json",
@@ -1242,6 +1373,9 @@ func TestResetPendingRequiresTwoSeparatedZeroObservations(t *testing.T) {
 	}
 	if _, err := os.Stat(pendingPath); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("reset-pending state remained after ready proof: %v", err)
+	}
+	if _, err := os.Stat(s.quarantinePath()); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("superseded quarantine remained after ready proof: %v", err)
 	}
 }
 
