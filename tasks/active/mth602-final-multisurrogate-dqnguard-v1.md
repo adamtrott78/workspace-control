@@ -29,11 +29,11 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Do not execute MTH602 Stage 03 yet. Parent V3 scheduler repair is proven, but workspace-control candidate 50395aad failed because it predates the required V3 controller subtree. Wait for a V3-lineage successor candidate to pass exact-head workspace-control validation, then refresh Workspace Shell PADataset authority to 4c095352bfe128e93f794112741efdb7a66b9c38.
+Do not execute Stage 03 yet. Workspace-control reconciliation is complete at f51b4ee201529d8785e920458700affced52ffdf; wait for PR #606 exact V3 validation run #437 / job 130702172851. If PASS, refresh Workspace Shell PADataset authority to 4c095352bfe128e93f794112741efdb7a66b9c38 and then resume Stage 03.
 
 ## Remaining work
 
-- Wait for the parent workspace-control multirepo candidate to be rebuilt on the accepted V3 lineage and pass exact-head validation.
+- Wait for PR #606 exact-head validation of reconciled workspace-control head f51b4ee201529d8785e920458700affced52ffdf.
 - Wait for exact-head validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030.
 - Refresh Workspace Shell to exact PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.
 - Run tests/test_multisurrogate_dqnguard.py through research-bounded on that exact clean snapshot.
@@ -42,7 +42,7 @@ Do not execute MTH602 Stage 03 yet. Parent V3 scheduler repair is proven, but wo
 
 ## Blockers / gates
 
-- Parent runtime incident is fixed, but exact candidate validation is still open because 50395aad lacks controller/lambda-ci-controller/v3 required by the current V3 workflow.
+- Parent reconciliation is complete; sole current gate is validation run #437 / job 130702172851, currently queued.
 - Live Workspace Shell PADataset runtime remains behind Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38; no Stage 03 execution is authorized until the parent control-plane gate clears and the runtime refresh is validated.
 
 ## Fresh-chat initialization
