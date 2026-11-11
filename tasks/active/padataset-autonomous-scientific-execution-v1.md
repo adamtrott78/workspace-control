@@ -24,7 +24,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: 7692508a1daa0ff4278bd08042388c2fa4f9c2cb
+- Remote checkpoint: ea00901d79c512f070435345c80b55df01e47dc3
 - Remote verified: true
 
 ### PADataset
@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Open validation PRs for the exact implementation candidates. Keep scientific route/contract planned and fail-closed until validation, workflow merge, and one-time DNNs/data promotion complete.
+Validate the hardened exact implementation head through workspace-control CI; keep the scientific route planned/fail-closed.
 
 ## Remaining work
 
