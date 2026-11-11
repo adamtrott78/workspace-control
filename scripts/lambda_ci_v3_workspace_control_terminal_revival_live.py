@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import os
 import pathlib
@@ -23,6 +24,7 @@ import re
 import shutil
 import stat
 import subprocess
+import tarfile
 import tempfile
 import time
 import urllib.error
@@ -96,6 +98,23 @@ DISP_END = "END_WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1"
 CONSUMED_START = "WORKSPACE_CONTROL_REVIEW_CONSUMED_V1"
 CONSUMED_END = "END_WORKSPACE_CONTROL_REVIEW_CONSUMED_V1"
 
+REQUEST_KEYS = frozenset({
+    "task_id", "pr_number", "head_sha", "base_sha", "tree_sha",
+    "review_kind", "sensitivity", "bindings_sha256",
+    "request_copilot", "request_digest",
+})
+DISPOSITION_KEYS = frozenset({
+    "request_comment_id", "request_digest", "task_id", "pr_number",
+    "head_sha", "review_kind", "sensitivity",
+    "reviewer_attestation", "disposition",
+})
+CONSUMPTION_KEYS = frozenset({
+    "request_comment_id", "request_digest", "task_id", "pr_number",
+    "head_sha", "review_kind", "sensitivity", "backend",
+    "disposition_id", "disposition",
+})
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
 
 class LiveRevivalError(RuntimeError):
     pass
@@ -161,8 +180,8 @@ def git_blob(repo_root: pathlib.Path, head: str, path: str) -> str:
 
 def assert_source(repo_root: pathlib.Path) -> str:
     head = git(repo_root, "rev-parse", "HEAD")
-    if git(repo_root, "status", "--porcelain", "--untracked-files=no"):
-        raise LiveRevivalError("tracked source tree is dirty")
+    if git(repo_root, "status", "--porcelain", "--untracked-files=all"):
+        raise LiveRevivalError("source tree is not completely clean, including untracked files")
     attached = subprocess.run(
         ["git", "-C", str(repo_root), "symbolic-ref", "-q", "HEAD"],
         stdout=subprocess.DEVNULL,
@@ -232,6 +251,95 @@ def issue_comments(token: str, pr_number: int) -> list[dict[str, Any]]:
         page += 1
 
 
+def require_exact_keys(fields: dict[str, str], expected: frozenset[str], label: str) -> None:
+    if set(fields) != set(expected):
+        missing = sorted(set(expected) - set(fields))
+        extra = sorted(set(fields) - set(expected))
+        raise LiveRevivalError(f"{label} keys mismatch: missing={missing} extra={extra}")
+
+
+def compact_json(value: Any) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def verified_request_digest(fields: dict[str, str]) -> str:
+    require_exact_keys(fields, REQUEST_KEYS, "review request")
+    supplied = fields["request_digest"]
+    if SHA256_RE.fullmatch(supplied) is None:
+        raise LiveRevivalError("review request digest format invalid")
+    unsigned = {key: value for key, value in fields.items() if key != "request_digest"}
+    computed = sha256(compact_json(unsigned))
+    if supplied != computed:
+        raise LiveRevivalError("review request digest mismatch")
+    return supplied
+
+
+def validate_bound_review_state(
+    *,
+    request_fields: dict[str, str],
+    request_comment_id: int,
+    expected_common: dict[str, str],
+    dispositions: list[tuple[int, dict[str, str], str]],
+    consumptions: list[tuple[int, dict[str, str], str]],
+) -> dict[str, Any]:
+    request_digest = verified_request_digest(request_fields)
+    for key, value in expected_common.items():
+        if request_fields.get(key) != value:
+            raise LiveRevivalError(f"review request mismatch: {key}")
+
+    if len(dispositions) != 1:
+        raise LiveRevivalError(
+            f"review request must have exactly one bound disposition, found {len(dispositions)}"
+        )
+    disposition_id, disposition, disposition_user = dispositions[0]
+    require_exact_keys(disposition, DISPOSITION_KEYS, "review disposition")
+    expected_disposition = {
+        "request_comment_id": str(request_comment_id),
+        "request_digest": request_digest,
+        "task_id": expected_common["task_id"],
+        "pr_number": expected_common["pr_number"],
+        "head_sha": expected_common["head_sha"],
+        "review_kind": expected_common["review_kind"],
+        "sensitivity": expected_common["sensitivity"],
+        "reviewer_attestation": "fresh_independent_session",
+        "disposition": "NO_BLOCKING_FINDING",
+    }
+    if disposition != expected_disposition:
+        raise LiveRevivalError("review disposition fields do not exactly match request authority")
+    if disposition_user == "github-actions[bot]":
+        raise LiveRevivalError("independent review disposition cannot be automation-authored")
+
+    if len(consumptions) != 1:
+        raise LiveRevivalError(
+            f"review request must have exactly one bound consumption, found {len(consumptions)}"
+        )
+    consumption_id, consumption, consumption_user = consumptions[0]
+    require_exact_keys(consumption, CONSUMPTION_KEYS, "review consumption")
+    expected_consumption = {
+        "request_comment_id": str(request_comment_id),
+        "request_digest": request_digest,
+        "task_id": expected_common["task_id"],
+        "pr_number": expected_common["pr_number"],
+        "head_sha": expected_common["head_sha"],
+        "review_kind": expected_common["review_kind"],
+        "sensitivity": expected_common["sensitivity"],
+        "backend": "comment",
+        "disposition_id": str(disposition_id),
+        "disposition": "NO_BLOCKING_FINDING",
+    }
+    if consumption != expected_consumption:
+        raise LiveRevivalError("review consumption fields do not exactly match accepted disposition")
+    if consumption_user != "github-actions[bot]":
+        raise LiveRevivalError("review consumption is not automation-authored")
+
+    return {
+        "review_request_comment_id": request_comment_id,
+        "review_request_digest": request_digest,
+        "review_disposition_comment_id": disposition_id,
+        "review_consumption_comment_id": consumption_id,
+    }
+
+
 def verify_code_review_acceptance(token: str) -> None:
     request = issue_comment(token, CODE_REVIEW_REQUEST_COMMENT)
     request_fields = exact_block(str(request.get("body", "")), REQUEST_START, REQUEST_END)
@@ -294,72 +402,67 @@ def verify_live_review(
         raise LiveRevivalError("live review request is not automation-authored")
     body = str(request.get("body", ""))
     fields = exact_block(body, REQUEST_START, REQUEST_END)
-    expected = {
+    require_exact_keys(fields, REQUEST_KEYS, "live review request")
+
+    base_sha = str(pr.get("base", {}).get("sha") or "")
+    tree_sha = git(repo_root, "rev-parse", f"{head}^{{tree}}")
+    bindings = request_bindings(body)
+    if set(bindings) != set(REVIEW_BINDING_PATHS):
+        raise LiveRevivalError("live review changed-path binding set mismatch")
+    rows = [
+        {"path": path, "blob": bindings[path]}
+        for path in sorted(bindings)
+    ]
+    expected_bindings_digest = sha256(compact_json(rows))
+    expected_request = {
         "task_id": TASK_ID,
         "pr_number": str(pr_number),
         "head_sha": head,
+        "base_sha": base_sha,
+        "tree_sha": tree_sha,
         "review_kind": LIVE_REVIEW_KIND,
         "sensitivity": "authority_sensitive",
+        "bindings_sha256": expected_bindings_digest,
         "request_copilot": "false",
     }
-    for key, value in expected.items():
+    for key, value in expected_request.items():
         if fields.get(key) != value:
             raise LiveRevivalError(f"live review request mismatch: {key}")
+    verified_request_digest(fields)
 
-    bindings = request_bindings(body)
     for path in REVIEW_BINDING_PATHS:
         actual = git_blob(repo_root, head, path)
-        if bindings.get(path) != actual:
+        if bindings[path] != actual:
             raise LiveRevivalError(f"live review binding mismatch: {path}")
 
-    dispositions: list[tuple[int, dict[str, str]]] = []
-    consumptions: list[tuple[int, dict[str, str]]] = []
+    dispositions: list[tuple[int, dict[str, str], str]] = []
+    consumptions: list[tuple[int, dict[str, str], str]] = []
     for comment in issue_comments(token, pr_number):
-        body = str(comment.get("body", ""))
+        comment_body = str(comment.get("body", ""))
         cid = int(comment.get("id", 0))
-        if DISP_START in body and comment.get("user", {}).get("login") != "github-actions[bot]":
-            try:
-                value = exact_block(body, DISP_START, DISP_END)
-            except LiveRevivalError:
-                continue
+        user = str(comment.get("user", {}).get("login") or "")
+        if DISP_START in comment_body:
+            value = exact_block(comment_body, DISP_START, DISP_END)
             if value.get("request_comment_id") == str(request_comment_id):
-                dispositions.append((cid, value))
-        if CONSUMED_START in body and comment.get("user", {}).get("login") == "github-actions[bot]":
-            try:
-                value = exact_block(body, CONSUMED_START, CONSUMED_END)
-            except LiveRevivalError:
-                continue
+                dispositions.append((cid, value, user))
+        if CONSUMED_START in comment_body:
+            value = exact_block(comment_body, CONSUMED_START, CONSUMED_END)
             if value.get("request_comment_id") == str(request_comment_id):
-                consumptions.append((cid, value))
+                consumptions.append((cid, value, user))
 
-    accepted = [(cid, value) for cid, value in dispositions if value.get("disposition") == "NO_BLOCKING_FINDING"]
-    if len(accepted) != 1:
-        raise LiveRevivalError("live transaction requires exactly one accepted independent disposition")
-    disposition_id, disposition = accepted[0]
-    for key in ("task_id", "pr_number", "head_sha", "review_kind", "sensitivity"):
-        if disposition.get(key) != expected[key]:
-            raise LiveRevivalError(f"live disposition mismatch: {key}")
-    if disposition.get("reviewer_attestation") != "fresh_independent_session":
-        raise LiveRevivalError("live disposition reviewer attestation mismatch")
-
-    matched = [
-        (cid, value)
-        for cid, value in consumptions
-        if value.get("disposition_id") == str(disposition_id)
-        and value.get("disposition") == "NO_BLOCKING_FINDING"
-        and value.get("head_sha") == head
-        and value.get("review_kind") == LIVE_REVIEW_KIND
-    ]
-    if len(matched) != 1:
-        raise LiveRevivalError("live transaction review acceptance was not uniquely consumed")
-
-    return {
-        "review_request_comment_id": request_comment_id,
-        "review_request_digest": fields.get("request_digest"),
-        "review_disposition_comment_id": disposition_id,
-        "review_consumption_comment_id": matched[0][0],
-    }
-
+    return validate_bound_review_state(
+        request_fields=fields,
+        request_comment_id=request_comment_id,
+        expected_common={
+            "task_id": TASK_ID,
+            "pr_number": str(pr_number),
+            "head_sha": head,
+            "review_kind": LIVE_REVIEW_KIND,
+            "sensitivity": "authority_sensitive",
+        },
+        dispositions=dispositions,
+        consumptions=consumptions,
+    )
 
 def verify_scheduler(token: str) -> dict[str, Any]:
     run = github_get(token, f"/repos/{REPOSITORY}/actions/runs/{WORKFLOW_RUN_ID}")
@@ -544,20 +647,51 @@ def verify_ledger(policy: dict[str, Any]) -> tuple[bytes, dict[str, Any]]:
     return raw, record
 
 
+def materialize_reviewed_controller_source(
+    repo_root: pathlib.Path,
+    destination: pathlib.Path,
+) -> pathlib.Path:
+    destination.mkdir(parents=True, exist_ok=False)
+    archive = subprocess.check_output(
+        [
+            "git", "-C", str(repo_root), "archive", "--format=tar",
+            REVIEWED_CONTROLLER_HEAD, "controller/lambda-ci-controller",
+        ]
+    )
+    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:") as handle:
+        members = handle.getmembers()
+        for member in members:
+            parts = pathlib.PurePosixPath(member.name).parts
+            if member.name.startswith("/") or ".." in parts:
+                raise LiveRevivalError("reviewed Git archive contains unsafe path")
+        handle.extractall(destination)
+    source = destination / "controller/lambda-ci-controller"
+    if not (source / "go.mod").is_file() or not (source / "v3").is_dir():
+        raise LiveRevivalError("reviewed controller Git archive is incomplete")
+    return source
+
+
 def build_controller(repo_root: pathlib.Path, go_bin: str, output: pathlib.Path) -> str:
     version = subprocess.check_output([go_bin, "env", "GOVERSION"], text=True).strip()
     if version != "go1.26.3":
         raise LiveRevivalError(f"Go version mismatch: {version}")
+
+    source_root = output.parent / "reviewed-controller-source"
+    source = materialize_reviewed_controller_source(repo_root, source_root)
+    build_env = os.environ.copy()
+    build_env["GOWORK"] = "off"
+    build_env["GOENV"] = "off"
+    build_env["GOFLAGS"] = ""
     subprocess.run(
         [go_bin, "build", "-mod=readonly", "-trimpath", "-o", str(output), "./v3"],
-        cwd=repo_root / "controller/lambda-ci-controller",
+        cwd=source,
+        env=build_env,
         check=True,
     )
     raw = output.read_bytes()
     if not raw:
         raise LiveRevivalError("built controller is empty")
     return sha256(raw)
-
 
 def dropin_bytes() -> bytes:
     return (
@@ -598,6 +732,20 @@ def wait_target_active() -> dict[str, str]:
             return last
         time.sleep(0.25)
     raise LiveRevivalError(f"target controller did not become active/running: {last}")
+
+
+def wait_target_stopped() -> dict[str, str]:
+    last: dict[str, str] = {}
+    for _ in range(40):
+        last = systemctl_show(TARGET_SERVICE)
+        if (
+            last.get("ActiveState") == "inactive"
+            and last.get("SubState") == "dead"
+            and int(last.get("MainPID") or 0) == 0
+        ):
+            return last
+        time.sleep(0.25)
+    raise LiveRevivalError(f"target controller did not become fully stopped: {last}")
 
 
 def observe_first_revival(old_raw: bytes, old_record: dict[str, Any]) -> dict[str, Any]:
@@ -646,10 +794,36 @@ def rollback_before_revival(
     receipt_path: pathlib.Path,
     old_raw: bytes,
 ) -> None:
-    if LEDGER_PATH.read_bytes() != old_raw:
-        receipt["phase"] = "POST_REVIVAL_FAIL_CLOSED_NO_ROLLBACK"
+    # Quiesce the accepted controller before deciding whether scheduler
+    # authority has been crossed. Once fully stopped, it cannot race a later
+    # ledger write against removal of the accepted executable override.
+    try:
+        subprocess.run(["systemctl", "stop", TARGET_SERVICE], check=True)
+        stopped = wait_target_stopped()
+        receipt["rollback_target_quiesced"] = stopped
         write_receipt(receipt_path, receipt)
-        raise LiveRevivalError("ledger changed; refusing rollback across scheduler mutation")
+    except Exception as exc:
+        receipt["phase"] = "ROLLBACK_QUIESCE_FAILED_OVERRIDE_RETAINED"
+        write_receipt(receipt_path, receipt)
+        raise LiveRevivalError("could not quiesce accepted controller for rollback") from exc
+
+    try:
+        current_raw = LEDGER_PATH.read_bytes()
+    except Exception as exc:
+        receipt["phase"] = "ROLLBACK_LEDGER_REATTEST_FAILED_OVERRIDE_RETAINED"
+        write_receipt(receipt_path, receipt)
+        raise LiveRevivalError("could not re-attest ledger after target quiescence") from exc
+
+    if current_raw != old_raw:
+        receipt["phase"] = "POST_REVIVAL_FAIL_CLOSED_NO_ROLLBACK"
+        receipt["ledger_after_quiesce_sha256"] = sha256(current_raw)
+        receipt["accepted_override_retained"] = True
+        receipt["target_controller_left_quiesced"] = True
+        write_receipt(receipt_path, receipt)
+        raise LiveRevivalError(
+            "ledger changed before rollback decision; accepted override retained and target left quiesced"
+        )
+
     try:
         if DROPIN_PATH.exists():
             DROPIN_PATH.unlink()
@@ -660,15 +834,15 @@ def rollback_before_revival(
         except OSError:
             pass
         subprocess.run(["systemctl", "daemon-reload"], check=True)
-        subprocess.run(["systemctl", "restart", TARGET_SERVICE], check=True)
-        wait_target_active()
+        subprocess.run(["systemctl", "start", TARGET_SERVICE], check=True)
+        restored = wait_target_active()
         receipt["phase"] = "ROLLED_BACK_BEFORE_REVIVAL"
+        receipt["restored_target_service"] = restored
         write_receipt(receipt_path, receipt)
     except Exception as exc:
         receipt["phase"] = "ROLLBACK_FAILED"
         write_receipt(receipt_path, receipt)
         raise LiveRevivalError("pre-revival rollback failed") from exc
-
 
 def preflight(
     token: str,
