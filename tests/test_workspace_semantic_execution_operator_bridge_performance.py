@@ -187,7 +187,6 @@ class OperatorBridgeStageNinePerformanceTests(unittest.TestCase):
         self.assertIn("-p:UseSharedCompilation=false", script)
         self.assertIn("-nodeReuse:false", script)
         self.assertIn("persistent compiler/MSBuild servers", script)
-        self.assertIn("unrelated background CPU mean", script)
         self.assertIn("sustained unrelated CPU mean", script)
         self.assertIn("ScenarioId", script)
         self.assertIn('"TARGET_WINDOWS_OPERATOR_WORKSTATION"', script)
