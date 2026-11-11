@@ -133,6 +133,10 @@ test("PADataset profiles expose bounded evidence and sandboxed research only", (
   assert.deepEqual(research.argv.slice(0, 2), ["-B", "experiments/pa_eval_osr_one.py"]);
   const contractTest = resolveProfile("research-bounded", ["tests/test_multisurrogate_dqnguard.py"]);
   assert.deepEqual(contractTest.argv, ["-B", "tests/test_multisurrogate_dqnguard.py"]);
+  assert.equal(
+    contractTest.env.LD_LIBRARY_PATH,
+    "/usr/lib/x86_64-linux-gnu/blas:/usr/lib/x86_64-linux-gnu/lapack:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu",
+  );
   assert.throws(
     () => resolveProfile("research-bounded", ["tests/test_other_research.py"]),
     /PROFILE_ARGV_DENIED/,
