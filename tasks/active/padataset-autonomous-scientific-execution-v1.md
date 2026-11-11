@@ -36,16 +36,32 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator-only one-time bootstrap: run scripts/install_padataset_scientific_runtime_v1.sh from exact validated workspace-control head 313e204d7342c0c14b00c2956401783d39e02d9b. Return PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.
+Read-only diagnose the uniquely resolved DNNs prefix /home/atrott/adamArchives/venvs/DNNs before changing or rerunning the promoter. Establish the actual environment type and why `conda list --prefix /home/atrott/adamArchives/venvs/DNNs --json` fails. Then implement a fail-closed immutable promotion path appropriate to that environment, validate the new exact head, and only then request the one-time root bootstrap.
 
 ## Remaining work
 
-- Operator runs scripts/install_padataset_scientific_runtime_v1.sh once from exact validated source head and returns the final binding lines.
-- ChatGPT commits exact DNNs runtime binding, activates the scientific contract/route, validates and reconciles live.
-- ChatGPT creates an exact Stage03 experiment PR/request, triggers autonomous scientific smoke, then full PA2 Architecture C execution.
-- ChatGPT inspects artifacts/receipts and continues scientific analysis without operator terminal work.
+- Read-only diagnose /home/atrott/adamArchives/venvs/DNNs: determine whether it is a Conda env, Python venv, or other environment; inspect sys.prefix/base_prefix, pyvenv.cfg, conda-meta presence, interpreter path, scientific imports/CUDA, and the exact Conda list failure without mutating the environment.
+- Choose the smallest reproducible immutable promotion mechanism supported by the actual environment type. Do not fall back to mounting the mutable user environment into routine jobs.
+- Implement the corrected promoter on padataset-autonomous-scientific-execution-v1, add regression coverage, and pass exact-head workspace-control validation before another operator attempt.
+- After one-time promotion succeeds, commit exact DNNs runtime/data bindings, activate the scientific contract/route, validate and reconcile live.
+- Then ChatGPT creates the Stage03 experiment request, triggers autonomous scientific smoke, full PA2 backbone training, and Architecture C evaluation.
 
 ## Blockers / gates
 
-- One-time operator/root DNNs + Stage03 cache promotion must run from exact validated source head 313e204d7342c0c14b00c2956401783d39e02d9b.
-- Routine scientific execution remains disabled until the emitted exact runtime/data bindings are committed, validated, activated, and reconciled.
+- The actual DNNs runtime is uniquely resolved at /home/atrott/adamArchives/venvs/DNNs, but the current promoter assumes that exact prefix is readable/cloneable by Conda. That assumption is false on this machine.
+- Do not retry the current promoter and do not perform root mutation until the environment type and reproducible immutable-copy/clone mechanism are diagnosed read-only and a replacement candidate passes exact-head validation.
+- Routine scientific execution remains disabled until a root-owned immutable DNNs runtime and Stage03 cache are promoted, bound, validated, activated, and reconciled.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/padataset-autonomous-scientific-execution-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
