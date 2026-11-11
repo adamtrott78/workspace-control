@@ -78,6 +78,7 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             contract_test["argv"],
             ["-B", "tests/test_multisurrogate_dqnguard.py"],
         )
+        self.assertEqual(contract_test["env"]["PYTHONPATH"], "/workspace")
         self.assertEqual(
             contract_test["env"]["LD_LIBRARY_PATH"],
             "/usr/lib/x86_64-linux-gnu/blas:"
