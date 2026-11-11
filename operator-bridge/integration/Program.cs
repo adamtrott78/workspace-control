@@ -11,6 +11,12 @@ internal static class Program
 {
     private static async Task<int> Main(string[] args)
     {
+        var usabilityTrial = GetArgument(args, "--usability-trial");
+        if (!string.IsNullOrWhiteSpace(usabilityTrial))
+        {
+            return UsabilityHarness.Run(args);
+        }
+
         var resultPath = GetArgument(args, "--result") ??
             Path.Combine(Environment.CurrentDirectory, "stage06-firefox-result.json");
         var timeoutSeconds = int.TryParse(

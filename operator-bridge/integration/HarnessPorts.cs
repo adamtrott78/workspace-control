@@ -57,7 +57,11 @@ public sealed class SimulatorOperatorActionPort : IOperatorActionPort
                 claimed.ActionId,
                 claimed.WorkerSlotId,
                 claimed.SessionGeneration),
-            $"WORKSPACE_SIM_PACKET_V1\naction_id={claimed.ActionId}\n",
+            $"WORKSPACE_SIM_PACKET_V1\n" +
+            $"action_id={claimed.ActionId}\n" +
+            $"worker_slot_id={claimed.WorkerSlotId}\n" +
+            $"session_generation={claimed.SessionGeneration}\n" +
+            $"payload_sha256={claimed.ExpectedPayloadSha256}\n",
             $"sim://payload/{claimed.ActionId}",
             claimed.ExpectedPayloadSha256,
             ParseType(claimed.ActionType));

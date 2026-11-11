@@ -1,0 +1,81 @@
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
+    def test_usability_harness_is_test_only_and_manual_input_preserved(self):
+        production = (
+            ROOT / "operator-bridge" / "WorkspaceOperatorBridge.slnx"
+        ).read_text(encoding="utf-8")
+        integration = (
+            ROOT / "operator-bridge" / "integration" / "Program.cs"
+        ).read_text(encoding="utf-8")
+        server = (
+            ROOT / "operator-bridge" / "integration" / "FakeWorkerLoopbackServer.cs"
+        ).read_text(encoding="utf-8")
+        harness = (
+            ROOT / "operator-bridge" / "integration" / "UsabilityHarness.cs"
+        ).read_text(encoding="utf-8")
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage10-usability.ps1"
+        ).read_text(encoding="utf-8")
+
+        self.assertNotIn("UsabilityHarness", production)
+        self.assertIn("--usability-trial", integration)
+        self.assertIn("WinFormsClipboardWriter", harness)
+        self.assertIn("WindowsHotkeyRegistrar", harness)
+        self.assertIn("IPAddress.Loopback", server)
+        self.assertNotIn("IPAddress.Any", server)
+        self.assertIn('event.key === "Enter"', server)
+        self.assertIn('fetch("/submit"', server)
+        self.assertIn("PENDING_OPERATOR_COUNTS_AND_RATINGS", harness)
+        self.assertIn("wrong_worker_dispatches", harness)
+        self.assertIn("wrong_packet_dispatches", harness)
+        self.assertIn("Ctrl+V", script)
+        self.assertNotIn("SendKeys", harness)
+        self.assertNotIn("KeyboardEvent", harness)
+        self.assertNotIn("MouseEvent", harness)
+
+    def test_usability_adapter_keeps_least_privilege_and_fake_worker_only(self):
+        manifest = (
+            ROOT
+            / "operator-bridge"
+            / "usability"
+            / "FirefoxProfile"
+            / "extension"
+            / "manifest.json"
+        ).read_text(encoding="utf-8")
+        background = (
+            ROOT
+            / "operator-bridge"
+            / "usability"
+            / "FirefoxProfile"
+            / "extension"
+            / "background.js"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('"nativeMessaging"', manifest)
+        self.assertIn('"tabs"', manifest)
+        self.assertIn('"sessions"', manifest)
+        self.assertNotIn("host_permissions", manifest)
+        self.assertNotIn("content_scripts", manifest)
+        self.assertIn("http://127.0.0.1:8765/fake-worker.html", background)
+        self.assertNotIn("chatgpt.com", background.lower())
+        self.assertNotIn("querySelector", background)
+        self.assertNotIn("executeScript", background)
+
+    def test_simulator_packet_carries_only_test_identity_and_hash(self):
+        ports = (
+            ROOT / "operator-bridge" / "integration" / "HarnessPorts.cs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("worker_slot_id=", ports)
+        self.assertIn("session_generation=", ports)
+        self.assertIn("payload_sha256=", ports)
+        self.assertNotIn("response_text", ports.lower())
+        self.assertNotIn("credential", ports.lower())
+
+
+if __name__ == "__main__":
+    unittest.main()
