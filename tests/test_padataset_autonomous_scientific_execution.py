@@ -44,6 +44,15 @@ class PADatasetAutonomousScientificExecutionTests(unittest.TestCase):
             'PADATASET_SCIENTIFIC_PROMOTION=PASS',
         ):
             self.assertIn(marker, text)
+        self.assertIn(
+            'SOURCE_OBJECT_BASE="/var/lib/workspace-ci/padataset-runtime-sources/sha256"',
+            text,
+        )
+        self.assertNotIn('SOURCE_OBJECT_BASE="$TRUSTED_CACHE', text)
+        self.assertIn(
+            'install -o root -g root -m 0400 "$TMP/environment.explicit.txt"',
+            text,
+        )
         self.assertNotIn("sudo bash -c", text)
         self.assertNotIn("chmod 777", text)
 
