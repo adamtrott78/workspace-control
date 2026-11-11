@@ -726,7 +726,9 @@
         "Operator observation: Ctrl+B retained normal foreground-application behavior; clipboard unchanged; no scheduler action or bridge-driven focus change observed.",
         "GitHub job failure was wrapper-only: Windows process exit code disagreed with the emitted structured OBJECTIVE_PASS. UT-11 acceptance is preserved; no rerun required.",
         "UT-01 first interactive attempt on Operator Bridge run #196 demonstrated no Ctrl+B clipboard effect. Operator verified clipboard history remained unchanged; no paste/Enter was performed.",
-        "Root cause isolated to Stage-10 integration harness entry point missing [STAThread], while production helper is [STAThread] and WinFormsClipboardWriter requires STA. First UT-01 attempt is INVALIDATED; rerun required after repair validation."
+        "Root cause isolated to Stage-10 integration harness entry point missing [STAThread], while production helper is [STAThread] and WinFormsClipboardWriter requires STA. First UT-01 attempt is INVALIDATED; rerun required after repair validation.",
+        "UT-01 attempt 2 on run #198 still showed no clipboard/focus effect after [STAThread] entry-point repair. Screenshot showed three fake-worker tabs although seed creates only slot-1 and slot-3, demonstrating browser dispatch progressed far enough to create slot-2 before clipboard/focus completion.",
+        "Root cause refined: Stage-10 harness lacked an explicit WindowsFormsSynchronizationContext. Async dispatch awaits browser IPC before WinFormsClipboardWriter; without a UI synchronization context the continuation can resume on a non-STA thread and fail before clipboard/focus. Harness repair preserves the real WinFormsClipboardWriter and adds fail-fast structured dispatch diagnostics."
       ],
       "implementation": [],
       "evidence": {
@@ -769,10 +771,26 @@
           },
           "demonstrated_blocker": "STAGE10_HARNESS_NOT_STA",
           "rerun_required": true
+        },
+        "ut01_attempt_2": {
+          "status": "INVALIDATED",
+          "workflow_run_id": 43114304915,
+          "job_id": 130839656985,
+          "source_sha": "d60dbf126e9741fe97d406ebabcebf36ae81883a",
+          "operator_observation": {
+            "fake_worker_tabs_visible": 3,
+            "ctrl_b_clipboard_effect_observed": false,
+            "focus_change_observed": false,
+            "pasted_packet": false,
+            "enter_pressed": false
+          },
+          "demonstrated_progress": "BROWSER_DISPATCH_PROGRESS_INFERRED_FROM_EXTRA_SLOT2_TAB",
+          "refined_blocker": "STAGE10_ASYNC_CONTINUATION_NOT_BOUND_TO_WINFORMS_SYNCHRONIZATION_CONTEXT",
+          "rerun_required": true
         }
       },
-      "claim": "Stage 10 active. UT-11 PASS. UT-01 first attempt invalidated by a test-harness STA defect; repair is in progress and UT-01 must be rerun.",
-      "blocker": "Stage-10 integration harness must execute on an STA UI thread before UT-01 can be accepted."
+      "claim": "Stage 10 active. UT-11 PASS. UT-01 attempts 1-2 invalidated by Stage-10 harness threading defects; explicit WinForms synchronization-context repair is in progress.",
+      "blocker": "Stage-10 harness must preserve STA across async browser IPC continuations before UT-01 can be accepted."
     }
   }
 }
