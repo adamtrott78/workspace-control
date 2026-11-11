@@ -361,6 +361,20 @@ func verifiedFromRecord(record jobRecord) verifiedJob {
 	}
 }
 
+func restRevivalProvenanceMatches(record jobRecord, job verifiedJob) bool {
+	return record.RunnerRequestID > 0 &&
+		record.RunnerRequestID == record.GitHubJobID &&
+		job.RunnerRequestID > 0 &&
+		job.RunnerRequestID == job.GitHubJobID &&
+		record.RunnerRequestID == job.RunnerRequestID &&
+		record.GitHubJobID == job.GitHubJobID &&
+		record.AuthoritySource == "REST_ACTIVE_JOB_SET" &&
+		job.AuthoritySource == "REST_ACTIVE_JOB_SET" &&
+		record.WorkflowRunID == job.WorkflowRunID &&
+		record.WorkflowPath == job.WorkflowPath &&
+		record.WorkflowBlobSHA == job.WorkflowBlobSHA
+}
+
 func resetFreshAttempt(policy controllerPolicy, record *jobRecord, now time.Time) error {
 	record.ProvisionAttempt++
 	requestID, runnerName, err := deriveProvisionIdentity(
@@ -626,6 +640,18 @@ func (s *v3Scaler) processRESTDemand(
 			// identity instead of suppressing it forever.
 			if existing.terminal() &&
 				existing.AuthoritySource == "REST_ACTIVE_JOB_SET" {
+				if !restRevivalProvenanceMatches(existing, job) {
+					s.logger.Warn(
+						"Refusing terminal REST revival because durable provenance differs from current REST attestation",
+						slog.Int64("durable_runner_request_id", existing.RunnerRequestID),
+						slog.Int64("durable_github_job_id", existing.GitHubJobID),
+						slog.Int64("current_runner_request_id", job.RunnerRequestID),
+						slog.Int64("current_github_job_id", job.GitHubJobID),
+						slog.Int64("durable_workflow_run_id", existing.WorkflowRunID),
+						slog.Int64("current_workflow_run_id", job.WorkflowRunID),
+					)
+					continue
+				}
 				if err := resetFreshAttempt(s.policy, &existing, s.now()); err != nil {
 					return err
 				}
