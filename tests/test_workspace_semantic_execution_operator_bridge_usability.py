@@ -24,6 +24,7 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
 
         self.assertNotIn("UsabilityHarness", production)
         self.assertIn("--usability-trial", integration)
+        self.assertIn("[STAThread]", integration)
         self.assertIn("WinFormsClipboardWriter", harness)
         self.assertIn("WindowsHotkeyRegistrar", harness)
         self.assertIn("IPAddress.Loopback", server)

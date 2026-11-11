@@ -9,6 +9,7 @@ namespace WorkspaceControl.OperatorBridge.IntegrationHarness;
 
 internal static class Program
 {
+    [STAThread]
     private static async Task<int> Main(string[] args)
     {
         var usabilityTrial = GetArgument(args, "--usability-trial");

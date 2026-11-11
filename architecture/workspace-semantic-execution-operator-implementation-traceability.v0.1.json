@@ -724,7 +724,9 @@
         "UT-11 bridge-off trial executed in Operator Bridge run #194 / stage10-usability job 130809245969 on exact head 3121cf8bb8eb197ccc217fe6ff4c763c3ea5b2a0.",
         "UT-11 structured result OBJECTIVE_PASS: wrong_worker_dispatches=0, wrong_packet_dispatches=0, rejected_state_submissions=0, content_policy=CONTENT_FREE.",
         "Operator observation: Ctrl+B retained normal foreground-application behavior; clipboard unchanged; no scheduler action or bridge-driven focus change observed.",
-        "GitHub job failure was wrapper-only: Windows process exit code disagreed with the emitted structured OBJECTIVE_PASS. UT-11 acceptance is preserved; no rerun required."
+        "GitHub job failure was wrapper-only: Windows process exit code disagreed with the emitted structured OBJECTIVE_PASS. UT-11 acceptance is preserved; no rerun required.",
+        "UT-01 first interactive attempt on Operator Bridge run #196 demonstrated no Ctrl+B clipboard effect. Operator verified clipboard history remained unchanged; no paste/Enter was performed.",
+        "Root cause isolated to Stage-10 integration harness entry point missing [STAThread], while production helper is [STAThread] and WinFormsClipboardWriter requires STA. First UT-01 attempt is INVALIDATED; rerun required after repair validation."
       ],
       "implementation": [],
       "evidence": {
@@ -753,10 +755,24 @@
           },
           "wrapper_exit_code_disagreement": true,
           "rerun_required": false
+        },
+        "ut01_attempt_1": {
+          "status": "INVALIDATED",
+          "workflow_run_id": 43111473974,
+          "job_id": 130830089070,
+          "source_sha": "7f2a54989637c4e8b6834303db5fba642a06afc0",
+          "operator_observation": {
+            "ctrl_b_clipboard_effect_observed": false,
+            "clipboard_history_changed": false,
+            "pasted_packet": false,
+            "enter_pressed": false
+          },
+          "demonstrated_blocker": "STAGE10_HARNESS_NOT_STA",
+          "rerun_required": true
         }
       },
-      "claim": "Stage 10 human-in-loop simulator usability trials are active. UT-11 bridge-OFF shortcut behavior has PASS evidence; UT-01 is next.",
-      "blocker": "NONE"
+      "claim": "Stage 10 active. UT-11 PASS. UT-01 first attempt invalidated by a test-harness STA defect; repair is in progress and UT-01 must be rerun.",
+      "blocker": "Stage-10 integration harness must execute on an STA UI thread before UT-01 can be accepted."
     }
   }
 }
