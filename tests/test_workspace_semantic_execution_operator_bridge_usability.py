@@ -38,6 +38,26 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertNotIn("KeyboardEvent", harness)
         self.assertNotIn("MouseEvent", harness)
 
+    def test_workflow_has_opt_in_interactive_stage10_trials(self):
+        workflow = (
+            ROOT / ".github" / "workflows" / "operator-bridge-validation.yml"
+        ).read_text(encoding="utf-8")
+        self.assertIn("stage10-usability:", workflow)
+        self.assertIn("stage10-ut11", workflow)
+        self.assertIn("stage10-ut01", workflow)
+        self.assertIn("stage10-ut10", workflow)
+        self.assertIn("needs: validation", workflow)
+        self.assertIn(
+            "runs-on: [self-hosted, windows, x64, workspace-operator-target]",
+            workflow,
+        )
+        self.assertIn("run-stage10-usability.ps1", workflow)
+        self.assertIn(
+            "Stage 10 usability runner must be launched interactively",
+            workflow,
+        )
+        self.assertIn("operator-bridge-stage10-usability-", workflow)
+
     def test_usability_adapter_keeps_least_privilege_and_fake_worker_only(self):
         manifest = (
             ROOT
