@@ -6,7 +6,7 @@
   "goal": "Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard project so Stage 00 can recover canonical MILCOM baseline/runtime provenance directly from the prepared Lambda checkout before architecture implementation.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "workspace_shell_bootstrap",
+  "current_stage": "stage03_architecture_c_smoke",
   "acceptance_criteria": [
     "Workspace Shell can inspect PADataset at the exact task-bound source SHA without changing the historical checkout.",
     "Stage 00 recovers the fixed-Scan DQNGuard, full 20-cell target-surrogate matrix, and VarMax surrogate-all evidence chains with machine-readable provenance.",
@@ -19,7 +19,7 @@
     "Read-only evidence profiles may inspect a dirty checkout snapshot; research-bounded execution requires a clean source snapshot and runs only in disposable scratch.",
     "Preserve the surviving pooled-length provenance of 16384 even where the accepted manuscript says 8192.",
     "Do not use target-test labels for architecture selection, normalization, aggregation, threshold selection, or tuning.",
-    "Clean PADataset execution authority is exact SHA 17e1147614f27702e43565089d618182ff71c5af.",
+    "Clean PADataset execution authority is exact SHA 4c095352bfe128e93f794112741efdb7a66b9c38.",
     "Historical Stage 00 evidence is sourced from the untouched Lambda checkout observed at branch leaf2026-review-1571342865, local HEAD b5a09cede6680b9e2a53eac244db4fbd7eaf76ec, dirty, approximately 107 GB.",
     "Do not require the historical evidence checkout to match the clean execution branch; preserve it read-only and record provenance differences explicitly."
   ],
@@ -30,7 +30,7 @@
       "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
       "remote": {
         "branch": "mth602-final-multisurrogate-dqnguard-v1",
-        "checkpoint_sha": "17e1147614f27702e43565089d618182ff71c5af",
+        "checkpoint_sha": "4c095352bfe128e93f794112741efdb7a66b9c38",
         "verified": true
       },
       "local": null,
@@ -40,7 +40,7 @@
   "stages": [
     {
       "id": "workspace_shell_bootstrap",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-shell-multirepo-research-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github+lambda",
@@ -51,12 +51,23 @@
       "outputs": [
         "live task-bound PADataset inspection"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Live PADataset Workspace Shell bootstrap",
+          "result": "PASS",
+          "evidence": [
+            "Dependent task runtime_inventory returns ok=true through live Workspace Shell.",
+            "PADataset HEAD exactly 17e1147614f27702e43565089d618182ff71c5af with clean git status/tree inspection.",
+            "Historical evidence provenance metadata binds leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec and states evidence_exposed_read_only=true.",
+            "Negative profile/path/SHA probes fail closed."
+          ]
+        }
+      ],
       "resume_condition": null
     },
     {
       "id": "stage00_baseline_provenance_recovery",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "workspace-shell",
@@ -67,12 +78,66 @@
         "machine-readable baseline provenance artifact",
         "updated authoritative PADataset TASK.md"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 00 baseline provenance freeze",
+          "result": "PASS",
+          "evidence": [
+            "PADataset commit 025f73632609891ee5292880b0efe25f5d50df04 adds docs/experiments/multisurrogate_dqnguard/stage00_baseline_provenance.json and marks Stage 00 complete in the authoritative TASK.md.",
+            "All 20 Target-Surrogate evaluator unknown_f1 values exactly match the accepted rendered matrix.",
+            "B0/B2 four-fold evaluator/config/checkpoint identities and the shared 16,384 OTA cache lineage are SHA-256 pinned.",
+            "Missing historical aggregate-input CSVs are explicitly recorded as absent and were not regenerated."
+          ]
+        }
+      ],
       "resume_condition": "workspace_shell_bootstrap validated."
     },
     {
+      "id": "stage02_common_evaluation_provenance_contract",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "stage01_evidence_partition_design"
+      ],
+      "outputs": [
+        "common result schema",
+        "deterministic smoke/provenance contract"
+      ],
+      "validation": [
+        {
+          "check": "Stage 02 common result/provenance contract",
+          "result": "PASS",
+          "evidence": [
+            "PADataset commit 7e3087b553f0ad182d45df6ffe8a1678ea64d16a adds STAGE02_RESULT_CONTRACT.md and stage02_result_schema.v1.json.",
+            "The schema fixes architecture/target/source/backbone/evidence-partition/score/threshold/metrics/provenance/status fields.",
+            "Deterministic smoke invariants cover target quarantine, disjoint calibration roles, score direction, known-only thresholding, monotone normalization, predeclared aggregation, and explicit failure/fallback state."
+          ]
+        }
+      ],
+      "resume_condition": "Stage 01 complete."
+    },
+    {
+      "id": "stage03_architecture_c_smoke",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+workspace-shell",
+      "inputs": [
+        "stage02_common_evaluation_provenance_contract"
+      ],
+      "outputs": [
+        "architecture C implementation",
+        "deterministic smoke tests",
+        "one reviewed real target-fold result"
+      ],
+      "validation": [],
+      "resume_condition": "Stage 02 complete and Workspace Shell rebound to the exact implementation SHA before execution."
+    },
+    {
       "id": "stage01_evidence_partition_design",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -82,7 +147,17 @@
       "outputs": [
         "exact A/B/C evidence partition designs"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Stage 01 evidence partition design",
+          "result": "PASS",
+          "evidence": [
+            "PADataset commit 6a3c62a229beb81fa8644d979b2198f46f6f0255 adds STAGE01_EVIDENCE_PARTITIONS.md and records Stage 01 complete in the authoritative TASK.md.",
+            "Design enforces target quarantine, known-only backbone checkpoint selection, disjoint calibration roles, known-only 5% final thresholding, and explicit A/B/C shared-vs-surrogate-specific state.",
+            "Architecture C is selected as first implementation candidate; implementation remains blocked until Stage 02 common result/provenance contract is frozen."
+          ]
+        }
+      ],
       "resume_condition": "Stage 00 complete."
     }
   ],
@@ -114,32 +189,101 @@
         "Lambda read-only preflight observed this checkout and its dirty working tree.",
         "The 107 GB checkout contains the ignored/local MILCOM-era artifacts needed for Stage 00 and must not be cleaned, switched, reset, stashed, or copied wholesale."
       ]
+    },
+    {
+      "id": "stage00-provenance-freeze",
+      "kind": "git_commit",
+      "identity": "025f73632609891ee5292880b0efe25f5d50df04",
+      "required_for_resume": true,
+      "evidence": [
+        "Adds Stage 00 baseline provenance artifact and marks scientific Stage 00 complete."
+      ]
+    },
+    {
+      "id": "stage01-evidence-partition-freeze",
+      "kind": "git_commit",
+      "identity": "6a3c62a229beb81fa8644d979b2198f46f6f0255",
+      "required_for_resume": true,
+      "evidence": [
+        "Adds frozen A/B/C evidence partition design and selects C as first implementation candidate."
+      ]
+    },
+    {
+      "id": "stage02-result-contract-freeze",
+      "kind": "git_commit",
+      "identity": "7e3087b553f0ad182d45df6ffe8a1678ea64d16a",
+      "required_for_resume": true,
+      "evidence": [
+        "Adds frozen result schema and deterministic smoke/reducer contract."
+      ]
+    },
+    {
+      "id": "stage03-architecture-c-implementation-candidate",
+      "kind": "git_commit",
+      "identity": "4c095352bfe128e93f794112741efdb7a66b9c38",
+      "required_for_resume": true,
+      "evidence": [
+        "Adds multisurrogate_dqnguard.py, pa_eval_multisurrogate_dqnguard.py, deterministic contract tests, and Stage 03 implementation note."
+      ]
+    },
+    {
+      "id": "parent-v3-rest-terminal-revival-gate-20261111",
+      "kind": "repository_artifact",
+      "identity": "workspace-control#604@1a355725c7ff80434622696995fcb72c5c9812f7",
+      "required_for_resume": true,
+      "evidence": [
+        "Parent workspace-control validation remains blocked by v3 cross-job terminalization of run #389.",
+        "Initial PR #602 review returned BLOCKING_FINDINGS in comment 6800923096 and was consumed by receipt 6800928540.",
+        "Corrected PR #602 head c7c45f11def0907bffb56fc4a3d56340df8bc8c1 passed Workspace Control Validation #2537 / run 43057114914; fresh independent review is pending at comment 6801138943.",
+        "BF-2 review returned BLOCKING_FINDINGS in comment 6801403821 and automated consumption receipt 6801419184 consumed it.",
+        "BF-2 corrected PR #602 head 4196934cad14ddf3238c4637da4229b8d5e0fc60 passed Workspace Control Validation #2542 / run 43059721180; fresh independent review is pending at comment 6801484654.",
+        "PR #602 corrected controller review accepted by 6801586149 and consumed by 6801591386.",
+        "PR #604 live transaction passed Workspace Control Validation #2546 / run 43061820455; review pending at 6801793676.",
+        "PR #604 initial live review returned BLOCKING_FINDINGS 6801931546; consumed 6801935499.",
+        "Corrected PR #604 head ae9f8495fbdbe88ad48d608c8d30fe84928e5b97 passed Workspace Control Validation #2549 / run 43064429832; review pending at 6802154988.",
+        "PR #604 service-semantics review returned BLOCKING_FINDINGS 6802271952; consumed 6802275694.",
+        "Corrected PR #604 head 1a355725c7ff80434622696995fcb72c5c9812f7 passed Workspace Control Validation #2552 / run 43065903208; review pending at 6802353544.",
+        "PR #604 review 6802506202 NO_BLOCKING_FINDING; consumption 6802526662.",
+        "Execution transport remains separately blocked by Workspace Shell helper/approval authority.",
+        "Run #389 / 42881495845 completed on fresh runner lambda-workspace-control-control-small-81d087089813.",
+        "Job 130058639814 was assigned runner_id 160 and executed from 2026-11-11T17:28:20Z to 17:28:33Z.",
+        "Exact same-repository PR-head gate, runner-isolation gate, and exact candidate checkout all passed.",
+        "Python unit suite completed 548 tests successfully.",
+        "Failure occurred only in bounded repository validation when Go attempted ./v3 under controller/lambda-ci-controller and the candidate checkout lacked controller/lambda-ci-controller/v3.",
+        "Exact error: stat .../controller/lambda-ci-controller/v3: directory not found.",
+        "Candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 has no V3 controller subtree; accepted V3 repair lineage 4196934cad14ddf3238c4637da4229b8d5e0fc60 does.",
+        "Therefore V3 scheduler/runner revival is proven; remaining failure is candidate-lineage/source mismatch."
+      ]
     }
   ],
   "artifacts": [],
   "validation": [
     {
       "check": "Live PADataset Workspace Shell binding",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "Live task visibility and exact-SHA clean source inspection passed.",
+        "Read-only historical evidence mount is available under local_artifacts/evidence with recorded source metadata."
+      ]
     },
     {
       "check": "Stage 00 baseline provenance artifact",
-      "result": "NOT_RUN",
-      "evidence": []
+      "result": "PASS",
+      "evidence": [
+        "PADataset scientific commit 025f73632609891ee5292880b0efe25f5d50df04 contains the machine-readable Stage 00 artifact and authoritative task update."
+      ]
     }
   ],
   "blockers": [
-    "Parent Workspace Shell implementation is validated at execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, but this task still returns TASK_NOT_FOUND through the live trusted authority snapshot. No PADataset read or research execution is permitted until the authority refresh completes."
+    "Live Workspace Shell policy has not yet been refreshed to validated workspace-control 72073976f02ca151c6ee68128175c51b069be42c; PADataset source 4c095352bfe128e93f794112741efdb7a66b9c38 is already exact and clean."
   ],
   "remaining_work": [
-    "Apply the validated parent authority refresh and prove this task is visible through Workspace Shell.",
-    "Verify clean PADataset execution HEAD is 17e1147614f27702e43565089d618182ff71c5af and historical evidence is mounted read-only.",
-    "Recover baseline CSVs, evaluator summaries, run directories, configs, checkpoints, cache identities, and calibration/evaluator settings.",
-    "Persist machine-readable Stage 00 provenance in PADataset and update its authoritative task.",
-    "Proceed to Stage 01 only after the provenance gate closes."
+    "Wait for parent policy refresh to complete successfully.",
+    "Run tests/test_multisurrogate_dqnguard.py through research-bounded.",
+    "Prepare one known-only four-class backbone target fold with 16,384 cache lineage and no target-informed checkpoint selection.",
+    "Run Architecture C smoke/small-real evaluator and validate result_record.json against Stage 02 schema."
   ],
-  "next_safe_action": "After the parent live upgrade reports LOCAL_TASK_AUTHORITY=PASS, verify this task through ChatGPT Workspace Shell and verify PADataset exact HEAD 17e1147614f27702e43565089d618182ff71c5af. Only then begin Stage 00 read-only provenance recovery from the clean execution snapshot and untouched historical evidence checkout leaf2026-review-1571342865@b5a09cede6680b9e2a53eac244db4fbd7eaf76ec.",
+  "next_safe_action": "Do not execute Stage 03 until the parent live policy refresh installs workspace-control 72073976f02ca151c6ee68128175c51b069be42c and confirms PADataset 4c095352bfe128e93f794112741efdb7a66b9c38. Then run tests/test_multisurrogate_dqnguard.py through research-bounded.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."
