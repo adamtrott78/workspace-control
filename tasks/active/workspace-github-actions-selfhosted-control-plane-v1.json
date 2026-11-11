@@ -474,7 +474,7 @@
       "selected_executor": "chatgpt",
       "selected_surface": "github+workspace-shell",
       "inputs": [
-        "PR #602 exact v3 repair head 22727738d1dae4a0dd2962386efa5a30d99bce53",
+        "PR #602 corrected v3 repair head c7c45f11def0907bffb56fc4a3d56340df8bc8c1",
         "run #388 / job 130057033416 older queued candidate d7e3237b09a5020235833672c9e445d189b8a23a",
         "run #389 / job 130058639814 exact candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030",
         "operator read-only v3 ledger fingerprint for scheduler-130058639814.json"
@@ -513,9 +513,29 @@
             "Request digest 473cc58c3ee1dd381652d2b4eaa194e443fa3f8e4bf5d744c2c65a56c3573b92.",
             "No live deployment is authorized by this request."
           ]
+        },
+        {
+          "check": "BF-1 provenance-binding correction",
+          "result": "PASS",
+          "evidence": [
+            "Fresh independent review comment 6800923096 returned BLOCKING_FINDINGS: terminal REST revival lacked a fail-closed durable-vs-current provenance comparison.",
+            "Automated consumption receipt 6800928540 consumed the exact blocking disposition.",
+            "Corrected exact head c7c45f11def0907bffb56fc4a3d56340df8bc8c1 requires durable/current REST provenance equality before resetFreshAttempt and leaves mismatched terminal records byte-semantically inert with zero root/JIT events.",
+            "Corrected blobs: controller.go 54d01d29ad23158f1fa4f6fd3d0188deb1163e89; controller_test.go 88eb88af3a0dedfe66d69024dcd6c7bb5026a8d5.",
+            "Workspace Control Validation 43057114914 / #2537 SUCCESS on the corrected exact head."
+          ]
+        },
+        {
+          "check": "Fresh corrected independent review request materialized",
+          "result": "PASS",
+          "evidence": [
+            "PR #602 automated request comment 6801138943 binds exact corrected head c7c45f11def0907bffb56fc4a3d56340df8bc8c1, base fcb88281ae485bb554825fca3972d044f3b4f665, tree fcb49dd6607524fa0846d621eeddc25119a8b888, and corrected controller blobs.",
+            "Request digest 272b1f1dfde0d64fed4199c3c43266e51f2adc301efbc5103bcc01a29e805c1d.",
+            "No live deployment, controller refresh, ledger revival, workflow retrigger/cancel, or Lambda mutation is authorized by this request."
+          ]
         }
       ],
-      "resume_condition": "Fresh independent reviewer posts an accepted disposition for request 6800469672 and automated consumption succeeds. Then design a separate authority-sensitive live refresh/revival transaction."
+      "resume_condition": "Fresh independent reviewer posts NO_BLOCKING_FINDING for corrected request 6801138943 and automated consumption succeeds. Then design a separate authority-sensitive live refresh/revival transaction; do not deploy directly from this code review."
     }
   ],
   "checkpoints": [
@@ -852,12 +872,13 @@
     {
       "id": "v3-rest-terminal-revival-pr602-20261111",
       "kind": "git_commit",
-      "identity": "workspace-control#602@22727738d1dae4a0dd2962386efa5a30d99bce53",
+      "identity": "workspace-control#602@c7c45f11def0907bffb56fc4a3d56340df8bc8c1",
       "required_for_resume": true,
       "evidence": [
         "PR #602 exact base fcb88281ae485bb554825fca3972d044f3b4f665.",
-        "Workspace Control Validation 43051783120 / #2534 SUCCESS.",
-        "Automated review request comment 6800469672 / digest 473cc58c3ee1dd381652d2b4eaa194e443fa3f8e4bf5d744c2c65a56c3573b92."
+        "Initial review request 6800469672 -> BLOCKING_FINDINGS 6800923096 -> consumed receipt 6800928540.",
+        "Workspace Control Validation 43057114914 / #2537 SUCCESS on corrected head.",
+        "Fresh corrected automated review request comment 6801138943 / digest 272b1f1dfde0d64fed4199c3c43266e51f2adc301efbc5103bcc01a29e805c1d."
       ]
     }
   ],
@@ -2278,7 +2299,7 @@
     }
   ],
   "blockers": [
-    "PR #602 exact-head code review is pending; no v3 deployment is authorized.",
+    "PR #602 corrected exact-head code review is pending at request 6801138943; no v3 deployment is authorized.",
     "Run #389 remains queued because its durable v3 ledger is falsely terminal after cross-job JIT capacity was assigned to older run #388.",
     "Retired v2 workspace-control controller/scale-set must remain untouched; current production validation is served by workspace-ci-v3-controller@workspace-control-control-small-v1.service.",
     "Live v3 deployment/ledger revival requires its own bounded, source-bound, independently reviewed transaction after code acceptance."
