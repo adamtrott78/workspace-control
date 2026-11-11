@@ -500,6 +500,64 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         self.assertIsNone(spec["model_binding"])
         self.assertIsNone(spec["runtime_binding"])
 
+    def test_padataset_scientific_route_is_not_admitted_while_planned(self):
+        manifest = copy.deepcopy(PAD)
+        route = manifest["routes"]["scientific-single-gpu"]
+        self.assertEqual(route["activation_state"], "PLANNED_NOT_BOUND")
+        with self.assertRaisesRegex(
+            multi.MultiRepoPolicyError,
+            "route is not active",
+        ):
+            multi.mint_admission(
+                request_for(manifest, "scientific-single-gpu"),
+                manifest,
+                CONTRACTS,
+                WORKLOAD,
+                now=datetime(2026, 11, 11, tzinfo=timezone.utc),
+            )
+
+    def test_gpu_small_static_ceiling_does_not_expand_existing_canary_runtime(self):
+        manifest = copy.deepcopy(PAD)
+        route = manifest["routes"]["gpu-ci"]
+        route["activation_state"] = "ACTIVE"
+        req_data = request_for(manifest, "gpu-ci")
+        req = provisioner.validate_request_v2_generic(
+            req_data,
+            manifest,
+            CONTRACTS,
+            WORKLOAD,
+            now=datetime(2026, 11, 11, tzinfo=timezone.utc),
+        )
+        spec = provisioner.build_launch_spec(req, manifest, PROFILES, PINS)
+        self.assertEqual(PROFILES["profiles"]["gpu-small"]["RuntimeMaxSec"], "4h")
+        self.assertEqual(
+            WORKLOAD["resource_classes"]["gpu_small_v1"]["max_runtime_seconds"],
+            1200,
+        )
+        self.assertEqual(spec["resources"]["runtime_max_seconds"], 1200)
+
+    def test_scientific_resource_ceiling_is_four_hours_and_single_gpu(self):
+        resource = WORKLOAD["resource_classes"]["scientific_gpu_single_v1"]
+        self.assertEqual(resource["execution_profile"], "gpu-small")
+        self.assertEqual(resource["max_runtime_seconds"], 14400)
+        self.assertEqual(resource["gpu_count"], 1)
+        self.assertEqual(
+            resource["gpu_uuids"],
+            ["GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"],
+        )
+        cache = WORKLOAD["cache_access_classes"][
+            "TRUSTED_RUNTIME_PROJECT_CACHE_READONLY"
+        ]
+        self.assertEqual(cache["trusted_runtime"], "read_only")
+        self.assertEqual(cache["project_trusted_cache"], "read_only")
+        self.assertFalse(cache["candidate_persistent_write"])
+        effect = WORKLOAD["state_effect_classes"][
+            "SCIENTIFIC_EXPERIMENT_EPHEMERAL_ARTIFACTS"
+        ]
+        self.assertTrue(effect["scientific_state_materialization"])
+        self.assertFalse(effect["persistent_candidate_write"])
+        self.assertEqual(effect["durable_output_channel"], "github_artifact_only")
+
     def test_padataset_gpu_canary_contract_needs_no_runtime_or_model_binding(self):
         manifest = copy.deepcopy(PAD)
         route = manifest["routes"]["gpu-ci"]
