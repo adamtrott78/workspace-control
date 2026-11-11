@@ -83,6 +83,30 @@
         "model_id": null,
         "runtime_id": null
       }
+    },
+    "scientific-single-gpu": {
+      "activation_state": "PLANNED_NOT_BOUND",
+      "lane": "gpu",
+      "execution_contract_id": "scientific-single-gpu-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-scientific.yml",
+        "default_branch": "main",
+        "blob_sha": null
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-scientific",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": "padataset-dnns-v1"
+      }
     }
   },
   "bindings": {
