@@ -6,7 +6,7 @@
   "goal": "Extend the live Workspace Shell v1 lineage with a first-class PADataset target that supports exact-SHA/task-bound Git provenance, bounded read-only evidence inspection, and sandboxed network-denied research execution without exposing a generic shell or making the historical PADataset checkout writable.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-shell-mcp-v1",
-  "current_stage": "stage03_research_test_policy_validation",
+  "current_stage": "stage03_research_test_policy_authority_validation",
   "acceptance_criteria": [
     "PADataset is an explicit Workspace Shell target authorized only by an IN_PROGRESS durable task capsule with an exact repository checkpoint SHA.",
     "Read-only PADataset evidence inspection supports bounded recursive file listing, bounded byte reads, SHA-256 hashing, and existing hardened Git inspection without arbitrary shell execution.",
@@ -578,20 +578,29 @@
         "PR #606 head 72073976f02ca151c6ee68128175c51b069be42c adds only exact tests/test_multisurrogate_dqnguard.py admission in both launcher implementations plus positive/negative regressions; other tests/ paths remain denied.",
         "Lambda CI Workspace Control Validation #442 / run 43075570444 / job 130714359098 is queued for that exact head."
       ]
+    },
+    {
+      "check": "Stage 03 exact-path research policy execution validation",
+      "result": "PASS",
+      "evidence": [
+        "PR #606 head 72073976f02ca151c6ee68128175c51b069be42c passed Lambda CI Workspace Control Validation #442 / run 43075570444 / job 130714359098.",
+        "Policy delta is limited to exact tests/test_multisurrogate_dqnguard.py admission plus mirrored positive/negative regressions.",
+        "State-only authority PR #608 head 77ca7a6d89bd99a6912d4a6956b12807f70c0399 contains only the two task JSON capsules and their derived handoffs.",
+        "Authority validation #443 / run 43076067520 / job 130716076177 is queued."
+      ]
     }
   ],
   "blockers": [
-    "Stage 03 deterministic execution is blocked only on validation of the exact-path research-bounded policy correction at PR #606 head 72073976f02ca151c6ee68128175c51b069be42c.",
-    "Do not widen research-bounded beyond tests/test_multisurrogate_dqnguard.py and do not execute Stage 03 until the validated policy is installed live."
+    "Live Workspace Shell runtime remains on validated pre-test policy 6466ff118127af1dfcc2dbf6aa69833fe1d06c04.",
+    "State-only authority snapshot 77ca7a6d89bd99a6912d4a6956b12807f70c0399 must pass exact validation #443 before the second live refresh."
   ],
   "remaining_work": [
-    "Complete exact-head validation #442 for PR #606 policy head 72073976f02ca151c6ee68128175c51b069be42c.",
-    "If PASS, produce a state-only authority snapshot binding that execution head, validate it, and rerun the existing rollback-capable Workspace Shell upgrade.",
-    "Run tests/test_multisurrogate_dqnguard.py through research-bounded on PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.",
-    "Prepare one known-only four-class backbone target fold with 16,384 cache lineage.",
-    "Run Architecture C smoke/small-real evaluation and validate result_record.json."
+    "Complete authority validation #443 for exact head 77ca7a6d89bd99a6912d4a6956b12807f70c0399.",
+    "If PASS, run the existing hardened multirepo upgrade with execution 72073976f02ca151c6ee68128175c51b069be42c and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.",
+    "Run tests/test_multisurrogate_dqnguard.py through research-bounded.",
+    "Prepare the known-only backbone and execute Architecture C smoke/small-real evaluation."
   ],
-  "next_safe_action": "Wait for exact policy validation #442 / run 43075570444 / job 130714359098 on PR #606 head 72073976f02ca151c6ee68128175c51b069be42c. If PASS, refresh only the validated Workspace Shell runtime policy using the existing hardened upgrade path, then run the deterministic Stage 03 contract test.",
+  "next_safe_action": "Do not perform the second live refresh until state-only authority PR #608 head 77ca7a6d89bd99a6912d4a6956b12807f70c0399 passes Lambda CI validation #443 / job 130716076177. No user action is required while that external validation remains queued.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385."
