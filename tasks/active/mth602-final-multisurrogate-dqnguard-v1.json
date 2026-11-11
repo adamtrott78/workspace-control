@@ -30,7 +30,7 @@
       "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
       "remote": {
         "branch": "mth602-final-multisurrogate-dqnguard-v1",
-        "checkpoint_sha": "4c095352bfe128e93f794112741efdb7a66b9c38",
+        "checkpoint_sha": "81ee9bf2a06949ce1e9477befe00f833248d8ea3",
         "verified": true
       },
       "local": null,
@@ -275,16 +275,16 @@
     }
   ],
   "blockers": [
-    "PADataset source 4c095352bfe128e93f794112741efdb7a66b9c38 remains exact and clean.",
-    "The deterministic test currently waits only for operator installation of validated Workspace Shell execution ca2241d44d5563b137f4c6978b33dfc060d2a968; prior failure was pre-test NumPy BLAS loading, not a scientific assertion."
+    "Deterministic-smoke source 81ee9bf2a06949ce1e9477befe00f833248d8ea3 is prepared and bound in validated parent authority 157aaf72e9e5761c8d7140a96d986e2e742a5a9c but is not yet installed live.",
+    "Real Architecture C execution will require a sanctioned PyTorch-capable scientific compute surface; Workspace Shell remains intentionally bounded."
   ],
   "remaining_work": [
-    "Wait for parent operator-owned BLAS runtime refresh to report PASS.",
-    "Verify live PADataset exact binding.",
-    "Rerun tests/test_multisurrogate_dqnguard.py through research-bounded.",
-    "Prepare the known-only backbone and run Architecture C smoke/small-real evaluation."
+    "Wait for parent operator root refresh.",
+    "Rerun deterministic Stage 03 test through research-bounded.",
+    "Prepare known-only backbone with cache_len=16384.",
+    "Run Architecture C small-real evaluation on sanctioned PyTorch-capable compute and validate result_record.json."
   ],
-  "next_safe_action": "After operator installs validated Workspace Shell execution ca2241d44d5563b137f4c6978b33dfc060d2a968 from authority 1a0df02b1199a9ca02702275df73c3d1da97a271, rerun the deterministic Stage 03 contract test on PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.",
+  "next_safe_action": "After operator installs authority 157aaf72e9e5761c8d7140a96d986e2e742a5a9c, verify PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3 and rerun the deterministic contract test.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."
