@@ -19,7 +19,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-test -z "$(git -C "$ROOT" status --porcelain --untracked-files=no)"
+test -z "$(git -C "$ROOT" status --porcelain --untracked-files=all)"
 if git -C "$ROOT" symbolic-ref -q HEAD >/dev/null 2>&1; then
   echo "STOP_ATTACHED_HEAD"
   exit 20
