@@ -24,24 +24,24 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 4c095352bfe128e93f794112741efdb7a66b9c38
+- Remote checkpoint: 81ee9bf2a06949ce1e9477befe00f833248d8ea3
 - Remote verified: true
 
 ## Next safe action
 
-After operator installs validated Workspace Shell execution ca2241d44d5563b137f4c6978b33dfc060d2a968 from authority 1a0df02b1199a9ca02702275df73c3d1da97a271, rerun the deterministic Stage 03 contract test on PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
+After operator installs authority 157aaf72e9e5761c8d7140a96d986e2e742a5a9c, verify PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3 and rerun the deterministic contract test.
 
 ## Remaining work
 
-- Wait for parent operator-owned BLAS runtime refresh to report PASS.
-- Verify live PADataset exact binding.
-- Rerun tests/test_multisurrogate_dqnguard.py through research-bounded.
-- Prepare the known-only backbone and run Architecture C smoke/small-real evaluation.
+- Wait for parent operator root refresh.
+- Rerun deterministic Stage 03 test through research-bounded.
+- Prepare known-only backbone with cache_len=16384.
+- Run Architecture C small-real evaluation on sanctioned PyTorch-capable compute and validate result_record.json.
 
 ## Blockers / gates
 
-- PADataset source 4c095352bfe128e93f794112741efdb7a66b9c38 remains exact and clean.
-- The deterministic test currently waits only for operator installation of validated Workspace Shell execution ca2241d44d5563b137f4c6978b33dfc060d2a968; prior failure was pre-test NumPy BLAS loading, not a scientific assertion.
+- Deterministic-smoke source 81ee9bf2a06949ce1e9477befe00f833248d8ea3 is prepared and bound in validated parent authority 157aaf72e9e5761c8d7140a96d986e2e742a5a9c but is not yet installed live.
+- Real Architecture C execution will require a sanctioned PyTorch-capable scientific compute surface; Workspace Shell remains intentionally bounded.
 
 ## Fresh-chat initialization
 
