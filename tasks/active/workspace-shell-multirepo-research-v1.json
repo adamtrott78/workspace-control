@@ -52,7 +52,7 @@
       "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
       "remote": {
         "branch": "mth602-final-multisurrogate-dqnguard-v1",
-        "checkpoint_sha": "694a0c828ed4c8e8d02a344eb2451905e171aaca",
+        "checkpoint_sha": "be04a4a4428a3c57233fc1ee598b4311ece96587",
         "verified": true
       },
       "local": null,
@@ -629,19 +629,30 @@
         "All exact-head, runner-isolation, repository-validation, receipt, and artifact steps passed.",
         "Validation-only PR #611 was closed without merge."
       ]
+    },
+    {
+      "check": "Final Stage 03 target-quarantine authority validation",
+      "result": "PASS",
+      "evidence": [
+        "Final PADataset source be04a4a4428a3c57233fc1ee598b4311ece96587 defers all target-open consumption until the frozen Architecture C evaluator.",
+        "State-only authority head 0c39bad0219d553fcd1ee8780374412ab9efab46 passed Lambda CI Workspace Control Validation #452 / run 43104215762 / job 130803174246.",
+        "Exact PR head, bounded runner isolation, checkout, repository validation, receipt, and artifact steps all passed.",
+        "Validation-only PR #612 was closed without merge."
+      ]
     }
   ],
   "blockers": [
-    "Live Workspace Shell remains bound to PADataset 81ee9bf2a06949ce1e9477befe00f833248d8ea3 until the operator installs validated authority f7b8a40f9f50e584974fac92e5eef4773405606b with PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca.",
-    "Connected Workspace Shell cannot perform the root-owned snapshot replacement because privileged helper trust is intentionally empty/fail-closed."
+    "Live Workspace Shell remains bound to PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca until operator installs validated authority 0c39bad0219d553fcd1ee8780374412ab9efab46 with PADataset be04a4a4428a3c57233fc1ee598b4311ece96587.",
+    "After that refresh, connected execution still cannot perform the actual scientific GPU training: accepted PADataset gpu-ci uses gpu-single-public-ci-v1 with state_effect_class=CI_VALIDATION_ONLY, and Workspace Shell intentionally lacks the DNNs/PyTorch runtime.",
+    "A new scientific-training execution contract would expand privileged execution authority and requires a separate explicitly reviewed task; it cannot be inferred from the current research task."
   ],
   "remaining_work": [
-    "Operator installs authority f7b8a40f9f50e584974fac92e5eef4773405606b, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca.",
-    "Verify exact live bindings and run the expanded deterministic Stage 03 contract test.",
-    "Train the frozen PA2 backbone config in the DNNs PyTorch scientific environment.",
-    "Run Architecture C small-real evaluation and validate result_record.json."
+    "Operator installs authority 0c39bad0219d553fcd1ee8780374412ab9efab46, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, and PADataset be04a4a4428a3c57233fc1ee598b4311ece96587.",
+    "Verify exact live bindings and rerun the 8-test deterministic Stage 03 contract.",
+    "Operator launches the frozen PA2 backbone in the existing DNNs scientific environment using a clean exact-SHA checkout; historical evidence checkout remains untouched.",
+    "After backbone completion, inspect exact artifacts, run Architecture C small-real evaluation, and validate result_record.json."
   ],
-  "next_safe_action": "Operator-only root gate: install authority f7b8a40f9f50e584974fac92e5eef4773405606b, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, and PADataset 694a0c828ed4c8e8d02a344eb2451905e171aaca. After PASS, ChatGPT must verify the live bindings and run the expanded deterministic contract test before scientific GPU training.",
+  "next_safe_action": "Operator-only root gate: install authority 0c39bad0219d553fcd1ee8780374412ab9efab46, workspace-control f7ed7305e904ec24a444f7a488ca07e9bef4fdc7, PADataset be04a4a4428a3c57233fc1ee598b4311ece96587. Then ChatGPT verifies the live state. Scientific GPU training itself remains a separate operator surface unless a new scientific execution contract is explicitly authorized.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
   "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385."
