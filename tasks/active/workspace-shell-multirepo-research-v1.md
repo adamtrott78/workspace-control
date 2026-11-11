@@ -23,8 +23,8 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 50395aad06ab719b8207d9e7d3d8270a6bb35030
+- Remote branch: workspace-shell-multirepo-v3-reconcile-20261111
+- Remote checkpoint: 6466ff118127af1dfcc2dbf6aa69833fe1d06c04
 - Remote verified: true
 
 ### PADataset
@@ -36,22 +36,17 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Wait for exact V3 validation run #437 / 43072034606, job 130702172851, on reconciled head f51b4ee201529d8785e920458700affced52ffdf. Do not refresh Workspace Shell runtime or start PADataset Stage 03 unless this exact candidate passes.
+Run the validated rollback-capable Workspace Shell multirepo upgrade from exact authority head 3fb385039108074bef7b5d142bb4fc4781a5c9ab, with workspace-control execution 6466ff118127af1dfcc2dbf6aa69833fe1d06c04 and PADataset execution 4c095352bfe128e93f794112741efdb7a66b9c38. Require LOCAL_TASK_AUTHORITY=PASS and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS before Stage 03.
 
 ## Remaining work
 
-- Complete exact-head validation of successor PR #606 at f51b4ee201529d8785e920458700affced52ffdf; then, if PASS, refresh Workspace Shell authority/runtime to the reconciled workspace-control head and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
-- Prepare and independently review a bounded live v3 production-controller refresh/revival transaction; do not touch retired v2 workspace-control controller generation.
-- Repair/revive only the exact #389 REST terminal record under reviewed semantics and allow run #389 to validate candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030.
-- After exact-head validation passes, refresh Workspace Shell authority/runtime to workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030 and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
-- Verify both live durable task gates, then resume MTH602 Stage 03 deterministic tests and architecture-C evaluation.
+- Operator executes hardened multirepo upgrade from authority head 3fb385039108074bef7b5d142bb4fc4781a5c9ab with workspace-control 6466ff118127af1dfcc2dbf6aa69833fe1d06c04 and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
+- Verify live Workspace Shell task visibility plus exact workspace-control and PADataset source bindings.
+- Resume MTH602 Stage 03 deterministic tests and architecture-C smoke.
 
 ## Blockers / gates
 
-- No reconciliation conflict remains. PR #606 exact validation run #437 / job 130702172851 is queued and is the sole current parent gate.
-- Live transaction semantics are approved, but Workspace Shell cannot execute them without a pre-admitted helper registry entry and externally signed off-Lambda workspace-shell-approval.v1; the connected ChatGPT surface cannot mint this authority.
-- Even after code review acceptance, no live v3 controller deployment or ledger revival is authorized until a separate source-bound live refresh transaction is designed, validated, and independently reviewed.
-- PADataset Stage 03 remains blocked until workspace-control exact-head validation completes and the parent runtime refresh can safely bind Workspace Shell to PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.
+- Live Workspace Shell runtime has not yet been refreshed to authority 3fb385039108074bef7b5d142bb4fc4781a5c9ab, workspace-control 6466ff118127af1dfcc2dbf6aa69833fe1d06c04, and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
 
 ## Fresh-chat initialization
 
