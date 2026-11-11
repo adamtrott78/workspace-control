@@ -36,11 +36,11 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Do not mutate Lambda or the v3 ledger. Obtain fresh independent review of PR #604 automated request 6801793676 for exact live-transaction head c0526aaba0942606f99fd00633281071e72d6c71. If accepted and consumed, execute that exact reviewed transaction once; no other runtime mutation is authorized.
+Do not mutate Lambda or the v3 ledger. Obtain fresh independent review of PR #604 corrected automated request 6802154988 for exact live-transaction head ae9f8495fbdbe88ad48d608c8d30fe84928e5b97. If accepted and consumed, execute that exact reviewed transaction once; no other runtime mutation is authorized.
 
 ## Remaining work
 
-- Obtain and consume fresh independent review for PR #604 request 6801793676.
+- Obtain and consume fresh independent review for corrected PR #604 request 6802154988.
 - Freeze a bounded v3 production refresh/revival design that installs only reviewed v3 controller material and revives only the exact #389 REST terminal record under scheduler proof.
 - Validate and independently review that live transaction before any host mutation.
 - Execute once; prove #389 receives a fresh request/runner identity and proceeds naturally.
@@ -48,7 +48,7 @@ Do not mutate Lambda or the v3 ledger. Obtain fresh independent review of PR #60
 
 ## Blockers / gates
 
-- PR #604 live transaction review is pending at request 6801793676; no V3 controller restart or transaction execution is authorized.
+- PR #604 corrected live transaction review is pending at request 6802154988; no V3 controller stop/restart or transaction execution is authorized.
 - Run #389 remains queued because its durable v3 ledger is falsely terminal after cross-job JIT capacity was assigned to older run #388.
 - Retired v2 workspace-control controller/scale-set must remain untouched; current production validation is served by workspace-ci-v3-controller@workspace-control-control-small-v1.service.
 - Live v3 deployment/ledger revival requires its own bounded, source-bound, independently reviewed transaction after code acceptance.
