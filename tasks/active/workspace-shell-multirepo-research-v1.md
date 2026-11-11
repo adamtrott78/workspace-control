@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 - Intent: mutate
 - Remote branch: workspace-shell-multirepo-v3-reconcile-20261111
-- Remote checkpoint: 72073976f02ca151c6ee68128175c51b069be42c
+- Remote checkpoint: ca2241d44d5563b137f4c6978b33dfc060d2a968
 - Remote verified: true
 
 ### PADataset
@@ -36,19 +36,20 @@ Extend the live Workspace Shell v1 lineage with a first-class PADataset target t
 
 ## Next safe action
 
-Operator-only root gate: run the validated multirepo upgrade from exact authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da with workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38. Connected Workspace Shell cannot perform this mutation because privileged helper trust is intentionally empty/fail-closed.
+Operator-only root gate: run the validated multirepo upgrade from exact authority 1a0df02b1199a9ca02702275df73c3d1da97a271, with workspace-control execution ca2241d44d5563b137f4c6978b33dfc060d2a968 and PADataset 4c095352bfe128e93f794112741efdb7a66b9c38. Connected Workspace Shell cannot perform this root-owned mutation because privileged helper trust is intentionally empty/fail-closed.
 
 ## Remaining work
 
-- Operator runs the validated rollback-capable multirepo upgrade from authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da, installing workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c while preserving PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
-- After PASS, verify both live exact bindings through ChatGPT Workspace Shell.
-- Run tests/test_multisurrogate_dqnguard.py through research-bounded.
-- Prepare the known-only four-class backbone target fold and run Architecture C smoke/small-real evaluation.
+- Operator runs validated rollback-capable upgrade from authority 1a0df02b1199a9ca02702275df73c3d1da97a271, installing workspace-control execution ca2241d44d5563b137f4c6978b33dfc060d2a968 and preserving PADataset 4c095352bfe128e93f794112741efdb7a66b9c38.
+- Verify live exact workspace-control and PADataset bindings through ChatGPT Workspace Shell.
+- Rerun tests/test_multisurrogate_dqnguard.py through research-bounded.
+- Prepare one known-only four-class backbone target fold with cache_len=16384 and no target-informed checkpoint selection.
+- Run Architecture C smoke/small-real evaluator and validate result_record.json.
 
 ## Blockers / gates
 
-- The remaining action is root-owned Workspace Shell runtime mutation. This task explicitly keeps privileged helper trust stores empty/fail-closed, and the connected Workspace Shell frontend cannot mint the required signed root approval.
-- Live runtime still uses workspace-control execution 6466ff118127af1dfcc2dbf6aa69833fe1d06c04 until the operator runs the validated upgrade from authority 2ea84019e40de2a3d2a8fa46427af6b4ff7fe3da to execution 72073976f02ca151c6ee68128175c51b069be42c.
+- Remaining action is root-owned Workspace Shell mutation. Privileged helper trust remains intentionally empty/fail-closed, so connected Workspace Shell cannot execute the refresh.
+- Live runtime remains on workspace-control execution 72073976f02ca151c6ee68128175c51b069be42c until operator installs validated execution ca2241d44d5563b137f4c6978b33dfc060d2a968.
 
 ## Fresh-chat initialization
 
