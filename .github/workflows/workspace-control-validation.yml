@@ -103,6 +103,129 @@ jobs:
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         run: python3 -m unittest discover -s tests -v
 
+      - name: Validate first v3 live canary operator syntax
+        if: steps.plan.outputs.tier != 'FAST_STATIC'
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n scripts/lambda_ci_v3_first_canary_live.sh
+          bash -n scripts/lambda_ci_v3_controller_refresh_live.sh
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path("scripts/lambda_ci_v3_first_canary_live.sh").read_text()
+          required = [
+              'BASE_SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"',
+              'SOURCE_HEAD="$(git -C "$ROOT" rev-parse HEAD)"',
+              'TARGET_CLASS="workspace-control-control-small-v1"',
+              'TARGET_SCALE_SET="lambda-workspace-control-control-small"',
+              'EXPECTED_WORKFLOW_BLOB="c7471bdd5e35a7f8be27c3153f615a382845e195"',
+          ]
+          for value in required:
+              assert value in source, value
+
+          materialize = 'git -C "$ROOT" show "$SOURCE_HEAD:scripts/lambda_ci_v3_migration_transaction.py" > "$TX_HELPER"'
+          require = 'require_path "$TX_HELPER"'
+          assert materialize in source
+          assert require in source
+          assert source.index(materialize) < source.index(require)
+
+          assert '/var/lib/workspace-ci/controller/github-token' not in source
+          assert 'gh auth token > "$TMP/operator-token"' in source
+          assert 'gh auth status \\' in source
+          assert '--show-token' in source
+          assert 'STATUS_TOKEN_FILE="$TMP/gh-auth-status-token"' in source
+          assert 'STOP_GH_AUTH_STATUS_TOKEN_EXPORT_FAILED' in source
+          assert 'STOP_GH_AUTH_STATUS_TOKEN_PARSE_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=PASS' in source
+          assert 'STOP_GH_AUTH_TOKEN_VERIFY_EMPTY' in source
+          assert 'IFS= read -r EXPORTED_TOKEN < "$TMP/operator-token" || true' in source
+          assert 'env GH_TOKEN="$EXPORTED_TOKEN"' in source
+          assert "tr -d '\\\\r\\\\n'" not in source
+          assert 're.search(r"(?:^|\\\\s)Token:\\\\s*(\\\\S+)\\\\s*$", line)' not in source
+          assert 're.search(r"(?:^|\\s)Token:\\s*(\\S+)\\s*$", line)' in source
+          assert 'TOKEN_EXPORT_METHOD="auth-status-show-token"' in source
+          assert 'sudo -n rm -f "$V3_TOKEN" "$V3_ENV"' in source
+          assert 'V3_CANARY_PREFLIGHT_BUILD=BEGIN' in source
+          assert 'STOP_V3_CANARY_PREFLIGHT_BUILD_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_EXPORT=BEGIN' in source
+          assert 'V3_WORKSPACE_CONTROL_GH_TOKEN_PRIMARY_UNAVAILABLE' in source
+          assert 'STOP_GH_AUTH_STATUS_TOKEN_EXPORT_FAILED' in source
+          assert 'STOP_GH_AUTH_STATUS_TOKEN_PARSE_FAILED' in source
+          assert 'STOP_GH_AUTH_TOKEN_VERIFY_FAILED' in source
+          assert 'V3_WORKSPACE_CONTROL_CREDENTIAL_RESET=PASS' in source
+          assert 'CANARY_RETRY_HISTORY_CHECK=BEGIN' in source
+          assert '--verify-retry-history' in source
+          assert 'STOP_CANARY_RETRY_HISTORY_FAILED' in source
+          assert 'PREFLIGHT_NO_ACTIVE_CANARY_WORKFLOW_RUN=PASS' in source
+          assert 'STOP_ACTIVE_CANARY_WORKFLOW_RUNS' in source
+          assert '.workflow_runs | [length, (map(select(.status != "completed")) | length)] | @tsv' in source
+          assert "'[length, (map(select(.status != \"completed\")) | length)] | @tsv'" not in source
+          assert 'BASE_INSTALLED_GENERATION_BINDING=PASS' in source
+          assert 'CONTROLLER_SOURCE_HEAD=' not in source
+          assert 'CONTROLLER_SOURCE_EQUIVALENCE_CHECK=BEGIN' not in source
+          assert 'STOP_CONTROLLER_SOURCE_DRIFT' not in source
+          assert 'CONTROLLER_OVERRIDE_BINDING_CHECK=BEGIN' in source
+          assert '--expected-source-head "$SOURCE_HEAD"' in source
+          assert 'CONTROLLER_OVERRIDE_BINDING=PASS' in source
+          assert 'STOP_CONTROLLER_OVERRIDE_BINDING_FAILED' in source
+          assert 'gh api --method GET' in source
+          assert 'gh api --method POST' in source
+          assert '"repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/runs"' in source
+          assert '"repos/$REPOSITORY/actions/workflows/$CANARY_WORKFLOW_ID/dispatches"' in source
+          assert '"repos/$REPOSITORY/actions/runs/$RUN_ID"' in source
+          assert '-f event=workflow_dispatch' in source
+          assert '-f branch=main' in source
+          assert 'gh run ' not in source
+          assert 'gh workflow run' not in source
+          assert 'STOP_CANARY_RUN_TIMEOUT' in source
+          assert 'CANARY_TERMINAL=PASS' in source
+          assert 'require_not_enabled workspace-ci-v3-reconciler.service' in source
+          assert 'require_not_enabled workspace-ci-v3-provisioner.service' in source
+
+          parse_receipt = 'TX_RECEIPT="$('
+          apply_failure = 'if [[ "$APPLY_RC" -ne 0 ]]; then'
+          assert source.index(parse_receipt, source.index('APPLY_RC=')) < source.index(apply_failure)
+          assert 'cancel_dispatched_canary' in source
+
+          refresh = Path("scripts/lambda_ci_v3_controller_refresh_live.sh").read_text()
+          assert 'BASE_SOURCE_HEAD="09c46818252991f6a55aaeedbcf046c554e2ffee"' in refresh
+          assert 'SOURCE_HEAD="$(git -C "$ROOT" rev-parse HEAD)"' in refresh
+          assert 'CONTROLLER_REFRESH_APPLY=BEGIN' in refresh
+          assert 'STOP_CONTROLLER_REFRESH_APPLY_FAILED' in refresh
+          assert 'CONTROLLER_REFRESH_VERIFY=PASS' in refresh
+          assert 'CONTROLLER_REFRESH_RETRY_HISTORY=PASS' in refresh
+          assert '--verify-active' in refresh
+          assert '--verify-retry-history' in refresh
+          PY
+
+      - name: Validate generated v3 systemd substrate in isolated root
+        if: steps.plan.outputs.tier != 'FAST_STATIC'
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'sudo rm -rf "$tmp"' EXIT
+
+          mkdir -p "$tmp/stage" "$tmp/root"
+          cp /bin/true "$tmp/controller"
+
+          python3 scripts/lambda_ci_v3_reconciler.py             --stage-dir "$tmp/stage"             --controller-binary "$tmp/controller"
+
+          cp -a "$tmp/stage/." "$tmp/root/"
+          sudo chown -R root:root "$tmp/root"
+
+          sudo systemd-sysusers             --root="$tmp/root"             workspace-ci-v3.conf
+
+          sudo systemd-tmpfiles             --root="$tmp/root"             --create             workspace-ci-v3.conf
+
+          test -d "$tmp/root/var/lib/workspace-ci/v3/migration"
+          test -d "$tmp/root/var/lib/workspace-ci/v3/migration-authority"
+          test -d "$tmp/root/run/workspace-ci-v3-payload"
+
+          grep -q '^ci-gh-workspace-control:' "$tmp/root/etc/group"
+          grep -q '^ci-gh-padataset:' "$tmp/root/etc/group"
+          grep -q '^ci-gh-research-engine:' "$tmp/root/etc/group"
+
       - name: Set up Go 1.26.3 for Lambda controller
         if: steps.plan.outputs.tier != 'FAST_STATIC'
         uses: actions/setup-go@v6
@@ -115,8 +238,17 @@ jobs:
         working-directory: controller/lambda-ci-controller
         run: |
           set -euo pipefail
-          go test -mod=mod ./...
-          go build -mod=mod ./...
+          go test -mod=readonly ./...
+          go build -mod=readonly ./...
+          grep -F 'func schedulerAdvertisedMaxCapacity(policy controllerPolicy) int' v3/main.go >/dev/null
+          grep -F 'return policy.MaxRunners' v3/main.go >/dev/null
+          grep -F 'MaxRunners: schedulerCapacity' v3/main.go >/dev/null
+          grep -F 'DiscoverTrustedDemand' v3/main.go >/dev/null
+          grep -F 'REST_ACTIVE_JOB_SET' v3/main.go >/dev/null
+          grep -F 'REST_ACTIVE_JOB_SET' v3/controller.go >/dev/null
+          grep -F 'Refusing target-label demand because REST attestation is unsafe' v3/controller.go >/dev/null
+          grep -F 'Ignoring untracked JobAssigned as standalone authority' v3/controller.go >/dev/null
+          grep -F 'assert_canary_retry_history' ../../scripts/lambda_ci_v3_controller_refresh.py >/dev/null
 
       - name: Run full integration contracts
         if: steps.plan.outputs.tier == 'FULL_INTEGRATION' || steps.plan.outputs.tier == 'CANONICAL_REGRESSION'
