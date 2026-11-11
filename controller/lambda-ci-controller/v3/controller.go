@@ -610,7 +610,11 @@ func (s *v3Scaler) processRESTDemand(
 	}
 
 	existingJobs := make(map[int64]jobRecord, len(records))
+	existingAuthorityKeys := make(map[int64]jobRecord, len(records))
 	for _, record := range records {
+		if record.RunnerRequestID > 0 {
+			existingAuthorityKeys[record.RunnerRequestID] = record
+		}
 		if record.GitHubJobID > 0 {
 			existingJobs[record.GitHubJobID] = record
 		}
@@ -623,6 +627,21 @@ func (s *v3Scaler) processRESTDemand(
 		}
 		if job.GitHubJobID <= 0 || job.WorkflowRunID <= 0 {
 			return fmt.Errorf("REST-attested job identity is incomplete")
+		}
+		if collision, ok := existingAuthorityKeys[job.GitHubJobID]; ok {
+			if !restRevivalProvenanceMatches(collision, job) {
+				s.logger.Warn(
+					"Refusing REST admission because durable authority-key provenance differs from current REST attestation",
+					slog.Int64("durable_runner_request_id", collision.RunnerRequestID),
+					slog.Int64("durable_github_job_id", collision.GitHubJobID),
+					slog.Int64("current_runner_request_id", job.RunnerRequestID),
+					slog.Int64("current_github_job_id", job.GitHubJobID),
+					slog.Int64("durable_workflow_run_id", collision.WorkflowRunID),
+					slog.Int64("current_workflow_run_id", job.WorkflowRunID),
+				)
+				continue
+			}
+			existingJobs[job.GitHubJobID] = collision
 		}
 		if existing, ok := existingJobs[job.GitHubJobID]; ok {
 			current, err := s.currentPolicyRecord(existing)
