@@ -30,7 +30,7 @@ RUNTIME_BASE="$PROJECT_ROOT/expanded-runtimes/padataset-dnns-v1"
 RECEIPT_ROOT="/var/lib/workspace-ci/expanded-runtime-receipts"
 DATA_PROFILE_ID="ota_core_high_run01_len16384_v1"
 DATA_DEST="$TRUSTED_CACHE/scientific-data/$DATA_PROFILE_ID"
-SOURCE_OBJECT_BASE="$TRUSTED_CACHE/objects/runtime/sha256"
+SOURCE_OBJECT_BASE="/var/lib/workspace-ci/padataset-runtime-sources/sha256"
 
 command -v sudo >/dev/null || fail "sudo is required for one-time root promotion"
 command -v sha256sum >/dev/null || fail "sha256sum is required"
@@ -105,9 +105,10 @@ print(json.dumps(payload, indent=2, sort_keys=True))
 PY
   echo "PROMOTED_DNNS_IMPORT_CUDA=PASS"
 
-  sudo install -d -o root -g root -m 0755 "$SOURCE_OBJECT_BASE"
-  sudo install -d -o root -g root -m 0755 "$SOURCE_OBJECT"
-  sudo install -o root -g root -m 0444 "$TMP/environment.explicit.txt" "$SOURCE_OBJECT/environment.explicit.txt"
+  sudo install -d -o root -g root -m 0700 "$(dirname "$SOURCE_OBJECT_BASE")"
+  sudo install -d -o root -g root -m 0700 "$SOURCE_OBJECT_BASE"
+  sudo install -d -o root -g root -m 0700 "$SOURCE_OBJECT"
+  sudo install -o root -g root -m 0400 "$TMP/environment.explicit.txt" "$SOURCE_OBJECT/environment.explicit.txt"
 
   SOURCE_META="$TMP/source-runtime.json"
   SOURCE_PREFIX="$SOURCE_PREFIX" SOURCE_OBJECT="$SOURCE_OBJECT" MANIFEST_SHA="$MANIFEST_SHA" "$SOURCE_PYTHON" - "$SOURCE_META" <<'PY'
@@ -121,7 +122,7 @@ out.write_text(json.dumps({
     "source_trusted_runtime_object":os.environ["SOURCE_OBJECT"],
 },indent=2,sort_keys=True)+"\n")
 PY
-  sudo install -o root -g root -m 0444 "$SOURCE_META" "$SOURCE_OBJECT/source.json"
+  sudo install -o root -g root -m 0400 "$SOURCE_META" "$SOURCE_OBJECT/source.json"
 
   # Reject relocations that still point into mutable user-home content.
   if sudo python3 - "$RUNTIME_PATH" <<'PY'
