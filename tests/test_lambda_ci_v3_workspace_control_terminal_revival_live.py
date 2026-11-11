@@ -157,6 +157,140 @@ END_WORKSPACE_CONTROL_REVIEW_DISPOSITION_V1
                 with self.assertRaisesRegex(live.LiveRevivalError, "workflow_run_id"):
                     live.observe_first_revival(old_raw, old)
 
+    def _root_service_states(self):
+        provisioner = {
+            "Id": live.PROVISIONER_SERVICE,
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "MainPID": "305379",
+            "NRestarts": "0",
+            "InvocationID": "p" * 32,
+            "User": "root",
+            "Group": "root",
+            "Type": "simple",
+            "RemainAfterExit": "no",
+            "Result": "success",
+            "ExecMainStatus": "0",
+        }
+        reconciler = {
+            "Id": live.RECONCILER_SERVICE,
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "exited",
+            "MainPID": "0",
+            "NRestarts": "0",
+            "InvocationID": "r" * 32,
+            "User": "root",
+            "Group": "root",
+            "Type": "oneshot",
+            "RemainAfterExit": "yes",
+            "Result": "success",
+            "ExecMainStatus": "0",
+        }
+        target = {
+            "Id": live.TARGET_SERVICE,
+            "LoadState": "loaded",
+            "ActiveState": "active",
+            "SubState": "running",
+            "MainPID": "1066315",
+            "NRestarts": "0",
+            "InvocationID": "t" * 32,
+            "User": live.TARGET_USER,
+            "Group": live.TARGET_GROUP,
+            "Type": "simple",
+            "RemainAfterExit": "no",
+            "Result": "success",
+            "ExecMainStatus": "0",
+        }
+        legacy = {
+            "Id": live.LEGACY_V2_SERVICE,
+            "LoadState": "loaded",
+            "ActiveState": "inactive",
+            "SubState": "dead",
+            "MainPID": "0",
+            "NRestarts": "0",
+            "InvocationID": "",
+            "User": "",
+            "Group": "",
+            "Type": "simple",
+            "RemainAfterExit": "no",
+            "Result": "success",
+            "ExecMainStatus": "0",
+        }
+        return provisioner, reconciler, target, legacy
+
+    def test_repository_reconciler_unit_declares_healthy_oneshot_semantics(self):
+        unit = (ROOT / "systemd/workspace-ci-v3-reconciler.service").read_text()
+        self.assertIn("Type=oneshot", unit)
+        self.assertIn("RemainAfterExit=yes", unit)
+        self.assertIn("--verify-installed", unit)
+
+    def test_repository_provisioner_unit_declares_long_running_simple_semantics(self):
+        unit = (ROOT / "systemd/workspace-ci-v3-provisioner.service").read_text()
+        self.assertIn("Type=simple", unit)
+        self.assertIn("Restart=on-failure", unit)
+
+    def test_service_boundary_accepts_actual_root_service_steady_states(self):
+        provisioner, reconciler, target, legacy = self._root_service_states()
+        states = {
+            live.PROVISIONER_SERVICE: provisioner,
+            live.RECONCILER_SERVICE: reconciler,
+            live.TARGET_SERVICE: target,
+            live.LEGACY_V2_SERVICE: legacy,
+        }
+        with (
+            mock.patch.object(live, "systemctl_show", side_effect=lambda unit: states[unit]),
+            mock.patch.object(live, "snapshot_services", return_value={live.TARGET_SERVICE: target}),
+        ):
+            result = live.verify_service_boundary()
+        self.assertEqual(result, {live.TARGET_SERVICE: target})
+
+    def test_service_boundary_rejects_reconciler_states_outside_oneshot_contract(self):
+        provisioner, reconciler, target, legacy = self._root_service_states()
+        mutations = {
+            "running-with-pid": {"SubState": "running", "MainPID": "99"},
+            "inactive": {"ActiveState": "inactive", "SubState": "dead"},
+            "wrong-type": {"Type": "simple"},
+            "no-remain-after-exit": {"RemainAfterExit": "no"},
+            "failed-result": {"Result": "failed"},
+            "failed-exec-status": {"ExecMainStatus": "1"},
+            "unexpected-mainpid": {"MainPID": "44"},
+        }
+        for name, delta in mutations.items():
+            with self.subTest(name=name):
+                bad = dict(reconciler)
+                bad.update(delta)
+                states = {
+                    live.PROVISIONER_SERVICE: provisioner,
+                    live.RECONCILER_SERVICE: bad,
+                    live.TARGET_SERVICE: target,
+                    live.LEGACY_V2_SERVICE: legacy,
+                }
+                with (
+                    mock.patch.object(live, "systemctl_show", side_effect=lambda unit, states=states: states[unit]),
+                    mock.patch.object(live, "snapshot_services", return_value={live.TARGET_SERVICE: target}),
+                ):
+                    with self.assertRaises(live.LiveRevivalError):
+                        live.verify_service_boundary()
+
+    def test_service_boundary_still_requires_running_provisioner_with_pid(self):
+        provisioner, reconciler, target, legacy = self._root_service_states()
+        provisioner["SubState"] = "exited"
+        provisioner["MainPID"] = "0"
+        states = {
+            live.PROVISIONER_SERVICE: provisioner,
+            live.RECONCILER_SERVICE: reconciler,
+            live.TARGET_SERVICE: target,
+            live.LEGACY_V2_SERVICE: legacy,
+        }
+        with (
+            mock.patch.object(live, "systemctl_show", side_effect=lambda unit: states[unit]),
+            mock.patch.object(live, "snapshot_services", return_value={live.TARGET_SERVICE: target}),
+        ):
+            with self.assertRaisesRegex(live.LiveRevivalError, "long-running"):
+                live.verify_service_boundary()
+
     def test_sibling_generation_change_is_rejected(self):
         target = live.TARGET_SERVICE
         sibling = "workspace-ci-v3-controller@padataset-cpu-public-v1.service"
