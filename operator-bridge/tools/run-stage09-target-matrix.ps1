@@ -692,6 +692,29 @@ function Invoke-FirefoxReplicate {
   $child.Refresh()
 
   if ($child.ExitCode -ne 0) {
+    $repEvidenceClass = $null
+    $repStatus = $null
+    if (Test-Path -LiteralPath $repResult -PathType Leaf) {
+      try {
+        $repDiagnostic = Get-Content -LiteralPath $repResult -Raw | ConvertFrom-Json
+        $repEvidenceClass = [string]$repDiagnostic.evidence_class
+        if ($repDiagnostic.PSObject.Properties.Name -contains "status") {
+          $repStatus = [string]$repDiagnostic.status
+        }
+      } catch {
+      }
+    }
+    $stdoutBytes = if (Test-Path -LiteralPath $stdout -PathType Leaf) { [long](Get-Item -LiteralPath $stdout).Length } else { 0 }
+    $stderrBytes = if (Test-Path -LiteralPath $stderr -PathType Leaf) { [long](Get-Item -LiteralPath $stderr).Length } else { 0 }
+    Write-Host ("STAGE09_FIREFOX_REPLICATE_FAILURE=" + ([ordered]@{
+      repetition = $Repetition
+      child_exit_code = [int]$child.ExitCode
+      result_exists = (Test-Path -LiteralPath $repResult -PathType Leaf)
+      result_evidence_class = $repEvidenceClass
+      result_status = $repStatus
+      stdout_bytes = $stdoutBytes
+      stderr_bytes = $stderrBytes
+    } | ConvertTo-Json -Depth 4 -Compress))
     if (Test-Path $stdout) { Get-Content $stdout }
     if (Test-Path $stderr) { Get-Content $stderr }
     if (Test-Path $repResult) { Get-Content $repResult }
