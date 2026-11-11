@@ -29,21 +29,18 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 ## Next safe action
 
-Do not execute Stage 03 yet. Workspace-control reconciliation is complete at f51b4ee201529d8785e920458700affced52ffdf; wait for PR #606 exact V3 validation run #437 / job 130702172851. If PASS, refresh Workspace Shell PADataset authority to 4c095352bfe128e93f794112741efdb7a66b9c38 and then resume Stage 03.
+Do not execute Stage 03 until the parent upgrade from authority 3fb385039108074bef7b5d142bb4fc4781a5c9ab reports PASS and live Workspace Shell confirms PADataset HEAD 4c095352bfe128e93f794112741efdb7a66b9c38.
 
 ## Remaining work
 
-- Wait for PR #606 exact-head validation of reconciled workspace-control head f51b4ee201529d8785e920458700affced52ffdf.
-- Wait for exact-head validation of workspace-control 50395aad06ab719b8207d9e7d3d8270a6bb35030.
-- Refresh Workspace Shell to exact PADataset candidate 4c095352bfe128e93f794112741efdb7a66b9c38.
-- Run tests/test_multisurrogate_dqnguard.py through research-bounded on that exact clean snapshot.
-- Prepare one known-only four-class backbone target fold with 16,384 cache lineage and no target-informed checkpoint selection.
-- Run architecture C smoke/small-real evaluator and validate result_record.json against the Stage 02 schema.
+- Wait for the parent hardened multirepo upgrade to complete successfully.
+- Verify live PADataset HEAD 4c095352bfe128e93f794112741efdb7a66b9c38 through Workspace Shell.
+- Run tests/test_multisurrogate_dqnguard.py through research-bounded.
+- Prepare the known-only four-class backbone target fold and run Architecture C smoke/small-real evaluation.
 
 ## Blockers / gates
 
-- Parent reconciliation is complete; sole current gate is validation run #437 / job 130702172851, currently queued.
-- Live Workspace Shell PADataset runtime remains behind Stage 03 candidate 4c095352bfe128e93f794112741efdb7a66b9c38; no Stage 03 execution is authorized until the parent control-plane gate clears and the runtime refresh is validated.
+- Live Workspace Shell is not yet rebound to PADataset 4c095352bfe128e93f794112741efdb7a66b9c38; parent authority head 3fb385039108074bef7b5d142bb4fc4781a5c9ab is validated and ready for operator refresh.
 
 ## Fresh-chat initialization
 
