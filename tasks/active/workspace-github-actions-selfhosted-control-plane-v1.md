@@ -36,11 +36,11 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Do not mutate Lambda or the v3 ledger. Use PR #602 automated request comment 6801484654 for fresh independent review of exact head 4196934cad14ddf3238c4637da4229b8d5e0fc60. If accepted and consumed, prepare a separate reviewed live v3 refresh/revival transaction; the current review is code/state-machine only.
+Do not mutate Lambda or the v3 ledger. Obtain fresh independent review of PR #604 automated request 6801793676 for exact live-transaction head c0526aaba0942606f99fd00633281071e72d6c71. If accepted and consumed, execute that exact reviewed transaction once; no other runtime mutation is authorized.
 
 ## Remaining work
 
-- Obtain and consume fresh independent review for PR #602 request 6801484654.
+- Obtain and consume fresh independent review for PR #604 request 6801793676.
 - Freeze a bounded v3 production refresh/revival design that installs only reviewed v3 controller material and revives only the exact #389 REST terminal record under scheduler proof.
 - Validate and independently review that live transaction before any host mutation.
 - Execute once; prove #389 receives a fresh request/runner identity and proceeds naturally.
@@ -48,7 +48,7 @@ Do not mutate Lambda or the v3 ledger. Use PR #602 automated request comment 680
 
 ## Blockers / gates
 
-- PR #602 corrected exact-head code review is pending at request 6801484654; no v3 deployment is authorized.
+- PR #604 live transaction review is pending at request 6801793676; no V3 controller restart or transaction execution is authorized.
 - Run #389 remains queued because its durable v3 ledger is falsely terminal after cross-job JIT capacity was assigned to older run #388.
 - Retired v2 workspace-control controller/scale-set must remain untouched; current production validation is served by workspace-ci-v3-controller@workspace-control-control-small-v1.service.
 - Live v3 deployment/ledger revival requires its own bounded, source-bound, independently reviewed transaction after code acceptance.
