@@ -394,39 +394,57 @@ function Get-TotalCpuPercent {
 function Assert-BackgroundCpuQuiet {
   param(
     [int]$Seconds = 10,
-    [double]$LimitPercent = $BackgroundCpuRejectPercent
+    [double]$LimitPercent = $BackgroundCpuRejectPercent,
+    [int]$MaxAttempts = 6,
+    [int]$RetryDelaySeconds = 5
   )
 
   # Apply the same frozen "unrelated CPU" definition used by the measured
   # scenarios. The benchmark's own build/compiler descendants must not make
-  # the quiet-machine preflight reject itself.
-  $samples = [System.Collections.Generic.List[double]]::new()
-  $ownedBefore = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
-  $wallBefore = Get-Date
+  # the quiet-machine preflight reject itself. A bounded settle loop permits
+  # transient post-build/antimalware spikes to drain without weakening the
+  # frozen <=20% mean requirement for any accepted window.
+  $bestMean = [double]::PositiveInfinity
 
-  for ($i = 0; $i -lt $Seconds; $i++) {
-    Start-Sleep -Seconds 1
-    $ownedAfter = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
-    $wallAfter = Get-Date
-    $wallSeconds = [Math]::Max(0.001, ($wallAfter - $wallBefore).TotalSeconds)
-    $ownedCpuTotal = (Get-CpuDeltaSeconds $ownedBefore $ownedAfter) / $wallSeconds / [Environment]::ProcessorCount * 100.0
-    $unrelatedCpu = [Math]::Max(0.0, (Get-TotalCpuPercent) - $ownedCpuTotal)
-    $samples.Add($unrelatedCpu)
-    $ownedBefore = $ownedAfter
-    $wallBefore = $wallAfter
+  for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+    $samples = [System.Collections.Generic.List[double]]::new()
+    $ownedBefore = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+    $wallBefore = Get-Date
+
+    for ($i = 0; $i -lt $Seconds; $i++) {
+      Start-Sleep -Seconds 1
+      $ownedAfter = Get-CpuSnapshot -ProcessIds @(Get-DescendantProcessIds -RootPid $PID)
+      $wallAfter = Get-Date
+      $wallSeconds = [Math]::Max(0.001, ($wallAfter - $wallBefore).TotalSeconds)
+      $ownedCpuTotal = (Get-CpuDeltaSeconds $ownedBefore $ownedAfter) / $wallSeconds / [Environment]::ProcessorCount * 100.0
+      $unrelatedCpu = [Math]::Max(0.0, (Get-TotalCpuPercent) - $ownedCpuTotal)
+      $samples.Add($unrelatedCpu)
+      $ownedBefore = $ownedAfter
+      $wallBefore = $wallAfter
+    }
+
+    $summary = Get-Summary ([double[]]$samples.ToArray())
+    $bestMean = [Math]::Min($bestMean, [double]$summary.mean)
+    $accepted = ([double]$summary.mean -le $LimitPercent)
+    Write-Host ("STAGE09_BACKGROUND_CPU_PREFLIGHT=" + ([ordered]@{
+      attempt = $attempt
+      max_attempts = $MaxAttempts
+      sample_seconds = $Seconds
+      mean_unrelated_cpu_percent = [double]$summary.mean
+      p95_unrelated_cpu_percent = [double]$summary.p95
+      limit_percent = $LimitPercent
+      accepted = $accepted
+    } | ConvertTo-Json -Depth 4 -Compress))
+
+    if ($accepted) {
+      return
+    }
+    if ($attempt -lt $MaxAttempts) {
+      Start-Sleep -Seconds $RetryDelaySeconds
+    }
   }
 
-  $summary = Get-Summary ([double[]]$samples.ToArray())
-  Write-Host ("STAGE09_BACKGROUND_CPU_PREFLIGHT=" + ([ordered]@{
-    sample_seconds = $Seconds
-    mean_unrelated_cpu_percent = [double]$summary.mean
-    p95_unrelated_cpu_percent = [double]$summary.p95
-    limit_percent = $LimitPercent
-  } | ConvertTo-Json -Depth 4 -Compress))
-
-  if ([double]$summary.mean -gt $LimitPercent) {
-    throw ("Target measurement rejected before benchmark: unrelated background CPU mean {0:N2}% exceeded {1:N2}%." -f [double]$summary.mean, $LimitPercent)
-  }
+  throw ("Target measurement rejected before benchmark: unrelated background CPU did not settle below {0:N2}% across {1} bounded windows; best mean was {2:N2}%." -f $LimitPercent, $MaxAttempts, $bestMean)
 }
 
 function Assert-NamedProcessesOwned {
