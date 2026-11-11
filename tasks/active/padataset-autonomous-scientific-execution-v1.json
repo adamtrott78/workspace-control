@@ -1,0 +1,183 @@
+{
+  "schema_version": 2,
+  "task_id": "padataset-autonomous-scientific-execution-v1",
+  "title": "PADataset autonomous scientific execution v1",
+  "status": "IN_PROGRESS",
+  "goal": "Make PADataset scientific GPU experiments autonomously executable by ChatGPT through the existing self-hosted Lambda control plane using an exact root-owned DNNs runtime, exact PR-head provenance, read-only project data/cache authority, bounded experiment request schemas, durable artifacts/receipts, and no per-run operator terminal work.",
+  "execution_topology": "remote_only",
+  "parent_execution_owner": "workspace-github-actions-selfhosted-control-plane-v1",
+  "current_stage": "design_and_contract",
+  "acceptance_criteria": [
+    "Routine PADataset scientific experiments can be triggered, monitored, and interpreted by ChatGPT with no operator terminal action.",
+    "Scientific jobs execute only exact open same-repository PR heads through a trusted default-branch workflow.",
+    "The DNNs runtime is a root-owned immutable exact binding; candidate jobs never execute from the mutable user Conda environment.",
+    "Scientific jobs receive exactly one accepted GPU and no unauthorized device, socket, secret, sibling-project root, or production-service access.",
+    "Dataset/cache inputs are read-only and project-scoped; candidate writes remain ephemeral and durable results leave only through bounded artifacts/receipts.",
+    "The request grammar exposes experiment operations, not arbitrary shell or argv authority.",
+    "The existing PADataset gpu-ci canary remains CI-only and unchanged in semantic authority.",
+    "Stage 03 PA2 backbone training and Architecture C evaluation complete through the autonomous path with exact provenance and cleanup receipts."
+  ],
+  "constraints": [
+    "Do not weaken same-repository PR-head, actor, fork-denial, cleanup, GPU isolation, or project identity controls.",
+    "Do not mount the mutable user DNNs environment directly into routine jobs.",
+    "Do not expose /home/atrott to scientific jobs.",
+    "Do not add Docker/socket/admin authority.",
+    "Do not turn the existing gpu-single-public-ci-v1 contract into a scientific contract; add a separate semantic contract.",
+    "Do not allow arbitrary shell, python -c, generic executable selection, or unbounded request parameters.",
+    "Keep GitHub-hosted compute out of the execution path; use the self-hosted PADataset lane.",
+    "Preserve the historical PADataset evidence checkout and current Stage 03 scientific source state."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "f7ed7305e904ec24a444f7a488ca07e9bef4fdc7",
+      "remote": {
+        "branch": "padataset-autonomous-scientific-execution-v1",
+        "checkpoint_sha": "f7ed7305e904ec24a444f7a488ca07e9bef4fdc7",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/padataset-autonomous-scientific-execution-v1.json",
+        "tasks/active/padataset-autonomous-scientific-execution-v1.md",
+        "architecture/padataset-autonomous-scientific-execution.v0.1.md",
+        "architecture/lambda-ci-execution-contracts.v1.json",
+        "architecture/lambda-ci-workload-policy.v1.json",
+        "architecture/lambda-ci-project-padataset.v1.json",
+        "schemas/**",
+        "scripts/lambda_ci_*.py",
+        "tests/test_lambda_ci*.py",
+        "plugins/workspace-shell/install/**"
+      ]
+    },
+    {
+      "name": "PADataset",
+      "intent": "mutate",
+      "base_sha": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
+      "remote": {
+        "branch": "autonomous-scientific-execution-v1",
+        "checkpoint_sha": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        ".github/workflows/lambda-ci-scientific.yml",
+        ".workspace-ci/scientific-request.schema.json",
+        "experiments/pa_scientific_request.py"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "design_and_contract",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "accepted PADataset control plane",
+        "existing DNNs environment",
+        "Stage 03 task"
+      ],
+      "outputs": [
+        "frozen scientific execution design",
+        "new durable task"
+      ],
+      "validation": [],
+      "resume_condition": "Design and task capsule validate."
+    },
+    {
+      "id": "implementation",
+      "status": "NOT_STARTED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "design_and_contract"
+      ],
+      "outputs": [
+        "scientific execution contract",
+        "DNNs promotion installer",
+        "trusted PADataset workflow",
+        "request validator"
+      ],
+      "validation": [],
+      "resume_condition": "Repository implementation passes exact-head validation."
+    },
+    {
+      "id": "dnns_runtime_promotion",
+      "status": "NOT_STARTED",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": "operator",
+      "selected_surface": "lambda",
+      "inputs": [
+        "validated installer"
+      ],
+      "outputs": [
+        "root-owned DNNs runtime snapshot",
+        "promotion/expansion receipt"
+      ],
+      "validation": [],
+      "resume_condition": "Runtime import/CUDA smoke and immutable-tree receipt pass."
+    },
+    {
+      "id": "live_activation",
+      "status": "NOT_STARTED",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "runtime promotion",
+        "validated controller policy"
+      ],
+      "outputs": [
+        "active scientific route"
+      ],
+      "validation": [],
+      "resume_condition": "Fresh reconciliation and bounded scientific canary pass."
+    },
+    {
+      "id": "autonomous_stage03",
+      "status": "NOT_STARTED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "active scientific route",
+        "frozen Stage 03 PA2 config"
+      ],
+      "outputs": [
+        "trained backbone artifact",
+        "Architecture C result record"
+      ],
+      "validation": [],
+      "resume_condition": "Full run and cleanup receipts validate."
+    }
+  ],
+  "checkpoints": [],
+  "artifacts": [
+    {
+      "path": "architecture/padataset-autonomous-scientific-execution.v0.1.md",
+      "state": "IMPLEMENTED",
+      "role": "frozen design contract",
+      "origin": "this task",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "exact-head validation"
+    }
+  ],
+  "validation": [],
+  "blockers": [],
+  "remaining_work": [
+    "Implement the scientific contract/resource class and root-owned DNNs runtime binding path.",
+    "Implement the trusted PADataset scientific workflow and request validator.",
+    "Pass exact-head repository validation.",
+    "Promote DNNs once on Lambda and activate the route.",
+    "Run autonomous Stage 03."
+  ],
+  "next_safe_action": "Implement the frozen v0.1 contract on the two candidate branches without activating live authority.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "User explicitly requested that DNNs become part of the PADataset automated execution path and that routine experiments no longer require manual terminal actions."
+}
