@@ -1173,6 +1173,164 @@ func TestLoadQuarantineRetiresSupersededResetQuarantineWithMatchingReadyGate(t *
 	}
 }
 
+func writeSupersededQuarantineFixture(
+	t *testing.T,
+	dir string,
+) (*scaler, string, string) {
+	t.Helper()
+	receiptID := "11111111-2222-4333-8444-555555555555"
+	generation := "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
+	if err := atomicWriteJSON(
+		filepath.Join(dir, "quarantine.json"),
+		laneQuarantineReceipt{
+			SchemaVersion: 1,
+			ReceiptID: receiptID,
+			Status: "ASSIGNMENT_DIVERGENCE_QUARANTINED",
+			ProjectID: "workspace-control",
+			Lane: "cpu",
+			ScaleSetName: "lambda-workspace-control",
+			ScaleSetID: 77,
+		},
+	); err != nil {
+		t.Fatal(err)
+	}
+	s := &scaler{
+		scaleSetID: 88,
+		projectID: "workspace-control",
+		lane: "cpu",
+		scaleSetName: "lambda-workspace-control",
+		stateDir: dir,
+		logger: slog.Default(),
+	}
+	return s, receiptID, generation
+}
+
+func matchingRecoveryGate(receiptID, generation string) map[string]any {
+	return map[string]any{
+		"schema_version": 1,
+		"status": "READY_FOR_SINGLE_RETRY",
+		"receipt_id": receiptID,
+		"project_id": "workspace-control",
+		"lane": "cpu",
+		"scale_set_name": "lambda-workspace-control",
+		"old_scale_set_id": 77,
+		"new_scale_set_id": 88,
+		"reset_generation": generation,
+		"automatic_workflow_triggered": false,
+	}
+}
+
+func assertRecoveryEvidencePreserved(t *testing.T, paths ...string) {
+	t.Helper()
+	for _, path := range paths {
+		if _, err := os.Stat(path); err != nil {
+			t.Fatalf("recovery evidence was not preserved at %s: %v", path, err)
+		}
+	}
+}
+
+func TestLoadQuarantineRejectsFractionalRecoveryGateIdentities(t *testing.T) {
+	cases := []struct {
+		name string
+		field string
+		value any
+	}{
+		{name: "schema", field: "schema_version", value: 1.5},
+		{name: "old-scale-set", field: "old_scale_set_id", value: 77.5},
+		{name: "new-scale-set", field: "new_scale_set_id", value: 88.5},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			s, receiptID, generation := writeSupersededQuarantineFixture(t, dir)
+			gate := matchingRecoveryGate(receiptID, generation)
+			gate[tc.field] = tc.value
+			gatePath := s.readyForSingleRetryPath()
+			if err := atomicWriteJSON(gatePath, gate); err != nil {
+				t.Fatal(err)
+			}
+			if err := s.loadQuarantine(); err == nil {
+				t.Fatal("fractional recovery-gate identity did not fail closed")
+			}
+			assertRecoveryEvidencePreserved(t, s.quarantinePath(), gatePath)
+		})
+	}
+}
+
+func TestLoadQuarantineRejectsMalformedNumericRecoveryGateIdentities(t *testing.T) {
+	cases := []string{"schema_version", "old_scale_set_id", "new_scale_set_id"}
+	for _, field := range cases {
+		t.Run(field, func(t *testing.T) {
+			dir := t.TempDir()
+			s, receiptID, generation := writeSupersededQuarantineFixture(t, dir)
+			gate := matchingRecoveryGate(receiptID, generation)
+			gate[field] = "not-an-integer"
+			gatePath := s.readyForSingleRetryPath()
+			if err := atomicWriteJSON(gatePath, gate); err != nil {
+				t.Fatal(err)
+			}
+			if err := s.loadQuarantine(); err == nil {
+				t.Fatal("malformed recovery-gate identity did not fail closed")
+			}
+			assertRecoveryEvidencePreserved(t, s.quarantinePath(), gatePath)
+		})
+	}
+}
+
+func TestLoadQuarantineRejectsConflictingRecoveryZeroObservation(t *testing.T) {
+	cases := []struct {
+		name string
+		generation string
+		scaleSetID int
+	}{
+		{name: "generation", generation: "bbbbbbbb-cccc-4ddd-8eee-ffffffffffff", scaleSetID: 88},
+		{name: "scale-set", generation: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee", scaleSetID: 99},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			s, receiptID, generation := writeSupersededQuarantineFixture(t, dir)
+			gatePath := s.readyForSingleRetryPath()
+			if err := atomicWriteJSON(gatePath, matchingRecoveryGate(receiptID, generation)); err != nil {
+				t.Fatal(err)
+			}
+			zeroPath := s.recoveryZeroPath()
+			if err := atomicWriteJSON(
+				zeroPath,
+				recoveryZeroObservation{
+					SchemaVersion: 1,
+					ResetGeneration: tc.generation,
+					ScaleSetID: tc.scaleSetID,
+					ObservedAt: time.Now().UTC().Format(time.RFC3339Nano),
+				},
+			); err != nil {
+				t.Fatal(err)
+			}
+			if err := s.loadQuarantine(); err == nil {
+				t.Fatal("conflicting recovery zero observation did not fail closed")
+			}
+			assertRecoveryEvidencePreserved(t, s.quarantinePath(), gatePath, zeroPath)
+		})
+	}
+}
+
+func TestLoadQuarantineRejectsMalformedRecoveryZeroObservation(t *testing.T) {
+	dir := t.TempDir()
+	s, receiptID, generation := writeSupersededQuarantineFixture(t, dir)
+	gatePath := s.readyForSingleRetryPath()
+	if err := atomicWriteJSON(gatePath, matchingRecoveryGate(receiptID, generation)); err != nil {
+		t.Fatal(err)
+	}
+	zeroPath := s.recoveryZeroPath()
+	if err := os.WriteFile(zeroPath, []byte("{not-json"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.loadQuarantine(); err == nil {
+		t.Fatal("malformed recovery zero observation did not fail closed")
+	}
+	assertRecoveryEvidencePreserved(t, s.quarantinePath(), gatePath, zeroPath)
+}
+
 func TestLoadQuarantineRejectsOldScaleSetWithoutMatchingReadyGate(t *testing.T) {
 	dir := t.TempDir()
 	if err := atomicWriteJSON(

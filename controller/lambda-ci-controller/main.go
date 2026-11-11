@@ -168,6 +168,18 @@ type recoveryZeroObservation struct {
 	ObservedAt      string `json:"observed_at"`
 }
 
+type recoveryRetryGate struct {
+	SchemaVersion   int    `json:"schema_version"`
+	Status          string `json:"status"`
+	ReceiptID       string `json:"receipt_id"`
+	ProjectID       string `json:"project_id"`
+	Lane            string `json:"lane"`
+	ScaleSetName    string `json:"scale_set_name"`
+	OldScaleSetID   int    `json:"old_scale_set_id"`
+	NewScaleSetID   int    `json:"new_scale_set_id"`
+	ResetGeneration string `json:"reset_generation"`
+}
+
 type scaler struct {
 	mu              sync.Mutex
 	active          map[string]string
@@ -704,31 +716,28 @@ func (s *scaler) retireSupersededResetQuarantine(
 	if err != nil {
 		return false, fmt.Errorf("read recovery retry gate while reconciling stale quarantine: %w", err)
 	}
-	var gate map[string]any
+	var gate recoveryRetryGate
 	if err := json.Unmarshal(raw, &gate); err != nil {
 		return false, fmt.Errorf("parse recovery retry gate while reconciling stale quarantine: %w", err)
 	}
-	status, _ := gate["status"].(string)
-	switch status {
+	switch gate.Status {
 	case "READY_FOR_SINGLE_RETRY", "RECOVERY_RETRY_ACQUIRED", "RECOVERY_RETRY_COMPLETED":
 	default:
 		return false, nil
 	}
-	schema, schemaOK := gate["schema_version"].(float64)
-	oldID, oldOK := gate["old_scale_set_id"].(float64)
-	newID, newOK := gate["new_scale_set_id"].(float64)
-	generation, generationOK := gate["reset_generation"].(string)
-	if !schemaOK || int(schema) != 1 ||
-		gate["receipt_id"] != receipt.ReceiptID ||
-		gate["project_id"] != s.projectID ||
-		gate["lane"] != s.lane ||
-		gate["scale_set_name"] != s.scaleSetName ||
-		!oldOK || int(oldID) != receipt.ScaleSetID ||
-		!newOK || int(newID) != s.scaleSetID ||
-		!generationOK || generation == "" {
+	if gate.SchemaVersion != 1 ||
+		gate.ReceiptID != receipt.ReceiptID ||
+		gate.ProjectID != s.projectID ||
+		gate.Lane != s.lane ||
+		gate.ScaleSetName != s.scaleSetName ||
+		gate.OldScaleSetID != receipt.ScaleSetID ||
+		gate.NewScaleSetID != s.scaleSetID ||
+		gate.ResetGeneration == "" {
 		return false, nil
 	}
 
+	// Validate all surviving recovery evidence before deleting any state. This
+	// keeps cleanup fail-closed when a crash left conflicting artifacts.
 	pendingPaths, err := filepath.Glob(filepath.Join(s.stateDir, "reset-pending-*.json"))
 	if err != nil {
 		return false, fmt.Errorf("glob reset-pending state while reconciling stale quarantine: %w", err)
@@ -755,16 +764,40 @@ func (s *scaler) retireSupersededResetQuarantine(
 			pending.ProjectID != s.projectID ||
 			pending.Lane != s.lane ||
 			pending.ScaleSetName != s.scaleSetName ||
-			pending.ResetGeneration != generation ||
+			pending.ResetGeneration != gate.ResetGeneration ||
 			pendingOldID != receipt.ScaleSetID {
 			return false, fmt.Errorf("reset-pending identity conflicts with recovery retry gate")
 		}
+	}
+
+	zeroPath := s.recoveryZeroPath()
+	zeroRaw, err := os.ReadFile(zeroPath)
+	zeroExists := err == nil
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return false, fmt.Errorf("read recovery zero observation while reconciling stale quarantine: %w", err)
+	}
+	if zeroExists {
+		var zero recoveryZeroObservation
+		if err := json.Unmarshal(zeroRaw, &zero); err != nil {
+			return false, fmt.Errorf("parse recovery zero observation while reconciling stale quarantine: %w", err)
+		}
+		if zero.SchemaVersion != 1 ||
+			zero.ResetGeneration != gate.ResetGeneration ||
+			zero.ScaleSetID != gate.NewScaleSetID ||
+			zero.ScaleSetID != s.scaleSetID {
+			return false, fmt.Errorf("recovery zero observation identity conflicts with recovery retry gate")
+		}
+	}
+
+	if len(pendingPaths) == 1 {
 		if err := os.Remove(pendingPaths[0]); err != nil {
 			return false, fmt.Errorf("remove superseded reset-pending receipt: %w", err)
 		}
 	}
-	if err := os.Remove(s.recoveryZeroPath()); err != nil && !errors.Is(err, os.ErrNotExist) {
-		return false, fmt.Errorf("remove superseded recovery zero observation: %w", err)
+	if zeroExists {
+		if err := os.Remove(zeroPath); err != nil {
+			return false, fmt.Errorf("remove superseded recovery zero observation: %w", err)
+		}
 	}
 	if err := os.Remove(s.quarantinePath()); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return false, fmt.Errorf("remove superseded controller quarantine: %w", err)
@@ -774,7 +807,7 @@ func (s *scaler) retireSupersededResetQuarantine(
 		slog.String("quarantine_receipt_id", receipt.ReceiptID),
 		slog.Int("old_scale_set_id", receipt.ScaleSetID),
 		slog.Int("new_scale_set_id", s.scaleSetID),
-		slog.String("recovery_status", status),
+		slog.String("recovery_status", gate.Status),
 	)
 	return true, nil
 }
