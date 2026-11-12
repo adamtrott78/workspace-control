@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-ci-runner-class-catalog.v1.schema.json",
+  "title": "Workspace CI Runner Class Catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "catalog_id",
+    "status",
+    "authority",
+    "generated_from",
+    "invariants",
+    "projects"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "catalog_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{2,127}$"
+    },
+    "projects": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "repository",
+          "runner_classes",
+          "routes"
+        ],
+        "properties": {
+          "repository": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          },
+          "runner_classes": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "scale_set_name",
+                "runner_prefix",
+                "max_runners",
+                "execution_contract_id",
+                "controller_peer",
+                "bindings"
+              ],
+              "properties": {
+                "scale_set_name": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]{2,95}$"
+                },
+                "runner_prefix": {
+                  "type": "string",
+                  "pattern": "^lambda-[a-z0-9][a-z0-9-]*-$"
+                },
+                "max_runners": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 64
+                },
+                "execution_contract_id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]{2,127}$"
+                },
+                "controller_peer": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "unix_user"
+                  ],
+                  "properties": {
+                    "unix_user": {
+                      "type": "string",
+                      "pattern": "^[a-z_][a-z0-9_-]{0,31}$"
+                    }
+                  }
+                },
+                "bindings": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "model_id",
+                    "runtime_id"
+                  ],
+                  "properties": {
+                    "model_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "runtime_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "routes": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "runner_class_id",
+                "trusted_workflow",
+                "ingress"
+              ],
+              "properties": {
+                "runner_class_id": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "trusted_workflow": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "path",
+                    "default_branch",
+                    "blob_sha",
+                    "job_key",
+                    "allowed_events",
+                    "allowed_actor_logins"
+                  ],
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "pattern": "^\\.github/workflows/[^/]+\\.ya?ml$"
+                    },
+                    "default_branch": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "blob_sha": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{40}$"
+                    },
+                    "job_key": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9_.-]{1,100}$"
+                    },
+                    "allowed_events": {
+                      "type": "array",
+                      "minItems": 1,
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "allowed_actor_logins": {
+                      "type": "array",
+                      "minItems": 1,
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                },
+                "ingress": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "command",
+                    "parameter_schema_id"
+                  ],
+                  "properties": {
+                    "command": {
+                      "type": "string",
+                      "pattern": "^/[a-z0-9][a-z0-9-]{2,127}$"
+                    },
+                    "parameter_schema_id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9][a-z0-9-]{2,127}$"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generated_from": {
+      "type": "string",
+      "minLength": 1
+    },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

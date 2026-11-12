@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "schemas_id": "lambda-ci-ingress-parameter-schemas-v1",
+  "status": "MODEL_ONLY_CANONICAL_INPUT",
+  "schemas": {
+    "candidate-sha-v1": {
+      "arguments": [
+        {
+          "name": "candidate_sha",
+          "type": "lower_hex_40",
+          "required": true
+        }
+      ]
+    },
+    "candidate-sha-reasoner-probe-v1": {
+      "arguments": [
+        {
+          "name": "candidate_sha",
+          "type": "lower_hex_40",
+          "required": true
+        },
+        {
+          "name": "candidate_id",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "qwen35-9b-q6-resource",
+            "qwythos-9b-v2-q6-resource"
+          ]
+        }
+      ]
+    },
+    "maintenance-runner-class-v2": {
+      "arguments": [
+        {
+          "name": "runner_class_id",
+          "type": "catalog_runner_class_id",
+          "required": true
+        }
+      ]
+    },
+    "maintenance-reset-stale-v2": {
+      "arguments": [
+        {
+          "name": "runner_class_id",
+          "type": "catalog_runner_class_id",
+          "required": true
+        },
+        {
+          "name": "quarantine_receipt_id",
+          "type": "uuid",
+          "required": true
+        }
+      ]
+    }
+  },
+  "invariants": [
+    "parameter schemas are ingress-only and cannot change root runner-class projection",
+    "unknown argument names fail locally",
+    "lower_hex_40 is lowercase exactly 40 hexadecimal characters",
+    "catalog_runner_class_id must resolve in the compiled catalog generation"
+  ]
+}

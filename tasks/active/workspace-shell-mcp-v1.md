@@ -11,40 +11,33 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-shell-mcp-v1
 - Title: Workspace Shell MCP v1
-- Status: IN_PROGRESS
+- Status: COMPLETE
 - Capsule schema: v2
 
 ## Goal
 
-Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and independently reviewable privileged authority.
+Give ChatGPT durable, auditable, least-privilege command-execution access to the Lambda workspace through a separate private MCP/plugin so workspace-control tasks can execute and inspect bounded shell operations directly without using the operator as a copy/paste terminal relay, while preserving explicit provenance, credential isolation, rollback boundaries, and separately auditable privileged authority.
 
 ## Repositories
 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-mcp-v1-design-freeze
-- Remote checkpoint: c28671e3e571cba298e8341bbce6999edc62bfd3
+- Remote branch: workspace-shell-mcp-v1-current-main
+- Remote checkpoint: 01a95b61410e2f427b9885a19e6a0b9c5ee60a38
 - Remote verified: true
 
 ## Next safe action
 
-After this state-only synchronization passes validation, record a fresh immutable-head independent re-review request on PR #550 that consumes blocking review 6447046381 and cites corrected design checkpoint c28671e3e571cba298e8341bbce6999edc62bfd3 / validation run #990. Do not implement, merge, install, provision tunnel/key, create job-launcher/root-broker/helper authority, execute Lambda commands, modify Heartbeat, or mutate project controllers.
+TASK COMPLETE. Workspace Shell v1 is live-accepted at installed execution/authority SHA 01a95b61410e2f427b9885a19e6a0b9c5ee60a38 with bounded Git/validation execution, durable receipts, fail-closed path/argv/privileged-helper denials, and all four services active while remaining boot-disabled. Resume the separate parked GitRunner migration task at padataset-cpu-public-v1 under its own fresh exact canary authority; do not reuse Workspace Shell task authority or alter the empty privileged-helper trust stores.
 
 ## Remaining work
 
-- Validate the BF-1/BF-2 corrected authority artifact, review procedure, task capsule and synchronized handoff on PR #550.
-- Record a fresh corrected-head independent review request consuming blocking review 6447046381 and resolve every new finding.
-- Only after design acceptance, implement repository-only policy frontend, job-launcher protocol, hostile worker sandbox, approval verifier and reviewed-helper broker with adversarial tests; no live Lambda authority yet.
-- Obtain fresh read-only Lambda host attestation before finalizing host-specific installation units/UIDs/sockets/mounts and approval trust-store placement.
-- Independently review implementation and installation/rollback boundary before provisioning a dedicated tunnel credential or live service.
-- Run isolated acceptance and later separately authorized live exact-SHA/receipt acceptance while keeping Heartbeat and unrelated project controllers untouched.
+- None.
 
 ## Blockers / gates
 
-- Fresh independent immutable-head review has not yet accepted the BF-1/BF-2 corrected authority/threat design.
-- Fresh live Lambda host attestation remains required before installation or activation; repository evidence alone is not host attestation.
-- Implementation, tunnel/key provisioning, job-launcher/root-broker/helper installation and live service activation remain prohibited until later gates.
+- None.
 
 ## Fresh-chat initialization
 
