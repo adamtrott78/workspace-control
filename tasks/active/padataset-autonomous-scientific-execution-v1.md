@@ -5,7 +5,7 @@ Derived human-readable view.
 
 Authoritative capsule: tasks/active/padataset-autonomous-scientific-execution-v1.json
 
-If this view disagrees with the JSON capsule or verified evidence, trust the capsule plus verified evidence.
+If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
 ## Task
 
