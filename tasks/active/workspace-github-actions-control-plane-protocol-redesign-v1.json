@@ -1,0 +1,1343 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-github-actions-control-plane-protocol-redesign-v1",
+  "title": "GitHub Actions Control-Plane Protocol Redesign v1",
+  "status": "COMPLETE",
+  "goal": "Replace the current parser-chained GitHub Actions runner admission path with a formally modeled, versioned, typed control-plane protocol whose routing, authority, scheduling, provisioning, execution, recovery, and lifecycle semantics are explicit end-to-end, so any executor request admitted by policy cannot later be falsely rejected by a downstream parser that implements a different grammar.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-lambda-self-hosted-execution-v1",
+  "current_stage": "bounded_migration_and_live_acceptance",
+  "acceptance_criteria": [
+    "Produce an end-to-end protocol graph from GitHub trigger through workflow/job construction, scale-set messages, controller attestation, root admission, launch-spec resolution, JIT runner creation, execution, completion, cleanup, replay, and recovery.",
+    "Enumerate every parser, serializer, identifier, state machine, authority boundary, retry boundary, durable record, and scheduler/lifecycle signal in workspace-control and relevant research-engine workflows.",
+    "Classify each field as routing metadata, identity, authority claim, policy input, resource request, lifecycle state, evidence, or human-readable display only.",
+    "Eliminate authority-bearing free-form serialization in job display names. Human-readable job names may remain for audit but must not be the canonical protocol.",
+    "Define one canonical versioned request/envelope schema and one semantic interpretation of each field. Downstream layers may validate typed invariants but must not independently reinterpret the same user-controlled string grammar.",
+    "Define a protocol-compatibility rule: a request accepted at ingress either remains representable and valid through all downstream transitions or is rejected at ingress with a stable machine-readable reason.",
+    "Separate scheduling/liveness semantics from authority/policy semantics so policy rejection cannot crash-loop a scale-set listener.",
+    "Model JobAvailable, JobAssigned, JobStarted, JobCompleted, cancellation, reassignment, duplicate delivery, controller restart, provisioner restart, stale aggregate statistics, durable request replay, and cleanup failure explicitly.",
+    "Use the official GitHub Runner Scale Set Client lifecycle semantics rather than deriving scheduler state from ad hoc per-message counts.",
+    "Compare the design with GitHub ARC/Runner Scale Set Client, GitLab Runner taskscaler/fleeting, and Buildkite stack/queue architectures and document what is reused versus custom.",
+    "Define executor-facing policy contracts for workspace-control and research-engine so executors construct requests from schemas/enums/builders rather than hand-written slash-command strings.",
+    "Add generated/centralized builders and validators so workflow producers, controller tests, root-policy tests, and executor tooling derive from the same protocol specification.",
+    "Add property-based or exhaustive compatibility tests proving every admitted request variant traverses all parsers/validators without false rejection, and every invalid variant is rejected at the first authority boundary.",
+    "Add model/state-machine tests for duplicate delivery, retries, cancellations, queue backlog, start-limit, listener restart, and provisioner rejection.",
+    "No further Lambda control-plane mutation is allowed until the protocol graph, invariant set, migration plan, and repository-only compatibility suite are complete and accepted."
+  ],
+  "constraints": [
+    "Do not treat individual parser failures as independent bugs unless the full protocol model proves they are independent.",
+    "Do not mutate Lambda, restart runner controllers, activate a new parser hotfix, or retrigger the blocked host-attest workflow while this redesign task is in architecture/research stages.",
+    "Do not start research-engine CPU/GPU controllers or alter research-engine quarantine/recovery state.",
+    "Do not replace GitHub's Runner Scale Set Client scheduling semantics with a custom queue/scheduler unless a documented capability gap requires it.",
+    "Keep root policy authority separate from GitHub credentials; redesign the evidence/envelope boundary rather than solving drift by giving root broad GitHub credentials.",
+    "Prefer typed structured data, exact identifiers, schemas, enums, generated builders, digests, and state machines over regex/string protocols.",
+    "Preserve fail-closed security boundaries, but policy rejection must be a recoverable job outcome, not a controller-fatal process outcome.",
+    "Keep GitHub-hosted validation available as a control path while the self-hosted control plane is redesigned."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "f48f46618b560d91950fae1927048e14e29a59ab",
+      "remote": {
+        "branch": "github-actions-control-plane-protocol-redesign-v1",
+        "checkpoint_sha": "f62a71bc4488da2cf2afeb90325d0b24dd61ada1",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.json",
+        "tasks/active/workspace-github-actions-control-plane-protocol-redesign-v1.md",
+        "architecture/github-actions-control-plane-protocol-redesign-v1.md",
+        "architecture/**lambda-ci**",
+        "schemas/**",
+        "controller/lambda-ci-controller/**",
+        "scripts/lambda_ci_*.py",
+        "tests/test_lambda_ci_*.py",
+        ".github/workflows/lambda-ci-workspace-control-validation.yml",
+        "architecture/github-actions-control-plane-system-model.v1.json"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "mutate",
+      "base_sha": "94edb809f4c295902911f8cc4b3652a9121ac715",
+      "remote": {
+        "branch": "github-actions-control-plane-protocol-redesign-v1",
+        "checkpoint_sha": "6165556086b73d2076f205f11ec7b988150f23dd",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        ".github/workflows/lambda-ci-*.yml"
+      ]
+    },
+    {
+      "name": "PADataset",
+      "intent": "mutate",
+      "base_sha": "35e6f451fe36f039b5f6461f7469f0eed1e79e43",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "a8f952c7cf964730a01b2dc5c6cd75850912f94f",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        ".github/workflows/lambda-ci-*.yml"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "system_inventory_and_external_architecture_research",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+web",
+      "inputs": [
+        "workspace-control main and active control-plane PRs",
+        "research-engine Lambda workflows",
+        "official GitHub Runner Scale Set Client and ARC documentation",
+        "GitLab Runner autoscaling architecture",
+        "Buildkite stack/queue architecture"
+      ],
+      "outputs": [
+        "complete request/lifecycle graph",
+        "parser/serializer/authority inventory",
+        "machine-readable controller/route/protocol-generation system model",
+        "scale-set homogeneity analysis",
+        "reuse-vs-custom architecture decision"
+      ],
+      "validation": [
+        {
+          "check": "Whole-system controller and protocol inventory",
+          "result": "PASS",
+          "evidence": [
+            "Root registry contains exactly three registered projects: workspace-control, padataset, research-engine.",
+            "Five registry-managed scale-set controller instances were identified: workspace-control CPU, PADataset CPU/GPU, research-engine CPU/GPU.",
+            "Maintenance and reconciliation were modeled as two additional GitHub-facing control processes with separate root services.",
+            "All 23 registered trusted workflow pins match the current main-branch workflow blob in their owning repository.",
+            "Research-engine GPU scale set contains 19 routes spanning six launch-equivalence classes and is not homogeneous.",
+            "22/23 execution routes use only command + candidate SHA; the only third-token route keeps that selector inside a fixed runner envelope."
+          ]
+        }
+      ],
+      "resume_condition": "Every request field and lifecycle transition has one documented semantic owner and all duplicated interpretation sites are identified."
+    },
+    {
+      "id": "canonical_protocol_and_state_machine",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "inventory and external architecture research"
+      ],
+      "outputs": [
+        "versioned canonical request envelope",
+        "protocol state machine",
+        "error taxonomy",
+        "policy/routing/resource separation"
+      ],
+      "validation": [
+        {
+          "check": "Canonical protocol and state-machine freeze",
+          "result": "PASS",
+          "evidence": [
+            "Workspace Control Validation #1219 / run 40960220712 passed at compiler-contract checkpoint 0c3598165871a569094f0c46551dfe13bdb4bb78.",
+            "Target architecture uses nine homogeneous runner classes across workspace-control, PADataset and research-engine.",
+            "Root capacity authority is derived from unique controller Unix UID via SO_PEERCRED, not request-provided class/workload strings.",
+            "Capacity protocol is two-phase RESERVE -> LAUNCH with STATUS/CANCEL recovery; JIT registration is created only after root resource reservation.",
+            "State machines separate GitHub scheduler lifecycle, controller admission/supervision, runner instance, root capacity, maintenance and reconciliation.",
+            "Explicit host resource policy preserves current effective host-wide concurrency=1 during migration.",
+            "Runner-instance crash matrix covers every boundary before/after reservation, JIT generation, systemd unit creation, runner execution and cleanup."
+          ]
+        }
+      ],
+      "resume_condition": "The protocol is representable without authority-bearing free-form job-name parsing."
+    },
+    {
+      "id": "producer_and_policy_compiler_design",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "canonical protocol"
+      ],
+      "outputs": [
+        "generated/shared request builders",
+        "workspace-control policy",
+        "research-engine policy",
+        "migration compatibility adapter"
+      ],
+      "validation": [
+        {
+          "check": "Single-source compiler and typed executor interface",
+          "result": "PASS",
+          "evidence": [
+            "Workspace Control Validation #1242 / run 40961745857 passed at exact head dd5e62e475331b4462a2310ccf02f4ad4d26f4d8.",
+            "Pure compiler emits 9 root runner classes, 9 class-controller projections, 23 execution actions, 4 maintenance actions and a 23-route compatibility matrix.",
+            "Compiler validates emitted root/controller/executor projections against checked-in schemas.",
+            "Adversarial tests reject duplicate controller UIDs, workflow blob/shape drift, target scale mismatch, missing schemas, and execution parameters that imply infrastructure authority.",
+            "Digest tests prove ingress command or workflow-local enum changes cannot alter root_policy_sha256 or controller_policy_sha256, while executor_policy_sha256 changes.",
+            "Typed builder rejects unknown action IDs, raw command override, invalid candidate SHA, unknown runner class, invalid maintenance receipt, and non-enum experiment selectors.",
+            "host-attest is exposed only as a typed maintenance action, never as an execution qualifier."
+          ]
+        }
+      ],
+      "resume_condition": "Executors can only construct schema-valid requests and root policy consumes typed claims rather than reparsing producer strings."
+    },
+    {
+      "id": "repository_only_protocol_verification",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "protocol and compiler implementation"
+      ],
+      "outputs": [
+        "compatibility matrix",
+        "property/state-machine tests",
+        "fault-injection tests"
+      ],
+      "validation": [
+        {
+          "check": "Whole-fleet repository-only protocol verification",
+          "result": "PASS",
+          "evidence": [
+            "Exact head 06d58450bb735178b516d9966fcb099763d8b4b0 passed Workspace Control Validation #1266 / run 40990406861 / job 123851171378.",
+            "616 unit tests passed; pinned Go scale-set controller validation and full integration contracts passed.",
+            "23/23 routes attest from structured workflow identity without authority-bearing display/candidate parsing.",
+            "9/9 runner classes pass RESERVE -> JIT -> LAUNCH -> terminal cleanup modeling.",
+            "TotalAssignedJobs-only scaling, redelivery, canceled reassignment, request-local anomaly liveness, retry backoff, root crash boundaries, controller ledger crash boundaries, reservation expiry, GPU atomicity, class quarantine, maintenance, reconciliation and deployment overlay are covered.",
+            "23/23 current routes have exact-equivalent target root launch envelopes.",
+            "Durable receipt: architecture/lambda-ci-control-plane-verification-receipt.v1.json.",
+            "PR #572 verification acceptance comment: 6513301714."
+          ]
+        }
+      ],
+      "resume_condition": "All accepted request families traverse producer -> controller -> root policy -> launch-spec simulation with zero false rejects."
+    },
+    {
+      "id": "bounded_migration_and_live_acceptance",
+      "status": "VALIDATED",
+      "execution_owner": "hybrid",
+      "selected_executor": "hybrid",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "repository-only verified protocol"
+      ],
+      "outputs": [
+        "migration receipt",
+        "workspace-control live validation",
+        "research-engine compatibility validation"
+      ],
+      "validation": [
+        {
+          "check": "Migration architecture initialized",
+          "result": "PASS",
+          "evidence": [
+            "architecture/lambda-ci-v3-migration-plan.v1.json defines disjoint v2/v3 paths and one-class canaries.",
+            "Migration design forbids simultaneous active v2/v3 project controllers because the generations do not share one physical-resource ledger.",
+            "Research GPU-derived classes remain installed-inactive/inherited-contained absent separate recovery authority."
+          ]
+        },
+        {
+          "check": "Production v3 repository implementation candidate",
+          "result": "PASS",
+          "evidence": [
+            "Exact head 455f0585d9006435335112ca896af7671a0f9f64 passed Workspace Control Validation #1293 / run 40999275931.",
+            "The canonical runtime bound is enforced for all nine runner classes as min(systemd RuntimeMaxSec, resource_class.max_runtime_seconds).",
+            "Production v3 root capacity provider implements SO_PEERCRED class authority, RESERVE -> JIT -> LAUNCH ordering, STATUS/CANCEL recovery, durable non-secret state, tmpfs-only raw JIT, resource reservation and fail-closed cleanup quarantine.",
+            "Separate production v3 Go runner-class controller uses the pinned actions/scaleset client, structured workflow/repository/event/actor/blob admission, TotalAssignedJobs capacity authority, durable crash recovery and in-process retry/backoff without JobDisplayName authority parsing.",
+            "Inactive v3 install/reconciliation substrate generates nine unique controller identities, three project credential groups, disjoint v3 systemd/tmpfiles/state paths, exact compiled projections, and contains no start/enable/restart operation.",
+            "Migration-only canary generator creates owner-only workflow_dispatch workflows with no inputs, checkout or candidate payload and replaces rather than widens controller trust.",
+            "One-class generation-exclusion transaction captures exact v2 prestate, blocks contained Research GPU and legacy compatibility paths, proves v2 drain before one v3 start, and proves v3 controller/transient/resource drain before exact legacy restore.",
+            "No Lambda mutation, v3 activation, workflow dispatch, quarantine change or retry-authority restoration was performed."
+          ]
+        },
+        {
+          "check": "Materialized binding and offline payload isolation",
+          "result": "PASS",
+          "evidence": [
+            "Compiler uses workload policy as authorization while projecting exact materialized model/runtime bindings from the owning project manifest into root launch envelopes.",
+            "Migration equivalence consumes the same materialized bindings and remains green.",
+            "GITHUB_CONTROL_PLANE_ONLY_PAYLOAD_OFFLINE is now enforced by splitting the online Actions runner from a root-owned one-shot payload broker: the runner keeps GitHub control-plane networking but no GPU/model/runtime authority; the broker alone receives private-network, GPU, and exact promoted model/runtime authority.",
+            "Migration canary verification inspects both runner and broker systemd/cgroup envelopes without connecting to the broker socket or executing candidate/scientific payload.",
+            "Research GPU-derived classes remain inherited-contained and NO_BY_DEFAULT absent separate recovery authority."
+          ]
+        },
+        {
+          "check": "Offline payload broker and cross-repo producer bridge",
+          "result": "PASS",
+          "evidence": [
+            "Exact workspace-control hosted-CI evidence head d7de132c7cadc620905b5a827f391d1bc8786dd0 passed Workspace Control Validation #1332 / run 41008189246, including task-contract validation, unit regression, pinned Go controller validation, and full integration contracts.",
+            "Exact workspace-control runtime/socket head 50b209efe8c6219b0bb428016fcf911470a953ba passed Workspace Control Validation #1329 / run 41006161421.",
+            "Each offline runner class retains its own distinct deterministic payload-broker Unix user; broker users share only the project runner group and receive no workspace-ci-v3-provisioner or controller credential-group authority.",
+            "The online Actions runner retains GitHub control-plane networking but has no GPU DeviceAllow, empty CUDA_VISIBLE_DEVICES, ProcSubset=pid, and no readable exact promoted model/runtime objects.",
+            "The root-owned broker uses env -i, PrivateNetwork=yes, IPAddressDeny=any with loopback-only allow, exact GPU DeviceAllow, and exact promoted model/runtime read authority.",
+            "The runner job/checkout tree is inaccessible to the broker; runner-private HOME/tmp/cache directories remain private, broker HOME/tmp/HF state is broker-private, and only the dedicated per-request payload-exchange is shared through the project group.",
+            "Payload data-plane sockets live under root-owned sibling runtime root /run/workspace-ci-v3-payload, outside forbidden /run/workspace-ci; the v3 spec and runtime independently reject any payload socket root nested beneath a project forbidden path.",
+            "SO_PEERCRED authenticates the exact online-runner UID plus runner systemd cgroup; root cleanup independently proves runner-UID and class-scoped broker-UID process/GPU residue absence.",
+            "Research Engine draft PR #283 exact head 6165556086b73d2076f205f11ec7b988150f23dd is one commit ahead of repaired main 1031861c03b2af8cff5cf72939bbbc83a95e65a4 and changes exactly the two offline Qwen producer workflows.",
+            "Research Engine hosted CI #642 / run 41007835081 / job 123906654539 executed repository steps on a GitHub Hosted Compute Agent and passed setup, install, Compile, full Test, Compose validation, daemon image build, and cleanup.",
+            "Research Engine exact-head repository-only acceptance is durable PR #283 comment 6515645161; reviewed workflow blobs remain 4016ec3d23627dd7299ef9a7d36ff1dcbcdf47fe and 90f8dc55c54f9f4759bc71dffa5d3fe622aa0b07.",
+            "The hosted-CI evidence gate is resolved, but PR #283 remains draft/default-branch-untrusted and current main workflow blobs remain the production trust source.",
+            "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json keeps ready_for_cutover=false because live canaries, Research GPU containment recovery, default-branch cutover authority, and Lambda live activation authority remain false.",
+            "No Lambda mutation, migration-canary dispatch, Research GPU containment change, retry-authority restoration, or Research Engine default-branch producer cutover was performed."
+          ]
+        },
+        {
+          "check": "Root-services activation and one-shot live authority",
+          "result": "PASS",
+          "evidence": [
+            "Exact substantive head 01019177fcb46e5ab9864ea9b764b533dcf0be81 passed Workspace Control Validation #1337 / run 41010515483.",
+            "Migration plan payload socket root is /run/workspace-ci-v3-payload and current repository-readiness binds Research Engine PR #283 hosted CI #642.",
+            "Private /var/lib/workspace-ci/v3/migration and /var/lib/workspace-ci/v3/migration-authority roots are staged root:root 0700 by the inactive substrate and live transactions refuse mode/owner drift.",
+            "ACTIVATE_ONE_V3_CANARY authority receipts require canonical unique UUIDs, exact head/generation/class/policy/workflow binding, <=1800-second validity, and atomic durable one-shot consumption before mutation; rollback never reopens them.",
+            "ACTIVATE_V3_ROOT_SERVICES is separately one-shot and binds exact installed manifest SHA, source head, and root-policy digest.",
+            "Root-services activation re-attests every installed artifact, starts only reconciler then provisioner transiently, verifies the root-owned workspace-ci-v3-provisioner-group 0660 Unix socket, proves Research GPU containment remains intact, proves all class controllers/transients/resource claims absent, and proves no v3 root/class unit is enabled.",
+            "Any root-services activation failure stops provisioner then reconciler and persists rollback evidence without reopening authority.",
+            "No Lambda mutation, v3 root/class activation, canary dispatch, Research GPU containment change, retry-authority restoration, or Research Engine default-branch cutover occurred."
+          ]
+        },
+        {
+          "check": "Initial v3 live canary acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Exact controller/source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa passed Workspace Control Validation #1398 / run 41262210278 before deployment.",
+            "Lambda controller override was refreshed and attested to exact source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa.",
+            "Retry-history preflight proved two prior failed canaries were terminally rolled back and exactly matched by two consumed one-shot authority markers.",
+            "Third workspace-control-control-small-v1 canary dispatched workflow run 41264356722 and completed successfully.",
+            "Live transaction then passed exact v3 canary rollback, generation-exclusion rollback, root-services-active proof, all-v3-class-controllers-inactive proof, Research GPU containment preservation, TERMINAL_INPUT_3=PASS, and INITIAL_V3_LIVE_PROOF=COMPLETE.",
+            "GitHub independently reports workflow run 41264356722 and job 124723948506 completed with conclusion=success."
+          ]
+        },
+        {
+          "check": "Workspace Shell terminal-transport commissioning dependency",
+          "result": "PASS",
+          "evidence": [
+            "Workspace Shell exact operator/runtime head 01a95b61410e2f427b9885a19e6a0b9c5ee60a38 passed Workspace Control Validation #1463/run 41273806752.",
+            "Live Lambda Workspace Shell activation passed LOCAL_MTLS_HEALTH, real LOCAL_MCP_INITIALIZE, PRE_TUNNEL_LOCAL_MTLS_RECHECK, TUNNEL_READY, and SERVICES_ACTIVE_BOOT_DISABLED.",
+            "Workspace Shell activation receipt is /var/lib/workspace-shell/commissioning/activation-receipt.json; its emergency stop is /opt/workspace-shell/bin/workspace-shell-disable.",
+            "Workspace Shell is intentionally not yet treated as the authoritative terminal transport until ChatGPT-side plugin/tool acceptance passes.",
+            "No GitRunner migration class beyond the already accepted workspace-control-control-small-v1 canary is authorized by this dependency update."
+          ]
+        },
+        {
+          "check": "PADataset CPU v3 live canary acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Exact operator head f0653307902b324692f8524a843bed55f30428c2 entered with all nine v3 class controllers inactive/dead and boot-disabled; retry-history matched exactly two prior rolled-back CPU transactions and two consumed authority markers.",
+            "Preflight created the exact target scale set `lambda-padataset-cpu-public` in the owning repository and explicitly attested `V3_SCALE_SET_TARGET_URL=https://github.com/adamtrott78/PADataset`; target scale-set id=3 with assigned=0/running=0.",
+            "Fresh one-shot ACTIVATE_ONE_V3_CANARY authority was created only after default-branch workflow blob attestation; transaction receipt `/var/lib/workspace-ci/v3/migration/b63ef32d-55f8-49c2-aa20-9bce412ccedf/transaction.json` activated exactly `padataset-cpu-public-v1`.",
+            "PADataset workflow_dispatch run 41418580438 / job 125188348656 completed SUCCESS on default-branch head 12d8ad19d14f2ab42474e159f958060f3050cf1e; GitHub independently reports the `Verify immutable v3 class envelope` step SUCCESS.",
+            "Rollback initially refused while the just-completed v3 runner and supervisor transient units were still present, then retried until they drained and returned V3_CANARY_ROLLBACK=PASS / GENERATION_EXCLUSION_ROLLBACK=PASS.",
+            "Operator terminal evidence: POST_CANARY_ROOT_SERVICES=ACTIVE, POST_CANARY_V3_CLASS_CONTROLLERS=INACTIVE, RESEARCH_GPU_CONTAINMENT=PRESERVED, CANARY_RESULT=SUCCESS, TERMINAL_INPUT_3=PASS, PADATASET_CPU_CANARY_ACCEPTED=PASS.",
+            "Independent post-canary attestation: v3 reconciler active/exited, v3 provisioner active/running, workspace-control v2 CPU active/running; PADataset CPU maintenance diagnose 6573364605 PASS active/running with no active project units/reset/recovery conflict; Research GPU diagnose 6573365907 PASS inactive/dead+disabled with active_count=0, pending_count=0, reset_pending=[], recovery_state_conflict=false."
+          ]
+        },
+        {
+          "check": "Production v3 generation cutover acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Production cutover completed with V3_PRODUCTION_CUTOVER_ACCEPTED=PASS under transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json and generation SHA256 5428c437e9724055b3a0da18d1aa81642e8c544869317abb340434e9e349722f.",
+            "Workspace Control production validation run 41504458922 / job 125480061499 completed SUCCESS at exact PR #572 head 78ae60364f472fd30654dd9018c90c546e3e8836.",
+            "PADataset CPU production validation run 41504979316 / job 125481849777 completed SUCCESS.",
+            "PADataset GPU production validation run 41505174483 / job 125482508067 completed SUCCESS.",
+            "Committed main workflow blobs are workspace-control 7e361db3a8ead667c047e9dc3fe12908c10eb96a, PADataset CPU f63eeaba0126c8241d3130449f12790b915c9495, and PADataset GPU 1ff52d3940a05a67d94bc21eeb31fd19b7e6d042.",
+            "Operator post-commit proof reports reconciler/provisioner active+enabled, accepted v3 class controllers active+enabled, non-selected research v3 classes inactive+disabled, all legacy v2 controllers inactive+disabled, and POST_COMMIT_V2_CONTROLLERS_RETIRED_OR_GATED=PASS.",
+            "Fresh maintenance receipts 6586186979, 6586188452, 6586190265, 6586192401, and 6586194095 independently report all five legacy v2 lanes inactive/dead and disabled with active_project_units=[]; Research GPU containment remains preserved."
+          ]
+        },
+        {
+          "check": "Accepted legacy v2 scale-set retirement",
+          "result": "PASS",
+          "evidence": [
+            "Validated retirement operator source head 8129291a59be2b25fa837c81091a0d7d8cac3387 was used for the live retirement.",
+            "Pre-delete live proof reported all six counters zero for lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu.",
+            "Root-owned rollback-window receipt was created before deletion at /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json.",
+            "Live retirement reported LEGACY_SCALE_SET_RETIRED for lambda-workspace-control id=3, lambda-padataset id=2, and lambda-padataset-gpu id=1.",
+            "Fresh-process verification reported all three legacy names absent and exact accepted targets present: lambda-workspace-control-control-small id=2, lambda-padataset-cpu-public id=3, lambda-padataset-gpu-single-public id=4.",
+            "RESEARCH_LEGACY_SCALE_SETS_PRESERVED=PASS and LEGACY_BYTES_CONFIG_STATE_PRESERVED=PASS; no Research legacy scale set or v2 bytes/config/state were removed."
+          ]
+        }
+      ],
+      "resume_condition": "Live control plane is stable under valid, invalid, duplicate, canceled, and recovery scenarios without controller crash loops."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "workspace-shell-v1-accepted",
+      "kind": "dependency_checkpoint",
+      "identity": "PR573-comment-6565110368",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Shell v1 LIVE CHATGPT ACCEPTANCE COMPLETE.",
+        "Accepted execution/authority SHA 01a95b61410e2f427b9885a19e6a0b9c5ee60a38; durable head 44b4e4f2020450c81cec56e86b711cdee7e651d9."
+      ]
+    },
+    {
+      "id": "workspace-shell-gitrunner-observability-live",
+      "kind": "dependency_checkpoint",
+      "identity": "PR591@1ca44e019fed66a55f2b9985d9d04397ba37b668",
+      "required_for_resume": true,
+      "evidence": [
+        "Hosted validation run 41384504196 SUCCESS.",
+        "Operator live updater PASS preserved accepted Workspace Shell execution source and identities.",
+        "Live unit_state shows legacy workspace-control controller active/running, maintenance controller/service active/running, v3 provisioner active/running, v3 control-small inactive/dead.",
+        "Fresh chat required to expose unit_logs_redacted and maintenance_receipt operations."
+      ]
+    },
+    {
+      "id": "legacy-workspace-control-queued-incident",
+      "kind": "incident_checkpoint",
+      "identity": "github-actions-run-41378944347",
+      "required_for_resume": true,
+      "evidence": [
+        "Run 41378944347 / job 125065275409 remains QUEUED with no runner assignment.",
+        "Production workflow targets legacy lambda-workspace-control lane, not v3 control-small class.",
+        "Run is now stale relative to later PR #590 heads and must not be treated as a clean post-recovery validation probe."
+      ]
+    },
+    {
+      "id": "legacy-workspace-control-reset-stale-attempt",
+      "kind": "incident_checkpoint",
+      "identity": "maintenance-comment-6569249619",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact reset-stale command targeted quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d.",
+        "Maintenance receipt status FAILED_CLOSED before any scale-set mutation.",
+        "Failure: quarantine observed_at timestamp is invalid; live quarantine timestamp 2026-11-01T22:20:58.365802851Z contains Go/RFC3339 nanosecond precision not accepted by deployed Python parser.",
+        "No old scale set deleted, no new scale set created, no READY_FOR_SINGLE_RETRY authority emitted, automatic_workflow_triggered=false.",
+        "Repository fix truncates only fractional precision to microseconds while preserving wall-clock second/timezone and adds regression coverage."
+      ]
+    },
+    {
+      "id": "legacy-workspace-control-incident-resolved",
+      "kind": "incident_checkpoint",
+      "identity": "PR572-comment-6571289778",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator cancelled stale legacy pilot demand; legacy listener reached total_assigned_jobs=0 and reconstructable_jobs=0.",
+        "reset-stale comment 6571166136 deleted old scale set id 1 and created clean scale set id 3.",
+        "restart comment 6571210035 produced READY_FOR_SINGLE_RETRY generation 40d61b30-e8b9-5559-abfc-706fb3df6c67.",
+        "Recovery probe run 41404080844/job 125142056183 launched a real legacy runner and executed repository tests; later failure was legacy Go-toolchain debt, not route/controller admission serviceability.",
+        "Post-probe diagnose found active_project_units=[], reset_pending=[], recovery_state_conflict=false.",
+        "Experimental stale-ghost recovery code was removed; cleanup head 743c60a89a72058172ce93aa1f9bab66b089b346 passed Workspace Control Validation 41404329147."
+      ]
+    },
+    {
+      "id": "power-loss-v3-root-reactivation-blocked",
+      "kind": "live_recovery_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:74c027df26253c9836f23240f7456623a5979859",
+      "required_for_resume": true,
+      "evidence": [
+        "Power loss rebooted Lambda and left v3 reconciler/provisioner inactive because accepted v3 root services were boot-disabled.",
+        "Original root reactivation rejected managed artifact digest drift on /opt/workspace-ci/v3/controller/lambda-ci-controller-v3 because a valid ACTIVE controller-refresh override had replaced the base-manifest controller bytes.",
+        "Repository fix makes root reactivation attest the accepted controller-refresh override instead of falsely treating it as corruption.",
+        "Exact head 74c027df26253c9836f23240f7456623a5979859 passed Workspace Control Validation run 41405429998 SUCCESS.",
+        "Live transactional updater then failed CLOSED before mutation: installed helper metadata mismatch for /opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py.",
+        "Do not rerun activation until installed helper prestate metadata/digest and authority-consumption state are independently reconciled."
+      ]
+    },
+    {
+      "id": "root-reactivation-helper-contract-corrected",
+      "kind": "live_recovery_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:cb6520c5855a7a8b4175411d1eaccff6bde626c5",
+      "required_for_resume": true,
+      "evidence": [
+        "Inactive installer manifest stages /opt/workspace-ci/v3/reconciler/lambda_ci_v3_root_activation.py root:root mode 0555; prior updater incorrectly required 0755 and therefore failed before mutation.",
+        "A second latent defect was corrected: refreshed helper bytes now require a narrow root-owned mode-0600 active helper override attestation bound to base manifest/source/helper digest+mode, candidate helper digest/source head, and root-policy digest.",
+        "Exact corrective head cb6520c5855a7a8b4175411d1eaccff6bde626c5 passed Workspace Control Validation 41407560030 SUCCESS.",
+        "Corrected updater derives prestate from immutable manifest, preserves 0555, refuses digest/metadata drift, performs no systemctl or activation-authority consumption, and regression-tests helper drift rejection without the override."
+      ]
+    },
+    {
+      "id": "diagnostic-run-cancelled-clean",
+      "kind": "incident_checkpoint",
+      "identity": "maintenance-comment-6571796799",
+      "required_for_resume": true,
+      "evidence": [
+        "GitHub Actions run 41407093346 / job 125151483128 is terminal cancelled.",
+        "Workspace Shell controller logs observed total_assigned_jobs=0 and reconstructable_jobs=0 after cancellation.",
+        "Maintenance diagnose comment 6571796799 completed PASS with active_project_units=[], reset_pending=[], recovery_state_conflict=false, quarantine active_count=0 and pending_count=0.",
+        "Historical quarantine b184ce08-d095-424b-9329-53c2b16beb62 remains provenance only; no active/pending runner execution residue exists.",
+        "v3 reconciler/provisioner remain inactive/dead."
+      ]
+    },
+    {
+      "id": "post-outage-root-recovery-wrapper-validated",
+      "kind": "live_recovery_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:675f8772e081052289641211691caeebe6b9f76a",
+      "required_for_resume": true,
+      "evidence": [
+        "scripts/lambda_ci_v3_post_outage_root_recovery_v1.py performs only the validated helper update, fresh manifest/root-policy-bound ACTIVATE_V3_ROOT_SERVICES authority creation, and installed activation helper invocation.",
+        "The wrapper requires root, exact clean checkout, fresh UUID authority, exclusive authority-file creation, and a 10-minute lifetime.",
+        "The wrapper contains no direct systemctl, ACTIVATE_ONE_V3_CANARY, old authority ID reuse, workflow mutation, class activation, or v2 mutation.",
+        "Workspace Control Validation 41408409461 failed only on a brittle wrapped-string test assertion; code behavior was unchanged.",
+        "Corrected exact head 675f8772e081052289641211691caeebe6b9f76a passed Workspace Control Validation 41408493173 SUCCESS."
+      ]
+    },
+    {
+      "id": "research-gpu-reboot-containment-drift",
+      "kind": "incident_checkpoint",
+      "identity": "maintenance-comment-6571931973",
+      "required_for_resume": true,
+      "evidence": [
+        "Root activation failed at _assert_research_gpu_contained before _consume_authority; no v3 root partial activation and the attempted authority was not consumed by that invocation.",
+        "Maintenance diagnose 6571931973: workspace-ci-controller@research-engine-gpu.service active/running, UnitFileState=enabled, active_project_units=[], active_count=0, pending_count=0, reset_pending=[], recovery_state_conflict=false.",
+        "workspace-ci-v3-reconciler.service and workspace-ci-v3-provisioner.service remained inactive/dead after the failed activation.",
+        "The drift is a reboot-persistence containment defect, not a v3 root activation transaction leak."
+      ]
+    },
+    {
+      "id": "research-gpu-containment-repair-wrapper-validated",
+      "kind": "live_recovery_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:ff56679982bc290842a95436ae24adfd568e8c56",
+      "required_for_resume": true,
+      "evidence": [
+        "scripts/lambda_ci_v3_repair_research_gpu_and_resume_roots_v1.py is bound to exact legacy unit workspace-ci-controller@research-engine-gpu.service and exact execution-unit pattern workspace-ci-research-engine-*.service.",
+        "It refuses containment repair if any Research execution unit is active or if either v3 root service is active.",
+        "It only stops/disables the exact legacy Research GPU controller, persists an exact receipt, creates a fresh UUID ACTIVATE_V3_ROOT_SERVICES authority with 10-minute lifetime, invokes the installed root activator, and post-attests Research GPU inactive+disabled plus both v3 roots active/running.",
+        "It contains no Research CPU start/stop, ACTIVATE_ONE_V3_CANARY, workflow mutation, scale-set mutation, or legacy Research GPU start/enable path.",
+        "Exact head ff56679982bc290842a95436ae24adfd568e8c56 passed Workspace Control Validation 41409276446 SUCCESS."
+      ]
+    },
+    {
+      "id": "v3-reconciler-old-verifier-start-failure",
+      "kind": "incident_checkpoint",
+      "identity": "workspace-ci-v3-reconciler.service@2026-11-02T08:00:34Z",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Shell logs show workspace-ci-v3-reconciler.service failed in lambda_ci_v3_reconciler.py verify_installed() with managed artifact digest drift: /opt/workspace-ci/v3/controller/lambda-ci-controller-v3.",
+        "The failure occurred when root activation attempted systemctl start reconciler after consuming its fresh authority; the activator then rolled back any started root service. Provisioner never started and remained inactive/dead.",
+        "Workspace Shell independently observed reconciler failed/failed and provisioner inactive/dead after the transaction.",
+        "Research GPU containment remained repaired: diagnose receipt 6572100953 reports service_active=false, ActiveState=inactive, SubState=dead, UnitFileState=disabled, active_project_units=[], active_count=0, pending_count=0."
+      ]
+    },
+    {
+      "id": "v3-verifier-stack-refresh-validated",
+      "kind": "live_recovery_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:ab616b27d0cf0939d7dc0a227fdc188656e8c749",
+      "required_for_resume": true,
+      "evidence": [
+        "scripts/lambda_ci_v3_reconciler.py now verifies immutable base generation plus exact root-owned controller/helper/reconciler override receipts, failing closed on any binding mismatch.",
+        "scripts/lambda_ci_v3_root_activation.py now recognizes the exact reconciler override in its effective-generation verification.",
+        "scripts/lambda_ci_v3_verifier_stack_live_update_v1.py updates only installed reconciler + root-activation helper while all v3 root/class services are inactive; it leaves controller override, v2, workflows, routes and classes untouched and rolls both files back on any post-receipt exception.",
+        "The recovery wrapper runs verifier-stack refresh before minting a fresh root activation authority and post-attests Research GPU containment plus both v3 roots.",
+        "Exact head c74b09da2ee3fa6fa8b559f88882d78c9c00d0f2 passed Validation 41410392729; rollback/path hardening head ab616b27d0cf0939d7dc0a227fdc188656e8c749 passed Validation 41410555713 SUCCESS."
+      ]
+    },
+    {
+      "id": "v3-root-reactivation-live-success",
+      "kind": "live_activation_checkpoint",
+      "identity": "root-activation-cbada5b8-4a9d-4a61-bae2-1cfc621a0960",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator output: V3_VERIFIER_STACK_LIVE_UPDATE=PASS; V3_ROOT_SERVICES_ACTIVATION=PASS; activation receipt /var/lib/workspace-ci/v3/migration/root-activation-cbada5b8-4a9d-4a61-bae2-1cfc621a0960.json.",
+        "Workspace Shell: reconciler ActiveState=active, SubState=exited; reconciler log at 2026-11-02T08:09:11Z emitted V3_INSTALLED_GENERATION_VERIFY=PASS and systemd Finished Workspace CI v3 installed-generation verifier.",
+        "Workspace Shell: provisioner ActiveState=active, SubState=running, MainPID=176579.",
+        "Workspace Shell: workspace-control-control-small-v1 v3 class remains inactive/dead.",
+        "Fresh Research GPU diagnose 6572239135: service_active=false, ActiveState=inactive, SubState=dead, UnitFileState=disabled, active_project_units=[], active_count=0, pending_count=0, reset_pending=[], recovery_state_conflict=false."
+      ]
+    },
+    {
+      "id": "root-wrapper-oneshot-false-negative",
+      "kind": "repository_correction_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:f8057d2925a329b773b312b62e897e4830e9d54c",
+      "required_for_resume": false,
+      "evidence": [
+        "The post-activation wrapper falsely required both root services to be active/running; reconciler is intentionally Type=oneshot + RemainAfterExit and is healthy at active/exited.",
+        "Fix f8057d2925a329b773b312b62e897e4830e9d54c requires reconciler active/exited + ExecMainStatus=0 + Result=success, and provisioner active/running + ExecMainStatus=0 + Result=success.",
+        "The wrapper now launches the verifier-stack updater with python -B, preventing root-owned __pycache__ files in the operator checkout.",
+        "Workspace Control Validation 41411117818 completed SUCCESS."
+      ]
+    },
+    {
+      "id": "padataset-cpu-canary-workflow-staged",
+      "kind": "cross_repository_proposal_checkpoint",
+      "identity": "adamtrott78/PADataset#3@dfc739e1ed275cf4bff3a5f3038ff1089b3bd739",
+      "required_for_resume": true,
+      "evidence": [
+        "Draft PR #3 has exactly one changed file: .github/workflows/workspace-ci-v3-migration-canary-padataset-cpu-public-v1.yml.",
+        "GitHub blob SHA is f42c165ef6dc658f026976984c87d2eb28f5cd17, matching the workspace-control canary generator output for padataset-cpu-public-v1.",
+        "Workflow is workflow_dispatch-only, owner-gated to adamtrott78, uses runs-on lambda-padataset-cpu-public, performs no checkout, and executes only /opt/workspace-ci/v3/canary/lambda_ci_v3_canary_probe.py --expected-class padataset-cpu-public-v1.",
+        "PR is draft and unmerged; staging does not authorize or dispatch live execution."
+      ]
+    },
+    {
+      "id": "padataset-cpu-canary-operator-validated",
+      "kind": "repository_validation_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:97cb93f3b46adea0a710717caeb84ef7999f6fcd",
+      "required_for_resume": true,
+      "evidence": [
+        "Dedicated operator targets only padataset-cpu-public-v1 / lambda-padataset-cpu-public / adamtrott78/PADataset.",
+        "Operator separates OPERATOR_HEAD from accepted CONTROLLER_SOURCE_HEAD=3e8a231483413ba3a16d405ba61b55d0ab9ff3aa and builds canary preflight from that accepted source worktree.",
+        "Operator pins migration transaction helper blob 0c02ca17cf267f1c3986bfee75ebfc6172ca592a and exact workflow blob f42c165ef6dc658f026976984c87d2eb28f5cd17.",
+        "Operator uses /var/lib/workspace-ci/v3/credentials/padataset and ci-gh-padataset only, verifies effective installed generation before mutation, and checks exact default-branch blob before creating any canary authority.",
+        "Workspace Control Validation 41411615725 completed SUCCESS including unit regression, canary operator syntax, isolated v3 substrate, pinned Go controller, and full integration contracts."
+      ]
+    },
+    {
+      "id": "padataset-cpu-canary-default-branch-accepted",
+      "kind": "cross_repository_live_prerequisite_checkpoint",
+      "identity": "adamtrott78/PADataset#3@12d8ad19d14f2ab42474e159f958060f3050cf1e",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator explicitly authorized merge of PADataset PR #3.",
+        "Immediately before merge, PR #3 was open/mergeable with exact head dfc739e1ed275cf4bff3a5f3038ff1089b3bd739 and workflow blob f42c165ef6dc658f026976984c87d2eb28f5cd17.",
+        "PR was marked ready and merged using expected_head_sha=dfc739e1ed275cf4bff3a5f3038ff1089b3bd739; GitHub returned merged=true and squash commit 12d8ad19d14f2ab42474e159f958060f3050cf1e.",
+        "Post-merge GitHub verification: PR state=closed/merged=true and PADataset main file blob remains exactly f42c165ef6dc658f026976984c87d2eb28f5cd17."
+      ]
+    },
+    {
+      "id": "padataset-cpu-preauthority-controller-refresh-verifier-drift",
+      "kind": "preauthority_incident_checkpoint",
+      "identity": "workspace-control@github-actions-control-plane-protocol-redesign-v1:eae9ba119ace3fc1acba4642c577c1454a03a064",
+      "required_for_resume": true,
+      "evidence": [
+        "First PADataset CPU canary attempt passed root/class preflight, effective installed-generation verify, retry-history verify, exact workflow resolution, and base binding, then failed at controller-refresh `--verify-active` with managed artifact digest drift on /opt/workspace-ci/v3/reconciler/lambda_ci_v3_reconciler.py.",
+        "The failure occurred before `CANARY_AUTHORITY_CREATED=PASS` and before transaction `--apply-canary`; user output contains no authority ID/transaction receipt.",
+        "GitHub post-check shows zero workflow_dispatch runs for workflow id 404277213, confirming no canary dispatch.",
+        "Workspace Shell post-check shows reconciler healthy active/exited with prior PASS attestation and provisioner active/running.",
+        "Fix removes the divergent `_verify_base_non_controller` interpretation and delegates effective installed-generation validation to `reconciler.verify_installed(manifest_path)`, preserving controller-specific source-head/base-head checks afterward.",
+        "Exact fix head eae9ba119ace3fc1acba4642c577c1454a03a064 passed Workspace Control Validation 41413372028 SUCCESS."
+      ]
+    },
+    {
+      "id": "padataset-cpu-v3-canary-accepted",
+      "kind": "live_canary_acceptance",
+      "identity": "PADataset/actions/runs/41418580438",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset CPU v3 canary accepted on workflow run 41418580438 / job 125188348656 with conclusion=success.",
+        "Owning default-branch head 12d8ad19d14f2ab42474e159f958060f3050cf1e and workflow id 404277213 were used.",
+        "Target class padataset-cpu-public-v1; target scale set lambda-padataset-cpu-public id=3 in https://github.com/adamtrott78/PADataset.",
+        "Transaction b63ef32d-55f8-49c2-aa20-9bce412ccedf terminally rolled back after transient runner/supervisor drain.",
+        "Post-canary roots/v2 restoration and Research GPU containment independently attested clean."
+      ]
+    },
+    {
+      "id": "padataset-gpu-canary-default-branch-trusted",
+      "kind": "default_branch_trust_gate",
+      "identity": "PADataset#4@d214b20471aac348bd28802596b92f81ee146b76",
+      "required_for_resume": true,
+      "evidence": [
+        "User explicitly authorized merge of PADataset PR #4.",
+        "PR #4 was marked ready and squash-merged successfully.",
+        "PADataset main is now exact SHA d214b20471aac348bd28802596b92f81ee146b76.",
+        "Main contains `.github/workflows/workspace-ci-v3-migration-canary-padataset-gpu-single-public-v1.yml` with exact blob 9311657f079aa1894d16d5e83ed0b18a813af487.",
+        "Workflow target remains `lambda-padataset-gpu-single-public` and expected class `padataset-gpu-single-public-v1`."
+      ]
+    },
+    {
+      "id": "padataset-gpu-live-operator-staged",
+      "kind": "live_operator_checkpoint",
+      "identity": "workspace-control@8b5afb6a77ae3347300904c4e410a8ce5ede1ecd",
+      "required_for_resume": true,
+      "evidence": [
+        "Added `scripts/lambda_ci_v3_padataset_gpu_canary_live.sh` derived from the accepted CPU operator while changing only target class, target scale set, workflow path/blob, and GPU terminal labels.",
+        "GPU operator pins controller source 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa and hardened migration helper source 2af7c8bba198b5b0e58ede6f8d34d0b64c8ed0af / blob d859cbcc4f8d2d25a76495e2159def2d6ac0c850.",
+        "Operator expects exact default-branch GPU workflow blob 9311657f079aa1894d16d5e83ed0b18a813af487 in `adamtrott78/PADataset` and uses target scale set `lambda-padataset-gpu-single-public`.",
+        "Validation run 41419981224 completed SUCCESS with unit regression, operator syntax, generated substrate, pinned Go controller, and full integration contracts all green.",
+        "No GPU authority has been minted and no GPU canary workflow has been dispatched."
+      ]
+    },
+    {
+      "id": "padataset-gpu-canary-1-failed-closed",
+      "kind": "live_canary_failure_checkpoint",
+      "identity": "PADataset/actions/runs/41420426352",
+      "required_for_resume": true,
+      "evidence": [
+        "Target class padataset-gpu-single-public-v1; transaction /var/lib/workspace-ci/v3/migration/f974ebde-388f-4d7b-a235-d41469134dfc/transaction.json.",
+        "PADataset run 41420426352 / job 125194478681 completed failure after launching on the correct GPU class/runner.",
+        "GPU cardinality/device/network/resource/model/runtime absence checks passed; immutable probe failed only forbidden_path_0, forbidden_path_3, forbidden_path_4, forbidden_path_5.",
+        "Those indices map to /home/atrott, sibling research root, provisioner state, and /run/workspace-ci; Docker socket denies passed.",
+        "Operator terminal rollback completed V3_CANARY_ROLLBACK=PASS / GENERATION_EXCLUSION_ROLLBACK=PASS / CANARY_RESULT=FAILED.",
+        "Root cause: build_gpu_systemd_command() hard-coded only the two Docker socket denies instead of applying the full validated root-authored forbidden_paths contract already used by CPU."
+      ]
+    },
+    {
+      "id": "v3-runtime-live-refresh-accepted",
+      "kind": "live_runtime_refresh_checkpoint",
+      "identity": "workspace-control@e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15",
+      "required_for_resume": true,
+      "evidence": [
+        "Repository fix/runtime-live-updater head e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15 passed Workspace Control Validation 41422523326 SUCCESS.",
+        "GPU runtime now applies _validated_inaccessible_paths() and the complete root-authored forbidden_paths contract; regression covers full deny propagation and forbidden-ancestor rejection.",
+        "Operator executed scripts/lambda_ci_v3_runtime_live_update_v1.py --expected-head e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15.",
+        "Live terminal evidence: V3_RUNTIME_LIVE_UPDATE=PASS; VALIDATED_HEAD=e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15; RUNTIME_SHA256=86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da; PROVISIONER_RESTART=PASS; RESEARCH_GPU_CONTAINMENT=PRESERVED.",
+        "Runtime override receipt: /var/lib/workspace-ci/v3/runtime-refresh/active.json.",
+        "Update receipt: /var/lib/workspace-ci/v3/migration/runtime-live-update-e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15/receipt.json.",
+        "Workspace Shell post-refresh root state observed reconciler active/exited and provisioner active/running.",
+        "No second GPU canary authority has been minted and no GPU retry has been dispatched."
+      ]
+    },
+    {
+      "id": "padataset-gpu-canary-2-preflight-operator-validated",
+      "kind": "repository_validation_checkpoint",
+      "identity": "workspace-control@56e5976597b0d1523ead6a11cdfe6f8a9d23dda0",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact head 56e5976597b0d1523ead6a11cdfe6f8a9d23dda0 passed Workspace Control Validation 41424882222 / job 125208968674 SUCCESS.",
+        "GPU retry operator now preflights all nine v3 runner-class controllers exactly once; the previous duplicate GPU entry and omitted padataset-cpu-public-v1 check are corrected.",
+        "Before any ACTIVATE_ONE_V3_CANARY authority creation, the operator requires the active runtime override and transactional update receipt to bind exact runtime source e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15 and runtime SHA256 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da, and hashes the installed runtime bytes.",
+        "Fresh observation-only maintenance receipts 6574183090 and 6574183720 show PADataset CPU/GPU v2 controllers active/running, NRestarts=0, active_project_units=[], reset_pending=[], and no recovery-state conflict.",
+        "Fresh observation-only maintenance receipt 6574184355 shows legacy Research GPU inactive/dead and disabled, active_count=0, pending_count=0, reset_pending=[], and no recovery-state conflict.",
+        "Fresh Workspace Shell observation shows v3 reconciler active/exited and v3 provisioner active/running; provisioner journal records the accepted runtime updater's single stop/start at 2026-11-02T09:42:54Z.",
+        "No GPU attempt #2 authority or workflow dispatch was performed by this repository/preflight correction."
+      ]
+    },
+    {
+      "id": "padataset-gpu-v3-canary-accepted",
+      "kind": "live_canary_acceptance",
+      "identity": "PADataset/actions/runs/41425633192",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset GPU v3 canary attempt #2 accepted on workflow run 41425633192 / job 125211444476 with conclusion=success.",
+        "Immutable probe on runner lambda-padataset-gpu-single-public-492596136931 returned status=PASS with failures=[] and all forbidden_path_0..5, GPU cardinality/device, public-network, CPU/memory/tasks/runtime, model/runtime absence, cache and rw-root checks passing.",
+        "Target class padataset-gpu-single-public-v1 used exact runtime refresh binding e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15 / runtime SHA256 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da before authority creation.",
+        "Live transaction /var/lib/workspace-ci/v3/migration/c43f3dec-ca6b-4515-9a35-fa6622cd3d46/transaction.json completed terminal success and rollback: V3_CANARY_ROLLBACK=PASS, GENERATION_EXCLUSION_ROLLBACK=PASS, POST_CANARY_ROOT_SERVICES=ACTIVE, POST_CANARY_V3_CLASS_CONTROLLERS=INACTIVE, RESEARCH_GPU_CONTAINMENT=PRESERVED, CANARY_RESULT=SUCCESS, PADATASET_GPU_CANARY_ACCEPTED=PASS.",
+        "Fresh post-canary maintenance receipts 6574390911 and 6574391523 prove PADataset CPU/GPU v2 controllers restored active/running, NRestarts=0, active_project_units=[], reset_pending=[], and no recovery-state conflict.",
+        "Fresh post-canary maintenance receipt 6574392119 proves legacy Research GPU remains inactive/dead and disabled, active_count=0, pending_count=0, reset_pending=[], no recovery-state conflict, and recovery retry remains invalidated."
+      ]
+    },
+    {
+      "id": "v3-production-cutover-repository-implementation-validated",
+      "kind": "repository_validation_checkpoint",
+      "identity": "workspace-control@602ff543a122038870598915f669d9f9bd5a9f6a",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact implementation head 602ff543a122038870598915f669d9f9bd5a9f6a passed Workspace Control Validation run 41428557221 / job 125221070190 SUCCESS, including unit regression, generated v3 substrate validation, pinned Go controller tests, and full integration contracts.",
+        "Reconciler verification now accepts only an exact root-owned V3_PRODUCTION_CUTOVER_OVERRIDE for the deployment overlay plus the three accepted controller-policy files; all other managed-artifact drift remains fail closed.",
+        "scripts/lambda_ci_v3_reconciler_live_update_v2.py provides a reconciler-only live verifier refresh that requires provisioner active/running, reconciler active/exited, all nine v3 class controllers inactive, Research GPU inactive+disabled, and mutates no service/workflow/scale-set/v2 state.",
+        "scripts/lambda_ci_v3_production_cutover.py implements exact generation rendering, one-shot CUTOVER_V3_PRODUCTION_GENERATION authority consumption, all-v2 generation exclusion, exact workflow-confirmation binding, activation of only workspace-control-control-small-v1 + padataset-cpu-public-v1 + padataset-gpu-single-public-v1, exact validation receipts, resource-drain proof, commit persistence, and rollback with v3 isolation before legacy restoration.",
+        "scripts/lambda_ci_v3_production_cutover_live.sh binds the three current production workflow blobs, the accepted runtime refresh, exact reconciler refresh, drained legacy/v3 scale-set state, a temporary PADataset validation PR, real production validation jobs, and automatic workflow/root rollback.",
+        "Fresh observation-only maintenance receipt 6574593603 shows legacy Research CPU currently active/running and enabled with active_project_units=[] and no recovery conflict. Production generation exclusion therefore stops it with all v2 controllers; successful v3 commit leaves it inactive/disabled but logically PRESENT and separately gated, while rollback restores its exact pre-cutover active/enabled state. Research GPU remains inactive+disabled and inherited-contained."
+      ]
+    },
+    {
+      "id": "v3-production-cutover-attempt-1-ledger-generation-mismatch",
+      "kind": "live_cutover_failure_checkpoint",
+      "identity": "workspace-control/actions/runs/41466656949",
+      "required_for_resume": true,
+      "evidence": [
+        "Production cutover attempt #1 reached V3_PRODUCTION_ACTIVE under transaction /var/lib/workspace-ci/v3/migration/c4c11247-0883-4eab-91fd-3b5306b23de6/transaction.json after exact preflights, generation freeze dd381c8748df079fb5e3d3479ba9f6fd8b8223579358bf58f5984fbe33a09ced, workflow retarget, and fresh CUTOVER_V3_PRODUCTION_GENERATION authority 4e3f02d6-bb89-4d13-85eb-36bbdf5e5608.",
+        "First production validation run 41466656949 / job 125349219134 remained queued; independent controller logs prove workspace-control-control-small-v1 repeatedly failed on `durable controller-policy binding mismatch for runner_request_id=124723948506`.",
+        "runner_request_id 124723948506 is terminal durable history from the earlier accepted workspace-control v3 canary; production policy digest changed when the trusted workflow blob changed, and the controller incorrectly treated terminal prior-generation history as a live policy violation.",
+        "The queued validation run is cancelled and all three production workflow blobs are restored to their exact pre-cutover values: workspace-control 524e01916e1a826efd1edb4792023973d7b3c73c; PADataset CPU 5e6a1d4a47ecdfa8b40d3bea23fa8739cc12cd9e; PADataset GPU 3e0c79dc1b8bed7b1480cc745c478c190a3c7da4.",
+        "At latest independent observation, rollback is not terminal: workspace-control legacy v2 and PADataset CPU legacy v2 controllers are inactive, while workspace-control-control-small-v1 remains in the production crash/restart lifecycle. Therefore no retry is authorized until the existing transaction is fully rolled back and v2 prestate is restored."
+      ]
+    },
+    {
+      "id": "v3-production-ledger-generation-fix-validated",
+      "kind": "repository_validation_checkpoint",
+      "identity": "workspace-control@467b8fb136d71448f7b44788200afca6c9673e32",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact fix head 467b8fb136d71448f7b44788200afca6c9673e32 passed Workspace Control Validation 41469850886 / job 125360238275 SUCCESS across unit regression, generated v3 substrate validation, pinned Go controller tests, and full integration contracts.",
+        "The v3 controller now treats terminal records from a prior controller-policy digest as inert historical state, while any nonterminal policy mismatch remains fatal before capacity mutation.",
+        "Production prepare now scans all nine class ledger roots and refuses authority consumption if any durable controller record is nonterminal; terminal historical records are allowed only after schema/identity/policy-binding validation.",
+        "The production operator now binds the already accepted reconciler refresh to source 559c6186b44f17d4b83cb9267d554b355cda2ef7 / SHA256 c8ef68bb99626a64a7783ec09b4e6383f6875c0193c5d9a771d52a218251e749, and separately requires the installed controller override source to equal the current operator head. This permits a controller-only live refresh without needlessly rewriting the accepted reconciler."
+      ]
+    },
+    {
+      "id": "v3-controller-refresh-effective-generation-fix-validated",
+      "kind": "repository_validation_checkpoint",
+      "identity": "workspace-control@40d2004ab58b7027a604f4462ef8f06b1cf7c92a",
+      "required_for_resume": true,
+      "evidence": [
+        "Controller-only refresh attempt from exact head 6512f7126e2ba71304f79097c4e249a732e6f934 failed before any live controller mutation with ControllerRefreshError: non-controller artifact drift: /opt/workspace-ci/v3/provisioner/lambda_ci_runtime.py.",
+        "The failure was caused by compare_manifests_for_controller_only_refresh comparing the candidate only to the original base install manifest even though reconciler.verify_installed had already accepted and bound the root-owned V3_RUNTIME_OVERRIDE (and other accepted live overrides) as the effective installed generation.",
+        "Exact fix head 40d2004ab58b7027a604f4462ef8f06b1cf7c92a passed Workspace Control Validation 41479699726 / job 125394701170 SUCCESS across unit regression, generated v3 substrate validation, pinned Go controller tests, and full integration contracts.",
+        "The refresh now snapshots exact bytes of every managed destination only after the shared reconciler verifies the effective installed generation. Candidate non-controller entries must equal those effective installed digests exactly; the controller entry alone may differ.",
+        "Regressions prove an already-authorized effective non-controller override is accepted, candidate drift beyond effective live state is rejected, and the effective digest set must exactly match the managed destination set.",
+        "Failed refresh attempt created no controller refresh receipt and performed no binary replacement because the error occurred in _stage_candidate before apply_refresh creates its transaction/backup or writes CONTROLLER_BINARY."
+      ]
+    },
+    {
+      "id": "v3-production-cutover-accepted",
+      "kind": "live_cutover_acceptance",
+      "identity": "workspace-control@78ae60364f472fd30654dd9018c90c546e3e8836",
+      "required_for_resume": true,
+      "evidence": [
+        "V3_PRODUCTION_CUTOVER_ACCEPTED=PASS; transaction receipt /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json.",
+        "Production generation SHA256 5428c437e9724055b3a0da18d1aa81642e8c544869317abb340434e9e349722f.",
+        "Workspace Control 41504458922/125480061499 SUCCESS; PADataset CPU 41504979316/125481849777 SUCCESS; PADataset GPU 41505174483/125482508067 SUCCESS.",
+        "All legacy v2 project controllers independently observed inactive/dead and disabled after commit; accepted v3 routes are now bound on main."
+      ]
+    },
+    {
+      "id": "accepted-legacy-v2-scale-set-retirement",
+      "kind": "live_retirement_acceptance",
+      "identity": "legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142",
+      "required_for_resume": true,
+      "evidence": [
+        "V3_LEGACY_SCALE_SET_RETIREMENT=PASS using exact validated helper head 8129291a59be2b25fa837c81091a0d7d8cac3387.",
+        "Receipt: /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json.",
+        "Fresh-process V3_LEGACY_SCALE_SET_RETIREMENT_VERIFY=PASS.",
+        "Retired legacy scale sets: lambda-workspace-control id=3; lambda-padataset id=2; lambda-padataset-gpu id=1.",
+        "Accepted v3 targets preserved: lambda-workspace-control-control-small id=2; lambda-padataset-cpu-public id=3; lambda-padataset-gpu-single-public id=4.",
+        "Research legacy scale sets and all v2 bytes/config/state remain intentionally preserved."
+      ]
+    }
+  ],
+  "blockers": [],
+  "next_safe_action": "Task complete for the accepted production scope. Resume workspace-semantic-execution-migration-v1 immediately. Do not delete lambda-research-engine, lambda-research-engine-gpu, or preserved v2 controller bytes/config/state from this completed task; those require separate future Research acceptance/cleanup authority.",
+  "artifacts": [
+    {
+      "path": "architecture/github-actions-control-plane-protocol-redesign-v1.md",
+      "state": "ARCHITECTURE_MODEL_IN_PROGRESS",
+      "evidence": [
+        "Documents the full controller census, parser chain, external architecture comparison, runner-class model, trust boundaries, correlation model, and simplified capacity-provider architecture."
+      ]
+    },
+    {
+      "path": "architecture/github-actions-control-plane-system-model.v1.json",
+      "state": "WHOLE_SYSTEM_MACHINE_MODEL",
+      "evidence": [
+        "Models all 23 registered routes, current controller topology, nine proposed runner classes, parser/liveness findings, command census, correlation model, failure algebra, and target maintenance/reconciliation planes."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-runner-class-catalog.v1.json",
+      "state": "MODEL_ONLY_TARGET_CATALOG",
+      "evidence": [
+        "Instantiates 3 projects, 9 homogeneous runner classes, and 23 workflow routes with class-specific controller identities.",
+        "Not authorized for live installation."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-control-plane-state-machine.v1.json",
+      "state": "MODEL_ONLY_STATE_MACHINE",
+      "evidence": [
+        "Defines GitHub job, controller admission, supervisor, runner instance, root capacity, maintenance, and reconciliation state machines plus typed failure algebra."
+      ]
+    },
+    {
+      "path": "schemas/workspace-ci-runner-class-catalog.v1.schema.json",
+      "state": "MODEL_SCHEMA",
+      "evidence": [
+        "Defines machine-checkable runner-class and trusted-route catalog shape."
+      ]
+    },
+    {
+      "path": "schemas/workspace-ci-capacity-protocol.v3.schema.json",
+      "state": "MODEL_SCHEMA",
+      "evidence": [
+        "Defines typed PROVISION/STATUS root capacity protocol without authority-bearing free-form arguments."
+      ]
+    },
+    {
+      "path": "schemas/workspace-ci-runner-class-controller-policy.v1.schema.json",
+      "state": "MODEL_SCHEMA",
+      "evidence": [
+        "Defines class-specific controller workflow allowlist policy."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-host-resource-policy.v1.json",
+      "state": "MODEL_ONLY_ROOT_RESOURCE_POLICY",
+      "evidence": [
+        "Makes current accidental global serialization explicit as host_max_active_runners=1 for migration.",
+        "Defines atomic exclusive GPU reservations and release/containment rules."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-projection-compiler-contract.v1.json",
+      "state": "MODEL_ONLY_COMPILER_CONTRACT",
+      "evidence": [
+        "Defines source inputs, canonical catalog generation digest, root/controller/executor projections, deployment overlay separation and compile-fail invariants."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-executor-action-catalog.v1.json",
+      "state": "MODEL_ONLY_TYPED_EXECUTOR_API",
+      "evidence": [
+        "Contains 23 execution actions and four maintenance actions.",
+        "Executor selects action_id + typed arguments; builder will render canonical ingress syntax and reject unknown/invalid arguments locally."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-control-plane-verification-plan.v1.json",
+      "state": "FROZEN_REPOSITORY_ONLY_ACCEPTANCE_PLAN",
+      "evidence": [
+        "Covers all 23 routes, nine runner classes, three control planes, scheduler lifecycle, capacity protocol, resource contention, crash recovery, maintenance, reconciliation and migration equivalence."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_policy_compiler.py",
+      "state": "REPOSITORY_ONLY_PROTOTYPE",
+      "evidence": [
+        "Pure deterministic compiler; no network/systemd/socket/Lambda access."
+      ]
+    },
+    {
+      "path": "tests/test_lambda_ci_control_plane_compiler.py",
+      "state": "ADVERSARIAL_VERIFICATION",
+      "evidence": [
+        "Compiler/projection separation and drift tests green in validation #1242."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_executor_builder.py",
+      "state": "REPOSITORY_ONLY_PROTOTYPE",
+      "evidence": [
+        "Typed action_id + argument ingress renderer; cannot accept raw root capability selectors."
+      ]
+    },
+    {
+      "path": "tests/test_lambda_ci_executor_builder.py",
+      "state": "ADVERSARIAL_VERIFICATION",
+      "evidence": [
+        "Covers Workspace Control, PADataset, Research Engine, maintenance and injection/invalid-input rejection."
+      ]
+    },
+    {
+      "path": "schemas/workspace-ci-root-policy-projection.v1.schema.json",
+      "state": "MODEL_SCHEMA",
+      "evidence": [
+        "Compiler validates emitted root projection against this schema."
+      ]
+    },
+    {
+      "path": "schemas/workspace-ci-executor-policy-projection.v1.schema.json",
+      "state": "MODEL_SCHEMA",
+      "evidence": [
+        "Compiler validates emitted executor projection against this schema."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-control-plane-verification-receipt.v1.json",
+      "state": "REPOSITORY_ONLY_PROTOCOL_VERIFIED",
+      "evidence": [
+        "Exact head 06d58450bb735178b516d9966fcb099763d8b4b0; validation #1266 SUCCESS; 616 tests PASS.",
+        "No Lambda mutation authorized or performed."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-v3-migration-plan.v1.json",
+      "state": "LIVE_MECHANICS_REPOSITORY_VERIFIED_NOT_AUTHORIZED",
+      "evidence": [
+        "Exact substantive workspace-control head 01019177fcb46e5ab9864ea9b764b533dcf0be81 passed Workspace Control Validation #1337 / run 41010515483.",
+        "Migration plan binds current Research Engine hosted-CI evidence and exact repository readiness while live_authority remains NONE.",
+        "Inactive install, root-services activation, one-shot canary authority, generation exclusion, rollback, and containment boundaries are all explicit."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_model.py",
+      "state": "REPOSITORY_ONLY_VERIFIED_MODEL",
+      "evidence": [
+        "Models scheduler admission/capacity, supervisor liveness, root resource allocation, assignment requeue, durable runner ledger and JIT crash recovery."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_deployment_overlay.py",
+      "state": "REPOSITORY_ONLY_VERIFIED_MODEL",
+      "evidence": [
+        "Proves generation binding cannot implicitly install/activate/enable/clear containment."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_control_planes.py",
+      "state": "REPOSITORY_ONLY_VERIFIED_MODEL",
+      "evidence": [
+        "Models maintenance and reconciliation isolation."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_migration_equivalence.py",
+      "state": "REPOSITORY_ONLY_VERIFIED_PROOF",
+      "evidence": [
+        "23/23 legacy routes exact-equivalent to target root launch envelopes."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_provisioner.py",
+      "state": "PRODUCTION_V3_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Root-owned v3 capacity provider: SO_PEERCRED class authority, RESERVE/JIT/LAUNCH/STATUS/CANCEL, tmpfs-only JIT, persistent non-secret ledger and quarantine/resource-hold recovery.",
+        "Covered by exact-head Validation #1293; not installed on Lambda."
+      ]
+    },
+    {
+      "path": "controller/lambda-ci-controller/v3",
+      "state": "PRODUCTION_V3_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Separate homogeneous runner-class controller using pinned actions/scaleset client.",
+        "Structured admission, TotalAssignedJobs capacity, crash ledger and in-process retry; no JobDisplayName authority parser.",
+        "Covered by exact-head Validation #1293; not activated."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_reconciler.py",
+      "state": "INACTIVE_INSTALL_PRIVATE_STATE_ROOTS_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Generates exact nine class identities, project credential groups, disjoint systemd/tmpfiles/state and install manifest.",
+        "APPLY_INACTIVE refuses active v3 services and contains no start/enable/restart operation."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-v3-migration-canaries.v1.json",
+      "state": "MIGRATION_CANARY_POLICY_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Nine migration-only canaries are staged, not installed or live-authorized.",
+        "Owner-only workflow_dispatch, no inputs/checkout/candidate authority; blocked classes remain blocked."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_canary.py",
+      "state": "MIGRATION_CANARY_GENERATOR_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Generates owning-repository canary workflows and one-workflow-only controller policies outside the ordinary executor action catalog."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_canary_probe.py",
+      "state": "OFFLINE_AND_PUBLIC_MIGRATION_CANARY_PROBE_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Verifies root-owned class envelope without network access or payload execution.",
+        "For offline classes, verifies the online runner and waiting root-owned payload broker as separate cgroup/systemd envelopes; broker PrivateNetwork/network/device/mount/resource drift fails closed."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_migration_transaction.py",
+      "state": "GENERATION_EXCLUSION_ONE_SHOT_AUTHORITY_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Requires separate exact-generation root-owned live authorization receipt.",
+        "Stops/drains v2 before one v3 controller start; rollback drains v3 before exact v2 state restore; never dispatches workflows or mutates containment receipts."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_payload_broker.py",
+      "state": "OFFLINE_PAYLOAD_BROKER_REPOSITORY_VERIFIED",
+      "evidence": [
+        "One-shot SO_PEERCRED/cgroup-authenticated Unix broker accepts argv/cwd only and executes exact promoted runtime Python in a root-defined clean environment.",
+        "Broker is launched by the root runtime in a private loopback-only network namespace with exact GPU/model/runtime authority."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-v3-offline-payload-producer-bridge.v1.json",
+      "state": "CROSS_REPO_PROPOSAL_HOSTED_CI_ACCEPTED_NOT_LIVE",
+      "evidence": [
+        "Exact hosted-CI evidence head d7de132c7cadc620905b5a827f391d1bc8786dd0 passed Workspace Control Validation #1332 / run 41008189246.",
+        "Exact runtime/socket head 50b209efe8c6219b0bb428016fcf911470a953ba passed Workspace Control Validation #1329 / run 41006161421.",
+        "Each offline class has a distinct broker Unix user; only payload-exchange is runner↔broker shared; payload sockets use disjoint /run/workspace-ci-v3-payload.",
+        "Research Engine PR #283 exact head 6165556086b73d2076f205f11ec7b988150f23dd passed repository-only acceptance comment 6515645161.",
+        "Research Engine hosted CI #642 / run 41007835081 / job 123906654539 executed repository steps on a Hosted Compute Agent and passed compile, full tests, Compose validation, image build, and cleanup.",
+        "Current main workflow blobs remain the production trust source; proposal blobs are still default-branch-untrusted."
+      ]
+    },
+    {
+      "path": "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json",
+      "state": "DEFAULT_BRANCH_CUTOVER_DESIGN_REPOSITORY_VERIFIED_NOT_AUTHORIZED",
+      "evidence": [
+        "Pre-binds old workflow blobs and reviewed candidate blobs 4016ec3d23627dd7299ef9a7d36ff1dcbcdf47fe / 90f8dc55c54f9f4759bc71dffa5d3fe622aa0b07 at Research Engine head 6165556086b73d2076f205f11ec7b988150f23dd.",
+        "Hosted CI #642 is accepted and current_readiness.github_hosted_ci_executed_repository_steps=true; ready_for_cutover remains false.",
+        "Separates live canary, containment recovery, default-branch cutover and Lambda activation authorities.",
+        "Rollback restores workflow/policy bytes only after v3 drain and never restarts legacy Research GPU."
+      ]
+    },
+    {
+      "path": "scripts/lambda_ci_v3_root_activation.py",
+      "state": "ROOT_SERVICES_ONE_SHOT_ACTIVATION_REPOSITORY_VERIFIED",
+      "evidence": [
+        "Exact substantive workspace-control head 01019177fcb46e5ab9864ea9b764b533dcf0be81 passed Workspace Control Validation #1337 / run 41010515483.",
+        "Activation is bound to exact installed manifest SHA, source head, and root-policy digest with a short-lived one-shot authorization.",
+        "Starts only reconciler then provisioner transiently; never enables/restarts v3 units or starts a class controller.",
+        "Verifies provisioner socket ownership/mode, Research GPU containment, no class/transient/resource activity, and rollback safety."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Whole-system controller and protocol inventory",
+      "result": "PASS",
+      "evidence": [
+        "Root registry contains exactly three registered projects: workspace-control, padataset, research-engine.",
+        "Five registry-managed scale-set controller instances were identified: workspace-control CPU, PADataset CPU/GPU, research-engine CPU/GPU.",
+        "Maintenance and reconciliation were modeled as two additional GitHub-facing control processes with separate root services.",
+        "All 23 registered trusted workflow pins match the current main-branch workflow blob in their owning repository.",
+        "Research-engine GPU scale set contains 19 routes spanning six launch-equivalence classes and is not homogeneous.",
+        "22/23 execution routes use only command + candidate SHA; the only third-token route keeps that selector inside a fixed runner envelope."
+      ]
+    },
+    {
+      "check": "Canonical protocol and state-machine freeze",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation #1219 / run 40960220712 passed at compiler-contract checkpoint 0c3598165871a569094f0c46551dfe13bdb4bb78.",
+        "Target architecture uses nine homogeneous runner classes across workspace-control, PADataset and research-engine.",
+        "Root capacity authority is derived from unique controller Unix UID via SO_PEERCRED, not request-provided class/workload strings.",
+        "Capacity protocol is two-phase RESERVE -> LAUNCH with STATUS/CANCEL recovery; JIT registration is created only after root resource reservation.",
+        "State machines separate GitHub scheduler lifecycle, controller admission/supervision, runner instance, root capacity, maintenance and reconciliation.",
+        "Explicit host resource policy preserves current effective host-wide concurrency=1 during migration.",
+        "Runner-instance crash matrix covers every boundary before/after reservation, JIT generation, systemd unit creation, runner execution and cleanup."
+      ]
+    },
+    {
+      "check": "Single-source compiler and typed executor interface",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation #1242 / run 40961745857 passed at exact head dd5e62e475331b4462a2310ccf02f4ad4d26f4d8.",
+        "Pure compiler emits 9 root runner classes, 9 class-controller projections, 23 execution actions, 4 maintenance actions and a 23-route compatibility matrix.",
+        "Compiler validates emitted root/controller/executor projections against checked-in schemas.",
+        "Adversarial tests reject duplicate controller UIDs, workflow blob/shape drift, target scale mismatch, missing schemas, and execution parameters that imply infrastructure authority.",
+        "Digest tests prove ingress command or workflow-local enum changes cannot alter root_policy_sha256 or controller_policy_sha256, while executor_policy_sha256 changes.",
+        "Typed builder rejects unknown action IDs, raw command override, invalid candidate SHA, unknown runner class, invalid maintenance receipt, and non-enum experiment selectors.",
+        "host-attest is exposed only as a typed maintenance action, never as an execution qualifier."
+      ]
+    },
+    {
+      "check": "Whole-fleet repository-only protocol verification",
+      "result": "PASS",
+      "evidence": [
+        "Exact head 06d58450bb735178b516d9966fcb099763d8b4b0 passed Workspace Control Validation #1266 / run 40990406861 / job 123851171378.",
+        "616 unit tests passed; pinned Go scale-set controller validation and full integration contracts passed.",
+        "23/23 routes attest from structured workflow identity without authority-bearing display/candidate parsing.",
+        "9/9 runner classes pass RESERVE -> JIT -> LAUNCH -> terminal cleanup modeling.",
+        "TotalAssignedJobs-only scaling, redelivery, canceled reassignment, request-local anomaly liveness, retry backoff, root crash boundaries, controller ledger crash boundaries, reservation expiry, GPU atomicity, class quarantine, maintenance, reconciliation and deployment overlay are covered.",
+        "23/23 current routes have exact-equivalent target root launch envelopes.",
+        "Durable receipt: architecture/lambda-ci-control-plane-verification-receipt.v1.json.",
+        "PR #572 verification acceptance comment: 6513301714."
+      ]
+    },
+    {
+      "check": "Migration architecture initialized",
+      "result": "PASS",
+      "evidence": [
+        "architecture/lambda-ci-v3-migration-plan.v1.json defines disjoint v2/v3 paths and one-class canaries.",
+        "Migration design forbids simultaneous active v2/v3 project controllers because the generations do not share one physical-resource ledger.",
+        "Research GPU-derived classes remain installed-inactive/inherited-contained absent separate recovery authority."
+      ]
+    },
+    {
+      "check": "Production v3 repository implementation and migration transaction",
+      "result": "PASS",
+      "evidence": [
+        "Exact head 455f0585d9006435335112ca896af7671a0f9f64 passed Workspace Control Validation #1293 / run 40999275931.",
+        "All unit regressions, pinned Go scale-set controller checks, and full integration contracts passed.",
+        "No Lambda mutation authorized or performed."
+      ]
+    },
+    {
+      "check": "Offline payload broker and cross-repo producer bridge",
+      "result": "PASS",
+      "evidence": [
+        "Exact workspace-control hosted-CI evidence head d7de132c7cadc620905b5a827f391d1bc8786dd0 passed Workspace Control Validation #1332 / run 41008189246, including task-contract validation, unit regression, pinned Go controller validation, and full integration contracts.",
+        "Exact workspace-control runtime/socket head 50b209efe8c6219b0bb428016fcf911470a953ba passed Workspace Control Validation #1329 / run 41006161421.",
+        "Each offline runner class retains its own distinct deterministic payload-broker Unix user; broker users share only the project runner group and receive no workspace-ci-v3-provisioner or controller credential-group authority.",
+        "The online Actions runner retains GitHub control-plane networking but has no GPU DeviceAllow, empty CUDA_VISIBLE_DEVICES, ProcSubset=pid, and no readable exact promoted model/runtime objects.",
+        "The root-owned broker uses env -i, PrivateNetwork=yes, IPAddressDeny=any with loopback-only allow, exact GPU DeviceAllow, and exact promoted model/runtime read authority.",
+        "The runner job/checkout tree is inaccessible to the broker; runner-private HOME/tmp/cache directories remain private, broker HOME/tmp/HF state is broker-private, and only the dedicated per-request payload-exchange is shared through the project group.",
+        "Payload data-plane sockets live under root-owned sibling runtime root /run/workspace-ci-v3-payload, outside forbidden /run/workspace-ci; the v3 spec and runtime independently reject any payload socket root nested beneath a project forbidden path.",
+        "SO_PEERCRED authenticates the exact online-runner UID plus runner systemd cgroup; root cleanup independently proves runner-UID and class-scoped broker-UID process/GPU residue absence.",
+        "Research Engine draft PR #283 exact head 6165556086b73d2076f205f11ec7b988150f23dd is one commit ahead of repaired main 1031861c03b2af8cff5cf72939bbbc83a95e65a4 and changes exactly the two offline Qwen producer workflows.",
+        "Research Engine hosted CI #642 / run 41007835081 / job 123906654539 executed repository steps on a GitHub Hosted Compute Agent and passed setup, install, Compile, full Test, Compose validation, daemon image build, and cleanup.",
+        "Research Engine exact-head repository-only acceptance is durable PR #283 comment 6515645161; reviewed workflow blobs remain 4016ec3d23627dd7299ef9a7d36ff1dcbcdf47fe and 90f8dc55c54f9f4759bc71dffa5d3fe622aa0b07.",
+        "The hosted-CI evidence gate is resolved, but PR #283 remains draft/default-branch-untrusted and current main workflow blobs remain the production trust source.",
+        "architecture/lambda-ci-v3-offline-producer-cutover-plan.v1.json keeps ready_for_cutover=false because live canaries, Research GPU containment recovery, default-branch cutover authority, and Lambda live activation authority remain false.",
+        "No Lambda mutation, migration-canary dispatch, Research GPU containment change, retry-authority restoration, or Research Engine default-branch producer cutover was performed."
+      ]
+    },
+    {
+      "check": "Root-services activation and one-shot live authority",
+      "result": "PASS",
+      "evidence": [
+        "Exact substantive head 01019177fcb46e5ab9864ea9b764b533dcf0be81 passed Workspace Control Validation #1337 / run 41010515483.",
+        "Migration plan payload socket root is /run/workspace-ci-v3-payload and current repository-readiness binds Research Engine PR #283 hosted CI #642.",
+        "Private /var/lib/workspace-ci/v3/migration and /var/lib/workspace-ci/v3/migration-authority roots are staged root:root 0700 by the inactive substrate and live transactions refuse mode/owner drift.",
+        "ACTIVATE_ONE_V3_CANARY authority receipts require canonical unique UUIDs, exact head/generation/class/policy/workflow binding, <=1800-second validity, and atomic durable one-shot consumption before mutation; rollback never reopens them.",
+        "ACTIVATE_V3_ROOT_SERVICES is separately one-shot and binds exact installed manifest SHA, source head, and root-policy digest.",
+        "Root-services activation re-attests every installed artifact, starts only reconciler then provisioner transiently, verifies the root-owned workspace-ci-v3-provisioner-group 0660 Unix socket, proves Research GPU containment remains intact, proves all class controllers/transients/resource claims absent, and proves no v3 root/class unit is enabled.",
+        "Any root-services activation failure stops provisioner then reconciler and persists rollback evidence without reopening authority.",
+        "No Lambda mutation, v3 root/class activation, canary dispatch, Research GPU containment change, retry-authority restoration, or Research Engine default-branch cutover occurred."
+      ]
+    },
+    {
+      "check": "Initial v3 live canary acceptance",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control v3 class workspace-control-control-small-v1 completed the first accepted live generation-exclusion canary.",
+        "Exact source/controller head: 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa; Validation #1398 / run 41262210278 SUCCESS.",
+        "Migration canary workflow run 41264356722 / job 124723948506 completed successfully.",
+        "Post-canary rollback restored the exact legacy prestate, left v3 root services active, left every v3 class controller inactive, and preserved legacy Research GPU containment."
+      ]
+    },
+    {
+      "check": "Workspace Shell troubleshooting dependency",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Shell v1 live acceptance complete at PR #573 comment 6565110368.",
+        "Bounded GitRunner observability extension PR #591 head 1ca44e019fed66a55f2b9985d9d04397ba37b668 passed Workspace Control Validation 41384504196 and live transactional update PASS.",
+        "No v3 canary/cutover authority was created by the observability task."
+      ]
+    },
+    {
+      "check": "Maintenance nanosecond recovery parser repair",
+      "result": "PASS",
+      "evidence": [
+        "Reset-stale maintenance comment 6569249619 failed closed before scale-set mutation because Go quarantine timestamp 2026-11-01T22:20:58.365802851Z exceeded deployed Python fromisoformat precision.",
+        "Repository repair at candidate head 7d138b900944b1138a74f7d92c2db1b6e8d25ba7 normalizes RFC3339 fractional precision to microseconds while preserving second/timezone semantics.",
+        "Regression covers nanosecond Z and offset timestamps plus malformed input rejection.",
+        "Transactional single-file live updater is statically frozen to old Git blob 4b5ec97754c83e4b01103dea9c2f84112b3d6110 and candidate blob f994992cb3e4713c1e0a165c18de459fa44dac74 and cannot mutate scale sets/controllers/v3/quarantine/credentials.",
+        "Workspace Control Validation run 41390709810 completed SUCCESS on exact final hotfix code/test head 28853cc42608def1790e25711c1a9dcbdb652346.",
+        "Final updater revision uses per-command Git safe.directory binding for the exact temporary worktree and makes no persistent/global Git configuration change."
+      ]
+    },
+    {
+      "check": "Post-outage root-reactivation helper prestate correction",
+      "result": "PASS",
+      "evidence": [
+        "Exact head cb6520c5855a7a8b4175411d1eaccff6bde626c5 passed Workspace Control Validation #1590 / run 41407560030.",
+        "Updater prestate now matches the immutable inactive-install manifest helper entry (root:root mode 0555 and exact base digest).",
+        "Effective-generation verification supports only an explicitly attested helper override; all other managed artifacts remain fail-closed against manifest digests/modes.",
+        "No live helper mutation, v3 root activation, class canary, production cutover, Research GPU containment change, or authority widening occurred."
+      ]
+    },
+    {
+      "check": "Post-outage bounded root recovery wrapper",
+      "result": "PASS",
+      "evidence": [
+        "Exact head 675f8772e081052289641211691caeebe6b9f76a passed Workspace Control Validation 41408493173 SUCCESS.",
+        "Wrapper requires exact clean checkout and root, calls only the transactional helper updater plus installed root activation helper, and always creates a fresh UUID ACTIVATE_V3_ROOT_SERVICES receipt.",
+        "No live root mutation was performed during repository validation."
+      ]
+    },
+    {
+      "check": "Research GPU containment repair + root resume wrapper",
+      "result": "PASS",
+      "evidence": [
+        "Exact head ff56679982bc290842a95436ae24adfd568e8c56 passed Workspace Control Validation 41409276446 SUCCESS.",
+        "Full unit regression, v3 canary operator syntax, isolated v3 systemd substrate, pinned Go controller, and full integration contracts passed.",
+        "No live containment or root mutation occurred during repository validation."
+      ]
+    },
+    {
+      "check": "V3 verifier-stack live refresh + root resume",
+      "result": "PASS",
+      "evidence": [
+        "Exact head ab616b27d0cf0939d7dc0a227fdc188656e8c749 passed Workspace Control Validation 41410555713 SUCCESS.",
+        "Unit regression, first-v3-canary operator syntax, isolated v3 systemd substrate validation, pinned Go controller validation, and full integration contracts all passed.",
+        "No live verifier-stack/root mutation occurred during repository validation."
+      ]
+    },
+    {
+      "check": "Root recovery live success + oneshot attestation correction",
+      "result": "PASS",
+      "evidence": [
+        "Live root activation authority cbada5b8-4a9d-4a61-bae2-1cfc621a0960 completed V3_ROOT_SERVICES_ACTIVATION=PASS.",
+        "Independent Workspace Shell attestation proves reconciler healthy active/exited with V3_INSTALLED_GENERATION_VERIFY=PASS and provisioner active/running.",
+        "Fresh post-activation Research GPU diagnose 6572239135 proves containment preserved.",
+        "Exact wrapper correction f8057d2925a329b773b312b62e897e4830e9d54c passed Validation 41411117818 SUCCESS."
+      ]
+    },
+    {
+      "check": "PADataset CPU canary staging/operator",
+      "result": "PASS",
+      "evidence": [
+        "PADataset draft PR #3 head dfc739e1ed275cf4bff3a5f3038ff1089b3bd739 contains exactly generated workflow blob f42c165ef6dc658f026976984c87d2eb28f5cd17.",
+        "Exact workspace-control operator head 97cb93f3b46adea0a710717caeb84ef7999f6fcd passed Validation 41411615725 SUCCESS.",
+        "No live PADataset v3 class controller, workflow dispatch, canary authority, scale set, or production route was activated by staging/validation."
+      ]
+    },
+    {
+      "check": "PADataset CPU default-branch canary prerequisite",
+      "result": "PASS",
+      "evidence": [
+        "PADataset PR #3 merged with exact reviewed head and no head drift.",
+        "PADataset main now exposes exact migration workflow blob f42c165ef6dc658f026976984c87d2eb28f5cd17.",
+        "No canary workflow dispatch or v3 class activation occurred during the merge."
+      ]
+    },
+    {
+      "check": "Controller-refresh shared effective-generation verifier",
+      "result": "PASS",
+      "evidence": [
+        "Exact head eae9ba119ace3fc1acba4642c577c1454a03a064 passed Validation 41413372028 SUCCESS.",
+        "Unit regression includes delegation and fail-closed tests for shared reconciler verification.",
+        "Dedicated regression proves PADataset operator still performs controller-specific `--verify-active` provenance checks before any authority creation."
+      ]
+    },
+    {
+      "check": "PADataset GPU v3 canary #2 acceptance",
+      "result": "PASS",
+      "evidence": [
+        "PADataset workflow run 41425633192 / job 125211444476 completed SUCCESS.",
+        "Immutable v3 class envelope probe returned status=PASS and failures=[] for padataset-gpu-single-public-v1.",
+        "Operator transaction c43f3dec-ca6b-4515-9a35-fa6622cd3d46 rolled back v3 canary and generation exclusion cleanly and restored post-canary roots/classes/Research GPU containment.",
+        "Fresh maintenance receipts 6574390911, 6574391523 and 6574392119 independently confirm PADataset v2 lane restoration and Research GPU containment."
+      ]
+    },
+    {
+      "check": "Production v3 generation cutover repository implementation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation 41428557221 / job 125221070190 completed SUCCESS at exact head 602ff543a122038870598915f669d9f9bd5a9f6a.",
+        "Unit regression covers exact workflow retargeting, root-policy invariance, accepted-only overlay activation, authority replay/time binding, generation exclusion, production activation/commit, v3-first rollback isolation, nonterminal transaction rejection, boot-state rejection, and validation binding to exact workflow/class/scale-set/runner identity.",
+        "Live-operator static regression includes bash -n plus ordering assertions that all root/class/workflow/scale-set/verifier preflights precede authority, no workflow retarget precedes v2 quiesce, real production validation precedes commit, and rollback restores workflows before legacy generation restoration."
+      ]
+    },
+    {
+      "check": "Production controller durable-ledger generation transition",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation 41469850886 / job 125360238275 completed SUCCESS at exact head 467b8fb136d71448f7b44788200afca6c9673e32.",
+        "Regression proves terminal prior-generation controller records remain unchanged and inert under a new policy digest.",
+        "Existing regression still proves nonterminal controller-policy digest drift is fatal before capacity mutation.",
+        "Production cutover tests now reject nonterminal durable ledgers before authority consumption."
+      ]
+    },
+    {
+      "check": "Controller-only refresh against authorized effective installed generation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation 41479699726 / job 125394701170 completed SUCCESS at exact head 40d2004ab58b7027a604f4462ef8f06b1cf7c92a.",
+        "Unit regression covers acceptance of authorized effective non-controller overrides, rejection of candidate drift beyond effective bytes, and exact managed-destination digest coverage.",
+        "The shared reconciler remains the authority for validating runtime/reconciler/helper/controller override receipts before the effective-byte snapshot is taken."
+      ]
+    },
+    {
+      "check": "Bounded accepted legacy scale-set retirement implementation",
+      "result": "PASS",
+      "evidence": [
+        "Exact implementation head 8129291a59be2b25fa837c81091a0d7d8cac3387 passed Workspace Control Validation run 41512744850 SUCCESS.",
+        "Retirement scope is limited to lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu because only their replacement v3 classes are production-accepted.",
+        "lambda-research-engine and lambda-research-engine-gpu are hard-coded preserve-only until separate Research v3 acceptance.",
+        "Preflight requires TotalAvailableJobs, TotalAcquiredJobs, TotalAssignedJobs, TotalRunningJobs, TotalRegisteredRunners, and TotalBusyRunners all zero before deletion.",
+        "A root-owned 0600 rollback-window receipt is persisted before the first DeleteRunnerScaleSet call; partial deletion is resumable from that exact receipt.",
+        "A fresh-process verify-receipt mode independently requires all three legacy names absent and the exact accepted v3 target scale-set IDs still present after retirement.",
+        "The tool observes systemd state only and never stops, disables, starts, enables, removes, or rewrites preserved v2 bytes/config/state."
+      ]
+    },
+    {
+      "check": "Live accepted legacy scale-set retirement",
+      "result": "PASS",
+      "evidence": [
+        "V3_LEGACY_SCALE_SET_RETIREMENT=PASS.",
+        "V3_LEGACY_SCALE_SET_RETIREMENT_VERIFY=PASS.",
+        "Rollback-window receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was persisted before remote deletion.",
+        "All three production-accepted legacy scale sets were independently verified absent after deletion; exact accepted v3 targets remained present.",
+        "Research legacy scale sets were preserved because their replacement v3 classes remain unaccepted."
+      ]
+    },
+    {
+      "check": "Final completed GitRunner task branch synchronization",
+      "result": "PASS",
+      "evidence": [
+        "PR #572 exact head f62a71bc4488da2cf2afeb90325d0b24dd61ada1 passed Workspace Control Validation run 41515276127 SUCCESS.",
+        "Accepted production transaction remains /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json.",
+        "Accepted retirement receipt remains /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json with fresh-process verification PASS.",
+        "Task status is COMPLETE; Research legacy scale sets and preserved v2 bytes/config/state remain outside this completed task's deletion authority."
+      ]
+    }
+  ],
+  "remaining_work": [],
+  "last_executor": "gpt-5.6-sol",
+  "last_surface": "github+workspace-shell+heartbeat",
+  "notes": "LIVE HANDOFF 2026-10-30 ~03:13 America/New_York. Input #1 succeeded on Lambda using corrected repository head 09c46818252991f6a55aaeedbcf046c554e2ffee after repository fixes for Go dependency locking and portable systemd sysusers/tmpfiles identities. It installed/attested the inactive v3 substrate; all nine class controllers remained inactive/disabled and Research GPU containment was preserved. Input #2 succeeded: one-shot ACTIVATE_V3_ROOT_SERVICES authority id 55f15dfe-a603-4901-b148-2aa11a2c0048 was consumed; workspace-ci-v3-reconciler.service and workspace-ci-v3-provisioner.service are ACTIVE, provisioner socket passed ownership/mode proof, all class controllers remained inactive/disabled, and Research GPU containment remained preserved. Multiple Input #3 attempts failed before transaction authority/v2 quiesce and exposed wrapper assumptions; the current rebuilt operator is exact head 52b82bcb1c1fe8f9304be6c4e7cd7737b5c88227, script blob 36e9a5419f0dcd7e45db8302bc41070cbe9137bc, Validation #1361/run 41018340472 SUCCESS. The latest live attempt passed root/class preflight, installed-generation binding, exact migration-helper Git-object materialization, and Go 1.26.3 archive verification, then emitted Go module download lines and returned silently to the prompt before V3_WORKSPACE_CONTROL_CREDENTIAL=PASS. Code ordering proves this was before CANARY_AUTHORITY_CREATED / ACTIVATE_ONE_V3_CANARY, GENERATION_EXCLUSION=BEGIN, --apply-canary, or gh workflow run. Thus no canary authority consumed, no v2 controller stopped, no target v3 class activated, and no canary dispatched. A temporary credential file may have been attempted only if execution got past the Go build; the wrapper cleanup is intended to remove it, but new executor should verify the v3 workspace-control credential directory before retry. Owner-only migration canary workflow is already present on workspace-control main at blob c7471bdd5e35a7f8be27c3153f615a382845e195. Research Engine PR #283 remains untouched/draft and Research GPU containment must not be changed. CORRECTED INPUT #3 OPERATOR 2026-10-30 ~03:23 America/New_York: exact head f7ac4e66313928c2f6d334a446bb30e4da160737, script blob 06ea115cdf1156f534a98829b140b74c59463bff. Workspace Control Validation #1364 / run 41019685530 passed task-contract sync, unit regression, first-canary operator syntax, isolated v3 substrate validation, pinned Go scale-set controller validation, and full integration contracts. A preceding run #1363 failed before operator validation only because metadata head 6be5021 had manually reformatted the derived handoff; the handoff was regenerated canonically from the authoritative JSON at f7ac4e66313928c2f6d334a446bb30e4da160737. GitHub Actions API showed zero workflow_dispatch runs on main before this retry boundary. The corrected operator adds explicit BEGIN/PASS/STOP markers around Go download/checksum/extract/version/build and gh token export/install/env/attestation, requires root services active but not boot-enabled, requires all nine v3 class controllers inactive and not enabled, rejects canary-specific authority/transaction residue while allowing the already-consumed Input #2 root activation record, checks zero prior migration-canary runs, and deliberately removes stale workspace-control v3 credential staging before recreating it. LIVE INPUT #3 RETRY 2026-10-31 ~20:29 America/New_York: operator f7ac4e66313928c2f6d334a446bb30e4da160737 re-proved reconciler/provisioner active+disabled, all nine v3 class controllers inactive+disabled, legacy Research GPU inactive, no ACTIVATE_ONE_V3_CANARY consumption, and no canary transaction receipt. It then failed at CANARY_RUN_HISTORY_CHECK because the installed Lambda gh CLI rejected `gh run list --event`; explicit terminal marker STOP_CANARY_RUN_HISTORY_QUERY_FAILED rc=1. No authority was created, no generation-exclusion transaction began, no v2 controller was stopped, no v3 class controller was started, no credential staging was reached, and no canary workflow was dispatched. REST-COMPATIBLE CORRECTION: exact substantive head 2480a1321ebf65a13d77d7d31443314fbfb95cd2, script blob 1b36bd64311fc7e45f56909a356c41a856fb0f85, Validation #1367/run 41257124698 SUCCESS. The operator now resolves the exact workflow ID with gh api, uses workflow-scoped REST run queries, dispatches via POST /actions/workflows/{id}/dispatches, polls terminal state via GET /actions/runs/{id}, and cancels via POST /actions/runs/{id}/cancel. No `gh run` or `gh workflow run` subcommand remains. LIVE INPUT #3 RETRY 2026-10-31 ~20:38 America/New_York: exact prior head 2480a1321ebf65a13d77d7d31443314fbfb95cd2 reached substantially farther. It proved root/class state, no canary authority consumption, no transaction receipt, resolved exact workflow id 401444238, proved zero prior canary runs, verified installed generation and exact transaction helper, verified/downloaded Go 1.26.3, built v3-canary-preflight successfully, and reset stale v3 workspace-control credential staging. It then emitted STOP_GH_AUTH_TOKEN_EXPORT_FAILED rc=1 at `gh auth token`; therefore no credential was installed, no canary authority created, no generation exclusion began, and no workflow was dispatched. LEGACY TOKEN EXPORT CORRECTION: exact head 92cbea0e71b3992f9a399b388a1884bbd3ce13a8, script blob 44ce0c0edc07b67354b0e7abafc0fa1b01353911, Validation #1370/run 41257730195 SUCCESS. Fallback captures `gh auth status --hostname github.com --show-token` entirely to a private temp file, parses exactly one unmasked Token value without logging it, verifies it via GH_TOKEN-scoped `gh api user` requiring adamtrott78, then proceeds with existing root-owned credential staging. LIVE INPUT #3 RETRY 2026-10-31 ~20:44 America/New_York: current validated head fcc925a43449f12c402de60fa7257498f3a9a3f1 repeated all pre-transaction proofs, built the v3 canary preflight binary successfully, reset credential staging, then `gh auth token` failed rc=1 and the legacy `gh auth status --show-token` capture contained no uniquely parseable unmasked token, producing STOP_GH_AUTH_STATUS_TOKEN_PARSE_FAILED. No credential install, canary authority, generation exclusion, controller mutation, or workflow dispatch occurred. A direct post-failure `gh api user --jq .login` returned adamtrott78 with rc=0, proving the stored credential is valid and narrowing the blocker to CLI token export. Operator decision: update gh from GitHub's official Debian/Ubuntu repository/keyring before the next Input #3 retry rather than adding further legacy credential-scraping logic. GH CLI UPGRADE 2026-10-31 ~20:50 America/New_York: operator upgraded Lambda host gh from 2.4.0+dfsg1 (Ubuntu package) to GitHub official 2.103.3 via the official apt repository/keyring. Post-upgrade `gh api user --jq .login` returned adamtrott78 and `gh auth token >/dev/null` succeeded, conclusively clearing token-expiry and raw-token-export concerns. No v3 migration authority, controller state, or workflow execution was changed by this tooling upgrade. LIVE INPUT #3 RETRY 2026-10-31 ~20:52 America/New_York: after upgrading gh to 2.103.3, the operator again proved all preflight invariants, built v3-canary-preflight successfully, reset credential staging, and reached V3_WORKSPACE_CONTROL_GH_TOKEN_VERIFY=BEGIN. It then emitted STOP_GH_AUTH_TOKEN_VERIFY_FAILED rc=1. No token/env credential was installed and no canary authority, generation exclusion, controller mutation, or workflow dispatch occurred. Root cause was identified in the script: `tr -d '\\\\r\\\\n'` contained doubled backslashes and therefore did not strip CR/LF before GH_TOKEN reinjection; the legacy fallback regex also had doubled backslashes. CORRECTION: exact head e8d879305ce8d016b06903cf3dc839861fe0e228, script blob 131b47b36cf3e5350a38e2a34f4614a40822fb09, Validation #1375/run 41258778360 SUCCESS. The verifier now uses `IFS= read -r EXPORTED_TOKEN`, verifies through GH_TOKEN, unsets the secret, and CI rejects the old escaping forms. INITIAL V3 LIVE PROOF ACCEPTED 2026-10-31 ~22:15 America/New_York: exact controller/source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa passed Validation #1398/run 41262210278, was installed as the active controller override, and then successfully executed the third workspace-control-control-small-v1 generation-exclusion canary. GitHub run 41264356722/job 124723948506 completed success. Operator terminal markers: CANARY_TERMINAL=PASS status=completed conclusion=success; V3_CANARY_ROLLBACK=PASS; GENERATION_EXCLUSION_ROLLBACK=PASS; POST_CANARY_ROOT_SERVICES=ACTIVE; POST_CANARY_V3_CLASS_CONTROLLERS=INACTIVE; RESEARCH_GPU_CONTAINMENT=PRESERVED; CANARY_RESULT=SUCCESS; TERMINAL_INPUT_3=PASS; INITIAL_V3_LIVE_PROOF=COMPLETE. The successful protocol uses positive class maxCapacity with REST whole-set attestation for identity-incomplete GitHub.com assigned demand; standalone JobAssigned remains non-authoritative.\n\n2026-11-01 WORKSPACE SHELL SEQUENCING UPDATE: Workspace Shell live commissioning succeeded at exact operator/runtime head 01a95b61410e2f427b9885a19e6a0b9c5ee60a38, Validation #1463/run 41273806752, including LOCAL_MTLS_HEALTH, real LOCAL_MCP_INITIALIZE, PRE_TUNNEL_LOCAL_MTLS_RECHECK, TUNNEL_READY, and SERVICES_ACTIVE_BOOT_DISABLED. The GitRunner task remains parked after the already accepted workspace-control-control-small-v1 first canary. Do not repeat Input #1/#2 or that canary. Complete ChatGPT-side Workspace Shell acceptance first; then prefer Workspace Shell over manual terminal relay for the next target padataset-cpu-public-v1. This update does not authorize any new runner class, Research CPU, Research GPU-derived class, or Research Engine producer cutover.\\n\\n2026-11-01 PRIORITY UPDATE: Operator explicitly chose completion of GitRunner v3 active-fleet migration and retirement of v2 as the main infrastructure priority. This changes sequencing, not authority: no new canary/cutover authority is inferred. Broad v2 rehabilitation is out of scope; only minimal safe drain/containment work should be done before remaining active-class canaries and the one-generation production cutover.\\n\\n2026-11-02 POWER-LOSS / HANDOFF UPDATE: the legacy workspace-control v2 stuck-lane incident is no longer the migration blocker. Old scale set 1 was replaced by clean scale set 3; a one-shot recovery probe proved route/controller serviceability; broad v2 environment rehabilitation remains out of scope. Power loss exposed two recovery-plane lifecycle defects: Workspace Shell lost /run/workspace-shell-control because its tmpfiles rule was not persistent (manually recovered; PR #592 proposes persistent tmpfiles + boot enablement), and v3 root services remained intentionally boot-disabled. Fresh v3 root reactivation then exposed a repository design bug: accepted controller-refresh override bytes were treated as base-manifest drift. Refresh-aware correction at 74c027df26253c9836f23240f7456623a5979859 is CI green, but its live helper updater failed closed on installed helper metadata mismatch before mutation. NEXT executor must reconcile that exact helper prestate, not bypass it. After v3 roots recover, continue PADataset CPU -> PADataset GPU -> single production cutover -> v2 retirement. This GitRunner task is only the current P0 substrate gate; the larger workspace-semantic-execution-migration-v1 umbrella must resume afterward.\\n\\n2026-11-02 ROOT-REACTIVATION HELPER CONTRACT UPDATE: exact corrective head cb6520c5855a7a8b4175411d1eaccff6bde626c5 passed Workspace Control Validation 41407560030. The prior updater incorrectly required mode 0755 even though the inactive installer manifest stages the helper at 0555; the correction derives metadata/digest from the immutable manifest and adds a narrow active helper override attestation so refreshed helper bytes remain verifiable without rewriting the base manifest. A temporary diagnostic Lambda run 41407093346 remains queued and currently perturbs the already-spent legacy recovery lane; cancel it before further live mutation and re-observe host cleanup. Workspace Shell still lacks standing privileged helper authority for this root bootstrap, so live helper installation remains an operator root gate.\\n\\n2026-11-02 DIAGNOSTIC CLEANUP UPDATE: temporary diagnostic run 41407093346/job 125151483128 was cancelled. Fresh Workspace Shell logs and diagnose receipt 6571796799 prove total_assigned_jobs=0, reconstructable_jobs=0, active_project_units=[], reset_pending=[], recovery_state_conflict=false, active_count=0, pending_count=0. The historical assignment-divergence quarantine remains only as provenance. The next live action is the validated transactional helper update plus a fresh exact-bound ACTIVATE_V3_ROOT_SERVICES root transaction; this remains operator-only because the current Workspace Shell privileged helper registry is empty and external approval cannot be minted by ChatGPT.\\n\\n2026-11-02 BOUNDED ROOT RECOVERY WRAPPER: scripts/lambda_ci_v3_post_outage_root_recovery_v1.py at exact head 675f8772e081052289641211691caeebe6b9f76a passed Workspace Control Validation 41408493173. It reduces the remaining operator intervention to one reviewed root transaction: validated helper update -> fresh exact-bound ACTIVATE_V3_ROOT_SERVICES receipt -> installed activator. It does not use direct systemctl or any class/workflow/v2 authority. Workspace Shell cannot perform this transaction yet because its live privileged-helper registry remains empty and approval signatures are external.\\n\\n2026-11-02 RESEARCH GPU REBOOT CONTAINMENT DRIFT: the first bounded post-outage root activation installed the refreshed helper successfully, then failed closed because legacy workspace-ci-controller@research-engine-gpu.service had rebooted active/running and enabled. Diagnose receipt 6571931973 proves no active Research execution units and no active/pending runner units. The activator checks containment before consuming authority, so the failed attempt did not consume its authority or partially start v3 roots. Exact recovery head ff56679982bc290842a95436ae24adfd568e8c56 / Validation 41409276446 adds a narrow root transaction that stops+disables only that exact legacy Research GPU controller, persists containment evidence, mints a fresh ACTIVATE_V3_ROOT_SERVICES authority, activates the installed v3 roots, and post-attests containment plus root health.\\n\\n2026-11-02 V3 RECONCILER START FAILURE / VERIFIER STACK FIX: after Research GPU containment repair succeeded, root activation consumed fresh authority e6672492-83c8-467f-9d78-9036626df9e4 and attempted to start workspace-ci-v3-reconciler.service. The service failed because the installed reconciler's legacy verify_installed() rejected the already-accepted controller override as base-manifest digest drift. Provisioner never started; Workspace Shell observed reconciler failed and provisioner inactive. Research GPU remained inactive+disabled, independently proved by diagnose receipt 6572100953. Exact corrected head ab616b27d0cf0939d7dc0a227fdc188656e8c749 / Validation 41410555713 makes the reconciler itself override-aware, extends root activation effective-generation verification to the reconciler override, and adds a two-file transactional verifier-stack live updater invoked before a new root authority is minted.\\n\\n2026-11-02 ROOT RECOVERY ACCEPTED / FALSE-NEGATIVE WRAPPER: authority cbada5b8-4a9d-4a61-bae2-1cfc621a0960 successfully activated the v3 roots after verifier-stack refresh. The wrapper then emitted ERROR solely because it modeled both services as long-running. workspace-ci-v3-reconciler.service is deliberately Type=oneshot with RemainAfterExit=yes, so healthy state is active/exited; independent logs show V3_INSTALLED_GENERATION_VERIFY=PASS. Provisioner is active/running. Fresh diagnose 6572239135 proves Research GPU inactive+disabled and no active execution units. No root rerun is required. Correction f8057d2925a329b773b312b62e897e4830e9d54c / Validation 41411117818 fixes oneshot attestation and suppresses sudo-owned repo pycache via python -B. Next live class is padataset-cpu-public-v1 under a fresh separate canary authority.\\n\\n2026-11-02 PADATASET CPU CANARY PREP: root recovery is fully accepted; no rerun needed. Exact generated PADataset CPU canary workflow blob f42c165ef6dc658f026976984c87d2eb28f5cd17 is staged only in draft PR adamtrott78/PADataset#3 at head dfc739e1ed275cf4bff3a5f3038ff1089b3bd739. New dedicated operator head 97cb93f3b46adea0a710717caeb84ef7999f6fcd / Validation 41411615725 decouples operator maintenance commits from the accepted controller/canary source head 3e8a231483413ba3a16d405ba61b55d0ab9ff3aa, pins exact transaction-helper/workflow blobs, uses PADataset-scoped credentials, and creates no canary authority until the exact workflow blob is observed on PADataset main. Default-branch placement is now the real repository-authority gate.\\n\\n2026-11-02 PADATASET CPU DEFAULT-BRANCH GATE SATISFIED: operator explicitly authorized merge of PADataset PR #3. GitHub merge used expected head dfc739e1ed275cf4bff3a5f3038ff1089b3bd739 and produced squash commit 12d8ad19d14f2ab42474e159f958060f3050cf1e. Post-merge main attestation shows exact generated workflow blob f42c165ef6dc658f026976984c87d2eb28f5cd17. No live canary dispatch or authority was consumed. Next gate is one operator-root invocation of the already-validated PADataset CPU canary script.\n\n2026-11-02 PADATASET CPU PRE-AUTHORITY STOP: canary attempt safely stopped during controller override binding because controller-refresh retained a stale duplicate non-controller base verifier and rejected the legitimate reconciler override. No canary authority, generation-exclusion transaction, or workflow dispatch occurred. Fix eae9ba119ace3fc1acba4642c577c1454a03a064 / Validation 41413372028 makes reconciler.verify_installed() the single source of installed-generation truth while preserving controller-specific provenance checks.\n\n2026-11-02 MANUAL-STOP RECOVERY: live CPU retry transaction b899379d-7e33-4b28-90db-10fbbcc8d24b was interrupted before rollback completed. Explicit recovery later returned V3_CANARY_ROLLBACK=PASS and GENERATION_EXCLUSION_RECOVERY=PASS. Run 41415414390 is cancelled. Post-recovery v2 CPU controllers are restored, roots healthy, Research GPU containment preserved. Root cause of queueing: v3-canary-preflight created/checked the target scale set under workspace-control instead of PADataset. Fix e5a44edfd22a62b05cf730cf918b6e8aa7d534a2 / Validation 41416385648 makes target repository explicit and operator-bound.\n\n2026-11-02 STALE V3 RESTART RACE RECOVERY: a retry stopped before authority creation because the prior PADataset v3 class unit resurfaced after initial inactive preflight. Root cause: rollback conditionally stopped the target only when `systemctl is-active` returned true; a Restart=on-failure unit in activating/auto-restart could be missed between attempts. Hardened helper 2af7c8bba198b5b0e58ede6f8d34d0b64c8ed0af unconditionally stops the target during rollback, and operator preflight rejects activating/auto-restart states. Operator pin head dce2327105a886cca78473dbec355c9e6b3610bc passed Validation 41417808454 SUCCESS. User replayed the old transaction receipt with the hardened helper and received V3_CANARY_ROLLBACK=PASS / STALE_V3_CONTROLLER_RECOVERY=PASS. Independent v2/root/Research-GPU poststate checks are clean.\n\n2026-11-02 PADATASET CPU V3 CANARY ACCEPTED: operator f0653307902b324692f8524a843bed55f30428c2 passed all preflights including corrected owning-repository target-scale-set attestation, minted a fresh authority, dispatched PADataset run 41418580438, and the immutable envelope verification job completed SUCCESS. Rollback correctly waited for the just-completed v3 runner/supervisor transient units to disappear, then restored v2 and produced full terminal acceptance. Independent GitHub and maintenance/root evidence confirms a clean poststate. Do not repeat CPU; next live class is padataset-gpu-single-public-v1.\n\n2026-11-02 PADATASET GPU STAGING: after CPU acceptance, draft PR #4 was created in PADataset from main 12d8ad19d14f2ab42474e159f958060f3050cf1e. PR head 0b7a1884c4a60046ce220f04f20b5e4ecdb598eb stages only the migration-only GPU canary workflow; exact blob 9311657f079aa1894d16d5e83ed0b18a813af487. No GPU authority or dispatch has occurred. Default-branch merge is an explicit gate.\n\n2026-11-02 PADATASET GPU DEFAULT-BRANCH + OPERATOR READY: user explicitly authorized PR #4 merge. PR #4 squash-merged to PADataset main d214b20471aac348bd28802596b92f81ee146b76; exact GPU canary workflow blob on main is 9311657f079aa1894d16d5e83ed0b18a813af487. Workspace-control head 8b5afb6a77ae3347300904c4e410a8ce5ede1ecd adds the bounded GPU live operator and regression test; Validation 41419981224 SUCCESS. No GPU authority or dispatch has occurred.\n\n2026-11-02 PADATASET GPU CANARY #1 + LIVE RUNTIME REFRESH: GPU canary #1 used transaction f974ebde-388f-4d7b-a235-d41469134dfc and PADataset run 41420426352 / job 125194478681. The correct GPU runner/class launched and GPU/network/resource checks passed; the immutable probe failed only forbidden_path_0/_3/_4/_5 because the GPU runtime hard-coded only the two Docker socket denies instead of the full root-authored forbidden_paths contract. The canary rolled back cleanly and is NOT accepted. Fix/runtime live-updater head e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15 passed Validation 41422523326. Operator then executed the transactional runtime updater successfully: V3_RUNTIME_LIVE_UPDATE=PASS, runtime SHA256 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da, runtime override /var/lib/workspace-ci/v3/runtime-refresh/active.json, update receipt /var/lib/workspace-ci/v3/migration/runtime-live-update-e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15/receipt.json, PROVISIONER_RESTART=PASS, RESEARCH_GPU_CONTAINMENT=PRESERVED. No second GPU authority or retry has occurred.\\n\\n2026-11-02 GPU #2 PREFLIGHT OPERATOR CORRECTION: fresh continuation independently accepted task-sync validation 41423303504 at f6cf91686e9bae73167bf35e4ae674e320199e33, re-attested PADataset main/workflow blob and live v2/Research-GPU state, then found the GPU retry operator duplicated padataset-gpu-single-public-v1 and omitted padataset-cpu-public-v1 from its all-class inactive preflight. Exact correction head 56e5976597b0d1523ead6a11cdfe6f8a9d23dda0 passed Workspace Control Validation 41424882222. The corrected operator checks all nine classes exactly once and, before authority creation, binds the installed runtime bytes plus active runtime override and transactional update receipt to e1a2d44bf24a3a7bf53d77baf0fc6170e4af0f15 / 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da. Fresh maintenance receipts 6574183090/6574183720/6574184355 show PADataset CPU/GPU lanes healthy and Research GPU inactive+disabled with no active/pending/reset conflict. No GPU #2 authority or dispatch occurred.\\n\\n2026-11-02 PADATASET GPU #2 + PRODUCTION CUTOVER IMPLEMENTATION: PADataset GPU canary #2 run 41425633192/job 125211444476 succeeded with immutable probe failures=[] and clean rollback/containment. Fresh post-canary receipts 6574390911/6574391523/6574392119 confirmed PADataset v2 restoration and Research GPU containment. Repository implementation head 602ff543a122038870598915f669d9f9bd5a9f6a passed Workspace Control Validation 41428557221/job 125221070190. Production design now has exact root-attested managed-policy overrides, a reconciler-only live verifier updater, transactional all-v2 generation exclusion with accepted-only v3 activation, exact workflow/runner validation binding, and fail-closed v3 isolation before rollback. Fresh Research CPU diagnose 6574593603 proves its v2 controller is currently active+enabled; successful generation cutover intentionally leaves it inactive/disabled and separately gated while preserving its scale set and exact rollback prestate. No production workflow has been retargeted, no production cutover authority has been minted, and no live production v3 class is active.\\n\\n2026-11-02 PRODUCTION CUTOVER ATTEMPT #1 FAILED ON DURABLE LEDGER GENERATION BINDING: transaction c4c11247-0883-4eab-91fd-3b5306b23de6 reached v3 production activation, but first workspace-control validation run 41466656949/job 125349219134 stayed queued because the workspace-control-control-small-v1 controller crash-looped on terminal canary ledger record runner_request_id=124723948506 carrying the prior controller-policy digest. Old production workflow blobs have been restored and the queued run cancelled, but the root rollback is not yet terminal at latest observation. Exact fix head 467b8fb136d71448f7b44788200afca6c9673e32 / Validation 41469850886 SUCCESS changes only generation-boundary semantics: terminal prior-policy history is inert, nonterminal mismatches remain fatal; production preflight rejects any nonterminal durable ledger before authority. The production operator now pins the accepted reconciler refresh separately and requires a controller override from the current operator head. Do not retry until the existing transaction is fully rolled back.\\n\\n2026-11-02 CONTROLLER REFRESH PRE-MUTATION FAILURE AND FIX: after production attempt #1 was fully rolled back to ROLLED_BACK_LEGACY_RESTORED and legacy lanes were independently verified restored, controller refresh from 6512f7126e2ba71304f79097c4e249a732e6f934 failed in _stage_candidate before any live write because compare_manifests_for_controller_only_refresh compared candidate non-controller artifacts to the original base manifest rather than the already-authorized effective installed generation. Runtime override e1a2d44... therefore appeared as forbidden drift despite shared reconciler verification accepting it. Exact fix head 40d2004ab58b7027a604f4462ef8f06b1cf7c92a / Validation 41479699726 SUCCESS now snapshots exact effective managed bytes only after reconciler.verify_installed and requires candidate equality for every non-controller artifact. No live controller binary mutation occurred in the failed attempt.\\n\\n2026-11-02 V3 PRODUCTION CUTOVER ACCEPTED: exact PR #572/source head 78ae60364f472fd30654dd9018c90c546e3e8836 completed production generation cutover. Workspace Control run 41504458922/job 125480061499, PADataset CPU run 41504979316/job 125481849777, and PADataset GPU run 41505174483/job 125482508067 all completed SUCCESS. Post-validation resource drain passed; V3_PRODUCTION_COMMIT=PASS; generation SHA256 5428c437e9724055b3a0da18d1aa81642e8c544869317abb340434e9e349722f; transaction /var/lib/workspace-ci/v3/migration/358b3fb9-f702-401e-b6bd-69d8c89f3488/transaction.json; V3_PRODUCTION_CUTOVER_ACCEPTED=PASS. Fresh maintenance receipts 6586186979/6586188452/6586190265/6586192401/6586194095 independently show every legacy v2 lane inactive/dead+disabled with no active project units; Research GPU remains contained. Next transition is bounded legacy scale-set retirement while preserving old v2 bytes/config/state for the rollback window.\\n\\n2026-11-02 LEGACY RETIREMENT SCOPE CORRECTION: migration-plan legacy_retirement requires target v3 route/class acceptance per scale set. Production cutover accepted only workspace-control-control-small-v1, padataset-cpu-public-v1, and padataset-gpu-single-public-v1. Therefore only legacy scale sets lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu are eligible for physical retirement now. lambda-research-engine and lambda-research-engine-gpu remain preserved because all Research v3 classes are intentionally inactive/unaccepted. Retirement implementation writes a root-owned rollback-window receipt before deletion, requires TotalAvailableJobs/TotalAcquiredJobs/TotalAssignedJobs/TotalRunningJobs/TotalRegisteredRunners/TotalBusyRunners all zero, preserves v2 bytes/config/state, and supports resume after partial remote mutation.\\n\\n2026-11-02 LEGACY RETIREMENT IMPLEMENTATION VALIDATED: exact head 216cab36a2d71c57d6669fe851e3da3b4a152644 passed Workspace Control Validation 41512118129 SUCCESS. The helper is root-only, binds the committed production transaction, requires exact post-commit systemd state, checks all six scale-set statistics at zero, writes a root-owned rollback-window receipt before remote deletion, supports resumable partial retirement, deletes only the three production-accepted legacy scale sets, and preserves both Research legacy sets plus all v2 bytes/config/state.\\n\\n2026-11-02 LEGACY RETIREMENT FRESH-PROCESS VERIFY VALIDATED: exact head 8129291a59be2b25fa837c81091a0d7d8cac3387 passed Workspace Control Validation 41512744850 SUCCESS. The root helper now supports a separate verify-receipt process that re-binds the committed production transaction, root-owned completed receipt, systemd post-commit state, absence of all three retired legacy names, and continued presence of the exact accepted v3 target scale-set IDs. Fresh maintenance receipts 6586820691/6586822452/6586824224/6586826239/6586828148 show all five v2 controllers inactive/dead+disabled with active_project_units=[] immediately before the retirement gate.\\n\\n2026-11-02 LEGACY RETIREMENT ACCEPTED / TASK COMPLETE: user executed exact validated retirement helper head 8129291a59be2b25fa837c81091a0d7d8cac3387. All six pre-delete scale-set counters were zero for lambda-workspace-control, lambda-padataset, and lambda-padataset-gpu. Root-owned rollback-window receipt /var/lib/workspace-ci/v3/legacy-retirement/fb427e98-2eaf-45d9-8392-e8f0757b8142/receipt.json was persisted before deletion. Live retirement removed lambda-workspace-control id=3, lambda-padataset id=2, and lambda-padataset-gpu id=1. Fresh-process verification then proved those three names absent and exact accepted targets lambda-workspace-control-control-small id=2, lambda-padataset-cpu-public id=3, and lambda-padataset-gpu-single-public id=4 still present. RESEARCH_LEGACY_SCALE_SETS_PRESERVED=PASS and LEGACY_BYTES_CONFIG_STATE_PRESERVED=PASS. The GitRunner v3 production migration gate is complete for the accepted scope; resume workspace-semantic-execution-migration-v1 now."
+}

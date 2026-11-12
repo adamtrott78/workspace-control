@@ -32,6 +32,8 @@ OWNER_LOGIN = "adamtrott78"
 P1_RESET_PROJECT = "workspace-control"
 P1_RESET_LANE = "cpu"
 P1_PILOT_WORKFLOW_ID = "lambda-ci-workspace-control-validation.yml"
+P1_PILOT_JOB_PREFIX = "wc-admission-v1|workload=control-validation|"
+P1_PILOT_REQUEST_PREFIX = "request=/workspace-control-validate "
 MAINTENANCE_POLICY_GENERATION = "workspace-ci-maintenance-p1-v1"
 UUID_NAMESPACE = uuid.UUID("450ecef9-fbb0-5cf8-a216-60d6f28f5c5c")
 PROJECT_RE = re.compile(r"^[a-z][a-z0-9-]{1,20}$")
@@ -344,13 +346,96 @@ def invoke_scale_set_helper(
     return response
 
 
+def _normalize_github_time(value: str) -> str:
+    # Controller quarantine receipts are written by Go and may contain RFC3339
+    # timestamps with nanosecond precision, while the deployed Python runtime
+    # accepts only microsecond precision. Normalize only the fractional
+    # precision and RFC3339 Z suffix; preserve the exact wall-clock second and
+    # timezone offset used for the fail-closed replacement-run boundary.
+    match = re.fullmatch(
+        r"(?P<base>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})"
+        r"(?:\.(?P<fraction>\d+))?"
+        r"(?P<zone>Z|[+-]\d{2}:\d{2})",
+        value,
+    )
+    if match is None:
+        return value.replace("Z", "+00:00")
+
+    fraction = match.group("fraction")
+    zone = "+00:00" if match.group("zone") == "Z" else match.group("zone")
+    normalized = match.group("base")
+    if fraction is not None:
+        normalized += "." + fraction[:6]
+    return normalized + zone
+
+
 def _parse_github_time(value: Any, label: str) -> datetime:
     if not isinstance(value, str) or not value:
         raise MaintenanceControllerError(f"{label} timestamp is missing")
+
+    normalized = _normalize_github_time(value)
     try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        return datetime.fromisoformat(normalized)
     except ValueError as exc:
         raise MaintenanceControllerError(f"{label} timestamp is invalid") from exc
+
+
+def _run_has_live_p1_pilot_job(
+    client: GitHubClient,
+    run: dict[str, Any],
+) -> bool:
+    run_id = run.get("id")
+    if not isinstance(run_id, int) or run_id <= 0:
+        raise MaintenanceControllerError("pilot workflow run id is invalid")
+
+    # The pilot workflow is triggered for every issue comment, including the
+    # maintenance command that invokes reset-stale. Only comments beginning
+    # /workspace-control-validate actually create runner demand. Classify the
+    # run from its rendered job name so the maintenance command cannot block
+    # itself while GitHub is finalizing the skipped job.
+    jobs_path = (
+        f"/repos/{SOURCE_REPOSITORY}/actions/runs/{run_id}/jobs"
+        "?filter=all&per_page=100"
+    )
+    for poll_attempt in range(3):
+        payload = client.get_json(jobs_path)
+        jobs = payload.get("jobs") if isinstance(payload, dict) else None
+        if not isinstance(jobs, list):
+            raise MaintenanceControllerError("pilot workflow job list is invalid")
+
+        saw_classifiable_job = False
+        for job in jobs:
+            if not isinstance(job, dict):
+                raise MaintenanceControllerError("pilot workflow job entry is invalid")
+            name = job.get("name")
+            if not isinstance(name, str):
+                continue
+            if not name.startswith(P1_PILOT_JOB_PREFIX):
+                continue
+
+            saw_classifiable_job = True
+            if P1_PILOT_REQUEST_PREFIX in name:
+                return True
+
+            # A false job-level condition leaves the expression text unresolved
+            # and completes as skipped. That path has no runner demand.
+            if (
+                "${{ github.event.comment.body }}" in name
+                and job.get("status") == "completed"
+                and job.get("conclusion") == "skipped"
+            ):
+                return False
+
+        if saw_classifiable_job:
+            raise MaintenanceControllerError(
+                "nonterminal pilot workflow job could not be classified"
+            )
+        if poll_attempt < 2:
+            time.sleep(0.5)
+
+    raise MaintenanceControllerError(
+        "nonterminal pilot workflow run has no classifiable job"
+    )
 
 
 def assert_no_replacement_runs(
@@ -402,6 +487,8 @@ def assert_no_replacement_runs(
                     "workflow run attempt is invalid"
                 ) from exc
             if created > cutoff or (attempt > 1 and updated > cutoff):
+                if not _run_has_live_p1_pilot_job(client, run):
+                    continue
                 raise MaintenanceControllerError(
                     "replacement pilot workflow run is still non-terminal: "
                     f"id={run.get('id')} status={run.get('status')}"
@@ -411,7 +498,6 @@ def assert_no_replacement_runs(
     raise MaintenanceControllerError(
         "pilot workflow run pagination exceeded fail-closed bound"
     )
-
 
 def require_policy_digests(
     root_receipt: dict[str, Any],

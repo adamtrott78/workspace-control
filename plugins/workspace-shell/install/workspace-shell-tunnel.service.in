@@ -1,0 +1,42 @@
+[Unit]
+Description=Workspace Shell dedicated OpenAI Secure MCP Tunnel
+After=network-online.target workspace-shell-mcp.service
+Wants=network-online.target
+Requires=workspace-shell-mcp.service
+
+[Service]
+Type=simple
+User=workspace-shell-tunnel
+Group=workspace-shell-tunnel
+SupplementaryGroups=
+ExecStart=/opt/workspace-shell/bin/tunnel-client run --profile workspace-shell-production --profile-dir /etc/workspace-shell/tunnel-client-profiles --health.url-file /var/lib/workspace-shell/tunnel/health.url
+Restart=on-failure
+RestartSec=2s
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+ProcSubset=pid
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadOnlyPaths=/etc/workspace-shell/tunnel /etc/workspace-shell/tunnel-client-profiles /opt/workspace-shell
+ReadWritePaths=/var/lib/workspace-shell/tunnel
+InaccessiblePaths=/root /home /run/workspace-shell-control /srv/workspace-shell /var/lib/workspace-shell/receipts /var/lib/workspace-shell/jobs /var/lib/workspace-shell/replay /var/lib/workspace-shell/helper-cache
+TasksMax=32
+MemoryMax=128M
+
+[Install]
+WantedBy=multi-user.target
