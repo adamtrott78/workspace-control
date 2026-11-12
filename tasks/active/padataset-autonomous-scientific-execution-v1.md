@@ -13,7 +13,6 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Title: PADataset autonomous scientific execution v1
 - Status: IN_PROGRESS
 - Capsule schema: v2
-- Current stage: scientific_activation_validation
 
 ## Goal
 
@@ -37,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Exact-head validate the corrected clean main-based PR head. If PASS, mark the clean implementation verified, promote through PR #613 to main, verify production reconciliation, then refresh Workspace Shell trusted authority once to the final promoted task state.
+Validate the schema-normalized clean main-based PR head. If the normal PR validation passes, trigger and follow one exact /workspace-control-validate request for that same immutable head. Promote only after both gates pass.
 
 ## Remaining work
 
