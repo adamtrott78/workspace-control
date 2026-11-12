@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-First live proof only: issue exactly one non-destructive /lambda-scientific smoke request through the trusted PADataset workflow, bound to the current exact scientific workflow blob e70412f3ccdc70826f56f7ba0255518f1f95224f, runtime padataset-dnns-v1, runtime tree 6922847a7ea87c318a36e1fd2cd3af5283e768ff06de90c4cb2558ea0d48cdaa, data profile ota_core_high_run01_len16384_v1 digest a76730a886909f9896e7cb7e9d1aede3d2301240f9ce08a4080e24d637406bf5, scale-set id 5, and exact candidate PR head. The smoke must import torch, verify exactly one authorized GPU, load the frozen Stage03 config, write only a tiny bounded artifact, perform no training, and end with zero assigned/running jobs, no transient residue, and runtime-integrity PASS before any training smoke is authorized.
+Operator live workflow-refresh gate: using exact reviewed workspace-control main 8208827862079b0a63719b427c76063d79358345, create a fresh root-owned 0600 workflow-refresh preflight proving PADataset main a7e3eb3718820f6fa3183ebc6b8990da2b49f61f, workflow blob 4cf390ec334b0569dbfc2399ff86c2d892f97586, zero active scientific workflow runs, scale-set id 5 assigned=0/running=0, and no local scientific ledger/provisioner/transient residue. Then create a separate one-shot REFRESH_PADATASET_SCIENTIFIC_WORKFLOW_V1 authority bound to the exact current scientific active receipt, preflight, old/new workflow blobs, current/new target controller-policy digests, and target class. Invoke scripts/lambda_ci_v3_padataset_scientific_workflow_refresh_v1.py. Require COMMITTED_ACTIVE_WORKFLOW_REFRESH, target controller active/running/enabled, shared provisioner preserved, and every non-target controller snapshot unchanged. Only after that commit, issue exactly one `/lambda-scientific 71ef2e5f72608737628164ed99be66e05d17e713 smoke` comment on PADataset PR #16.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ First live proof only: issue exactly one non-destructive /lambda-scientific smok
 
 ## Blockers / gates
 
-- No activation blocker remains: the dedicated scientific class/route are live. The next safety gate is the non-destructive first-live scientific smoke; do not jump directly to training.
-- Live Workspace Shell trusted task authority still does not include padataset-autonomous-scientific-execution-v1, so privileged Workspace Shell helpers remain unavailable for this task until a later explicit authority refresh.
+- The live scientific controller still trusts predecessor workflow blob e70412f3ccdc70826f56f7ba0255518f1f95224f while PADataset default branch now serves reviewed replacement blob 4cf390ec334b0569dbfc2399ff86c2d892f97586; admission therefore remains intentionally fail-closed until the one-shot root workflow-refresh transaction commits.
+- Live Workspace Shell trusted task authority still does not include padataset-autonomous-scientific-execution-v1, so the root-owned live workflow refresh requires the operator to invoke the reviewed helper with sudo.
 
 ## Fresh-chat initialization
 
