@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Read-only controller-binary provenance gate only. On Lambda, read /etc/workspace-ci/v3/install-manifest.json source_head and controller entry digest; hash /opt/workspace-ci/v3/controller/lambda-ci-controller-v3; read /var/lib/workspace-ci/v3/controller-refresh/active.json if present; then reproducibly build controller/lambda-ci-controller/v3 from exact reviewed source 59ca152a497300e2f8854145860c7bb4313ff739 using pinned Go 1.26.3 -mod=readonly -trimpath and compare its SHA-256 to the installed binary. If the installed binary does not match either the base manifest or an active controller-refresh receipt/source build, fail closed. If it matches an older valid override whose source predates the required revival behavior, implement a transactional live controller-binary refresh that quiesces the currently-active controller set, preserves root services and controller topology, and then allows the existing queued scientific job to revive without retrigger.
+Wait only for the already-issued authoritative Lambda CI Workspace Control Validation #484 / job 131520720719 on PR #622 exact head ae38809ce9b78facebe0565f254ef72c33112f19. If SUCCESS, merge PR #622, record the merge head, and prepare a fresh root-owned one-shot REFRESH_V3_CONTROLLER_BINARY_LIVE_V1 transaction bound to the exact currently installed controller SHA 01c5589c1fd38f2879f7c3688c7e45d2427079f5e7d061402768284164b29728, current controller-refresh receipt/source 78ae60364f472fd30654dd9018c90c546e3e8836, base manifest/root-policy identities, and freshly built reviewed candidate controller SHA. Execute the merged live repair only after proving no active provisioner hold/transient. After commit, do not retrigger scientific demand; monitor existing run 43293735325/job 131446381843 for terminal REST revival.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Read-only controller-binary provenance gate only. On Lambda, read /etc/workspace
 
 ## Blockers / gates
 
-- Need read-only proof of the installed v3 controller binary provenance: base install-manifest source_head/controller digest, active controller-refresh receipt if present, actual installed controller SHA-256, and SHA-256 of a fresh Go 1.26.3 build from reviewed source 59ca152a497300e2f8854145860c7bb4313ff739. Do not refresh controller binary until this mismatch is proven.
-- Do not issue another /lambda-scientific comment, restart the scientific controller, edit its ledger, or mutate scale-set state. Existing run 43293735325/job 131446381843 remains the sole demand.
+- Authoritative self-hosted Validation #484 for PR #622 exact head ae38809ce9b78facebe0565f254ef72c33112f19 is queued. Do not merge or execute the live controller repair until it succeeds.
+- Do not issue another /workspace-control-validate command, another /lambda-scientific comment, restart a controller, edit ledger state, or alter scale-set state.
 
 ## Fresh-chat initialization
 
