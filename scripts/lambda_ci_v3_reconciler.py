@@ -99,6 +99,19 @@ PADATASET_SCIENTIFIC_DATA_PROFILE = "ota_core_high_run01_len16384_v1"
 PADATASET_SCIENTIFIC_DATA_DIGEST = (
     "a76730a886909f9896e7cb7e9d1aede3d2301240f9ce08a4080e24d637406bf5"
 )
+
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_BLOB = (
+    "4cf390ec334b0569dbfc2399ff86c2d892f97586"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_PAD_MAIN = (
+    "a7e3eb3718820f6fa3183ebc6b8990da2b49f61f"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "workflow-refresh"
+    / "active.json"
+)
 PADATASET_SCIENTIFIC_OVERRIDE_DESTINATIONS = {
     str(V3_CONFIG_ROOT / "root-policy.json"),
     str(V3_CONFIG_ROOT / "executor-actions.json"),
@@ -147,6 +160,19 @@ def _canonical(value: Any) -> bytes:
 
 def _sha256(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
+
+
+def _optional_root_receipt_is_file(path: pathlib.Path) -> bool:
+    try:
+        return path.is_file()
+    except PermissionError:
+        # Repository validation may run as an intentionally unprivileged
+        # controller user on the live host. Optional root-private override
+        # state must not leak into unrelated temp-manifest tests. Production
+        # root verification still fails closed on the same permission fault.
+        if os.geteuid() == 0:
+            raise
+        return False
 
 
 def _load_override_receipt(path: pathlib.Path, label: str) -> dict[str, Any]:
@@ -247,7 +273,7 @@ def _padataset_scientific_additive_override(
     manifest: dict[str, Any],
     production_overrides: dict[str, str],
 ) -> dict[str, Any] | None:
-    if not PADATASET_SCIENTIFIC_ACTIVE_RECEIPT.is_file():
+    if not _optional_root_receipt_is_file(PADATASET_SCIENTIFIC_ACTIVE_RECEIPT):
         return None
 
     active = _load_override_receipt(
@@ -386,7 +412,57 @@ def _padataset_scientific_additive_override(
     return active
 
 
-def _verify_padataset_scientific_effective_state(active: dict[str, Any]) -> None:
+def _padataset_scientific_workflow_refresh(
+    scientific_active: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT
+    ):
+        return None
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT,
+        "active PADataset scientific workflow refresh",
+    )
+    scientific_raw = PADATASET_SCIENTIFIC_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_WORKFLOW_REFRESH",
+        "phase": "ACTIVE",
+        "scientific_active_receipt_sha256": _sha256(scientific_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_WORKFLOW_PATH,
+        "previous_workflow_blob_sha": PADATASET_SCIENTIFIC_WORKFLOW_BLOB,
+        "workflow_blob_sha": PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_BLOB,
+        "padataset_main_sha": PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            scientific_active["target_controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset scientific workflow refresh",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh {key} invalid"
+            )
+    return refresh
+
+
+def _verify_padataset_scientific_effective_state(
+    active: dict[str, Any],
+    workflow_refresh: dict[str, Any] | None = None,
+) -> None:
     root_policy = _json(V3_CONFIG_ROOT / "root-policy.json")
     if root_policy.get("root_policy_sha256") != active["root_policy_sha256"]:
         raise ReconcileError("PADataset scientific expanded root-policy digest mismatch")
@@ -454,9 +530,14 @@ def _verify_padataset_scientific_effective_state(active: dict[str, Any]) -> None
         / "controllers"
         / f"{PADATASET_SCIENTIFIC_TARGET_CLASS}.json"
     )
+    expected_controller_policy_sha256 = (
+        workflow_refresh["controller_policy_sha256"]
+        if workflow_refresh is not None
+        else active["target_controller_policy_sha256"]
+    )
     if (
         controller.get("controller_policy_sha256")
-        != active["target_controller_policy_sha256"]
+        != expected_controller_policy_sha256
     ):
         raise ReconcileError(
             "PADataset scientific target controller policy digest mismatch"
@@ -467,10 +548,15 @@ def _verify_padataset_scientific_effective_state(active: dict[str, Any]) -> None
     if not isinstance(workflows, list) or len(workflows) != 1:
         raise ReconcileError("PADataset scientific controller workflow set invalid")
     workflow = workflows[0]
+    expected_workflow_blob = (
+        workflow_refresh["workflow_blob_sha"]
+        if workflow_refresh is not None
+        else PADATASET_SCIENTIFIC_WORKFLOW_BLOB
+    )
     if (
         workflow.get("route_id") != "scientific-single-gpu"
         or workflow.get("path") != PADATASET_SCIENTIFIC_WORKFLOW_PATH
-        or workflow.get("blob_sha") != PADATASET_SCIENTIFIC_WORKFLOW_BLOB
+        or workflow.get("blob_sha") != expected_workflow_blob
     ):
         raise ReconcileError("PADataset scientific controller workflow binding drift")
 
@@ -913,6 +999,11 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         manifest,
         production_overrides,
     )
+    scientific_workflow_refresh = (
+        _padataset_scientific_workflow_refresh(scientific_override)
+        if scientific_override is not None
+        else None
+    )
     scientific_overrides = (
         scientific_override["managed_artifact_overrides"]
         if scientific_override is not None
@@ -981,7 +1072,20 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             raise ReconcileError(
                 f"PADataset scientific managed addition mode drift: {path}"
             )
-        if _sha256(path.read_bytes()) != binding["sha256"]:
+        expected_addition_sha = binding["sha256"]
+        if (
+            scientific_workflow_refresh is not None
+            and destination
+            == str(
+                V3_CONFIG_ROOT
+                / "controllers"
+                / f"{PADATASET_SCIENTIFIC_TARGET_CLASS}.json"
+            )
+        ):
+            expected_addition_sha = scientific_workflow_refresh[
+                "controller_policy_file_sha256"
+            ]
+        if _sha256(path.read_bytes()) != expected_addition_sha:
             raise ReconcileError(
                 f"PADataset scientific managed addition digest drift: {path}"
             )
@@ -1105,7 +1209,10 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         )
 
     if scientific_override is not None:
-        _verify_padataset_scientific_effective_state(scientific_override)
+        _verify_padataset_scientific_effective_state(
+            scientific_override,
+            scientific_workflow_refresh,
+        )
 
 
 def _git_exact_head(repo_root: pathlib.Path, expected: str) -> None:

@@ -14,7 +14,7 @@ The execution path is intentionally separate from the existing `gpu-ci` canary. 
 - Compute: existing single-GPU PADataset lane on the accepted Lambda host.
 - Runtime: exact root-owned read-only snapshot derived once from the operator's verified isolated `DNNs` Python venv, with the exact root-controlled base interpreter digest bound in the promotion receipt.
 - Source: exact head of an open same-repository PADataset PR.
-- Request: `.workspace-ci/scientific-request.json` at that exact candidate SHA.
+- Request: one bounded token carried by the trusted issue-comment trigger after the exact candidate SHA. The controller independently proves that SHA is the head of an open same-repository PR.
 - Dataset/cache: root-owned project trusted-cache material exposed read-only; candidate code receives no persistent write authority.
 - Outputs: job-local experiment directory uploaded as a GitHub artifact plus a machine-readable scientific receipt.
 - Orchestration: ChatGPT updates/creates the candidate PR, triggers the trusted issue-comment route, monitors the job, reads artifacts/receipts, and continues automatically.
@@ -60,14 +60,13 @@ The v1 promoter does not re-resolve dependencies with Conda or pip. It preserves
 
 ## Scientific request v1
 
-The candidate request file contains only:
-- schema_version = 1
-- operation = `train_backbone` or `evaluate_architecture_c`
-- config_path / run_dir / checkpoint / out_dir as applicable
-- bounded integer controls already permitted by the operation schema
-- expected PADataset candidate SHA
+The trusted trigger grammar is:
 
-Paths must be repository-relative and must remain inside fixed allowlisted prefixes.
+- `/lambda-scientific <exact-candidate-sha> smoke`
+- `/lambda-scientific <exact-candidate-sha> train_backbone:manifests/configs/<config>.json`
+- `/lambda-scientific <exact-candidate-sha> stage03_archc:manifests/configs/<config>.json`
+
+The candidate SHA is not repeated inside candidate-controlled file content. The controller independently binds it to the exact head of an open same-repository PR, so duplicating the SHA inside the commit would create an impossible self-reference. The third token is a bounded semantic request, not generic argv or shell authority. Training config paths remain repository-relative under `manifests/configs/` and are revalidated by the trusted workflow before execution.
 
 ## Execution contract
 
@@ -208,3 +207,12 @@ The execution sequence remains:
 - No GitHub-hosted runner dependency.
 - No multi-GPU scientific execution in v1.
 - No automatic promotion of candidate-written executable dependencies.
+
+
+## Post-activation trusted-workflow refresh
+
+The first live-proof review found that the original trusted scientific workflow required a candidate-controlled request file to contain the SHA of the commit that itself contained that file. That is a cryptographic self-reference and therefore cannot be used as a practical admission contract.
+
+PADataset PR #15 corrected only the request transport while preserving exact open same-repository PR-head attestation and all scientific operation/config bounds. The reviewed replacement workflow blob is `4cf390ec334b0569dbfc2399ff86c2d892f97586` on PADataset main `a7e3eb3718820f6fa3183ebc6b8990da2b49f61f`.
+
+Live adoption is a separate, one-shot, root-owned workflow-refresh transaction layered on top of the immutable Phase-A/Phase-B activation receipt. It may replace only the dedicated scientific controller policy and the installed reconciler verifier needed to understand the refresh receipt; it must stop/restart only the dedicated scientific controller, preserve the shared provisioner and every other controller identity, prove zero scientific assigned/running work before mutation, and roll back to the prior trusted workflow on failure.
