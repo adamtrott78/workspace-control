@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Perform read-only operator diagnosis only; do NOT create another /lambda-scientific comment. Inspect workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service state and recent journal, rerun the reviewed v3-canary-preflight against scale-set lambda-padataset-scientific-single-gpu to capture assigned/running counts, inspect only the target scientific controller ledger and target-class provisioner records/transients, and correlate with queued GitHub run 43293735325 / job 131446381843. If controller is healthy and scale-set assigned=1 but no local admission, diagnose verifier/message-session path. If controller exited, diagnose exact journal failure before any restart. If capacity is held by another class, wait/resolve that class without duplicating scientific demand. Only resume the existing smoke after the cause is proven.
+Operator root runtime repair only: materialize exact workspace-control source b0f1c80b76e13e8333ab135a9d4cda437c3e3ce4, compute and bind the current installed runtime SHA, candidate runtime SHA, and existing runtime-override receipt SHA into one fresh root-owned 0600 REPAIR_PADATASET_SCIENTIFIC_RUNTIME_V1 authority, then invoke scripts/lambda_ci_v3_padataset_scientific_runtime_repair_v1.py. Require transaction phase COMMITTED_ACTIVE_RUNTIME_REPAIR, V3 installed-generation verification PASS, shared provisioner active/running, and restoration of exactly the previously active v3 controller set with unchanged UnitFileState/NRestarts. After repair, do not retrigger; observe existing run 43293735325 for the controller's terminal REST revival and fresh provision attempt.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Perform read-only operator diagnosis only; do NOT create another /lambda-scienti
 
 ## Blockers / gates
 
-- Scientific workflow run 43293735325 is queued with no scheduler transition. Before any retrigger or training, read-only live diagnosis must determine whether the dedicated scientific controller is still active, whether scale-set 5 now reports assigned=1/running=0, and whether controller journal/ledger shows admission rejection, message-session failure, or capacity wait.
-- Live Workspace Shell trusted authority still does not include padataset-autonomous-scientific-execution-v1, so connected Workspace Shell cannot inspect this live controller without an explicit authority/trust change; do not widen trust merely to diagnose this run.
+- The reviewed runtime repair is not yet installed on Lambda. Root/operator authority is required to execute scripts/lambda_ci_v3_padataset_scientific_runtime_repair_v1.py from exact workspace-control main b0f1c80b76e13e8333ab135a9d4cda437c3e3ce4.
+- Do not issue another /lambda-scientific comment. Existing run 43293735325 / job 131446381843 must be allowed to revive through the controller's provenance-preserving terminal REST retry path after the runtime repair.
 
 ## Fresh-chat initialization
 
