@@ -53,6 +53,10 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("_awaitingHumanSubmit", harness)
         self.assertIn("_awaitingActionId", harness)
         self.assertIn("HandoffBlockedPresses", harness)
+        self.assertIn("HandoffRefocuses", harness)
+        self.assertIn("SimActionStatus.AwaitingDurableAck", harness)
+        self.assertIn("FocusTargetAsync", harness)
+        self.assertIn("handoff_refocuses", harness)
         self.assertIn("safely_recovered_repeat_presses", harness)
         self.assertIn(
             "Volatile.Read(ref _awaitingHumanSubmit) != 0",

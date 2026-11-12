@@ -735,7 +735,10 @@
         "Repair moves WindowsFormsSynchronizationContext installation into UsabilityApplicationContext construction, after adapter connection and browser seeding, immediately before the WinForms message loop. READY remains gated on confirmed global hotkey registration.",
         "UT-01 attempt 5 / Operator Bridge run #206 demonstrated the primary human loop is functional on the real Windows path: Ctrl+B global interception works, the synthetic packet reaches the clipboard, and fake-worker submission works.",
         "Operator accidentally pressed Ctrl+B again before paste/Enter on some cycles. Review of SingleFlightDispatchCoordinator showed its _inFlight guard ends at LocalPrepared, so a later Ctrl+B can claim the next queued action before durable acknowledgment. This is a real human-handoff recovery gap.",
-        "Recovery rule added to the Stage-10 human harness: after LocalPrepared, repeated Ctrl+B is safely ignored until the matching fake-worker submission receives durable acknowledgment. Rapid presses caught by the existing Busy guard are also treated as safe recovered repeats rather than objective failure."
+        "Recovery rule added to the Stage-10 human harness: after LocalPrepared, repeated Ctrl+B is safely ignored until the matching fake-worker submission receives durable acknowledgment. Rapid presses caught by the existing Busy guard are also treated as safe recovered repeats rather than objective failure.",
+        "UT-01 recovery rerun on job 130952654587 completed all 5 actions with 5 durable acknowledgments and blocked 8 repeated Ctrl+B presses, but recorded 2 rejected submissions. Operator observed that repeated Ctrl+B was blocked before paste, yet could still move tabs after paste and before Enter.",
+        "Fake-worker inspection confirmed paste alone does not submit; only Enter triggers POST /submit. Therefore durable acknowledgment is not being cleared by paste.",
+        "Recovery hardening: treat simulator action status AwaitingDurableAck as authoritative on every Ctrl+B. While such an action exists, do not claim another action; idempotently re-focus the same worker binding and remain on the same handoff until Enter is durably acknowledged."
       ],
       "implementation": [],
       "evidence": {
@@ -835,10 +838,35 @@
           "demonstrated_gap": "NEXT_ACTION_CAN_BE_CLAIMED_AFTER_LOCAL_PREPARED_BEFORE_DURABLE_ACK",
           "repair": "BLOCK_REPEAT_CTRL_B_UNTIL_MATCHING_DURABLE_ACK",
           "rerun_required": true
+        },
+        "ut01_recovery_rerun": {
+          "status": "PARTIAL_RECOVERY_SUCCESS",
+          "workflow_run_id": 43147582603,
+          "job_id": 130952654587,
+          "source_sha": "b5d9ae62b15d5496925f634aa4582dd435b23c0e",
+          "structured_result": {
+            "result": "OBJECTIVE_FAIL",
+            "actions_completed": 5,
+            "valid_durable_acks": 5,
+            "hotkey_presses": 13,
+            "handoff_blocked_presses": 8,
+            "safely_recovered_repeat_presses": 8,
+            "rejected_state_submissions": 2,
+            "wrong_worker_dispatches": 0,
+            "wrong_packet_dispatches": 0,
+            "dispatch_failures": 0
+          },
+          "operator_observation": {
+            "repeated_ctrl_b_before_paste_blocked": true,
+            "repeated_ctrl_b_after_paste_before_enter_still_moved_tabs": true
+          },
+          "diagnosis": "LOCAL_LATCH_RECOVERY_INSUFFICIENT_AFTER_PASTE_PHASE",
+          "repair": "AUTHORITATIVE_AWAITING_DURABLE_ACK_REFOCUS",
+          "rerun_required": true
         }
       },
-      "claim": "Stage 10 active. UT-11 PASS. UT-01 primary operator loop is functional; repeat-Ctrl+B handoff recovery is being hardened before acceptance.",
-      "blocker": "Validate durable-ack handoff gate and rerun UT-01 with deliberate repeated Ctrl+B recovery coverage."
+      "claim": "Stage 10 active. UT-11 PASS. UT-01 happy path passes; repeated Ctrl+B recovery now uses authoritative AwaitingDurableAck state and same-worker refocus until Enter/ack.",
+      "blocker": "Validate AwaitingDurableAck-driven refocus and rerun UT-01 recovery sequence."
     }
   }
 }

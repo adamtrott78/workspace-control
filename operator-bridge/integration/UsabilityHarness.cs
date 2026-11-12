@@ -382,6 +382,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public int NoActionPresses { get; private set; }
     public int BusyPresses { get; private set; }
     public int HandoffBlockedPresses { get; private set; }
+    public int HandoffRefocuses { get; private set; }
     public int ValidDurableAcks { get; private set; }
     public int WrongWorkerDispatches { get; private set; }
     public int WrongPacketDispatches { get; private set; }
@@ -394,6 +395,33 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private async void HotkeyPressed(object? sender, EventArgs e)
     {
         HotkeyPresses++;
+
+        var pending = _world.Actions.Actions.FirstOrDefault(action =>
+            action.Status == SimActionStatus.AwaitingDurableAck);
+        if (pending is not null)
+        {
+            HandoffBlockedPresses++;
+            _awaitingActionId = pending.ActionId;
+            Volatile.Write(ref _awaitingHumanSubmit, 1);
+
+            var focus = await _browser.FocusTargetAsync(
+                new BrowserTarget(
+                    pending.WorkerSlotId,
+                    pending.SessionGeneration),
+                CancellationToken.None);
+            if (!focus.IsApplied)
+            {
+                DispatchFailures++;
+                LastDispatchOutcome = "HandoffRefocusFailed";
+                LastDispatchError =
+                    focus.NormalizedError ?? "HANDOFF_REFOCUS_FAILED";
+                Finish();
+                return;
+            }
+
+            HandoffRefocuses++;
+            return;
+        }
 
         if (Volatile.Read(ref _awaitingHumanSubmit) != 0)
         {
@@ -597,6 +625,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                     no_action_presses = NoActionPresses,
                     busy_presses = BusyPresses,
                     handoff_blocked_presses = HandoffBlockedPresses,
+                    handoff_refocuses = HandoffRefocuses,
                     safely_recovered_repeat_presses =
                         BusyPresses + HandoffBlockedPresses,
                     awaiting_human_submit =
