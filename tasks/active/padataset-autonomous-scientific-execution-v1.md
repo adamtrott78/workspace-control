@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Read-only post-repair revival diagnosis only: capture workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service journal since the successful repair, current scheduler-131446381843.json, and reviewed scale-set statistics for lambda-padataset-scientific-single-gpu id=5 (assigned/running). Do not mutate anything. If scale-set assigned=0 while GitHub job 131446381843 remains queued, implement and validate an authority-preserving controller fix for terminal REST revival that does not provision without scheduler capacity authority. If assigned=1, trace why processRESTDemand did not revive the matching REST_ACTIVE_JOB_SET terminal record.
+Read-only controller-binary provenance gate only. On Lambda, read /etc/workspace-ci/v3/install-manifest.json source_head and controller entry digest; hash /opt/workspace-ci/v3/controller/lambda-ci-controller-v3; read /var/lib/workspace-ci/v3/controller-refresh/active.json if present; then reproducibly build controller/lambda-ci-controller/v3 from exact reviewed source 59ca152a497300e2f8854145860c7bb4313ff739 using pinned Go 1.26.3 -mod=readonly -trimpath and compare its SHA-256 to the installed binary. If the installed binary does not match either the base manifest or an active controller-refresh receipt/source build, fail closed. If it matches an older valid override whose source predates the required revival behavior, implement a transactional live controller-binary refresh that quiesces the currently-active controller set, preserves root services and controller topology, and then allows the existing queued scientific job to revive without retrigger.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Read-only post-repair revival diagnosis only: capture workspace-ci-v3-controller
 
 ## Blockers / gates
 
-- Existing smoke run 43293735325/job 131446381843 remains queued after the committed runtime repair and a bounded post-repair observation window.
-- Need read-only live scale-set statistics and post-repair scientific-controller journal/ledger before changing controller logic. Do not retrigger, restart, or manually edit ledger state.
+- Need read-only proof of the installed v3 controller binary provenance: base install-manifest source_head/controller digest, active controller-refresh receipt if present, actual installed controller SHA-256, and SHA-256 of a fresh Go 1.26.3 build from reviewed source 59ca152a497300e2f8854145860c7bb4313ff739. Do not refresh controller binary until this mismatch is proven.
+- Do not issue another /lambda-scientific comment, restart the scientific controller, edit its ledger, or mutate scale-set state. Existing run 43293735325/job 131446381843 remains the sole demand.
 
 ## Fresh-chat initialization
 
