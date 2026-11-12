@@ -208,7 +208,7 @@ def _resolve_runtime(
         isinstance(materialized, dict),
         f"{project_id}: materialized runtime binding {runtime_id!r} missing",
     )
-    required = {
+    legacy_required = {
         "runtime_id",
         "canonical_path",
         "python_path",
@@ -218,10 +218,19 @@ def _resolve_runtime(
         "source_trusted_runtime_object",
         "required_controls",
     }
+    python_venv_v2_required = legacy_required | {
+        "promotion_method",
+        "base_python_path",
+        "base_python_sha256",
+        "scientific_data",
+    }
+    materialized_keys = set(materialized)
     _require(
-        set(materialized) == required,
+        materialized_keys == legacy_required
+        or materialized_keys == python_venv_v2_required,
         f"{project_id}: materialized runtime binding keys drift",
     )
+    rich_runtime = materialized_keys == python_venv_v2_required
     _require(
         authorized.get("promotion_required_before_eval") is True,
         f"{project_id}: runtime authorization must require promotion",
@@ -235,12 +244,22 @@ def _resolve_runtime(
         materialized["runtime_id"] == authorized["runtime_id"],
         f"{project_id}: materialized runtime id differs from authorization",
     )
-    for key in (
+    authorization_keys = [
         "canonical_path",
         "receipt_path",
         "tree_digest_sha256",
         "manifest_identity_sha256",
-    ):
+    ]
+    if rich_runtime:
+        authorization_keys.extend(
+            [
+                "promotion_method",
+                "base_python_path",
+                "base_python_sha256",
+                "scientific_data",
+            ]
+        )
+    for key in authorization_keys:
         _require(
             materialized[key] == expanded.get(key),
             f"{project_id}: materialized runtime {key} differs from authorization",

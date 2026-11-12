@@ -287,8 +287,8 @@ def render_sysusers(
                 )
             broker_users[broker_user] = current
 
-    if len(users) != 9:
-        raise ReconcileError(f"expected nine unique class users, got {len(users)}")
+    if len(users) != 10:
+        raise ReconcileError(f"expected ten unique class users, got {len(users)}")
 
     for broker_user, (project, broker_group) in sorted(broker_users.items()):
         lines.append(
@@ -480,8 +480,8 @@ def build_stage(
         raise ReconcileError("migration root socket drifted")
     if migration["side_by_side_paths"]["controller_binary"] != str(V3_CONTROLLER_BINARY):
         raise ReconcileError("migration controller binary drifted")
-    if len(compiled["root_projection"]["runner_classes"]) != 9:
-        raise ReconcileError("compiled runner class count is not nine")
+    if len(compiled["root_projection"]["runner_classes"]) != 10:
+        raise ReconcileError("compiled runner class count is not ten")
 
     if base_overlay is None:
         base_overlay = _json(repo_root / OVERLAY_PATH)
@@ -580,7 +580,7 @@ def build_stage(
         "source_head": source_head,
         "catalog_generation_sha256": compiled["catalog_generation_sha256"],
         "root_policy_sha256": compiled["root_projection"]["root_policy_sha256"],
-        "runner_class_count": 9,
+        "runner_class_count": 10,
         "controller_state": "INACTIVE",
         "route_state": "DISABLED",
         "entries": sorted(entries, key=lambda item: item["destination"]),
@@ -606,7 +606,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
     manifest = _json(manifest_path)
     if manifest.get("mode") != "V3_SUBSTRATE_INSTALL_INACTIVE":
         raise ReconcileError("installed manifest mode invalid")
-    if manifest.get("runner_class_count") != 9:
+    if manifest.get("runner_class_count") not in {9, 10}:
         raise ReconcileError("installed manifest runner class count invalid")
 
     controller_destination = str(V3_CONTROLLER_BINARY)

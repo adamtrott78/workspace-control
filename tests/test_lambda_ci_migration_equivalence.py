@@ -26,11 +26,11 @@ eq_spec.loader.exec_module(equivalence)
 
 
 class MigrationEquivalenceTests(unittest.TestCase):
-    def test_all_23_routes_preserve_exact_root_launch_semantics(self):
+    def test_all_24_routes_preserve_exact_root_launch_semantics(self):
         result = equivalence.verify_migration(ROOT)
         self.assertEqual(result["decision"], "PASS")
-        self.assertEqual(result["route_count"], 23)
-        self.assertEqual(result["exact_equivalence_count"], 23)
+        self.assertEqual(result["route_count"], 24)
+        self.assertEqual(result["exact_equivalence_count"], 24)
 
     def test_padataset_cpu_and_gpu_preserve_contracts(self):
         rows = equivalence.verify_migration(ROOT)["rows"]

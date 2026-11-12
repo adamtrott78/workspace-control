@@ -71,7 +71,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             "pull_request_number": -1,
         }
 
-    def test_all_23_routes_attest_from_structured_workflow_identity(self):
+    def test_all_24_routes_attest_from_structured_workflow_identity(self):
         total = 0
         for class_id, policy in self.compiled["controller_projections"].items():
             controller = model.RunnerClassControllerModel(policy)
@@ -85,7 +85,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
                     controller.scale_result_for_admission(decision),
                     "ACQUIRE",
                 )
-        self.assertEqual(total, 23)
+        self.assertEqual(total, 24)
 
     def test_job_display_candidate_and_pr_fields_have_zero_admission_effect(self):
         class_id = "workspace-control-control-small-v1"
@@ -704,7 +704,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
         with self.assertRaises(model.ProtocolFatal):
             supervisor.handle("SOMETHING_IMPLICIT_AND_UNMODELED")
 
-    def test_all_nine_runner_classes_can_reserve_launch_and_cleanup(self):
+    def test_all_ten_runner_classes_can_reserve_launch_and_cleanup(self):
         for class_id in sorted(self.compiled["root_projection"]["runner_classes"]):
             root = self.root(host_max=9, project_max=9)
             peer = self.peer(class_id)

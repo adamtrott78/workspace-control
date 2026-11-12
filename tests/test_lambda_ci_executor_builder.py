@@ -31,8 +31,8 @@ class ExecutorBuilderTests(unittest.TestCase):
 
     def test_catalog_exposes_every_compiled_action(self):
         actions = builder.list_actions(compiled=self.compiled)
-        self.assertEqual(len(actions), 27)
-        self.assertEqual(len(set(actions)), 27)
+        self.assertEqual(len(actions), 28)
+        self.assertEqual(len(set(actions)), 28)
         self.assertIn("workspace_control.control_validation", actions)
         self.assertIn("padataset.cpu_ci", actions)
         self.assertIn("padataset.gpu_ci", actions)

@@ -75,6 +75,14 @@
         "state": "INHERITED_CONTAINED",
         "source": "legacy research-engine-gpu containment must be explicitly consumed during migration"
       }
+    },
+    "padataset-scientific-single-gpu-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "CLEAR",
+        "source": null
+      }
     }
   },
   "routes": {
@@ -169,6 +177,10 @@
     "workspace-control:control-validation": {
       "admission_state": "DISABLED",
       "source": "migration default: new v3 route disabled until explicit cutover acceptance"
+    },
+    "padataset:scientific-single-gpu": {
+      "admission_state": "DISABLED",
+      "source": "scientific activation default: dedicated v3 route disabled until explicit reviewed host activation"
     }
   },
   "legacy": {

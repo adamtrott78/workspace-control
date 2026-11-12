@@ -504,6 +504,19 @@
             "model_id": null,
             "runtime_id": null
           }
+        },
+        "padataset-scientific-single-gpu-v1": {
+          "scale_set_name": "lambda-padataset-scientific-single-gpu",
+          "runner_prefix": "lambda-padataset-scientific-single-gpu-",
+          "max_runners": 1,
+          "execution_contract_id": "scientific-single-gpu-v1",
+          "controller_peer": {
+            "unix_user": "ci-ctl-pad-science"
+          },
+          "bindings": {
+            "model_id": null,
+            "runtime_id": "padataset-dnns-v1"
+          }
         }
       },
       "routes": {
@@ -542,6 +555,25 @@
           },
           "ingress": {
             "command": "/lambda-ci-gpu",
+            "parameter_schema_id": "candidate-sha-v1"
+          }
+        },
+        "scientific-single-gpu": {
+          "runner_class_id": "padataset-scientific-single-gpu-v1",
+          "trusted_workflow": {
+            "path": ".github/workflows/lambda-ci-scientific.yml",
+            "default_branch": "main",
+            "blob_sha": "e70412f3ccdc70826f56f7ba0255518f1f95224f",
+            "job_key": "padataset-scientific",
+            "allowed_events": [
+              "issue_comment"
+            ],
+            "allowed_actor_logins": [
+              "adamtrott78"
+            ]
+          },
+          "ingress": {
+            "command": "/lambda-scientific",
             "parameter_schema_id": "candidate-sha-v1"
           }
         }

@@ -41,8 +41,8 @@ class V3LaunchSpecTests(unittest.TestCase):
             jit_config="ZmFrZS1qaXQ=",
         )
 
-    def test_all_nine_runner_classes_build(self):
-        self.assertEqual(len(self.root["runner_classes"]), 9)
+    def test_all_ten_runner_classes_build(self):
+        self.assertEqual(len(self.root["runner_classes"]), 10)
         for class_id in sorted(self.root["runner_classes"]):
             request, spec = self.build(class_id)
             cls = self.root["runner_classes"][class_id]
@@ -92,6 +92,20 @@ class V3LaunchSpecTests(unittest.TestCase):
         self.assertEqual(
             spec["resources"]["gpu_uuid"],
             spec["resources"]["gpu_uuids"][0],
+        )
+
+    def test_scientific_class_binds_exact_padataset_runtime(self):
+        _, spec = self.build("padataset-scientific-single-gpu-v1")
+        self.assertEqual(spec["execution_contract"]["resource_class"], "scientific_gpu_single_v1")
+        self.assertEqual(spec["resources"]["runtime_max_seconds"], 14400)
+        self.assertEqual(spec["runtime_binding"]["runtime_id"], "padataset-dnns-v1")
+        self.assertEqual(
+            spec["runtime_binding"]["promotion_method"],
+            "python-venv-copy-rewrite-v1",
+        )
+        self.assertEqual(
+            spec["runtime_binding"]["scientific_data"]["profile_id"],
+            "ota_core_high_run01_len16384_v1",
         )
 
     def test_runner_release_is_bound_from_root_projection(self):
@@ -157,27 +171,26 @@ class V3LaunchSpecTests(unittest.TestCase):
 
     def test_runtime_and_model_bindings_are_exact_materialized_project_objects(self):
         manifests = compiler.load_inputs(ROOT)["project_manifests"]
-        research = manifests["research-engine"]
         for class_id, cls in self.root["runner_classes"].items():
-            if cls["project_id"] != "research-engine":
-                continue
+            manifest = manifests[cls["project_id"]]
+            bindings = manifest.get("bindings", {})
             model = cls["bindings"]["model"]
             runtime = cls["bindings"]["runtime"]
             catalog_class = self.compiled["root_projection"]["runner_classes"][class_id]
             if model is not None:
-                self.assertIn(model["model_id"], research["bindings"]["models"])
+                self.assertIn(model["model_id"], bindings["models"])
                 self.assertEqual(
                     model,
-                    research["bindings"]["models"][model["model_id"]],
+                    bindings["models"][model["model_id"]],
                     class_id,
                 )
                 self.assertIn("object_path", model)
                 self.assertIn("descriptor_sha256", model)
             if runtime is not None:
-                self.assertIn(runtime["runtime_id"], research["bindings"]["runtimes"])
+                self.assertIn(runtime["runtime_id"], bindings["runtimes"])
                 self.assertEqual(
                     runtime,
-                    research["bindings"]["runtimes"][runtime["runtime_id"]],
+                    bindings["runtimes"][runtime["runtime_id"]],
                     class_id,
                 )
                 self.assertEqual(

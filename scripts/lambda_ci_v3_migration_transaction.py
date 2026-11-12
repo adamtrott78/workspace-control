@@ -58,6 +58,17 @@ COMPATIBILITY_V2_UNITS = (
 UUID_RE = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 AUTHORIZATION_ID_RE = re.compile(rf"^{UUID_RE}$")
 V3_SUPERVISOR_RE = re.compile(r"^workspace-ci-v3-supervisor-[0-9a-f]{20}\.service$")
+MIGRATION_V3_CLASS_IDS = (
+    "workspace-control-control-small-v1",
+    "padataset-cpu-public-v1",
+    "padataset-gpu-single-public-v1",
+    "research-cpu-public-v1",
+    "research-gpu-single-public-v1",
+    "research-gpu-single-runtime-v1",
+    "research-model-single-offline-v1",
+    "research-model-dual-offline-v1",
+    "research-model-dual-public-v1",
+)
 
 
 class MigrationError(RuntimeError):
@@ -167,11 +178,16 @@ def v2_controller_units(registry: dict[str, Any]) -> list[str]:
 
 def v3_controller_units(root_policy: dict[str, Any]) -> list[str]:
     classes = root_policy.get("runner_classes")
-    if not isinstance(classes, dict) or len(classes) != 9:
-        raise MigrationError("installed v3 root policy must contain exactly nine classes")
+    if not isinstance(classes, dict):
+        raise MigrationError("installed v3 root policy class map invalid")
+    missing = set(MIGRATION_V3_CLASS_IDS) - set(classes)
+    if missing:
+        raise MigrationError(
+            f"installed v3 root policy is missing migration classes: {sorted(missing)}"
+        )
     return [
         f"workspace-ci-v3-controller@{class_id}.service"
-        for class_id in sorted(classes)
+        for class_id in sorted(MIGRATION_V3_CLASS_IDS)
     ]
 
 

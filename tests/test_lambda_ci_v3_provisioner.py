@@ -121,9 +121,9 @@ class V3ProvisionerTests(unittest.TestCase):
             },
         )
 
-    def test_all_nine_controller_uids_reserve_only_their_root_owned_class(self):
-        self.assertEqual(len(self.class_ids), 9)
-        self.assertEqual(len(set(self.uid_by_class.values())), 9)
+    def test_all_ten_controller_uids_reserve_only_their_root_owned_class(self):
+        self.assertEqual(len(self.class_ids), 10)
+        self.assertEqual(len(set(self.uid_by_class.values())), 10)
         for index, class_id in enumerate(self.class_ids, start=1):
             response = self.reserve(class_id, index)
             self.assertEqual(response["status"], "RESERVED", class_id)
@@ -374,7 +374,7 @@ class V3ProvisionerTests(unittest.TestCase):
             cls["controller_peer"]["unix_user"]
             for cls in self.root["runner_classes"].values()
         ]
-        self.assertEqual(len(users), 9)
+        self.assertEqual(len(users), 10)
         with self.assertRaisesRegex(provider.V3ServiceError, "maps to both"):
             provider.build_controller_uid_map(
                 self.root,
