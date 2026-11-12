@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator recovery + fresh one-shot runtime repair from exact workspace-control main 59ca152a497300e2f8854145860c7bb4313ff739. First require latest prior transaction phase ROLLED_BACK_PREVIOUS_RUNTIME with rollback_completed=true, independently require installed predecessor runtime SHA 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da and predecessor runtime-override SHA d9548a56ab46e133aa321e804e310c0fad1712e87cda5cece56bda308fc5bcd0, verify installed generation and scientific controller/provisioner health. Then create fresh root-owned 0600 REPAIR_PADATASET_SCIENTIFIC_RUNTIME_V1 authority bound to candidate runtime f2791ade8e951408d8a3818da617ec64919c06bd2f7d07c9f6fa0c137bb6afa2 and invoke the final repair helper. Require COMMITTED_ACTIVE_RUNTIME_REPAIR. Do not retrigger smoke; monitor existing run 43293735325 / job 131446381843 for automatic terminal REST revival.
+Observe existing PADataset scientific run 43293735325 / job 131446381843 only; do not retrigger. Allow one bounded scientific-controller listener/REST reconciliation cycle. If the job transitions to in_progress, follow that same run through smoke completion, artifact/receipt inspection, and zero-work cleanup. If it remains queued after the bounded cycle, perform read-only scientific-controller journal/ledger diagnosis focused on terminal REST revival provenance and current scale-set assigned/running statistics.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Operator recovery + fresh one-shot runtime repair from exact workspace-control m
 
 ## Blockers / gates
 
-- Before the fresh root repair retry, prove the first attempt restored exact predecessor runtime SHA 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da and runtime-override SHA d9548a56ab46e133aa321e804e310c0fad1712e87cda5cece56bda308fc5bcd0, and inspect its transaction receipt. Never reuse consumed authority d4f31151-331b-46e3-921b-e56ced421bfe.
-- Do not issue another /lambda-scientific comment. Existing run 43293735325 / job 131446381843 is still queued and must revive automatically after the repaired runtime and controller restoration.
+- Existing scientific run 43293735325 / job 131446381843 remains queued immediately after the committed runtime repair. The controller should revive the terminal REST_ACTIVE_JOB_SET record only after its next REST demand reconciliation. Do not issue a second /lambda-scientific comment.
+- If the existing run does not transition after a bounded controller cycle, inspect the scientific controller journal and ledger again to determine why the terminal REST revival path did not fire; do not infer failure from the immediate post-repair stale ledger snapshot.
 
 ## Fresh-chat initialization
 
