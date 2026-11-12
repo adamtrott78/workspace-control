@@ -226,7 +226,8 @@ def _resolve_runtime(
     }
     materialized_keys = set(materialized)
     _require(
-        materialized_keys in {frozenset(legacy_required), frozenset(python_venv_v2_required)},
+        materialized_keys == legacy_required
+        or materialized_keys == python_venv_v2_required,
         f"{project_id}: materialized runtime binding keys drift",
     )
     rich_runtime = materialized_keys == python_venv_v2_required
