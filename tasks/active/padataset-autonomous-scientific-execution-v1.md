@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Observe existing PADataset scientific run 43293735325 / job 131446381843 only; do not retrigger. Allow one bounded scientific-controller listener/REST reconciliation cycle. If the job transitions to in_progress, follow that same run through smoke completion, artifact/receipt inspection, and zero-work cleanup. If it remains queued after the bounded cycle, perform read-only scientific-controller journal/ledger diagnosis focused on terminal REST revival provenance and current scale-set assigned/running statistics.
+Read-only post-repair revival diagnosis only: capture workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service journal since the successful repair, current scheduler-131446381843.json, and reviewed scale-set statistics for lambda-padataset-scientific-single-gpu id=5 (assigned/running). Do not mutate anything. If scale-set assigned=0 while GitHub job 131446381843 remains queued, implement and validate an authority-preserving controller fix for terminal REST revival that does not provision without scheduler capacity authority. If assigned=1, trace why processRESTDemand did not revive the matching REST_ACTIVE_JOB_SET terminal record.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Observe existing PADataset scientific run 43293735325 / job 131446381843 only; d
 
 ## Blockers / gates
 
-- Existing scientific run 43293735325 / job 131446381843 remains queued immediately after the committed runtime repair. The controller should revive the terminal REST_ACTIVE_JOB_SET record only after its next REST demand reconciliation. Do not issue a second /lambda-scientific comment.
-- If the existing run does not transition after a bounded controller cycle, inspect the scientific controller journal and ledger again to determine why the terminal REST revival path did not fire; do not infer failure from the immediate post-repair stale ledger snapshot.
+- Existing smoke run 43293735325/job 131446381843 remains queued after the committed runtime repair and a bounded post-repair observation window.
+- Need read-only live scale-set statistics and post-repair scientific-controller journal/ledger before changing controller logic. Do not retrigger, restart, or manually edit ledger state.
 
 ## Fresh-chat initialization
 
