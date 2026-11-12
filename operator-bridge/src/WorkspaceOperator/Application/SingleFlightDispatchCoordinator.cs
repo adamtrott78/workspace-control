@@ -60,185 +60,210 @@ public sealed class SingleFlightDispatchCoordinator
 
         var started = _clock.GetTimestamp();
         OperatorAction? action = null;
+        var localOnlyActionsCompleted = 0;
+        string? lastLocalOnlyActionId = null;
+        const int maxLocalOnlyActionsPerDispatch = 32;
 
         try
         {
-            action = await _actions.ClaimNextAsync(cancellationToken);
-            if (action is null)
+            while (true)
             {
-                Write("dispatch", "NO_ACTION", null, started);
-                return new DispatchResult(DispatchOutcome.NoAction);
-            }
+                action = await _actions.ClaimNextAsync(cancellationToken);
+                if (action is null)
+                {
+                    Write("dispatch", "NO_ACTION", null, started);
+                    return localOnlyActionsCompleted > 0
+                        ? new DispatchResult(
+                            DispatchOutcome.LocalCompleted,
+                            lastLocalOnlyActionId)
+                        : new DispatchResult(DispatchOutcome.NoAction);
+                }
 
-            if (action.ActionType == OperatorActionType.OpenJudgmentGate)
-            {
-                await _surface.OpenJudgmentAsync(cancellationToken);
-                await _actions.RecordLocalCompletedAsync(
-                    action.Identity,
-                    cancellationToken);
-                Write("dispatch", "JUDGMENT_GATE_OPENED", action, started);
-                return new DispatchResult(
-                    DispatchOutcome.JudgmentGateOpened,
-                    action.Identity.ActionId);
-            }
+                if (action.ActionType == OperatorActionType.OpenJudgmentGate)
+                {
+                    await _surface.OpenJudgmentAsync(cancellationToken);
+                    await _actions.RecordLocalCompletedAsync(
+                        action.Identity,
+                        cancellationToken);
+                    Write("dispatch", "JUDGMENT_GATE_OPENED", action, started);
+                    return new DispatchResult(
+                        DispatchOutcome.JudgmentGateOpened,
+                        action.Identity.ActionId);
+                }
 
-            if (action.ActionType == OperatorActionType.OpenRecovery)
-            {
-                await _surface.OpenRecoveryAsync(cancellationToken);
-                Write("dispatch", "RECOVERY_OPENED", action, started);
-                return new DispatchResult(
-                    DispatchOutcome.RecoveryOpened,
-                    action.Identity.ActionId);
-            }
+                if (action.ActionType == OperatorActionType.OpenRecovery)
+                {
+                    await _surface.OpenRecoveryAsync(cancellationToken);
+                    Write("dispatch", "RECOVERY_OPENED", action, started);
+                    return new DispatchResult(
+                        DispatchOutcome.RecoveryOpened,
+                        action.Identity.ActionId);
+                }
 
-            var target = new BrowserTarget(
-                action.Identity.WorkerSlotId,
-                action.Identity.SessionGeneration);
+                var target = new BrowserTarget(
+                    action.Identity.WorkerSlotId,
+                    action.Identity.SessionGeneration);
 
-            if (action.ActionType is
-                OperatorActionType.DiscardSession or
-                OperatorActionType.RetireSession)
-            {
-                var maintenance = action.ActionType == OperatorActionType.DiscardSession
-                    ? await _browser.DiscardTargetAsync(target, cancellationToken)
-                    : await _browser.CloseTargetAsync(target, cancellationToken);
+                if (action.ActionType is
+                    OperatorActionType.DiscardSession or
+                    OperatorActionType.RetireSession)
+                {
+                    var maintenance = action.ActionType == OperatorActionType.DiscardSession
+                        ? await _browser.DiscardTargetAsync(target, cancellationToken)
+                        : await _browser.CloseTargetAsync(target, cancellationToken);
 
-                if (!maintenance.IsApplied)
+                    if (!maintenance.IsApplied)
+                    {
+                        await RecordFailureAsync(
+                            action,
+                            maintenance.NormalizedError ?? "BROWSER_MAINTENANCE_FAILED",
+                            cancellationToken);
+                        Write(
+                            "dispatch",
+                            "BROWSER_MAINTENANCE_FAILED",
+                            action,
+                            started,
+                            maintenance.NormalizedError);
+                        return new DispatchResult(
+                            DispatchOutcome.BrowserMaintenanceFailed,
+                            action.Identity.ActionId,
+                            maintenance.NormalizedError);
+                    }
+
+                    await _actions.RecordLocalCompletedAsync(
+                        action.Identity,
+                        cancellationToken);
+                    Write("dispatch", "LOCAL_COMPLETED", action, started);
+                    localOnlyActionsCompleted++;
+                    lastLocalOnlyActionId = action.Identity.ActionId;
+
+                    if (localOnlyActionsCompleted >= maxLocalOnlyActionsPerDispatch)
+                    {
+                        Write(
+                            "dispatch",
+                            "LOCAL_DRAIN_SAFETY_CAP",
+                            action,
+                            started,
+                            "LOCAL_DRAIN_SAFETY_CAP");
+                        return new DispatchResult(
+                            DispatchOutcome.LocalCompleted,
+                            action.Identity.ActionId,
+                            "LOCAL_DRAIN_SAFETY_CAP");
+                    }
+
+                    continue;
+                }
+
+                var prepared = action.ActionType switch
+                {
+                    OperatorActionType.CreateAndService =>
+                        await _browser.CreateTargetAsync(target, cancellationToken),
+                    OperatorActionType.RestoreAndService =>
+                        await _browser.RestoreTargetAsync(target, cancellationToken),
+                    _ =>
+                        await _browser.PrepareTargetAsync(target, cancellationToken)
+                };
+
+                if (!prepared.IsApplied)
+                {
+                    var error = prepared.NormalizedError ??
+                        (prepared.Outcome == BrowserOutcome.Unknown
+                            ? "BROWSER_OUTCOME_UNKNOWN"
+                            : "BROWSER_PREPARE_FAILED");
+
+                    if (prepared.Outcome == BrowserOutcome.Unknown)
+                    {
+                        await _actions.RecordBlockedAsync(
+                            action.Identity,
+                            error,
+                            cancellationToken);
+                    }
+                    else
+                    {
+                        await RecordFailureAsync(
+                            action,
+                            error,
+                            cancellationToken);
+                    }
+
+                    Write(
+                        "dispatch",
+                        prepared.Outcome == BrowserOutcome.Unknown
+                            ? "BROWSER_OUTCOME_UNKNOWN"
+                            : "BROWSER_PREPARE_FAILED",
+                        action,
+                        started,
+                        error);
+                    return new DispatchResult(
+                        DispatchOutcome.BrowserPrepareFailed,
+                        action.Identity.ActionId,
+                        error);
+                }
+
+                if (!await _actions.RevalidateAsync(
+                        action.Identity,
+                        cancellationToken))
                 {
                     await RecordFailureAsync(
                         action,
-                        maintenance.NormalizedError ?? "BROWSER_MAINTENANCE_FAILED",
+                        "STALE_ACTION_OR_GENERATION",
                         cancellationToken);
                     Write(
                         "dispatch",
-                        "BROWSER_MAINTENANCE_FAILED",
+                        "STALE",
                         action,
                         started,
-                        maintenance.NormalizedError);
+                        "STALE_ACTION_OR_GENERATION");
                     return new DispatchResult(
-                        DispatchOutcome.BrowserMaintenanceFailed,
+                        DispatchOutcome.Stale,
                         action.Identity.ActionId,
-                        maintenance.NormalizedError);
+                        "STALE_ACTION_OR_GENERATION");
                 }
 
-                await _actions.RecordLocalCompletedAsync(
-                    action.Identity,
-                    cancellationToken);
-                Write("dispatch", "LOCAL_COMPLETED", action, started);
-                return new DispatchResult(
-                    DispatchOutcome.LocalCompleted,
-                    action.Identity.ActionId);
-            }
-
-            var prepared = action.ActionType switch
-            {
-                OperatorActionType.CreateAndService =>
-                    await _browser.CreateTargetAsync(target, cancellationToken),
-                OperatorActionType.RestoreAndService =>
-                    await _browser.RestoreTargetAsync(target, cancellationToken),
-                _ =>
-                    await _browser.PrepareTargetAsync(target, cancellationToken)
-            };
-
-            if (!prepared.IsApplied)
-            {
-                var error = prepared.NormalizedError ??
-                    (prepared.Outcome == BrowserOutcome.Unknown
-                        ? "BROWSER_OUTCOME_UNKNOWN"
-                        : "BROWSER_PREPARE_FAILED");
-
-                if (prepared.Outcome == BrowserOutcome.Unknown)
+                try
                 {
-                    await _actions.RecordBlockedAsync(
-                        action.Identity,
-                        error,
-                        cancellationToken);
+                    _clipboard.WriteText(action.PacketText);
                 }
-                else
+                catch (Exception exception)
+                {
+                    var error = ErrorNormalizer.FromException(exception);
+                    await RecordFailureAsync(action, error, cancellationToken);
+                    Write("dispatch", "CLIPBOARD_FAILED", action, started, error);
+                    return new DispatchResult(
+                        DispatchOutcome.ClipboardFailed,
+                        action.Identity.ActionId,
+                        error);
+                }
+
+                var focused = await _browser.FocusTargetAsync(
+                    target,
+                    cancellationToken);
+                if (!focused.IsApplied)
                 {
                     await RecordFailureAsync(
                         action,
-                        error,
+                        focused.NormalizedError ?? "BROWSER_FOCUS_FAILED",
                         cancellationToken);
+                    Write(
+                        "dispatch",
+                        "BROWSER_FOCUS_FAILED",
+                        action,
+                        started,
+                        focused.NormalizedError);
+                    return new DispatchResult(
+                        DispatchOutcome.BrowserFocusFailed,
+                        action.Identity.ActionId,
+                        focused.NormalizedError);
                 }
 
-                Write(
-                    "dispatch",
-                    prepared.Outcome == BrowserOutcome.Unknown
-                        ? "BROWSER_OUTCOME_UNKNOWN"
-                        : "BROWSER_PREPARE_FAILED",
-                    action,
-                    started,
-                    error);
-                return new DispatchResult(
-                    DispatchOutcome.BrowserPrepareFailed,
-                    action.Identity.ActionId,
-                    error);
-            }
-
-            if (!await _actions.RevalidateAsync(
+                await _actions.RecordLocalPreparedAsync(
                     action.Identity,
-                    cancellationToken))
-            {
-                await RecordFailureAsync(
-                    action,
-                    "STALE_ACTION_OR_GENERATION",
                     cancellationToken);
-                Write(
-                    "dispatch",
-                    "STALE",
-                    action,
-                    started,
-                    "STALE_ACTION_OR_GENERATION");
+                Write("dispatch", "LOCAL_PREPARED", action, started);
                 return new DispatchResult(
-                    DispatchOutcome.Stale,
-                    action.Identity.ActionId,
-                    "STALE_ACTION_OR_GENERATION");
+                    DispatchOutcome.LocalPrepared,
+                    action.Identity.ActionId);
             }
-
-            try
-            {
-                _clipboard.WriteText(action.PacketText);
-            }
-            catch (Exception exception)
-            {
-                var error = ErrorNormalizer.FromException(exception);
-                await RecordFailureAsync(action, error, cancellationToken);
-                Write("dispatch", "CLIPBOARD_FAILED", action, started, error);
-                return new DispatchResult(
-                    DispatchOutcome.ClipboardFailed,
-                    action.Identity.ActionId,
-                    error);
-            }
-
-            var focused = await _browser.FocusTargetAsync(
-                target,
-                cancellationToken);
-            if (!focused.IsApplied)
-            {
-                await RecordFailureAsync(
-                    action,
-                    focused.NormalizedError ?? "BROWSER_FOCUS_FAILED",
-                    cancellationToken);
-                Write(
-                    "dispatch",
-                    "BROWSER_FOCUS_FAILED",
-                    action,
-                    started,
-                    focused.NormalizedError);
-                return new DispatchResult(
-                    DispatchOutcome.BrowserFocusFailed,
-                    action.Identity.ActionId,
-                    focused.NormalizedError);
-            }
-
-            await _actions.RecordLocalPreparedAsync(
-                action.Identity,
-                cancellationToken);
-            Write("dispatch", "LOCAL_PREPARED", action, started);
-            return new DispatchResult(
-                DispatchOutcome.LocalPrepared,
-                action.Identity.ActionId);
         }
         catch (OperationCanceledException)
         {

@@ -418,6 +418,7 @@ jobs:
         github.event.action == 'labeled' &&
         (github.event.label.name == 'stage10-ut11' ||
          github.event.label.name == 'stage10-ut01' ||
+         github.event.label.name == 'stage10-ut02' ||
          github.event.label.name == 'stage10-ut10') &&
         github.event.pull_request.number == 590 &&
         github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1'
@@ -470,6 +471,7 @@ jobs:
           $trial = switch ($label) {
             "stage10-ut11" { "UT-11" }
             "stage10-ut01" { "UT-01" }
+            "stage10-ut02" { "UT-02" }
             "stage10-ut10" { "UT-10" }
             default { throw "Unsupported Stage 10 usability label: $label" }
           }

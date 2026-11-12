@@ -88,6 +88,49 @@ public sealed class SingleFlightDispatchCoordinatorTests
     }
 
     [TestMethod]
+    public async Task LocalOnlyMaintenanceDrainsUntilServiceActionInOneDispatch()
+    {
+        var fixture = new Fixture(enabled: true);
+        fixture.Actions.NextAction = null;
+        fixture.Actions.QueuedActions.Enqueue(new OperatorAction(
+            new ActionIdentity("discard-1", "slot-old", 0),
+            "",
+            "payload-ref-discard",
+            new string('b', 64),
+            OperatorActionType.DiscardSession));
+        fixture.Actions.QueuedActions.Enqueue(new OperatorAction(
+            new ActionIdentity("service-1", "slot-next", 0),
+            "PACKET-SECRET-CONTENT",
+            "payload-ref-service",
+            new string('c', 64),
+            OperatorActionType.ServiceExisting));
+
+        var result = await fixture.Coordinator.DispatchAsync();
+
+        Assert.AreEqual(DispatchOutcome.LocalPrepared, result.Outcome);
+        Assert.AreEqual("service-1", result.ActionId);
+        Assert.AreEqual(2, fixture.Actions.ClaimCalls);
+        Assert.AreEqual(1, fixture.Actions.LocalCompletedCalls);
+        Assert.AreEqual(1, fixture.Browser.DiscardCalls);
+        Assert.AreEqual(1, fixture.Browser.PrepareCalls);
+        Assert.AreEqual(1, fixture.Clipboard.WriteCalls);
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                "claim",
+                "discard",
+                "local_completed",
+                "claim",
+                "prepare",
+                "revalidate",
+                "clipboard",
+                "focus",
+                "local_prepared"
+            },
+            fixture.Order);
+    }
+
+    [TestMethod]
     public async Task DiagnosticEventsNeverContainPacketText()
     {
         var fixture = new Fixture(enabled: true);
@@ -134,6 +177,8 @@ public sealed class SingleFlightDispatchCoordinatorTests
         public List<string> Order { get; set; } = [];
         public int ClaimCalls { get; private set; }
         public int LocalPreparedCalls { get; private set; }
+        public int LocalCompletedCalls { get; private set; }
+        public Queue<OperatorAction> QueuedActions { get; } = new();
         public bool RevalidateResult { get; set; } = true;
         public Task<OperatorAction?>? ClaimGate { get; set; }
         public TaskCompletionSource FirstClaimEntered { get; } =
@@ -153,6 +198,11 @@ public sealed class SingleFlightDispatchCoordinatorTests
             if (ClaimGate is not null)
             {
                 return await ClaimGate;
+            }
+
+            if (QueuedActions.Count > 0)
+            {
+                return QueuedActions.Dequeue();
             }
 
             return NextAction;
@@ -183,6 +233,15 @@ public sealed class SingleFlightDispatchCoordinatorTests
             Order.Add("local_failure");
             return Task.CompletedTask;
         }
+
+        public Task RecordLocalCompletedAsync(
+            ActionIdentity identity,
+            CancellationToken cancellationToken)
+        {
+            LocalCompletedCalls++;
+            Order.Add("local_completed");
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class FakeBrowserPort : IBrowserPort
@@ -190,6 +249,7 @@ public sealed class SingleFlightDispatchCoordinatorTests
         public List<string> Order { get; set; } = [];
         public int PrepareCalls { get; private set; }
         public int FocusCalls { get; private set; }
+        public int DiscardCalls { get; private set; }
 
         public Task<BrowserResult> PrepareTargetAsync(
             BrowserTarget target,
@@ -206,6 +266,15 @@ public sealed class SingleFlightDispatchCoordinatorTests
         {
             FocusCalls++;
             Order.Add("focus");
+            return Task.FromResult(BrowserResult.Applied());
+        }
+
+        public Task<BrowserResult> DiscardTargetAsync(
+            BrowserTarget target,
+            CancellationToken cancellationToken)
+        {
+            DiscardCalls++;
+            Order.Add("discard");
             return Task.FromResult(BrowserResult.Applied());
         }
     }

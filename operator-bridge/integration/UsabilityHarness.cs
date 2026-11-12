@@ -202,6 +202,35 @@ internal static class UsabilityHarness
                 world.Queue("ut01-04", "RESTORE_AND_SERVICE", "slot-3", 0);
                 world.Queue("ut01-05", "SERVICE_EXISTING", "slot-2", 0);
                 return;
+            case "UT-02":
+                world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, bindingPresent: true);
+                world.Sessions.Add("slot-2", 0, SimContinuity.NotEstablished, bindingPresent: false);
+                world.Sessions.Add("slot-3", 0, SimContinuity.Trusted, bindingPresent: true);
+                world.Sessions.Add("slot-4", 0, SimContinuity.Trusted, bindingPresent: true);
+                world.Sessions.Add("slot-5", 0, SimContinuity.NotEstablished, bindingPresent: false);
+                world.Sessions.Add("slot-6", 0, SimContinuity.Trusted, bindingPresent: true);
+
+                world.Queue("ut02-01", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut02-02", "DISCARD_SESSION", "slot-4", 0);
+                world.Queue("ut02-03", "RESTORE_AND_SERVICE", "slot-3", 0);
+                world.Queue("ut02-04", "CREATE_AND_SERVICE", "slot-2", 0);
+                world.Queue("ut02-05", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut02-06", "RESTORE_AND_SERVICE", "slot-4", 0);
+                world.Queue("ut02-07", "RETIRE_SESSION", "slot-6", 0);
+                world.Queue("ut02-08", "CREATE_AND_SERVICE", "slot-6", 0);
+                world.Queue("ut02-09", "SERVICE_EXISTING", "slot-2", 0);
+                world.Queue("ut02-10", "DISCARD_SESSION", "slot-1", 0);
+                world.Queue("ut02-11", "RESTORE_AND_SERVICE", "slot-1", 0);
+                world.Queue("ut02-12", "SERVICE_EXISTING", "slot-3", 0);
+                world.Queue("ut02-13", "CREATE_AND_SERVICE", "slot-5", 0);
+                world.Queue("ut02-14", "SERVICE_EXISTING", "slot-6", 0);
+                world.Queue("ut02-15", "DISCARD_SESSION", "slot-4", 0);
+                world.Queue("ut02-16", "RESTORE_AND_SERVICE", "slot-4", 0);
+                world.Queue("ut02-17", "SERVICE_EXISTING", "slot-5", 0);
+                world.Queue("ut02-18", "SERVICE_EXISTING", "slot-2", 0);
+                world.Queue("ut02-19", "SERVICE_EXISTING", "slot-3", 0);
+                world.Queue("ut02-20", "SERVICE_EXISTING", "slot-1", 0);
+                return;
             case "UT-10":
                 world.Sessions.Add(
                     "slot-1",
@@ -240,7 +269,7 @@ internal static class UsabilityHarness
                 .GetResult(),
             "seed slot-1");
 
-        if (trialId == "UT-01")
+        if (trialId is "UT-01" or "UT-02")
         {
             RequireApplied(
                 browser.CreateTargetAsync(
@@ -256,6 +285,20 @@ internal static class UsabilityHarness
                     .GetAwaiter()
                     .GetResult(),
                 "discard slot-3");
+        }
+
+        if (trialId == "UT-02")
+        {
+            foreach (var slot in new[] { "slot-4", "slot-6" })
+            {
+                RequireApplied(
+                    browser.CreateTargetAsync(
+                            new BrowserTarget(slot, 0),
+                            CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult(),
+                    $"seed {slot}");
+            }
         }
     }
 
@@ -600,14 +643,26 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         var intended = _world.Actions.Actions.Count;
         var completed = _world.Actions.Actions.Count(
             action => action.Status == SimActionStatus.Completed);
+        var serviceActionsIntended = _world.Actions.Actions.Count(IsServiceAction);
+        var localOnlyActionsIntended = _world.Actions.Actions.Count(action =>
+            action.ActionType is "DISCARD_SESSION" or "RETIRE_SESSION");
+        var distinctServiceWorkers = _world.Actions.Actions
+            .Where(IsServiceAction)
+            .Select(action => action.WorkerSlotId)
+            .Distinct(StringComparer.Ordinal)
+            .Count();
         var objectivePass = _trialId == "UT-11"
             ? true
             : completed == intended &&
-              ValidDurableAcks == intended &&
+              ValidDurableAcks == serviceActionsIntended &&
               WrongWorkerDispatches == 0 &&
               WrongPacketDispatches == 0 &&
               RejectedStateSubmissions == 0 &&
-              DispatchFailures == 0;
+              DispatchFailures == 0 &&
+              (_trialId != "UT-02" ||
+               (intended == 20 &&
+                localOnlyActionsIntended > 0 &&
+                distinctServiceWorkers >= 2));
 
         Directory.CreateDirectory(
             Path.GetDirectoryName(Path.GetFullPath(_resultPath))!);
@@ -629,6 +684,9 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                     end_timestamp = DateTimeOffset.UtcNow,
                     actions_intended = intended,
                     actions_completed = completed,
+                    service_actions_intended = serviceActionsIntended,
+                    local_only_actions_intended = localOnlyActionsIntended,
+                    distinct_service_workers = distinctServiceWorkers,
                     valid_durable_acks = ValidDurableAcks,
                     hotkey_presses = HotkeyPresses,
                     no_action_presses = NoActionPresses,
@@ -654,6 +712,12 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         ExitCode = objectivePass ? 0 : 1;
         ExitThread();
     }
+
+    private static bool IsServiceAction(SimAction action) =>
+        action.ActionType is
+            "SERVICE_EXISTING" or
+            "CREATE_AND_SERVICE" or
+            "RESTORE_AND_SERVICE";
 
     protected override void ExitThreadCore()
     {

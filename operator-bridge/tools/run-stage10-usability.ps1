@@ -2,7 +2,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$RepositoryRoot,
   [Parameter(Mandatory = $true)]
-  [ValidateSet("UT-11", "UT-01", "UT-10")]
+  [ValidateSet("UT-11", "UT-01", "UT-02", "UT-10")]
   [string]$TrialId,
   [string]$ResultPath,
   [int]$DurationSeconds = 900,
@@ -128,6 +128,8 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
   Write-Host "STAGE10_USABILITY_READY=$TrialId"
   if ($TrialId -eq "UT-11") {
     Write-Host "Bridge is OFF. Use $SchedulerHotkey normally in representative foreground applications for the configured duration. The bridge must not react."
+  } elseif ($TrialId -eq "UT-02") {
+    Write-Host "UT-02 mixed batch is ready. Repeat: press $SchedulerHotkey, then Ctrl+V, then Enter whenever a worker is focused. Local-only retire/discard actions are drained transparently by the same scheduler press. Do not manually choose or search browser tabs."
   } else {
     Write-Host "For each cycle: press $SchedulerHotkey, then Ctrl+V, then Enter. Do not manually choose or search browser tabs."
   }
