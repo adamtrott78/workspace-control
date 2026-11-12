@@ -225,6 +225,64 @@ internal static class UsabilityHarness
                 world.Queue("ut03-05", "SERVICE_EXISTING", "slot-2", 0);
                 world.Queue("ut03-06", "SERVICE_EXISTING", "slot-3", 0);
                 return;
+            case "UT-04":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-3",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-4",
+                    0,
+                    SimContinuity.NotEstablished,
+                    bindingPresent: false);
+                world.Sessions.Add(
+                    "slot-5",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+
+                var pendingOne = world.Queue(
+                    "ut04-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                var claimedOne = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedOne, pendingOne) ||
+                    !world.Actions.MarkLocalPrepared(pendingOne))
+                {
+                    throw new InvalidOperationException(
+                        "UT04_PENDING_ONE_SEED_FAILED");
+                }
+
+                var pendingTwo = world.Queue(
+                    "ut04-pending-02",
+                    "SERVICE_EXISTING",
+                    "slot-2",
+                    0);
+                var claimedTwo = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedTwo, pendingTwo) ||
+                    !world.Actions.MarkLocalPrepared(pendingTwo))
+                {
+                    throw new InvalidOperationException(
+                        "UT04_PENDING_TWO_SEED_FAILED");
+                }
+
+                world.Queue("ut04-01", "SERVICE_EXISTING", "slot-3", 0);
+                world.Queue("ut04-02", "CREATE_AND_SERVICE", "slot-4", 0);
+                world.Queue("ut04-03", "RESTORE_AND_SERVICE", "slot-5", 0);
+                world.Queue("ut04-04", "SERVICE_EXISTING", "slot-3", 0);
+                return;
             case "UT-02":
                 world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, bindingPresent: true);
                 world.Sessions.Add("slot-2", 0, SimContinuity.NotEstablished, bindingPresent: false);
@@ -323,6 +381,27 @@ internal static class UsabilityHarness
                     $"seed {slot}");
             }
         }
+
+        if (trialId == "UT-04")
+        {
+            foreach (var slot in new[] { "slot-2", "slot-3", "slot-5" })
+            {
+                RequireApplied(
+                    browser.CreateTargetAsync(
+                            new BrowserTarget(slot, 0),
+                            CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult(),
+                    $"seed {slot}");
+            }
+            RequireApplied(
+                browser.DiscardTargetAsync(
+                        new BrowserTarget("slot-5", 0),
+                        CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult(),
+                "discard slot-5");
+        }
     }
 
     private static void RequireApplied(
@@ -396,6 +475,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private int _awaitingHumanSubmit;
     private string? _awaitingActionId;
     private bool _finishing;
+    private int _maxSentUnconfirmed;
+    private bool _multipleSentUnconfirmedWithReadyObserved;
 
     public UsabilityApplicationContext(
         string trialId,
@@ -488,6 +569,10 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public int HandoffBlockedPresses { get; private set; }
     public int HandoffRefocuses { get; private set; }
     public int InterruptionPromptsIssued { get; private set; }
+    public int Ut04BackgroundAcksApplied { get; private set; }
+    public int MaxSentUnconfirmed => _maxSentUnconfirmed;
+    public bool MultipleSentUnconfirmedWithReadyObserved =>
+        _multipleSentUnconfirmedWithReadyObserved;
     public int ValidDurableAcks { get; private set; }
     public int WrongWorkerDispatches { get; private set; }
     public int WrongPacketDispatches { get; private set; }
@@ -501,13 +586,21 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     {
         HotkeyPresses++;
 
-        var pending = _world.Actions.Actions.FirstOrDefault(action =>
-            action.Status == SimActionStatus.AwaitingDurableAck);
-        if (pending is not null)
+        if (Volatile.Read(ref _awaitingHumanSubmit) != 0)
         {
             HandoffBlockedPresses++;
-            _awaitingActionId = pending.ActionId;
-            Volatile.Write(ref _awaitingHumanSubmit, 1);
+
+            var pending = _world.Actions.Actions.FirstOrDefault(action =>
+                action.ActionId == _awaitingActionId &&
+                action.Status == SimActionStatus.AwaitingDurableAck);
+            if (pending is null)
+            {
+                DispatchFailures++;
+                LastDispatchOutcome = "HandoffStateMismatch";
+                LastDispatchError = "AWAITING_HUMAN_SUBMIT_ACTION_MISSING";
+                Finish();
+                return;
+            }
 
             var focus = await _browser.FocusTargetAsync(
                 new BrowserTarget(
@@ -525,12 +618,6 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             }
 
             HandoffRefocuses++;
-            return;
-        }
-
-        if (Volatile.Read(ref _awaitingHumanSubmit) != 0)
-        {
-            HandoffBlockedPresses++;
             return;
         }
 
@@ -614,6 +701,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                 request.Completion.TrySetResult(applied);
             }
 
+            ApplyUt04BackgroundAcksIfReady();
             RefreshWorkloadPresentation();
 
             if (ShouldFinish())
@@ -699,6 +787,43 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         return applied;
     }
 
+    private void ApplyUt04BackgroundAcksIfReady()
+    {
+        if (_trialId != "UT-04" ||
+            Ut04BackgroundAcksApplied >= 2 ||
+            Volatile.Read(ref _awaitingHumanSubmit) != 0)
+        {
+            return;
+        }
+
+        var newWorkCompleted = _world.Actions.Actions
+            .Where(action =>
+                action.ActionId.StartsWith(
+                    "ut04-",
+                    StringComparison.Ordinal) &&
+                !action.ActionId.StartsWith(
+                    "ut04-pending-",
+                    StringComparison.Ordinal))
+            .All(action => action.Status == SimActionStatus.Completed);
+        if (!newWorkCompleted)
+        {
+            return;
+        }
+
+        foreach (var pending in _world.Actions.Actions.Where(action =>
+                     action.ActionId.StartsWith(
+                         "ut04-pending-",
+                         StringComparison.Ordinal) &&
+                     action.Status == SimActionStatus.AwaitingDurableAck))
+        {
+            if (_world.Actions.ApplyAck(pending))
+            {
+                ValidDurableAcks++;
+                Ut04BackgroundAcksApplied++;
+            }
+        }
+    }
+
     private bool ShouldFinish()
     {
         if (_trialId == "UT-11")
@@ -748,6 +873,12 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
               WrongPacketDispatches == 0 &&
               RejectedStateSubmissions == 0 &&
               DispatchFailures == 0 &&
+              (_trialId != "UT-04" ||
+               (intended == 6 &&
+                serviceActionsIntended == 6 &&
+                Ut04BackgroundAcksApplied == 2 &&
+                MaxSentUnconfirmed >= 2 &&
+                MultipleSentUnconfirmedWithReadyObserved)) &&
               (_trialId != "UT-03" ||
                (intended == 6 &&
                 serviceActionsIntended == 6 &&
@@ -794,6 +925,14 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                         _trialId == "UT-03" ? 5 : 0,
                     interruption_prompts_issued =
                         InterruptionPromptsIssued,
+                    ut04_preexisting_sent_unconfirmed =
+                        _trialId == "UT-04" ? 2 : 0,
+                    ut04_background_acks_applied =
+                        Ut04BackgroundAcksApplied,
+                    max_sent_unconfirmed =
+                        MaxSentUnconfirmed,
+                    multiple_sent_unconfirmed_with_ready_observed =
+                        MultipleSentUnconfirmedWithReadyObserved,
                     awaiting_human_submit =
                         Volatile.Read(ref _awaitingHumanSubmit) != 0,
                     wrong_worker_dispatches = WrongWorkerDispatches,
@@ -819,6 +958,14 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             IsServiceAction(action));
         var sentUnconfirmed = _world.Actions.Actions.Count(action =>
             action.Status == SimActionStatus.AwaitingDurableAck);
+
+        _maxSentUnconfirmed = Math.Max(
+            _maxSentUnconfirmed,
+            sentUnconfirmed);
+        if (ready > 0 && sentUnconfirmed >= 2)
+        {
+            _multipleSentUnconfirmedWithReadyObserved = true;
+        }
 
         var presentation = WorkloadStatusPresentation.Project(
             _bridgeController.IsEnabled,
