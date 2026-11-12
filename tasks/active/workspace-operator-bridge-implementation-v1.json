@@ -507,7 +507,7 @@
       "validation": [
         {
           "check": "Stage 10 UT-01 primary loop + recovery hardening checkpoint",
-          "result": "IN_PROGRESS",
+          "result": "NOT_RUN",
           "evidence": [
             "UT-11 PASS: Operator Bridge run #194 / stage10-usability job 130809245969 emitted OBJECTIVE_PASS with zero wrong-worker, wrong-packet, or rejected submissions.",
             "UT-01 happy path PASS on recovery-guard head b5d9ae62b15d5496925f634aa4582dd435b23c0e: Operator Bridge run #208 / stage10-usability job 130950231898 completed 5/5 actions with 5/5 durable acknowledgments and OBJECTIVE_PASS.",
