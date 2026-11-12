@@ -36,23 +36,21 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Genuine root/operator authority gate: on the Lambda host, use exact validated head 52525fa00688cc80079f008a975131cee959402e and rerun the read-only Phase-A preflight. Only if every existing runner-class authority envelope is preserved may the operator create the exact root-owned 0600 EXPAND_PADATASET_SCIENTIFIC_V3_INACTIVE authorization receipt and invoke scripts/lambda_ci_v3_padataset_scientific_activation_v1.py --expand-inactive with --expected-head 52525fa00688cc80079f008a975131cee959402e. Do not run Phase B until the Phase-A committed receipt is verified.
+Phase-B preflight only: on Lambda, using exact validated source head 52525fa00688cc80079f008a975131cee959402e and the committed Phase-A installed-inactive generation, re-verify effective generation; re-attest runtime/base-Python/scientific-data identities; verify PADataset default-branch workflow blob e70412f3ccdc70826f56f7ba0255518f1f95224f and zero queued/in-progress scientific runs; run the reviewed v3 scale-set preflight for lambda-padataset-scientific-single-gpu and require exact PADataset repository identity with assigned=0/running=0; verify project-scoped controller credential. Persist a fresh root-owned 0600 PADATASET_SCIENTIFIC_ACTIVATION_PREFLIGHT_CONFIRMED receipt only if every check passes. Do not activate yet.
 
 ## Remaining work
 
-- On the Lambda host, use the exact validated correction head 52525fa00688cc80079f008a975131cee959402e to rerun the read-only Phase-A preflight; require exact preservation of every existing class root envelope, then create the root-owned one-shot EXPAND_PADATASET_SCIENTIFIC_V3_INACTIVE authority receipt.
-- Run Phase A with scripts/lambda_ci_v3_padataset_scientific_activation_v1.py --expand-inactive; require the committed INSTALLED_INACTIVE transaction receipt, active ten-class shared provisioner, exact effective-generation verification, and proof that existing class controller InvocationID/MainPID/NRestarts values were preserved.
-- Create/attest lambda-padataset-scientific-single-gpu with the already-reviewed v3 scale-set preflight; verify exact PADataset default-branch workflow blob, zero stale scientific runs, promoted runtime/base-Python integrity, and exact scientific-data identity.
-- Create the separate root-owned ACTIVATE_PADATASET_SCIENTIFIC_V3 authority receipt and run Phase B; require only the scientific controller/route to become ACTIVE/ENABLED.
-- Run scientific smoke, bounded training smoke, full PA2 Stage03 backbone training, and Architecture C evaluation with cleanup/runtime-integrity receipts.
+- Run the fresh Phase-B activation preflight: verify effective generation is still INSTALLED/INACTIVE with route DISABLED; re-attest promoted runtime tree/base-Python and scientific-data digests; verify exact PADataset default-branch scientific workflow blob and zero queued/in-progress scientific workflow runs; create/attest lambda-padataset-scientific-single-gpu with the reviewed v3 scale-set preflight and require zero assigned/running jobs; verify the PADataset controller credential remains project-scoped.
+- Create the separate root-owned ACTIVATE_PADATASET_SCIENTIFIC_V3 authority receipt bound to the exact inactive-generation receipt, fresh preflight confirmation, scale-set identity, workflow blob, runtime/data identities, target class/route, then run Phase B; require only the scientific controller/route to become ACTIVE/ENABLED while all existing controller snapshots remain unchanged.
+- Run the non-destructive scientific smoke, then one bounded training smoke, full PA2 Stage03 backbone training, and Architecture C evaluation with cleanup/runtime-integrity receipts.
 - Refresh Workspace Shell trusted task authority to include padataset-autonomous-scientific-execution-v1 only after the final promoted/activated state is durable.
 - Track the separate v3 controller primary-rate-limit 403 handling defect under separately authorized infrastructure scope; do not mix that hotfix into this scientific task.
 
 ## Blockers / gates
 
-- Live Phase A now requires explicit root/operator authority on the Lambda host. GitHub repository authority cannot create the required root-owned 0600 one-shot authorization receipt or mutate /etc, /var/lib, systemd, or the shared provisioner.
+- Phase B requires a fresh operator/root-owned activation preflight confirmation and separate one-shot ACTIVATE_PADATASET_SCIENTIFIC_V3 authority receipt; Phase-A authority cannot be reused.
 - Live Workspace Shell trusted task authority still does not include padataset-autonomous-scientific-execution-v1, so privileged Workspace Shell helpers remain unavailable for this task.
-- Phase B remains gated behind successful Phase A plus a fresh exact workflow/scale-set/runtime/data/no-stale-run preflight and a separate one-shot root/operator activation receipt.
+- Scientific execution remains admission-disabled until the full Phase-B preflight and activation transaction commit.
 
 ## Fresh-chat initialization
 
