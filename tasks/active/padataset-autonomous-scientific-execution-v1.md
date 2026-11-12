@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Reconnect to the Lambda host and run a no-temp-file, non-set-e secret-safe rate-limit probe against the installed workspace-control controller credential. If the authenticated probe reports positive remaining quota, start workspace-ci-v3-controller@workspace-control-control-small-v1.service and verify it stays active; if quota remains zero, leave it stopped and capture the reset epoch. Do not cancel or duplicate validation #466.
+First recover Workspace Heartbeat separately by diagnosing exact v0.4.8 local MCP startup (runtime SHA, node_modules, port 8787 ownership, and an isolated ephemeral-port Node startup). For validation #466, perform one fresh authenticated rate-limit probe after reset; if remaining quota is positive, start workspace-ci-v3-controller@workspace-control-control-small-v1.service and verify it remains active before rechecking #466. Do not cancel or duplicate #466.
 
 ## Remaining work
 
@@ -51,8 +51,9 @@ Reconnect to the Lambda host and run a no-temp-file, non-set-e secret-safe rate-
 
 - Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
 - Root cause is proven: workspace-ci-v3-controller@workspace-control-control-small-v1.service restart-stormed on GitHub primary-rate-limit HTTP 403 while discovering REST-attested queued demand.
-- The exact v3 control-small controller is now intentionally stopped/inactive at NRestarts=3495, containing further rate-limit amplification.
-- The first secret-safe rate-limit probe failed with curl rc=23 and the SSH login shell exited because top-level set -e was enabled. No restart was attempted after that failed probe.
+- The exact v3 control-small controller is intentionally stopped/inactive at NRestarts=3495, containing further rate-limit amplification.
+- Authenticated secret-safe probe at 2026-11-12 07:55:11 EST returned core quota 0/5000, used=5002, reset epoch 1794488297 = 2026-11-12 07:58:17 EST. A fresh post-reset probe is required before restarting.
+- Workspace Heartbeat is independently unavailable after operator heartbeat-down/heartbeat-up: launcher reports v0.4.8 MCP server failed to become healthy before tunnel startup. This is a separate operator infrastructure incident and does not change validation #466 authority.
 - Scientific route must not be reconciled or invoked until exact-head validation and live reconciliation succeed.
 
 ## Fresh-chat initialization
