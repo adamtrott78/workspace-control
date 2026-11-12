@@ -2,7 +2,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$RepositoryRoot,
   [Parameter(Mandatory = $true)]
-  [ValidateSet("UT-11", "UT-01", "UT-02", "UT-03", "UT-10")]
+  [ValidateSet("UT-11", "UT-01", "UT-02", "UT-03", "UT-04", "UT-10")]
   [string]$TrialId,
   [string]$ResultPath,
   [int]$DurationSeconds = 900,
@@ -132,6 +132,8 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
     Write-Host "UT-02 mixed batch is ready. Repeat: press $SchedulerHotkey, then Ctrl+V, then Enter whenever a worker is focused. Local-only retire/discard actions are drained transparently by the same scheduler press. Do not manually choose or search browser tabs."
   } elseif ($TrialId -eq "UT-03") {
     Write-Host "UT-03 interruption trial is ready. Complete six normal service cycles. After each of the first five durable acknowledgments, follow the tray interruption prompt: switch to another normal app for 30-60 seconds or take a short idle, then return and resume only with $SchedulerHotkey. Do not search worker tabs or reconstruct scheduler state."
+  } elseif ($TrialId -eq "UT-04") {
+    Write-Host "UT-04 multiple SENT/UNCONFIRMED trial is ready. The tray starts with two independent sent/unconfirmed workers while four new service actions are ready. Complete four normal $SchedulerHotkey -> Ctrl+V -> Enter cycles. Do not choose, revisit, or resolve the prior unconfirmed workers; the simulator will deliver their late durable acknowledgments after the ready work is complete."
   } else {
     Write-Host "For each cycle: press $SchedulerHotkey, then Ctrl+V, then Enter. Do not manually choose or search browser tabs."
   }
