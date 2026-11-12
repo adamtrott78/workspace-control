@@ -147,7 +147,7 @@ class PADatasetAutonomousScientificExecutionTests(unittest.TestCase):
         self.assertEqual(route["execution_contract_id"], "scientific-single-gpu-v1")
         self.assertEqual(
             route["trusted_workflow"]["blob_sha"],
-            "555c2bd1f824519281f149017898d4923439d6cc",
+            "e70412f3ccdc70826f56f7ba0255518f1f95224f",
         )
         self.assertEqual(route["trigger"]["command"], "/lambda-scientific")
         self.assertFalse(route["trigger"]["fork_pr_execution_allowed"])
