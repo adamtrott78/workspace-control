@@ -25,8 +25,8 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: bb6528faf9643ffddf517891eba70f7988267d40
-- Remote verified: false
+- Remote checkpoint: edd1c378a1f9965299581dcb8210e5bb698a6717
+- Remote verified: true
 
 ### PADataset
 
@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Follow exact integration validation #467 / run 43229075867 to terminal state. If SUCCESS, verify main and PR/base authority remain unchanged, then resolve the reviewed promotion path to main without relying on PR #613's current non-main base. Do not create another validation run.
+Stop at the authority gate. Obtain a reviewed authority path that either (A) promotes the validated PR #606 parent lineage through its owning task before this scientific candidate is promoted, or (B) explicitly authorizes a standalone main-based restage including architecture/lambda-ci-systemd-profiles.v1.json and scripts/install_padataset_scientific_runtime_v1.sh. After authority is durable, rebuild/restage from current main as required, exact-head validate again, then promote and reconcile. Do not move main, PR #606's head/base, or widen this capsule autonomously.
 
 ## Remaining work
 
@@ -49,9 +49,10 @@ Follow exact integration validation #467 / run 43229075867 to terminal state. If
 
 ## Blockers / gates
 
-- Exact integration validation #467 / run 43229075867 for edd1c378a1f9965299581dcb8210e5bb698a6717 is queued. Do not duplicate or cancel it.
-- PR #613 currently targets workspace-shell-multirepo-v3-reconcile-20261111 rather than main; do not treat PR merge as main promotion without separately resolving the intended authority/base path.
-- Scientific route must not be reconciled or invoked until the integrated exact-head validation succeeds and the reviewed policy is promoted/reconciled through the authorized path.
+- Promotion authority is blocked. PR #613 targets workspace-shell-multirepo-v3-reconcile-20261111 (PR #606 lineage), not main. Fast-forwarding main to edd1c378a1f9965299581dcb8210e5bb698a6717 would also promote the still-open parent reconciliation lineage and many paths outside this task's mutation authority.
+- A standalone restage from main is also not currently authorized because the scientific task diff includes architecture/lambda-ci-systemd-profiles.v1.json and scripts/install_padataset_scientific_runtime_v1.sh, neither of which is listed in this task capsule's allowed_mutation_scope. Do not self-expand scope.
+- Workspace Shell multirepo authority remains a separate owning-task concern; current Workspace Shell inspection for this PADataset task still fails TASK_NOT_FOUND in the trusted authority root.
+- Scientific route must not be reconciled or invoked until an authority-correct promotion path is established and promoted policy is freshly reconciled.
 
 ## Fresh-chat initialization
 
