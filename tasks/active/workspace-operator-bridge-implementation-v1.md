@@ -29,7 +29,7 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 ## Next safe action
 
-Continue impl_10 from validated implementation head 62e9260f2451d51cdc8b2d724cabbe5691e39ef9. After the UT-01 evidence-only promotion head passes exact-head Workspace Control and Operator Bridge validation, run the implemented UT-10 20-cycle motor-rhythm trial on the interactive foreground Windows runner using the stage10-ut10 path. Complete 20 normal Ctrl+B -> Ctrl+V -> Enter cycles without manually choosing/searching worker tabs. Capture the frozen UT-10 subjective ratings afterward: routine rhythm friction target <=2/7 and worker-selection confidence target >=6/7. Keep Stage 09 target benchmarking deferred.
+Validate the runtime-configurable Ctrl+Space binding change at exact head. After Workspace Control and Operator Bridge validation pass, rerun implemented Stage-10 trials in this order on the interactive foreground Windows runner: UT-11 to prove Bridge OFF releases Ctrl+Space, UT-01 to reconfirm the 5-action/repeated-hotkey recovery path using Ctrl+Space, then UT-10 for 20 normal Ctrl+Space -> Ctrl+V -> Enter cycles. Capture routine rhythm friction and worker-selection confidence after UT-10. Do not retain Ctrl+Space as final until UT-09 representative-work collision testing passes. Keep Stage 09 target benchmarking deferred.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ Continue impl_10 from validated implementation head 62e9260f2451d51cdc8b2d724cab
 
 ## Blockers / gates
 
-- Stage 10 remains IN_PROGRESS after UT-01 recovery-hardening PASS and prior UT-11 PASS. The next directly implemented human trial is UT-10 (20-cycle motor rhythm). Frozen UX-11 still requires the remaining mixed-batch, interruption, judgment, recovery, no-work/background-ack, hotkey-collision, and feedback/checklist evidence before Stage 10 can validate.
+- Ctrl+Space is the selected Stage-10 candidate binding but is not yet empirically accepted. Exact-head validation must pass, then rerun UT-11, UT-01, and UT-10 on Ctrl+Space; later hotkey-sensitive UT-02, UT-03, and UT-09 must also pass before final retention.
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. Do not rerun it during Stage-10 work. It remains mandatory before impl_13 production readiness can pass.
 
 ## Fresh-chat initialization

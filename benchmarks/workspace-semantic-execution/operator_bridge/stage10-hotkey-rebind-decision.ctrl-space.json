@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "stage": "impl_10_usability_trial_execution",
+  "decision": "HOTKEY_REBIND_CANDIDATE",
+  "previous_binding": "Ctrl+B",
+  "previous_binding_disposition": "REJECTED",
+  "candidate_binding": "Ctrl+Space",
+  "candidate_status": "PENDING_EMPIRICAL_ACCEPTANCE",
+  "implementation": "RUNTIME_CONFIGURABLE",
+  "rationale": [
+    "Operator reports better ergonomics for Ctrl+Space -> Ctrl+V than Ctrl+B -> Ctrl+V.",
+    "Ctrl+B UT-10 recorded one extra hotkey press and one rejected submission despite 20/20 actions and durable acknowledgments."
+  ],
+  "invariant_preservation": [
+    "scheduler command semantics unchanged",
+    "manual Ctrl+V unchanged",
+    "manual Enter/durable acknowledgment unchanged",
+    "no synthetic paste/typing/Enter",
+    "browser adapter and content-blind security boundary unchanged",
+    "authority and recovery semantics unchanged"
+  ],
+  "required_reruns": [
+    "UT-11",
+    "UT-01",
+    "UT-10",
+    "UT-02",
+    "UT-03",
+    "UT-09"
+  ],
+  "retention_gate": "Retain Ctrl+Space only after zero unintended scheduler dispatches, zero required native shortcut collisions, and hotkey interference <=2/7 in representative work."
+}

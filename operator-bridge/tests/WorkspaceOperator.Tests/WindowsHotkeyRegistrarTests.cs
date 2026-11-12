@@ -7,7 +7,7 @@ namespace WorkspaceControl.OperatorBridge.Tests;
 public sealed class WindowsHotkeyRegistrarTests
 {
     [TestMethod]
-    public void RegisterUsesDefaultControlBAndNoRepeatThenUnregisters()
+    public void RegisterUsesDefaultControlSpaceAndNoRepeatThenUnregisters()
     {
         var native = new FakeNativeApi();
         var registrar = new WindowsHotkeyRegistrar((nint)123, native);
@@ -20,12 +20,23 @@ public sealed class WindowsHotkeyRegistrarTests
         Assert.AreEqual(
             SchedulerHotkeyBinding.ModControl | WindowsHotkeyRegistrar.ModNoRepeat,
             native.RegisterModifiers);
-        Assert.AreEqual((uint)'B', native.RegisterVirtualKey);
+        Assert.AreEqual((uint)0x20, native.RegisterVirtualKey);
+        Assert.AreEqual("Ctrl+Space", SchedulerHotkeyBinding.Default.DisplayName);
 
         registrar.Unregister();
 
         Assert.IsFalse(registrar.IsRegistered);
         Assert.AreEqual(1, native.UnregisterCalls);
+    }
+
+    [TestMethod]
+    public void ParseSupportsControlSpaceBinding()
+    {
+        var binding = SchedulerHotkeyBinding.Parse("Ctrl+Space");
+
+        Assert.AreEqual(SchedulerHotkeyBinding.ModControl, binding.Modifiers);
+        Assert.AreEqual((uint)0x20, binding.VirtualKey);
+        Assert.AreEqual("Ctrl+Space", binding.DisplayName);
     }
 
     [TestMethod]

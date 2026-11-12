@@ -6,7 +6,7 @@ param(
   [string]$TrialId,
   [string]$ResultPath,
   [int]$DurationSeconds = 900,
-  [string]$SchedulerHotkey = "Ctrl+B"
+  [string]$SchedulerHotkey = "Ctrl+Space"
 )
 
 $ErrorActionPreference = "Stop"

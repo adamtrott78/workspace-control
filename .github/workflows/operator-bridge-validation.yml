@@ -259,7 +259,6 @@ jobs:
     timeout-minutes: 20
     env:
       PSExecutionPolicyPreference: Bypass
-      STAGE10_SCHEDULER_HOTKEY: Ctrl+Alt+X
 
     steps:
       - name: Checkout exact profile-repair head
@@ -428,6 +427,7 @@ jobs:
     timeout-minutes: 35
     env:
       PSExecutionPolicyPreference: Bypass
+      STAGE10_SCHEDULER_HOTKEY: Ctrl+Space
 
     steps:
       - name: Checkout exact Stage 10 usability head

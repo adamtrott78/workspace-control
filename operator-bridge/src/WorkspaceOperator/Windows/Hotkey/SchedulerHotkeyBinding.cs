@@ -11,7 +11,7 @@ public readonly record struct SchedulerHotkeyBinding(
     public const uint ModWin = 0x0008;
 
     public static SchedulerHotkeyBinding Default =>
-        new(ModControl, 0x42, "Ctrl+B");
+        new(ModControl, 0x20, "Ctrl+Space");
 
     public static SchedulerHotkeyBinding Parse(string? value)
     {

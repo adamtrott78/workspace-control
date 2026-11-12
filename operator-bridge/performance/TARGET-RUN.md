@@ -97,7 +97,7 @@ also requires the Chrome parity replicates and the cold-start requirement.
 
 ## Cold-start target probe
 
-The frozen requirement UX-P003 requires Ctrl+B while the dedicated worker
+The frozen requirement UX-P003 requires the configured scheduler hotkey while the dedicated worker
 profile is stopped to reach a ready worker within 8000 ms p95. The production
 helper now has a bounded chrome-level launch adapter for the fixed
 `WorkspaceWorkers` profile. The target Firefox collector follows its

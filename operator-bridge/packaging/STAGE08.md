@@ -2,7 +2,7 @@
 
 Status: implementation artifact for impl_08_packaging_install_update_rollback.
 
-Stage 08 packages the frozen production helper and Firefox adapter without changing UX-00 through UX-13, browser permissions, extension identity, native-host identity, dispatch authority, recovery semantics, or the manual Ctrl+B -> Ctrl+V -> Enter operator workflow.
+Stage 08 packages the frozen production helper and Firefox adapter without changing UX-00 through UX-13, browser permissions, extension identity, native-host identity, dispatch authority, recovery semantics, or the manual Ctrl+Space -> Ctrl+V -> Enter operator workflow.
 
 Production installation is per-user only. Files live under %LOCALAPPDATA%\WorkspaceControl\OperatorBridge by default. Native Messaging registration uses only HKCU\Software\Mozilla\NativeMessagingHosts\com.workspacecontrol.operator_bridge. The installer never writes Firefox profiles, profiles.ini, extension databases, cookies, credentials, tokens, local storage, IndexedDB, or page content. No administrator elevation, service, scheduled task, machine-wide registry key, network listener, or automatic updater is introduced.
 
