@@ -3,7 +3,7 @@
   "policy_id": "lambda-ci-workload-policy-v1",
   "status": "CONTRACT_ONLY_NOT_LIVE_ENFORCEMENT",
   "owning_task": "workspace-lambda-execution-policy-v1",
-  "policy_epoch": 3,
+  "policy_epoch": 4,
   "authority": {
     "owner": "workspace-control",
     "principle": "workflow_or_candidate_input_is_a_claim_root_owned_policy_is_authority",
@@ -129,6 +129,14 @@
       "completeness_verify_before_execution": true,
       "digest_verify_before_execution": true,
       "post_execution_digest_verify": true
+    },
+    "TRUSTED_RUNTIME_PROJECT_CACHE_READONLY": {
+      "trusted_runtime": "read_only",
+      "project_trusted_cache": "read_only",
+      "candidate_persistent_write": false,
+      "completeness_verify_before_execution": true,
+      "runtime_digest_verify_before_execution": true,
+      "runtime_digest_verify_after_execution": true
     }
   },
   "state_effect_classes": {
@@ -150,6 +158,13 @@
       "production_routing_change": false,
       "scientific_state_materialization": false,
       "sustained_model_server_after_job": false
+    },
+    "SCIENTIFIC_EXPERIMENT_EPHEMERAL_ARTIFACTS": {
+      "production_routing_change": false,
+      "scientific_state_materialization": true,
+      "persistent_candidate_write": false,
+      "durable_output_channel": "github_artifact_only",
+      "sustained_process_after_job": false
     }
   },
   "serialization_policy": {
@@ -254,6 +269,16 @@
       "scratch_max_bytes": 8589934592,
       "staging_max_bytes": 0,
       "gpu_count": 0
+    },
+    "scientific_gpu_single_v1": {
+      "execution_profile": "gpu-small",
+      "max_runtime_seconds": 14400,
+      "scratch_max_bytes": 68719476736,
+      "staging_max_bytes": 0,
+      "gpu_count": 1,
+      "gpu_uuids": [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+      ]
     }
   },
   "workload_classes": {
