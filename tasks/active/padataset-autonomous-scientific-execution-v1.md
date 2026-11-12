@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Phase-B preflight only: on Lambda, using exact validated source head 52525fa00688cc80079f008a975131cee959402e and the committed Phase-A installed-inactive generation, re-verify effective generation; re-attest runtime/base-Python/scientific-data identities; verify PADataset default-branch workflow blob e70412f3ccdc70826f56f7ba0255518f1f95224f and zero queued/in-progress scientific runs; run the reviewed v3 scale-set preflight for lambda-padataset-scientific-single-gpu and require exact PADataset repository identity with assigned=0/running=0; verify project-scoped controller credential. Persist a fresh root-owned 0600 PADATASET_SCIENTIFIC_ACTIVATION_PREFLIGHT_CONFIRMED receipt only if every check passes. Do not activate yet.
+Reconnect to Lambda and resume Phase-B preflight without changing repository or system Go: download Go 1.26.3 to a temporary directory using the exact authoritative-validation archive checksum 2b2cfc7148493da5e73981bffbf3353af381d5f93e789c82c79aff64962eb556, run the reviewed v3-canary-preflight with that exact temporary binary, then re-run the fresh runtime/data/GitHub gates and write the short-lived root-owned activation preflight receipt only if all checks pass. Do not activate yet.
 
 ## Remaining work
 
