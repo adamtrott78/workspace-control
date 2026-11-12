@@ -290,6 +290,7 @@ def main() -> int:
             ctl("start",units[cid]); wait_state(units[cid],"active")
 
         after=snapshot_controllers(units)
+        restart_deltas={}
         for cid,state in before.items():
             now=after[cid]
             expected_active=cid in active_before
@@ -301,8 +302,21 @@ def main() -> int:
                     raise RepairError(f"inactive controller unexpectedly activated: {cid}")
             if now.get("UnitFileState")!=state.get("UnitFileState"):
                 raise RepairError(f"controller enablement changed: {cid}")
-            if now.get("NRestarts")!=state.get("NRestarts"):
-                raise RepairError(f"controller restart counter changed: {cid}")
+
+            before_restarts=int(state.get("NRestarts") or "0")
+            after_restarts=int(now.get("NRestarts") or "0")
+            delta=after_restarts-before_restarts
+            restart_deltas[cid]=delta
+            if delta < 0:
+                raise RepairError(f"controller restart counter regressed: {cid}")
+            if before_restarts == 0 and delta != 0:
+                raise RepairError(
+                    f"previously-stable controller restarted during repair: {cid}"
+                )
+            if before_restarts > 0 and delta > 1:
+                raise RepairError(
+                    f"pre-existing restarting controller exceeded bounded restart delta: {cid}"
+                )
 
         require_no_live_provisioner_records()
         require_no_transients(units)
@@ -312,6 +326,7 @@ def main() -> int:
             "phase":"COMMITTED_ACTIVE_RUNTIME_REPAIR",
             "runtime_override_sha256":sha(RUNTIME_OVERRIDE.read_bytes()),
             "controller_snapshot_after":after,
+            "controller_restart_deltas":restart_deltas,
             "provisioner_after":systemd(PROVISIONER_UNIT),
             "completed_at":datetime.now(timezone.utc).isoformat(),
         })
@@ -335,9 +350,35 @@ def main() -> int:
                 else:
                     atomic_file(RUNTIME_OVERRIDE,old_receipt_raw,0o600)
             subprocess.run(["systemctl","start",PROVISIONER_UNIT],check=False)
+            wait_state(PROVISIONER_UNIT,"active")
             for cid in active_before:
                 subprocess.run(["systemctl","start",units[cid]],check=False)
-            tx["phase"]="ROLLED_BACK_PREVIOUS_RUNTIME"; tx["rollback_completed"]=True
+                wait_state(units[cid],"active")
+
+            rollback_after=snapshot_controllers(units)
+            for cid,state in before.items():
+                now=rollback_after[cid]
+                if cid in active_before:
+                    if now.get("ActiveState")!="active" or now.get("SubState")!="running":
+                        raise RepairError(
+                            f"rollback did not restore active controller: {cid}"
+                        )
+                elif now.get("ActiveState")!="inactive":
+                    raise RepairError(
+                        f"rollback activated previously-inactive controller: {cid}"
+                    )
+                if now.get("UnitFileState")!=state.get("UnitFileState"):
+                    raise RepairError(
+                        f"rollback changed controller enablement: {cid}"
+                    )
+
+            require_no_live_provisioner_records()
+            require_no_transients(units)
+            reconciler.verify_installed(BASE_MANIFEST)
+            tx["phase"]="ROLLED_BACK_PREVIOUS_RUNTIME"
+            tx["rollback_completed"]=True
+            tx["rollback_controller_snapshot_after"]=rollback_after
+            tx["rollback_provisioner_after"]=systemd(PROVISIONER_UNIT)
         except BaseException as rollback:
             tx["phase"]="ROLLBACK_INCOMPLETE"; tx["rollback_completed"]=False; tx["rollback_error"]=str(rollback)
         tx["failure"]=str(exc); tx["failed_at"]=datetime.now(timezone.utc).isoformat()
