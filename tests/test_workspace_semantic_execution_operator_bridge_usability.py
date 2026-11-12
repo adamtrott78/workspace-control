@@ -89,6 +89,8 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("stage10-usability:", workflow)
         self.assertIn("stage10-ut11", workflow)
         self.assertIn("stage10-ut01", workflow)
+        self.assertIn("stage10-ut02", workflow)
+        self.assertIn("stage10-ut03", workflow)
         self.assertIn("stage10-ut10", workflow)
         self.assertIn("STAGE10_SCHEDULER_HOTKEY: Ctrl+Space", workflow)
         self.assertIn("needs: validation", workflow)
@@ -102,6 +104,30 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
             workflow,
         )
         self.assertIn("operator-bridge-stage10-usability-", workflow)
+
+    def test_stage10_ut03_interruption_trial_is_explicit_and_bounded(self):
+        harness = (
+            ROOT / "operator-bridge" / "integration" / "UsabilityHarness.cs"
+        ).read_text(encoding="utf-8")
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage10-usability.ps1"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT / ".github" / "workflows" / "operator-bridge-validation.yml"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('case "UT-03":', harness)
+        self.assertIn('world.Queue("ut03-06"', harness)
+        self.assertIn("InterruptionPromptsIssued", harness)
+        self.assertIn("interruption_prompts_required", harness)
+        self.assertIn("interruption_prompts_issued", harness)
+        self.assertIn("InterruptionPromptsIssued == 5", harness)
+        self.assertIn('"UT-03"', script)
+        self.assertIn('$TrialId -eq "UT-03"', script)
+        self.assertIn("stage10-ut03", workflow)
+        self.assertNotIn("SendKeys", harness)
+        self.assertNotIn("KeyboardEvent", harness)
+        self.assertNotIn("MouseEvent", harness)
 
     def test_stage10_wrapper_uses_structured_objective_result_not_windows_exit_code(self):
         script = (
