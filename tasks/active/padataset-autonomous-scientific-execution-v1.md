@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator live workflow-refresh gate: using exact reviewed workspace-control main 8208827862079b0a63719b427c76063d79358345, create a fresh root-owned 0600 workflow-refresh preflight proving PADataset main a7e3eb3718820f6fa3183ebc6b8990da2b49f61f, workflow blob 4cf390ec334b0569dbfc2399ff86c2d892f97586, zero active scientific workflow runs, scale-set id 5 assigned=0/running=0, and no local scientific ledger/provisioner/transient residue. Then create a separate one-shot REFRESH_PADATASET_SCIENTIFIC_WORKFLOW_V1 authority bound to the exact current scientific active receipt, preflight, old/new workflow blobs, current/new target controller-policy digests, and target class. Invoke scripts/lambda_ci_v3_padataset_scientific_workflow_refresh_v1.py. Require COMMITTED_ACTIVE_WORKFLOW_REFRESH, target controller active/running/enabled, shared provisioner preserved, and every non-target controller snapshot unchanged. Only after that commit, issue exactly one `/lambda-scientific 71ef2e5f72608737628164ed99be66e05d17e713 smoke` comment on PADataset PR #16.
+Perform read-only operator diagnosis only; do NOT create another /lambda-scientific comment. Inspect workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service state and recent journal, rerun the reviewed v3-canary-preflight against scale-set lambda-padataset-scientific-single-gpu to capture assigned/running counts, inspect only the target scientific controller ledger and target-class provisioner records/transients, and correlate with queued GitHub run 43293735325 / job 131446381843. If controller is healthy and scale-set assigned=1 but no local admission, diagnose verifier/message-session path. If controller exited, diagnose exact journal failure before any restart. If capacity is held by another class, wait/resolve that class without duplicating scientific demand. Only resume the existing smoke after the cause is proven.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Operator live workflow-refresh gate: using exact reviewed workspace-control main
 
 ## Blockers / gates
 
-- The live scientific controller still trusts predecessor workflow blob e70412f3ccdc70826f56f7ba0255518f1f95224f while PADataset default branch now serves reviewed replacement blob 4cf390ec334b0569dbfc2399ff86c2d892f97586; admission therefore remains intentionally fail-closed until the one-shot root workflow-refresh transaction commits.
-- Live Workspace Shell trusted task authority still does not include padataset-autonomous-scientific-execution-v1, so the root-owned live workflow refresh requires the operator to invoke the reviewed helper with sudo.
+- Scientific workflow run 43293735325 is queued with no scheduler transition. Before any retrigger or training, read-only live diagnosis must determine whether the dedicated scientific controller is still active, whether scale-set 5 now reports assigned=1/running=0, and whether controller journal/ledger shows admission rejection, message-session failure, or capacity wait.
+- Live Workspace Shell trusted authority still does not include padataset-autonomous-scientific-execution-v1, so connected Workspace Shell cannot inspect this live controller without an explicit authority/trust change; do not widen trust merely to diagnose this run.
 
 ## Fresh-chat initialization
 
