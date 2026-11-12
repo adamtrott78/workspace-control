@@ -119,8 +119,16 @@ def generate(repo_root: pathlib.Path, output_root: pathlib.Path) -> dict[str, An
     order = migration["canary_order"]
     if order != sorted(order, key=lambda item: item["order"]):
         raise CanaryGenerationError("canary order is not stable")
-    if set(item["runner_class_id"] for item in order) != set(classes):
-        raise CanaryGenerationError("canary order does not cover exactly nine classes")
+    order_class_ids = [item["runner_class_id"] for item in order]
+    if len(order_class_ids) != 9 or len(set(order_class_ids)) != 9:
+        raise CanaryGenerationError(
+            "migration canary order must contain exactly nine unique classes"
+        )
+    unknown_classes = set(order_class_ids) - set(classes)
+    if unknown_classes:
+        raise CanaryGenerationError(
+            f"migration canary order references unknown classes: {sorted(unknown_classes)}"
+        )
 
     owner_actor = spec["owner_actor_login"]
     workflow_records: dict[str, dict[str, Any]] = {}

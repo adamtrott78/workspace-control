@@ -170,7 +170,7 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
     manifest = _load(manifest_path)
     if manifest.get("mode") != "V3_SUBSTRATE_INSTALL_INACTIVE":
         raise RootActivationError("installed manifest mode invalid")
-    if manifest.get("runner_class_count") != 10:
+    if manifest.get("runner_class_count") not in {9, 10}:
         raise RootActivationError("installed manifest runner class count invalid")
 
     controller_destination = str(reconciler.V3_CONTROLLER_BINARY)
@@ -516,8 +516,10 @@ def _consume_authority(
 
 def _class_ids(root_policy: dict[str, Any]) -> list[str]:
     classes = root_policy.get("runner_classes")
-    if not isinstance(classes, dict) or len(classes) != 10:
-        raise RootActivationError("installed root policy must contain exactly ten classes")
+    if not isinstance(classes, dict) or len(classes) not in {9, 10}:
+        raise RootActivationError(
+            "installed root policy must contain a supported nine- or ten-class generation"
+        )
     return sorted(classes)
 
 
@@ -657,8 +659,9 @@ def activate_root_services(
         raise RootActivationError("installed manifest source head invalid")
     if install_manifest.get("mode") != "V3_SUBSTRATE_INSTALL_INACTIVE":
         raise RootActivationError("installed manifest mode invalid")
-    if install_manifest.get("runner_class_count") != 10:
-        raise RootActivationError("installed manifest runner class count invalid")
+    class_ids = _class_ids(root_policy)
+    if install_manifest.get("runner_class_count") != len(class_ids):
+        raise RootActivationError("installed manifest/root policy class count mismatch")
     root_policy_sha256 = str(root_policy.get("root_policy_sha256", ""))
     if install_manifest.get("root_policy_sha256") != root_policy_sha256:
         raise RootActivationError("installed manifest/root policy digest mismatch")

@@ -606,7 +606,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
     manifest = _json(manifest_path)
     if manifest.get("mode") != "V3_SUBSTRATE_INSTALL_INACTIVE":
         raise ReconcileError("installed manifest mode invalid")
-    if manifest.get("runner_class_count") != 10:
+    if manifest.get("runner_class_count") not in {9, 10}:
         raise ReconcileError("installed manifest runner class count invalid")
 
     controller_destination = str(V3_CONTROLLER_BINARY)

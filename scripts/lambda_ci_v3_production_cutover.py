@@ -474,8 +474,8 @@ def build_overlay(
     classes = overlay.get("classes")
     routes = overlay.get("routes")
     legacy = overlay.get("legacy")
-    if not isinstance(classes, dict) or set(classes) != set(ALL_CLASSES):
-        raise CutoverError("installed deployment overlay class set drift")
+    if not isinstance(classes, dict) or set(ALL_CLASSES) - set(classes):
+        raise CutoverError("installed deployment overlay is missing cutover classes")
     if not isinstance(routes, dict) or set(ROUTES) - set(routes):
         raise CutoverError("installed deployment overlay route set drift")
     if not isinstance(legacy, dict):
@@ -719,13 +719,13 @@ def _assert_controller_ledgers_terminal(
     root_policy: dict[str, Any],
 ) -> None:
     classes = root_policy.get("runner_classes")
-    if not isinstance(classes, dict) or set(classes) != set(ALL_CLASSES):
-        raise CutoverError("installed root policy class set invalid")
+    if not isinstance(classes, dict) or set(ALL_CLASSES) - set(classes):
+        raise CutoverError("installed root policy is missing cutover classes")
     if not controller_state_root.exists():
         return
     if controller_state_root.is_symlink() or not controller_state_root.is_dir():
         raise CutoverError("controller state root must be a real directory")
-    for class_id in ALL_CLASSES:
+    for class_id in sorted(classes):
         class_root = controller_state_root / class_id
         if not class_root.exists():
             continue
