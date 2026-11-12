@@ -37,21 +37,22 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-On the Lambda host, inspect workspace-ci-v3-controller@workspace-control-control-small-v1.service read-only (LoadState/ActiveState/SubState/MainPID/Result/NRestarts/is-enabled and recent journal) plus the existence/hash of /etc/workspace-ci/v3/controllers/workspace-control-control-small-v1.json. Return the output. Do not restart the unit or submit a duplicate validation yet.
+Perform bounded rate-limit containment on workspace-ci-v3-controller@workspace-control-control-small-v1.service: stop the exact unit, make one secret-safe authenticated rate-limit probe using the installed workspace-control controller credential, and restart immediately only if remaining quota is positive. If remaining quota is zero, leave the unit stopped and capture the reset epoch/remaining seconds. Do not cancel or duplicate validation #466.
 
 ## Remaining work
 
-- Diagnose why exact-head validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment; use read-only live controller/provisioner evidence first.
-- After #466 succeeds (or after a bounded repair followed by a new exact-head validation if #466 is proven irrecoverably orphaned), recheck main and integrate current main into the activation branch with unchanged scientific tree, then exact-head validate the integrated SHA.
-- Advance the validated integrated policy to main so Lambda CI Project Reconcile validates it and the live reconcile controller installs the exact runtime/data/contract/route policy.
+- Contain the v3 control-small controller restart storm and recover after the GitHub REST primary-rate-limit window resets; preserve validation #466 without duplicate requests.
+- Once #466 runs, require SUCCESS or diagnose its exact failure. Then recheck main and integrate current main into the activation branch with unchanged scientific tree, followed by exact-head validation of the integrated SHA.
+- Advance the validated integrated policy to main so Lambda CI Project Reconcile installs the exact runtime/data/contract/route policy.
 - Verify live reconciliation and run autonomous scientific smoke, bounded training smoke, full PA2 Stage03 backbone training, and Architecture C evaluation.
+- Track the v3 controller 403 rate-limit handling defect for a separately authorized infrastructure hotfix; current code retries 429/5xx but treats primary-rate-limit 403 as fatal.
 
 ## Blockers / gates
 
 - Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
-- The initial operator diagnostic checked legacy/v2 workspace-control-cpu controller instances. Those are expected inactive after the committed v3 production cutover and therefore do not explain #466.
-- The authoritative runner class for control-validation is workspace-control-control-small-v1 with scale set lambda-workspace-control-control-small and unit workspace-ci-v3-controller@workspace-control-control-small-v1.service. Read-only status/log evidence for that exact unit is required before any restart or retry.
-- Scientific route must not be reconciled or invoked until the integrated main-compatible activation head passes exact-head validation and live reconciliation succeeds.
+- Root cause is now proven: workspace-ci-v3-controller@workspace-control-control-small-v1.service is restart-storming because the v3 GitHub REST verifier treats GitHub primary-rate-limit HTTP 403 as fatal. The controller exits during initial REST-attested demand discovery, systemd restarts it ~5 seconds later, and the queued validation cannot be admitted.
+- This controller source is outside this task capsule's authorized mutation scope, so a code hotfix must not be folded into the PADataset activation candidate without separate authority. Immediate containment may stop the exact controller while the shared PAT rate limit is exhausted, then restart after reset.
+- Scientific route must not be reconciled or invoked until exact-head validation and live reconciliation succeed.
 
 ## Fresh-chat initialization
 
