@@ -24,7 +24,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: 2f2c8a9cf45082b811f5753ecc747cc2e43f00f6
+- Remote checkpoint: 460aad8a585f3d746225a70d8dff2dd0bcbdf740
 - Remote verified: false
 
 ### PADataset
@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Validate the schema-normalized clean main-based PR head. If the normal PR validation passes, trigger and follow one exact /workspace-control-validate request for that same immutable head. Promote only after both gates pass.
+Validate the clean source-reconciled PR head. Require normal Workspace Control Validation PASS, then one exact /workspace-control-validate PASS on the identical SHA. Promote only after both gates succeed.
 
 ## Remaining work
 
@@ -48,8 +48,8 @@ Validate the schema-normalized clean main-based PR head. If the normal PR valida
 
 ## Blockers / gates
 
-- Clean main-based candidate includes the required baseline workspace-control workflow-pin correction and must pass exact-head validation before promotion.
-- Live Workspace Shell trusted authority still does not include padataset-autonomous-scientific-execution-v1; refresh it only after final clean candidate validation.
+- Clean main-based candidate now includes the exact accepted production v3 source closure and must pass normal plus exact-head validation before promotion.
+- Live Workspace Shell trusted authority still does not include padataset-autonomous-scientific-execution-v1; refresh it only after final promotion.
 
 ## Fresh-chat initialization
 
