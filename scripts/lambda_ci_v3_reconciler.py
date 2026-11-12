@@ -78,6 +78,48 @@ PRODUCTION_ROUTE_KEYS = {
     "padataset:gpu-ci",
 }
 
+PADATASET_SCIENTIFIC_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT / "padataset-scientific" / "active.json"
+)
+PADATASET_SCIENTIFIC_TARGET_CLASS = "padataset-scientific-single-gpu-v1"
+PADATASET_SCIENTIFIC_TARGET_ROUTE = "padataset:scientific-single-gpu"
+PADATASET_SCIENTIFIC_TARGET_SCALE_SET = "lambda-padataset-scientific-single-gpu"
+PADATASET_SCIENTIFIC_WORKFLOW_PATH = ".github/workflows/lambda-ci-scientific.yml"
+PADATASET_SCIENTIFIC_WORKFLOW_BLOB = "e70412f3ccdc70826f56f7ba0255518f1f95224f"
+PADATASET_SCIENTIFIC_RUNTIME_MANIFEST = (
+    "57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579"
+)
+PADATASET_SCIENTIFIC_RUNTIME_TREE = (
+    "6922847a7ea87c318a36e1fd2cd3af5283e768ff06de90c4cb2558ea0d48cdaa"
+)
+PADATASET_SCIENTIFIC_BASE_PYTHON_SHA = (
+    "1217953cf9b9b0bb25fb75f60fe2c59d91a578ab194f7f3f5956e1aec6814e74"
+)
+PADATASET_SCIENTIFIC_DATA_PROFILE = "ota_core_high_run01_len16384_v1"
+PADATASET_SCIENTIFIC_DATA_DIGEST = (
+    "a76730a886909f9896e7cb7e9d1aede3d2301240f9ce08a4080e24d637406bf5"
+)
+PADATASET_SCIENTIFIC_OVERRIDE_DESTINATIONS = {
+    str(V3_CONFIG_ROOT / "root-policy.json"),
+    str(V3_CONFIG_ROOT / "executor-actions.json"),
+    str(V3_CONFIG_ROOT / "compatibility-matrix.json"),
+    str(V3_CONFIG_ROOT / "deployment-overlay.json"),
+    "/etc/sysusers.d/workspace-ci-v3.conf",
+    "/etc/tmpfiles.d/workspace-ci-v3.conf",
+}
+PADATASET_SCIENTIFIC_ADDITION_DESTINATIONS = {
+    str(
+        V3_CONFIG_ROOT
+        / "controllers"
+        / f"{PADATASET_SCIENTIFIC_TARGET_CLASS}.json"
+    ),
+    str(
+        pathlib.Path("/etc/systemd/system")
+        / f"workspace-ci-v3-controller@{PADATASET_SCIENTIFIC_TARGET_CLASS}.service.d"
+        / "identity.conf"
+    ),
+}
+
 MANAGED_SYSTEMD = {
     "workspace-ci-v3-provisioner.service":
         "systemd/workspace-ci-v3-provisioner.service",
@@ -198,6 +240,257 @@ def _production_cutover_overrides(
                 f"active production cutover digest invalid: {destination}"
             )
     return dict(overrides)
+
+
+def _padataset_scientific_additive_override(
+    manifest_raw: bytes,
+    manifest: dict[str, Any],
+    production_overrides: dict[str, str],
+) -> dict[str, Any] | None:
+    if not PADATASET_SCIENTIFIC_ACTIVE_RECEIPT.is_file():
+        return None
+
+    active = _load_override_receipt(
+        PADATASET_SCIENTIFIC_ACTIVE_RECEIPT,
+        "active PADataset scientific additive override",
+    )
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_ADDITIVE_OVERRIDE",
+        "base_source_head": manifest.get("source_head"),
+        "base_install_manifest_sha256": _sha256(manifest_raw),
+        "base_root_policy_sha256": manifest.get("root_policy_sha256"),
+        "target_class_id": PADATASET_SCIENTIFIC_TARGET_CLASS,
+        "target_route_key": PADATASET_SCIENTIFIC_TARGET_ROUTE,
+        "target_scale_set_name": PADATASET_SCIENTIFIC_TARGET_SCALE_SET,
+        "trusted_workflow_blob_sha": PADATASET_SCIENTIFIC_WORKFLOW_BLOB,
+        "runtime_manifest_identity_sha256": PADATASET_SCIENTIFIC_RUNTIME_MANIFEST,
+        "runtime_tree_digest_sha256": PADATASET_SCIENTIFIC_RUNTIME_TREE,
+        "base_python_sha256": PADATASET_SCIENTIFIC_BASE_PYTHON_SHA,
+        "scientific_data_profile_id": PADATASET_SCIENTIFIC_DATA_PROFILE,
+        "scientific_data_tree_digest_sha256": PADATASET_SCIENTIFIC_DATA_DIGEST,
+        "prior_production_overrides": production_overrides,
+    }
+    for key, expected in required.items():
+        if active.get(key) != expected:
+            raise ReconcileError(
+                f"active PADataset scientific additive override binding mismatch: {key}"
+            )
+
+    if active.get("phase") not in {"INSTALLED_INACTIVE", "ACTIVE"}:
+        raise ReconcileError("active PADataset scientific additive phase invalid")
+    source_head = active.get("source_head")
+    if not isinstance(source_head, str) or re.fullmatch(r"[0-9a-f]{40}", source_head) is None:
+        raise ReconcileError("active PADataset scientific additive source head invalid")
+    for key in (
+        "catalog_generation_sha256",
+        "root_policy_sha256",
+        "target_controller_policy_sha256",
+        "installed_inactive_overlay_sha256",
+    ):
+        value = active.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"active PADataset scientific additive {key} invalid"
+            )
+
+    preserved = active.get("preserved_root_envelope_sha256")
+    if not isinstance(preserved, dict) or not preserved:
+        raise ReconcileError(
+            "active PADataset scientific additive preserved root envelopes missing"
+        )
+    if PADATASET_SCIENTIFIC_TARGET_CLASS in preserved:
+        raise ReconcileError(
+            "active PADataset scientific additive target appears in preserved classes"
+        )
+    for class_id, digest in preserved.items():
+        if (
+            not isinstance(class_id, str)
+            or not class_id
+            or not isinstance(digest, str)
+            or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+        ):
+            raise ReconcileError(
+                "active PADataset scientific additive preserved root envelope invalid"
+            )
+
+    entries = manifest.get("entries")
+    if not isinstance(entries, list):
+        raise ReconcileError("installed manifest entries missing")
+    base_entries = {
+        str(entry.get("destination")): entry
+        for entry in entries
+        if isinstance(entry, dict) and isinstance(entry.get("destination"), str)
+    }
+
+    overrides = active.get("managed_artifact_overrides")
+    if not isinstance(overrides, dict) or set(overrides) != PADATASET_SCIENTIFIC_OVERRIDE_DESTINATIONS:
+        raise ReconcileError(
+            "active PADataset scientific additive override destination set invalid"
+        )
+    for destination, binding in overrides.items():
+        if not isinstance(binding, dict) or set(binding) != {
+            "prior_sha256",
+            "sha256",
+            "mode",
+        }:
+            raise ReconcileError(
+                f"active PADataset scientific additive override binding invalid: {destination}"
+            )
+        base_entry = base_entries.get(destination)
+        if base_entry is None:
+            raise ReconcileError(
+                f"active PADataset scientific additive override is not base-managed: {destination}"
+            )
+        prior_expected = production_overrides.get(
+            destination,
+            str(base_entry.get("sha256", "")),
+        )
+        if binding.get("prior_sha256") != prior_expected:
+            raise ReconcileError(
+                f"active PADataset scientific additive prior digest mismatch: {destination}"
+            )
+        if binding.get("mode") != str(base_entry.get("mode")):
+            raise ReconcileError(
+                f"active PADataset scientific additive mode mismatch: {destination}"
+            )
+        digest = binding.get("sha256")
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise ReconcileError(
+                f"active PADataset scientific additive digest invalid: {destination}"
+            )
+
+    additions = active.get("managed_artifact_additions")
+    if not isinstance(additions, dict) or set(additions) != PADATASET_SCIENTIFIC_ADDITION_DESTINATIONS:
+        raise ReconcileError(
+            "active PADataset scientific additive addition destination set invalid"
+        )
+    for destination, binding in additions.items():
+        if not isinstance(binding, dict) or set(binding) != {"sha256", "mode"}:
+            raise ReconcileError(
+                f"active PADataset scientific additive addition binding invalid: {destination}"
+            )
+        if destination in base_entries:
+            raise ReconcileError(
+                f"active PADataset scientific additive addition is already base-managed: {destination}"
+            )
+        digest = binding.get("sha256")
+        if not isinstance(digest, str) or re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+            raise ReconcileError(
+                f"active PADataset scientific additive addition digest invalid: {destination}"
+            )
+        if binding.get("mode") != "0644":
+            raise ReconcileError(
+                f"active PADataset scientific additive addition mode invalid: {destination}"
+            )
+    return active
+
+
+def _verify_padataset_scientific_effective_state(active: dict[str, Any]) -> None:
+    root_policy = _json(V3_CONFIG_ROOT / "root-policy.json")
+    if root_policy.get("root_policy_sha256") != active["root_policy_sha256"]:
+        raise ReconcileError("PADataset scientific expanded root-policy digest mismatch")
+    if (
+        root_policy.get("control_plane_generation_sha256")
+        != active["catalog_generation_sha256"]
+    ):
+        raise ReconcileError(
+            "PADataset scientific expanded catalog generation mismatch"
+        )
+    classes = root_policy.get("runner_classes")
+    if not isinstance(classes, dict):
+        raise ReconcileError("PADataset scientific expanded runner classes missing")
+    preserved = active["preserved_root_envelope_sha256"]
+    if set(classes) != set(preserved) | {PADATASET_SCIENTIFIC_TARGET_CLASS}:
+        raise ReconcileError("PADataset scientific expanded class set drift")
+    for class_id, digest in preserved.items():
+        if classes[class_id].get("root_envelope_sha256") != digest:
+            raise ReconcileError(
+                f"PADataset scientific preserved class envelope drift: {class_id}"
+            )
+
+    target = classes[PADATASET_SCIENTIFIC_TARGET_CLASS]
+    exact_target = {
+        "runner_class_id": PADATASET_SCIENTIFIC_TARGET_CLASS,
+        "project_id": "padataset",
+        "repository": "adamtrott78/PADataset",
+        "scale_set_name": PADATASET_SCIENTIFIC_TARGET_SCALE_SET,
+        "runner_prefix": "lambda-padataset-scientific-single-gpu-",
+        "execution_contract_id": "scientific-single-gpu-v1",
+    }
+    for key, expected in exact_target.items():
+        if target.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset scientific target root binding mismatch: {key}"
+            )
+    if target.get("controller_peer") != {"unix_user": "ci-ctl-pad-science"}:
+        raise ReconcileError("PADataset scientific controller identity mismatch")
+
+    runtime = target.get("bindings", {}).get("runtime")
+    if not isinstance(runtime, dict):
+        raise ReconcileError("PADataset scientific runtime binding missing")
+    runtime_expected = {
+        "runtime_id": "padataset-dnns-v1",
+        "manifest_identity_sha256": PADATASET_SCIENTIFIC_RUNTIME_MANIFEST,
+        "tree_digest_sha256": PADATASET_SCIENTIFIC_RUNTIME_TREE,
+        "base_python_path": "/usr/bin/python3.12",
+        "base_python_sha256": PADATASET_SCIENTIFIC_BASE_PYTHON_SHA,
+    }
+    for key, expected in runtime_expected.items():
+        if runtime.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset scientific runtime binding mismatch: {key}"
+            )
+    data = runtime.get("scientific_data")
+    if not isinstance(data, dict):
+        raise ReconcileError("PADataset scientific data binding missing")
+    if data.get("profile_id") != PADATASET_SCIENTIFIC_DATA_PROFILE:
+        raise ReconcileError("PADataset scientific data profile mismatch")
+    if data.get("tree_digest_sha256") != PADATASET_SCIENTIFIC_DATA_DIGEST:
+        raise ReconcileError("PADataset scientific data digest mismatch")
+
+    controller = _json(
+        V3_CONFIG_ROOT
+        / "controllers"
+        / f"{PADATASET_SCIENTIFIC_TARGET_CLASS}.json"
+    )
+    if (
+        controller.get("controller_policy_sha256")
+        != active["target_controller_policy_sha256"]
+    ):
+        raise ReconcileError(
+            "PADataset scientific target controller policy digest mismatch"
+        )
+    if controller.get("runner_class_id") != PADATASET_SCIENTIFIC_TARGET_CLASS:
+        raise ReconcileError("PADataset scientific controller class mismatch")
+    workflows = controller.get("trusted_workflows")
+    if not isinstance(workflows, list) or len(workflows) != 1:
+        raise ReconcileError("PADataset scientific controller workflow set invalid")
+    workflow = workflows[0]
+    if (
+        workflow.get("route_id") != "scientific-single-gpu"
+        or workflow.get("path") != PADATASET_SCIENTIFIC_WORKFLOW_PATH
+        or workflow.get("blob_sha") != PADATASET_SCIENTIFIC_WORKFLOW_BLOB
+    ):
+        raise ReconcileError("PADataset scientific controller workflow binding drift")
+
+    overlay = _json(V3_CONFIG_ROOT / "deployment-overlay.json")
+    if overlay.get("catalog_generation_sha256") != active["catalog_generation_sha256"]:
+        raise ReconcileError("PADataset scientific overlay generation mismatch")
+    target_state = overlay.get("classes", {}).get(PADATASET_SCIENTIFIC_TARGET_CLASS)
+    route_state = overlay.get("routes", {}).get(PADATASET_SCIENTIFIC_TARGET_ROUTE)
+    if not isinstance(target_state, dict) or not isinstance(route_state, dict):
+        raise ReconcileError("PADataset scientific overlay target missing")
+    expected_controller = "ACTIVE" if active["phase"] == "ACTIVE" else "INACTIVE"
+    expected_route = "ENABLED" if active["phase"] == "ACTIVE" else "DISABLED"
+    if target_state.get("install_state") != "INSTALLED":
+        raise ReconcileError("PADataset scientific class is not installed")
+    if target_state.get("controller_state") != expected_controller:
+        raise ReconcileError("PADataset scientific controller overlay state mismatch")
+    if target_state.get("containment") != {"state": "CLEAR", "source": None}:
+        raise ReconcileError("PADataset scientific containment state mismatch")
+    if route_state.get("admission_state") != expected_route:
+        raise ReconcileError("PADataset scientific route overlay state mismatch")
 
 
 SYSUSER_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]{0,30}$")
@@ -615,7 +908,23 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
     runtime_destination = str(V3_RUNTIME_SCRIPT)
     special: dict[str, dict[str, Any]] = {}
     production_overrides = _production_cutover_overrides(manifest_raw, manifest)
+    scientific_override = _padataset_scientific_additive_override(
+        manifest_raw,
+        manifest,
+        production_overrides,
+    )
+    scientific_overrides = (
+        scientific_override["managed_artifact_overrides"]
+        if scientific_override is not None
+        else {}
+    )
+    scientific_additions = (
+        scientific_override["managed_artifact_additions"]
+        if scientific_override is not None
+        else {}
+    )
     production_overrides_seen: set[str] = set()
+    scientific_overrides_seen: set[str] = set()
 
     for entry in manifest.get("entries", []):
         if not isinstance(entry, dict):
@@ -635,21 +944,47 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             special[destination] = entry
             continue
         actual_sha = _sha256(path.read_bytes())
-        if actual_sha != entry.get("sha256"):
-            expected_override = production_overrides.get(destination)
-            if expected_override != actual_sha:
+        scientific_binding = scientific_overrides.get(destination)
+        production_digest = production_overrides.get(destination)
+        if scientific_binding is not None:
+            if actual_sha != scientific_binding["sha256"]:
+                raise ReconcileError(
+                    f"PADataset scientific managed artifact digest drift: {path}"
+                )
+            scientific_overrides_seen.add(destination)
+            if production_digest is not None:
+                production_overrides_seen.add(destination)
+        elif production_digest is not None:
+            if actual_sha != production_digest:
                 raise ReconcileError(f"managed artifact digest drift: {path}")
             production_overrides_seen.add(destination)
-        elif destination in production_overrides:
-            raise ReconcileError(
-                f"active production cutover override claims unchanged artifact: {path}"
-            )
+        elif actual_sha != entry.get("sha256"):
+            raise ReconcileError(f"managed artifact digest drift: {path}")
 
     if production_overrides_seen != set(production_overrides):
         missing = sorted(set(production_overrides) - production_overrides_seen)
         raise ReconcileError(
             f"active production cutover override artifacts were not observed: {missing}"
         )
+    if scientific_overrides_seen != set(scientific_overrides):
+        missing = sorted(set(scientific_overrides) - scientific_overrides_seen)
+        raise ReconcileError(
+            f"PADataset scientific override artifacts were not observed: {missing}"
+        )
+    for destination, binding in scientific_additions.items():
+        path = pathlib.Path(destination)
+        if not path.is_file():
+            raise ReconcileError(
+                f"PADataset scientific managed addition missing: {path}"
+            )
+        if stat.S_IMODE(path.stat().st_mode) != int(str(binding["mode"]), 8):
+            raise ReconcileError(
+                f"PADataset scientific managed addition mode drift: {path}"
+            )
+        if _sha256(path.read_bytes()) != binding["sha256"]:
+            raise ReconcileError(
+                f"PADataset scientific managed addition digest drift: {path}"
+            )
 
     base_manifest_sha = _sha256(manifest_raw)
     root_policy_sha = manifest.get("root_policy_sha256")
@@ -768,6 +1103,9 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             active_runtime.get("runtime_source_head"),
             "active runtime override",
         )
+
+    if scientific_override is not None:
+        _verify_padataset_scientific_effective_state(scientific_override)
 
 
 def _git_exact_head(repo_root: pathlib.Path, expected: str) -> None:
