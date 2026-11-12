@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Perform a two-phase, rollback-safe storage migration of /srv/workspace-ci/padataset/expanded-runtimes and /srv/workspace-ci/padataset/trusted-cache to /data/workspace-ci/padataset using rsync -aHAX --numeric-ids, checksum verification, then bind mounts at the original paths and persistent /etc/fstab entries. Keep the original root copies renamed as rollback until post-cutover verification succeeds; only then delete them to reclaim ~80.56 GiB. Do not move the mutable source DNNs venv or PADataset feature cache.
+Delete only /srv/workspace-ci/padataset/expanded-runtimes.root-backup-20261112 and /srv/workspace-ci/padataset/trusted-cache.root-backup-20261112 after one final bind-source/path sanity check, then verify root free space increased by about 80.56 GiB and both bind mounts remain healthy. After storage reclaim, perform one fresh authenticated GitHub rate-limit probe and restart the exact v3 control-small controller only if remaining quota is positive. Do not cancel or duplicate validation #466.
 
 ## Remaining work
 
@@ -50,9 +50,8 @@ Perform a two-phase, rollback-safe storage migration of /srv/workspace-ci/padata
 ## Blockers / gates
 
 - Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
-- workspace-ci-v3-controller@workspace-control-control-small-v1.service is intentionally stopped/inactive at NRestarts=3495 after a GitHub primary-rate-limit 403 restart storm; a fresh post-reset authenticated rate-limit probe is required before restart.
-- Exact disk attribution proves the PADataset promotion added 80.56 GiB of physical duplicate storage on the root NVMe: promoted DNNs runtime 7.38 GiB plus promoted scientific cache 73.18 GiB. Source and promoted copies are on the same ext4 root filesystem, so reflink sharing did not occur.
-- A separate /data ext4 volume has ~569 GiB free. Preferred remediation is to move only immutable promoted expanded-runtimes and trusted-cache backing stores to /data and bind-mount them back at their existing /srv/workspace-ci/padataset paths, preserving all absolute-path provenance and policy bindings.
+- workspace-ci-v3-controller@workspace-control-control-small-v1.service remains intentionally stopped after the GitHub primary-rate-limit restart storm; a fresh post-reset authenticated quota probe and controlled restart are still required.
+- PADataset immutable promoted storage has been successfully relocated to /data: expanded-runtimes and trusted-cache were copied with rsync -aHAX --numeric-ids, checksum-verified, bind-mounted back at the original /srv/workspace-ci/padataset paths, persisted in /etc/fstab, and revalidated. Root-side originals remain only as rollback backups.
 - Scientific route must not be reconciled or invoked until exact-head validation and live reconciliation succeed.
 
 ## Fresh-chat initialization
