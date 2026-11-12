@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-On the Lambda host, perform a read-only diagnostic of workspace-ci-controller@workspace-control-cpu.service and the provisioner/controller logs covering queued validation #466. Return the output. Do not restart services, cancel #466, or submit a duplicate validation request until the stalled provisioning cause is identified.
+On the Lambda host, inspect workspace-ci-v3-controller@workspace-control-control-small-v1.service read-only (LoadState/ActiveState/SubState/MainPID/Result/NRestarts/is-enabled and recent journal) plus the existence/hash of /etc/workspace-ci/v3/controllers/workspace-control-control-small-v1.json. Return the output. Do not restart the unit or submit a duplicate validation yet.
 
 ## Remaining work
 
@@ -48,8 +48,9 @@ On the Lambda host, perform a read-only diagnostic of workspace-ci-controller@wo
 
 ## Blockers / gates
 
-- Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued with no runner assignment after competing Actions completed. The activation delta from successful #465 changes no workspace-control routing/controller/workflow files, so the blocker is live control-runner provisioning rather than the scientific activation patch.
-- Workspace Shell cannot inspect this task's live services because the task capsule is not yet present in its trusted authority root (TASK_NOT_FOUND). A read-only operator-side status/log capture is required before any retry, duplicate validation, or repair.
+- Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
+- The initial operator diagnostic checked legacy/v2 workspace-control-cpu controller instances. Those are expected inactive after the committed v3 production cutover and therefore do not explain #466.
+- The authoritative runner class for control-validation is workspace-control-control-small-v1 with scale set lambda-workspace-control-control-small and unit workspace-ci-v3-controller@workspace-control-control-small-v1.service. Read-only status/log evidence for that exact unit is required before any restart or retry.
 - Scientific route must not be reconciled or invoked until the integrated main-compatible activation head passes exact-head validation and live reconciliation succeeds.
 
 ## Fresh-chat initialization
