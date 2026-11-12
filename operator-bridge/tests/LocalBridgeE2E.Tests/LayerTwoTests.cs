@@ -28,19 +28,20 @@ public sealed class LayerTwoTests
             clipboard,
             new RecordingOperatorSurface());
 
-        var maintenance = await coordinator.DispatchAsync();
-        var serviceDispatch = await coordinator.DispatchAsync();
+        var transaction = await coordinator.DispatchAsync();
         var submitted = world.HumanSubmit(service);
 
         Assert.AreEqual(
-            DispatchOutcome.LocalCompleted,
-            maintenance.Outcome);
+            DispatchOutcome.LocalPrepared,
+            transaction.Outcome);
+        Assert.AreEqual(
+            "service",
+            transaction.ActionId);
         Assert.AreEqual(
             SimActionStatus.Completed,
             discard.Status);
-        Assert.AreEqual(
-            DispatchOutcome.LocalPrepared,
-            serviceDispatch.Outcome);
+        Assert.AreEqual(1, discard.ClaimCount);
+        Assert.AreEqual(1, service.ClaimCount);
         Assert.IsTrue(submitted);
         Assert.AreEqual(1, clipboard.WriteCount);
     }
