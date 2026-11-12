@@ -223,7 +223,7 @@ def verify_expanded_runtime_binding(
     if not isinstance(binding, dict):
         raise RuntimeLaunchError("expanded runtime binding must be an object")
 
-    required = {
+    legacy_required = {
         "runtime_id",
         "canonical_path",
         "python_path",
@@ -233,7 +233,18 @@ def verify_expanded_runtime_binding(
         "source_trusted_runtime_object",
         "required_controls",
     }
-    if set(binding) != required:
+    venv_v2_required = legacy_required | {
+        "promotion_method",
+        "base_python_path",
+        "base_python_sha256",
+        "scientific_data",
+    }
+    binding_keys = set(binding)
+    if binding_keys == legacy_required:
+        binding_version = "legacy"
+    elif binding_keys == venv_v2_required:
+        binding_version = "python-venv-v2"
+    else:
         raise RuntimeLaunchError("expanded runtime binding keys drift")
 
     runtime = pathlib.Path(binding["canonical_path"])
@@ -271,6 +282,31 @@ def verify_expanded_runtime_binding(
         "model_weights_loaded": False,
         "model_inference_performed": False,
     }
+    base_python = None
+    scientific_data_verified = None
+    if binding_version == "python-venv-v2":
+        if binding.get("promotion_method") != "python-venv-copy-rewrite-v1":
+            raise RuntimeLaunchError("expanded runtime promotion method drift")
+        base_python = pathlib.Path(binding["base_python_path"]).resolve()
+        if not base_python.is_absolute() or not base_python.is_file():
+            raise RuntimeLaunchError("expanded runtime base Python missing")
+        base_stat = base_python.stat()
+        if base_stat.st_uid != 0 or base_stat.st_gid != 0:
+            raise RuntimeLaunchError("expanded runtime base Python is not root-owned")
+        if stat.S_IMODE(base_stat.st_mode) & 0o022:
+            raise RuntimeLaunchError("expanded runtime base Python is group/world writable")
+        base_digest = hashlib.sha256()
+        with base_python.open("rb") as handle:
+            for block in iter(lambda: handle.read(8 * 1024 * 1024), b""):
+                base_digest.update(block)
+        if base_digest.hexdigest() != binding["base_python_sha256"]:
+            raise RuntimeLaunchError("expanded runtime base Python digest drift")
+        expected_receipt.update({
+            "schema": "padataset.expanded-runtime-receipt.v2",
+            "promotion_method": binding["promotion_method"],
+            "base_python_path": str(base_python),
+            "base_python_sha256": binding["base_python_sha256"],
+        })
     for key, expected in expected_receipt.items():
         if receipt.get(key) != expected:
             raise RuntimeLaunchError(
@@ -278,10 +314,13 @@ def verify_expanded_runtime_binding(
                 f"{receipt.get(key)!r} != {expected!r}"
             )
 
-    allowed_external_symlinks = {
-        pathlib.Path("/usr/bin/python3"),
-        pathlib.Path("/usr/bin/python3.12"),
-    }
+    if binding_version == "python-venv-v2":
+        allowed_external_symlinks = {base_python}
+    else:
+        allowed_external_symlinks = {
+            pathlib.Path("/usr/bin/python3"),
+            pathlib.Path("/usr/bin/python3.12"),
+        }
     file_count = 0
     directory_count = 1
     symlink_count = 0
@@ -332,6 +371,79 @@ def verify_expanded_runtime_binding(
             f"expanded runtime tree digest mismatch: {actual_digest}"
         )
 
+    if binding_version == "python-venv-v2":
+        scientific_data = binding["scientific_data"]
+        if not isinstance(scientific_data, dict) or set(scientific_data) != {
+            "profile_id", "path", "tree_digest_sha256", "file_count"
+        }:
+            raise RuntimeLaunchError("scientific data binding keys drift")
+        data_root = pathlib.Path(scientific_data["path"])
+        trusted_root = pathlib.Path(spec["paths"]["trusted_cache"])
+        if not data_root.is_absolute():
+            raise RuntimeLaunchError("scientific data path must be absolute")
+        try:
+            data_root.resolve().relative_to(trusted_root.resolve())
+        except ValueError as exc:
+            raise RuntimeLaunchError("scientific data path escapes project trusted cache") from exc
+        if not data_root.is_dir():
+            raise RuntimeLaunchError("scientific data root missing")
+        data_root_stat = data_root.stat()
+        if data_root_stat.st_uid != 0 or data_root_stat.st_gid != 0:
+            raise RuntimeLaunchError("scientific data root is not root-owned")
+        if stat.S_IMODE(data_root_stat.st_mode) & 0o222:
+            raise RuntimeLaunchError("scientific data root is writable")
+        promotion_path = data_root / "promotion.json"
+        if not promotion_path.is_file():
+            raise RuntimeLaunchError("scientific data promotion receipt missing")
+        promotion_stat = promotion_path.stat()
+        if promotion_stat.st_uid != 0 or promotion_stat.st_gid != 0:
+            raise RuntimeLaunchError("scientific data promotion receipt is not root-owned")
+        if stat.S_IMODE(promotion_stat.st_mode) & 0o222:
+            raise RuntimeLaunchError("scientific data promotion receipt is writable")
+        try:
+            promotion = json.loads(promotion_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            raise RuntimeLaunchError("scientific data promotion receipt is invalid JSON") from exc
+        expected_promotion = {
+            "schema": "padataset.scientific-data-promotion.v1",
+            "profile_id": scientific_data["profile_id"],
+            "tree_digest_sha256": scientific_data["tree_digest_sha256"],
+            "file_count": scientific_data["file_count"],
+            "read_only_hardened": True,
+        }
+        for key, expected in expected_promotion.items():
+            if promotion.get(key) != expected:
+                raise RuntimeLaunchError(
+                    f"scientific data promotion mismatch for {key}: "
+                    f"{promotion.get(key)!r} != {expected!r}"
+                )
+        data_hash = hashlib.sha256()
+        h5_files = sorted(data_root.glob("*.h5"), key=lambda path: path.name)
+        if len(h5_files) != int(scientific_data["file_count"]):
+            raise RuntimeLaunchError("scientific data file count drift")
+        for path in h5_files:
+            st = path.stat()
+            if st.st_uid != 0 or st.st_gid != 0:
+                raise RuntimeLaunchError(f"scientific data ownership drift: {path}")
+            if stat.S_IMODE(st.st_mode) & 0o222:
+                raise RuntimeLaunchError(f"scientific data writable file detected: {path}")
+            digest = hashlib.sha256()
+            with path.open("rb") as handle:
+                for block in iter(lambda: handle.read(8 * 1024 * 1024), b""):
+                    digest.update(block)
+            data_hash.update(
+                f"{path.name}\0{st.st_size}\0{digest.hexdigest()}\n".encode()
+            )
+        if data_hash.hexdigest() != scientific_data["tree_digest_sha256"]:
+            raise RuntimeLaunchError("scientific data tree digest drift")
+        scientific_data_verified = {
+            "profile_id": scientific_data["profile_id"],
+            "path": str(data_root),
+            "tree_digest_sha256": data_hash.hexdigest(),
+            "file_count": len(h5_files),
+            "receipt_verified": True,
+        }
+
     return {
         "runtime_id": binding["runtime_id"],
         "runtime_path": str(runtime),
@@ -344,6 +456,16 @@ def verify_expanded_runtime_binding(
         "symlink_count": symlink_count,
         "read_only_hardened": True,
         "receipt_verified": True,
+        **(
+            {
+                "promotion_method": binding["promotion_method"],
+                "base_python_path": str(base_python),
+                "base_python_sha256": binding["base_python_sha256"],
+                "scientific_data": scientific_data_verified,
+            }
+            if binding_version == "python-venv-v2"
+            else {}
+        ),
     }
 
 

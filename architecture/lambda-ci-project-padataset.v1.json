@@ -83,11 +83,63 @@
         "model_id": null,
         "runtime_id": null
       }
+    },
+    "scientific-single-gpu": {
+      "activation_state": "ACTIVE",
+      "lane": "gpu",
+      "execution_contract_id": "scientific-single-gpu-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-scientific.yml",
+        "default_branch": "main",
+        "blob_sha": "555c2bd1f824519281f149017898d4923439d6cc"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-scientific",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": "padataset-dnns-v1"
+      }
     }
   },
   "bindings": {
     "models": {},
-    "runtimes": {}
+    "runtimes": {
+      "padataset-dnns-v1": {
+        "runtime_id": "padataset-dnns-v1",
+        "canonical_path": "/srv/workspace-ci/padataset/expanded-runtimes/padataset-dnns-v1/57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579",
+        "python_path": "/srv/workspace-ci/padataset/expanded-runtimes/padataset-dnns-v1/57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579/bin/python",
+        "receipt_path": "/var/lib/workspace-ci/expanded-runtime-receipts/57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579.json",
+        "tree_digest_sha256": "6922847a7ea87c318a36e1fd2cd3af5283e768ff06de90c4cb2558ea0d48cdaa",
+        "manifest_identity_sha256": "57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579",
+        "source_trusted_runtime_object": "/var/lib/workspace-ci/padataset-runtime-sources/sha256/57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579",
+        "required_controls": [
+          "root_owned_no_write_bits",
+          "private_systemd_mount_namespace",
+          "read_only_bind",
+          "no_new_privileges",
+          "restrict_suid_sgid",
+          "device_policy_closed",
+          "job_local_mutable_caches"
+        ],
+        "promotion_method": "python-venv-copy-rewrite-v1",
+        "base_python_path": "/usr/bin/python3.12",
+        "base_python_sha256": "1217953cf9b9b0bb25fb75f60fe2c59d91a578ab194f7f3f5956e1aec6814e74",
+        "scientific_data": {
+          "profile_id": "ota_core_high_run01_len16384_v1",
+          "path": "/srv/workspace-ci/padataset/trusted-cache/scientific-data/ota_core_high_run01_len16384_v1",
+          "tree_digest_sha256": "a76730a886909f9896e7cb7e9d1aede3d2301240f9ce08a4080e24d637406bf5",
+          "file_count": 360
+        }
+      }
+    }
   },
   "isolation": {
     "unique_project_uid_required": true,
