@@ -415,14 +415,10 @@ jobs:
     if: >-
       ${{
         github.event_name == 'pull_request' &&
-        (
-          (github.event.action == 'labeled' &&
-           (github.event.label.name == 'stage10-ut11' ||
-            github.event.label.name == 'stage10-ut01' ||
-            github.event.label.name == 'stage10-ut10')) ||
-          (github.event.action == 'synchronize' &&
-           contains(github.event.pull_request.labels.*.name, 'stage10-ut10'))
-        ) &&
+        github.event.action == 'labeled' &&
+        (github.event.label.name == 'stage10-ut11' ||
+         github.event.label.name == 'stage10-ut01' ||
+         github.event.label.name == 'stage10-ut10') &&
         github.event.pull_request.number == 590 &&
         github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1'
       }}
@@ -470,17 +466,12 @@ jobs:
       - name: Execute Stage 10 human-in-loop usability trial
         shell: powershell
         run: |
-          $action = "${{ github.event.action }}"
-          if ($action -eq "synchronize") {
-            $trial = "UT-10"
-          } else {
-            $label = "${{ github.event.label.name }}"
-            $trial = switch ($label) {
-              "stage10-ut11" { "UT-11" }
-              "stage10-ut01" { "UT-01" }
-              "stage10-ut10" { "UT-10" }
-              default { throw "Unsupported Stage 10 usability label: $label" }
-            }
+          $label = "${{ github.event.label.name }}"
+          $trial = switch ($label) {
+            "stage10-ut11" { "UT-11" }
+            "stage10-ut01" { "UT-01" }
+            "stage10-ut10" { "UT-10" }
+            default { throw "Unsupported Stage 10 usability label: $label" }
           }
           New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
           $result = "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage10-$($trial.ToLowerInvariant())-result.json"
