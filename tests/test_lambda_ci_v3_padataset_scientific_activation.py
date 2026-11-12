@@ -110,6 +110,19 @@ class PADatasetScientificActivationTests(unittest.TestCase):
             activation.TARGET_CLASS
         ]
         activation._validate_target_root(target)
+        self.assertEqual(
+            target["execution_contract"]["execution_profile"],
+            "gpu-scientific-single",
+        )
+        self.assertEqual(target["systemd_profile"]["RuntimeMaxSec"], "4h")
+        existing = self.compiled["root_projection"]["runner_classes"][
+            "padataset-gpu-single-public-v1"
+        ]
+        self.assertEqual(
+            existing["execution_contract"]["execution_profile"],
+            "gpu-small",
+        )
+        self.assertEqual(existing["systemd_profile"]["RuntimeMaxSec"], "20min")
         runtime = target["bindings"]["runtime"]
         self.assertEqual(runtime["runtime_id"], "padataset-dnns-v1")
         self.assertEqual(runtime["manifest_identity_sha256"], activation.RUNTIME_MANIFEST)

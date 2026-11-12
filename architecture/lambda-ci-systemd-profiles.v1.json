@@ -69,7 +69,7 @@
       "MemoryHigh": "56G",
       "MemoryMax": "64G",
       "TasksMax": 8192,
-      "RuntimeMaxSec": "4h",
+      "RuntimeMaxSec": "20min",
       "DeviceAllow_candidate": [
         "/dev/nvidiactl rw",
         "/dev/nvidia-uvm rw",
@@ -77,7 +77,7 @@
         "UUID-resolved GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea device node rw"
       ],
       "CUDA_VISIBLE_DEVICES": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
-      "note": "gpu-small has a 4h static sandbox ceiling; each semantic execution contract retains its own root-issued admission runtime ceiling. Existing gpu_small_v1 jobs remain capped at 1200s, while scientific_gpu_single_v1 may use up to 4h. GPU UUID/device isolation remains unchanged."
+      "note": "P5 gpu-small resolves the accepted physical GPU by stable UUID at launch time, grants only its current device node plus nvidiactl/UVM compute-support nodes under DevicePolicy=closed, and explicitly denies all other physical GPU nodes."
     },
     "gpu-heavy": {
       "CPUQuota": "2400%",
@@ -107,6 +107,21 @@
       "RuntimeMaxSec": "10min",
       "DeviceAllow": [],
       "CUDA_VISIBLE_DEVICES": ""
+    },
+    "gpu-scientific-single": {
+      "CPUQuota": "1200%",
+      "MemoryHigh": "56G",
+      "MemoryMax": "64G",
+      "TasksMax": 8192,
+      "RuntimeMaxSec": "4h",
+      "DeviceAllow_candidate": [
+        "/dev/nvidiactl rw",
+        "/dev/nvidia-uvm rw",
+        "/dev/nvidia-uvm-tools rw",
+        "UUID-resolved GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea device node rw"
+      ],
+      "CUDA_VISIBLE_DEVICES": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
+      "note": "Dedicated PADataset scientific single-GPU sandbox ceiling. This profile preserves the accepted GPU UUID/device-isolation envelope while allowing the scientific_gpu_single_v1 contract its bounded 4h runtime without widening gpu-small authority for existing CI/model classes."
     }
   },
   "unresolved_before_activation": [
