@@ -12,48 +12,59 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - ID: padataset-autonomous-scientific-execution-v1
 - Title: PADataset autonomous scientific execution v1
 - Status: IN_PROGRESS
+- Current stage: live_activation
 - Capsule schema: v2
 
-## Goal
+## Promoted Stage-5 state
 
-Make PADataset scientific GPU experiments autonomously executable by ChatGPT through the existing self-hosted Lambda control plane using an exact root-owned DNNs runtime, exact PR-head provenance, read-only project data/cache authority, bounded experiment request schemas, durable artifacts/receipts, and no per-run operator terminal work.
+- Workspace Control main: `dff9024e16f36767facd3cbbbf1009f62b9899f7`
+- Stage-5 validated PR head: `e1705197c40ee4614f6780e6872c6d0bbf6148d5`
+- Normal validation: Workspace Control Validation #2600 — SUCCESS
+- Authoritative validation: Lambda CI Workspace Control Validation #474 — SUCCESS on the same requested SHA
+- Merge: PR #614 → `dff9024e16f36767facd3cbbbf1009f62b9899f7`
+- Post-merge Project Reconcile #36 — SUCCESS
+- Additive activation design commit: `46f6b048b93014d24254be232bb3e17f8e0a900d`
 
-## Repositories
+No live scientific class/controller/route activation has occurred.
 
-### workspace-control
+## Additive activation design
 
-- Intent: mutate
-- Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: 3133fe46f9f30bc77637226dc24c5e796a7fe71b
-- Remote verified: false
+The original v2→v3 production cutover is historical and MUST NOT be replayed.
 
-### PADataset
+Phase A expands the shared provisioner to the reviewed ten-class policy while:
+- all pre-existing class root envelopes remain unchanged;
+- existing class controllers remain running and are not restarted;
+- only the shared provisioner is quiesced/restarted after zero-active/held-record and zero-transient proof;
+- the scientific class is installed but INACTIVE;
+- the scientific route remains DISABLED.
 
-- Intent: mutate
-- Remote branch: main
-- Remote checkpoint: d27eb8feb481696548766b8df325737d766a8d3a
-- Remote verified: true
+Phase B is separately authorized and activates only:
+- `padataset-scientific-single-gpu-v1`
+- `padataset:scientific-single-gpu`
+
+It requires exact workflow/runtime/data/no-stale-run proof plus exact target scale-set identity with zero assigned/running work.
 
 ## Next safe action
 
-Create a fresh PR from workspace-control branch padataset-autonomous-scientific-execution-v1 (implementation checkpoint 3133fe46f9f30bc77637226dc24c5e796a7fe71b plus handoff-only state commits) to current main 517911090acd316fd47190b0db0a36c4d81b589e. First require normal Workspace Control Validation PASS; then trigger exactly one authoritative /workspace-control-validate for that immutable PR head. Do not perform live host activation before both gates pass.
+Implement and regression-cover the two-phase additive scientific activation transaction and effective-generation verifier support on `padataset-autonomous-scientific-execution-v1`, based on promoted main `dff9024e16f36767facd3cbbbf1009f62b9899f7`.
 
-## Remaining work
+Do NOT mutate live host state. After implementation, open a fresh PR and require normal validation PASS followed by exactly one authoritative `/workspace-control-validate <frozen-head>` PASS on that identical SHA.
 
-- Open a fresh Workspace Control Stage-5 PR from padataset-autonomous-scientific-execution-v1 to current main 517911090acd316fd47190b0db0a36c4d81b589e.
-- Run normal Workspace Control Validation on the exact PR head. Diagnose/fix only evidence-backed failures; do not broaden authority or alter live host state.
-- After normal PASS, issue exactly one /workspace-control-validate <exact-head-sha> request and require authoritative self-hosted PASS on the identical immutable SHA.
-- Promote the validated Stage-5 policy to main, then design and validate the additive v3 live-activation transaction for the new dedicated scientific class/route without replaying the original v2→v3 cutover.
-- Apply the reviewed live activation, verify the dedicated controller/scale set and exact compiled runtime/data bindings, then run autonomous scientific smoke, bounded training smoke, full PA2 Stage03 backbone training, and Architecture C evaluation.
-- Refresh Workspace Shell trusted task authority to include padataset-autonomous-scientific-execution-v1 once the final promoted/activated state is durable.
-- Track the separate v3 controller primary-rate-limit 403 handling defect under separately authorized infrastructure scope; do not mix that hotfix into this scientific task.
+## Remaining gates
 
-## Blockers / gates
+- Repository implementation + regression tests for additive effective-generation expansion and target-only activation.
+- Normal + authoritative exact-head validation and merge.
+- Explicit root/operator authority for live Phase A.
+- Exact scale-set/workflow/runtime/data/no-stale-run preflight and explicit root/operator authority for Phase B.
+- Scientific smoke → bounded training smoke → full PA2 Stage03 backbone training → Architecture C evaluation.
+- Refresh Workspace Shell trusted task authority only after final activation state is durable.
 
-- Stage-5 v3 policy implementation is constructed on branch padataset-autonomous-scientific-execution-v1 but has not yet passed repository validation.
-- The branch has no current pull request after PR #613 was merged; a fresh Stage-5 PR to main is required to obtain the normal pull_request validation gate.
-- No live host activation has been attempted for the dedicated scientific class. The deployment overlay intentionally leaves padataset-scientific-single-gpu-v1 NOT_INSTALLED/INACTIVE and padataset:scientific-single-gpu DISABLED.
-- Live Workspace Shell trusted authority still does not include padataset-autonomous-scientific-execution-v1; refresh it only after the final Stage-5 policy is validated/promoted and the live activation transaction is accepted.
+## Safety boundaries
+
+- Existing CPU/GPU/control v3 classes/routes must not be disturbed.
+- Historical v2→v3 cutover must not be replayed.
+- Separate primary-rate-limit HTTP 403 controller defect remains out of scope.
+- Privileged Workspace Shell helpers remain unauthorized for this task until trusted task authority is refreshed after activation.
 
 ## Fresh-chat initialization
 
@@ -61,10 +72,7 @@ Create a fresh PR from workspace-control branch padataset-autonomous-scientific-
 
 https://github.com/adamtrott78/workspace-control
 
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/padataset-autonomous-scientific-execution-v1.json
+Continue the durable task:
+`tasks/active/padataset-autonomous-scientific-execution-v1.json`
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Read the capsule first and follow its `next_safe_action`.
