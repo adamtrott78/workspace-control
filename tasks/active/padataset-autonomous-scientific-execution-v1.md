@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator read-only diagnosis of workspace-control-control-small-v1 only: inspect workspace-ci-v3-controller@workspace-control-control-small-v1.service state and journal since 2026-11-12 16:55:30 EST; inspect its controller ledger, provisioner records for runner_class_id workspace-control-control-small-v1, and active target-class transients. Correlate specifically with GitHub run 43315043736/job 131520720719. Do not restart or mutate. Use the evidence to determine whether the control controller is inactive/crashing, has admitted the job but failed root provisioning, or is not receiving scheduler demand.
+Operator bootstrap controller repair from exact PR #622 head ae38809ce9b78facebe0565f254ef72c33112f19 only. Do not merge PR #622 first. Build the exact controller with pinned Go 1.26.3, bind current installed controller SHA, active controller-refresh receipt SHA/source, base manifest SHA/source, and current root-policy SHA into a fresh root-owned 0600 REFRESH_V3_CONTROLLER_BINARY_LIVE_V1 authority, invoke scripts/lambda_ci_v3_live_controller_repair_v1.py, and require COMMITTED_ACTIVE_CONTROLLER_REPAIR plus installed-generation verification. Then observe existing authoritative Validation #484/job 131520720719; if it succeeds, merge PR #622. If the repair fails, use its transaction receipt/rollback evidence and do not retry blindly.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Operator read-only diagnosis of workspace-control-control-small-v1 only: inspect
 
 ## Blockers / gates
 
-- Authoritative Validation #484 cannot currently acquire the workspace-control control-validation self-hosted lane. Read-only Lambda host evidence is now required; connected Workspace Shell authority for this PADataset task cannot inspect that lane without widening trust.
-- Do not reissue /workspace-control-validate, merge PR #622, restart services, edit controller ledgers, or retrigger the scientific smoke before diagnosing the existing queued control-validation job 131520720719.
+- Authoritative Validation #484 cannot run until the stale shared v3 controller binary is replaced, but PR #622 must not be merged before #484 succeeds. This is a bootstrap dependency loop.
+- The only safe forward path is an operator-authorized one-shot transactional install of exact PR #622 head ae38809ce9b78facebe0565f254ef72c33112f19 while PR #622 remains open, with pre-swap quiescence and rollback. After install, existing #484 must run and pass before PR #622 is merged.
 
 ## Fresh-chat initialization
 
