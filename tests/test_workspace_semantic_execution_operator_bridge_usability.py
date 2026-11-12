@@ -91,6 +91,7 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("stage10-ut01", workflow)
         self.assertIn("stage10-ut02", workflow)
         self.assertIn("stage10-ut03", workflow)
+        self.assertIn("stage10-ut04", workflow)
         self.assertIn("stage10-ut10", workflow)
         self.assertIn("STAGE10_SCHEDULER_HOTKEY: Ctrl+Space", workflow)
         self.assertIn("needs: validation", workflow)
@@ -125,6 +126,41 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn('"UT-03"', script)
         self.assertIn('$TrialId -eq "UT-03"', script)
         self.assertIn("stage10-ut03", workflow)
+        self.assertNotIn("SendKeys", harness)
+        self.assertNotIn("KeyboardEvent", harness)
+        self.assertNotIn("MouseEvent", harness)
+
+    def test_stage10_ut04_allows_ready_work_with_multiple_sent_unconfirmed(self):
+        harness = (
+            ROOT / "operator-bridge" / "integration" / "UsabilityHarness.cs"
+        ).read_text(encoding="utf-8")
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage10-usability.ps1"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT / ".github" / "workflows" / "operator-bridge-validation.yml"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('case "UT-04":', harness)
+        self.assertIn('"ut04-pending-01"', harness)
+        self.assertIn('"ut04-pending-02"', harness)
+        self.assertIn("MultipleSentUnconfirmedWithReadyObserved", harness)
+        self.assertIn("MaxSentUnconfirmed", harness)
+        self.assertIn("Ut04BackgroundAcksApplied", harness)
+        self.assertIn(
+            "action.ActionId == _awaitingActionId",
+            harness,
+        )
+        self.assertNotIn(
+            "var pending = _world.Actions.Actions.FirstOrDefault(action =>\n"
+            "            action.Status == SimActionStatus.AwaitingDurableAck);",
+            harness,
+        )
+        self.assertIn("multiple_sent_unconfirmed_with_ready_observed", harness)
+        self.assertIn("max_sent_unconfirmed", harness)
+        self.assertIn('"UT-04"', script)
+        self.assertIn('$TrialId -eq "UT-04"', script)
+        self.assertIn("stage10-ut04", workflow)
         self.assertNotIn("SendKeys", harness)
         self.assertNotIn("KeyboardEvent", harness)
         self.assertNotIn("MouseEvent", harness)
