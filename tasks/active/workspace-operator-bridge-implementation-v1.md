@@ -12,36 +12,78 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - ID: workspace-operator-bridge-implementation-v1
 - Title: Workspace Operator Bridge Implementation v1
 - Status: IN_PROGRESS
-- Capsule schema: v2
+- Parent: workspace-semantic-execution-migration-v1
+- Branch: workspace-semantic-execution-migration-v1
+- PR: #590
+- Current stage: impl_10_usability_trial_execution
 
-## Goal
+## Current validated implementation checkpoint
 
-Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-first Windows/Firefox system: .NET 10 helper, typed Native Messaging/named-pipe BrowserPort, least-privilege Firefox MV3 adapter, deterministic fake-worker simulator, recovery/fault closure, packaging/rollback, empirical performance/usability evidence, optional WebView2 comparison, and gated real-account calibration without changing the frozen manual Ctrl+V + Enter or authority/security boundaries.
+- Implementation head: `62e9260f2451d51cdc8b2d724cabbe5691e39ef9`
+- Workspace Control Validation #2572: SUCCESS
+- Operator Bridge Validation #209: SUCCESS
+- Stage 09 target benchmark: DEFERRED/SUSPENDED as an intermediate gate; still mandatory before Stage 13 production readiness.
 
-## Repositories
+## Stage-10 evidence
 
-### workspace-control
+- UT-11: PASS on run #194 / job `130809245969`.
+- UT-01 primary operator loop is functional.
+- Clean happy-path UT-01: run #208 / job `130950231898` on `b5d9ae62...` completed 5/5 actions, 5/5 durable acknowledgments, OBJECTIVE_PASS.
+- Recovery rerun job `130952654587`: 13 hotkey presses, 8 repeat presses blocked, 5/5 actions completed, 5/5 durable acks, but 2 rejected submissions. Operator observed:
+  - repeat Ctrl+B before paste was blocked;
+  - after paste but before Enter, Ctrl+B could still move tabs.
+- Paste alone is NOT acknowledgment. Only Enter/fake-worker submit can durably acknowledge the prepared action.
+- Current repair `62e9260f...`: while any simulator action is `AwaitingDurableAck`, repeated Ctrl+B must not claim the next action; it must idempotently refocus/retain that same worker binding until Enter/durable ack.
+- Follow-up run #210 / job `130957988034` on `62e9260f...` reached `STAGE10_USABILITY_READY=UT-01`, then hit the 30-minute wrapper timeout with no result artifact because the final human recovery sequence was not completed. Treat as NO VERDICT, not product failure.
 
-- Intent: mutate
-- Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 053816f7c9f42aed09af08997fdebd045c92d7cd
-- Remote verified: true
+## Exact next action
 
-## Next safe action
+1. Ensure the interactive Windows self-hosted runner labeled `workspace-operator-target` is listening in the logged-in desktop session.
+2. Prefer GitHub **rerun only job `130957988034`**. Do not cycle the Stage-10 label unless necessary; that needlessly replays hosted validation.
+3. Close pre-existing Firefox and WorkspaceOperator before the job starts.
+4. When UT-01 is READY, deliberately test the unresolved case:
+   - `Ctrl+B`
+   - `Ctrl+V`
+   - `Ctrl+B` again
+   - **do not press Enter yet**
+5. Expected: second Ctrl+B does not advance to another action; it keeps/refocuses the same worker/action and preserves the pending handoff.
+6. Then press Enter to create the durable acknowledgment.
+7. Continue the remaining UT-01 actions and inspect the structured result.
+8. If the recovery case passes, continue the remaining required Stage-10 usability trials. Do not restart the long Stage-09 target matrix during routine Stage-10 work.
 
-Begin impl_10_usability_trial_execution against the validated packaged fake-worker baseline. Do not run another multi-hour Stage-09 target matrix during routine implementation/debug work. Continue through impl_10, conditional impl_11, and impl_12 under their existing authority/security gates. Before impl_13 production readiness, resume impl_09 exactly once from the then-current validated implementation head, preserve complete target evidence, evaluate every frozen UX-09 budget, and block production promotion unless Stage 09 is VALIDATED.
+## Windows runner restart
 
-## Remaining work
+Stage-10 requires an **interactive foreground runner**, not a Windows service/session-0 runner.
 
-- impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials
-- impl_11_webview2_comparison_spike: Conditional WebView2 custom-shell comparison
-- impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration
-- impl_09_performance_benchmark_execution: Deferred authoritative UX-09 performance/resource benchmark before production readiness
-- impl_13_production_readiness_review: Integrated implementation review and promotion decision
+PowerShell, when no GitHub job is active:
 
-## Blockers / gates
+```powershell
+Set-Location C:\Users\ATrott\actions-runner
 
-- No Stage-10 development blocker. The authoritative long-form UX-09 target benchmark is intentionally SUSPENDED as an intermediate gate after repeated multi-hour harness-debug runs. It remains mandatory before impl_13 production readiness can pass. Run #185 physically executed deep Firefox/Chrome resource measurement, but the harness did not preserve or print the RAM summary before a later latency-shape failure; those RAM values are therefore not admissible/recoverable from GitHub evidence.
+# See whether a runner listener/worker is already alive.
+Get-Process -Name Runner.Listener,Runner.Worker -ErrorAction SilentlyContinue
+
+# If a stale listener/worker must be force-restarted, only do this when no job is active:
+Get-Process -Name Runner.Listener,Runner.Worker -ErrorAction SilentlyContinue |
+    Stop-Process -Force
+
+# Start the persistent interactive runner in this logged-in desktop session.
+.\run.cmd
+```
+
+Expected terminal state after startup: `Listening for Jobs`.
+
+Do not install/start it as a Windows service for Stage-10 usability work; the workflow explicitly requires an interactive user session and foreground browser/hotkey behavior.
+
+## Safety / invariants
+
+- Fake-worker only. No real ChatGPT account yet.
+- Manual `Ctrl+V` + Enter boundary remains frozen.
+- No automatic paste/typing/Enter/Send.
+- No ChatGPT DOM/content/output inspection.
+- No credential/cookie/token/profile-secret collection.
+- Do not weaken hotkey, content-free evidence, fake-worker, process-ownership, or exact-head boundaries.
+- Do not run the multi-hour Stage-09 target benchmark during current Stage-10 work.
 
 ## Fresh-chat initialization
 
@@ -52,7 +94,6 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-operator-bridge-implementation-v1.json
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Recover the exact branch/task state from GitHub first.
+Treat the authoritative capsule, current branch head, exact validation evidence, and traceability artifact as authoritative.
+Do not rely on previous conversation prose when it conflicts with durable evidence.
