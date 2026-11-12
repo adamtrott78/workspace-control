@@ -172,7 +172,7 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
         contract = CONTRACTS["contracts"]["scientific-single-gpu-v1"]
         self.assertEqual(contract["lifecycle"], "ACCEPTED_SCIENTIFIC_V1")
         self.assertTrue(contract["admission_enabled_after_generic_activation"])
-        self.assertEqual(contract["execution_profile"], "gpu-small")
+        self.assertEqual(contract["execution_profile"], "gpu-scientific-single")
         self.assertEqual(contract["resource_class"], "scientific_gpu_single_v1")
         self.assertEqual(contract["gpu_count"], 1)
         self.assertEqual(contract["model_binding_mode"], "FORBIDDEN")
