@@ -118,21 +118,72 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
 
     def test_padataset_public_repo_gate_is_fail_closed(self):
         self.assertEqual(PAD["repository_visibility"], "public")
-        expected_blobs = {
+        expected_active_blobs = {
             "cpu-ci": "5e6a1d4a47ecdfa8b40d3bea23fa8739cc12cd9e",
             "gpu-ci": "3e0c79dc1b8bed7b1480cc745c478c190a3c7da4",
         }
-        self.assertEqual(set(PAD["routes"]), set(expected_blobs))
-        for route_id, route in PAD["routes"].items():
+        self.assertEqual(
+            set(PAD["routes"]),
+            {*expected_active_blobs, "scientific-single-gpu"},
+        )
+        for route_id, sha in expected_active_blobs.items():
+            route = PAD["routes"][route_id]
             trigger = route["trigger"]
             self.assertEqual(trigger["allowed_actor_logins"], ["adamtrott78"])
             self.assertTrue(trigger["require_open_same_repository_pr_head"])
             self.assertFalse(trigger["fork_pr_execution_allowed"])
-            self.assertEqual(
-                route["trusted_workflow"]["blob_sha"],
-                expected_blobs[route_id],
-            )
+            self.assertEqual(route["trusted_workflow"]["blob_sha"], sha)
             self.assertEqual(route["activation_state"], "ACTIVE")
+
+        scientific = PAD["routes"]["scientific-single-gpu"]
+        self.assertEqual(scientific["activation_state"], "ACTIVE")
+        self.assertEqual(
+            scientific["execution_contract_id"],
+            "scientific-single-gpu-v1",
+        )
+        self.assertEqual(
+            scientific["trusted_workflow"]["path"],
+            ".github/workflows/lambda-ci-scientific.yml",
+        )
+        self.assertEqual(
+            scientific["trusted_workflow"]["blob_sha"],
+            "555c2bd1f824519281f149017898d4923439d6cc",
+        )
+        self.assertEqual(scientific["trigger"]["command"], "/lambda-scientific")
+        self.assertEqual(
+            scientific["trigger"]["allowed_actor_logins"],
+            ["adamtrott78"],
+        )
+        self.assertTrue(
+            scientific["trigger"]["require_open_same_repository_pr_head"]
+        )
+        self.assertFalse(scientific["trigger"]["fork_pr_execution_allowed"])
+        self.assertEqual(
+            scientific["bindings"],
+            {"model_id": None, "runtime_id": "padataset-dnns-v1"},
+        )
+        runtime = PAD["bindings"]["runtimes"]["padataset-dnns-v1"]
+        self.assertEqual(runtime["promotion_method"], "python-venv-copy-rewrite-v1")
+        self.assertEqual(runtime["base_python_path"], "/usr/bin/python3.12")
+        self.assertEqual(runtime["scientific_data"]["profile_id"], "ota_core_high_run01_len16384_v1")
+        self.assertEqual(runtime["scientific_data"]["file_count"], 360)
+
+    def test_padataset_scientific_contract_is_accepted_and_admission_enabled(self):
+        contract = CONTRACTS["contracts"]["scientific-single-gpu-v1"]
+        self.assertEqual(contract["lifecycle"], "ACCEPTED_SCIENTIFIC_V1")
+        self.assertTrue(contract["admission_enabled_after_generic_activation"])
+        self.assertEqual(contract["execution_profile"], "gpu-small")
+        self.assertEqual(contract["resource_class"], "scientific_gpu_single_v1")
+        self.assertEqual(contract["gpu_count"], 1)
+        self.assertEqual(contract["model_binding_mode"], "FORBIDDEN")
+        self.assertEqual(
+            contract["runtime_binding_mode"],
+            "REQUIRED_EXPANDED_RUNTIME_EXACT",
+        )
+        self.assertEqual(
+            contract["state_effect_class"],
+            "SCIENTIFIC_EXPERIMENT_EPHEMERAL_ARTIFACTS",
+        )
 
     def test_generic_dual_gpu_compute_remains_unaccepted(self):
         generic_heavy = CONTRACTS["contracts"]["gpu-dual-public-ci-v1"]
