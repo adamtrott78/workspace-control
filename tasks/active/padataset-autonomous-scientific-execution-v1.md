@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Reclaim space only from low-risk user caches first: remove the user pip cache (~22G) and re-check df. Do not touch /srv/workspace-ci, /var/lib/workspace-ci, PADataset scientific data, research models, checkpoints, or large artifacts yet. Once several GiB are free, rerun heartbeat-up and verify local MCP/tunnel health; then perform one fresh authenticated GitHub rate-limit probe and restart the exact v3 control-small controller only if remaining quota is positive. Do not cancel or duplicate validation #466.
+Measure exact disk attribution for the PADataset promoted runtime/data versus their mutable sources, enumerate all promoted generations/profiles, and inventory all block devices/mounts. Do not delete trusted runtime/data while the scientific route depends on them. Separately maintain safe free-space headroom using disposable caches only. After attribution, choose a storage design that preserves immutable root-owned scientific inputs without duplicating tens of GiB on the root ext4 filesystem.
 
 ## Remaining work
 
@@ -51,7 +51,7 @@ Reclaim space only from low-risk user caches first: remove the user pip cache (~
 
 - Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
 - workspace-ci-v3-controller@workspace-control-control-small-v1.service is intentionally stopped/inactive at NRestarts=3495 after a GitHub primary-rate-limit 403 restart storm; a fresh post-reset authenticated rate-limit probe is required before restart.
-- Lambda root filesystem is byte-exhausted: /dev/nvme0n1p2 is 879G total, 846G used, 0 available, 100% full; inode usage is only 7%. Workspace Heartbeat v0.4.8 runtime itself passes direct Node startup, but user-level launcher operations can fail because no non-root blocks remain.
+- Disk pressure is now a design issue, not just incidental cache growth. The PADataset promoter intentionally copies both the DNNs venv and Stage-03 H5 feature cache into root-owned /srv/workspace-ci/padataset storage using cp -a --reflink=auto. On the ext4 root filesystem this likely falls back to full physical copies. Exact source/promoted sizes and any superseded generations must be measured before deletion or redesign.
 - Scientific route must not be reconciled or invoked until exact-head validation and live reconciliation succeed.
 
 ## Fresh-chat initialization
