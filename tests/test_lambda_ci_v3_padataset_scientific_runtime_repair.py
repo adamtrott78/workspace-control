@@ -35,10 +35,19 @@ class PADatasetScientificRuntimeRepairTests(unittest.TestCase):
         self.assertIn("require_no_live_provisioner_records()",HELPER)
         self.assertIn("require_no_transients(units)",HELPER)
 
-    def test_repair_preserves_enablement_restart_counters_and_inactive_set(self):
+    def test_repair_preserves_enablement_and_bounds_restart_delta(self):
         self.assertIn('now.get("UnitFileState")!=state.get("UnitFileState")',HELPER)
-        self.assertIn('now.get("NRestarts")!=state.get("NRestarts")',HELPER)
+        self.assertIn("previously-stable controller restarted during repair",HELPER)
+        self.assertIn("pre-existing restarting controller exceeded bounded restart delta",HELPER)
+        self.assertIn('"controller_restart_deltas":restart_deltas',HELPER)
         self.assertIn("inactive controller unexpectedly activated",HELPER)
+
+    def test_rollback_is_verified_before_claiming_completion(self):
+        self.assertIn('wait_state(PROVISIONER_UNIT,"active")',HELPER)
+        self.assertIn('wait_state(units[cid],"active")',HELPER)
+        self.assertIn("rollback_controller_snapshot_after",HELPER)
+        self.assertIn("rollback_provisioner_after",HELPER)
+        self.assertIn("reconciler.verify_installed(BASE_MANIFEST)",HELPER)
 
 if __name__=="__main__":
     unittest.main()
