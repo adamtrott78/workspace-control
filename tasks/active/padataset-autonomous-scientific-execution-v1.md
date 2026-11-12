@@ -5,7 +5,7 @@ Derived human-readable view.
 
 Authoritative capsule: tasks/active/padataset-autonomous-scientific-execution-v1.json
 
-If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
+If this view disagrees with the JSON capsule or verified evidence, trust the capsule plus verified evidence.
 
 ## Task
 
@@ -24,7 +24,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: 230f3ed6cfaaf2bcb563c55f6be38b578de21ecc
+- Remote checkpoint: 52525fa00688cc80079f008a975131cee959402e
 - Remote verified: true
 
 ### PADataset
@@ -36,11 +36,11 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Genuine root/operator authority gate: on the Lambda host, check out exact validated implementation head 230f3ed6cfaaf2bcb563c55f6be38b578de21ecc, perform only read-only Phase-A preflight, create the exact root-owned 0600 EXPAND_PADATASET_SCIENTIFIC_V3_INACTIVE authorization receipt, then invoke scripts/lambda_ci_v3_padataset_scientific_activation_v1.py --expand-inactive with --expected-head 230f3ed6cfaaf2bcb563c55f6be38b578de21ecc. Do not run Phase B until the Phase-A committed receipt is verified.
+Genuine root/operator authority gate: on the Lambda host, use exact validated head 52525fa00688cc80079f008a975131cee959402e and rerun the read-only Phase-A preflight. Only if every existing runner-class authority envelope is preserved may the operator create the exact root-owned 0600 EXPAND_PADATASET_SCIENTIFIC_V3_INACTIVE authorization receipt and invoke scripts/lambda_ci_v3_padataset_scientific_activation_v1.py --expand-inactive with --expected-head 52525fa00688cc80079f008a975131cee959402e. Do not run Phase B until the Phase-A committed receipt is verified.
 
 ## Remaining work
 
-- On the Lambda host, use the exact validated implementation head 230f3ed6cfaaf2bcb563c55f6be38b578de21ecc to perform read-only Phase-A preflight and create the root-owned one-shot EXPAND_PADATASET_SCIENTIFIC_V3_INACTIVE authority receipt.
+- On the Lambda host, use the exact validated correction head 52525fa00688cc80079f008a975131cee959402e to rerun the read-only Phase-A preflight; require exact preservation of every existing class root envelope, then create the root-owned one-shot EXPAND_PADATASET_SCIENTIFIC_V3_INACTIVE authority receipt.
 - Run Phase A with scripts/lambda_ci_v3_padataset_scientific_activation_v1.py --expand-inactive; require the committed INSTALLED_INACTIVE transaction receipt, active ten-class shared provisioner, exact effective-generation verification, and proof that existing class controller InvocationID/MainPID/NRestarts values were preserved.
 - Create/attest lambda-padataset-scientific-single-gpu with the already-reviewed v3 scale-set preflight; verify exact PADataset default-branch workflow blob, zero stale scientific runs, promoted runtime/base-Python integrity, and exact scientific-data identity.
 - Create the separate root-owned ACTIVATE_PADATASET_SCIENTIFIC_V3 authority receipt and run Phase B; require only the scientific controller/route to become ACTIVE/ENABLED.
