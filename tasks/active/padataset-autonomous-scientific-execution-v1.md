@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Stop at the authority gate. Obtain a reviewed authority path that either (A) promotes the validated PR #606 parent lineage through its owning task before this scientific candidate is promoted, or (B) explicitly authorizes a standalone main-based restage including architecture/lambda-ci-systemd-profiles.v1.json and scripts/install_padataset_scientific_runtime_v1.sh. After authority is durable, rebuild/restage from current main as required, exact-head validate again, then promote and reconcile. Do not move main, PR #606's head/base, or widen this capsule autonomously.
+Use this exact authority-state head as /etc/workspace-shell/authority input to the already-validated multirepo upgrade operator, with workspace-control execution SHA 1a9a24fc1bc6e5cda2984e296151a378138600c8 and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. After LOCAL_TASK_AUTHORITY=PASS, verify live Workspace Shell visibility for workspace-shell-multirepo-research-v1, mth602-final-multisurrogate-dqnguard-v1, and padataset-autonomous-scientific-execution-v1. Then restage only the scientific changes from current main under the now-explicitly-authorized scope and exact-head validate again.
 
 ## Remaining work
 
@@ -49,10 +49,8 @@ Stop at the authority gate. Obtain a reviewed authority path that either (A) pro
 
 ## Blockers / gates
 
-- Promotion authority is blocked. PR #613 targets workspace-shell-multirepo-v3-reconcile-20261111 (PR #606 lineage), not main. Fast-forwarding main to edd1c378a1f9965299581dcb8210e5bb698a6717 would also promote the still-open parent reconciliation lineage and many paths outside this task's mutation authority.
-- A standalone restage from main is also not currently authorized because the scientific task diff includes architecture/lambda-ci-systemd-profiles.v1.json and scripts/install_padataset_scientific_runtime_v1.sh, neither of which is listed in this task capsule's allowed_mutation_scope. Do not self-expand scope.
-- Workspace Shell multirepo authority remains a separate owning-task concern; current Workspace Shell inspection for this PADataset task still fails TASK_NOT_FOUND in the trusted authority root.
-- Scientific route must not be reconciled or invoked until an authority-correct promotion path is established and promoted policy is freshly reconciled.
+- Live Workspace Shell trusted authority is stale and must be refreshed before using Workspace Shell for the scientific task. The validated multirepo upgrade operator is the authorized host-mutation path.
+- Scientific promotion must still be restaged cleanly from current main after Workspace Shell authority refresh; do not merge the stacked PR #606 lineage into main.
 
 ## Fresh-chat initialization
 
