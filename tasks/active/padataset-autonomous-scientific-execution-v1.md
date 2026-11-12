@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator root runtime repair only: materialize exact workspace-control source b0f1c80b76e13e8333ab135a9d4cda437c3e3ce4, compute and bind the current installed runtime SHA, candidate runtime SHA, and existing runtime-override receipt SHA into one fresh root-owned 0600 REPAIR_PADATASET_SCIENTIFIC_RUNTIME_V1 authority, then invoke scripts/lambda_ci_v3_padataset_scientific_runtime_repair_v1.py. Require transaction phase COMMITTED_ACTIVE_RUNTIME_REPAIR, V3 installed-generation verification PASS, shared provisioner active/running, and restoration of exactly the previously active v3 controller set with unchanged UnitFileState/NRestarts. After repair, do not retrigger; observe existing run 43293735325 for the controller's terminal REST revival and fresh provision attempt.
+Operator recovery + fresh one-shot repair only. Materialize exact workspace-control main f7e0f72e82e20eef732ab78ebe082d91e4bd21dc. Read the latest scientific runtime-repair transaction receipt and require phase ROLLED_BACK_PREVIOUS_RUNTIME with rollback_completed=true; independently require installed runtime SHA 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da and runtime-override SHA d9548a56ab46e133aa321e804e310c0fad1712e87cda5cece56bda308fc5bcd0; verify installed generation and active scientific controller/provisioner. Then create a fresh root-owned 0600 REPAIR_PADATASET_SCIENTIFIC_RUNTIME_V1 authority bound to the current predecessor runtime/override and candidate runtime f2791ade8e951408d8a3818da617ec64919c06bd2f7d07c9f6fa0c137bb6afa2, invoke the corrected repair helper, and require COMMITTED_ACTIVE_RUNTIME_REPAIR. After success, do not retrigger; observe existing run 43293735325 / job 131446381843 for REST terminal-record revival.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Operator root runtime repair only: materialize exact workspace-control source b0
 
 ## Blockers / gates
 
-- The reviewed runtime repair is not yet installed on Lambda. Root/operator authority is required to execute scripts/lambda_ci_v3_padataset_scientific_runtime_repair_v1.py from exact workspace-control main b0f1c80b76e13e8333ab135a9d4cda437c3e3ce4.
-- Do not issue another /lambda-scientific comment. Existing run 43293735325 / job 131446381843 must be allowed to revive through the controller's provenance-preserving terminal REST retry path after the runtime repair.
+- Before retrying the root runtime repair, prove the failed attempt rolled back to the exact predecessor runtime SHA 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da and predecessor runtime-override SHA d9548a56ab46e133aa321e804e310c0fad1712e87cda5cece56bda308fc5bcd0, and inspect the failed transaction receipt phase. Do not reuse consumed authority d4f31151-331b-46e3-921b-e56ced421bfe.
+- Do not issue another /lambda-scientific comment. Existing run 43293735325 / job 131446381843 remains the only scientific demand and must revive through the controller after a successful runtime repair.
 
 ## Fresh-chat initialization
 
