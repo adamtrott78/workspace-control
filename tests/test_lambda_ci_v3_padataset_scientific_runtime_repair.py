@@ -42,6 +42,22 @@ class PADatasetScientificRuntimeRepairTests(unittest.TestCase):
         self.assertIn('"controller_restart_deltas":restart_deltas',HELPER)
         self.assertIn("inactive controller unexpectedly activated",HELPER)
 
+    def test_scheduler_emptiness_is_required_before_swap_not_after_restore(self):
+        pre_swap = HELPER.index('ctl("stop",PROVISIONER_UNIT)')
+        post_restore = HELPER.index('for cid in active_before:\n            ctl("start",units[cid])')
+        self.assertLess(
+            HELPER.rfind("require_no_live_provisioner_records()", 0, pre_swap),
+            pre_swap,
+        )
+        self.assertNotIn(
+            "require_no_live_provisioner_records()",
+            HELPER[post_restore:HELPER.index('tx.update({', post_restore)],
+        )
+        self.assertIn(
+            "queued GitHub demand may legitimately",
+            HELPER,
+        )
+
     def test_rollback_is_verified_before_claiming_completion(self):
         self.assertIn('wait_state(PROVISIONER_UNIT,"active")',HELPER)
         self.assertIn('wait_state(units[cid],"active")',HELPER)
