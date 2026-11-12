@@ -71,6 +71,8 @@ TRUSTED_CACHE_MANAGER_PATH = pathlib.Path(
 )
 TRUSTED_CACHE_MANAGER_BLOB = "a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807"
 CPU_EXECUTION_PROFILES = frozenset({"control-small", "cpu-test"})
+SINGLE_GPU_EXECUTION_PROFILES = frozenset({"gpu-small", "gpu-scientific-single"})
+GPU_EXECUTION_PROFILES = SINGLE_GPU_EXECUTION_PROFILES | frozenset({"gpu-heavy"})
 
 def run(argv: list[str], *, check: bool = True):
     proc = subprocess.run(
@@ -127,7 +129,7 @@ def execution_semantics(spec: dict[str, Any]) -> dict[str, Any]:
             }
 
     profile = semantics.get("execution_profile")
-    if profile not in {"control-small", "cpu-test", "gpu-small", "gpu-heavy"}:
+    if profile not in CPU_EXECUTION_PROFILES | GPU_EXECUTION_PROFILES:
         raise RuntimeLaunchError("execution contract profile is unsupported")
     gpu_count = semantics.get("gpu_count")
     if not isinstance(gpu_count, int) or gpu_count < 0 or gpu_count > 2:
@@ -2282,12 +2284,14 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
     if len(target_uuids) != semantics["gpu_count"]:
         raise RuntimeLaunchError("GPU target count differs from semantic contract")
 
-    if profile == "gpu-small":
+    if profile in SINGLE_GPU_EXECUTION_PROFILES:
         if semantics["gpu_count"] != 1 or resources["gpu_indices"] != [0]:
-            raise RuntimeLaunchError("gpu-small semantic authority must be exactly one GPU")
+            raise RuntimeLaunchError(
+                "single-GPU semantic authority must be exactly one GPU"
+            )
         target_uuid = resources.get("gpu_uuid")
         if target_uuids != [target_uuid]:
-            raise RuntimeLaunchError("gpu-small UUID set drift")
+            raise RuntimeLaunchError("single-GPU UUID set drift")
         assignment = resolve_gpu_assignment(target_uuid)
     elif profile == "gpu-heavy":
         if semantics["gpu_count"] != 2:
@@ -2322,7 +2326,7 @@ def launch_gpu_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         }:
             trusted_cuda_oom_probe = trusted_failure_probe
 
-        if profile == "gpu-small" and probe_kind != TRUSTED_CUDA_OOM_PROBE_KIND:
+        if profile in SINGLE_GPU_EXECUTION_PROFILES and probe_kind != TRUSTED_CUDA_OOM_PROBE_KIND:
             raise RuntimeLaunchError("single-GPU profile received a dual failure probe")
         if profile == "gpu-heavy" and probe_kind not in {
             TRUSTED_DUAL_TIMEOUT_PROBE_KIND,
@@ -2916,7 +2920,7 @@ def launch_runner(request, spec: dict[str, Any]) -> dict[str, Any]:
         raise RuntimeLaunchError("launch profile differs from semantic contract")
     if profile in CPU_EXECUTION_PROFILES:
         return launch_cpu_runner(request, spec)
-    if profile == "gpu-small":
+    if profile in SINGLE_GPU_EXECUTION_PROFILES:
         return launch_gpu_runner(request, spec)
     if profile == "gpu-heavy":
         if (
