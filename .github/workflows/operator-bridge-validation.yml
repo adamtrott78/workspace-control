@@ -259,6 +259,7 @@ jobs:
     timeout-minutes: 20
     env:
       PSExecutionPolicyPreference: Bypass
+      STAGE10_SCHEDULER_HOTKEY: Ctrl+Alt+X
 
     steps:
       - name: Checkout exact profile-repair head
@@ -412,8 +413,6 @@ jobs:
 
   stage10-usability:
     name: stage10-usability
-    env:
-      STAGE10_SCHEDULER_HOTKEY: Ctrl+Alt+X
     if: >-
       ${{
         github.event_name == 'pull_request' &&
