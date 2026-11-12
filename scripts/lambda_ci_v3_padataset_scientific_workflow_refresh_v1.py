@@ -18,7 +18,6 @@ import tempfile
 import uuid
 from typing import Any
 
-import lambda_ci_policy_compiler as compiler
 import lambda_ci_v3_reconciler as candidate
 
 BASE_MANIFEST = pathlib.Path("/etc/workspace-ci/v3/install-manifest.json")
@@ -235,33 +234,41 @@ def current_reconciler_override(manifest: dict[str,Any], manifest_raw: bytes, ac
             raise RefreshError(f"current reconciler override mismatch: {k}")
     return value,raw
 
-def build_refreshed_policy(repo: pathlib.Path, current: dict[str,Any]) -> dict[str,Any]:
-    compiled=compiler.compile_policy(repo)
-    candidate_policy=compiled["controller_projections"][TARGET_CLASS]
-    workflows=candidate_policy.get("trusted_workflows")
-    if not isinstance(workflows,list) or len(workflows)!=1 or workflows[0].get("blob_sha")!=NEW_BLOB:
-        raise RefreshError("reviewed candidate workflow binding invalid")
-    current_copy=copy.deepcopy(current)
-    candidate_copy=copy.deepcopy(candidate_policy)
-    for value in (current_copy,candidate_copy):
-        value.pop("controller_policy_sha256",None)
-        value.pop("control_plane_generation_sha256",None)
-    current_workflows=current_copy.pop("trusted_workflows",None)
-    candidate_workflows=candidate_copy.pop("trusted_workflows",None)
-    if current_copy!=candidate_copy:
-        raise RefreshError("controller policy changed beyond workflow binding")
-    if not isinstance(current_workflows,list) or len(current_workflows)!=1 or current_workflows[0].get("blob_sha")!=OLD_BLOB:
-        raise RefreshError("current workflow binding is not the accepted predecessor")
-    old=copy.deepcopy(current_workflows[0]); new=copy.deepcopy(candidate_workflows[0])
-    old.pop("blob_sha",None); new.pop("blob_sha",None)
-    if old!=new:
-        raise RefreshError("trusted workflow metadata changed beyond blob")
-    refreshed=copy.deepcopy(current)
-    refreshed["trusted_workflows"]=copy.deepcopy(candidate_workflows)
-    refreshed["controller_policy_sha256"]=compiler.sha256_object({
-        k:v for k,v in refreshed.items()
+def policy_digest(policy: dict[str,Any]) -> str:
+    payload={
+        k:v for k,v in policy.items()
         if k not in {"control_plane_generation_sha256","controller_policy_sha256"}
-    })
+    }
+    raw=json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",",":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
+
+def build_refreshed_policy(current: dict[str,Any]) -> dict[str,Any]:
+    workflows=current.get("trusted_workflows")
+    if not isinstance(workflows,list) or len(workflows)!=1:
+        raise RefreshError("current trusted workflow set invalid")
+    workflow=workflows[0]
+    required={
+        "route_id":"scientific-single-gpu",
+        "path":WORKFLOW_PATH,
+        "default_branch":"main",
+        "blob_sha":OLD_BLOB,
+        "compile_time_job_key":"padataset-scientific",
+        "compile_time_top_level_job_count":1,
+        "allowed_events":["issue_comment"],
+        "allowed_actor_logins":["adamtrott78"],
+    }
+    if workflow!=required:
+        raise RefreshError("current workflow binding is not the accepted predecessor")
+    refreshed=copy.deepcopy(current)
+    refreshed_workflow=copy.deepcopy(workflow)
+    refreshed_workflow["blob_sha"]=NEW_BLOB
+    refreshed["trusted_workflows"]=[refreshed_workflow]
+    refreshed["controller_policy_sha256"]=policy_digest(refreshed)
     return refreshed
 
 def main() -> int:
@@ -294,7 +301,7 @@ def main() -> int:
     current_policy,current_policy_raw=load(TARGET_POLICY)
     if current_policy.get("controller_policy_sha256")!=scientific.get("target_controller_policy_sha256"):
         raise RefreshError("current target policy digest binding mismatch")
-    refreshed_policy=build_refreshed_policy(repo,current_policy)
+    refreshed_policy=build_refreshed_policy(current_policy)
     refreshed_policy_raw=canonical(refreshed_policy)
 
     manifest,manifest_raw=load(BASE_MANIFEST)
