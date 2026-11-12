@@ -31,6 +31,9 @@ INSTALLED_RECONCILER = candidate.RECONCILER_SCRIPT
 RECONCILER_OVERRIDE = candidate.RECONCILER_OVERRIDE_ACTIVE_RECEIPT
 PROVISIONER_UNIT = "workspace-ci-v3-provisioner.service"
 RECONCILER_UNIT = "workspace-ci-v3-reconciler.service"
+PROVISIONER_STATE = pathlib.Path("/var/lib/workspace-ci/v3/provisioner")
+TARGET_LEDGER = pathlib.Path("/var/lib/workspace-ci/v3/controller/state") / TARGET_CLASS
+ACTIVE_RECORD_STATES = {"RESERVED","PREPARING","ACCEPTED","RUNNING"}
 SCIENTIFIC_ROOT = pathlib.Path("/var/lib/workspace-ci/v3/padataset-scientific")
 TX_ROOT = SCIENTIFIC_ROOT / "workflow-refresh" / "transactions"
 AUTHORITY_ROOT = SCIENTIFIC_ROOT / "authority-consumption"
@@ -134,6 +137,43 @@ def require_roots() -> None:
     r=systemd(RECONCILER_UNIT)
     if r.get("ActiveState")!="active" or r.get("SubState")!="exited" or r.get("MainPID") not in {"","0"}:
         raise RefreshError("reconciler must be active/exited with no running process")
+
+def require_scientific_quiescent() -> None:
+    if TARGET_LEDGER.exists():
+        for path in sorted(TARGET_LEDGER.glob("scheduler-*.json")):
+            value=json.loads(path.read_text())
+            if value.get("state") not in {"COMPLETED","FAILED","CANCELED"}:
+                raise RefreshError(
+                    f"scientific controller has nonterminal ledger record: {path.name}"
+                )
+    if PROVISIONER_STATE.exists():
+        for path in sorted(PROVISIONER_STATE.glob("*.json")):
+            if path.name.startswith("_"):
+                continue
+            value=json.loads(path.read_text())
+            if value.get("runner_class_id")!=TARGET_CLASS:
+                continue
+            if value.get("state") in ACTIVE_RECORD_STATES or value.get("resource_hold") is True:
+                raise RefreshError(
+                    f"scientific provisioner record still holds capacity: {path.name}"
+                )
+    proc=subprocess.run(
+        ["systemctl","list-units","--all","--type=service","--plain","--no-legend","--no-pager"],
+        text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False,
+    )
+    if proc.returncode:
+        raise RefreshError("failed to enumerate transient units")
+    prefix=f"workspace-ci-v3-{TARGET_CLASS}-"
+    for line in proc.stdout.splitlines():
+        fields=line.split()
+        if not fields:
+            continue
+        unit=fields[0]
+        if not unit.startswith(prefix):
+            continue
+        state=systemd(unit)
+        if state.get("ActiveState") in {"active","activating","reloading"}:
+            raise RefreshError(f"scientific transient still active: {unit}")
 
 def ensure_dir(path: pathlib.Path) -> None:
     path.mkdir(parents=True,exist_ok=True)
@@ -282,6 +322,7 @@ def main() -> int:
         raise RefreshError("workflow refresh requires root")
     repo=exact_repo(args.repo_root,args.expected_head)
     require_roots()
+    require_scientific_quiescent()
 
     # Candidate verifier must accept the currently installed predecessor state.
     candidate.verify_installed(BASE_MANIFEST)
@@ -401,6 +442,7 @@ def main() -> int:
         if target_after.get("ActiveState")!="active" or target_after.get("SubState")!="running" or target_after.get("UnitFileState")!="enabled":
             raise RefreshError("scientific controller did not return active/running/enabled")
         require_roots()
+        require_scientific_quiescent()
         others_after=controller_snapshots(); require_snapshot_same(others_before,others_after)
         candidate.verify_installed(BASE_MANIFEST)
 
