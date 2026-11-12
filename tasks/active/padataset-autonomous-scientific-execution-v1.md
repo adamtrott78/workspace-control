@@ -25,7 +25,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: 611cbdb5a89c6da0db6b4b98ac3f3faac7d5b7ca
+- Remote checkpoint: 2f2c8a9cf45082b811f5753ecc747cc2e43f00f6
 - Remote verified: false
 
 ### PADataset
@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Exact-head validate the clean main-based PR head. If PASS, mark the clean implementation verified, promote it to main through the reviewed PR path, let the production reconciler activate the scientific policy, then refresh Workspace Shell trusted authority once to the final promoted task state before scientific execution.
+Exact-head validate the corrected clean main-based PR head. If PASS, mark the clean implementation verified, promote through PR #613 to main, verify production reconciliation, then refresh Workspace Shell trusted authority once to the final promoted task state.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Exact-head validate the clean main-based PR head. If PASS, mark the clean implem
 
 ## Blockers / gates
 
-- Clean main-based scientific restage is prepared and must pass exact-head validation before promotion.
-- Live Workspace Shell trusted authority still does not include padataset-autonomous-scientific-execution-v1; refresh that authority only after the final clean candidate SHA is validated and bound.
+- Clean main-based candidate includes the required baseline workspace-control workflow-pin correction and must pass exact-head validation before promotion.
+- Live Workspace Shell trusted authority still does not include padataset-autonomous-scientific-execution-v1; refresh it only after final clean candidate validation.
 
 ## Fresh-chat initialization
 
