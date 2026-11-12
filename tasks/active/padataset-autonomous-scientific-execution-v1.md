@@ -24,7 +24,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: 313e204d7342c0c14b00c2956401783d39e02d9b
+- Remote checkpoint: f627c113de479258c45cd32c4ba146139481ea5d
 - Remote verified: true
 
 ### PADataset
@@ -36,21 +36,18 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Read-only diagnose the uniquely resolved DNNs prefix /home/atrott/adamArchives/venvs/DNNs before changing or rerunning the promoter. Establish the actual environment type and why `conda list --prefix /home/atrott/adamArchives/venvs/DNNs --json` fails. Then implement a fail-closed immutable promotion path appropriate to that environment, validate the new exact head, and only then request the one-time root bootstrap.
+Execute the one-time validated Python-venv promotion from exact capability head f627c113de479258c45cd32c4ba146139481ea5d on the Lambda host using operator sudo/private-source authority. Capture the emitted runtime/data binding JSON and promotion PASS line. Do not activate the scientific route until those exact bindings are returned and committed.
 
 ## Remaining work
 
-- Read-only diagnose /home/atrott/adamArchives/venvs/DNNs: determine whether it is a Conda env, Python venv, or other environment; inspect sys.prefix/base_prefix, pyvenv.cfg, conda-meta presence, interpreter path, scientific imports/CUDA, and the exact Conda list failure without mutating the environment.
-- Choose the smallest reproducible immutable promotion mechanism supported by the actual environment type. Do not fall back to mounting the mutable user environment into routine jobs.
-- Implement the corrected promoter on padataset-autonomous-scientific-execution-v1, add regression coverage, and pass exact-head workspace-control validation before another operator attempt.
-- After one-time promotion succeeds, commit exact DNNs runtime/data bindings, activate the scientific contract/route, validate and reconcile live.
-- Then ChatGPT creates the Stage03 experiment request, triggers autonomous scientific smoke, full PA2 backbone training, and Architecture C evaluation.
+- Run the one-time root/private-source promotion from exact validated capability head f627c113de479258c45cd32c4ba146139481ea5d and capture PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.
+- After successful promotion, commit the exact DNNs runtime/data bindings, activate scientific-single-gpu-v1 and the PADataset scientific route, validate the exact activation head, and reconcile live control-plane state.
+- Run the autonomous scientific smoke and bounded training smoke, then create the exact Stage03 request, train the frozen PA2 four-known-class backbone, run Architecture C evaluation, validate result_record.json, and inspect artifacts/receipts.
 
 ## Blockers / gates
 
-- The actual DNNs runtime is uniquely resolved at /home/atrott/adamArchives/venvs/DNNs, but the current promoter assumes that exact prefix is readable/cloneable by Conda. That assumption is false on this machine.
-- Do not retry the current promoter and do not perform root mutation until the environment type and reproducible immutable-copy/clone mechanism are diagnosed read-only and a replacement candidate passes exact-head validation.
-- Routine scientific execution remains disabled until a root-owned immutable DNNs runtime and Stage03 cache are promoted, bound, validated, activated, and reconciled.
+- The corrected promoter is exact-head validated at f627c113de479258c45cd32c4ba146139481ea5d, but the one-time root/private-source promotion has not yet been executed. This remains an operator-only authority gate because it requires sudo and reads the private DNNs source/cache under /home/atrott.
+- Routine scientific execution remains disabled until the validated promoter emits exact runtime/data bindings, those bindings are committed, the scientific contract/route is activated and validated, and live reconciliation succeeds.
 
 ## Fresh-chat initialization
 
