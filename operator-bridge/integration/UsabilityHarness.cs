@@ -366,6 +366,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private readonly NotifyIcon _notifyIcon;
     private readonly ToolStripMenuItem _readyItem;
     private readonly ToolStripMenuItem _sentItem;
+    private readonly WorkerWindowSafetyController _workerWindowSafety;
     private Icon? _statusIcon;
     private DateTimeOffset? _allCompletedAt;
     private int _dispatching;
@@ -390,6 +391,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         _world = world;
         _submissions = submissions;
         _browser = browser;
+        _workerWindowSafety = new WorkerWindowSafetyController(
+            new Win32WorkerWindowSafetyPort());
 
         SynchronizationContext.SetSynchronizationContext(
             new WindowsFormsSynchronizationContext());
@@ -456,6 +459,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public string ConfiguredHotkey { get; }
     public int HotkeyPresses { get; private set; }
     public int NoActionPresses { get; private set; }
+    public int NoWorkMinimizeAttempts { get; private set; }
+    public int NoWorkMinimizeSuccesses { get; private set; }
     public int BusyPresses { get; private set; }
     public int HandoffBlockedPresses { get; private set; }
     public int HandoffRefocuses { get; private set; }
@@ -521,14 +526,23 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             {
                 _awaitingActionId = result.ActionId;
                 Volatile.Write(ref _awaitingHumanSubmit, 1);
+                _workerWindowSafety.RecordPreparedWorkerWindow();
             }
             else if (result.Outcome == DispatchOutcome.NoAction)
             {
                 NoActionPresses++;
+                NoWorkMinimizeAttempts++;
+                var minimized = _workerWindowSafety.MinimizeAfterNoAction();
+                if (minimized)
+                {
+                    NoWorkMinimizeSuccesses++;
+                }
                 _notifyIcon.ShowBalloonTip(
                     1500,
                     "Workspace Worker Bridge",
-                    "Nothing needs service",
+                    minimized
+                        ? "Nothing needs service; worker Firefox minimized"
+                        : "Nothing needs service",
                     ToolTipIcon.None);
             }
             else if (result.Outcome == DispatchOutcome.Busy)
@@ -731,6 +745,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                     valid_durable_acks = ValidDurableAcks,
                     hotkey_presses = HotkeyPresses,
                     no_action_presses = NoActionPresses,
+                    no_work_minimize_attempts = NoWorkMinimizeAttempts,
+                    no_work_minimize_successes = NoWorkMinimizeSuccesses,
                     busy_presses = BusyPresses,
                     handoff_blocked_presses = HandoffBlockedPresses,
                     handoff_refocuses = HandoffRefocuses,

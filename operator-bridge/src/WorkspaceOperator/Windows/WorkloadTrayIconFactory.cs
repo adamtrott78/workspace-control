@@ -24,8 +24,11 @@ public static class WorkloadTrayIconFactory
             2 => 14f,
             _ => 9f
         };
+        var fontFamily =
+            SystemFonts.MessageBoxFont?.FontFamily ??
+            FontFamily.GenericSansSerif;
         using var font = new Font(
-            SystemFonts.MessageBoxFont.FontFamily,
+            fontFamily,
             fontSize,
             FontStyle.Bold,
             GraphicsUnit.Pixel);

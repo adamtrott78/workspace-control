@@ -23,6 +23,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly System.Windows.Forms.Timer _statusTimer;
     private readonly Func<WorkloadStatusSnapshot> _workloadStatusProvider;
     private readonly string _configuredHotkey;
+    private readonly WorkerWindowSafetyController _workerWindowSafety;
     private Icon? _statusIcon;
     private readonly CancellationTokenSource _ipcCancellation = new();
     private readonly Task _ipcTask;
@@ -42,6 +43,8 @@ public sealed class TrayApplicationContext : ApplicationContext
         _configuredHotkey = binding.DisplayName;
         _workloadStatusProvider =
             workloadStatusProvider ?? (() => WorkloadStatusSnapshot.Empty);
+        _workerWindowSafety = new WorkerWindowSafetyController(
+            new Win32WorkerWindowSafetyPort());
         var hotkey = new WindowsHotkeyRegistrar(
             _hotkeyWindow.Handle,
             binding);
@@ -157,12 +160,19 @@ public sealed class TrayApplicationContext : ApplicationContext
         try
         {
             var result = await _dispatch.DispatchAsync();
-            if (result.Outcome == DispatchOutcome.NoAction)
+            if (result.Outcome == DispatchOutcome.LocalPrepared)
             {
+                _workerWindowSafety.RecordPreparedWorkerWindow();
+            }
+            else if (result.Outcome == DispatchOutcome.NoAction)
+            {
+                var minimized = _workerWindowSafety.MinimizeAfterNoAction();
                 _notifyIcon.ShowBalloonTip(
                     1500,
                     "Workspace Worker Bridge",
-                    "Nothing needs service",
+                    minimized
+                        ? "Nothing needs service; worker Firefox minimized"
+                        : "Nothing needs service",
                     ToolTipIcon.None);
             }
 
