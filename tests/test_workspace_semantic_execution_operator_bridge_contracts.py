@@ -65,7 +65,8 @@ class OperatorBridgeContractTests(unittest.TestCase):
 
     def test_hotkey_adapter_enforces_no_repeat(self):
         source = HOTKEY_ADAPTER.read_text(encoding="utf-8")
-        self.assertIn("ModControl | ModNoRepeat", source)
+        self.assertIn("_binding.Modifiers | ModNoRepeat", source)
+        self.assertIn("SchedulerHotkeyBinding.Default", source)
 
     def test_named_pipe_is_current_user_only_and_not_network_listening(self):
         source = IPC_SERVER.read_text(encoding="utf-8")
