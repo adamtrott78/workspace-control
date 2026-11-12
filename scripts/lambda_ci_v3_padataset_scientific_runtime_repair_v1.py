@@ -318,8 +318,9 @@ def main() -> int:
                     f"pre-existing restarting controller exceeded bounded restart delta: {cid}"
                 )
 
-        require_no_live_provisioner_records()
-        require_no_transients(units)
+        # Once controllers are restored, queued GitHub demand may legitimately
+        # revive immediately. Emptiness is a pre-swap quiescence invariant, not
+        # a post-restore invariant. The effective generation must still verify.
         reconciler.verify_installed(BASE_MANIFEST)
 
         tx.update({
@@ -372,8 +373,9 @@ def main() -> int:
                         f"rollback changed controller enablement: {cid}"
                     )
 
-            require_no_live_provisioner_records()
-            require_no_transients(units)
+            # Restored controllers may immediately resume queued work. Verify
+            # the restored generation and controller topology, but do not
+            # require post-restore scheduler emptiness.
             reconciler.verify_installed(BASE_MANIFEST)
             tx["phase"]="ROLLED_BACK_PREVIOUS_RUNTIME"
             tx["rollback_completed"]=True
