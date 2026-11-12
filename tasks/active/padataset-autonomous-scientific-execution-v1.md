@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Run one fresh secret-safe authenticated GitHub rate-limit probe using the installed workspace-control controller credential. If core remaining quota is positive, start workspace-ci-v3-controller@workspace-control-control-small-v1.service, verify it remains active without restart growth, inspect the immediate journal, and then re-check exact validation #466. If quota is zero, leave the controller stopped. Do not cancel or duplicate #466.
+Follow exact integration validation #467 / run 43229075867 to terminal state. If SUCCESS, verify main and PR/base authority remain unchanged, then resolve the reviewed promotion path to main without relying on PR #613's current non-main base. Do not create another validation run.
 
 ## Remaining work
 
@@ -49,9 +49,9 @@ Run one fresh secret-safe authenticated GitHub rate-limit probe using the instal
 
 ## Blockers / gates
 
-- Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
-- workspace-ci-v3-controller@workspace-control-control-small-v1.service remains intentionally stopped after the GitHub primary-rate-limit restart storm; a fresh authenticated quota probe is required before restart.
-- Scientific route must not be reconciled or invoked until exact-head validation and live reconciliation succeed.
+- Exact integration validation #467 / run 43229075867 for edd1c378a1f9965299581dcb8210e5bb698a6717 is queued. Do not duplicate or cancel it.
+- PR #613 currently targets workspace-shell-multirepo-v3-reconcile-20261111 rather than main; do not treat PR merge as main promotion without separately resolving the intended authority/base path.
+- Scientific route must not be reconciled or invoked until the integrated exact-head validation succeeds and the reviewed policy is promoted/reconciled through the authorized path.
 
 ## Fresh-chat initialization
 
