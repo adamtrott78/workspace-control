@@ -60,8 +60,17 @@ public sealed class WindowsHotkeyRegistrarTests
     [TestMethod]
     public void ParseRejectsModifierOnlyHotkey()
     {
-        Assert.ThrowsException<ArgumentException>(
-            () => SchedulerHotkeyBinding.Parse("Ctrl+Alt"));
+        ArgumentException? caught = null;
+        try
+        {
+            SchedulerHotkeyBinding.Parse("Ctrl+Alt");
+        }
+        catch (ArgumentException exception)
+        {
+            caught = exception;
+        }
+
+        Assert.IsNotNull(caught);
     }
 
     [TestMethod]

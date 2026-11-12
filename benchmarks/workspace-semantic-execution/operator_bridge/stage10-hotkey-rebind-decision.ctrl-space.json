@@ -5,10 +5,11 @@
   "previous_binding": "Ctrl+B",
   "previous_binding_disposition": "REJECTED",
   "candidate_binding": "Ctrl+Space",
-  "candidate_status": "PENDING_EMPIRICAL_ACCEPTANCE",
+  "candidate_status": "PENDING_OPERATOR_AND_EMPIRICAL_ACCEPTANCE",
   "implementation": "RUNTIME_CONFIGURABLE",
   "rationale": [
-    "Operator reports better ergonomics for Ctrl+Space -> Ctrl+V than Ctrl+B -> Ctrl+V.",
+    "Operator explicitly rejected Ctrl+B because the Ctrl+B -> Ctrl+V transition requires an uncomfortable pointer-finger stretch.",
+    "Ctrl+Space is selected by the implementation as the next ergonomic candidate because the scheduler chord uses the thumb for Space and leaves the index finger available for V; operator acceptance is still pending empirical trial.",
     "Ctrl+B UT-10 recorded one extra hotkey press and one rejected submission despite 20/20 actions and durable acknowledgments."
   ],
   "invariant_preservation": [
