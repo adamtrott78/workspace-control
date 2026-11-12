@@ -17,8 +17,9 @@ class PADatasetScientificWorkflowRefreshTests(unittest.TestCase):
 
     def test_helper_changes_only_target_policy_reconciler_and_refresh_receipt(self):
         self.assertIn("REFRESH_PADATASET_SCIENTIFIC_WORKFLOW_V1", HELPER)
-        self.assertIn("controller policy changed beyond workflow binding", HELPER)
-        self.assertIn("trusted workflow metadata changed beyond blob", HELPER)
+        self.assertIn("current workflow binding is not the accepted predecessor", HELPER)
+        self.assertIn('refreshed_workflow["blob_sha"]=NEW_BLOB', HELPER)
+        self.assertIn('refreshed["controller_policy_sha256"]=policy_digest(refreshed)', HELPER)
         self.assertIn('run_systemctl("stop",TARGET_UNIT)', HELPER)
         self.assertIn('run_systemctl("start",TARGET_UNIT)', HELPER)
         self.assertNotIn('systemctl","restart"', HELPER)
