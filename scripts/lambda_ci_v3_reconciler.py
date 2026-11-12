@@ -162,6 +162,19 @@ def _sha256(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
+def _optional_root_receipt_is_file(path: pathlib.Path) -> bool:
+    try:
+        return path.is_file()
+    except PermissionError:
+        # Repository validation may run as an intentionally unprivileged
+        # controller user on the live host. Optional root-private override
+        # state must not leak into unrelated temp-manifest tests. Production
+        # root verification still fails closed on the same permission fault.
+        if os.geteuid() == 0:
+            raise
+        return False
+
+
 def _load_override_receipt(path: pathlib.Path, label: str) -> dict[str, Any]:
     try:
         st = path.stat()
@@ -260,7 +273,7 @@ def _padataset_scientific_additive_override(
     manifest: dict[str, Any],
     production_overrides: dict[str, str],
 ) -> dict[str, Any] | None:
-    if not PADATASET_SCIENTIFIC_ACTIVE_RECEIPT.is_file():
+    if not _optional_root_receipt_is_file(PADATASET_SCIENTIFIC_ACTIVE_RECEIPT):
         return None
 
     active = _load_override_receipt(
@@ -402,7 +415,9 @@ def _padataset_scientific_additive_override(
 def _padataset_scientific_workflow_refresh(
     scientific_active: dict[str, Any],
 ) -> dict[str, Any] | None:
-    if not PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT.is_file():
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT
+    ):
         return None
 
     refresh = _load_override_receipt(

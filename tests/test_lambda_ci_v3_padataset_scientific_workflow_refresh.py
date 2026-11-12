@@ -43,5 +43,11 @@ class PADatasetScientificWorkflowRefreshTests(unittest.TestCase):
         self.assertIn("candidate.verify_installed(BASE_MANIFEST)", HELPER)
         self.assertIn("COMMITTED_ACTIVE_WORKFLOW_REFRESH", HELPER)
 
+    def test_nonroot_validation_ignores_inaccessible_optional_live_receipts(self):
+        self.assertIn("def _optional_root_receipt_is_file", REC)
+        self.assertIn("except PermissionError:", REC)
+        self.assertIn("if os.geteuid() == 0:", REC)
+        self.assertIn("return False", REC)
+
 if __name__ == "__main__":
     unittest.main()
