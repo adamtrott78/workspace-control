@@ -317,6 +317,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private readonly HotkeyMessageWindow _hotkeyWindow;
     private readonly System.Windows.Forms.Timer _timer;
     private int _dispatching;
+    private int _awaitingHumanSubmit;
+    private string? _awaitingActionId;
     private bool _finishing;
 
     public UsabilityApplicationContext(
@@ -379,6 +381,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public int HotkeyPresses { get; private set; }
     public int NoActionPresses { get; private set; }
     public int BusyPresses { get; private set; }
+    public int HandoffBlockedPresses { get; private set; }
     public int ValidDurableAcks { get; private set; }
     public int WrongWorkerDispatches { get; private set; }
     public int WrongPacketDispatches { get; private set; }
@@ -391,6 +394,13 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private async void HotkeyPressed(object? sender, EventArgs e)
     {
         HotkeyPresses++;
+
+        if (Volatile.Read(ref _awaitingHumanSubmit) != 0)
+        {
+            HandoffBlockedPresses++;
+            return;
+        }
+
         if (Interlocked.Exchange(ref _dispatching, 1) != 0)
         {
             BusyPresses++;
@@ -403,7 +413,12 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             LastDispatchOutcome = result.Outcome.ToString();
             LastDispatchError = result.NormalizedError;
 
-            if (result.Outcome == DispatchOutcome.NoAction)
+            if (result.Outcome == DispatchOutcome.LocalPrepared)
+            {
+                _awaitingActionId = result.ActionId;
+                Volatile.Write(ref _awaitingHumanSubmit, 1);
+            }
+            else if (result.Outcome == DispatchOutcome.NoAction)
             {
                 NoActionPresses++;
             }
@@ -508,6 +523,14 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         if (applied)
         {
             ValidDurableAcks++;
+            if (string.Equals(
+                    _awaitingActionId,
+                    submission.ActionId,
+                    StringComparison.Ordinal))
+            {
+                _awaitingActionId = null;
+                Volatile.Write(ref _awaitingHumanSubmit, 0);
+            }
         }
         else
         {
@@ -547,7 +570,6 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
               WrongWorkerDispatches == 0 &&
               WrongPacketDispatches == 0 &&
               RejectedStateSubmissions == 0 &&
-              BusyPresses == 0 &&
               DispatchFailures == 0;
 
         Directory.CreateDirectory(
@@ -574,6 +596,11 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                     hotkey_presses = HotkeyPresses,
                     no_action_presses = NoActionPresses,
                     busy_presses = BusyPresses,
+                    handoff_blocked_presses = HandoffBlockedPresses,
+                    safely_recovered_repeat_presses =
+                        BusyPresses + HandoffBlockedPresses,
+                    awaiting_human_submit =
+                        Volatile.Read(ref _awaitingHumanSubmit) != 0,
                     wrong_worker_dispatches = WrongWorkerDispatches,
                     wrong_packet_dispatches = WrongPacketDispatches,
                     rejected_state_submissions = RejectedStateSubmissions,

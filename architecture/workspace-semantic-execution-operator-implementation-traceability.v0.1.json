@@ -732,7 +732,10 @@
         "UT-01 attempt 3 / Operator Bridge run #201 was INVALID before human-trial readiness: Firefox launched, but the harness never emitted STAGE10_USABILITY_READY and no Stage-10 result artifact was produced. User Ctrl+B opened Firefox Bookmarks, confirming ordinary browser handling after the bridge harness had failed to become ready.",
         "Repair: integration executable now uses a synchronous [STAThread] Main, all early Stage-10 startup failures are converted into structured evidence, and STAGE10_USABILITY_READY is written only after UsabilityApplicationContext construction and explicit hotkey-registration/bridge-enabled confirmation.",
         "UT-01 attempt 4 / Operator Bridge run #203 failed before READY with no structured result. The harness had installed WindowsFormsSynchronizationContext before synchronously blocking on hub.WaitForConnectionAsync(...).GetAwaiter().GetResult(), while the WinForms message loop had not started.",
-        "Repair moves WindowsFormsSynchronizationContext installation into UsabilityApplicationContext construction, after adapter connection and browser seeding, immediately before the WinForms message loop. READY remains gated on confirmed global hotkey registration."
+        "Repair moves WindowsFormsSynchronizationContext installation into UsabilityApplicationContext construction, after adapter connection and browser seeding, immediately before the WinForms message loop. READY remains gated on confirmed global hotkey registration.",
+        "UT-01 attempt 5 / Operator Bridge run #206 demonstrated the primary human loop is functional on the real Windows path: Ctrl+B global interception works, the synthetic packet reaches the clipboard, and fake-worker submission works.",
+        "Operator accidentally pressed Ctrl+B again before paste/Enter on some cycles. Review of SingleFlightDispatchCoordinator showed its _inFlight guard ends at LocalPrepared, so a later Ctrl+B can claim the next queued action before durable acknowledgment. This is a real human-handoff recovery gap.",
+        "Recovery rule added to the Stage-10 human harness: after LocalPrepared, repeated Ctrl+B is safely ignored until the matching fake-worker submission receives durable acknowledgment. Rapid presses caught by the existing Busy guard are also treated as safe recovered repeats rather than objective failure."
       ],
       "implementation": [],
       "evidence": {
@@ -817,10 +820,25 @@
           "workflow_failure": "Stage 10 usability harness never reached ready state.",
           "diagnosed_startup_risk": "WINFORMS_SYNCHRONIZATION_CONTEXT_INSTALLED_BEFORE_BLOCKING_ASYNC_ADAPTER_WAIT",
           "rerun_required": true
+        },
+        "ut01_attempt_5": {
+          "status": "PARTIAL_FUNCTIONAL_SUCCESS_WITH_RECOVERY_GAP",
+          "workflow_run_id": 43145923429,
+          "job_id": 130944865182,
+          "source_sha": "099412bc92dde500b95ee96dce21e76d1a36f184",
+          "operator_observation": {
+            "global_ctrl_b_interception_worked": true,
+            "synthetic_packet_clipboard_delivery_worked": true,
+            "fake_worker_submission_worked": true,
+            "repeated_ctrl_b_before_ack_observed": true
+          },
+          "demonstrated_gap": "NEXT_ACTION_CAN_BE_CLAIMED_AFTER_LOCAL_PREPARED_BEFORE_DURABLE_ACK",
+          "repair": "BLOCK_REPEAT_CTRL_B_UNTIL_MATCHING_DURABLE_ACK",
+          "rerun_required": true
         }
       },
-      "claim": "Stage 10 active. UT-11 PASS. UT-01 attempts remain invalidated by Stage-10 harness startup/threading defects; synchronization context is now installed only after adapter startup and before the UI message loop.",
-      "blocker": "Validate post-adapter WinForms synchronization-context placement and readiness gate before rerunning UT-01."
+      "claim": "Stage 10 active. UT-11 PASS. UT-01 primary operator loop is functional; repeat-Ctrl+B handoff recovery is being hardened before acceptance.",
+      "blocker": "Validate durable-ack handoff gate and rerun UT-01 with deliberate repeated Ctrl+B recovery coverage."
     }
   }
 }

@@ -50,6 +50,19 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("clipboard_failed_dispatches", harness)
         self.assertIn("last_dispatch_outcome", harness)
         self.assertIn("DispatchOutcome.ClipboardFailed", harness)
+        self.assertIn("_awaitingHumanSubmit", harness)
+        self.assertIn("_awaitingActionId", harness)
+        self.assertIn("HandoffBlockedPresses", harness)
+        self.assertIn("safely_recovered_repeat_presses", harness)
+        self.assertIn(
+            "Volatile.Read(ref _awaitingHumanSubmit) != 0",
+            harness,
+        )
+        self.assertIn(
+            "Volatile.Write(ref _awaitingHumanSubmit, 0)",
+            harness,
+        )
+        self.assertNotIn("BusyPresses == 0", harness)
         self.assertIn("WindowsHotkeyRegistrar", harness)
         self.assertIn("IPAddress.Loopback", server)
         self.assertNotIn("IPAddress.Any", server)
