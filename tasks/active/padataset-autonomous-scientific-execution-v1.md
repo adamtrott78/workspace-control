@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Perform bounded rate-limit containment on workspace-ci-v3-controller@workspace-control-control-small-v1.service: stop the exact unit, make one secret-safe authenticated rate-limit probe using the installed workspace-control controller credential, and restart immediately only if remaining quota is positive. If remaining quota is zero, leave the unit stopped and capture the reset epoch/remaining seconds. Do not cancel or duplicate validation #466.
+Reconnect to the Lambda host and run a no-temp-file, non-set-e secret-safe rate-limit probe against the installed workspace-control controller credential. If the authenticated probe reports positive remaining quota, start workspace-ci-v3-controller@workspace-control-control-small-v1.service and verify it stays active; if quota remains zero, leave it stopped and capture the reset epoch. Do not cancel or duplicate validation #466.
 
 ## Remaining work
 
@@ -50,8 +50,9 @@ Perform bounded rate-limit containment on workspace-ci-v3-controller@workspace-c
 ## Blockers / gates
 
 - Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
-- Root cause is now proven: workspace-ci-v3-controller@workspace-control-control-small-v1.service is restart-storming because the v3 GitHub REST verifier treats GitHub primary-rate-limit HTTP 403 as fatal. The controller exits during initial REST-attested demand discovery, systemd restarts it ~5 seconds later, and the queued validation cannot be admitted.
-- This controller source is outside this task capsule's authorized mutation scope, so a code hotfix must not be folded into the PADataset activation candidate without separate authority. Immediate containment may stop the exact controller while the shared PAT rate limit is exhausted, then restart after reset.
+- Root cause is proven: workspace-ci-v3-controller@workspace-control-control-small-v1.service restart-stormed on GitHub primary-rate-limit HTTP 403 while discovering REST-attested queued demand.
+- The exact v3 control-small controller is now intentionally stopped/inactive at NRestarts=3495, containing further rate-limit amplification.
+- The first secret-safe rate-limit probe failed with curl rc=23 and the SSH login shell exited because top-level set -e was enabled. No restart was attempted after that failed probe.
 - Scientific route must not be reconciled or invoked until exact-head validation and live reconciliation succeed.
 
 ## Fresh-chat initialization
