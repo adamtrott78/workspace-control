@@ -37,19 +37,20 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Wait for the already-created exact-head validation #466 / run 43149651861 on bb6528faf9643ffddf517891eba70f7988267d40. If it succeeds, recheck main SHA before integrating; if it fails, diagnose the exact failing evidence. Do not submit a duplicate validation request or reconcile scientific policy while #466 remains queued.
+On the Lambda host, perform a read-only diagnostic of workspace-ci-controller@workspace-control-cpu.service and the provisioner/controller logs covering queued validation #466. Return the output. Do not restart services, cancel #466, or submit a duplicate validation request until the stalled provisioning cause is identified.
 
 ## Remaining work
 
-- Obtain SUCCESS for exact-head validation #466 on activation head bb6528faf9643ffddf517891eba70f7988267d40.
-- Recheck current main. If main remains 3bee43a810d739cb199c5091024b8d91115aa5d6, move the activation branch to the prepared two-parent integration commit edd1c378a1f9965299581dcb8210e5bb698a6717; otherwise rebuild the integration against the new main. Then validate that exact integrated head.
-- After integrated exact-head validation passes, advance reviewed policy to main so Lambda CI Project Reconcile validates it and the live reconcile controller installs the exact runtime/data/contract/route policy.
-- Verify live reconciliation and then run the autonomous scientific smoke, bounded training smoke, full PA2 Stage03 backbone training, and Architecture C evaluation.
+- Diagnose why exact-head validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment; use read-only live controller/provisioner evidence first.
+- After #466 succeeds (or after a bounded repair followed by a new exact-head validation if #466 is proven irrecoverably orphaned), recheck main and integrate current main into the activation branch with unchanged scientific tree, then exact-head validate the integrated SHA.
+- Advance the validated integrated policy to main so Lambda CI Project Reconcile validates it and the live reconcile controller installs the exact runtime/data/contract/route policy.
+- Verify live reconciliation and run autonomous scientific smoke, bounded training smoke, full PA2 Stage03 backbone training, and Architecture C evaluation.
 
 ## Blockers / gates
 
-- Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 is queued without runner assignment. Do not bypass this gate or create duplicate validation requests while it remains live.
-- Scientific route must not be reconciled or invoked until the integrated main-compatible activation head passes exact-head validation and the live reconciler installs it.
+- Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued with no runner assignment after competing Actions completed. The activation delta from successful #465 changes no workspace-control routing/controller/workflow files, so the blocker is live control-runner provisioning rather than the scientific activation patch.
+- Workspace Shell cannot inspect this task's live services because the task capsule is not yet present in its trusted authority root (TASK_NOT_FOUND). A read-only operator-side status/log capture is required before any retry, duplicate validation, or repair.
+- Scientific route must not be reconciled or invoked until the integrated main-compatible activation head passes exact-head validation and live reconciliation succeeds.
 
 ## Fresh-chat initialization
 
