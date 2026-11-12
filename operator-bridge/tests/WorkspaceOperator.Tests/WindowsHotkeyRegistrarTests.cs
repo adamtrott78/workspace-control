@@ -7,7 +7,7 @@ namespace WorkspaceControl.OperatorBridge.Tests;
 public sealed class WindowsHotkeyRegistrarTests
 {
     [TestMethod]
-    public void RegisterUsesControlBAndNoRepeatThenUnregisters()
+    public void RegisterUsesDefaultControlBAndNoRepeatThenUnregisters()
     {
         var native = new FakeNativeApi();
         var registrar = new WindowsHotkeyRegistrar((nint)123, native);
@@ -18,14 +18,39 @@ public sealed class WindowsHotkeyRegistrarTests
         Assert.AreEqual((nint)123, native.RegisterHandle);
         Assert.AreEqual(WindowsHotkeyRegistrar.HotkeyId, native.RegisterId);
         Assert.AreEqual(
-            WindowsHotkeyRegistrar.ModControl | WindowsHotkeyRegistrar.ModNoRepeat,
+            SchedulerHotkeyBinding.ModControl | WindowsHotkeyRegistrar.ModNoRepeat,
             native.RegisterModifiers);
-        Assert.AreEqual(WindowsHotkeyRegistrar.VirtualKeyB, native.RegisterVirtualKey);
+        Assert.AreEqual((uint)'B', native.RegisterVirtualKey);
 
         registrar.Unregister();
 
         Assert.IsFalse(registrar.IsRegistered);
         Assert.AreEqual(1, native.UnregisterCalls);
+    }
+
+    [TestMethod]
+    public void RegisterUsesConfiguredControlAltXBinding()
+    {
+        var native = new FakeNativeApi();
+        var binding = SchedulerHotkeyBinding.Parse("Ctrl+Alt+X");
+        var registrar = new WindowsHotkeyRegistrar((nint)123, binding, native);
+
+        registrar.Register();
+
+        Assert.AreEqual(
+            SchedulerHotkeyBinding.ModControl |
+            SchedulerHotkeyBinding.ModAlt |
+            WindowsHotkeyRegistrar.ModNoRepeat,
+            native.RegisterModifiers);
+        Assert.AreEqual((uint)'X', native.RegisterVirtualKey);
+        Assert.AreEqual("Ctrl+Alt+X", binding.DisplayName);
+    }
+
+    [TestMethod]
+    public void ParseRejectsModifierOnlyHotkey()
+    {
+        Assert.ThrowsException<ArgumentException>(
+            () => SchedulerHotkeyBinding.Parse("Ctrl+Alt"));
     }
 
     [TestMethod]

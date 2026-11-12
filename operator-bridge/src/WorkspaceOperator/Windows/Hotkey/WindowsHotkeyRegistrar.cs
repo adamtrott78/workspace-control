@@ -16,21 +16,41 @@ public sealed class HotkeyRegistrationException : InvalidOperationException
 public sealed class WindowsHotkeyRegistrar : IHotkeyRegistrar
 {
     internal const int HotkeyId = 0x5743;
-    internal const uint ModControl = 0x0002;
     internal const uint ModNoRepeat = 0x4000;
-    internal const uint VirtualKeyB = 0x42;
 
     private readonly nint _windowHandle;
+    private readonly SchedulerHotkeyBinding _binding;
     private readonly IHotkeyNativeApi _nativeApi;
 
     public WindowsHotkeyRegistrar(nint windowHandle)
-        : this(windowHandle, new Win32HotkeyNativeApi())
+        : this(
+            windowHandle,
+            SchedulerHotkeyBinding.Default,
+            new Win32HotkeyNativeApi())
     {
     }
 
-    internal WindowsHotkeyRegistrar(nint windowHandle, IHotkeyNativeApi nativeApi)
+    public WindowsHotkeyRegistrar(
+        nint windowHandle,
+        SchedulerHotkeyBinding binding)
+        : this(windowHandle, binding, new Win32HotkeyNativeApi())
+    {
+    }
+
+    internal WindowsHotkeyRegistrar(
+        nint windowHandle,
+        IHotkeyNativeApi nativeApi)
+        : this(windowHandle, SchedulerHotkeyBinding.Default, nativeApi)
+    {
+    }
+
+    internal WindowsHotkeyRegistrar(
+        nint windowHandle,
+        SchedulerHotkeyBinding binding,
+        IHotkeyNativeApi nativeApi)
     {
         _windowHandle = windowHandle;
+        _binding = binding;
         _nativeApi = nativeApi;
     }
 
@@ -46,8 +66,8 @@ public sealed class WindowsHotkeyRegistrar : IHotkeyRegistrar
         if (!_nativeApi.RegisterHotKey(
                 _windowHandle,
                 HotkeyId,
-                ModControl | ModNoRepeat,
-                VirtualKeyB))
+                _binding.Modifiers | ModNoRepeat,
+                _binding.VirtualKey))
         {
             throw new HotkeyRegistrationException(_nativeApi.GetLastError());
         }

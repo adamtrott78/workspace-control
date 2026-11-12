@@ -76,6 +76,8 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("wrong_worker_dispatches", harness)
         self.assertIn("wrong_packet_dispatches", harness)
         self.assertIn("Ctrl+V", script)
+        self.assertIn("SchedulerHotkey", script)
+        self.assertIn('"--scheduler-hotkey"', harness)
         self.assertNotIn("SendKeys", harness)
         self.assertNotIn("KeyboardEvent", harness)
         self.assertNotIn("MouseEvent", harness)
@@ -88,6 +90,7 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("stage10-ut11", workflow)
         self.assertIn("stage10-ut01", workflow)
         self.assertIn("stage10-ut10", workflow)
+        self.assertIn("STAGE10_SCHEDULER_HOTKEY: Ctrl+Alt+X", workflow)
         self.assertIn("needs: validation", workflow)
         self.assertIn(
             "runs-on: [self-hosted, windows, x64, workspace-operator-target]",

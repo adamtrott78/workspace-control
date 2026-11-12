@@ -412,6 +412,8 @@ jobs:
 
   stage10-usability:
     name: stage10-usability
+    env:
+      STAGE10_SCHEDULER_HOTKEY: Ctrl+Alt+X
     if: >-
       ${{
         github.event_name == 'pull_request' &&
@@ -477,7 +479,8 @@ jobs:
           ./operator-bridge/tools/run-stage10-usability.ps1 `
             -RepositoryRoot "${{ github.workspace }}" `
             -TrialId $trial `
-            -ResultPath $result
+            -ResultPath $result `
+            -SchedulerHotkey "$env:STAGE10_SCHEDULER_HOTKEY"
           Write-Host "STAGE10_USABILITY_TRIAL=$trial"
 
       - name: Upload Stage 10 content-free usability evidence

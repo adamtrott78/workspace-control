@@ -5,7 +5,8 @@ param(
   [ValidateSet("UT-11", "UT-01", "UT-10")]
   [string]$TrialId,
   [string]$ResultPath,
-  [int]$DurationSeconds = 900
+  [int]$DurationSeconds = 900,
+  [string]$SchedulerHotkey = "Ctrl+B"
 )
 
 $ErrorActionPreference = "Stop"
@@ -89,7 +90,8 @@ try {
     "--usability-trial=$TrialId",
     "--result=$ResultPath",
     "--ready=$readyPath",
-    "--duration-seconds=$DurationSeconds"
+    "--duration-seconds=$DurationSeconds",
+    "--scheduler-hotkey=$SchedulerHotkey"
   ) -RedirectStandardOutput $runnerOut -RedirectStandardError $runnerErr -PassThru
 
   Start-Sleep -Seconds 1
@@ -125,9 +127,9 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
 
   Write-Host "STAGE10_USABILITY_READY=$TrialId"
   if ($TrialId -eq "UT-11") {
-    Write-Host "Bridge is OFF. Use Ctrl+B normally in representative foreground applications for the configured duration. The bridge must not react."
+    Write-Host "Bridge is OFF. Use $SchedulerHotkey normally in representative foreground applications for the configured duration. The bridge must not react."
   } else {
-    Write-Host "For each cycle: press Ctrl+B, then Ctrl+V, then Enter. Do not manually choose or search browser tabs."
+    Write-Host "For each cycle: press $SchedulerHotkey, then Ctrl+V, then Enter. Do not manually choose or search browser tabs."
   }
 
   if (-not $runner.WaitForExit(1800000)) {

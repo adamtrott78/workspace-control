@@ -23,13 +23,17 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly BrowserCommandHub _browserCommandHub;
     private int _hotkeyDispatching;
 
-    public TrayApplicationContext(int? idleProbeMilliseconds = null)
+    public TrayApplicationContext(
+        int? idleProbeMilliseconds = null,
+        SchedulerHotkeyBinding? schedulerHotkey = null)
     {
         _diagnostics = JsonLineDiagnosticsSink.CreateDefault();
         _hotkeyWindow = new HotkeyMessageWindow();
 
         var bridgeState = new BridgeState();
-        var hotkey = new WindowsHotkeyRegistrar(_hotkeyWindow.Handle);
+        var hotkey = new WindowsHotkeyRegistrar(
+            _hotkeyWindow.Handle,
+            schedulerHotkey ?? SchedulerHotkeyBinding.Default);
         _bridgeController = new BridgeController(
             bridgeState,
             hotkey,

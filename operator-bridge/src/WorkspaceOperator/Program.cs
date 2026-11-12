@@ -1,5 +1,6 @@
 using WorkspaceControl.OperatorBridge.Ipc;
 using WorkspaceControl.OperatorBridge.Windows;
+using WorkspaceControl.OperatorBridge.Windows.Hotkey;
 
 namespace WorkspaceControl.OperatorBridge;
 
@@ -20,8 +21,21 @@ internal static class Program
 
         ApplicationConfiguration.Initialize();
         var idleProbeMilliseconds = ParseIdleProbe(args);
+        var schedulerHotkey = ParseSchedulerHotkey(args);
         System.Windows.Forms.Application.Run(
-            new TrayApplicationContext(idleProbeMilliseconds));
+            new TrayApplicationContext(
+                idleProbeMilliseconds,
+                schedulerHotkey));
+    }
+
+    private static SchedulerHotkeyBinding ParseSchedulerHotkey(string[] args)
+    {
+        const string prefix = "--scheduler-hotkey=";
+        var value = args.FirstOrDefault(arg =>
+            arg.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+
+        return SchedulerHotkeyBinding.Parse(
+            value is null ? null : value[prefix.Length..]);
     }
 
     private static int? ParseIdleProbe(string[] args)

@@ -47,6 +47,9 @@ internal static class UsabilityHarness
 
         ApplicationConfiguration.Initialize();
 
+        var schedulerHotkey = SchedulerHotkeyBinding.Parse(
+            GetArgument(args, "--scheduler-hotkey"));
+
         var readyPath = GetArgument(args, "--ready")
             ?? resultPath + ".ready.json";
         var durationSeconds = int.TryParse(GetArgument(args, "--duration-seconds"), out var parsedDuration)
@@ -116,7 +119,8 @@ internal static class UsabilityHarness
                 submissions,
                 bridgeState,
                 browser,
-                diagnostics);
+                diagnostics,
+                schedulerHotkey);
 
             if (trialId != "UT-11" &&
                 (!context.HotkeyRegistered || !context.BridgeEnabled))
@@ -137,7 +141,7 @@ internal static class UsabilityHarness
                         trial_id = trialId,
                         adapter_version = AdapterVersion,
                         fake_worker_origin = "http://127.0.0.1:8765",
-                        configured_hotkey = "Ctrl+B",
+                        configured_hotkey = schedulerHotkey.DisplayName,
                         hotkey_registered = context.HotkeyRegistered,
                         bridge_enabled = context.BridgeEnabled,
                         content_policy = "CONTENT_FREE"
@@ -329,7 +333,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         ConcurrentQueue<UsabilitySubmissionRequest> submissions,
         BridgeState bridgeState,
         IpcBrowserPort browser,
-        CaptureDiagnostics diagnostics)
+        CaptureDiagnostics diagnostics,
+        SchedulerHotkeyBinding schedulerHotkey)
     {
         _trialId = trialId;
         _resultPath = resultPath;
@@ -342,7 +347,10 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             new WindowsFormsSynchronizationContext());
 
         _hotkeyWindow = new HotkeyMessageWindow();
-        var hotkey = new WindowsHotkeyRegistrar(_hotkeyWindow.Handle);
+        var hotkey = new WindowsHotkeyRegistrar(
+            _hotkeyWindow.Handle,
+            schedulerHotkey);
+        ConfiguredHotkey = schedulerHotkey.DisplayName;
         _bridgeController = new BridgeController(
             bridgeState,
             hotkey,
@@ -378,6 +386,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public int ExitCode { get; private set; }
     public bool HotkeyRegistered { get; private set; }
     public bool BridgeEnabled => _bridgeController.IsEnabled;
+    public string ConfiguredHotkey { get; }
     public int HotkeyPresses { get; private set; }
     public int NoActionPresses { get; private set; }
     public int BusyPresses { get; private set; }
@@ -615,7 +624,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                     manual_observation_state = "PENDING_OPERATOR_COUNTS_AND_RATINGS",
                     adapter_id = "FIREFOX_EXTENSION",
                     adapter_version = "0.1.10-usability",
-                    configured_hotkey = "Ctrl+B",
+                    configured_hotkey = ConfiguredHotkey,
                     start_timestamp = _started,
                     end_timestamp = DateTimeOffset.UtcNow,
                     actions_intended = intended,
