@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator recovery + fresh one-shot repair only. Materialize exact workspace-control main f7e0f72e82e20eef732ab78ebe082d91e4bd21dc. Read the latest scientific runtime-repair transaction receipt and require phase ROLLED_BACK_PREVIOUS_RUNTIME with rollback_completed=true; independently require installed runtime SHA 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da and runtime-override SHA d9548a56ab46e133aa321e804e310c0fad1712e87cda5cece56bda308fc5bcd0; verify installed generation and active scientific controller/provisioner. Then create a fresh root-owned 0600 REPAIR_PADATASET_SCIENTIFIC_RUNTIME_V1 authority bound to the current predecessor runtime/override and candidate runtime f2791ade8e951408d8a3818da617ec64919c06bd2f7d07c9f6fa0c137bb6afa2, invoke the corrected repair helper, and require COMMITTED_ACTIVE_RUNTIME_REPAIR. After success, do not retrigger; observe existing run 43293735325 / job 131446381843 for REST terminal-record revival.
+Operator recovery + fresh one-shot runtime repair from exact workspace-control main 59ca152a497300e2f8854145860c7bb4313ff739. First require latest prior transaction phase ROLLED_BACK_PREVIOUS_RUNTIME with rollback_completed=true, independently require installed predecessor runtime SHA 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da and predecessor runtime-override SHA d9548a56ab46e133aa321e804e310c0fad1712e87cda5cece56bda308fc5bcd0, verify installed generation and scientific controller/provisioner health. Then create fresh root-owned 0600 REPAIR_PADATASET_SCIENTIFIC_RUNTIME_V1 authority bound to candidate runtime f2791ade8e951408d8a3818da617ec64919c06bd2f7d07c9f6fa0c137bb6afa2 and invoke the final repair helper. Require COMMITTED_ACTIVE_RUNTIME_REPAIR. Do not retrigger smoke; monitor existing run 43293735325 / job 131446381843 for automatic terminal REST revival.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Operator recovery + fresh one-shot repair only. Materialize exact workspace-cont
 
 ## Blockers / gates
 
-- Before retrying the root runtime repair, prove the failed attempt rolled back to the exact predecessor runtime SHA 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da and predecessor runtime-override SHA d9548a56ab46e133aa321e804e310c0fad1712e87cda5cece56bda308fc5bcd0, and inspect the failed transaction receipt phase. Do not reuse consumed authority d4f31151-331b-46e3-921b-e56ced421bfe.
-- Do not issue another /lambda-scientific comment. Existing run 43293735325 / job 131446381843 remains the only scientific demand and must revive through the controller after a successful runtime repair.
+- Before the fresh root repair retry, prove the first attempt restored exact predecessor runtime SHA 86a7c8e33d689b11ece5cd1456ff3af9e841ed6b62a84356e8727d9cd8e1b9da and runtime-override SHA d9548a56ab46e133aa321e804e310c0fad1712e87cda5cece56bda308fc5bcd0, and inspect its transaction receipt. Never reuse consumed authority d4f31151-331b-46e3-921b-e56ced421bfe.
+- Do not issue another /lambda-scientific comment. Existing run 43293735325 / job 131446381843 is still queued and must revive automatically after the repaired runtime and controller restoration.
 
 ## Fresh-chat initialization
 
