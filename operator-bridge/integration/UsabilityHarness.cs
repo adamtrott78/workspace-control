@@ -363,6 +363,11 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private readonly SingleFlightDispatchCoordinator _dispatch;
     private readonly HotkeyMessageWindow _hotkeyWindow;
     private readonly System.Windows.Forms.Timer _timer;
+    private readonly NotifyIcon _notifyIcon;
+    private readonly ToolStripMenuItem _readyItem;
+    private readonly ToolStripMenuItem _sentItem;
+    private Icon? _statusIcon;
+    private DateTimeOffset? _allCompletedAt;
     private int _dispatching;
     private int _awaitingHumanSubmit;
     private string? _awaitingActionId;
@@ -421,8 +426,27 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                 "STAGE10_HOTKEY_REGISTRATION_NOT_CONFIRMED");
         }
 
+        _readyItem = new ToolStripMenuItem("Ready now: 0")
+        {
+            Enabled = false
+        };
+        _sentItem = new ToolStripMenuItem("Sent / unconfirmed: 0")
+        {
+            Enabled = false
+        };
+        _notifyIcon = new NotifyIcon
+        {
+            Icon = SystemIcons.Application,
+            Text = "Workspace Worker Bridge",
+            Visible = true,
+            ContextMenuStrip = new ContextMenuStrip()
+        };
+        _notifyIcon.ContextMenuStrip.Items.Add(_readyItem);
+        _notifyIcon.ContextMenuStrip.Items.Add(_sentItem);
+
         _timer = new System.Windows.Forms.Timer { Interval = 100 };
         _timer.Tick += TimerTick;
+        RefreshWorkloadPresentation();
         _timer.Start();
     }
 
@@ -501,6 +525,11 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             else if (result.Outcome == DispatchOutcome.NoAction)
             {
                 NoActionPresses++;
+                _notifyIcon.ShowBalloonTip(
+                    1500,
+                    "Workspace Worker Bridge",
+                    "Nothing needs service",
+                    ToolTipIcon.None);
             }
             else if (result.Outcome == DispatchOutcome.Busy)
             {
@@ -526,6 +555,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         }
         finally
         {
+            RefreshWorkloadPresentation();
             Volatile.Write(ref _dispatching, 0);
         }
     }
@@ -545,6 +575,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                 var applied = await ApplySubmissionAsync(request.Submission);
                 request.Completion.TrySetResult(applied);
             }
+
+            RefreshWorkloadPresentation();
 
             if (ShouldFinish())
             {
@@ -626,9 +658,18 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             return DateTimeOffset.UtcNow - _started >= _duration;
         }
 
-        return _world.Actions.Actions.Count > 0 &&
+        var allCompleted = _world.Actions.Actions.Count > 0 &&
             _world.Actions.Actions.All(action =>
                 action.Status == SimActionStatus.Completed);
+        if (!allCompleted)
+        {
+            _allCompletedAt = null;
+            return false;
+        }
+
+        _allCompletedAt ??= DateTimeOffset.UtcNow;
+        return DateTimeOffset.UtcNow - _allCompletedAt >=
+            TimeSpan.FromSeconds(4);
     }
 
     private void Finish()
@@ -713,6 +754,30 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         ExitThread();
     }
 
+    private void RefreshWorkloadPresentation()
+    {
+        var ready = _world.Actions.Actions.Count(action =>
+            action.Status == SimActionStatus.Queued &&
+            IsServiceAction(action));
+        var sentUnconfirmed = _world.Actions.Actions.Count(action =>
+            action.Status == SimActionStatus.AwaitingDurableAck);
+
+        var presentation = WorkloadStatusPresentation.Project(
+            _bridgeController.IsEnabled,
+            new WorkloadStatusSnapshot(ready, sentUnconfirmed),
+            ConfiguredHotkey);
+
+        _readyItem.Text = presentation.ReadyLabel;
+        _sentItem.Text = presentation.SentUnconfirmedLabel;
+        _notifyIcon.Text = presentation.Tooltip;
+
+        var nextIcon = WorkloadTrayIconFactory.Create(presentation);
+        var previous = _statusIcon;
+        _statusIcon = nextIcon;
+        _notifyIcon.Icon = nextIcon;
+        previous?.Dispose();
+    }
+
     private static bool IsServiceAction(SimAction action) =>
         action.ActionType is
             "SERVICE_EXISTING" or
@@ -731,6 +796,9 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
 
         _hotkeyWindow.HotkeyPressed -= HotkeyPressed;
         _timer.Dispose();
+        _notifyIcon.Visible = false;
+        _notifyIcon.Dispose();
+        _statusIcon?.Dispose();
         _hotkeyWindow.Dispose();
         base.ExitThreadCore();
     }
