@@ -202,6 +202,29 @@ internal static class UsabilityHarness
                 world.Queue("ut01-04", "RESTORE_AND_SERVICE", "slot-3", 0);
                 world.Queue("ut01-05", "SERVICE_EXISTING", "slot-2", 0);
                 return;
+            case "UT-03":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.NotEstablished,
+                    bindingPresent: false);
+                world.Sessions.Add(
+                    "slot-3",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Queue("ut03-01", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut03-02", "CREATE_AND_SERVICE", "slot-2", 0);
+                world.Queue("ut03-03", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut03-04", "RESTORE_AND_SERVICE", "slot-3", 0);
+                world.Queue("ut03-05", "SERVICE_EXISTING", "slot-2", 0);
+                world.Queue("ut03-06", "SERVICE_EXISTING", "slot-3", 0);
+                return;
             case "UT-02":
                 world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, bindingPresent: true);
                 world.Sessions.Add("slot-2", 0, SimContinuity.NotEstablished, bindingPresent: false);
@@ -269,7 +292,7 @@ internal static class UsabilityHarness
                 .GetResult(),
             "seed slot-1");
 
-        if (trialId is "UT-01" or "UT-02")
+        if (trialId is "UT-01" or "UT-02" or "UT-03")
         {
             RequireApplied(
                 browser.CreateTargetAsync(
@@ -464,6 +487,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public int BusyPresses { get; private set; }
     public int HandoffBlockedPresses { get; private set; }
     public int HandoffRefocuses { get; private set; }
+    public int InterruptionPromptsIssued { get; private set; }
     public int ValidDurableAcks { get; private set; }
     public int WrongWorkerDispatches { get; private set; }
     public int WrongPacketDispatches { get; private set; }
@@ -649,6 +673,16 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         if (applied)
         {
             ValidDurableAcks++;
+            if (_trialId == "UT-03" &&
+                ValidDurableAcks <= 5)
+            {
+                InterruptionPromptsIssued++;
+                _notifyIcon.ShowBalloonTip(
+                    5000,
+                    "Workspace Worker Bridge",
+                    $"Interruption {InterruptionPromptsIssued}/5: switch to another normal app for 30-60 seconds or take a short idle. Return and resume only with {ConfiguredHotkey}; do not search worker tabs or reconstruct state.",
+                    ToolTipIcon.None);
+            }
             if (string.Equals(
                     _awaitingActionId,
                     submission.ActionId,
@@ -714,6 +748,10 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
               WrongPacketDispatches == 0 &&
               RejectedStateSubmissions == 0 &&
               DispatchFailures == 0 &&
+              (_trialId != "UT-03" ||
+               (intended == 6 &&
+                serviceActionsIntended == 6 &&
+                InterruptionPromptsIssued == 5)) &&
               (_trialId != "UT-02" ||
                (intended == 20 &&
                 localOnlyActionsIntended > 0 &&
@@ -752,6 +790,10 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                     handoff_refocuses = HandoffRefocuses,
                     safely_recovered_repeat_presses =
                         BusyPresses + HandoffBlockedPresses,
+                    interruption_prompts_required =
+                        _trialId == "UT-03" ? 5 : 0,
+                    interruption_prompts_issued =
+                        InterruptionPromptsIssued,
                     awaiting_human_submit =
                         Volatile.Read(ref _awaitingHumanSubmit) != 0,
                     wrong_worker_dispatches = WrongWorkerDispatches,
