@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 62e9260f2451d51cdc8b2d724cabbe5691e39ef9
+- Remote checkpoint: ae7f94d8f2e327da12874ffde3f680b5328bd8d9
 - Remote verified: true
 
 ## Next safe action
 
-Validate the runtime-configurable Ctrl+Space candidate at exact head. After Workspace Control and Operator Bridge validation pass, rerun implemented Stage-10 trials in this order on the interactive foreground Windows runner: UT-11 to prove Bridge OFF releases Ctrl+Space, UT-01 to reconfirm the 5-action/repeated-hotkey recovery path using Ctrl+Space, then UT-10 for 20 normal Ctrl+Space -> Ctrl+V -> Enter cycles. The operator has selected Ctrl+Space as the candidate; use these trials to validate ergonomics and collisions rather than to establish initial operator selection. Capture routine rhythm friction and worker-selection confidence after UT-10. Do not retain Ctrl+Space as final until UT-09 representative-work collision testing passes. Keep Stage 09 target benchmarking deferred.
+Ctrl+Space UT-10 is empirically PASS on exact source head ae7f94d8f2e327da12874ffde3f680b5328bd8d9: 20/20 actions, 20/20 durable acknowledgments, exactly 20 hotkey presses, zero routing/dispatch/clipboard/rejected-submission failures; operator ratings are friction 1/7, worker-selection confidence 7/7, and physical comfort 7/7. Continue Stage 10 with the remaining simulator trials UT-02, UT-03, UT-04, UT-05, UT-06, UT-07, UT-08, and UT-12, then complete full UT-11 Bridge-OFF release coverage and UT-09 representative-work collision testing before final Ctrl+Space retention. Keep Stage 09 target benchmarking deferred and do not use a real ChatGPT account.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ Validate the runtime-configurable Ctrl+Space candidate at exact head. After Work
 
 ## Blockers / gates
 
-- Ctrl+Space is the selected Stage-10 candidate binding but is not yet empirically accepted. Exact-head validation must pass, then rerun UT-11, UT-01, and UT-10 on Ctrl+Space; later hotkey-sensitive UT-02, UT-03, and UT-09 must also pass before final retention.
+- Ctrl+Space clean UT-10 motor rhythm is accepted. Final binding retention still requires the remaining hotkey-sensitive Stage-10 coverage and UT-09 representative-work collision/interference test.
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. Do not rerun it during Stage-10 work. It remains mandatory before impl_13 production readiness can pass.
 
 ## Fresh-chat initialization
