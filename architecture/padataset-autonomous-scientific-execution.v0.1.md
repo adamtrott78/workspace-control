@@ -87,6 +87,107 @@ Initial properties:
 
 The contract is introduced disabled/planned, validated, then activated only after the DNNs runtime promotion receipt and a non-destructive scientific smoke canary pass.
 
+## Stage 5 additive live-v3 activation design
+
+The dedicated scientific class is added to an already-live v3 production generation. Activation therefore MUST be an additive expansion; the original v2→v3 migration/cutover transaction is historical and MUST NOT be replayed.
+
+### Frozen identities
+
+- target class: `padataset-scientific-single-gpu-v1`
+- target route: `padataset:scientific-single-gpu`
+- target scale set: `lambda-padataset-scientific-single-gpu`
+- target controller user: `ci-ctl-pad-science`
+- target command: `/lambda-scientific`
+- trusted workflow: `.github/workflows/lambda-ci-scientific.yml`
+- trusted workflow blob: `e70412f3ccdc70826f56f7ba0255518f1f95224f`
+- exact runtime: `padataset-dnns-v1`, manifest identity `57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579`
+- exact scientific data profile: `ota_core_high_run01_len16384_v1`, digest `a76730a886909f9896e7cb7e9d1aede3d2301240f9ce08a4080e24d637406bf5`
+
+### Compatibility proof
+
+The current compiler intentionally excludes `control_plane_generation_sha256` from each class's `root_envelope_sha256`. The additive transaction MUST prove that every pre-existing runner class has the same root envelope before and after expansion. A changed global generation or root-policy digest is expected because a tenth class is added; a changed pre-existing class envelope is not.
+
+The candidate generation MUST be exactly the effective installed class set plus one class, `padataset-scientific-single-gpu-v1`, and the effective installed route set plus one route, `padataset:scientific-single-gpu`. Existing controller policy authority, existing route admission state, containment state, class lifecycle state, systemd units, scale-set names, runner prefixes, and exclusive resource envelopes MUST remain unchanged.
+
+### Phase A — expand shared root policy, scientific class inactive
+
+Phase A installs the tenth class into the shared v3 root policy without granting scientific admission.
+
+Preconditions:
+
+1. Candidate source is an exact, clean, repository-validated Workspace Control head.
+2. The current installed generation and all existing live overrides verify before mutation.
+3. Existing production controllers/routes remain the accepted live set; the scientific class/route are absent from effective live authority.
+4. The candidate compiler proves the exact-superset compatibility condition above.
+5. The shared provisioner has no active/held durable reservation records and no active v3 runner/supervisor transient.
+6. Existing class controller units are NOT stopped or restarted.
+
+Race closure and mutation:
+
+1. Stop only `workspace-ci-v3-provisioner.service`. This closes new root reservations while existing class controllers remain running; their root RPC retry behavior cannot grant work while the socket is absent.
+2. Re-prove zero active/held reservations and zero v3 runner/supervisor transients after the provisioner stops.
+3. Install only the reviewed additive generation artifacts: expanded root policy/executor/compatibility projections, an overlay that preserves every existing state while adding the scientific class as `INSTALLED/INACTIVE` and route as `DISABLED`, the scientific controller policy/drop-in, and the sysusers/tmpfiles additions required for `ci-ctl-pad-science` and its state directory.
+4. Do not replace the shared controller binary, runner runtime, production class policies, existing controller identities, or existing class service units.
+5. Restart the shared provisioner on the expanded 10-class root policy and verify its socket, UID map, and effective-generation binding.
+6. Prove the previously live class controller processes were not restarted by the expansion transaction.
+7. Commit a root-owned additive-generation receipt. After this point the 10-class provisioner generation is a safe committed intermediate state even if scientific activation is deferred.
+
+Phase-A failure before the expanded provisioner is verified MUST restore the exact pre-expansion files and restart the old provisioner. After Phase A commits, later scientific activation failure MUST NOT roll the shared provisioner back; it leaves the target class installed/inactive and route disabled.
+
+### Effective-generation attestation
+
+The immutable historical install manifest remains the base attestation. Existing production-cutover/controller/runtime/helper override receipts remain historical authority for their exact prior deltas.
+
+A new root-owned scientific additive override receipt MUST attest the chain from that verified effective generation to the expanded generation. It MUST bind:
+
+- base install-manifest SHA-256 and base source head;
+- prior effective production override identity when present;
+- reviewed additive source head;
+- expanded catalog generation and root-policy SHA-256;
+- exact preserved root-envelope digests for every pre-existing class;
+- exact target class/route identities;
+- exact digests and modes for each changed base-managed artifact;
+- exact digests and modes for each newly introduced managed artifact;
+- the current target phase: `INSTALLED_INACTIVE` or `ACTIVE`.
+
+The installed reconciler MUST understand and verify this override chain before Phase A is considered committed. The additive transaction may update only the reconciler verifier needed to understand this receipt; that verifier update must itself remain exactly bound to the immutable base manifest and reviewed source head.
+
+### Phase B — activate only the scientific class and route
+
+Phase B is separately authorized after Phase A commits.
+
+Preconditions:
+
+1. Effective-generation verification passes with the scientific target `INSTALLED_INACTIVE` and route `DISABLED`.
+2. The exact promoted DNNs runtime tree/base-Python binding and exact scientific-data digest re-attest successfully.
+3. The PADataset trusted workflow on default branch has exact blob `e70412f3ccdc70826f56f7ba0255518f1f95224f`.
+4. No queued/in-progress scientific workflow run exists.
+5. The existing reviewed v3 scale-set preflight creates `lambda-padataset-scientific-single-gpu` if absent and then proves its exact repository/name/group identity with zero assigned and zero running jobs.
+6. The PADataset controller credential remains project-scoped; no new secret class is introduced.
+7. A fresh one-shot root-owned activation authority receipt is bound to the exact expanded generation, target controller policy, workflow blob, scale-set confirmation, runtime/data identities, and target class/route.
+
+Activation mutates only:
+
+- scientific overlay class state `INACTIVE → ACTIVE`;
+- scientific route state `DISABLED → ENABLED`;
+- `workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service`, which is started/enabled only after the exact preflights above.
+
+Every other class, route, controller, v2 retirement state, containment state, scale set, and workflow remains unchanged.
+
+If Phase B fails, stop/disable only the scientific controller and restore the scientific overlay/active receipt to `INSTALLED_INACTIVE / DISABLED`. The shared 10-class provisioner remains installed and live.
+
+### First live proof
+
+After Phase B succeeds, verify the dedicated controller/scale-set identity and exact runtime/data bindings before issuing `/lambda-scientific`.
+
+The execution sequence remains:
+
+1. non-destructive scientific smoke;
+2. one bounded training smoke;
+3. full PA2 Stage 03 backbone training;
+4. Architecture C evaluation;
+5. final cleanup, runtime-integrity, and residue receipt.
+
 ## First acceptance sequence
 
 1. Repository/schema/policy tests.
