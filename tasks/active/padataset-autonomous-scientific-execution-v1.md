@@ -13,6 +13,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Title: PADataset autonomous scientific execution v1
 - Status: IN_PROGRESS
 - Capsule schema: v2
+- Current stage: scientific_activation_validation
 
 ## Goal
 
@@ -24,8 +25,8 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: f627c113de479258c45cd32c4ba146139481ea5d
-- Remote verified: true
+- Remote checkpoint: bb6528faf9643ffddf517891eba70f7988267d40
+- Remote verified: false
 
 ### PADataset
 
@@ -36,18 +37,19 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Execute the one-time validated Python-venv promotion from exact capability head f627c113de479258c45cd32c4ba146139481ea5d on the Lambda host using operator sudo/private-source authority. Capture the emitted runtime/data binding JSON and promotion PASS line. Do not activate the scientific route until those exact bindings are returned and committed.
+Wait for the already-created exact-head validation #466 / run 43149651861 on bb6528faf9643ffddf517891eba70f7988267d40. If it succeeds, recheck main SHA before integrating; if it fails, diagnose the exact failing evidence. Do not submit a duplicate validation request or reconcile scientific policy while #466 remains queued.
 
 ## Remaining work
 
-- Run the one-time root/private-source promotion from exact validated capability head f627c113de479258c45cd32c4ba146139481ea5d and capture PADATASET_DNNS_RUNTIME_BINDING_JSON, PADATASET_SCIENTIFIC_DATA_JSON, and PADATASET_SCIENTIFIC_PROMOTION=PASS.
-- After successful promotion, commit the exact DNNs runtime/data bindings, activate scientific-single-gpu-v1 and the PADataset scientific route, validate the exact activation head, and reconcile live control-plane state.
-- Run the autonomous scientific smoke and bounded training smoke, then create the exact Stage03 request, train the frozen PA2 four-known-class backbone, run Architecture C evaluation, validate result_record.json, and inspect artifacts/receipts.
+- Obtain SUCCESS for exact-head validation #466 on activation head bb6528faf9643ffddf517891eba70f7988267d40.
+- Recheck current main. If main remains 3bee43a810d739cb199c5091024b8d91115aa5d6, move the activation branch to the prepared two-parent integration commit edd1c378a1f9965299581dcb8210e5bb698a6717; otherwise rebuild the integration against the new main. Then validate that exact integrated head.
+- After integrated exact-head validation passes, advance reviewed policy to main so Lambda CI Project Reconcile validates it and the live reconcile controller installs the exact runtime/data/contract/route policy.
+- Verify live reconciliation and then run the autonomous scientific smoke, bounded training smoke, full PA2 Stage03 backbone training, and Architecture C evaluation.
 
 ## Blockers / gates
 
-- The corrected promoter is exact-head validated at f627c113de479258c45cd32c4ba146139481ea5d, but the one-time root/private-source promotion has not yet been executed. This remains an operator-only authority gate because it requires sudo and reads the private DNNs source/cache under /home/atrott.
-- Routine scientific execution remains disabled until the validated promoter emits exact runtime/data bindings, those bindings are committed, the scientific contract/route is activated and validated, and live reconciliation succeeds.
+- Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 is queued without runner assignment. Do not bypass this gate or create duplicate validation requests while it remains live.
+- Scientific route must not be reconciled or invoked until the integrated main-compatible activation head passes exact-head validation and the live reconciler installs it.
 
 ## Fresh-chat initialization
 
