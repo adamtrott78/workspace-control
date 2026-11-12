@@ -1136,6 +1136,54 @@ class LambdaCIP5GPURuntimeTests(unittest.TestCase):
             runtime.launch_cpu_runner = original_cpu
             runtime.launch_gpu_runner = original_gpu
 
+    def test_scientific_single_gpu_profile_uses_single_gpu_runtime_dispatch(self):
+        self.assertIn(
+            "gpu-scientific-single",
+            runtime.SINGLE_GPU_EXECUTION_PROFILES,
+        )
+        semantics = runtime.execution_semantics(
+            {
+                "profile": "gpu-scientific-single",
+                "execution_contract": {
+                    "execution_profile": "gpu-scientific-single",
+                    "gpu_count": 1,
+                    "model_binding_mode": "FORBIDDEN",
+                    "runtime_binding_mode": "REQUIRED_EXPANDED_RUNTIME_EXACT",
+                    "admission_enabled_after_generic_activation": True,
+                },
+            }
+        )
+        self.assertEqual(
+            semantics["execution_profile"],
+            "gpu-scientific-single",
+        )
+        self.assertEqual(semantics["gpu_count"], 1)
+
+        original = runtime.launch_gpu_runner
+        calls = []
+        try:
+            runtime.launch_gpu_runner = lambda req, spec: (
+                calls.append((req, spec))
+                or {"profile": spec["profile"]}
+            )
+            spec = {
+                "profile": "gpu-scientific-single",
+                "execution_contract": {
+                    "execution_profile": "gpu-scientific-single",
+                    "gpu_count": 1,
+                    "model_binding_mode": "FORBIDDEN",
+                    "runtime_binding_mode": "REQUIRED_EXPANDED_RUNTIME_EXACT",
+                    "admission_enabled_after_generic_activation": True,
+                },
+            }
+            self.assertEqual(
+                runtime.launch_runner("request", spec),
+                {"profile": "gpu-scientific-single"},
+            )
+            self.assertEqual(calls, [("request", spec)])
+        finally:
+            runtime.launch_gpu_runner = original
+
     def test_runtime_contains_no_github_credential_client(self):
         source = MODULE_PATH.read_text()
         for forbidden in (
