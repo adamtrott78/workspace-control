@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Operator bootstrap controller repair from exact PR #622 head ae38809ce9b78facebe0565f254ef72c33112f19 only. Do not merge PR #622 first. Build the exact controller with pinned Go 1.26.3, bind current installed controller SHA, active controller-refresh receipt SHA/source, base manifest SHA/source, and current root-policy SHA into a fresh root-owned 0600 REFRESH_V3_CONTROLLER_BINARY_LIVE_V1 authority, invoke scripts/lambda_ci_v3_live_controller_repair_v1.py, and require COMMITTED_ACTIVE_CONTROLLER_REPAIR plus installed-generation verification. Then observe existing authoritative Validation #484/job 131520720719; if it succeeds, merge PR #622. If the repair fails, use its transaction receipt/rollback evidence and do not retry blindly.
+Prepare a corrected operator bootstrap for exact still-open PR #622 head ae38809ce9b78facebe0565f254ef72c33112f19. Before creating fresh authority, re-prove installed controller SHA 01c5589c1fd38f2879f7c3688c7e45d2427079f5e7d061402768284164b29728, ACTIVE predecessor controller-refresh source 78ae60364f472fd30654dd9018c90c546e3e8836, effective-generation PASS, no live provisioner hold/transient, and candidate controller SHA 7367021d8d84cff9a5e7eab64d95ef50d23135b8790574b1b2ab9b03ec6574b2. Create a NEW root-owned 0600 REFRESH_V3_CONTROLLER_BINARY_LIVE_V1 authority whose root_policy_sha256 value is manifest['root_policy_sha256'] from /etc/workspace-ci/v3/install-manifest.json, exactly matching scripts/lambda_ci_v3_live_controller_repair_v1.py. Invoke the exact PR #622 helper once. Require COMMITTED_ACTIVE_CONTROLLER_REPAIR and generation verification. Then do not retrigger anything: allow existing authoritative Validation #484 to run on exact PR #622 head; only after #484 succeeds may PR #622 be merged. Existing PADataset smoke run 43293735325/job 131446381843 remains the sole scientific demand.
 
 ## Remaining work
 
@@ -49,8 +49,9 @@ Operator bootstrap controller repair from exact PR #622 head ae38809ce9b78facebe
 
 ## Blockers / gates
 
-- Authoritative Validation #484 cannot run until the stale shared v3 controller binary is replaced, but PR #622 must not be merged before #484 succeeds. This is a bootstrap dependency loop.
-- The only safe forward path is an operator-authorized one-shot transactional install of exact PR #622 head ae38809ce9b78facebe0565f254ef72c33112f19 while PR #622 remains open, with pre-swap quiescence and rollback. After install, existing #484 must run and pass before PR #622 is merged.
+- PR #622 authoritative Validation #484 / job 131520720719 remains queued because the stale live shared controller creates the self-validation bootstrap loop; PR #622 remains open and unmerged.
+- The first operator bootstrap authority d2d5fdd6-5605-4a5e-8f44-be0f437fe2a4 is invalid for the reviewed helper and must never be reused. It failed before authority consumption/live mutation.
+- A corrected bootstrap must bind root_policy_sha256 to the base install manifest's `root_policy_sha256` field exactly, not SHA-256 of the current root-policy.json file.
 
 ## Fresh-chat initialization
 
