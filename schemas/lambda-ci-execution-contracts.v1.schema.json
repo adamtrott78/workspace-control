@@ -97,7 +97,8 @@
             "ACCEPTED_MIGRATION_EQUIVALENT",
             "MIGRATION_PLUS_P6_VALIDATION_REQUIRED",
             "PLANNED_NOT_ACCEPTED",
-            "P1_CONTROL_PILOT_REVIEW_REQUIRED"
+            "P1_CONTROL_PILOT_REVIEW_REQUIRED",
+            "ACCEPTED_SCIENTIFIC_V1"
           ]
         },
         "execution_plane": {

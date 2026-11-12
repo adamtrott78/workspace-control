@@ -123,6 +123,22 @@
       "runtime_binding_mode": "OPTIONAL_EXACT_IF_ROUTE_BINDS",
       "gpu_count": 0,
       "admission_enabled_after_generic_activation": true
+    },
+    "scientific-single-gpu-v1": {
+      "lifecycle": "ACCEPTED_SCIENTIFIC_V1",
+      "execution_plane": "jit_runner",
+      "execution_profile": "gpu-small",
+      "resource_class": "scientific_gpu_single_v1",
+      "payload_network_class": "GITHUB_CONTROL_PLANE_PLUS_PUBLIC_PAYLOAD",
+      "payload_secret_class": "CONTROL_PLANE_EPHEMERAL_ONLY",
+      "filesystem_class": "EPHEMERAL_JOB_PLUS_TRUSTED_CACHE_READONLY",
+      "cache_access_class": "TRUSTED_RUNTIME_PROJECT_CACHE_READONLY",
+      "state_effect_class": "SCIENTIFIC_EXPERIMENT_EPHEMERAL_ARTIFACTS",
+      "candidate_payload_allowed": true,
+      "model_binding_mode": "FORBIDDEN",
+      "runtime_binding_mode": "REQUIRED_EXPANDED_RUNTIME_EXACT",
+      "gpu_count": 1,
+      "admission_enabled_after_generic_activation": true
     }
   }
 }

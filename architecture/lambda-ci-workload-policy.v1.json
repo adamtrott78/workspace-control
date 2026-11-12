@@ -3,7 +3,7 @@
   "policy_id": "lambda-ci-workload-policy-v1",
   "status": "CONTRACT_ONLY_NOT_LIVE_ENFORCEMENT",
   "owning_task": "workspace-lambda-execution-policy-v1",
-  "policy_epoch": 3,
+  "policy_epoch": 4,
   "authority": {
     "owner": "workspace-control",
     "principle": "workflow_or_candidate_input_is_a_claim_root_owned_policy_is_authority",
@@ -129,6 +129,14 @@
       "completeness_verify_before_execution": true,
       "digest_verify_before_execution": true,
       "post_execution_digest_verify": true
+    },
+    "TRUSTED_RUNTIME_PROJECT_CACHE_READONLY": {
+      "trusted_runtime": "read_only",
+      "project_trusted_cache": "read_only",
+      "candidate_persistent_write": false,
+      "completeness_verify_before_execution": true,
+      "runtime_digest_verify_before_execution": true,
+      "runtime_digest_verify_after_execution": true
     }
   },
   "state_effect_classes": {
@@ -150,6 +158,13 @@
       "production_routing_change": false,
       "scientific_state_materialization": false,
       "sustained_model_server_after_job": false
+    },
+    "SCIENTIFIC_EXPERIMENT_EPHEMERAL_ARTIFACTS": {
+      "production_routing_change": false,
+      "scientific_state_materialization": true,
+      "persistent_candidate_write": false,
+      "durable_output_channel": "github_artifact_only",
+      "sustained_process_after_job": false
     }
   },
   "serialization_policy": {
@@ -254,6 +269,16 @@
       "scratch_max_bytes": 8589934592,
       "staging_max_bytes": 0,
       "gpu_count": 0
+    },
+    "scientific_gpu_single_v1": {
+      "execution_profile": "gpu-small",
+      "max_runtime_seconds": 14400,
+      "scratch_max_bytes": 68719476736,
+      "staging_max_bytes": 0,
+      "gpu_count": 1,
+      "gpu_uuids": [
+        "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+      ]
     }
   },
   "workload_classes": {
@@ -454,6 +479,40 @@
         "production_routing_change": false,
         "activation_status": "LIVE_ONLY_AFTER_EXACT_HOST_INSTALL"
       }
+    },
+    "padataset": {
+      "repository": "adamtrott78/PADataset",
+      "allowed_workload_classes": [
+        "scientific-single-gpu"
+      ],
+      "denied_workload_classes": [],
+      "trusted_workflow_requirement": "exact_default_branch_workflow_identity",
+      "candidate_sha_requirement": "exact_40_hex_commit",
+      "allowed_models": [],
+      "allowed_runtimes": [
+        {
+          "runtime_id": "padataset-dnns-v1",
+          "promotion_required_before_eval": true,
+          "owning_contracts": [
+            "architecture/padataset-autonomous-scientific-execution.v0.1.md"
+          ],
+          "expanded_runtime": {
+            "manifest_identity_sha256": "57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579",
+            "tree_digest_sha256": "6922847a7ea87c318a36e1fd2cd3af5283e768ff06de90c4cb2558ea0d48cdaa",
+            "canonical_path": "/srv/workspace-ci/padataset/expanded-runtimes/padataset-dnns-v1/57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579",
+            "receipt_path": "/var/lib/workspace-ci/expanded-runtime-receipts/57b0cd8d0f3d2c5f353891237ad52d118458a4cff1f9b403321754ae4fcbe579.json",
+            "promotion_method": "python-venv-copy-rewrite-v1",
+            "base_python_path": "/usr/bin/python3.12",
+            "base_python_sha256": "1217953cf9b9b0bb25fb75f60fe2c59d91a578ab194f7f3f5956e1aec6814e74",
+            "scientific_data": {
+              "profile_id": "ota_core_high_run01_len16384_v1",
+              "path": "/srv/workspace-ci/padataset/trusted-cache/scientific-data/ota_core_high_run01_len16384_v1",
+              "tree_digest_sha256": "a76730a886909f9896e7cb7e9d1aede3d2301240f9ce08a4080e24d637406bf5",
+              "file_count": 360
+            }
+          }
+        }
+      ]
     }
   },
   "required_execution_receipt": {

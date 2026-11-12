@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "receipt_id": "lambda-ci-v3-repository-verification-v1",
+  "task_id": "workspace-github-actions-control-plane-protocol-redesign-v1",
+  "disposition": "REPOSITORY_ONLY_PROTOCOL_VERIFIED",
+  "exact_head": "06d58450bb735178b516d9966fcb099763d8b4b0",
+  "validation": {
+    "workflow": "Workspace Control Validation",
+    "run_id": 40990406861,
+    "run_number": 1266,
+    "job_id": 123851171378,
+    "conclusion": "success",
+    "unit_tests": {
+      "count": 616,
+      "result": "PASS"
+    },
+    "go_controller_validation": "PASS",
+    "full_integration_contracts": "PASS",
+    "task_contracts": "PASS"
+  },
+  "verified_scope": {
+    "projects": [
+      "workspace-control",
+      "padataset",
+      "research-engine"
+    ],
+    "registered_routes": 23,
+    "runner_classes": 9,
+    "control_planes": [
+      "runner-execution",
+      "maintenance",
+      "reconciliation"
+    ],
+    "upstream_scale_set_client": "actions/scaleset@e6daac702355cdb5b880b4fbdcf6d85dcd9e48e5"
+  },
+  "proofs": [
+    "23/23 registered routes attest from structured GitHub workflow identity without parsing JobDisplayName, candidate SHA, PR number, or workflow-local options as infrastructure authority",
+    "9/9 runner classes can RESERVE -> JIT -> LAUNCH -> terminal cleanup under the pure root-capacity model",
+    "desired capacity is a function of TotalAssignedJobs, not lifecycle-message counts",
+    "redelivery and canceled assignment/requeue are idempotent under attempt-scoped RunnerRequestID bookkeeping",
+    "100 repeated request-local anomalies do not request process exit or consume modeled systemd restart budget",
+    "BUSY, CLASS_QUARANTINED, and RESERVATION_EXPIRED remain capacity-local outcomes",
+    "unknown controller peer, cross-class request identity collision, malformed runner prefix, and protocol corruption fail closed",
+    "root resources are reserved before JIT generation; BUSY creates no JIT registration",
+    "dual-GPU reservations are atomic and cleanup retains ambiguous resources until containment proof",
+    "root crash before systemd unit reconciles FAILED and releases resources; root crash after unit creation reconciles ACCEPTED without relaunch",
+    "controller crash after JIT generation but before LAUNCH removes the exact orphan JIT registration and generates fresh JIT under the still-valid reservation",
+    "raw JIT configuration is not persisted in the controller durable ledger",
+    "deployment generation binding cannot install, activate, enable, or clear containment implicitly",
+    "legacy research-engine GPU quarantine and RECOVERY_RETRY_INVALIDATED state remain preserved in the migration overlay",
+    "maintenance host-attest/diagnose are read-only and maintenance restart cannot activate an inactive or contained class",
+    "reconciliation installs policy generation without changing controller activation, route admission, legacy quarantine, or retry state",
+    "23/23 legacy routes resolve to exact-equivalent target root launch envelopes; moving cpu-validation-exact-provenance off the legacy GPU scale set does not grant GPU authority"
+  ],
+  "corrections_discovered_by_verification": [
+    "deployment overlay schema initially rejected its own status_note/invariants; schema was aligned before verification",
+    "reservation expiry needed an explicit internal EXPIRED tombstone so late LAUNCH returns RESERVATION_EXPIRED",
+    "scheduler acquisition dedupe must be scoped to assignment attempt and released on canceled reassignment",
+    "controller crash after JIT generation cannot resume with lost raw JIT bytes; recovery removes orphan registration and regenerates JIT under the existing reservation"
+  ],
+  "live_state_effect": "NONE",
+  "prohibitions": [
+    "this receipt does not authorize Lambda mutation",
+    "this receipt does not authorize PR #571 parser hotfix activation",
+    "this receipt does not authorize research-engine GPU recovery or retry authority",
+    "this receipt does not authorize starting any new v3 class controller"
+  ],
+  "next_gate": "Design and repository-verify a side-by-side one-class-at-a-time migration that preserves the v2 control plane until each target class has independent acceptance."
+}

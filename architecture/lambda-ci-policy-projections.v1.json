@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "model_id": "lambda-ci-policy-projections-v1",
+  "status": "MODEL_ONLY_NOT_LIVE",
+  "source_catalog": "architecture/lambda-ci-runner-class-catalog.v1.json",
+  "compiler_inputs": [
+    "runner class catalog",
+    "architecture/lambda-ci-execution-contracts.v1.json",
+    "architecture/lambda-ci-workload-policy.v1.json",
+    "architecture/lambda-ci-systemd-profiles.v1.json",
+    "project manifests/root paths/forbidden paths",
+    "trusted workflow files on owning repository main"
+  ],
+  "compiler_global_invariants": [
+    "every route references exactly one existing runner class in the same project",
+    "every runner class has a unique scale_set_name, runner_prefix and controller Unix user across the fleet",
+    "every trusted workflow path is unique to one registered route unless an explicit multi-route workflow schema is introduced later",
+    "every registered trusted workflow has exactly one top-level job and that job targets the route's runner-class scale set",
+    "trusted workflow blob pin equals the file blob on the declared default branch at compilation checkpoint",
+    "the runner class execution contract and exact model/runtime bindings resolve to one deterministic root launch envelope",
+    "a runner_class_id is immutable with respect to its root launch envelope; semantic change requires a new class ID",
+    "executor ingress parameter schemas cannot select or widen runner class authority",
+    "root projection contains no slash commands, candidate SHA, PR number, workflow display name or experiment selector",
+    "controller projection contains no root resource selector supplied by GitHub/job input",
+    "executor projection contains no root resource ceiling, model mount path, GPU UUID or privileged launch detail"
+  ],
+  "projections": {
+    "root": {
+      "authority": "root",
+      "generated_per_runner_class": true,
+      "fields": [
+        "runner_class_id",
+        "catalog_sha256",
+        "controller_unix_user and resolved UID",
+        "runner_prefix",
+        "execution_contract_id and fully resolved immutable contract",
+        "fully resolved resource class/ceiling",
+        "project runner UID/group and filesystem roots",
+        "systemd profile",
+        "forbidden paths",
+        "exact model binding if any",
+        "exact runtime binding if any",
+        "concurrency and quarantine policy"
+      ],
+      "forbidden_fields": [
+        "ingress command",
+        "candidate SHA",
+        "pull request number",
+        "workflow route ID as runtime selector",
+        "workflow display name",
+        "experiment selector",
+        "GitHub actor",
+        "GitHub token or App credential"
+      ],
+      "request_authority": "SO_PEERCRED UID selects exactly one generated class record"
+    },
+    "controller": {
+      "authority": "unprivileged GitHub-facing policy adapter",
+      "generated_per_runner_class": true,
+      "fields": [
+        "runner_class_id",
+        "catalog_sha256",
+        "repository",
+        "scale_set_name",
+        "runner_prefix",
+        "max_runners",
+        "trusted workflow path/default branch/blob",
+        "compile-time single-job workflow assertion",
+        "allowed events",
+        "allowed actor and triggering-actor logins"
+      ],
+      "forbidden_fields": [
+        "arbitrary root execution contract selector",
+        "arbitrary model/runtime selector",
+        "GPU UUID selector",
+        "human command grammar",
+        "candidate SHA parser",
+        "JobDisplayName parser"
+      ]
+    },
+    "executor": {
+      "authority": "ingress builder only",
+      "generated_per_route": true,
+      "fields": [
+        "project ID",
+        "route ID",
+        "human action name",
+        "slash command",
+        "parameter schema ID and typed enum/range constraints",
+        "target repository/PR requirement"
+      ],
+      "forbidden_fields": [
+        "root runner class override",
+        "root execution contract override",
+        "root resource class",
+        "GPU device authority",
+        "model/runtime filesystem path",
+        "controller local UID"
+      ],
+      "rule": "builder either emits a schema-valid ingress command or fails locally before GitHub mutation"
+    }
+  },
+  "parameter_schemas": {
+    "candidate-sha-v1": {
+      "arguments": [
+        {
+          "name": "candidate_sha",
+          "type": "lower_hex_40",
+          "required": true
+        }
+      ],
+      "root_effect": "NONE"
+    },
+    "candidate-sha-reasoner-probe-v1": {
+      "arguments": [
+        {
+          "name": "candidate_sha",
+          "type": "lower_hex_40",
+          "required": true
+        },
+        {
+          "name": "candidate_id",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "qwen35-9b-q6-resource",
+            "qwythos-9b-v2-q6-resource"
+          ]
+        }
+      ],
+      "root_effect": "NONE"
+    }
+  },
+  "route_counts": {
+    "research-engine": 20,
+    "padataset": 2,
+    "workspace-control": 1
+  },
+  "runner_class_counts": {
+    "research-engine": 6,
+    "padataset": 2,
+    "workspace-control": 1
+  },
+  "migration_rule": "generate and verify all projections repository-only; live reconciliation installs one catalog generation atomically after all current nonterminal class requests are drained or explicitly bound to the previous generation"
+}
