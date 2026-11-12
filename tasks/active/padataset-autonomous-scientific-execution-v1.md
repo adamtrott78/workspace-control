@@ -36,7 +36,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Wait only for the already-issued authoritative Lambda CI Workspace Control Validation #484 / job 131520720719 on PR #622 exact head ae38809ce9b78facebe0565f254ef72c33112f19. If SUCCESS, merge PR #622, record the merge head, and prepare a fresh root-owned one-shot REFRESH_V3_CONTROLLER_BINARY_LIVE_V1 transaction bound to the exact currently installed controller SHA 01c5589c1fd38f2879f7c3688c7e45d2427079f5e7d061402768284164b29728, current controller-refresh receipt/source 78ae60364f472fd30654dd9018c90c546e3e8836, base manifest/root-policy identities, and freshly built reviewed candidate controller SHA. Execute the merged live repair only after proving no active provisioner hold/transient. After commit, do not retrigger scientific demand; monitor existing run 43293735325/job 131446381843 for terminal REST revival.
+Operator read-only diagnosis of workspace-control-control-small-v1 only: inspect workspace-ci-v3-controller@workspace-control-control-small-v1.service state and journal since 2026-11-12 16:55:30 EST; inspect its controller ledger, provisioner records for runner_class_id workspace-control-control-small-v1, and active target-class transients. Correlate specifically with GitHub run 43315043736/job 131520720719. Do not restart or mutate. Use the evidence to determine whether the control controller is inactive/crashing, has admitted the job but failed root provisioning, or is not receiving scheduler demand.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Wait only for the already-issued authoritative Lambda CI Workspace Control Valid
 
 ## Blockers / gates
 
-- Authoritative self-hosted Validation #484 for PR #622 exact head ae38809ce9b78facebe0565f254ef72c33112f19 is queued. Do not merge or execute the live controller repair until it succeeds.
-- Do not issue another /workspace-control-validate command, another /lambda-scientific comment, restart a controller, edit ledger state, or alter scale-set state.
+- Authoritative Validation #484 cannot currently acquire the workspace-control control-validation self-hosted lane. Read-only Lambda host evidence is now required; connected Workspace Shell authority for this PADataset task cannot inspect that lane without widening trust.
+- Do not reissue /workspace-control-validate, merge PR #622, restart services, edit controller ledgers, or retrigger the scientific smoke before diagnosing the existing queued control-validation job 131520720719.
 
 ## Fresh-chat initialization
 
