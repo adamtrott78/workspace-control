@@ -29,7 +29,7 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 ## Next safe action
 
-Continue impl_10 on validated implementation head 62e9260f2451d51cdc8b2d724cabbe5691e39ef9. Ensure the interactive Windows runner workspace-operator-target is listening in the logged-in desktop session. If needed, from PowerShell: Set-Location C:\Users\ATrott\actions-runner; verify no active Runner.Worker job; if the foreground runner is absent run .\run.cmd. Do NOT run Stage-10 as a Windows service/session-0 runner because the trial requires [Environment]::UserInteractive and real foreground browser/hotkey behavior. Prefer rerunning only failed Stage-10 job 130957988034 rather than cycling the PR label and replaying hosted validation. For the first action deliberately test Ctrl+B -> Ctrl+V -> Ctrl+B, do not Enter yet; second Ctrl+B must refocus/retain the same AwaitingDurableAck worker/action and must not advance the queue. Then Enter, confirm durable acknowledgment, finish the remaining UT-01 actions, inspect structured result, and continue remaining Stage-10 usability trials. Keep Stage 09 deferred until final production gating.
+Continue impl_10 from validated implementation head 62e9260f2451d51cdc8b2d724cabbe5691e39ef9. After the UT-01 evidence-only promotion head passes exact-head Workspace Control and Operator Bridge validation, run the implemented UT-10 20-cycle motor-rhythm trial on the interactive foreground Windows runner using the stage10-ut10 path. Complete 20 normal Ctrl+B -> Ctrl+V -> Enter cycles without manually choosing/searching worker tabs. Capture the frozen UT-10 subjective ratings afterward: routine rhythm friction target <=2/7 and worker-selection confidence target >=6/7. Keep Stage 09 target benchmarking deferred.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ Continue impl_10 on validated implementation head 62e9260f2451d51cdc8b2d724cabbe
 
 ## Blockers / gates
 
-- Stage 10 recovery validation remains open: human-test the AwaitingDurableAck same-worker refocus on exact validated implementation head 62e9260f2451d51cdc8b2d724cabbe5691e39ef9. Exact sequence: Ctrl+B -> Ctrl+V -> Ctrl+B again, do not press Enter yet; verify the second Ctrl+B keeps/refocuses the same worker and does not advance to the next action, then press Enter to durably acknowledge and continue the trial.
+- Stage 10 remains IN_PROGRESS after UT-01 recovery-hardening PASS and prior UT-11 PASS. The next directly implemented human trial is UT-10 (20-cycle motor rhythm). Frozen UX-11 still requires the remaining mixed-batch, interruption, judgment, recovery, no-work/background-ack, hotkey-collision, and feedback/checklist evidence before Stage 10 can validate.
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. Do not rerun it during Stage-10 work. It remains mandatory before impl_13 production readiness can pass.
 
 ## Fresh-chat initialization
