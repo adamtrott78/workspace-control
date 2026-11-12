@@ -131,10 +131,18 @@ class PADatasetAutonomousScientificExecutionTests(unittest.TestCase):
         self.assertEqual(canary["runtime_binding_mode"], "OPTIONAL_EXACT_IF_ROUTE_BINDS")
 
     def test_existing_gpu_canary_effective_runtime_ceiling_stays_twenty_minutes(self):
-        self.assertEqual(PROFILES["profiles"]["gpu-small"]["RuntimeMaxSec"], "4h")
+        self.assertEqual(PROFILES["profiles"]["gpu-small"]["RuntimeMaxSec"], "20min")
         self.assertEqual(
             WORKLOAD["resource_classes"]["gpu_small_v1"]["max_runtime_seconds"],
             1200,
+        )
+        self.assertEqual(
+            WORKLOAD["resource_classes"]["scientific_gpu_single_v1"]["execution_profile"],
+            "gpu-scientific-single",
+        )
+        self.assertEqual(
+            PROFILES["profiles"]["gpu-scientific-single"]["RuntimeMaxSec"],
+            "4h",
         )
         self.assertEqual(
             WORKLOAD["resource_classes"]["scientific_gpu_single_v1"]["max_runtime_seconds"],
