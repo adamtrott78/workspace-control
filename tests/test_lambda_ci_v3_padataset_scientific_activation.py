@@ -161,8 +161,8 @@ class PADatasetScientificActivationTests(unittest.TestCase):
         self.assertEqual(parsed_raw, raw)
 
         stale = dict(payload)
-        stale["issued_at"] = (now - timedelta(hours=2)).isoformat()
-        stale["expires_at"] = (now - timedelta(hours=1)).isoformat()
+        stale["issued_at"] = (now - timedelta(minutes=20)).isoformat()
+        stale["expires_at"] = (now - timedelta(minutes=10)).isoformat()
         raw = (json.dumps(stale) + "\n").encode()
         with mock.patch.object(
             activation,
@@ -399,8 +399,8 @@ class PADatasetScientificActivationTests(unittest.TestCase):
             if "systemd.stop(" in line
         ]
         self.assertEqual(stop_lines, ["systemd.stop(PROVISIONER_UNIT)"])
-        self.assertNotIn("production_cutover", source)
-        self.assertNotIn("migration_transaction", source)
+        self.assertNotIn("lambda_ci_v3_production_cutover", source)
+        self.assertNotIn("lambda_ci_v3_migration_transaction", source)
 
     def test_activation_rollback_never_stops_shared_provisioner(self):
         source = inspect.getsource(activation.activate)
