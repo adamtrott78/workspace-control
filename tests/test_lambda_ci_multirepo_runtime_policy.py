@@ -142,7 +142,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             now=datetime(2026, 10, 28, tzinfo=timezone.utc),
         )
         self.assertEqual(admission["workload_class"], "gpu-experiment-public")
-        self.assertEqual(admission["execution_profile"], "gpu-small")
+        self.assertEqual(admission["execution_profile"], "gpu-scientific-single")
         self.assertEqual(admission["models"], [])
         self.assertIsNone(admission["runtime"])
         semantic = multi.execution_semantics_from_admission(admission)
@@ -533,6 +533,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             now=datetime(2026, 11, 11, tzinfo=timezone.utc),
         )
         spec = provisioner.build_launch_spec(validated, manifest, PROFILES, PINS)
+        self.assertEqual(spec["profile"], "gpu-scientific-single")
         self.assertEqual(spec["runtime_binding"], admission["runtime"])
         self.assertEqual(spec["resources"]["runtime_max_seconds"], 14400)
         self.assertEqual(
@@ -553,7 +554,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
             now=datetime(2026, 11, 11, tzinfo=timezone.utc),
         )
         spec = provisioner.build_launch_spec(req, manifest, PROFILES, PINS)
-        self.assertEqual(PROFILES["profiles"]["gpu-small"]["RuntimeMaxSec"], "4h")
+        self.assertEqual(PROFILES["profiles"]["gpu-small"]["RuntimeMaxSec"], "20min")
         self.assertEqual(
             WORKLOAD["resource_classes"]["gpu_small_v1"]["max_runtime_seconds"],
             1200,
@@ -562,7 +563,11 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
 
     def test_scientific_resource_ceiling_is_four_hours_and_single_gpu(self):
         resource = WORKLOAD["resource_classes"]["scientific_gpu_single_v1"]
-        self.assertEqual(resource["execution_profile"], "gpu-small")
+        self.assertEqual(resource["execution_profile"], "gpu-scientific-single")
+        self.assertEqual(
+            PROFILES["profiles"]["gpu-scientific-single"]["RuntimeMaxSec"],
+            "4h",
+        )
         self.assertEqual(resource["max_runtime_seconds"], 14400)
         self.assertEqual(resource["gpu_count"], 1)
         self.assertEqual(
