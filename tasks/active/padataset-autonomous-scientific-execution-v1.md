@@ -25,8 +25,8 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 - Intent: mutate
 - Remote branch: padataset-autonomous-scientific-execution-v1
-- Remote checkpoint: edd1c378a1f9965299581dcb8210e5bb698a6717
-- Remote verified: true
+- Remote checkpoint: 611cbdb5a89c6da0db6b4b98ac3f3faac7d5b7ca
+- Remote verified: false
 
 ### PADataset
 
@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Use this exact authority-state head as /etc/workspace-shell/authority input to the already-validated multirepo upgrade operator, with workspace-control execution SHA 1a9a24fc1bc6e5cda2984e296151a378138600c8 and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. After LOCAL_TASK_AUTHORITY=PASS, verify live Workspace Shell visibility for workspace-shell-multirepo-research-v1, mth602-final-multisurrogate-dqnguard-v1, and padataset-autonomous-scientific-execution-v1. Then restage only the scientific changes from current main under the now-explicitly-authorized scope and exact-head validate again.
+Exact-head validate the clean main-based PR head. If PASS, mark the clean implementation verified, promote it to main through the reviewed PR path, let the production reconciler activate the scientific policy, then refresh Workspace Shell trusted authority once to the final promoted task state before scientific execution.
 
 ## Remaining work
 
@@ -49,8 +49,8 @@ Use this exact authority-state head as /etc/workspace-shell/authority input to t
 
 ## Blockers / gates
 
-- Live Workspace Shell trusted authority is stale and must be refreshed before using Workspace Shell for the scientific task. The validated multirepo upgrade operator is the authorized host-mutation path.
-- Scientific promotion must still be restaged cleanly from current main after Workspace Shell authority refresh; do not merge the stacked PR #606 lineage into main.
+- Clean main-based scientific restage is prepared and must pass exact-head validation before promotion.
+- Live Workspace Shell trusted authority still does not include padataset-autonomous-scientific-execution-v1; refresh that authority only after the final clean candidate SHA is validated and bound.
 
 ## Fresh-chat initialization
 
