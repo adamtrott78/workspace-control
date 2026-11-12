@@ -29,7 +29,7 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 ## Next safe action
 
-Validate the runtime-configurable Ctrl+Space candidate at exact head. After Workspace Control and Operator Bridge validation pass, rerun implemented Stage-10 trials in this order on the interactive foreground Windows runner: UT-11 to prove Bridge OFF releases Ctrl+Space, UT-01 to reconfirm the 5-action/repeated-hotkey recovery path using Ctrl+Space, then UT-10 for 20 normal Ctrl+Space -> Ctrl+V -> Enter cycles. During these trials, ask the operator to judge whether Ctrl+Space actually resolves the finger-stretch complaint; do not treat the candidate as operator-accepted until observed. Capture routine rhythm friction and worker-selection confidence after UT-10. Do not retain Ctrl+Space as final until UT-09 representative-work collision testing passes. Keep Stage 09 target benchmarking deferred.
+Validate the runtime-configurable Ctrl+Space candidate at exact head. After Workspace Control and Operator Bridge validation pass, rerun implemented Stage-10 trials in this order on the interactive foreground Windows runner: UT-11 to prove Bridge OFF releases Ctrl+Space, UT-01 to reconfirm the 5-action/repeated-hotkey recovery path using Ctrl+Space, then UT-10 for 20 normal Ctrl+Space -> Ctrl+V -> Enter cycles. The operator has selected Ctrl+Space as the candidate; use these trials to validate ergonomics and collisions rather than to establish initial operator selection. Capture routine rhythm friction and worker-selection confidence after UT-10. Do not retain Ctrl+Space as final until UT-09 representative-work collision testing passes. Keep Stage 09 target benchmarking deferred.
 
 ## Remaining work
 
