@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-On the Lambda host, perform a read-only filesystem-capacity/inode/large-directory diagnostic and inspect the v0.4.8 worktree index.lock. Do not delete files yet. After reclaiming space with a separately justified cleanup, rerun heartbeat-up; then perform one fresh authenticated GitHub rate-limit probe and restart the exact v3 control-small controller only if remaining quota is positive. Do not cancel or duplicate validation #466.
+Reclaim space only from low-risk user caches first: remove the user pip cache (~22G) and re-check df. Do not touch /srv/workspace-ci, /var/lib/workspace-ci, PADataset scientific data, research models, checkpoints, or large artifacts yet. Once several GiB are free, rerun heartbeat-up and verify local MCP/tunnel health; then perform one fresh authenticated GitHub rate-limit probe and restart the exact v3 control-small controller only if remaining quota is positive. Do not cancel or duplicate validation #466.
 
 ## Remaining work
 
@@ -50,8 +50,8 @@ On the Lambda host, perform a read-only filesystem-capacity/inode/large-director
 ## Blockers / gates
 
 - Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
-- workspace-ci-v3-controller@workspace-control-control-small-v1.service is intentionally stopped/inactive at NRestarts=3495 after a GitHub primary-rate-limit 403 restart storm. Authenticated probe previously showed 0/5000 core remaining with reset epoch 1794488297; a fresh post-reset probe is still required before restart.
-- Workspace Heartbeat local v0.4.8 runtime provenance and direct Node startup are healthy, but host filesystem exhaustion is now proven by Git reporting index.lock write error: Out of diskspace. heartbeat-up fails before tunnel startup, likely because its conda/npm launcher path requires filesystem writes.
+- workspace-ci-v3-controller@workspace-control-control-small-v1.service is intentionally stopped/inactive at NRestarts=3495 after a GitHub primary-rate-limit 403 restart storm; a fresh post-reset authenticated rate-limit probe is required before restart.
+- Lambda root filesystem is byte-exhausted: /dev/nvme0n1p2 is 879G total, 846G used, 0 available, 100% full; inode usage is only 7%. Workspace Heartbeat v0.4.8 runtime itself passes direct Node startup, but user-level launcher operations can fail because no non-root blocks remain.
 - Scientific route must not be reconciled or invoked until exact-head validation and live reconciliation succeed.
 
 ## Fresh-chat initialization
