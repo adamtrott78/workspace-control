@@ -37,7 +37,7 @@ Make PADataset scientific GPU experiments autonomously executable by ChatGPT thr
 
 ## Next safe action
 
-Delete only /srv/workspace-ci/padataset/expanded-runtimes.root-backup-20261112 and /srv/workspace-ci/padataset/trusted-cache.root-backup-20261112 after one final bind-source/path sanity check, then verify root free space increased by about 80.56 GiB and both bind mounts remain healthy. After storage reclaim, perform one fresh authenticated GitHub rate-limit probe and restart the exact v3 control-small controller only if remaining quota is positive. Do not cancel or duplicate validation #466.
+Run one fresh secret-safe authenticated GitHub rate-limit probe using the installed workspace-control controller credential. If core remaining quota is positive, start workspace-ci-v3-controller@workspace-control-control-small-v1.service, verify it remains active without restart growth, inspect the immediate journal, and then re-check exact validation #466. If quota is zero, leave the controller stopped. Do not cancel or duplicate #466.
 
 ## Remaining work
 
@@ -50,8 +50,7 @@ Delete only /srv/workspace-ci/padataset/expanded-runtimes.root-backup-20261112 a
 ## Blockers / gates
 
 - Dedicated exact-head Lambda CI Workspace Control Validation #466 / run 43149651861 / job 130955554208 remains queued without runner assignment.
-- workspace-ci-v3-controller@workspace-control-control-small-v1.service remains intentionally stopped after the GitHub primary-rate-limit restart storm; a fresh post-reset authenticated quota probe and controlled restart are still required.
-- PADataset immutable promoted storage has been successfully relocated to /data: expanded-runtimes and trusted-cache were copied with rsync -aHAX --numeric-ids, checksum-verified, bind-mounted back at the original /srv/workspace-ci/padataset paths, persisted in /etc/fstab, and revalidated. Root-side originals remain only as rollback backups.
+- workspace-ci-v3-controller@workspace-control-control-small-v1.service remains intentionally stopped after the GitHub primary-rate-limit restart storm; a fresh authenticated quota probe is required before restart.
 - Scientific route must not be reconciled or invoked until exact-head validation and live reconciliation succeed.
 
 ## Fresh-chat initialization
