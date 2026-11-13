@@ -597,6 +597,49 @@ This changes sequencing, not the frozen security/authority model:
 7. Multi-worker decomposed workflow replay and synthesis.
 8. Then calibrate the human-launched Instant surface against real Temporary Chats once the parallel browser gate is ready.
 
+
+## Cognitive + execution + state architecture amendment — 2026-11-13
+
+The orchestrator is now defined as an **external cognitive + execution system**, not only a reasoning scheduler.
+
+Authoritative design inputs:
+- `architecture/workspace-semantic-execution-cognitive-execution-state-architecture.v0.1.md`
+- `architecture/workspace-semantic-execution-state-store-contract.v0.1.json`
+
+### Execution plane
+
+Reasoning may produce `CandidateAction`, but execution requires a deterministic compilation boundary:
+
+```text
+CandidateAction
+  -> AuthorityDecision
+  -> ActionSpec
+  -> claim/lease/generation/idempotency
+  -> exact effect
+  -> EffectReceipt
+  -> postcondition ValidationResult
+  -> COMMIT / REPAIR / RETRY / COMPENSATE / BLOCK
+```
+
+A successful tool call is not terminal proof. The observed postcondition is the success criterion.
+
+### State plane
+
+Do not force all state into one data structure. The default logical split is:
+- append-only event journal for process history/replay;
+- relational current state for atomic scheduling/leases/actions;
+- typed DAG nodes+edges for work dependencies/decomposition/synthesis;
+- first-class DecisionRecords for rationale and alternatives;
+- immutable artifact/evidence references;
+- rebuildable semantic ontology graph for cross-domain meaning, provenance, contradiction, context assembly and explanation;
+- derived retrieval indexes and local session/browser caches.
+
+The semantic graph remains important, but it is a **derived cognitive read model**, not the transactional control plane or execution authority.
+
+### Evolution rule
+
+This architecture is deliberately non-final. Re-review after the first end-to-end reasoning+execution workflow and on the explicit triggers in the state-store contract. Introduce graph/vector/durable-workflow infrastructure only when measured workload demonstrates material benefit.
+
 ## 11. Success criterion
 
 The v0 orchestrator is successful when a user can submit one durable task and the system can:
