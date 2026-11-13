@@ -53,8 +53,11 @@ has not advanced.
 
 The stale executable and drop-in are moved into the root-private transaction
 directory as rollback material. The operator performs one `daemon-reload`,
-starts only the target service, and requires the live process to execute the
-exact shared controller path and SHA-256 above.
+starts only the target service, and then waits for `/proc/<MainPID>/exe` to
+converge to the exact shared controller path and SHA-256 above. The verifier
+explicitly tolerates systemd's short pre-exec child window, where the service
+may already report active/running while that PID still maps to the systemd
+executable before `execve()` completes.
 
 Sibling service generations must remain byte-for-byte equivalent at the
 systemd property snapshot boundary. Installed-generation verification must
