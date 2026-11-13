@@ -640,6 +640,38 @@ The semantic graph remains important, but it is a **derived cognitive read model
 
 This architecture is deliberately non-final. Re-review after the first end-to-end reasoning+execution workflow and on the explicit triggers in the state-store contract. Introduce graph/vector/durable-workflow infrastructure only when measured workload demonstrates material benefit.
 
+
+## Second-pass implementation discipline — 2026-11-13
+
+Before freezing backend infrastructure, use these governing artifacts:
+- `architecture/workspace-semantic-execution-adversarial-architecture-review.v0.2.md`
+- `architecture/workspace-semantic-execution-engineering-fitness.v0.1.json`
+- `architecture/workspace-semantic-execution-assumption-register.v0.1.json`
+
+### Freeze boundary
+
+Freeze domain invariants and ports, not vendor/runtime/storage choices. The first backend is a modular monolith. Workspace-specific cognitive/task/action logic remains explicit and debuggable; distributed durability/replay/waits are delegated behind `DurableRuntimePort` to a mature runtime.
+
+### First spike
+
+Use DBOS + PostgreSQL first because it minimizes infrastructure and couples naturally to transactional runtime state. DBOS is provisional. Restate is the first challenger; Temporal is the mature platform-scale option.
+
+### Correctness program
+
+Model the small dangerous orchestration kernel in TLA+ or an equivalent state-machine formalism, then enforce the same invariants with property-based state-machine tests and injected crash/duplicate/stale-event scenarios. Do not attempt to formally verify open-ended model reasoning.
+
+### Hot-state boundary
+
+Git/GitHub remains authoritative for source, task/policy contracts, ADRs, artifacts and meaningful checkpoints. It is no longer the hot scheduler database for leases, ready queues, generations, transient retries, sessions or every reasoning quantum.
+
+### Resource boundary
+
+The control plane is CPU/RAM/disk only and must run GPU-blind by default. Heavy project compute is routed to separately leased executors. Resource budgets are architecture fitness functions, not informal hopes.
+
+### Evolution
+
+The first real backend workflow is also an architecture experiment. Do not freeze DBOS/Postgres/semantic-graph physical technology until Architecture Review v0.3 examines traces, fault tests, resource measurements and implementation friction.
+
 ## 11. Success criterion
 
 The v0 orchestrator is successful when a user can submit one durable task and the system can:
