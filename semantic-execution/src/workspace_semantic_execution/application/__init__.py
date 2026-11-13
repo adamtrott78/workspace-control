@@ -15,6 +15,7 @@ from .packet_compiler import (
     SemanticPacketCompiler,
 )
 from .router import ExecutorRegistry, route_executor
+from .runtime import RuntimeCoordinator
 
 __all__ = [
     "CompiledPacket",
@@ -24,6 +25,7 @@ __all__ = [
     "PacketCompilationInput",
     "QuestionRecord",
     "SemanticPacketCompiler",
+    "RuntimeCoordinator",
     "initial_executor_profiles",
     "machine_llm_profile",
     "openai_chat_instant_current_profile",
