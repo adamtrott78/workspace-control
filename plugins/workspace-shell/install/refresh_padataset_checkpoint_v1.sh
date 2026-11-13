@@ -107,7 +107,12 @@ sudo cp -a --reflink=auto "$PAD_ROOT" "$BACKUP/PADataset"
 MUTATION_STARTED=0
 rollback() {
   rc="$1"
-  if [[ "$MUTATION_STARTED" != "1" || "$rc" -eq 0 ]]; then
+  if [[ "$rc" -eq 0 ]]; then
+    cleanup_tmp
+    return
+  fi
+  if [[ "$MUTATION_STARTED" != "1" ]]; then
+    cleanup_tmp
     return
   fi
   echo "Checkpoint refresh failed; rolling back from $BACKUP" >&2
@@ -116,12 +121,13 @@ rollback() {
   sudo cp -a "$BACKUP/authority" "$AUTHORITY_ROOT"
   sudo cp -a "$BACKUP/PADataset" "$PAD_ROOT"
   sudo systemctl start workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service || true
+  cleanup_tmp
   exit "$rc"
 }
 trap 'rollback "$?"' EXIT
 
-sudo systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
 MUTATION_STARTED=1
+sudo systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
 
 sudo rm -rf "$AUTHORITY_ROOT" "$PAD_ROOT"
 sudo cp -a --reflink=auto "$AUTH_NEXT" "$AUTHORITY_ROOT"
