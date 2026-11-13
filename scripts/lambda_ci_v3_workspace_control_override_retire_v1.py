@@ -328,28 +328,30 @@ def apply(repo: pathlib.Path, expected_head: str) -> pathlib.Path:
     receipt["target_stopped"] = wait_target("stopped")
     write_receipt(receipt_path, receipt)
 
-    # Re-attest after quiescence. From here to the shared-controller start,
-    # scheduler authority cannot advance through this target controller.
-    if TARGET_JOB_LEDGER.exists() or TARGET_JOB_LEDGER.is_symlink():
-        raise OverrideRetireError("#484 ledger appeared before retirement mutation")
-    if current_policy_nonterminal_records():
-        raise OverrideRetireError("nonterminal target record appeared before retirement mutation")
-
-    os.replace(STALE_OVERRIDE_BINARY, backup_bin)
-    os.replace(STALE_DROPIN, backup_dropin)
+    moved_override = False
     try:
-        STALE_OVERRIDE_BINARY.parent.rmdir()
-    except OSError:
-        pass
-    try:
-        STALE_DROPIN.parent.rmdir()
-    except OSError:
-        pass
+        # Re-attest after quiescence. From here to the shared-controller start,
+        # scheduler authority cannot advance through this target controller.
+        if TARGET_JOB_LEDGER.exists() or TARGET_JOB_LEDGER.is_symlink():
+            raise OverrideRetireError("#484 ledger appeared before retirement mutation")
+        if current_policy_nonterminal_records():
+            raise OverrideRetireError("nonterminal target record appeared before retirement mutation")
 
-    receipt["phase"] = "STALE_OVERRIDE_DEACTIVATED"
-    write_receipt(receipt_path, receipt)
+        os.replace(STALE_OVERRIDE_BINARY, backup_bin)
+        os.replace(STALE_DROPIN, backup_dropin)
+        moved_override = True
+        try:
+            STALE_OVERRIDE_BINARY.parent.rmdir()
+        except OSError:
+            pass
+        try:
+            STALE_DROPIN.parent.rmdir()
+        except OSError:
+            pass
 
-    try:
+        receipt["phase"] = "STALE_OVERRIDE_DEACTIVATED"
+        write_receipt(receipt_path, receipt)
+
         subprocess.run(["systemctl", "daemon-reload"], check=True)
         subprocess.run(["systemctl", "start", TARGET_SERVICE], check=True)
         target_after = wait_target("running")
@@ -384,7 +386,14 @@ def apply(repo: pathlib.Path, expected_head: str) -> pathlib.Path:
         write_receipt(receipt_path, receipt)
         return receipt_path
     except Exception:
-        restore_override(txdir, receipt, receipt_path)
+        if moved_override:
+            restore_override(txdir, receipt, receipt_path)
+        else:
+            # No host override material moved. Restore only service liveness.
+            subprocess.run(["systemctl", "start", TARGET_SERVICE], check=True)
+            wait_target("running")
+            receipt["phase"] = "ABORTED_BEFORE_OVERRIDE_RETIREMENT"
+            write_receipt(receipt_path, receipt)
         raise
 
 
