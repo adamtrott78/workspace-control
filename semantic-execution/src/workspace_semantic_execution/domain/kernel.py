@@ -605,18 +605,25 @@ class DomainKernel:
     ) -> ActionSpec:
         if candidate.authorization_state != "UNDECIDED":
             raise KernelError("candidate_claimed_authority")
+        if candidate.process_generation < 0:
+            raise KernelError("candidate_generation_invalid")
         if decision.outcome != AuthorityOutcome.ALLOW:
             raise KernelError("authority_not_allow")
         if not decision.decision_id or not decision.authority_scope_ref:
             raise KernelError("authority_binding_required")
         if decision.action_id != candidate.action_id:
             raise KernelError("authority_action_mismatch")
+        if decision.process_id != candidate.process_id:
+            raise KernelError("authority_process_mismatch")
+        if decision.process_generation != candidate.process_generation:
+            raise KernelError("authority_generation_mismatch")
         if decision.target_ref != candidate.target_ref:
             raise KernelError("authority_target_mismatch")
 
         return ActionSpec(
             action_id=candidate.action_id,
             process_id=candidate.process_id,
+            process_generation=candidate.process_generation,
             target_ref=candidate.target_ref,
             executor_type=candidate.executor_type,
             authority_decision_id=decision.decision_id,
