@@ -6,6 +6,7 @@ installs pinned DBOS/PostgreSQL dependencies and supplies a disposable database.
 """
 from __future__ import annotations
 
+import ast
 import os
 from pathlib import Path
 import sys
@@ -211,7 +212,7 @@ class DBOSDurableRuntimeIntegrationTests(unittest.TestCase):
             }
 
         cls.DBOS = DBOS
-        cls.workflow_fn = DBOS.workflow()(bounded_dispatch)
+        cls.workflow_fn = staticmethod(DBOS.workflow()(bounded_dispatch))
         config: DBOSConfig = {
             "name": "workspace-semantic-execution-spike",
             "application_version": "0.1.0",
@@ -294,15 +295,22 @@ class DBOSDurableRuntimeIntegrationTests(unittest.TestCase):
                 )
             )
 
-    def test_adapter_never_uses_dbos_recv_for_semantic_external_waits(self):
-        source = (
+    def test_adapter_never_calls_dbos_recv_for_semantic_external_waits(self):
+        path = (
             SRC
             / "workspace_semantic_execution"
             / "adapters"
             / "dbos_runtime.py"
-        ).read_text()
-        self.assertNotIn(".recv(", source)
-        self.assertNotIn("DBOS.recv", source)
+        )
+        tree = ast.parse(path.read_text(), filename=str(path))
+        recv_calls = [
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "recv"
+        ]
+        self.assertEqual(recv_calls, [])
 
 
 if __name__ == "__main__":
