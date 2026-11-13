@@ -150,3 +150,92 @@ func TestDiscoverTrustedDemandIgnoresJobsForOtherLabels(t *testing.T) {
 		t.Fatalf("unrelated job affected class admission: safe=%v jobs=%#v reason=%q", safe, jobs, reason)
 	}
 }
+
+
+func TestDiscoverTrustedDemandFallsBackToUnfilteredRecentRuns(t *testing.T) {
+	policy := testPolicy()
+	headSHA := strings.Repeat("d", 40)
+	workflowSHA := strings.Repeat("c", 40)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs":
+			if r.URL.Query().Get("status") != "" {
+				_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{}})
+				return
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"workflow_runs": []any{
+					map[string]any{
+						"id":          501,
+						"head_sha":    headSHA,
+						"head_branch": "main",
+						"path":        ".github/workflows/control.yml",
+						"event":       "issue_comment",
+						"status":      "queued",
+						"actor": map[string]any{
+							"login": "adamtrott78",
+						},
+						"triggering_actor": map[string]any{
+							"login": "adamtrott78",
+						},
+						"repository": map[string]any{
+							"full_name": "adamtrott78/workspace-control",
+						},
+					},
+					map[string]any{
+						"id":     502,
+						"status": "completed",
+					},
+				},
+			})
+			return
+
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/501/jobs":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"jobs": []any{map[string]any{
+					"id":          601,
+					"status":      "queued",
+					"labels":      []string{"lambda-v3-wc-control"},
+					"runner_id":   0,
+					"runner_name": "",
+				}},
+			})
+			return
+
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/contents/.github/workflows/control.yml":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"type": "file",
+				"path": ".github/workflows/control.yml",
+				"sha":  workflowSHA,
+			})
+			return
+
+		default:
+			t.Fatalf("unexpected REST request: %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+	}))
+	defer server.Close()
+
+	verifier := &githubVerifier{
+		policy:     policy,
+		owner:      "adamtrott78",
+		repo:       "workspace-control",
+		apiBase:    server.URL,
+		httpClient: server.Client(),
+		tokens:     fixedTokenSource("test-token"),
+		logger:     slog.New(slog.DiscardHandler),
+	}
+
+	jobs, safe, reason, err := verifier.DiscoverTrustedDemand(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !safe || reason != "" {
+		t.Fatalf("fallback REST demand rejected: safe=%v reason=%q", safe, reason)
+	}
+	if len(jobs) != 1 || jobs[0].GitHubJobID != 601 || jobs[0].WorkflowRunID != 501 {
+		t.Fatalf("fallback REST candidate mismatch: %#v", jobs)
+	}
+}
