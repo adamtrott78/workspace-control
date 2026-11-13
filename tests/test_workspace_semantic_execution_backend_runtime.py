@@ -15,6 +15,7 @@ from workspace_semantic_execution.adapters import (  # noqa: E402
     DeterministicSemanticProjection,
     FakeClock,
     InMemoryDurableRuntime,
+    InMemoryEventLedger,
     InMemoryStateStore,
     RecordingTelemetry,
     StaticAuthorityEvaluator,
@@ -38,6 +39,9 @@ from workspace_semantic_execution.domain import (  # noqa: E402
     SessionMode,
 )
 from workspace_semantic_execution.ports import (  # noqa: E402
+    DurableWorkConflict,
+    DurableWorkRequest,
+    DurableWorkState,
     RuntimeEvent,
     StateConflict,
 )
@@ -48,12 +52,12 @@ def make_runtime(
     process_id: str = "R",
 ):
     store = InMemoryStateStore()
-    runtime = InMemoryDurableRuntime()
+    event_ledger = InMemoryEventLedger()
     clock = FakeClock()
     telemetry = RecordingTelemetry()
     coordinator = RuntimeCoordinator(
         state_store=store,
-        runtime=runtime,
+        event_ledger=event_ledger,
         telemetry=telemetry,
         clock=clock,
     )
@@ -61,7 +65,7 @@ def make_runtime(
         [DomainKernel.create_process(process_id)]
     )
     coordinator.initialize(graph)
-    return coordinator, store, runtime, clock, telemetry
+    return coordinator, store, event_ledger, clock, telemetry
 
 
 def start_process(
@@ -138,6 +142,49 @@ class StateStoreTests(unittest.TestCase):
         self.assertEqual(reread.graph.processes["R"].generation, 0)
 
 
+class BoundedDurableRuntimeTests(unittest.TestCase):
+    def test_work_id_is_idempotency_key_and_conflicts_fail_closed(self):
+        runtime = InMemoryDurableRuntime()
+        request = DurableWorkRequest(
+            work_id="work:R:3:reason",
+            work_kind="reasoning_quantum",
+            payload={"process_id": "R", "generation": 3},
+            queue_name="reasoning",
+        )
+        self.assertTrue(runtime.submit(request))
+        self.assertFalse(runtime.submit(request))
+        self.assertEqual(
+            runtime.get_status(work_id=request.work_id).state,
+            DurableWorkState.ENQUEUED,
+        )
+
+        conflicting = DurableWorkRequest(
+            work_id=request.work_id,
+            work_kind="reasoning_quantum",
+            payload={"process_id": "R", "generation": 4},
+            queue_name="reasoning",
+        )
+        with self.assertRaises(DurableWorkConflict):
+            runtime.submit(conflicting)
+
+    def test_bounded_work_status_lifecycle_is_explicit(self):
+        runtime = InMemoryDurableRuntime()
+        request = DurableWorkRequest(
+            work_id="work:A",
+            work_kind="effect",
+            payload={"action_id": "A"},
+        )
+        runtime.submit(request)
+        running = runtime.mark_running(work_id="work:A")
+        self.assertEqual(running.state, DurableWorkState.RUNNING)
+        completed = runtime.complete(
+            work_id="work:A",
+            result_ref="receipt:A",
+        )
+        self.assertEqual(completed.state, DurableWorkState.COMPLETED)
+        self.assertEqual(completed.result_ref, "receipt:A")
+
+
 class EventDrivenRuntimeTests(unittest.TestCase):
     def test_event_before_wait_is_reconciled_at_wait_boundary(self):
         coordinator, store, _runtime, _clock, telemetry = make_runtime()
@@ -171,7 +218,7 @@ class EventDrivenRuntimeTests(unittest.TestCase):
         self.assertIn("process.external_wake", names)
 
     def test_restart_while_waiting_needs_real_event_to_resume(self):
-        coordinator1, store, runtime, clock, telemetry = make_runtime()
+        coordinator1, store, event_ledger, clock, telemetry = make_runtime()
         start_process(coordinator1)
         waiting = coordinator1.wait_external(
             "R",
@@ -187,7 +234,7 @@ class EventDrivenRuntimeTests(unittest.TestCase):
         # New coordinator instance: application memory is gone, durable ports remain.
         coordinator2 = RuntimeCoordinator(
             state_store=store,
-            runtime=runtime,
+            event_ledger=event_ledger,
             telemetry=telemetry,
             clock=clock,
         )
@@ -241,7 +288,7 @@ class EventDrivenRuntimeTests(unittest.TestCase):
         )
 
     def test_recovery_during_external_wait_preserves_wait_after_restart(self):
-        coordinator1, store, runtime, clock, telemetry = make_runtime()
+        coordinator1, store, event_ledger, clock, telemetry = make_runtime()
         start_process(coordinator1)
         coordinator1.wait_external(
             "R",
@@ -252,7 +299,7 @@ class EventDrivenRuntimeTests(unittest.TestCase):
 
         coordinator2 = RuntimeCoordinator(
             state_store=store,
-            runtime=runtime,
+            event_ledger=event_ledger,
             telemetry=telemetry,
             clock=clock,
         )
