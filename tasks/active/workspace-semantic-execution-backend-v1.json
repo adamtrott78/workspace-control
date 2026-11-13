@@ -1,0 +1,302 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-semantic-execution-backend-v1",
+  "title": "Workspace Semantic Execution Backend v1",
+  "status": "IN_PROGRESS",
+  "goal": "Implement the first production-grade modular-monolith backend for Workspace Semantic Execution: a pure executor-agnostic domain kernel, deterministic packet compilation, typed executor/resource routing, durable runtime/state ports, provisional DBOS+PostgreSQL adapters, exact CandidateAction-to-ActionSpec authority compilation, EffectReceipt/postcondition validation, event-driven waits, and a real Research Engine shadow canary—without replacing GitRunner, Research Engine, Operator Bridge, project-local truth, or existing authority owners.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-semantic-execution-migration-v1",
+  "current_stage": "kernel_domain_and_reference_parity",
+  "acceptance_criteria": [
+    "The production domain kernel has no dependency on DBOS, PostgreSQL, GitHub, browser/UI, model-provider SDKs, GPU libraries, or other infrastructure adapters.",
+    "Production kernel behavior satisfies the validated parent executable reference contract at workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723.",
+    "Stale generations cannot mutate or complete current work; at most one current lease owns a process generation; dependency readiness fails closed until all required dependencies are COMPLETED.",
+    "Effect execution is idempotent: identical duplicate receipts are no-ops and conflicting duplicates fail closed.",
+    "No action reaches COMPLETED from tool/executor success alone; completion requires EffectReceipt plus passing postcondition ValidationResult evidence.",
+    "WAITING_EXTERNAL and dependency waits release worker leases and consume no model-polling quanta.",
+    "CandidateAction and all model output are non-authoritative; ActionSpec compilation requires an explicit exact-scope AuthorityDecision=ALLOW and cannot widen scope.",
+    "Unknown state, transition, executor capability, authority outcome, or incompatible session/resource requirement fails closed.",
+    "Worker packets are deterministically reproducible from typed durable state, DecisionRecords, constraints, evidence refs, authority refs, validator contracts and executor profile; no second LLM is required merely to write routine prompts.",
+    "Executor identity is provider + model + surface + harness + toolset + capability/resource/session profile, not model name alone.",
+    "The same generic ReasoningProcess can be represented for human-assisted persistent ChatGPT Instant sessions and future fully programmatic stateless/session-scoped/persistent/batch institutional LLM executors without workflow-schema changes.",
+    "The control plane is GPU-blind by default and introduces no CUDA/GPU dependency; heavy compute remains an explicit separately leased executor.",
+    "DBOS+PostgreSQL is tested only behind DurableRuntimePort/StateStorePort and remains provisional until Architecture Review v0.3.",
+    "The first effect adapter is read-only or low-consequence and verifies exact postconditions after tool success.",
+    "A frozen real Research Engine workflow shape is replayed through the production kernel, then a read-only/shadow integration canary observes actual Research Engine state without mutating research-engine.",
+    "Crash/fault tests cover death after claim, death after effect before checkpoint, duplicate/delayed/out-of-order events, stale generations, executor/session loss, validator timeout, and durable recovery.",
+    "The current GitRunner/controller remains untouched except as a future adapter/dependency; no controller redesign or authority widening is performed by this task.",
+    "The current Operator Bridge remains independently owned; this task may define its backend action/status port but does not change browser automation or real-account promotion gates.",
+    "Architecture Review v0.3 is performed after the first real backend workflow using traces, faults, resource measurements, and implementation friction before freezing DBOS/PostgreSQL/semantic-graph physical choices."
+  ],
+  "constraints": [
+    "Do not mutate research-engine in this first backend task; it is a read-only real-workflow canary source until separately authorized.",
+    "Do not mutate controller/lambda-ci-controller, GitRunner policies, provisioner/runtime state, or GitRunner task authority.",
+    "Do not mutate operator-bridge/** or widen its ChatGPT/browser interaction authority.",
+    "Do not put hot runtime leases, generations, retries, sessions, waits, or ready queues into Git/GitHub.",
+    "Do not introduce Kafka, Redis, Neo4j, a vector database, Kubernetes, microservices, a general agent framework, or a local LLM dependency in the first vertical slice.",
+    "Do not make DBOS, PostgreSQL, a graph database, a specific model, a specific provider, or a specific worker count part of the domain model.",
+    "Do not allow model inference, semantic projection, executor selection, or semantic graph edges to grant/widen execution authority.",
+    "Do not treat persistent chat memory as required for correctness; durable typed state must support stateless resume.",
+    "Do not fabricate executor capability, quota, resource availability, model context limits, or institutional GPU allocation; unknown remains UNKNOWN and fails/defers according to policy.",
+    "Do not consume reasoning/model quanta while waiting for CI, experiments, human decisions, resources, or other external events.",
+    "Do not use the control plane's local GPU; CUDA_VISIBLE_DEVICES must be empty in resource-budget validation.",
+    "Do not replace accepted Research Engine orchestration semantics merely because generic kernel primitives overlap; adapt incrementally and preserve rollback.",
+    "Do not broaden mutation paths beyond this capsule's allowed scope without a new explicit authority boundary."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
+      "remote": {
+        "branch": "workspace-semantic-execution-migration-v1",
+        "checkpoint_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-semantic-execution-backend-v1.json",
+        "tasks/active/workspace-semantic-execution-backend-v1.md",
+        "semantic-execution/**",
+        "architecture/workspace-semantic-execution-*.md",
+        "architecture/workspace-semantic-execution-*.json",
+        "benchmarks/workspace-semantic-execution/backend/**",
+        "benchmarks/workspace-semantic-execution/research_engine_kernel_canary_v1.json",
+        "tests/test_workspace_semantic_execution_backend*.py",
+        "tests/test_workspace_semantic_execution_kernel.py",
+        "tests/test_workspace_semantic_execution_research_engine_canary.py",
+        ".github/workflows/semantic-execution-validation.yml"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "kernel_domain_and_reference_parity",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-semantic-execution-backend",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723",
+        "architecture/workspace-semantic-execution-kernel.v0.1.json",
+        "benchmarks/workspace-semantic-execution/kernel_reference_v1.py",
+        "Workspace Control Validation #2669 SUCCESS"
+      ],
+      "outputs": [
+        "production pure-domain state machine",
+        "typed work/reasoning/action/receipt/validation records",
+        "reference-parity regression tests",
+        "fail-closed transition guards"
+      ],
+      "validation": [],
+      "resume_condition": "Production domain kernel passes all reference invariants with no infrastructure imports."
+    },
+    {
+      "id": "packet_compiler_and_executor_registry",
+      "status": "PLANNED",
+      "execution_owner": "workspace-semantic-execution-backend",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated domain kernel",
+        "workspace-semantic-execution-instant-executor-contract.v0.1.md",
+        "workspace-semantic-execution-executor-resource.v0.1.json"
+      ],
+      "outputs": [
+        "deterministic SemanticPacketCompiler",
+        "typed ExecutorProfile and ResourceRequirement",
+        "ChatGPT Instant executor profile",
+        "generic machine LLM profile for future H100/Harmony/local service",
+        "deterministic eligibility/router tests"
+      ],
+      "validation": [],
+      "resume_condition": "Equivalent durable state produces stable packets and executor filtering is capability/session/resource based rather than model-name branches."
+    },
+    {
+      "id": "runtime_ports_and_inmemory_slice",
+      "status": "PLANNED",
+      "execution_owner": "workspace-semantic-execution-backend",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated domain kernel",
+        "packet compiler",
+        "executor registry"
+      ],
+      "outputs": [
+        "DurableRuntimePort",
+        "StateStorePort",
+        "AuthorityEvaluatorPort",
+        "ExecutorPort",
+        "SemanticProjectionPort",
+        "TelemetryPort",
+        "ClockPort",
+        "deterministic in-memory adapters/fake clock"
+      ],
+      "validation": [],
+      "resume_condition": "End-to-end in-memory reasoning/action lifecycle survives restart/fault simulation without infrastructure coupling."
+    },
+    {
+      "id": "dbos_postgres_spike",
+      "status": "PLANNED",
+      "execution_owner": "workspace-semantic-execution-backend",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated ports",
+        "assumption A-001"
+      ],
+      "outputs": [
+        "provisional DBOS DurableRuntimePort adapter",
+        "provisional PostgreSQL StateStorePort adapter",
+        "restart/wait/idempotency evidence"
+      ],
+      "validation": [],
+      "resume_condition": "DBOS+PostgreSQL either satisfies the measured first-slice durability needs or produces concrete evidence to spike Restate next."
+    },
+    {
+      "id": "read_only_effect_executor",
+      "status": "PLANNED",
+      "execution_owner": "workspace-semantic-execution-backend",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated runtime/state adapters",
+        "authority compiler"
+      ],
+      "outputs": [
+        "read-only GitHub executor family",
+        "EffectReceipt",
+        "exact postcondition validator",
+        "fault-injection coverage"
+      ],
+      "validation": [],
+      "resume_condition": "Read-only real effects are completed only after exact observed postconditions and duplicate/stale events are safe."
+    },
+    {
+      "id": "research_engine_shadow_canary",
+      "status": "PLANNED",
+      "execution_owner": "workspace-semantic-execution-backend",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+        "benchmarks/workspace-semantic-execution/research_engine_kernel_canary_v1.json",
+        "validated read-only executor"
+      ],
+      "outputs": [
+        "real Research Engine state observation",
+        "generic process projection",
+        "shadow routing/decomposition trace",
+        "zero-mutation proof"
+      ],
+      "validation": [],
+      "resume_condition": "A real Research Engine workflow is observed and represented without lost dependencies, authority changes, or source-repository mutation."
+    },
+    {
+      "id": "fault_resource_and_architecture_review_v03",
+      "status": "PLANNED",
+      "execution_owner": "workspace-semantic-execution-backend",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "first real workflow traces",
+        "fault evidence",
+        "resource measurements",
+        "implementation-friction record"
+      ],
+      "outputs": [
+        "Architecture Review v0.3",
+        "DBOS/Restate/Temporal decision evidence",
+        "resource-budget verdict",
+        "next bounded implementation slice"
+      ],
+      "validation": [],
+      "resume_condition": "Provisional substrate choices are accepted, revised, or rejected from real evidence rather than architecture preference."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "parent-kernel-canary-validated",
+      "kind": "implementation_handoff",
+      "identity": "workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Control Validation run 43525901963 / #2669 SUCCESS.",
+        "Unit regression, pinned Lambda controller validation, generated systemd substrate validation, Go controller tests/build, and full integration contracts all passed.",
+        "architecture/workspace-semantic-execution-kernel.v0.1.json freezes dangerous-kernel semantics.",
+        "benchmarks/workspace-semantic-execution/research_engine_kernel_canary_v1.json pins the real Research Engine workflow shape at research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723",
+      "required_for_resume": true,
+      "evidence": [
+        "First unfinished stage is kernel_domain_and_reference_parity.",
+        "No production semantic-execution source exists yet at this checkpoint.",
+        "Research Engine, GitRunner and Operator Bridge remain unchanged."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "semantic-execution/",
+      "state": "PLANNED",
+      "role": "production modular-monolith backend",
+      "origin": "workspace-semantic-execution-backend-v1",
+      "persistence": "git",
+      "regeneration": "not generated",
+      "review_requirement": "validate each coherent slice before widening effect authority",
+      "evidence": []
+    }
+  ],
+  "validation": [
+    {
+      "check": "Parent implementation handoff",
+      "result": "PASS",
+      "evidence": [
+        "Explicit user instruction authorized beginning the already-bounded backend implementation plan.",
+        "Shared Operator Workflow recognizes explicit user instruction as a valid mutation-authority source.",
+        "The parent executable kernel/reference and real Research Engine canary passed Workspace Control Validation #2669 before child activation."
+      ]
+    },
+    {
+      "check": "Authority isolation",
+      "result": "PASS",
+      "evidence": [
+        "Child mutation scope is restricted to its own capsule/handoff, semantic-execution backend paths, matching tests/architecture/benchmarks, and a dedicated validation workflow.",
+        "research-engine is read-only.",
+        "GitRunner/controller and operator-bridge paths are excluded."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Implement pure production domain types/state machine and prove reference parity.",
+    "Implement deterministic packet compiler and executor/resource/session registry.",
+    "Implement ports plus deterministic in-memory adapters/fake clock.",
+    "Spike DBOS+PostgreSQL behind ports without freezing the substrate.",
+    "Implement first read-only exact-effect executor plus receipt/postcondition validator.",
+    "Run the real Research Engine shadow canary with zero source mutation.",
+    "Run crash/fault/resource acceptance and Architecture Review v0.3."
+  ],
+  "next_safe_action": "Implement the production pure-domain kernel under semantic-execution/ with no infrastructure imports. Mirror the validated parent state/authority/effect invariants, add reference-parity tests under tests/test_workspace_semantic_execution_backend*.py, and validate the exact head before beginning packet/compiler/router work. Do not add DBOS/PostgreSQL or external executor effects until the pure domain boundary is green.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports."
+}
