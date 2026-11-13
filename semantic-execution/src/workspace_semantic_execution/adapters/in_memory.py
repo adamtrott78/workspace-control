@@ -17,6 +17,10 @@ from ..domain import (
     WorkGraph,
 )
 from ..ports import (
+    DurableWorkConflict,
+    DurableWorkRequest,
+    DurableWorkState,
+    DurableWorkStatus,
     RuntimeEvent,
     StateConflict,
     StateNotInitialized,
@@ -65,7 +69,7 @@ class InMemoryStateStore:
         return deepcopy(self._snapshot)
 
 
-class InMemoryDurableRuntime:
+class InMemoryEventLedger:
     def __init__(self) -> None:
         self._events_by_id: dict[str, RuntimeEvent] = {}
         self._order: list[str] = []
@@ -90,6 +94,79 @@ class InMemoryDurableRuntime:
             if event.wait_key == wait_key:
                 return deepcopy(event)
         return None
+
+
+class InMemoryDurableRuntime:
+    """Reference implementation of idempotent bounded work submission."""
+
+    def __init__(self) -> None:
+        self._requests: dict[str, DurableWorkRequest] = {}
+        self._statuses: dict[str, DurableWorkStatus] = {}
+
+    def submit(self, request: DurableWorkRequest) -> bool:
+        if not request.work_id or not request.work_kind or not request.queue_name:
+            raise ValueError("durable_work_required_fields")
+        existing = self._requests.get(request.work_id)
+        if existing is not None:
+            if existing != request:
+                raise DurableWorkConflict("conflicting_durable_work_id")
+            return False
+        self._requests[request.work_id] = deepcopy(request)
+        self._statuses[request.work_id] = DurableWorkStatus(
+            work_id=request.work_id,
+            state=DurableWorkState.ENQUEUED,
+        )
+        return True
+
+    def get_status(self, *, work_id: str) -> DurableWorkStatus | None:
+        status = self._statuses.get(work_id)
+        return deepcopy(status) if status is not None else None
+
+    def mark_running(self, *, work_id: str) -> DurableWorkStatus:
+        if work_id not in self._requests:
+            raise KeyError(work_id)
+        status = DurableWorkStatus(
+            work_id=work_id,
+            state=DurableWorkState.RUNNING,
+        )
+        self._statuses[work_id] = status
+        return deepcopy(status)
+
+    def complete(
+        self,
+        *,
+        work_id: str,
+        result_ref: str,
+    ) -> DurableWorkStatus:
+        if work_id not in self._requests:
+            raise KeyError(work_id)
+        if not result_ref:
+            raise ValueError("result_ref_required")
+        status = DurableWorkStatus(
+            work_id=work_id,
+            state=DurableWorkState.COMPLETED,
+            result_ref=result_ref,
+        )
+        self._statuses[work_id] = status
+        return deepcopy(status)
+
+    def fail(
+        self,
+        *,
+        work_id: str,
+        error: str,
+    ) -> DurableWorkStatus:
+        if work_id not in self._requests:
+            raise KeyError(work_id)
+        if not error:
+            raise ValueError("error_required")
+        status = DurableWorkStatus(
+            work_id=work_id,
+            state=DurableWorkState.FAILED,
+            error=error,
+        )
+        self._statuses[work_id] = status
+        return deepcopy(status)
 
 
 class FakeClock:
