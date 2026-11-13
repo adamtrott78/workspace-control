@@ -613,6 +613,7 @@ class AuthorityBoundaryTests(unittest.TestCase):
         return kernel.candidate_action(
             action_id="A1",
             process_id="R1",
+            process_generation=0,
             target_ref="github:repo@sha",
             executor_type="GITHUB_READ_ONLY",
             idempotency_key="idem:A1",
@@ -636,6 +637,8 @@ class AuthorityBoundaryTests(unittest.TestCase):
                             "decision_id": f"D:{outcome}",
                             "outcome": outcome,
                             "action_id": "A1",
+                            "process_id": "R1",
+                            "process_generation": 0,
                             "target_ref": "github:repo@sha",
                             "authority_scope_ref": "policy:scope",
                         },
@@ -650,6 +653,22 @@ class AuthorityBoundaryTests(unittest.TestCase):
                     "decision_id": "D1",
                     "outcome": "ALLOW",
                     "action_id": "OTHER",
+                    "process_id": "R1",
+                    "process_generation": 0,
+                    "target_ref": "github:repo@sha",
+                    "authority_scope_ref": "policy:scope",
+                },
+            )
+
+        with self.assertRaises(kernel.KernelContractError):
+            kernel.compile_action_spec(
+                candidate,
+                authority_decision={
+                    "decision_id": "D-stale",
+                    "outcome": "ALLOW",
+                    "action_id": "A1",
+                    "process_id": "R1",
+                    "process_generation": 1,
                     "target_ref": "github:repo@sha",
                     "authority_scope_ref": "policy:scope",
                 },
@@ -661,6 +680,8 @@ class AuthorityBoundaryTests(unittest.TestCase):
                 "decision_id": "D2",
                 "outcome": "ALLOW",
                 "action_id": "A1",
+                "process_id": "R1",
+                "process_generation": 0,
                 "target_ref": "github:repo@sha",
                 "authority_scope_ref": "policy:scope",
             },
