@@ -10,7 +10,7 @@
       "AuthorityDecision",
       "ActionSpec"
     ],
-    "rule": "CandidateAction and model output are non-authoritative. ActionSpec compilation requires an explicit ALLOW authority decision bound to exact scope; unknown/missing authority fails closed."
+    "rule": "CandidateAction and model output are non-authoritative. ActionSpec compilation requires an explicit ALLOW authority decision bound to exact action, process generation, target, and scope; unknown/missing/mismatched authority fails closed."
   },
   "process_states": [
     "READY",
@@ -318,6 +318,10 @@
     {
       "id": "K-011",
       "text": "Recovery cannot satisfy an unresolved external wait or dependency wait; it may fence ownership but must preserve the wait until its actual wake condition is met."
+    },
+    {
+      "id": "K-012",
+      "text": "CandidateAction, AuthorityDecision, ActionSpec, and EffectReceipt must bind the same current process generation; an action authorized for a stale generation cannot execute or complete current work."
     }
   ],
   "effect_receipt_required_fields": [
@@ -338,6 +342,7 @@
   "action_spec_required_fields": [
     "action_id",
     "process_id",
+    "process_generation",
     "target_ref",
     "executor_type",
     "authority_decision_id",
@@ -379,5 +384,29 @@
       "Only the matching external wake event or completed child set may satisfy a wait."
     ],
     "discovered_during": "packet_compiler_and_executor_registry implementation review"
+  },
+  "candidate_action_required_fields": [
+    "action_id",
+    "process_id",
+    "process_generation",
+    "target_ref",
+    "executor_type",
+    "idempotency_key",
+    "preconditions",
+    "expected_effect",
+    "postcondition_validator"
+  ],
+  "authority_decision_required_fields": [
+    "decision_id",
+    "outcome",
+    "action_id",
+    "process_id",
+    "process_generation",
+    "target_ref",
+    "authority_scope_ref"
+  ],
+  "generation_bound_effect_chain": {
+    "chain": "ReasoningProcess(generation) -> CandidateAction(process_generation) -> AuthorityDecision(process_generation) -> ActionSpec(process_generation) -> EffectReceipt(generation)",
+    "rule": "Every boundary must preserve exact process identity + generation. Recovery advances generation and thereby fences all prior candidate/authority/action specifications."
   }
 }
