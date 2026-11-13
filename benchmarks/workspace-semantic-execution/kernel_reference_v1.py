@@ -511,6 +511,7 @@ def candidate_action(
     *,
     action_id: str,
     process_id: str,
+    process_generation: int,
     target_ref: str,
     executor_type: str,
     idempotency_key: str,
@@ -529,9 +530,12 @@ def candidate_action(
     ]
     if not all(required):
         raise KernelContractError("candidate_action_fields_required")
+    if process_generation < 0:
+        raise KernelContractError("candidate_generation_invalid")
     return {
         "action_id": action_id,
         "process_id": process_id,
+        "process_generation": process_generation,
         "target_ref": target_ref,
         "executor_type": executor_type,
         "idempotency_key": idempotency_key,
@@ -557,11 +561,19 @@ def compile_action_spec(
         raise KernelContractError("authority_binding_required")
     if authority_decision.get("action_id") != candidate.get("action_id"):
         raise KernelContractError("authority_action_mismatch")
+    if authority_decision.get("process_id") != candidate.get("process_id"):
+        raise KernelContractError("authority_process_mismatch")
+    if (
+        authority_decision.get("process_generation")
+        != candidate.get("process_generation")
+    ):
+        raise KernelContractError("authority_generation_mismatch")
     if authority_decision.get("target_ref") != candidate.get("target_ref"):
         raise KernelContractError("authority_target_mismatch")
     return {
         "action_id": candidate["action_id"],
         "process_id": candidate["process_id"],
+        "process_generation": candidate["process_generation"],
         "target_ref": candidate["target_ref"],
         "executor_type": candidate["executor_type"],
         "authority_decision_id": decision_id,
