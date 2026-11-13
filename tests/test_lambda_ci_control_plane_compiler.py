@@ -316,7 +316,7 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
             compiler._write_outputs(compiled, out)
             receipt = json.loads((out / "compilation-receipt.json").read_text())
             self.assertEqual(receipt["decision"], "PASS")
-            self.assertEqual(receipt["runner_class_count"], 10)
+            self.assertEqual(receipt["runner_class_count"], 11)
             self.assertEqual(receipt["route_count"], 24)
             root_text = (out / "root-policy.json").read_text()
             self.assertNotIn("jit_config", root_text)
