@@ -41,8 +41,8 @@ class V3LaunchSpecTests(unittest.TestCase):
             jit_config="ZmFrZS1qaXQ=",
         )
 
-    def test_all_ten_runner_classes_build(self):
-        self.assertEqual(len(self.root["runner_classes"]), 10)
+    def test_all_eleven_runner_classes_build(self):
+        self.assertEqual(len(self.root["runner_classes"]), 11)
         for class_id in sorted(self.root["runner_classes"]):
             request, spec = self.build(class_id)
             cls = self.root["runner_classes"][class_id]
