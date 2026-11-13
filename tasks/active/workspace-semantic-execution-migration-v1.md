@@ -13,6 +13,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Title: Workspace Semantic Execution Migration v1
 - Status: IN_PROGRESS
 - Capsule schema: v2
+- Current stage: semantic_core_and_extension_contract
 
 ## Goal
 
@@ -70,14 +71,16 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Operator UX design remains frozen at UX-13. Implementation authority is now durably established in child task tasks/active/workspace-operator-bridge-implementation-v1.json, Stage 00 validated at workspace-control@2ff35d02ec823744937dc8fdd82d69c44bb3cb69 / Workspace Control Validation #2377 SUCCESS. Continue the child task at impl_01_repository_bootstrap_and_contract_harness; do not implement the bridge under the parent task's mutation scope.
+PIVOT TO BACKEND NOW. Treat Operator Bridge UX as a parallel calibration lane, not the foreground critical path. Begin Phase 1 of architecture/workspace-semantic-execution-orchestrator-implementation-plan.v0.1.md inside the existing benchmark/prototype authority: deterministic task-tree/ReasoningProcess kernel, CAS/generation fencing, recursive decomposition, event-driven waits, objective validation, and executor routing. Reuse the already-proven INSTANT_MULTI_LEAF_QUEUE_V1, INSTANT_CONCURRENT_EXECUTION_V1, INSTANT_WORKER_LEASE_RECOVERY_V1, and INSTANT_MULTI_WORKER_SCALE_V1 evidence as mechanics fixtures. Do not wait for the long UX-09 RAM/performance benchmark; it remains deferred until production-readiness review. Remaining Stage-10 browser UX gates block Stage-12/production promotion only, not backend implementation.
 
 ## Remaining work
 
-- Preserve completed P0-P3 screening as non-claim-bearing protocol evidence. Complete evaluator-runtime isolation and claim-bearing replicated scoring/calibration separately; do not repeat the manual screening matrix unless a material frozen-protocol change requires it.
-- Provision or identify an evaluator-only runtime store for hidden-ephemeral oracle/seed/nonce material, prove scored workers cannot read it, and bind benchmark runs to the public commitment.
-- After a clean frozen screening pass, run at least three independent replicates for the selected paired causal comparisons and analyze quality, reliability, decomposition, escalation calibration, context/work quanta, and frontier usage.
-- Run the frozen P2 research_iterate fixture across clean oracle-unexposed A-E sessions as an end-to-end calibration pilot; do not treat that single fixture as a general capability-boundary result.
+- ACCELERATED BACKEND LANE: implement the deterministic orchestration kernel from workspace-semantic-execution-orchestrator-implementation-plan.v0.1.md Phase 1: WorkItem/ReasoningProcess/Attempt/Lease/Event/WaitCondition/RoutingDecision/ExecutorSession/ValidationResult plus CAS/generation fencing, stale-worker rejection, idempotent transitions, event-driven waits, and fail-closed unknown transitions.
+- ACCELERATED BACKEND LANE: implement executable task-tree decomposition semantics and recursive TOO_LARGE -> DECOMPOSE behavior, preserving inherited constraints, provenance, validator contracts, authority refs, and dependency edges.
+- ACCELERATED BACKEND LANE: implement the executor registry/resource router, semantic packet compiler, persistent session broker, and validator/event service so disposable Instant workers can process bounded leaves and publish durable results.
+- ACCELERATED BACKEND LANE: replay the already-proven multi-worker queue/CAS/lease-recovery fixtures through the new kernel, then add one end-to-end decomposed workflow where multiple Instant-worker leaves complete independently and a synthesizer consumes validated outputs.
+- PARALLEL CALIBRATION LANE: finish remaining Operator Bridge Stage-10 UX trials only as required for real-account/production promotion; do not serialize backend development behind them.
+- PARALLEL CLAIM-BEARING BENCHMARK LANE: provision evaluator-only hidden runtime storage and run replicated capability scoring before making strong Instant-vs-frontier equivalence claims.
 - Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.
 - Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.
 - Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.
@@ -91,8 +94,9 @@ Operator UX design remains frozen at UX-13. Implementation authority is now dura
 
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is now validated.
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
-- Scored resumable-reasoning arms require oracle-unexposed clean model sessions. For ChatGPT plugin-backed workers, the viable product surface is now a brand-new regular chat with Memory disabled and required plugins enabled; Temporary Chat cannot provide both isolation and plugin transport simultaneously.
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
+- Claim-bearing benchmark conclusions still require evaluator-only runtime isolation and replicated scoring; this blocks strong capability-equivalence claims, not deterministic orchestrator/backend implementation.
+- Remaining Operator Bridge Stage-10 UX trials gate real-account/production promotion, but they do not block implementation of the deterministic task-tree, decomposition, routing, packet-compiler, session-broker, event/wait, and validator backend.
 
 ## Fresh-chat initialization
 
