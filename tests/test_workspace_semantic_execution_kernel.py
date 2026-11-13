@@ -234,6 +234,49 @@ class DependencyAndDecompositionTests(unittest.TestCase):
         graph = kernel.refresh_dependency_waits(graph, event_id="child-failed")
         self.assertEqual(graph["processes"]["P"]["state"], "WAITING_DEPENDENCIES")
 
+    def test_recovery_does_not_satisfy_child_dependencies(self):
+        graph = kernel.new_graph([kernel.new_process("P-recover")])
+        graph = kernel.claim(
+            graph,
+            "P-recover",
+            worker_id="WP",
+            lease_id="LP",
+            expected_generation=0,
+        )
+        graph = kernel.start(
+            graph,
+            "P-recover",
+            lease_id="LP",
+            expected_generation=0,
+        )
+        graph = kernel.decompose(
+            graph,
+            "P-recover",
+            children=[
+                {"process_id": "P-recover.1"},
+                {"process_id": "P-recover.2"},
+            ],
+            lease_id="LP",
+            expected_generation=0,
+        )
+        graph = kernel.recover(
+            graph,
+            "P-recover",
+            expected_generation=0,
+            reason="scheduler restart",
+        )
+        parent = graph["processes"]["P-recover"]
+        self.assertEqual(parent["generation"], 1)
+        self.assertEqual(parent["state"], "WAITING_DEPENDENCIES")
+        with self.assertRaises(kernel.KernelContractError):
+            kernel.claim(
+                graph,
+                "P-recover",
+                worker_id="WP2",
+                lease_id="LP2",
+                expected_generation=1,
+            )
+
 
 class WaitTests(unittest.TestCase):
     def test_external_wait_releases_worker_and_does_not_poll_model(self):
@@ -285,6 +328,57 @@ class WaitTests(unittest.TestCase):
         )
         self.assertEqual(graph["processes"]["R"]["state"], "READY_TO_RESUME")
         self.assertEqual(graph["processes"]["R"]["reasoning_quanta"], before)
+
+    def test_recovery_does_not_satisfy_external_wait(self):
+        graph = kernel.new_graph([kernel.new_process("R-recover-wait")])
+        graph = kernel.claim(
+            graph,
+            "R-recover-wait",
+            worker_id="W",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = kernel.start(
+            graph,
+            "R-recover-wait",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = kernel.wait_external(
+            graph,
+            "R-recover-wait",
+            wait_key="experiment:E1",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = kernel.recover(
+            graph,
+            "R-recover-wait",
+            expected_generation=0,
+            reason="process restart while experiment still running",
+        )
+        process = graph["processes"]["R-recover-wait"]
+        self.assertEqual(process["generation"], 1)
+        self.assertEqual(process["state"], "WAITING_EXTERNAL")
+        self.assertEqual(process["wait_key"], "experiment:E1")
+        with self.assertRaises(kernel.KernelContractError):
+            kernel.claim(
+                graph,
+                "R-recover-wait",
+                worker_id="W2",
+                lease_id="L2",
+                expected_generation=1,
+            )
+        graph = kernel.wake_external(
+            graph,
+            "R-recover-wait",
+            wait_key="experiment:E1",
+            event_id="experiment:E1:complete",
+        )
+        self.assertEqual(
+            graph["processes"]["R-recover-wait"]["state"],
+            "READY_TO_RESUME",
+        )
 
 
 class EffectAndValidationTests(unittest.TestCase):
