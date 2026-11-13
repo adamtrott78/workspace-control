@@ -166,23 +166,29 @@ func TestDiscoverTrustedDemandFallsBackToUnfilteredRecentRuns(t *testing.T) {
 				return
 			}
 			_ = json.NewEncoder(w).Encode(map[string]any{
-				"workflow_runs": []any{map[string]any{
-					"id":          501,
-					"head_sha":    headSHA,
-					"head_branch": "main",
-					"path":        ".github/workflows/control.yml",
-					"event":       "issue_comment",
-					"status":      "queued",
-					"actor": map[string]any{
-						"login": "adamtrott78",
+				"workflow_runs": []any{
+					map[string]any{
+						"id":          501,
+						"head_sha":    headSHA,
+						"head_branch": "main",
+						"path":        ".github/workflows/control.yml",
+						"event":       "issue_comment",
+						"status":      "queued",
+						"actor": map[string]any{
+							"login": "adamtrott78",
+						},
+						"triggering_actor": map[string]any{
+							"login": "adamtrott78",
+						},
+						"repository": map[string]any{
+							"full_name": "adamtrott78/workspace-control",
+						},
 					},
-					"triggering_actor": map[string]any{
-						"login": "adamtrott78",
+					map[string]any{
+						"id":     502,
+						"status": "completed",
 					},
-					"repository": map[string]any{
-						"full_name": "adamtrott78/workspace-control",
-					},
-				}},
+				},
 			})
 			return
 
