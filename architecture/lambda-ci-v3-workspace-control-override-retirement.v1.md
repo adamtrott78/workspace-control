@@ -28,7 +28,7 @@ The operator requires:
 - exact stale drop-in:
   `/etc/systemd/system/workspace-ci-v3-controller@workspace-control-control-small-v1.service.d/99-terminal-revival-reviewed.conf`;
 - controller policy SHA-256:
-  `870feb9835230c1d9dd897d9fe64b7c1c23def4d5d0bd1e`.
+  `870feb9835230c1d9dd897d9fe64b7c1c23def4bcbfc34d1cafd4111681dd9aa`.
 
 The active controller-refresh receipt must bind the exact shared source head and
 binary digest and remain in `ACTIVE` phase.
