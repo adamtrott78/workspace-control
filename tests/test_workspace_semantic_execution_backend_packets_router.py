@@ -28,8 +28,10 @@ from workspace_semantic_execution.application import (  # noqa: E402
 from workspace_semantic_execution.domain import (  # noqa: E402
     ExecutionRequirement,
     ExecutorAvailability,
+    ExecutorLifecycle,
     ExecutorLocality,
     InvocationMode,
+    MemoryResetPolicy,
     PrivacyClass,
     SessionMode,
 )
@@ -126,6 +128,8 @@ class PacketCompilerTests(unittest.TestCase):
             toolset_id="workspace-machine-tools-v1",
             capabilities=frozenset({"reasoning.bounded"}),
             session_mode=SessionMode.STATELESS,
+            lifecycle=ExecutorLifecycle.PERSISTENT_SERVICE,
+            memory_reset_policy=MemoryResetPolicy.EVERY_INVOCATION,
             availability=ExecutorAvailability.AVAILABLE,
             locality=ExecutorLocality.INSTITUTIONAL_REMOTE,
             privacy_classes=frozenset({PrivacyClass.INTERNAL}),
@@ -188,6 +192,11 @@ class ExecutorRouterTests(unittest.TestCase):
             ExecutorAvailability.UNKNOWN,
         )
         self.assertEqual(placeholder.capabilities, frozenset())
+        self.assertEqual(placeholder.lifecycle, ExecutorLifecycle.UNKNOWN)
+        self.assertEqual(
+            placeholder.memory_reset_policy,
+            MemoryResetPolicy.UNKNOWN,
+        )
 
     def test_human_assisted_persistent_requirement_selects_chat_instant(self):
         registry = ExecutorRegistry(initial_executor_profiles())
@@ -198,6 +207,12 @@ class ExecutorRouterTests(unittest.TestCase):
             ),
             allowed_session_modes=frozenset(
                 {SessionMode.PERSISTENT_CHAT}
+            ),
+            allowed_lifecycles=frozenset(
+                {ExecutorLifecycle.INTERACTIVE_CHAT}
+            ),
+            allowed_memory_reset_policies=frozenset(
+                {MemoryResetPolicy.PROVIDER_MANAGED}
             ),
             allowed_localities=frozenset(
                 {ExecutorLocality.PROVIDER_REMOTE}
@@ -264,6 +279,8 @@ class ExecutorRouterTests(unittest.TestCase):
                 {"reasoning.bounded", "code.read"}
             ),
             session_mode=SessionMode.STATELESS,
+            lifecycle=ExecutorLifecycle.PERSISTENT_SERVICE,
+            memory_reset_policy=MemoryResetPolicy.EVERY_INVOCATION,
             availability=ExecutorAvailability.AVAILABLE,
             locality=ExecutorLocality.INSTITUTIONAL_REMOTE,
             privacy_classes=frozenset(
@@ -288,6 +305,12 @@ class ExecutorRouterTests(unittest.TestCase):
                 {InvocationMode.PROGRAMMATIC}
             ),
             allowed_session_modes=frozenset({SessionMode.STATELESS}),
+            allowed_lifecycles=frozenset(
+                {ExecutorLifecycle.PERSISTENT_SERVICE}
+            ),
+            allowed_memory_reset_policies=frozenset(
+                {MemoryResetPolicy.EVERY_INVOCATION}
+            ),
             allowed_localities=frozenset(
                 {ExecutorLocality.INSTITUTIONAL_REMOTE}
             ),
@@ -327,6 +350,72 @@ class ExecutorRouterTests(unittest.TestCase):
             decision.exclusions[0].reasons,
         )
 
+    def test_persistent_service_can_expose_distinct_memory_reset_semantics(self):
+        per_request = machine_llm_profile(
+            executor_id="service-stateless",
+            provider_id="lab",
+            model_id="model",
+            harness_id="h",
+            toolset_id="t",
+            capabilities=frozenset({"reasoning.bounded"}),
+            session_mode=SessionMode.STATELESS,
+            lifecycle=ExecutorLifecycle.PERSISTENT_SERVICE,
+            memory_reset_policy=MemoryResetPolicy.EVERY_INVOCATION,
+            availability=ExecutorAvailability.AVAILABLE,
+            locality=ExecutorLocality.INSTITUTIONAL_REMOTE,
+            privacy_classes=frozenset({PrivacyClass.PUBLIC}),
+            resource_classes=frozenset({"GPU_REMOTE"}),
+            context_capacity=32768,
+        )
+        session_scoped = machine_llm_profile(
+            executor_id="service-session",
+            provider_id="lab",
+            model_id="model",
+            harness_id="h",
+            toolset_id="t",
+            capabilities=frozenset({"reasoning.bounded"}),
+            session_mode=SessionMode.SESSION_SCOPED,
+            lifecycle=ExecutorLifecycle.PERSISTENT_SERVICE,
+            memory_reset_policy=MemoryResetPolicy.SESSION_END,
+            availability=ExecutorAvailability.AVAILABLE,
+            locality=ExecutorLocality.INSTITUTIONAL_REMOTE,
+            privacy_classes=frozenset({PrivacyClass.PUBLIC}),
+            resource_classes=frozenset({"GPU_REMOTE"}),
+            context_capacity=32768,
+        )
+        registry = ExecutorRegistry((per_request, session_scoped))
+        decision = route_executor(
+            registry,
+            requirement_id="req:stateless-isolation",
+            requirement=ExecutionRequirement(
+                required_capabilities=frozenset({"reasoning.bounded"}),
+                allowed_session_modes=frozenset({SessionMode.STATELESS}),
+                allowed_lifecycles=frozenset(
+                    {ExecutorLifecycle.PERSISTENT_SERVICE}
+                ),
+                allowed_memory_reset_policies=frozenset(
+                    {MemoryResetPolicy.EVERY_INVOCATION}
+                ),
+                privacy_class=PrivacyClass.PUBLIC,
+            ),
+        )
+        self.assertEqual(
+            decision.selected_executor_id,
+            "service-stateless",
+        )
+        excluded = {
+            item.executor_id: item.reasons
+            for item in decision.exclusions
+        }
+        self.assertIn(
+            "SESSION_MODE_INCOMPATIBLE",
+            excluded["service-session"],
+        )
+        self.assertIn(
+            "MEMORY_RESET_POLICY_INCOMPATIBLE",
+            excluded["service-session"],
+        )
+
     def test_lowest_scarcity_known_eligible_executor_wins(self):
         first = machine_llm_profile(
             executor_id="machine-a",
@@ -336,6 +425,8 @@ class ExecutorRouterTests(unittest.TestCase):
             toolset_id="t",
             capabilities=frozenset({"reasoning.bounded"}),
             session_mode=SessionMode.STATELESS,
+            lifecycle=ExecutorLifecycle.PERSISTENT_SERVICE,
+            memory_reset_policy=MemoryResetPolicy.EVERY_INVOCATION,
             availability=ExecutorAvailability.AVAILABLE,
             locality=ExecutorLocality.INSTITUTIONAL_REMOTE,
             privacy_classes=frozenset({PrivacyClass.PUBLIC}),
@@ -351,6 +442,8 @@ class ExecutorRouterTests(unittest.TestCase):
             toolset_id="t",
             capabilities=frozenset({"reasoning.bounded"}),
             session_mode=SessionMode.STATELESS,
+            lifecycle=ExecutorLifecycle.PERSISTENT_SERVICE,
+            memory_reset_policy=MemoryResetPolicy.EVERY_INVOCATION,
             availability=ExecutorAvailability.AVAILABLE,
             locality=ExecutorLocality.INSTITUTIONAL_REMOTE,
             privacy_classes=frozenset({PrivacyClass.PUBLIC}),
