@@ -33,6 +33,7 @@ class PadatasetCheckpointRefreshContractTests(unittest.TestCase):
             'live PADataset execution snapshot is dirty',
             'candidate checkpoint',
             'remote PADataset branch head',
+            'mkdir -p "$PAD_FETCH/local_artifacts/evidence"',
             'BACKUP="/var/lib/workspace-shell/upgrades/padataset-checkpoint-',
             'Checkpoint refresh failed; rolling back',
             'sudo cp -a "$BACKUP/authority" "$AUTHORITY_ROOT"',
@@ -51,6 +52,30 @@ class PadatasetCheckpointRefreshContractTests(unittest.TestCase):
         self.assertEqual(data["status"], "IN_PROGRESS")
         self.assertIn(TARGET, data["next_safe_action"])
         self.assertTrue(any(c.get("identity") == TARGET for c in data["checkpoints"]))
+
+    def test_evidence_mountpoint_repair_is_exact_sha_and_read_only_evidence_bound(self):
+        repair = ROOT / "plugins" / "workspace-shell" / "install" / "repair_padataset_evidence_mountpoint_v1.sh"
+        cp = subprocess.run(
+            ["/usr/bin/bash", "-n", str(repair)],
+            cwd=ROOT,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(cp.returncode, 0, cp.stdout + cp.stderr)
+        source = repair.read_text()
+        for marker in (
+            'AUTHORITY_ROOT="/etc/workspace-shell/authority"',
+            'PAD_ROOT="/srv/workspace-shell/PADataset"',
+            'EVIDENCE_ROOT="/srv/workspace-shell/PADataset-evidence"',
+            'sudo mountpoint -q "$EVIDENCE_ROOT"',
+            'evidence root is not read-only',
+            'nosuid nodev noexec',
+            'sudo mkdir -p "$MOUNTPOINT"',
+            'mountpoint repair dirtied PADataset source',
+            'PADATASET_EVIDENCE_MOUNTPOINT_REPAIR=PASS',
+        ):
+            self.assertIn(marker, source)
 
 
 if __name__ == "__main__":
