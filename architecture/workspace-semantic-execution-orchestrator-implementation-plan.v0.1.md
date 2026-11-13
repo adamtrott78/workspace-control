@@ -40,25 +40,34 @@ The core MUST NOT hard-code GPT-5.6, GPT-6, or any future model family.
 
 The scheduler routes to capability/surface classes. Exact runtime identity is registry data.
 
-Initial Chat calibration target:
+Authoritative Instant behavior contract:
+- `architecture/workspace-semantic-execution-instant-executor-contract.v0.1.md`
 
+Current characterization matrix:
+- `benchmarks/workspace-semantic-execution/gpt6_instant_characterization_v1.json`
+
+Current Chat calibration target:
+
+- logical selector: `OPENAI_CHAT_INSTANT_CURRENT`
 - provider: OpenAI
 - surface: ChatGPT Chat
 - model: GPT-6 Sol
 - configuration: Instant
-- continuity: persistent worker session where safe; durable resume on rotation/failure
+- matched stronger-effort control: GPT-6 Sol / High
+- continuity: persistent or fresh durable-resume sessions as selected by the experiment/session broker
 - programmatic invocation: false unless an explicitly supported OpenAI surface later provides it
 - human launch required: true while ordinary Chat Instant lacks a documented machine invocation path
 
-Suggested logical selector:
+GPT-5.6 benchmark results remain historical mechanics/protocol evidence and MUST NOT define the current production capability envelope.
 
-`OPENAI_CHAT_INSTANT_CURRENT`
+The orchestrator MUST distinguish:
+- DOCUMENTED provider/product facts;
+- EMPIRICALLY_OBSERVED Workspace Control capability evidence;
+- UNKNOWN_CALIBRATE serving/effort properties.
 
-Resolution must record the exact observed executor identity at invocation time. Replacing GPT-6 later should require recalibration, not scheduler redesign.
+It MUST NOT infer an exact hidden Instant reasoning-token budget or assume that ChatGPT Instant maps to a particular API `reasoning.effort` value.
 
-Official product evidence as of 2026-11:
-- https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt
-- https://help.openai.com/en/articles/6825453-chatgpt-release-notes
+Replacing GPT-6 later requires registry identity change + focused re-characterization, not scheduler redesign. Task-tree, lease/CAS, validator, authority, and durable-state semantics remain unchanged.
 
 ## 4. Consumer ChatGPT automation boundary
 
