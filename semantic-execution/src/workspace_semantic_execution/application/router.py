@@ -58,6 +58,19 @@ def _exclusion_reasons(
         reasons.append("SESSION_MODE_INCOMPATIBLE")
 
     if (
+        requirement.allowed_lifecycles
+        and profile.lifecycle not in requirement.allowed_lifecycles
+    ):
+        reasons.append("LIFECYCLE_INCOMPATIBLE")
+
+    if (
+        requirement.allowed_memory_reset_policies
+        and profile.memory_reset_policy
+        not in requirement.allowed_memory_reset_policies
+    ):
+        reasons.append("MEMORY_RESET_POLICY_INCOMPATIBLE")
+
+    if (
         requirement.allowed_localities
         and profile.locality not in requirement.allowed_localities
     ):
@@ -135,7 +148,8 @@ def route_executor(
             outcome="NO_ELIGIBLE_EXECUTOR",
             rationale=(
                 "No executor satisfied all known capability, lifecycle, "
-                "privacy, context, resource, and availability constraints."
+                "memory/session, privacy, context, resource, and availability "
+                "constraints."
             ),
         )
 
