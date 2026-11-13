@@ -151,11 +151,13 @@ class BoundedDurableRuntimeTests(unittest.TestCase):
             payload={"process_id": "R", "generation": 3},
             queue_name="reasoning",
         )
-        self.assertTrue(runtime.submit(request))
-        self.assertFalse(runtime.submit(request))
+        first = runtime.submit(request)
+        duplicate = runtime.submit(request)
+        self.assertEqual(first.state, DurableWorkState.ENQUEUED)
+        self.assertEqual(duplicate, first)
         self.assertEqual(
-            runtime.get_status(work_id=request.work_id).state,
-            DurableWorkState.ENQUEUED,
+            runtime.get_status(work_id=request.work_id),
+            first,
         )
 
         conflicting = DurableWorkRequest(
