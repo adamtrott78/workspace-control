@@ -608,6 +608,28 @@ func (v *githubVerifier) activeRuns(ctx context.Context) ([]githubWorkflowRun, e
 			}
 		}
 	}
+
+	// GitHub's status-filtered workflow-run collection can transiently omit a
+	// run that the individual run/job endpoints still report as queued. Merge
+	// the first unfiltered recent-runs page and apply the status check locally
+	// so already-assigned scale-set demand remains discoverable without
+	// unbounded history scans.
+	var recent githubWorkflowRunsResponse
+	recentPath := fmt.Sprintf(
+		"/repos/%s/%s/actions/runs?per_page=100&page=1",
+		url.PathEscape(v.owner),
+		url.PathEscape(v.repo),
+	)
+	if err := v.getJSON(ctx, recentPath, &recent); err != nil {
+		return nil, err
+	}
+	for _, run := range recent.WorkflowRuns {
+		if run.ID <= 0 || (run.Status != "queued" && run.Status != "in_progress") {
+			continue
+		}
+		byID[run.ID] = run
+	}
+
 	result := make([]githubWorkflowRun, 0, len(byID))
 	for _, run := range byID {
 		result = append(result, run)
