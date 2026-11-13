@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "packet_compiler_and_executor_registry",
+  "current_stage": "runtime_ports_and_inmemory_slice",
   "acceptance_criteria": [
     "The production domain kernel has no dependency on DBOS, PostgreSQL, GitHub, browser/UI, model-provider SDKs, GPU libraries, or other infrastructure adapters.",
     "Production kernel behavior satisfies the validated parent executable reference contract at workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723.",
@@ -51,7 +51,7 @@
       "base_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "546a3f64b115baf6b07227416e2b844c5c6d3a58",
+        "checkpoint_sha": "713f70533eee1dfe7f5274c17ca7d2091204c40c",
         "verified": true
       },
       "local": null,
@@ -117,10 +117,10 @@
     },
     {
       "id": "packet_compiler_and_executor_registry",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-semantic-execution-backend",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "validated domain kernel",
         "workspace-semantic-execution-instant-executor-contract.v0.1.md",
@@ -133,12 +133,35 @@
         "generic machine LLM profile for future H100/Harmony/local service",
         "deterministic eligibility/router tests"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Deterministic packet compiler and executor/session/resource registry",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation run 43527278875 / #2691 SUCCESS.",
+            "Run #2691 passed the complete unit regression plus full integration contracts.",
+            "Identical durable typed state plus executor profile produces byte-for-byte identical WORKSPACE_REASONING_PACKET_V1 text and SHA-256.",
+            "Executor switching preserves the underlying process state while changing only executor/continuity metadata.",
+            "The initial institutional LLM placeholder is availability UNKNOWN with no invented capabilities and cannot be routed.",
+            "Lifecycle, session mode, and memory reset policy are separate semantics, supporting persistent service + per-request reset, session-scoped reset, or context-threshold/provider-managed policies without workflow redesign.",
+            "A calibrated programmatic institutional model can be slotted into routing without a model-name-specific scheduler branch."
+          ]
+        },
+        {
+          "check": "Recovery wait semantics correction",
+          "result": "PASS",
+          "evidence": [
+            "Architecture invariant K-011 now forbids recovery from satisfying unresolved external or dependency waits.",
+            "Production and executable-reference regressions preserve wait_key/child dependencies across generation recovery and permit readiness only from the real wake condition.",
+            "The corrected recovery tests passed Workspace Control Validation #2691."
+          ]
+        }
+      ],
       "resume_condition": "Equivalent durable state produces stable packets and executor filtering is capability/session/resource based rather than model-name branches."
     },
     {
       "id": "runtime_ports_and_inmemory_slice",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": null,
       "selected_surface": null,
@@ -264,14 +287,25 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "546a3f64b115baf6b07227416e2b844c5c6d3a58",
+      "id": "packet-router-validated",
+      "kind": "implementation_checkpoint",
+      "identity": "713f70533eee1dfe7f5274c17ca7d2091204c40c",
       "required_for_resume": true,
       "evidence": [
-        "kernel_domain_and_reference_parity is VALIDATED.",
-        "First unfinished stage is packet_compiler_and_executor_registry.",
-        "GitRunner/controller, Research Engine, and Operator Bridge remain unchanged."
+        "Workspace Control Validation #2691 SUCCESS.",
+        "Deterministic packet compiler, executor registry/router, lifecycle/session/memory semantics and corrected wait-recovery invariants are validated.",
+        "No DBOS/PostgreSQL/provider runtime/effect adapter has been introduced yet."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "713f70533eee1dfe7f5274c17ca7d2091204c40c",
+      "required_for_resume": true,
+      "evidence": [
+        "kernel_domain_and_reference_parity and packet_compiler_and_executor_registry are VALIDATED.",
+        "First unfinished stage is runtime_ports_and_inmemory_slice.",
+        "Research Engine, GitRunner/controller, and Operator Bridge remain unmodified by the backend child."
       ]
     }
   ],
@@ -311,15 +345,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement deterministic packet compiler and executor/resource/session registry.",
     "Implement ports plus deterministic in-memory adapters/fake clock.",
     "Spike DBOS+PostgreSQL behind ports without freezing the substrate.",
     "Implement first read-only exact-effect executor plus receipt/postcondition validator.",
     "Run the real Research Engine shadow canary with zero source mutation.",
     "Run crash/fault/resource acceptance and Architecture Review v0.3."
   ],
-  "next_safe_action": "Implement the deterministic SemanticPacketCompiler and executor/resource/session registry under semantic-execution/ without adding infrastructure dependencies. Packets must be reproducible from typed durable state and executor profile; executor eligibility must be determined by explicit capabilities, invocation/session lifecycle, context/privacy/locality/resource requirements, and availability rather than model-name branches. Register ChatGPT GPT-6 Instant as a human-assisted persistent-chat profile and a generic machine LLM profile capable of representing future department-H100/Harmony stateless/session-scoped/persistent/batch services. Validate this slice before adding DurableRuntimePort/StateStorePort or DBOS/PostgreSQL.",
+  "next_safe_action": "Implement infrastructure-neutral ports plus deterministic in-memory adapters and a fake clock under semantic-execution/. The slice must persist/reload WorkGraph state without Git, model durable wait/event publication without polling, expose AuthorityEvaluatorPort/ExecutorPort/SemanticProjectionPort/TelemetryPort contracts, and demonstrate restart/recovery/duplicate-event/session-loss behavior entirely in memory. Do not add DBOS/PostgreSQL or real external effects until this slice validates.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n"
+  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n"
 }
