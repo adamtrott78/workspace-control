@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 546a3f64b115baf6b07227416e2b844c5c6d3a58
+- Remote checkpoint: 713f70533eee1dfe7f5274c17ca7d2091204c40c
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,10 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement the deterministic SemanticPacketCompiler and executor/resource/session registry under semantic-execution/ without adding infrastructure dependencies. Packets must be reproducible from typed durable state and executor profile; executor eligibility must be determined by explicit capabilities, invocation/session lifecycle, context/privacy/locality/resource requirements, and availability rather than model-name branches. Register ChatGPT GPT-6 Instant as a human-assisted persistent-chat profile and a generic machine LLM profile capable of representing future department-H100/Harmony stateless/session-scoped/persistent/batch services. Validate this slice before adding DurableRuntimePort/StateStorePort or DBOS/PostgreSQL.
+Implement infrastructure-neutral ports plus deterministic in-memory adapters and a fake clock under semantic-execution/. The slice must persist/reload WorkGraph state without Git, model durable wait/event publication without polling, expose AuthorityEvaluatorPort/ExecutorPort/SemanticProjectionPort/TelemetryPort contracts, and demonstrate restart/recovery/duplicate-event/session-loss behavior entirely in memory. Do not add DBOS/PostgreSQL or real external effects until this slice validates.
 
 ## Remaining work
 
-- Implement deterministic packet compiler and executor/resource/session registry.
 - Implement ports plus deterministic in-memory adapters/fake clock.
 - Spike DBOS+PostgreSQL behind ports without freezing the substrate.
 - Implement first read-only exact-effect executor plus receipt/postcondition validator.
