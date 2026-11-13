@@ -96,6 +96,7 @@ git -C "$PAD_FETCH" fetch origin "$PAD_BRANCH:refs/remotes/origin/$PAD_BRANCH"
 REMOTE_PAD_HEAD="$(git -C "$PAD_FETCH" rev-parse "origin/$PAD_BRANCH")"
 [[ "$REMOTE_PAD_HEAD" == "$EXPECTED_NEW_PAD_SHA" ]]   || fail "remote PADataset branch head $REMOTE_PAD_HEAD != expected $EXPECTED_NEW_PAD_SHA"
 git -C "$PAD_FETCH" checkout --detach "$EXPECTED_NEW_PAD_SHA"
+mkdir -p "$PAD_FETCH/local_artifacts/evidence"
 git -C "$PAD_FETCH" merge-base --is-ancestor "$EXPECTED_OLD_PAD_SHA" "$EXPECTED_NEW_PAD_SHA"   || fail "new PADataset candidate is not descended from installed source"
 [[ -z "$(git -C "$PAD_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] || fail "prepared PADataset snapshot is dirty"
 
