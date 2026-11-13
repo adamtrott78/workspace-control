@@ -7,9 +7,11 @@ from __future__ import annotations
 
 from ..domain import (
     ExecutorAvailability,
+    ExecutorLifecycle,
     ExecutorLocality,
     ExecutorProfile,
     InvocationMode,
+    MemoryResetPolicy,
     PrivacyClass,
     SessionMode,
 )
@@ -33,6 +35,8 @@ def openai_chat_instant_current_profile() -> ExecutorProfile:
         ),
         invocation_mode=InvocationMode.HUMAN_ASSISTED,
         session_mode=SessionMode.PERSISTENT_CHAT,
+        lifecycle=ExecutorLifecycle.INTERACTIVE_CHAT,
+        memory_reset_policy=MemoryResetPolicy.PROVIDER_MANAGED,
         availability=ExecutorAvailability.AVAILABLE,
         locality=ExecutorLocality.PROVIDER_REMOTE,
         privacy_classes=frozenset(
@@ -62,6 +66,8 @@ def unprovisioned_institutional_llm_profile() -> ExecutorProfile:
         capabilities=frozenset(),
         invocation_mode=InvocationMode.PROGRAMMATIC,
         session_mode=SessionMode.NONE,
+        lifecycle=ExecutorLifecycle.UNKNOWN,
+        memory_reset_policy=MemoryResetPolicy.UNKNOWN,
         availability=ExecutorAvailability.UNKNOWN,
         locality=ExecutorLocality.UNKNOWN,
         privacy_classes=frozenset({PrivacyClass.UNKNOWN}),
@@ -83,6 +89,8 @@ def machine_llm_profile(
     toolset_id: str,
     capabilities: frozenset[str],
     session_mode: SessionMode,
+    lifecycle: ExecutorLifecycle,
+    memory_reset_policy: MemoryResetPolicy,
     availability: ExecutorAvailability,
     locality: ExecutorLocality,
     privacy_classes: frozenset[PrivacyClass],
@@ -100,10 +108,16 @@ def machine_llm_profile(
     if session_mode not in {
         SessionMode.STATELESS,
         SessionMode.SESSION_SCOPED,
-        SessionMode.PERSISTENT_SERVICE,
-        SessionMode.BATCH_QUEUED,
     }:
         raise ValueError("machine_llm_session_mode_required")
+    if lifecycle not in {
+        ExecutorLifecycle.PERSISTENT_SERVICE,
+        ExecutorLifecycle.EPHEMERAL_INVOCATION,
+        ExecutorLifecycle.BATCH_JOB,
+    }:
+        raise ValueError("machine_llm_lifecycle_required")
+    if memory_reset_policy == MemoryResetPolicy.UNKNOWN:
+        raise ValueError("machine_llm_memory_reset_policy_must_be_known")
 
     return ExecutorProfile(
         executor_id=executor_id,
@@ -115,6 +129,8 @@ def machine_llm_profile(
         capabilities=capabilities,
         invocation_mode=InvocationMode.PROGRAMMATIC,
         session_mode=session_mode,
+        lifecycle=lifecycle,
+        memory_reset_policy=memory_reset_policy,
         availability=availability,
         locality=locality,
         privacy_classes=privacy_classes,
@@ -125,7 +141,6 @@ def machine_llm_profile(
         human_launch_required=False,
         calibration_ref=calibration_ref,
     )
-
 
 
 def initial_executor_profiles() -> tuple[ExecutorProfile, ...]:
