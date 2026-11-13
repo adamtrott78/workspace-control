@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "kernel_domain_and_reference_parity",
+  "current_stage": "packet_compiler_and_executor_registry",
   "acceptance_criteria": [
     "The production domain kernel has no dependency on DBOS, PostgreSQL, GitHub, browser/UI, model-provider SDKs, GPU libraries, or other infrastructure adapters.",
     "Production kernel behavior satisfies the validated parent executable reference contract at workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723.",
@@ -51,7 +51,7 @@
       "base_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
+        "checkpoint_sha": "546a3f64b115baf6b07227416e2b844c5c6d3a58",
         "verified": true
       },
       "local": null,
@@ -85,7 +85,7 @@
   "stages": [
     {
       "id": "kernel_domain_and_reference_parity",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -101,12 +101,23 @@
         "reference-parity regression tests",
         "fail-closed transition guards"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Pure production domain kernel and reference parity",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation run 43526399879 / #2676 SUCCESS.",
+            "Run #2676 passed changed task contracts, full unit regression, v3 live-canary syntax, generated systemd substrate validation, pinned Go controller tests/build, and full integration contracts.",
+            "semantic-execution/src/workspace_semantic_execution/domain contains only standard-library/domain imports and no DBOS/PostgreSQL/GitHub/browser/model-provider/GPU dependency.",
+            "Production tests cover generation fencing, single-lease ownership, dependency readiness/fan-in, decomposition wait/resume, no-model-poll external waits, effect idempotency, crash-after-effect recovery, postcondition-gated completion, CandidateAction authority isolation, and fail-closed unknown state."
+          ]
+        }
+      ],
       "resume_condition": "Production domain kernel passes all reference invariants with no infrastructure imports."
     },
     {
       "id": "packet_compiler_and_executor_registry",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": null,
       "selected_surface": null,
@@ -242,27 +253,40 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723",
+      "id": "production-kernel-validated",
+      "kind": "implementation_checkpoint",
+      "identity": "546a3f64b115baf6b07227416e2b844c5c6d3a58",
       "required_for_resume": true,
       "evidence": [
-        "First unfinished stage is kernel_domain_and_reference_parity.",
-        "No production semantic-execution source exists yet at this checkpoint.",
-        "Research Engine, GitRunner and Operator Bridge remain unchanged."
+        "Workspace Control Validation #2676 SUCCESS.",
+        "Production pure-domain kernel and typed records are durable under semantic-execution/src/workspace_semantic_execution/domain/.",
+        "No infrastructure adapter, provider SDK, database, browser, or GPU dependency was introduced."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "546a3f64b115baf6b07227416e2b844c5c6d3a58",
+      "required_for_resume": true,
+      "evidence": [
+        "kernel_domain_and_reference_parity is VALIDATED.",
+        "First unfinished stage is packet_compiler_and_executor_registry.",
+        "GitRunner/controller, Research Engine, and Operator Bridge remain unchanged."
       ]
     }
   ],
   "artifacts": [
     {
       "path": "semantic-execution/",
-      "state": "PLANNED",
+      "state": "IN_PROGRESS_KERNEL_VALIDATED",
       "role": "production modular-monolith backend",
       "origin": "workspace-semantic-execution-backend-v1",
       "persistence": "git",
       "regeneration": "not generated",
       "review_requirement": "validate each coherent slice before widening effect authority",
-      "evidence": []
+      "evidence": [
+        "Pure domain kernel validated at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 / Workspace Control #2676 SUCCESS."
+      ]
     }
   ],
   "validation": [
@@ -287,7 +311,6 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement pure production domain types/state machine and prove reference parity.",
     "Implement deterministic packet compiler and executor/resource/session registry.",
     "Implement ports plus deterministic in-memory adapters/fake clock.",
     "Spike DBOS+PostgreSQL behind ports without freezing the substrate.",
@@ -295,8 +318,8 @@
     "Run the real Research Engine shadow canary with zero source mutation.",
     "Run crash/fault/resource acceptance and Architecture Review v0.3."
   ],
-  "next_safe_action": "Implement the production pure-domain kernel under semantic-execution/ with no infrastructure imports. Mirror the validated parent state/authority/effect invariants, add reference-parity tests under tests/test_workspace_semantic_execution_backend*.py, and validate the exact head before beginning packet/compiler/router work. Do not add DBOS/PostgreSQL or external executor effects until the pure domain boundary is green.",
+  "next_safe_action": "Implement the deterministic SemanticPacketCompiler and executor/resource/session registry under semantic-execution/ without adding infrastructure dependencies. Packets must be reproducible from typed durable state and executor profile; executor eligibility must be determined by explicit capabilities, invocation/session lifecycle, context/privacy/locality/resource requirements, and availability rather than model-name branches. Register ChatGPT GPT-6 Instant as a human-assisted persistent-chat profile and a generic machine LLM profile capable of representing future department-H100/Harmony stateless/session-scoped/persistent/batch services. Validate this slice before adding DurableRuntimePort/StateStorePort or DBOS/PostgreSQL.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports."
+  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n"
 }
