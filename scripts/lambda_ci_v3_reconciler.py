@@ -511,6 +511,7 @@ def _padataset_scientific_dual_lane_override(
         "target_route_key": PADATASET_SCIENTIFIC_DUAL_TARGET_ROUTE,
         "target_scale_set_name": PADATASET_SCIENTIFIC_DUAL_TARGET_SCALE_SET,
         "trusted_workflow_blob_sha": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB,
+        "previous_root_policy_sha256": scientific_active["root_policy_sha256"],
         "gpu0_uuid": PADATASET_SCIENTIFIC_DUAL_GPU0,
         "gpu1_uuid": PADATASET_SCIENTIFIC_DUAL_GPU1,
         "runtime_manifest_identity_sha256": PADATASET_SCIENTIFIC_RUNTIME_MANIFEST,
