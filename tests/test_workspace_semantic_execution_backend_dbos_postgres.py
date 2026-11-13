@@ -9,7 +9,9 @@ from __future__ import annotations
 import ast
 import os
 from pathlib import Path
+import subprocess
 import sys
+import textwrap
 import time
 import unittest
 import uuid
@@ -187,6 +189,177 @@ class PostgresAdapterIntegrationTests(unittest.TestCase):
         self.assertEqual(
             resumed.graph.processes["R"].state,
             ProcessState.READY_TO_RESUME,
+        )
+
+
+@unittest.skipUnless(
+    RUN_INTEGRATION and DBOS_DSN,
+    "dedicated semantic-execution DBOS process-recovery integration only",
+)
+class DBOSProcessRecoveryIntegrationTests(unittest.TestCase):
+    def test_inflight_workflow_recovers_after_abrupt_process_death(self):
+        work_id = f"dbos-recovery-{uuid.uuid4()}"
+        queue_name = "semantic-execution-recovery"
+        probe = textwrap.dedent(
+            r"""
+            import json
+            import os
+            import sys
+            import time
+
+            from dbos import DBOS, DBOSConfig
+            from workspace_semantic_execution.adapters import DBOSDurableRuntime
+            from workspace_semantic_execution.ports import (
+                DurableWorkRequest,
+                DurableWorkState,
+            )
+
+            mode = sys.argv[1]
+            dsn = sys.argv[2]
+            work_id = sys.argv[3]
+            queue_name = sys.argv[4]
+
+            def recoverable_workflow(envelope):
+                DBOS.sleep(5.0)
+                return {
+                    "result_ref": (
+                        "recovered:"
+                        + envelope["work_kind"]
+                        + ":"
+                        + str(envelope["payload"]["value"])
+                    )
+                }
+
+            workflow_fn = DBOS.workflow()(recoverable_workflow)
+            config: DBOSConfig = {
+                "name": "workspace-semantic-execution-recovery-probe",
+                "application_version": "0.1.0",
+                "system_database_url": dsn,
+                "dbos_system_schema": "dbos_semantic_execution_recovery_test",
+            }
+            DBOS(config=config)
+            DBOS.launch()
+            DBOS.register_queue(queue_name)
+
+            runtime = DBOSDurableRuntime(
+                workflow_fn=workflow_fn,
+                registered_queues=frozenset({queue_name}),
+            )
+            request = DurableWorkRequest(
+                work_id=work_id,
+                work_kind="recovery_probe",
+                payload={"value": "v1"},
+                queue_name=queue_name,
+            )
+
+            if mode == "submit-crash":
+                runtime.submit(request)
+                deadline = time.monotonic() + 10.0
+                while time.monotonic() < deadline:
+                    status = runtime.get_status(work_id=work_id)
+                    if status is not None and status.state == DurableWorkState.RUNNING:
+                        print("PROBE_INFLIGHT=PASS", flush=True)
+                        os._exit(23)
+                    time.sleep(0.02)
+                print("PROBE_INFLIGHT=TIMEOUT", flush=True)
+                os._exit(24)
+
+            if mode == "recover":
+                deadline = time.monotonic() + 15.0
+                while time.monotonic() < deadline:
+                    status = runtime.get_status(work_id=work_id)
+                    if status is not None and status.state == DurableWorkState.COMPLETED:
+                        print(
+                            "PROBE_RECOVERED="
+                            + json.dumps(
+                                {
+                                    "work_id": status.work_id,
+                                    "state": status.state.value,
+                                    "result_ref": status.result_ref,
+                                },
+                                sort_keys=True,
+                            ),
+                            flush=True,
+                        )
+                        DBOS.destroy(destroy_registry=True)
+                        raise SystemExit(0)
+                    if status is not None and status.state in {
+                        DurableWorkState.FAILED,
+                        DurableWorkState.CANCELLED,
+                    }:
+                        print(
+                            "PROBE_RECOVERY_TERMINAL_FAILURE="
+                            + status.state.value,
+                            flush=True,
+                        )
+                        DBOS.destroy(destroy_registry=True)
+                        raise SystemExit(25)
+                    time.sleep(0.05)
+                print("PROBE_RECOVERY_TIMEOUT", flush=True)
+                DBOS.destroy(destroy_registry=True)
+                raise SystemExit(26)
+
+            raise SystemExit(27)
+            """
+        )
+        env = os.environ.copy()
+        prior_pythonpath = env.get("PYTHONPATH")
+        env["PYTHONPATH"] = (
+            str(SRC)
+            if not prior_pythonpath
+            else str(SRC) + os.pathsep + prior_pythonpath
+        )
+
+        crashed = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                probe,
+                "submit-crash",
+                DBOS_DSN,
+                work_id,
+                queue_name,
+            ],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            capture_output=True,
+            timeout=20,
+            check=False,
+        )
+        self.assertEqual(
+            crashed.returncode,
+            23,
+            msg=crashed.stdout + "\n" + crashed.stderr,
+        )
+        self.assertIn("PROBE_INFLIGHT=PASS", crashed.stdout)
+
+        recovered = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                probe,
+                "recover",
+                DBOS_DSN,
+                work_id,
+                queue_name,
+            ],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            capture_output=True,
+            timeout=25,
+            check=False,
+        )
+        self.assertEqual(
+            recovered.returncode,
+            0,
+            msg=recovered.stdout + "\n" + recovered.stderr,
+        )
+        self.assertIn('"state": "COMPLETED"', recovered.stdout)
+        self.assertIn(
+            '"result_ref": "recovered:recovery_probe:v1"',
+            recovered.stdout,
         )
 
 
