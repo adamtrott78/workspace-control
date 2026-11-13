@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "runtime_ports_and_inmemory_slice",
+  "current_stage": "dbos_postgres_spike",
   "acceptance_criteria": [
     "The production domain kernel has no dependency on DBOS, PostgreSQL, GitHub, browser/UI, model-provider SDKs, GPU libraries, or other infrastructure adapters.",
     "Production kernel behavior satisfies the validated parent executable reference contract at workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723.",
@@ -51,7 +51,7 @@
       "base_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "e927fbc8117ddb7caed114b2136eb5408ce1fe29",
+        "checkpoint_sha": "752351d064f815e600dcdf19f2ba154f7234211f",
         "verified": true
       },
       "local": null,
@@ -170,10 +170,10 @@
     },
     {
       "id": "runtime_ports_and_inmemory_slice",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-semantic-execution-backend",
-      "selected_executor": null,
-      "selected_surface": null,
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
       "inputs": [
         "validated domain kernel",
         "packet compiler",
@@ -189,12 +189,25 @@
         "ClockPort",
         "deterministic in-memory adapters/fake clock"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Ports + deterministic in-memory durable runtime",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control@752351d064f815e600dcdf19f2ba154f7234211f passed Workspace Control Validation run 43527934516 / #2702 SUCCESS.",
+            "StateStorePort uses versioned CAS; stale writers cannot overwrite current state and loaded snapshots are detached copies.",
+            "DurableRuntimePort event ledger handles event-before-wait, restart while waiting, exact duplicate event idempotence, and startup/event-bound reconciliation without model polling.",
+            "Runtime recovery preserves unresolved waits and fences stale executors by generation.",
+            "DeterministicFakeExecutor derives EffectReceipt.generation from the generation-bound ActionSpec.",
+            "StaticAuthorityEvaluator defaults to UNKNOWN rather than ALLOW; semantic projection is deterministic and derived."
+          ]
+        }
+      ],
       "resume_condition": "End-to-end in-memory reasoning/action lifecycle survives restart/fault simulation without infrastructure coupling."
     },
     {
       "id": "dbos_postgres_spike",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": null,
       "selected_surface": null,
@@ -318,15 +331,25 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "e927fbc8117ddb7caed114b2136eb5408ce1fe29",
+      "id": "runtime-ports-inmemory-validated",
+      "kind": "implementation_checkpoint",
+      "identity": "752351d064f815e600dcdf19f2ba154f7234211f",
       "required_for_resume": true,
       "evidence": [
-        "Pure kernel + packet/router slices are validated.",
-        "Recovery preserves unresolved waits.",
-        "CandidateAction -> AuthorityDecision -> ActionSpec -> EffectReceipt is exact-generation bound.",
-        "First unfinished stage remains runtime_ports_and_inmemory_slice."
+        "Workspace Control Validation #2702 SUCCESS.",
+        "Pure domain, packet/router, ports and deterministic in-memory runtime are validated.",
+        "No DBOS/PostgreSQL or real external effect dependency exists at this checkpoint."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "752351d064f815e600dcdf19f2ba154f7234211f",
+      "required_for_resume": true,
+      "evidence": [
+        "kernel, packet/router, and runtime_ports_and_inmemory_slice are VALIDATED.",
+        "First unfinished stage is dbos_postgres_spike.",
+        "Research Engine, GitRunner/controller, and Operator Bridge remain unchanged by this backend child."
       ]
     }
   ],
@@ -366,14 +389,13 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement ports plus deterministic in-memory adapters/fake clock.",
     "Spike DBOS+PostgreSQL behind ports without freezing the substrate.",
     "Implement first read-only exact-effect executor plus receipt/postcondition validator.",
     "Run the real Research Engine shadow canary with zero source mutation.",
     "Run crash/fault/resource acceptance and Architecture Review v0.3."
   ],
-  "next_safe_action": "Implement infrastructure-neutral ports plus deterministic in-memory adapters and a fake clock under semantic-execution/. The slice must persist/reload WorkGraph state without Git, model durable wait/event publication without polling, expose AuthorityEvaluatorPort/ExecutorPort/SemanticProjectionPort/TelemetryPort contracts, and demonstrate restart/recovery/duplicate-event/session-loss behavior entirely in memory. Do not add DBOS/PostgreSQL or real external effects until this slice validates.",
+  "next_safe_action": "Research the current official DBOS Python/PostgreSQL integration API, then implement the narrowest provisional adapters behind DurableRuntimePort and StateStorePort without leaking DBOS/PostgreSQL types into domain/application code. Keep deterministic in-memory adapters as the reference. The spike must test restart/wait/idempotency semantics and document any mismatch; if current DBOS semantics make this awkward, record evidence and stop before forcing the architecture. Do not add real external effect authority in this stage.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n\n2026-11-13 GENERATION-BOUND EFFECT CHAIN CORRECTION: While defining ExecutorPort, the implementation review found that ActionSpec bound process_id but not process_generation, which could allow a previously authorized action to survive recovery into a newer generation. Corrected CandidateAction, AuthorityDecision and ActionSpec to bind exact process_generation; compilation now fails closed on process/generation/action/target mismatch and EffectReceipt generation completes the fence. workspace-control@e927fbc8117ddb7caed114b2136eb5408ce1fe29 passed Workspace Control Validation #2697 including full unit/integration regression. Runtime-port implementation resumes only from this corrected boundary.\n"
+  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n\n2026-11-13 GENERATION-BOUND EFFECT CHAIN CORRECTION: While defining ExecutorPort, the implementation review found that ActionSpec bound process_id but not process_generation, which could allow a previously authorized action to survive recovery into a newer generation. Corrected CandidateAction, AuthorityDecision and ActionSpec to bind exact process_generation; compilation now fails closed on process/generation/action/target mismatch and EffectReceipt generation completes the fence. workspace-control@e927fbc8117ddb7caed114b2136eb5408ce1fe29 passed Workspace Control Validation #2697 including full unit/integration regression. Runtime-port implementation resumes only from this corrected boundary.\n\n2026-11-13 RUNTIME PORTS / IN-MEMORY SLICE VALIDATED: workspace-control@752351d064f815e600dcdf19f2ba154f7234211f passed Workspace Control Validation #2702. StateStorePort CAS, DurableRuntimePort event publication/reconciliation, RuntimeCoordinator, fake clock/telemetry, deterministic semantic projection, static fail-closed authority and deterministic fake executor are implemented and tested. Fault coverage includes stale writer, event-before-wait, restart while waiting, duplicate event, generation recovery and stale executor completion. The design remains database/runtime independent. Next stage is a provisional DBOS+PostgreSQL adapter spike behind the validated ports.\n"
 }
