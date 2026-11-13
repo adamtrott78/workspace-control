@@ -92,7 +92,7 @@ git -C "$AUTH_NEXT" checkout --detach "$EXPECTED_NEW_AUTHORITY_SHA"
 [[ -z "$(git -C "$AUTH_NEXT" status --porcelain=v1 --untracked-files=normal)" ]] || fail "prepared authority snapshot is dirty"
 
 git clone --filter=blob:none --no-checkout "$PAD_REPO_URL" "$PAD_FETCH"
-git -C "$PAD_FETCH" fetch origin "$PAD_BRANCH"
+git -C "$PAD_FETCH" fetch origin "$PAD_BRANCH:refs/remotes/origin/$PAD_BRANCH"
 REMOTE_PAD_HEAD="$(git -C "$PAD_FETCH" rev-parse "origin/$PAD_BRANCH")"
 [[ "$REMOTE_PAD_HEAD" == "$EXPECTED_NEW_PAD_SHA" ]]   || fail "remote PADataset branch head $REMOTE_PAD_HEAD != expected $EXPECTED_NEW_PAD_SHA"
 git -C "$PAD_FETCH" checkout --detach "$EXPECTED_NEW_PAD_SHA"
