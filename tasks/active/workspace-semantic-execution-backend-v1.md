@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: e927fbc8117ddb7caed114b2136eb5408ce1fe29
+- Remote checkpoint: 752351d064f815e600dcdf19f2ba154f7234211f
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,10 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement infrastructure-neutral ports plus deterministic in-memory adapters and a fake clock under semantic-execution/. The slice must persist/reload WorkGraph state without Git, model durable wait/event publication without polling, expose AuthorityEvaluatorPort/ExecutorPort/SemanticProjectionPort/TelemetryPort contracts, and demonstrate restart/recovery/duplicate-event/session-loss behavior entirely in memory. Do not add DBOS/PostgreSQL or real external effects until this slice validates.
+Research the current official DBOS Python/PostgreSQL integration API, then implement the narrowest provisional adapters behind DurableRuntimePort and StateStorePort without leaking DBOS/PostgreSQL types into domain/application code. Keep deterministic in-memory adapters as the reference. The spike must test restart/wait/idempotency semantics and document any mismatch; if current DBOS semantics make this awkward, record evidence and stop before forcing the architecture. Do not add real external effect authority in this stage.
 
 ## Remaining work
 
-- Implement ports plus deterministic in-memory adapters/fake clock.
 - Spike DBOS+PostgreSQL behind ports without freezing the substrate.
 - Implement first read-only exact-effect executor plus receipt/postcondition validator.
 - Run the real Research Engine shadow canary with zero source mutation.
