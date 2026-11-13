@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 6b27e9c057c6ea33fdf532112711a11e10ff3723
+- Remote checkpoint: 546a3f64b115baf6b07227416e2b844c5c6d3a58
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,10 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement the production pure-domain kernel under semantic-execution/ with no infrastructure imports. Mirror the validated parent state/authority/effect invariants, add reference-parity tests under tests/test_workspace_semantic_execution_backend*.py, and validate the exact head before beginning packet/compiler/router work. Do not add DBOS/PostgreSQL or external executor effects until the pure domain boundary is green.
+Implement the deterministic SemanticPacketCompiler and executor/resource/session registry under semantic-execution/ without adding infrastructure dependencies. Packets must be reproducible from typed durable state and executor profile; executor eligibility must be determined by explicit capabilities, invocation/session lifecycle, context/privacy/locality/resource requirements, and availability rather than model-name branches. Register ChatGPT GPT-6 Instant as a human-assisted persistent-chat profile and a generic machine LLM profile capable of representing future department-H100/Harmony stateless/session-scoped/persistent/batch services. Validate this slice before adding DurableRuntimePort/StateStorePort or DBOS/PostgreSQL.
 
 ## Remaining work
 
-- Implement pure production domain types/state machine and prove reference parity.
 - Implement deterministic packet compiler and executor/resource/session registry.
 - Implement ports plus deterministic in-memory adapters/fake clock.
 - Spike DBOS+PostgreSQL behind ports without freezing the substrate.
