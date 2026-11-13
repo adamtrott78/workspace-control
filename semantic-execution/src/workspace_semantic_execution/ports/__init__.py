@@ -19,6 +19,11 @@ from .contracts import (
     TelemetryPort,
     TelemetryRecord,
 )
+from .repository_read import (
+    RepositoryFileObservation,
+    RepositoryReadPort,
+    RepositoryReadRequest,
+)
 
 __all__ = [
     "AuthorityEvaluatorPort",
@@ -30,6 +35,9 @@ __all__ = [
     "DurableWorkStatus",
     "EventLedgerPort",
     "ExecutorPort",
+    "RepositoryFileObservation",
+    "RepositoryReadPort",
+    "RepositoryReadRequest",
     "RuntimeEvent",
     "SemanticProjectionPort",
     "StateConflict",
