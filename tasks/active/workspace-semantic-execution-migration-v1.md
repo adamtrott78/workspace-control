@@ -13,7 +13,6 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - Title: Workspace Semantic Execution Migration v1
 - Status: IN_PROGRESS
 - Capsule schema: v2
-- Current stage: semantic_core_and_extension_contract
 
 ## Goal
 
@@ -71,10 +70,13 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-PIVOT TO BACKEND NOW. Treat Operator Bridge UX as a parallel calibration lane, not the foreground critical path. Begin Phase 1 of architecture/workspace-semantic-execution-orchestrator-implementation-plan.v0.1.md inside the existing benchmark/prototype authority: deterministic task-tree/ReasoningProcess kernel, CAS/generation fencing, recursive decomposition, event-driven waits, objective validation, and executor routing. Reuse the already-proven INSTANT_MULTI_LEAF_QUEUE_V1, INSTANT_CONCURRENT_EXECUTION_V1, INSTANT_WORKER_LEASE_RECOVERY_V1, and INSTANT_MULTI_WORKER_SCALE_V1 evidence as mechanics fixtures. Do not wait for the long UX-09 RAM/performance benchmark; it remains deferred until production-readiness review. Remaining Stage-10 browser UX gates block Stage-12/production promotion only, not backend implementation.
+Before implementing backend decomposition/routing thresholds, execute the focused GPT-6 Instant execution-envelope characterization defined in benchmarks/workspace-semantic-execution/gpt6_instant_characterization_v1.json. Start with E1 coupling staircase, E2 horizon/decomposition, E4 synthesis fan-in, and E6 validator-repair because these directly determine leaf size, recursive decomposition, hierarchical synthesis, retry, and escalation policy. Use matched ChatGPT GPT-6 Sol Instant vs GPT-6 Sol High controls on the same surface/toolset. Do not infer hidden reasoning-token budgets or map ChatGPT Instant to an API effort value without evidence. After those four profiles establish initial thresholds, proceed directly to deterministic backend implementation while E3/E5/E7 continue as calibration refinements.
 
 ## Remaining work
 
+- INSTANT FOUNDATION: execute the focused GPT-6 Sol / Instant characterization in benchmarks/workspace-semantic-execution/gpt6_instant_characterization_v1.json before freezing backend decomposition/routing thresholds. Prioritize coupling staircase, horizon/decomposition, synthesis fan-in, and validator-repair experiments.
+- INSTANT FOUNDATION: treat architecture/workspace-semantic-execution-instant-executor-contract.v0.1.md as the scheduler's evidence contract. Only DOCUMENTED and EMPIRICALLY_OBSERVED properties may become routing facts; UNKNOWN_CALIBRATE properties remain measured runtime/profile data.
+- INSTANT FOUNDATION: GPT-5.6 results remain historical mechanics/protocol evidence only. Production calibration target is logical OPENAI_CHAT_INSTANT_CURRENT resolving today to ChatGPT GPT-6 Sol / Instant; any future model/surface change triggers focused re-characterization rather than architecture redesign.
 - ACCELERATED BACKEND LANE: implement the deterministic orchestration kernel from workspace-semantic-execution-orchestrator-implementation-plan.v0.1.md Phase 1: WorkItem/ReasoningProcess/Attempt/Lease/Event/WaitCondition/RoutingDecision/ExecutorSession/ValidationResult plus CAS/generation fencing, stale-worker rejection, idempotent transitions, event-driven waits, and fail-closed unknown transitions.
 - ACCELERATED BACKEND LANE: implement executable task-tree decomposition semantics and recursive TOO_LARGE -> DECOMPOSE behavior, preserving inherited constraints, provenance, validator contracts, authority refs, and dependency edges.
 - ACCELERATED BACKEND LANE: implement the executor registry/resource router, semantic packet compiler, persistent session broker, and validator/event service so disposable Instant workers can process bounded leaves and publish durable results.
