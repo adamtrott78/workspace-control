@@ -49,10 +49,10 @@ class V3ReconcilerTests(unittest.TestCase):
     def staged(self, absolute):
         return self.stage / pathlib.Path(absolute).relative_to("/")
 
-    def test_all_ten_class_identities_and_projection_files_are_generated(self):
+    def test_all_eleven_class_identities_and_projection_files_are_generated(self):
         compiled = self.result["compiled"]
         classes = compiled["root_projection"]["runner_classes"]
-        self.assertEqual(len(classes), 10)
+        self.assertEqual(len(classes), 11)
         users = {
             policy["controller_peer"]["unix_user"]
             for policy in classes.values()
