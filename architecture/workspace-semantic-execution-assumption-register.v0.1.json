@@ -7,18 +7,20 @@
   "assumptions": [
     {
       "assumption_id": "A-001",
-      "statement": "DBOS + PostgreSQL can provide adequate durability, queues, waits, messages, and recovery for the first Workspace Semantic Execution backend slice without requiring custom replay/event-sourcing infrastructure.",
+      "statement": "DBOS 3.5.0 for bounded durable work plus PostgreSQL for current-state CAS and external-event evidence can provide adequate first-slice durability/recovery without a custom replay/event-sourcing engine.",
       "scope": "durable_runtime",
       "evidence": [
-        "DBOS open-source runtime checkpoints workflows/steps into Postgres.",
-        "DBOS supports durable queues, messages, HITL, recovery, and agent integrations.",
-        "No separate orchestrator server is required for the initial single-application deployment."
+        "Semantic Execution Validation #7 on workspace-control@8e8caf543cff000275bd2cf543f57f89ad9ff3e5 passed pinned DBOS 3.5.0 + PostgreSQL 17 integration.",
+        "PostgreSQL CAS state and immutable external-event evidence survived adapter/coordinator recreation and rejected stale/conflicting writes.",
+        "DBOS workflow IDs provided idempotent bounded-work identity and stored inputs allowed conflicting same-ID reuse to fail closed.",
+        "A RUNNING DBOS workflow survived abrupt os._exit process death and completed after a fresh process launched the same application version against the same PostgreSQL.",
+        "External semantic waits are not implemented with long-lived DBOS.recv; DurableRuntimePort and EventLedgerPort are separate responsibilities."
       ],
       "risk_if_false": "We recreate missing workflow machinery or accumulate operational fragility.",
-      "observable_signal": "First real workflow requires custom recovery/queue/wait/versioning logic outside the runtime adapter.",
-      "invalidation_trigger": "Two or more important durable semantics require bespoke workarounds, or recovery behavior cannot be represented cleanly behind DurableRuntimePort.",
+      "observable_signal": "Real Research Engine shadow/active workflows require custom replay, queue, wait, versioning, or recovery semantics outside the validated ports, or DBOS/PostgreSQL operational/resource cost violates fitness budgets.",
+      "invalidation_trigger": "Two or more important durable semantics require bespoke substrate workarounds, crash recovery fails under real workflow conditions, or measured resource/operational complexity materially exceeds the Restate/Temporal alternatives.",
       "fallback": "Spike Restate on the same workflow contract; evaluate Temporal if platform-scale workflow semantics are required.",
-      "status": "UNPROVEN_SPIKE_REQUIRED"
+      "status": "PROVISIONALLY_SUPPORTED_FIRST_SPIKE"
     },
     {
       "assumption_id": "A-002",
