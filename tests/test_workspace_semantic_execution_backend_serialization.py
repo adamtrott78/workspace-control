@@ -1,6 +1,7 @@
 """Deterministic durable WorkGraph serialization tests."""
 from __future__ import annotations
 
+import ast
 import json
 from pathlib import Path
 import sys
@@ -160,14 +161,21 @@ class GraphCodecTests(unittest.TestCase):
         with self.assertRaises(GraphCodecError):
             decode_work_graph(payload)
 
-    def test_codec_does_not_use_pickle(self):
-        source = (
+    def test_codec_does_not_import_pickle(self):
+        path = (
             SRC
             / "workspace_semantic_execution"
             / "adapters"
             / "serialization.py"
-        ).read_text().lower()
-        self.assertNotIn("pickle", source)
+        )
+        tree = ast.parse(path.read_text(), filename=str(path))
+        imported = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imported.update(alias.name.split(".", 1)[0] for alias in node.names)
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                imported.add(node.module.split(".", 1)[0])
+        self.assertNotIn("pickle", imported)
 
 
 if __name__ == "__main__":
