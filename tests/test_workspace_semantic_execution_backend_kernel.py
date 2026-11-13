@@ -664,12 +664,33 @@ class AuthorityTests(unittest.TestCase):
         return CandidateAction(
             action_id="A1",
             process_id="R1",
+            process_generation=0,
             target_ref="github:repo@sha",
             executor_type="GITHUB_READ_ONLY",
             idempotency_key="idem:A1",
             preconditions=("source_sha_matches",),
             expected_effect="read exact repository state",
             postcondition_validator="validator:exact_sha_read",
+        )
+
+    def decision(
+        self,
+        *,
+        outcome: AuthorityOutcome = AuthorityOutcome.ALLOW,
+        action_id: str = "A1",
+        process_id: str = "R1",
+        process_generation: int = 0,
+        target_ref: str = "github:repo@sha",
+        decision_id: str = "D",
+    ) -> AuthorityDecision:
+        return AuthorityDecision(
+            decision_id=decision_id,
+            outcome=outcome,
+            action_id=action_id,
+            process_id=process_id,
+            process_generation=process_generation,
+            target_ref=target_ref,
+            authority_scope_ref="policy:scope",
         )
 
     def test_candidate_cannot_self_authorize(self):
@@ -685,13 +706,7 @@ class AuthorityTests(unittest.TestCase):
         with self.assertRaises(KernelError):
             DomainKernel.compile_action_spec(
                 claimed,
-                AuthorityDecision(
-                    decision_id="D",
-                    outcome=AuthorityOutcome.ALLOW,
-                    action_id="A1",
-                    target_ref="github:repo@sha",
-                    authority_scope_ref="policy:scope",
-                ),
+                self.decision(),
             )
 
     def test_only_exact_allow_compiles_action_spec(self):
@@ -705,38 +720,40 @@ class AuthorityTests(unittest.TestCase):
                 with self.assertRaises(KernelError):
                     DomainKernel.compile_action_spec(
                         candidate,
-                        AuthorityDecision(
-                            decision_id=f"D:{outcome}",
-                            outcome=outcome,
-                            action_id="A1",
-                            target_ref="github:repo@sha",
-                            authority_scope_ref="policy:scope",
-                        ),
+                        self.decision(outcome=outcome),
                     )
 
         with self.assertRaises(KernelError):
             DomainKernel.compile_action_spec(
                 candidate,
-                AuthorityDecision(
-                    decision_id="D:mismatch",
-                    outcome=AuthorityOutcome.ALLOW,
-                    action_id="OTHER",
-                    target_ref="github:repo@sha",
-                    authority_scope_ref="policy:scope",
-                ),
+                self.decision(action_id="OTHER"),
+            )
+
+        with self.assertRaises(KernelError):
+            DomainKernel.compile_action_spec(
+                candidate,
+                self.decision(process_id="OTHER"),
+            )
+
+        with self.assertRaises(KernelError):
+            DomainKernel.compile_action_spec(
+                candidate,
+                self.decision(process_generation=1),
+            )
+
+        with self.assertRaises(KernelError):
+            DomainKernel.compile_action_spec(
+                candidate,
+                self.decision(target_ref="github:other@sha"),
             )
 
         action = DomainKernel.compile_action_spec(
             candidate,
-            AuthorityDecision(
-                decision_id="D:allow",
-                outcome=AuthorityOutcome.ALLOW,
-                action_id="A1",
-                target_ref="github:repo@sha",
-                authority_scope_ref="policy:scope",
-            ),
+            self.decision(decision_id="D:allow"),
         )
         self.assertEqual(action.authority_decision_id, "D:allow")
+        self.assertEqual(action.process_id, "R1")
+        self.assertEqual(action.process_generation, 0)
         self.assertEqual(action.target_ref, "github:repo@sha")
 
 
