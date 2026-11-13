@@ -125,3 +125,16 @@ def machine_llm_profile(
         human_launch_required=False,
         calibration_ref=calibration_ref,
     )
+
+
+
+def initial_executor_profiles() -> tuple[ExecutorProfile, ...]:
+    """Return the conservative boot registry.
+
+    The institutional placeholder is intentionally UNKNOWN/ineligible until
+    concrete deployment facts are supplied.
+    """
+    return (
+        openai_chat_instant_current_profile(),
+        unprovisioned_institutional_llm_profile(),
+    )
