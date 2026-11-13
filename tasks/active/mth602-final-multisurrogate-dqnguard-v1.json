@@ -19,7 +19,7 @@
     "Read-only evidence profiles may inspect a dirty checkout snapshot; research-bounded execution requires a clean source snapshot and runs only in disposable scratch.",
     "Preserve the surviving pooled-length provenance of 16384 even where the accepted manuscript says 8192.",
     "Do not use target-test labels for architecture selection, normalization, aggregation, threshold selection, or tuning.",
-    "Clean PADataset execution authority is exact SHA 4c095352bfe128e93f794112741efdb7a66b9c38.",
+    "Clean PADataset execution authority is exact SHA db8e2a1a97b69b73e3602e83ebd196686ceaaa95.",
     "Historical Stage 00 evidence is sourced from the untouched Lambda checkout observed at branch leaf2026-review-1571342865, local HEAD b5a09cede6680b9e2a53eac244db4fbd7eaf76ec, dirty, approximately 107 GB.",
     "Do not require the historical evidence checkout to match the clean execution branch; preserve it read-only and record provenance differences explicitly."
   ],
@@ -30,7 +30,7 @@
       "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
       "remote": {
         "branch": "mth602-final-multisurrogate-dqnguard-v1",
-        "checkpoint_sha": "be04a4a4428a3c57233fc1ee598b4311ece96587",
+        "checkpoint_sha": "db8e2a1a97b69b73e3602e83ebd196686ceaaa95",
         "verified": true
       },
       "local": null,
@@ -254,6 +254,17 @@
         "Candidate 50395aad06ab719b8207d9e7d3d8270a6bb35030 has no V3 controller subtree; accepted V3 repair lineage 4196934cad14ddf3238c4637da4229b8d5e0fc60 does.",
         "Therefore V3 scheduler/runner revival is proven; remaining failure is candidate-lineage/source mismatch."
       ]
+    },
+    {
+      "id": "stage03-architecture-c-metadata-decollation-repair-candidate",
+      "kind": "git_commit",
+      "identity": "db8e2a1a97b69b73e3602e83ebd196686ceaaa95",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset PR #17 metadata de-collation repair reconstructs one metadata record per sample from PyTorch default-collated dictionaries.",
+        "Regression exercises real torch default_collate, stable identities, disjoint calibration roles, and target-quarantine rejection.",
+        "Previous Stage03 run 43470619282 must not be repeated unchanged; deterministic Workspace Shell validation is required at this exact repaired head before one new scientific request."
+      ]
     }
   ],
   "artifacts": [],
@@ -275,17 +286,16 @@
     }
   ],
   "blockers": [
-    "Final target-quarantine source be04a4a4428a3c57233fc1ee598b4311ece96587 is committed but not yet installed live.",
-    "No connected accepted executor currently has authority for scientific PyTorch training; PADataset gpu-ci is CI validation only."
+    "Live Workspace Shell authority and /srv/workspace-shell/PADataset remain pinned to be04a4a4428a3c57233fc1ee598b4311ece96587; exact repaired head db8e2a1a97b69b73e3602e83ebd196686ceaaa95 is not executable until the reviewed checkpoint refresh completes."
   ],
   "remaining_work": [
-    "Wait for parent authority validation and final root snapshot refresh.",
-    "Rerun expanded deterministic Stage 03 contract.",
-    "Launch frozen PA2 backbone in DNNs scientific environment.",
-    "Run Architecture C final evaluator and validate Stage 02 result schema."
+    "Refresh the live Workspace Shell task authority and clean PADataset execution snapshot to the exact repaired head.",
+    "Run exact-head deterministic Stage 03 contract validation through Workspace Shell and retain the receipt.",
+    "Only on deterministic PASS, issue exactly one new frozen Stage 03 Architecture C scientific request.",
+    "Interpret the resulting Architecture C metrics against the matching fixed-surrogate DQNGuard cell under the frozen Stage 03 contract."
   ],
-  "next_safe_action": "After parent installs PADataset be04a4a4428a3c57233fc1ee598b4311ece96587, verify the expanded contract. Scientific training then requires the existing DNNs operator surface or a separately authorized scientific execution contract.",
+  "next_safe_action": "Install PADataset db8e2a1a97b69b73e3602e83ebd196686ceaaa95 into the live Workspace Shell authority/snapshot through the reviewed checkpoint-refresh operator, then run exact-head deterministic Stage 03 validation. Do not issue a new /lambda-scientific request until that validation passes.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
-  "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate."
+  "notes": "This capsule is a Workspace Shell authority mirror only. It must not supersede or rewrite the PADataset scientific task.\n\n2026-11-10 fresh-chat gate result: refreshed Workspace Shell schema/transport are healthy, but this task returns TASK_NOT_FOUND because the independent trusted authority snapshot was not refreshed by the prior multirepo deployment. Parent candidate ce19452c644599bda23f6e3766c9390fa0d906db addresses that defect.\n\n2026-11-10 parent validation: the independent authority/execution repair passed the 548-test Python repository suite (1 intentional skip) at authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64. The remaining blocker is live authority deployment and task visibility, not repository implementation.\n\n2026-11-10 rerun hardening: parent execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 safely handles the already-mounted historical evidence bind and is repository-validated; live task visibility remains the gate.\n\n2026-11-13 Stage 03 scientific run 43470619282 trained the quarantined PA2 backbone successfully but failed in evaluation because osr_core._collect_split_outputs extended a default-collated metadata dict as keys. PADataset repair head db8e2a1a97b69b73e3602e83ebd196686ceaaa95 fixes de-collation and adds real default_collate regression coverage. PR #17 remains open/unmerged; no merge authority is inferred. Live Workspace Shell remains intentionally pinned to be04a4a4428a3c57233fc1ee598b4311ece96587 pending reviewed checkpoint refresh."
 }
