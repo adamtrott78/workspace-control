@@ -103,20 +103,21 @@ class InMemoryDurableRuntime:
         self._requests: dict[str, DurableWorkRequest] = {}
         self._statuses: dict[str, DurableWorkStatus] = {}
 
-    def submit(self, request: DurableWorkRequest) -> bool:
+    def submit(self, request: DurableWorkRequest) -> DurableWorkStatus:
         if not request.work_id or not request.work_kind or not request.queue_name:
             raise ValueError("durable_work_required_fields")
         existing = self._requests.get(request.work_id)
         if existing is not None:
             if existing != request:
                 raise DurableWorkConflict("conflicting_durable_work_id")
-            return False
+            return deepcopy(self._statuses[request.work_id])
         self._requests[request.work_id] = deepcopy(request)
-        self._statuses[request.work_id] = DurableWorkStatus(
+        status = DurableWorkStatus(
             work_id=request.work_id,
             state=DurableWorkState.ENQUEUED,
         )
-        return True
+        self._statuses[request.work_id] = status
+        return deepcopy(status)
 
     def get_status(self, *, work_id: str) -> DurableWorkStatus | None:
         status = self._statuses.get(work_id)
