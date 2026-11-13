@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "benchmark_id": "workspace-gpt6-instant-characterization-v1",
-  "status": "DESIGN_FROZEN_PENDING_EXECUTION",
+  "status": "REAL_WORKFLOW_ONLINE_CALIBRATION",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Empirically characterize the GPT-6 Sol / Instant execution envelope that matters to decomposition, retry, synthesis and stronger-effort routing without attempting to infer undocumented hidden reasoning budgets.",
   "logical_executor": "OPENAI_CHAT_INSTANT_CURRENT",
@@ -89,7 +89,8 @@
         "Instant",
         "High"
       ],
-      "outcome": "Find the earliest level where Instant validated success/reliability diverges materially from High."
+      "outcome": "Find the earliest level where Instant validated success/reliability diverges materially from High.",
+      "execution_policy": "INSTRUMENT_REAL_WORKFLOW_FIRST; synthesize a controlled fixture only if real traces cannot isolate this mechanism."
     },
     {
       "id": "E2_horizon_decomposition",
@@ -105,7 +106,8 @@
         "Instant_decomposed_parallel",
         "High_monolith"
       ],
-      "outcome": "Measure whether decomposition restores Instant quality when horizon rather than intrinsic coupling is the cause."
+      "outcome": "Measure whether decomposition restores Instant quality when horizon rather than intrinsic coupling is the cause.",
+      "execution_policy": "INSTRUMENT_REAL_WORKFLOW_FIRST; synthesize a controlled fixture only if real traces cannot isolate this mechanism."
     },
     {
       "id": "E3_context_staircase",
@@ -121,7 +123,8 @@
         "Instant_bounded_packet",
         "High_bounded_packet"
       ],
-      "outcome": "Calibrate packet-size/progressive-disclosure policy and distinguish context overload from reasoning limits."
+      "outcome": "Calibrate packet-size/progressive-disclosure policy and distinguish context overload from reasoning limits.",
+      "execution_policy": "INSTRUMENT_REAL_WORKFLOW_FIRST; synthesize a controlled fixture only if real traces cannot isolate this mechanism."
     },
     {
       "id": "E4_synthesis_fanin",
@@ -137,7 +140,8 @@
         "Instant_synthesizer",
         "High_synthesizer"
       ],
-      "outcome": "Calibrate maximum reliable Instant synthesis fan-in and when hierarchical synthesis is required."
+      "outcome": "Calibrate maximum reliable Instant synthesis fan-in and when hierarchical synthesis is required.",
+      "execution_policy": "INSTRUMENT_REAL_WORKFLOW_FIRST; synthesize a controlled fixture only if real traces cannot isolate this mechanism."
     },
     {
       "id": "E5_tool_chain_depth",
@@ -153,7 +157,8 @@
         "Instant",
         "High"
       ],
-      "outcome": "Determine whether serial tool depth creates a distinct reliability envelope that should trigger decomposition/checkpointing."
+      "outcome": "Determine whether serial tool depth creates a distinct reliability envelope that should trigger decomposition/checkpointing.",
+      "execution_policy": "INSTRUMENT_REAL_WORKFLOW_FIRST; synthesize a controlled fixture only if real traces cannot isolate this mechanism."
     },
     {
       "id": "E6_validator_repair",
@@ -168,7 +173,8 @@
         "Instant_repair",
         "High_repair"
       ],
-      "outcome": "Calibrate bounded same-tier repair attempts before re-decomposition or stronger-effort routing."
+      "outcome": "Calibrate bounded same-tier repair attempts before re-decomposition or stronger-effort routing.",
+      "execution_policy": "INSTRUMENT_REAL_WORKFLOW_FIRST; synthesize a controlled fixture only if real traces cannot isolate this mechanism."
     },
     {
       "id": "E7_persistence_resume",
@@ -177,7 +183,8 @@
         "Instant_persistent",
         "Instant_fresh_durable_resume"
       ],
-      "outcome": "Quantify whether continuity materially improves validated outcome after packet/state externalization."
+      "outcome": "Quantify whether continuity materially improves validated outcome after packet/state externalization.",
+      "execution_policy": "INSTRUMENT_REAL_WORKFLOW_FIRST; synthesize a controlled fixture only if real traces cannot isolate this mechanism."
     }
   ],
   "metrics": [
@@ -206,20 +213,46 @@
     "no use of hidden reasoning-token estimates as ground truth"
   ],
   "initial_execution_order": [
-    "E1_coupling_staircase",
-    "E2_horizon_decomposition",
-    "E4_synthesis_fanin",
-    "E6_validator_repair",
-    "E3_context_staircase",
-    "E5_tool_chain_depth",
-    "E7_persistence_resume"
+    "Begin backend Phase-1 deterministic kernel immediately with telemetry hooks.",
+    "Run real user workflows through shadow/bounded Instant workers and accumulate execution-envelope evidence.",
+    "Prioritize naturally occurring examples of coupling, decomposition/horizon, synthesis fan-in, and validator repair.",
+    "Use compact sentinels only after real evidence suggests a threshold/failure mode or when executor identity changes."
   ],
-  "production_profile_rule": "Route Instant based on the validated envelope by phenotype. Re-run a compact sentinel subset after any model/surface/toolset change; run the full profile only when sentinel behavior materially shifts.",
+  "production_profile_rule": "Continuously update phenotype-specific routing evidence from validated real workflows. Model/surface changes trigger a compact sentinel suite plus fresh real-workflow observations; full synthetic profiling is not a release prerequisite unless a specific unresolved mechanism requires it.",
   "source_refs": [
     "https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt",
     "https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
     "https://developers.openai.com/api/docs/guides/reasoning",
     "https://developers.openai.com/api/docs/guides/deployment-checklist",
     "https://developers.openai.com/api/docs/guides/latest-model"
-  ]
+  ],
+  "primary_measurement_mode": "ONLINE_REAL_WORKFLOW",
+  "secondary_measurement_mode": "COMPACT_SENTINEL_REGRESSION",
+  "real_workflow_first_policy": {
+    "rule": "Do not block backend implementation on weeks of isolated synthetic characterization. Learn the GPT-6 Instant envelope primarily from the user's actual workflows while running the orchestrator in instrumented shadow/bounded mode.",
+    "eligible_workflow_classes": [
+      "workspace-control repository/CI/debug work",
+      "research/evaluate/iterate workflows",
+      "architecture/design work",
+      "artifact/document production",
+      "data-science/experiment workflows"
+    ],
+    "per_quantum_telemetry": [
+      "exact executor identity",
+      "task/work phenotype",
+      "packet/context size",
+      "dependency/coupling estimate",
+      "tool depth",
+      "decomposition child count",
+      "validator result",
+      "repair count",
+      "escalation decision",
+      "accepted terminal outcome"
+    ],
+    "synthetic_use_only": [
+      "small sentinel regression after model/surface/toolset changes",
+      "controlled reproduction of failure modes discovered in real workflows",
+      "deterministic authority/security invariants"
+    ]
+  }
 }
