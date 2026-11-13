@@ -520,12 +520,29 @@ class DomainKernel:
         if not reason:
             raise KernelError("recovery_reason_required")
 
+        previous_state = process.state
         process.generation += 1
-        process.state = ProcessState.READY_TO_RESUME
         process.worker_id = None
         process.lease_id = None
-        process.wait_key = None
-        cls._event(next_graph, process, "RECOVER", reason=reason)
+
+        if previous_state == ProcessState.WAITING_EXTERNAL:
+            # Recovery fences ownership only. The external condition still owns
+            # readiness, so the exact wait key must survive.
+            process.state = ProcessState.WAITING_EXTERNAL
+        elif previous_state == ProcessState.WAITING_DEPENDENCIES:
+            # A restart cannot complete child work. Preserve the dependency wait.
+            process.state = ProcessState.WAITING_DEPENDENCIES
+        else:
+            process.state = ProcessState.READY_TO_RESUME
+            process.wait_key = None
+
+        cls._event(
+            next_graph,
+            process,
+            "RECOVER",
+            reason=reason,
+            previous_state=previous_state.value,
+        )
         cls.validate(next_graph)
         return next_graph
 
