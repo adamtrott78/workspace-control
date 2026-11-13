@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "design_id": "workspace-semantic-execution-kernel-v0.1",
-  "status": "EXECUTABLE_REFERENCE_CONTRACT",
+  "status": "EXECUTABLE_REFERENCE_CONTRACT_CORRECTED",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Freeze the dangerous orchestration-kernel semantics before production backend implementation. This contract is executor/model/runtime agnostic and deliberately excludes infrastructure choices.",
   "authority_boundary": {
@@ -223,8 +223,6 @@
       "from": [
         "CLAIMED",
         "RUNNING",
-        "WAITING_EXTERNAL",
-        "WAITING_DEPENDENCIES",
         "READY_TO_RESUME",
         "TERMINAL_CANDIDATE",
         "VALIDATING"
@@ -238,7 +236,40 @@
       "effects": [
         "increment_generation",
         "release_worker_and_lease",
-        "clear_active_wait",
+        "preserve_receipts_and_history"
+      ]
+    },
+    {
+      "from": [
+        "WAITING_EXTERNAL"
+      ],
+      "event": "RECOVER",
+      "to": "WAITING_EXTERNAL",
+      "guards": [
+        "generation_matches",
+        "wait_key_nonempty"
+      ],
+      "effects": [
+        "increment_generation",
+        "release_worker_and_lease",
+        "preserve_wait_key",
+        "preserve_receipts_and_history"
+      ]
+    },
+    {
+      "from": [
+        "WAITING_DEPENDENCIES"
+      ],
+      "event": "RECOVER",
+      "to": "WAITING_DEPENDENCIES",
+      "guards": [
+        "generation_matches",
+        "children_nonempty"
+      ],
+      "effects": [
+        "increment_generation",
+        "release_worker_and_lease",
+        "preserve_children",
         "preserve_receipts_and_history"
       ]
     }
@@ -283,6 +314,10 @@
     {
       "id": "K-010",
       "text": "A decomposed parent resumes only after every recorded child reaches COMPLETED; failed/blocked children do not count as satisfied."
+    },
+    {
+      "id": "K-011",
+      "text": "Recovery cannot satisfy an unresolved external wait or dependency wait; it may fence ownership but must preserve the wait until its actual wake condition is met."
     }
   ],
   "effect_receipt_required_fields": [
@@ -334,5 +369,15 @@
     "path": "benchmarks/workspace-semantic-execution/kernel_reference_v1.py",
     "status": "NON_PRODUCTION_EXECUTABLE_SPEC",
     "rule": "Production code must satisfy this contract but must not import the benchmark reference implementation."
+  },
+  "recovery_semantics": {
+    "correction": "Recovery fences stale workers but never satisfies an unresolved external or dependency wait.",
+    "rules": [
+      "CLAIMED/RUNNING/READY_TO_RESUME/TERMINAL_CANDIDATE/VALIDATING recover to READY_TO_RESUME with generation increment.",
+      "WAITING_EXTERNAL recovers in WAITING_EXTERNAL, preserving the exact wait_key while incrementing generation.",
+      "WAITING_DEPENDENCIES recovers in WAITING_DEPENDENCIES, preserving child dependencies while incrementing generation.",
+      "Only the matching external wake event or completed child set may satisfy a wait."
+    ],
+    "discovered_during": "packet_compiler_and_executor_registry implementation review"
   }
 }
