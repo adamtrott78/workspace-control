@@ -170,7 +170,7 @@ def verify_effective_installed_generation(manifest_path: pathlib.Path) -> dict[s
     manifest = _load(manifest_path)
     if manifest.get("mode") != "V3_SUBSTRATE_INSTALL_INACTIVE":
         raise RootActivationError("installed manifest mode invalid")
-    if manifest.get("runner_class_count") not in {9, 10}:
+    if manifest.get("runner_class_count") not in {9, 10, 11}:
         raise RootActivationError("installed manifest runner class count invalid")
 
     controller_destination = str(reconciler.V3_CONTROLLER_BINARY)
@@ -516,9 +516,9 @@ def _consume_authority(
 
 def _class_ids(root_policy: dict[str, Any]) -> list[str]:
     classes = root_policy.get("runner_classes")
-    if not isinstance(classes, dict) or len(classes) not in {9, 10}:
+    if not isinstance(classes, dict) or len(classes) not in {9, 10, 11}:
         raise RootActivationError(
-            "installed root policy must contain a supported nine- or ten-class generation"
+            "installed root policy must contain a supported nine-, ten-, or eleven-class generation"
         )
     return sorted(classes)
 
