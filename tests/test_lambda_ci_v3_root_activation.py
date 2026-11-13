@@ -461,7 +461,7 @@ class V3RootActivationTests(unittest.TestCase):
             "source_head": self.source_head,
             "catalog_generation_sha256": self.compiled["catalog_generation_sha256"],
             "root_policy_sha256": self.root_policy["root_policy_sha256"],
-            "runner_class_count": 10,
+            "runner_class_count": 11,
             "controller_state": "INACTIVE",
             "route_state": "DISABLED",
             "entries": [],

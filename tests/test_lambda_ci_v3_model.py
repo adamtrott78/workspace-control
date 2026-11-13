@@ -71,7 +71,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             "pull_request_number": -1,
         }
 
-    def test_all_24_routes_attest_from_structured_workflow_identity(self):
+    def test_all_25_routes_attest_from_structured_workflow_identity(self):
         total = 0
         for class_id, policy in self.compiled["controller_projections"].items():
             controller = model.RunnerClassControllerModel(policy)
@@ -85,7 +85,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
                     controller.scale_result_for_admission(decision),
                     "ACQUIRE",
                 )
-        self.assertEqual(total, 24)
+        self.assertEqual(total, 25)
 
     def test_job_display_candidate_and_pr_fields_have_zero_admission_effect(self):
         class_id = "workspace-control-control-small-v1"
@@ -258,24 +258,28 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             )
 
     def test_busy_does_not_generate_jit(self):
-        root = self.root()  # migration host max = 1
-        wc = "workspace-control-control-small-v1"
-        pad = "padataset-cpu-public-v1"
-        first = model.ClassCapacityControllerModel(self.controller_policy(wc), root)
-        second = model.ClassCapacityControllerModel(self.controller_policy(pad), root)
+        root = self.root()
+        lane_a = "padataset-gpu-single-public-v1"
+        lane_conflict = "padataset-scientific-single-gpu-v1"
+        first = model.ClassCapacityControllerModel(
+            self.controller_policy(lane_a), root
+        )
+        second = model.ClassCapacityControllerModel(
+            self.controller_policy(lane_conflict), root
+        )
 
         self.assertEqual(
             first.provision_one(
-                request_id="req-wc",
-                runner_name=self.runner_name(wc, "one"),
+                request_id="req-gpu-a",
+                runner_name=self.runner_name(lane_a, "one"),
             ),
             "ACCEPTED",
         )
         self.assertEqual(first.jit_generation_count, 1)
         self.assertEqual(
             second.provision_one(
-                request_id="req-pad",
-                runner_name=self.runner_name(pad, "two"),
+                request_id="req-gpu-conflict",
+                runner_name=self.runner_name(lane_conflict, "two"),
             ),
             "BUSY",
         )
@@ -478,10 +482,11 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             "FAILED",
         )
 
-    def test_migration_host_max_one_serializes_even_disjoint_cpu_classes(self):
-        root = self.root()  # host max one is deliberate migration policy.
+    def test_host_max_two_allows_two_disjoint_classes_then_blocks_third(self):
+        root = self.root()
         a = "workspace-control-control-small-v1"
         b = "research-cpu-public-v1"
+        c = "padataset-cpu-public-v1"
         self.assertEqual(
             root.reserve(
                 peer_user=self.peer(a),
@@ -495,6 +500,14 @@ class V3ControlPlaneModelTests(unittest.TestCase):
                 peer_user=self.peer(b),
                 request_id="req-host-b",
                 runner_name=self.runner_name(b, "b"),
+            )["status"],
+            "RESERVED",
+        )
+        self.assertEqual(
+            root.reserve(
+                peer_user=self.peer(c),
+                request_id="req-host-c",
+                runner_name=self.runner_name(c, "c"),
             )["status"],
             "BUSY",
         )

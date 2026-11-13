@@ -32,12 +32,12 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
 
     def test_compiles_entire_registered_fleet(self):
         result = self.compile()
-        self.assertEqual(len(result["root_projection"]["runner_classes"]), 10)
-        self.assertEqual(len(result["controller_projections"]), 10)
-        self.assertEqual(len(result["compatibility_matrix"]), 24)
+        self.assertEqual(len(result["root_projection"]["runner_classes"]), 11)
+        self.assertEqual(len(result["controller_projections"]), 11)
+        self.assertEqual(len(result["compatibility_matrix"]), 25)
         self.assertEqual(
             len(result["executor_projection"]["execution_actions"]),
-            24,
+            25,
         )
         self.assertEqual(
             len(result["executor_projection"]["maintenance_actions"]),
@@ -316,8 +316,8 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
             compiler._write_outputs(compiled, out)
             receipt = json.loads((out / "compilation-receipt.json").read_text())
             self.assertEqual(receipt["decision"], "PASS")
-            self.assertEqual(receipt["runner_class_count"], 10)
-            self.assertEqual(receipt["route_count"], 24)
+            self.assertEqual(receipt["runner_class_count"], 11)
+            self.assertEqual(receipt["route_count"], 25)
             root_text = (out / "root-policy.json").read_text()
             self.assertNotIn("jit_config", root_text)
             self.assertNotIn("candidate_sha", root_text)

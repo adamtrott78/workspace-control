@@ -70,7 +70,7 @@ class PADatasetScientificActivationTests(unittest.TestCase):
             set(current["runner_classes"]) | {activation.TARGET_CLASS},
         )
         self.assertEqual(set(preserved), set(current["runner_classes"]))
-        self.assertEqual(len(preserved), 9)
+        self.assertEqual(len(preserved), 10)
         for class_id, digest in preserved.items():
             self.assertEqual(
                 digest,
