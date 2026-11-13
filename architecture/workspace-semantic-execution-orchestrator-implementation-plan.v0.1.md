@@ -557,6 +557,30 @@ Do not:
 - optimize every workflow family at once;
 - make strong Instant-vs-frontier equivalence claims from screening data.
 
+
+## Acceleration amendment — 2026-11-13
+
+Operator priority is now the semantic-execution backend: task decomposition, worker routing, durable multi-worker processing, validation, and synthesis.
+
+This changes sequencing, not the frozen security/authority model:
+
+- The long UX-09 target RAM/performance benchmark remains deferred and is **not** on the backend critical path.
+- Remaining Operator Bridge Stage-10 UX trials run in parallel and gate real-account/production promotion only; they do **not** block Phases 1-6 of this orchestrator plan.
+- Backend implementation begins immediately with the deterministic orchestration kernel and recursive decomposition semantics, using existing proven multi-worker queue/CAS/lease-recovery fixtures as regression evidence.
+- Claim-bearing Instant-vs-frontier capability conclusions still require evaluator-only hidden runtime isolation and replicated scoring, but those claims are not prerequisites for implementing the deterministic backend mechanics.
+- As of 2026-11-13, current OpenAI product documentation says Personalized Temporary Chat can use plugins and existing personalization while temporary chats do not create/update memory. The prior assumption that isolation and plugin transport were mutually exclusive is obsolete; future real-worker calibration should revalidate this product behavior at execution time.
+
+### Accelerated critical path
+
+1. Phase 1 deterministic orchestration kernel.
+2. Recursive task-tree decomposition and dependency scheduling.
+3. Executor registry/resource router.
+4. Semantic packet compiler with inherited constraints/provenance/validator refs.
+5. Persistent session broker with disposable-session recovery.
+6. Event-driven waits + objective validator/repair loop.
+7. Multi-worker decomposed workflow replay and synthesis.
+8. Then calibrate the human-launched Instant surface against real Temporary Chats once the parallel browser gate is ready.
+
 ## 11. Success criterion
 
 The v0 orchestrator is successful when a user can submit one durable task and the system can:
