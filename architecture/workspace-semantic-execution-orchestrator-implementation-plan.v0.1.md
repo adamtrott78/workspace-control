@@ -46,6 +46,9 @@ Authoritative Instant behavior contract:
 Current characterization matrix:
 - `benchmarks/workspace-semantic-execution/gpt6_instant_characterization_v1.json`
 
+Recursive/asynchronous reasoning foundation:
+- `architecture/workspace-semantic-execution-recursive-asynchronous-reasoning.v0.1.md`
+
 Current Chat calibration target:
 
 - logical selector: `OPENAI_CHAT_INSTANT_CURRENT`
@@ -466,15 +469,19 @@ Implement:
 Exit gate:
 - P3-like six-experiment workflow completes in simulation with zero reasoning calls while waiting.
 
-### Phase 7 — GPT-6 Sol / Instant calibration
+### Phase 7 — GPT-6 Sol / Instant online calibration
 
-Do NOT rerun the entire painful manual screening matrix.
+Do NOT block implementation on a standalone benchmark campaign. Learn primarily from instrumented real user workflows; retain small controlled fixtures only as sentinels and for reproducing failure mechanisms discovered in real work.
 
-Run a focused GPT-6 calibration set:
-- P0 easy control;
-- P2 coupled reasoning;
-- P3 mixed long/hard;
-- one unseen-workflow extension.
+Continuously record real-workflow evidence for:
+- coupled residual decisions;
+- horizon-heavy/decomposable work;
+- synthesis fan-in;
+- validator-feedback repair;
+- context curation and tool-chain depth;
+- persistent-chat versus fresh durable resume.
+
+After a model/surface/toolset change, run only a compact sentinel subset before returning to real-workflow learning.
 
 Compare:
 - objective score;
