@@ -57,7 +57,7 @@ class V3ReconcilerTests(unittest.TestCase):
             policy["controller_peer"]["unix_user"]
             for policy in classes.values()
         }
-        self.assertEqual(len(users), 10)
+        self.assertEqual(len(users), 11)
 
         sysusers = self.staged("/etc/sysusers.d/workspace-ci-v3.conf").read_text()
         for class_id, policy in classes.items():
@@ -299,7 +299,7 @@ class V3ReconcilerTests(unittest.TestCase):
 
     def test_manifest_is_digest_bound_and_verifiable_in_staging_projection(self):
         manifest = self.result["manifest"]
-        self.assertEqual(manifest["runner_class_count"], 10)
+        self.assertEqual(manifest["runner_class_count"], 11)
         self.assertEqual(manifest["controller_state"], "INACTIVE")
         self.assertEqual(manifest["route_state"], "DISABLED")
         self.assertEqual(manifest["source_head"], "f" * 40)
