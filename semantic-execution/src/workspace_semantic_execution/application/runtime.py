@@ -13,7 +13,7 @@ from ..domain import (
 )
 from ..ports import (
     ClockPort,
-    DurableRuntimePort,
+    EventLedgerPort,
     RuntimeEvent,
     StateSnapshot,
     StateStorePort,
@@ -36,12 +36,12 @@ class RuntimeCoordinator:
         self,
         *,
         state_store: StateStorePort,
-        runtime: DurableRuntimePort,
+        event_ledger: EventLedgerPort,
         telemetry: TelemetryPort,
         clock: ClockPort,
     ) -> None:
         self._state_store = state_store
-        self._runtime = runtime
+        self._event_ledger = event_ledger
         self._telemetry = telemetry
         self._clock = clock
 
@@ -146,7 +146,7 @@ class RuntimeCoordinator:
         self,
         event: RuntimeEvent,
     ) -> StateSnapshot:
-        inserted = self._runtime.publish_event(event)
+        inserted = self._event_ledger.publish_event(event)
         if not inserted:
             self._record(
                 "runtime.event_duplicate",
@@ -184,7 +184,7 @@ class RuntimeCoordinator:
                 continue
             if process.wait_key is None:
                 continue
-            event = self._runtime.find_event(wait_key=process.wait_key)
+            event = self._event_ledger.find_event(wait_key=process.wait_key)
             if event is None:
                 continue
             next_graph = DomainKernel.wake_external(
@@ -219,7 +219,7 @@ class RuntimeCoordinator:
         wait_key: str,
     ) -> StateSnapshot | None:
         before = self._state_store.load()
-        event = self._runtime.find_event(wait_key=wait_key)
+        event = self._event_ledger.find_event(wait_key=wait_key)
         if event is None:
             return None
 
