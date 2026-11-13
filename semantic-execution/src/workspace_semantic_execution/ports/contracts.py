@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Any, Protocol
 
 from ..domain import (
@@ -28,6 +29,31 @@ class RuntimeEvent:
     payload_ref: str | None = None
 
 
+class DurableWorkState(StrEnum):
+    ENQUEUED = "ENQUEUED"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    CANCELLED = "CANCELLED"
+    UNKNOWN = "UNKNOWN"
+
+
+@dataclass(frozen=True)
+class DurableWorkRequest:
+    work_id: str
+    work_kind: str
+    payload: dict[str, Any]
+    queue_name: str = "default"
+
+
+@dataclass(frozen=True)
+class DurableWorkStatus:
+    work_id: str
+    state: DurableWorkState
+    result_ref: str | None = None
+    error: str | None = None
+
+
 @dataclass(frozen=True)
 class TelemetryRecord:
     name: str
@@ -43,6 +69,10 @@ class StateNotInitialized(RuntimeError):
     """State store has no initialized graph."""
 
 
+class DurableWorkConflict(RuntimeError):
+    """A durable work ID was reused with conflicting immutable inputs."""
+
+
 class StateStorePort(Protocol):
     def initialize(self, graph: WorkGraph) -> StateSnapshot: ...
 
@@ -56,10 +86,25 @@ class StateStorePort(Protocol):
     ) -> StateSnapshot: ...
 
 
-class DurableRuntimePort(Protocol):
+class EventLedgerPort(Protocol):
+    """Durable evidence for external wake conditions."""
+
     def publish_event(self, event: RuntimeEvent) -> bool: ...
 
     def find_event(self, *, wait_key: str) -> RuntimeEvent | None: ...
+
+
+class DurableRuntimePort(Protocol):
+    """Idempotent execution of bounded work quanta.
+
+    Long external waits are intentionally not represented as a blocked runtime
+    invocation. The semantic process persists WAITING_EXTERNAL in StateStorePort
+    and is resumed by EventLedgerPort evidence.
+    """
+
+    def submit(self, request: DurableWorkRequest) -> bool: ...
+
+    def get_status(self, *, work_id: str) -> DurableWorkStatus | None: ...
 
 
 class AuthorityEvaluatorPort(Protocol):
