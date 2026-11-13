@@ -87,7 +87,7 @@ class PadatasetScientificDualLaneActivationTests(unittest.TestCase):
         self.assertLess(stop, second_quiescent)
         self.assertLess(second_quiescent, first_write)
 
-    def test_activation_requires_fresh_zero-work_preflight(self):
+    def test_activation_requires_fresh_zero_work_preflight(self):
         source = (ROOT / 'scripts/lambda_ci_v3_padataset_scientific_dual_lane_v1.py').read_text()
         for marker in (
             '"assigned_jobs": 0',
