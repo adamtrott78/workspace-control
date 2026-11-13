@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: bc4ec0e1dad7a55148224ffd7ffaf6e246615fdc
+- Remote checkpoint: f952a4b0dfea079469ad9d15f32efa51e9ca053b
 - Remote verified: true
 
 ## Next safe action
 
-Treat Ctrl+Space UT-03 interruption recovery as objectively PASS at exact source head bc4ec0e1dad7a55148224ffd7ffaf6e246615fdc; do not rerun unless later evidence invalidates it. Continue Stage 10 by implementing/executing UT-04 multiple SENT/UNCONFIRMED workers, then UT-05 judgment gate, UT-06/UT-07/UT-08 recovery trials, UT-12 no-work/background acknowledgment, the full Bridge-OFF UT-11 release check, and UT-09 representative-work collision testing before final Ctrl+Space retention. Keep the authoritative Stage 09 target benchmark deferred and do not use a real ChatGPT account.
+Continue Stage 10 by implementing/executing UT-05 judgment-gate handling, UT-06/UT-07/UT-08 recovery trials, UT-12 no-work/background acknowledgment, the full Bridge-OFF UT-11 Ctrl+Space release check, and UT-09 60-minute representative-work collision testing. In parallel, define a separately authorized production OperatorBridge action/status transport to replace NoWorkOperatorActionPort/empty workload status before Stage 12 real-account calibration. Do not use a real ChatGPT account until Stage 10 and the Stage-12 predecessor gates are satisfied.
 
 ## Remaining work
 
@@ -41,8 +41,9 @@ Treat Ctrl+Space UT-03 interruption recovery as objectively PASS at exact source
 
 ## Blockers / gates
 
-- Ctrl+Space passed UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, and UT-03 interruption recovery. Final binding retention still requires the remaining Stage-10 trials plus UT-09 representative-work collision testing; do not mark the physical binding finally retained yet.
-- The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. Do not rerun it during Stage-10 work. It remains mandatory before impl_13 production readiness can pass.
+- Ctrl+Space passed UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, UT-03 interruption recovery, and UT-04 multiple SENT/UNCONFIRMED coexistence. Final binding retention still requires UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing.
+- The production helper still uses NoWorkOperatorActionPort and an empty workload-status provider. An explicitly authorized production OperatorBridge action/status transport is required before real-account Stage 12 can service actual scheduler work.
+- The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
 
 ## Fresh-chat initialization
 
