@@ -1,4 +1,4 @@
-"""Executor, resource, and session semantics for the domain layer."""
+"""Executor, resource, lifecycle, and session semantics for the domain layer."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -16,9 +16,26 @@ class SessionMode(StrEnum):
     STATELESS = "STATELESS"
     PERSISTENT_CHAT = "PERSISTENT_CHAT"
     SESSION_SCOPED = "SESSION_SCOPED"
-    PERSISTENT_SERVICE = "PERSISTENT_SERVICE"
-    BATCH_QUEUED = "BATCH_QUEUED"
     NONE = "NONE"
+
+
+class ExecutorLifecycle(StrEnum):
+    INTERACTIVE_CHAT = "INTERACTIVE_CHAT"
+    PERSISTENT_SERVICE = "PERSISTENT_SERVICE"
+    EPHEMERAL_INVOCATION = "EPHEMERAL_INVOCATION"
+    BATCH_JOB = "BATCH_JOB"
+    DETERMINISTIC_PROCESS = "DETERMINISTIC_PROCESS"
+    HUMAN = "HUMAN"
+    UNKNOWN = "UNKNOWN"
+
+
+class MemoryResetPolicy(StrEnum):
+    EVERY_INVOCATION = "EVERY_INVOCATION"
+    SESSION_END = "SESSION_END"
+    CONTEXT_THRESHOLD = "CONTEXT_THRESHOLD"
+    PROVIDER_MANAGED = "PROVIDER_MANAGED"
+    NONE = "NONE"
+    UNKNOWN = "UNKNOWN"
 
 
 class ExecutorAvailability(StrEnum):
@@ -54,6 +71,8 @@ class ExecutorProfile:
     capabilities: frozenset[str]
     invocation_mode: InvocationMode
     session_mode: SessionMode
+    lifecycle: ExecutorLifecycle
+    memory_reset_policy: MemoryResetPolicy
     availability: ExecutorAvailability
     locality: ExecutorLocality
     privacy_classes: frozenset[PrivacyClass]
@@ -88,6 +107,12 @@ class ExecutionRequirement:
         default_factory=frozenset
     )
     allowed_session_modes: frozenset[SessionMode] = field(
+        default_factory=frozenset
+    )
+    allowed_lifecycles: frozenset[ExecutorLifecycle] = field(
+        default_factory=frozenset
+    )
+    allowed_memory_reset_policies: frozenset[MemoryResetPolicy] = field(
         default_factory=frozenset
     )
     allowed_localities: frozenset[ExecutorLocality] = field(
