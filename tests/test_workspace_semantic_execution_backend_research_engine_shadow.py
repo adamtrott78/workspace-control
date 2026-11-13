@@ -27,6 +27,7 @@ from workspace_semantic_execution.domain import (  # noqa: E402
     ExecutorLocality,
     ExecutorProfile,
     InvocationMode,
+    KernelError,
     MemoryResetPolicy,
     PrivacyClass,
     ProcessState,
@@ -242,7 +243,7 @@ class ResearchEngineProductionShadowCanary(unittest.TestCase):
             ["re:arbitrate:g1"],
         )
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(KernelError):
             DomainKernel.claim(
                 graph,
                 "re:checkpoint",
