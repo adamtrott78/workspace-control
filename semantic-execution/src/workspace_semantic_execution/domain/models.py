@@ -59,6 +59,7 @@ class ValidationResult:
 class CandidateAction:
     action_id: str
     process_id: str
+    process_generation: int
     target_ref: str
     executor_type: str
     idempotency_key: str
@@ -73,6 +74,8 @@ class AuthorityDecision:
     decision_id: str
     outcome: AuthorityOutcome
     action_id: str
+    process_id: str
+    process_generation: int
     target_ref: str
     authority_scope_ref: str | None
 
@@ -81,6 +84,7 @@ class AuthorityDecision:
 class ActionSpec:
     action_id: str
     process_id: str
+    process_generation: int
     target_ref: str
     executor_type: str
     authority_decision_id: str
