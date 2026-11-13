@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-assumption-register-v0.1",
+  "status": "ACTIVE_PROVISIONAL",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "rule": "A material architecture assumption without an observable invalidation signal is not allowed to become an implicit production invariant.",
+  "assumptions": [
+    {
+      "assumption_id": "A-001",
+      "statement": "DBOS + PostgreSQL can provide adequate durability, queues, waits, messages, and recovery for the first Workspace Semantic Execution backend slice without requiring custom replay/event-sourcing infrastructure.",
+      "scope": "durable_runtime",
+      "evidence": [
+        "DBOS open-source runtime checkpoints workflows/steps into Postgres.",
+        "DBOS supports durable queues, messages, HITL, recovery, and agent integrations.",
+        "No separate orchestrator server is required for the initial single-application deployment."
+      ],
+      "risk_if_false": "We recreate missing workflow machinery or accumulate operational fragility.",
+      "observable_signal": "First real workflow requires custom recovery/queue/wait/versioning logic outside the runtime adapter.",
+      "invalidation_trigger": "Two or more important durable semantics require bespoke workarounds, or recovery behavior cannot be represented cleanly behind DurableRuntimePort.",
+      "fallback": "Spike Restate on the same workflow contract; evaluate Temporal if platform-scale workflow semantics are required.",
+      "status": "UNPROVEN_SPIKE_REQUIRED"
+    },
+    {
+      "assumption_id": "A-002",
+      "statement": "A modular monolith is simpler and more reliable than an initial microservice decomposition for the expected workload.",
+      "scope": "deployment_topology",
+      "evidence": [
+        "Current workload is human/ChatGPT-scale rather than high-throughput service-scale.",
+        "SRE guidance favors simplicity and modularity before distributed decomposition.",
+        "No component currently requires independent scaling except external executors already behind adapters."
+      ],
+      "risk_if_false": "One component causes contention, deployment coupling, or failure propagation that requires independent lifecycle/scaling.",
+      "observable_signal": "Profiling or incidents show a module needs independent scaling/fault containment.",
+      "invalidation_trigger": "A concrete module repeatedly violates resource/reliability targets because of process co-location.",
+      "fallback": "Extract only that bounded context behind the existing port; do not redesign all modules.",
+      "status": "SUPPORTED_PROVISIONAL"
+    },
+    {
+      "assumption_id": "A-003",
+      "statement": "Git/GitHub should remain project/task/source authority but should not be the hot runtime coordination database.",
+      "scope": "state_ownership",
+      "evidence": [
+        "Existing Git-CAS/controller work exposed latency and concurrency complexity.",
+        "Hot state requires transactional leases/generations/ready queues.",
+        "Meaningful checkpoints still benefit from immutable Git provenance."
+      ],
+      "risk_if_false": "Runtime DB diverges from required authority or loses important auditability.",
+      "observable_signal": "Real workflow cannot cleanly distinguish runtime facts from Git-authoritative project/task facts.",
+      "invalidation_trigger": "A required authority decision depends on runtime state that cannot be safely reconciled with Git source contracts.",
+      "fallback": "Add explicit reconciliation/checkpoint protocol; do not revert to per-transition Git mutation.",
+      "status": "SUPPORTED_PROVISIONAL"
+    },
+    {
+      "assumption_id": "A-004",
+      "statement": "The semantic ontology graph is most useful as a derived temporal/provenance/context projection rather than the transactional scheduler store.",
+      "scope": "semantic_state",
+      "evidence": [
+        "Graph-shaped queries dominate meaning/provenance/contradiction/context needs.",
+        "Transactional claims/leases/idempotency are better served by relational/durable-runtime primitives."
+      ],
+      "risk_if_false": "Context compilation becomes awkward or semantic/runtime duplication drifts.",
+      "observable_signal": "Real workflows require frequent deep graph traversals or semantic updates that are difficult/slow in the initial relational projection.",
+      "invalidation_trigger": "Measured query complexity/latency or developer complexity materially improves with a dedicated graph substrate.",
+      "fallback": "Introduce graph database adapter while preserving authoritative ownership and projection rebuild rules.",
+      "status": "SUPPORTED_PROVISIONAL"
+    },
+    {
+      "assumption_id": "A-005",
+      "statement": "GPT-6 Instant can serve as the default reasoning quantum when work is recursively bounded, context is curated, and external validation is available.",
+      "scope": "reasoning_executor",
+      "evidence": [
+        "Current OpenAI product identity: GPT-6 Sol powers Instant on eligible paid ChatGPT plans.",
+        "Workspace Control GPT-6 Instant protocol screening has validated bounded tasks.",
+        "External reasoning/test-time compute literature supports decomposed, feedback-driven cycles."
+      ],
+      "risk_if_false": "Excessive repair/decomposition overhead or poor reasoning quality overwhelms benefits.",
+      "observable_signal": "Real-workflow telemetry shows repeated validator failures, premature convergence, or frequent High escalation for supposedly bounded leaves.",
+      "invalidation_trigger": "Validated progress per Instant quantum is consistently worse than a stronger-effort route for the same phenotype after decomposition.",
+      "fallback": "Adjust routing profile; preserve architecture and map affected phenotype to stronger executor.",
+      "status": "ONLINE_CALIBRATION"
+    },
+    {
+      "assumption_id": "A-006",
+      "statement": "Persistent ChatGPT sessions are useful working-memory caches but not required for correctness or recovery.",
+      "scope": "session_continuity",
+      "evidence": [
+        "Durable state and packet reconstruction already work mechanically.",
+        "Long-horizon research warns that large uncurated histories cause context degradation."
+      ],
+      "risk_if_false": "Fresh durable resume loses important tacit context and materially harms performance.",
+      "observable_signal": "Matched real workflows show strong persistent-session advantage despite equivalent durable packets.",
+      "invalidation_trigger": "Persistent sessions produce materially higher validated success or lower reasoning cost for a recurring phenotype.",
+      "fallback": "Increase affinity/reuse for that phenotype while preserving durable recovery boundary.",
+      "status": "ONLINE_CALIBRATION"
+    },
+    {
+      "assumption_id": "A-007",
+      "statement": "The control plane can run with zero GPU allocation and modest CPU/RAM because model inference is remote and heavy project compute is delegated to executors.",
+      "scope": "resource_budget",
+      "evidence": [
+        "DBOS runtime overhead is database/checkpoint oriented.",
+        "Human/Instant-worker orchestration rate is far below documented DBOS/Postgres throughput.",
+        "CUDA visibility can be explicitly disabled for control-plane processes."
+      ],
+      "risk_if_false": "Scheduler competes with research workloads or causes workstation instability.",
+      "observable_signal": "Resource telemetry violates control-plane fitness targets under representative workload.",
+      "invalidation_trigger": "Steady control-plane CPU >= one core, app RSS > 1 GiB, any GPU VRAM allocation, or Postgres resource use is disproportionate to workload.",
+      "fallback": "Profile and simplify; isolate components; tune Postgres; only then reconsider budgets.",
+      "status": "UNPROVEN_MEASURE_FIRST_WORKFLOW"
+    },
+    {
+      "assumption_id": "A-008",
+      "statement": "A small custom agent loop plus typed domain state is more debuggable and durable for this project than adopting a general-purpose agent framework in the core.",
+      "scope": "agent_harness",
+      "evidence": [
+        "2026 source-code study of eleven production coding harnesses found hand-written loops and no general agent framework in their core runtimes.",
+        "Anthropic recommends simple composable patterns and warns frameworks can obscure prompts/responses."
+      ],
+      "risk_if_false": "We spend unnecessary effort rebuilding useful framework primitives.",
+      "observable_signal": "Core loop accumulates generic plumbing unrelated to Workspace semantics.",
+      "invalidation_trigger": "A mature harness SDK/framework removes substantial code without obscuring state, prompts, tools, or recovery semantics.",
+      "fallback": "Adopt it behind domain ports after a concrete diff/prototype proves simplification.",
+      "status": "SUPPORTED_PROVISIONAL"
+    }
+  ]
+}
