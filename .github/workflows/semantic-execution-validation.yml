@@ -1,0 +1,85 @@
+name: Semantic Execution Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - 'semantic-execution/**'
+      - '.github/workflows/semantic-execution-validation.yml'
+      - 'tests/test_workspace_semantic_execution_backend_dbos_postgres.py'
+      - 'tests/test_workspace_semantic_execution_backend_serialization.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: semantic-execution-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dbos-postgres-spike:
+    name: dbos-postgres-spike
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CUDA_VISIBLE_DEVICES: ''
+      SEMANTIC_EXECUTION_INTEGRATION: '1'
+      SEMANTIC_EXECUTION_POSTGRES_DSN: postgresql://postgres:postgres@127.0.0.1:5432/semantic_execution_test
+      DBOS_SYSTEM_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/semantic_execution_test
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: semantic_execution_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d semantic_execution_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout tested tree
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned spike dependencies
+        run: |
+          python -m pip install --disable-pip-version-check --no-input \
+            'dbos==3.5.0' \
+            'psycopg[binary]==3.3.9'
+
+      - name: Verify exact dependency versions and GPU blindness
+        run: |
+          python - <<'PY'
+          import importlib.metadata
+          import os
+          assert importlib.metadata.version("dbos") == "3.5.0"
+          assert importlib.metadata.version("psycopg") == "3.3.9"
+          assert os.environ.get("CUDA_VISIBLE_DEVICES") == ""
+          print("SEMANTIC_EXECUTION_DEPENDENCY_PIN=PASS")
+          print("SEMANTIC_EXECUTION_GPU_BLIND=PASS")
+          PY
+
+      - name: Run deterministic codec and runtime unit slice
+        run: |
+          python -m unittest -v \
+            tests/test_workspace_semantic_execution_backend_serialization.py \
+            tests/test_workspace_semantic_execution_backend_runtime.py
+
+      - name: Run PostgreSQL and DBOS integration spike
+        run: |
+          python tests/test_workspace_semantic_execution_backend_dbos_postgres.py -v
