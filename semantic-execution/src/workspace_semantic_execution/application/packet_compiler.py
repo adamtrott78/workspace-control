@@ -71,19 +71,15 @@ class SemanticPacketCompiler:
                 "Session-local context is optional optimization state; resume "
                 "must remain possible from durable packet state."
             )
-        if session_mode in {
-            SessionMode.STATELESS,
-            SessionMode.BATCH_QUEUED,
-            SessionMode.NONE,
-        }:
+        if session_mode == SessionMode.STATELESS:
             return (
                 "Assume no prior conversational memory. Use only this packet "
                 "and explicitly retrieved evidence."
             )
-        if session_mode == SessionMode.PERSISTENT_SERVICE:
+        if session_mode == SessionMode.NONE:
             return (
-                "Service persistence does not imply reasoning-memory authority; "
-                "durable packet state remains the recovery source."
+                "No conversational continuity is available or required; durable "
+                "packet state remains authoritative."
             )
         raise ValueError(f"unknown_session_mode:{session_mode}")
 
@@ -150,6 +146,8 @@ class SemanticPacketCompiler:
                 "toolset_id": executor.toolset_id,
                 "invocation_mode": executor.invocation_mode.value,
                 "session_mode": executor.session_mode.value,
+                "lifecycle": executor.lifecycle.value,
+                "memory_reset_policy": executor.memory_reset_policy.value,
             },
             "execution_contract": {
                 "authority_rule": (
@@ -162,6 +160,11 @@ class SemanticPacketCompiler:
                 ),
                 "continuity_rule": self._continuity_contract(
                     executor.session_mode
+                ),
+                "memory_rule": (
+                    "Executor memory is an optimization governed by the declared "
+                    "memory_reset_policy; durable packet state is the recovery "
+                    "source regardless of service lifetime."
                 ),
                 "retry_rule": (
                     "Do not repeat an unchanged reasoning attempt. A retry must "
@@ -190,6 +193,8 @@ class SemanticPacketCompiler:
             f"executor_id={executor.executor_id}\n"
             f"invocation_mode={executor.invocation_mode.value}\n"
             f"session_mode={executor.session_mode.value}\n"
+            f"lifecycle={executor.lifecycle.value}\n"
+            f"memory_reset_policy={executor.memory_reset_policy.value}\n"
             "BEGIN_PAYLOAD\n"
             f"{pretty}\n"
             "END_PAYLOAD\n"
