@@ -313,6 +313,54 @@ class DependencyTests(unittest.TestCase):
             ProcessState.READY_TO_RESUME,
         )
 
+    def test_recovery_preserves_dependency_wait(self):
+        graph = DomainKernel.create_graph(
+            [DomainKernel.create_process("P-recover")]
+        )
+        graph = DomainKernel.claim(
+            graph,
+            "P-recover",
+            worker_id="WP",
+            lease_id="LP",
+            expected_generation=0,
+        )
+        graph = DomainKernel.start(
+            graph,
+            "P-recover",
+            lease_id="LP",
+            expected_generation=0,
+        )
+        graph = DomainKernel.decompose(
+            graph,
+            "P-recover",
+            children=(
+                DomainKernel.create_process("P-recover.1"),
+                DomainKernel.create_process("P-recover.2"),
+            ),
+            lease_id="LP",
+            expected_generation=0,
+        )
+        graph = DomainKernel.recover(
+            graph,
+            "P-recover",
+            expected_generation=0,
+            reason="scheduler restart",
+        )
+        parent = graph.processes["P-recover"]
+        self.assertEqual(parent.generation, 1)
+        self.assertEqual(
+            parent.state,
+            ProcessState.WAITING_DEPENDENCIES,
+        )
+        with self.assertRaises(KernelError):
+            DomainKernel.claim(
+                graph,
+                "P-recover",
+                worker_id="WP2",
+                lease_id="LP2",
+                expected_generation=1,
+            )
+
 
 class WaitTests(unittest.TestCase):
     def test_external_wait_owns_no_lease_and_cannot_poll_model(self):
@@ -372,6 +420,59 @@ class WaitTests(unittest.TestCase):
         self.assertEqual(
             graph.processes["R"].reasoning_quanta,
             before_quanta,
+        )
+
+    def test_recovery_preserves_external_wait_until_actual_wake(self):
+        graph = DomainKernel.create_graph(
+            [DomainKernel.create_process("R-wait-recover")]
+        )
+        graph = DomainKernel.claim(
+            graph,
+            "R-wait-recover",
+            worker_id="W",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = DomainKernel.start(
+            graph,
+            "R-wait-recover",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = DomainKernel.wait_external(
+            graph,
+            "R-wait-recover",
+            wait_key="ci:run:999",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = DomainKernel.recover(
+            graph,
+            "R-wait-recover",
+            expected_generation=0,
+            reason="backend restart",
+        )
+        process = graph.processes["R-wait-recover"]
+        self.assertEqual(process.generation, 1)
+        self.assertEqual(process.state, ProcessState.WAITING_EXTERNAL)
+        self.assertEqual(process.wait_key, "ci:run:999")
+        with self.assertRaises(KernelError):
+            DomainKernel.claim(
+                graph,
+                "R-wait-recover",
+                worker_id="W2",
+                lease_id="L2",
+                expected_generation=1,
+            )
+        graph = DomainKernel.wake_external(
+            graph,
+            "R-wait-recover",
+            wait_key="ci:run:999",
+            event_id="ci:run:999:completed",
+        )
+        self.assertEqual(
+            graph.processes["R-wait-recover"].state,
+            ProcessState.READY_TO_RESUME,
         )
 
 
