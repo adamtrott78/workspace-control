@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-engineering-fitness-v0.1",
+  "status": "PROVISIONAL_ENFORCEMENT_CONTRACT",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "architecture_review": "architecture/workspace-semantic-execution-adversarial-architecture-review.v0.2.md",
+  "principles": [
+    "SIMPLE_BEFORE_DISTRIBUTED",
+    "DOMAIN_LOGIC_OWNS_SEMANTICS",
+    "DURABILITY_IS_REUSED_NOT_REIMPLEMENTED",
+    "HOT_RUNTIME_STATE_NOT_IN_GIT",
+    "TYPED_STATE_OVER_FREE_FORM_COORDINATION",
+    "POSTCONDITION_OVER_TOOL_SUCCESS",
+    "ZERO_GPU_CONTROL_PLANE",
+    "FAULTS_ARE_TEST_INPUTS",
+    "ASSUMPTIONS_ARE_EXPLICIT_AND_FALSIFIABLE",
+    "ARCHITECTURE_EVOLVES_FROM_REAL_WORKFLOW_EVIDENCE"
+  ],
+  "freeze_now": [
+    "strategic_tactical_operational_reasoning_scales",
+    "context_manager_packet_compiler",
+    "candidate_action_to_action_spec_trust_boundary",
+    "durable_runtime_port",
+    "state_store_port",
+    "authority_evaluator_port",
+    "executor_port",
+    "effect_receipt_plus_validation_completion",
+    "semantic_projection_non_authoritative",
+    "model_generation_independent_executor_profiles",
+    "control_plane_gpu_free"
+  ],
+  "defer_freeze": [
+    "DBOS_vs_Restate_vs_Temporal",
+    "backend_language_after_first_spike",
+    "graph_database",
+    "vector_database",
+    "policy_engine",
+    "exact_memory_compaction",
+    "exact_worker_count",
+    "exact_instant_thresholds"
+  ],
+  "fitness_functions": [
+    {
+      "id": "FF-001",
+      "name": "core-domain-has-no-infrastructure-dependencies",
+      "class": "STATIC_ARCHITECTURE",
+      "gate": "FAST"
+    },
+    {
+      "id": "FF-002",
+      "name": "model-inference-cannot-grant-authority",
+      "class": "SAFETY",
+      "gate": "FAST"
+    },
+    {
+      "id": "FF-003",
+      "name": "stale-generation-cannot-complete-current-work",
+      "class": "STATE_MACHINE",
+      "gate": "COHERENT_SLICE"
+    },
+    {
+      "id": "FF-004",
+      "name": "duplicate-effect-event-cannot-duplicate-validated-effect",
+      "class": "IDEMPOTENCY",
+      "gate": "COHERENT_SLICE"
+    },
+    {
+      "id": "FF-005",
+      "name": "crash-at-durable-boundaries-recovers",
+      "class": "FAULT_INJECTION",
+      "gate": "MILESTONE"
+    },
+    {
+      "id": "FF-006",
+      "name": "semantic-projection-rebuild-is-deterministic",
+      "class": "PROJECTION",
+      "gate": "COHERENT_SLICE"
+    },
+    {
+      "id": "FF-007",
+      "name": "waiting-external-does-not-busy-poll",
+      "class": "RESOURCE",
+      "gate": "COHERENT_SLICE"
+    },
+    {
+      "id": "FF-008",
+      "name": "control-plane-gpu-usage-zero",
+      "class": "RESOURCE",
+      "gate": "MILESTONE",
+      "target": {
+        "gpu_visible_devices": 0,
+        "gpu_vram_bytes": 0
+      }
+    },
+    {
+      "id": "FF-009",
+      "name": "control-plane-resource-budget",
+      "class": "RESOURCE",
+      "gate": "MILESTONE",
+      "target": {
+        "steady_cpu_cores_lt": 1,
+        "burst_cpu_cores_lte": 2,
+        "application_rss_mib_lte": 1024
+      },
+      "note": "Initial target only; tune from first real workflow. PostgreSQL budget measured separately."
+    },
+    {
+      "id": "FF-010",
+      "name": "complete-action-has-receipt-and-validation",
+      "class": "EXECUTION_CORRECTNESS",
+      "gate": "FAST"
+    },
+    {
+      "id": "FF-011",
+      "name": "unknown-transition-fails-closed",
+      "class": "SAFETY",
+      "gate": "FAST"
+    },
+    {
+      "id": "FF-012",
+      "name": "material-assumptions-have-invalidation-signals",
+      "class": "ARCHITECTURE_GOVERNANCE",
+      "gate": "FAST"
+    }
+  ],
+  "control_plane_resource_policy": {
+    "cuda_visible_devices": "",
+    "gpu_default": "FORBIDDEN",
+    "local_gpu_execution": "EXPLICIT_SEPARATE_EXECUTOR_ONLY",
+    "linux_resource_controls": [
+      "CPUQuota",
+      "MemoryHigh",
+      "MemoryMax",
+      "TasksMax"
+    ],
+    "wait_policy": "WAITING_EXTERNAL_MUST_NOT_CONSUME_MODEL_QUANTA_OR_BUSY_POLL"
+  },
+  "test_strategy": {
+    "design_model": "TLA+_OR_EQUIVALENT_FOR_SMALL_ORCHESTRATION_KERNEL",
+    "executable_state_machine": "HYPOTHESIS_RULE_BASED_STATE_MACHINE_OR_EQUIVALENT",
+    "adapter_contract_tests": true,
+    "fault_injection": true,
+    "real_workflow_canary": true,
+    "architecture_fitness_continuous": true
+  },
+  "critical_faults": [
+    "death_after_claim_before_execution",
+    "death_after_effect_before_checkpoint",
+    "duplicate_event",
+    "delayed_event",
+    "out_of_order_event",
+    "stale_generation",
+    "database_disconnect",
+    "executor_disappearance",
+    "validator_timeout",
+    "session_loss",
+    "duplicate_ci_callback",
+    "partial_external_effect"
+  ],
+  "assumption_record_schema": {
+    "required_fields": [
+      "assumption_id",
+      "statement",
+      "scope",
+      "evidence",
+      "risk_if_false",
+      "observable_signal",
+      "invalidation_trigger",
+      "fallback",
+      "status"
+    ]
+  },
+  "ci_gates": [
+    "FAST",
+    "COHERENT_SLICE",
+    "MILESTONE",
+    "PROMOTION"
+  ],
+  "first_slice_non_goals": [
+    "microservices",
+    "kafka",
+    "redis",
+    "neo4j",
+    "vector_database",
+    "general_agent_framework",
+    "local_llm",
+    "gpu_dependency",
+    "broad_autonomous_write_surface"
+  ]
+}
