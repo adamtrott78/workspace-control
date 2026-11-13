@@ -3,6 +3,7 @@ import json
 import pathlib
 import tempfile
 import unittest
+from unittest import mock
 
 MODULE_PATH = pathlib.Path(__file__).resolve().parents[1] / "scripts" / "lambda_ci_v3_workspace_control_override_retire_v1.py"
 SPEC = importlib.util.spec_from_file_location("override_retire", MODULE_PATH)
@@ -58,6 +59,47 @@ class OverrideRetireTests(unittest.TestCase):
             mod.STALE_OVERRIDE_SHA256,
             "9db8161340baacd7d7aad48ad47e013651158748bfd61b13c41ab29539a35af3",
         )
+
+
+    def test_wait_target_executable_tolerates_pre_exec_systemd_image(self):
+        service = {
+            "ActiveState": "active",
+            "SubState": "running",
+            "MainPID": "123",
+        }
+        with mock.patch.object(mod, "systemctl_show", return_value=service), \
+             mock.patch.object(
+                 mod,
+                 "executable_for_pid",
+                 side_effect=[
+                     pathlib.Path("/usr/lib/systemd/systemd"),
+                     mod.SHARED_BINARY,
+                 ],
+             ), \
+             mock.patch.object(
+                 mod.pathlib.Path,
+                 "read_bytes",
+                 side_effect=[
+                     b"systemd",
+                     b"shared-controller",
+                 ],
+             ), \
+             mock.patch.object(mod.time, "sleep", return_value=None), \
+             mock.patch.object(
+                 mod,
+                 "sha256",
+                 side_effect=[
+                     "0" * 64,
+                     mod.SHARED_SHA256,
+                 ],
+             ):
+            observed, observed_path, digest = mod.wait_target_executable(
+                mod.SHARED_BINARY,
+                mod.SHARED_SHA256,
+            )
+        self.assertEqual(observed, service)
+        self.assertEqual(observed_path, mod.SHARED_BINARY)
+        self.assertEqual(digest, mod.SHARED_SHA256)
 
     def test_target_scope_is_workspace_control_only(self):
         self.assertEqual(mod.TARGET_CLASS, "workspace-control-control-small-v1")
