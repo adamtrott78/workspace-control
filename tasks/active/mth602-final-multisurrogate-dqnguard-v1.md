@@ -24,24 +24,23 @@ Provide Workspace Shell authority for the PADataset multi-surrogate DQNGuard pro
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: be04a4a4428a3c57233fc1ee598b4311ece96587
+- Remote checkpoint: db8e2a1a97b69b73e3602e83ebd196686ceaaa95
 - Remote verified: true
 
 ## Next safe action
 
-After parent installs PADataset be04a4a4428a3c57233fc1ee598b4311ece96587, verify the expanded contract. Scientific training then requires the existing DNNs operator surface or a separately authorized scientific execution contract.
+Install PADataset db8e2a1a97b69b73e3602e83ebd196686ceaaa95 into the live Workspace Shell authority/snapshot through the reviewed checkpoint-refresh operator, then run exact-head deterministic Stage 03 validation. Do not issue a new /lambda-scientific request until that validation passes.
 
 ## Remaining work
 
-- Wait for parent authority validation and final root snapshot refresh.
-- Rerun expanded deterministic Stage 03 contract.
-- Launch frozen PA2 backbone in DNNs scientific environment.
-- Run Architecture C final evaluator and validate Stage 02 result schema.
+- Refresh the live Workspace Shell task authority and clean PADataset execution snapshot to the exact repaired head.
+- Run exact-head deterministic Stage 03 contract validation through Workspace Shell and retain the receipt.
+- Only on deterministic PASS, issue exactly one new frozen Stage 03 Architecture C scientific request.
+- Interpret the resulting Architecture C metrics against the matching fixed-surrogate DQNGuard cell under the frozen Stage 03 contract.
 
 ## Blockers / gates
 
-- Final target-quarantine source be04a4a4428a3c57233fc1ee598b4311ece96587 is committed but not yet installed live.
-- No connected accepted executor currently has authority for scientific PyTorch training; PADataset gpu-ci is CI validation only.
+- Live Workspace Shell authority and /srv/workspace-shell/PADataset remain pinned to be04a4a4428a3c57233fc1ee598b4311ece96587; exact repaired head db8e2a1a97b69b73e3602e83ebd196686ceaaa95 is not executable until the reviewed checkpoint refresh completes.
 
 ## Fresh-chat initialization
 
