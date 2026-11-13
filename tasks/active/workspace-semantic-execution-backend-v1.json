@@ -51,7 +51,7 @@
       "base_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "713f70533eee1dfe7f5274c17ca7d2091204c40c",
+        "checkpoint_sha": "e927fbc8117ddb7caed114b2136eb5408ce1fe29",
         "verified": true
       },
       "local": null,
@@ -110,6 +110,15 @@
             "Run #2676 passed changed task contracts, full unit regression, v3 live-canary syntax, generated systemd substrate validation, pinned Go controller tests/build, and full integration contracts.",
             "semantic-execution/src/workspace_semantic_execution/domain contains only standard-library/domain imports and no DBOS/PostgreSQL/GitHub/browser/model-provider/GPU dependency.",
             "Production tests cover generation fencing, single-lease ownership, dependency readiness/fan-in, decomposition wait/resume, no-model-poll external waits, effect idempotency, crash-after-effect recovery, postcondition-gated completion, CandidateAction authority isolation, and fail-closed unknown state."
+          ]
+        },
+        {
+          "check": "Generation-bound action authority correction",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control@e927fbc8117ddb7caed114b2136eb5408ce1fe29 passed Workspace Control Validation run 43527645277 / #2697 SUCCESS.",
+            "CandidateAction, AuthorityDecision and ActionSpec now bind exact process_id + process_generation; mismatched generation/process/target/action fails closed.",
+            "EffectReceipt already binds generation, completing the generation fence across proposal -> authority -> spec -> observed effect."
           ]
         }
       ],
@@ -298,14 +307,26 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "713f70533eee1dfe7f5274c17ca7d2091204c40c",
+      "id": "generation-authority-correction-validated",
+      "kind": "implementation_checkpoint",
+      "identity": "e927fbc8117ddb7caed114b2136eb5408ce1fe29",
       "required_for_resume": true,
       "evidence": [
-        "kernel_domain_and_reference_parity and packet_compiler_and_executor_registry are VALIDATED.",
-        "First unfinished stage is runtime_ports_and_inmemory_slice.",
-        "Research Engine, GitRunner/controller, and Operator Bridge remain unmodified by the backend child."
+        "Workspace Control Validation #2697 SUCCESS.",
+        "Action authority/effect chain is generation-bound end to end.",
+        "Unit regression and full integration contracts passed."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "e927fbc8117ddb7caed114b2136eb5408ce1fe29",
+      "required_for_resume": true,
+      "evidence": [
+        "Pure kernel + packet/router slices are validated.",
+        "Recovery preserves unresolved waits.",
+        "CandidateAction -> AuthorityDecision -> ActionSpec -> EffectReceipt is exact-generation bound.",
+        "First unfinished stage remains runtime_ports_and_inmemory_slice."
       ]
     }
   ],
@@ -354,5 +375,5 @@
   "next_safe_action": "Implement infrastructure-neutral ports plus deterministic in-memory adapters and a fake clock under semantic-execution/. The slice must persist/reload WorkGraph state without Git, model durable wait/event publication without polling, expose AuthorityEvaluatorPort/ExecutorPort/SemanticProjectionPort/TelemetryPort contracts, and demonstrate restart/recovery/duplicate-event/session-loss behavior entirely in memory. Do not add DBOS/PostgreSQL or real external effects until this slice validates.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n"
+  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n\n2026-11-13 GENERATION-BOUND EFFECT CHAIN CORRECTION: While defining ExecutorPort, the implementation review found that ActionSpec bound process_id but not process_generation, which could allow a previously authorized action to survive recovery into a newer generation. Corrected CandidateAction, AuthorityDecision and ActionSpec to bind exact process_generation; compilation now fails closed on process/generation/action/target mismatch and EffectReceipt generation completes the fence. workspace-control@e927fbc8117ddb7caed114b2136eb5408ce1fe29 passed Workspace Control Validation #2697 including full unit/integration regression. Runtime-port implementation resumes only from this corrected boundary.\n"
 }
