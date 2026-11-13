@@ -1,6 +1,14 @@
 name: Semantic Execution Validation
 
 on:
+  push:
+    branches:
+      - workspace-semantic-execution-migration-v1
+    paths:
+      - 'semantic-execution/**'
+      - '.github/workflows/semantic-execution-validation.yml'
+      - 'tests/test_workspace_semantic_execution_backend_dbos_postgres.py'
+      - 'tests/test_workspace_semantic_execution_backend_serialization.py'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
