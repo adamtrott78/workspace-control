@@ -133,6 +133,32 @@ PADATASET_SCIENTIFIC_ADDITION_DESTINATIONS = {
     ),
 }
 
+PADATASET_SCIENTIFIC_DUAL_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT / "padataset-scientific" / "dual-lane" / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS = "padataset-scientific-single-gpu-2-v1"
+PADATASET_SCIENTIFIC_DUAL_TARGET_ROUTE = "padataset:scientific-single-gpu-2"
+PADATASET_SCIENTIFIC_DUAL_TARGET_SCALE_SET = "lambda-padataset-scientific-single-gpu-2"
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH = ".github/workflows/lambda-ci-scientific-2.yml"
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB = "6b710d36a7bcd59bfba7224ab4a068411398edfd"
+PADATASET_SCIENTIFIC_DUAL_GPU0 = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
+PADATASET_SCIENTIFIC_DUAL_GPU1 = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
+PADATASET_SCIENTIFIC_DUAL_OVERRIDE_DESTINATIONS = set(
+    PADATASET_SCIENTIFIC_OVERRIDE_DESTINATIONS
+)
+PADATASET_SCIENTIFIC_DUAL_ADDITION_DESTINATIONS = {
+    str(
+        V3_CONFIG_ROOT
+        / "controllers"
+        / f"{PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS}.json"
+    ),
+    str(
+        pathlib.Path("/etc/systemd/system")
+        / f"workspace-ci-v3-controller@{PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS}.service.d"
+        / "identity.conf"
+    ),
+}
+
 MANAGED_SYSTEMD = {
     "workspace-ci-v3-provisioner.service":
         "systemd/workspace-ci-v3-provisioner.service",
@@ -457,6 +483,129 @@ def _padataset_scientific_workflow_refresh(
                 f"PADataset scientific workflow refresh {key} invalid"
             )
     return refresh
+
+
+def _padataset_scientific_dual_lane_override(
+    scientific_active: dict[str, Any],
+    workflow_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(PADATASET_SCIENTIFIC_DUAL_ACTIVE_RECEIPT):
+        return None
+
+    active = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_ACTIVE_RECEIPT,
+        "active PADataset scientific dual-lane override",
+    )
+    predecessor_workflow_sha = (
+        _sha256(PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT.read_bytes())
+        if workflow_refresh is not None
+        else None
+    )
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_LANE_OVERRIDE",
+        "scientific_active_receipt_sha256":
+            _sha256(PADATASET_SCIENTIFIC_ACTIVE_RECEIPT.read_bytes()),
+        "scientific_workflow_refresh_receipt_sha256": predecessor_workflow_sha,
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "target_route_key": PADATASET_SCIENTIFIC_DUAL_TARGET_ROUTE,
+        "target_scale_set_name": PADATASET_SCIENTIFIC_DUAL_TARGET_SCALE_SET,
+        "trusted_workflow_blob_sha": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB,
+        "gpu0_uuid": PADATASET_SCIENTIFIC_DUAL_GPU0,
+        "gpu1_uuid": PADATASET_SCIENTIFIC_DUAL_GPU1,
+        "runtime_manifest_identity_sha256": PADATASET_SCIENTIFIC_RUNTIME_MANIFEST,
+        "runtime_tree_digest_sha256": PADATASET_SCIENTIFIC_RUNTIME_TREE,
+        "scientific_data_profile_id": PADATASET_SCIENTIFIC_DATA_PROFILE,
+        "scientific_data_tree_digest_sha256": PADATASET_SCIENTIFIC_DATA_DIGEST,
+    }
+    for key, expected in required.items():
+        if active.get(key) != expected:
+            raise ReconcileError(
+                f"active PADataset scientific dual-lane binding mismatch: {key}"
+            )
+    if active.get("phase") not in {"INSTALLED_INACTIVE", "ACTIVE"}:
+        raise ReconcileError("active PADataset scientific dual-lane phase invalid")
+    _require_source_head(
+        active.get("source_head"),
+        "PADataset scientific dual-lane override",
+    )
+    for key in (
+        "catalog_generation_sha256",
+        "previous_root_policy_sha256",
+        "root_policy_sha256",
+        "target_controller_policy_sha256",
+        "installed_inactive_overlay_sha256",
+    ):
+        value = active.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"active PADataset scientific dual-lane {key} invalid"
+            )
+
+    previous = active.get("previous_root_envelope_sha256")
+    current = active.get("root_envelope_sha256")
+    if not isinstance(previous, dict) or not isinstance(current, dict):
+        raise ReconcileError("dual-lane root envelope maps missing")
+    if PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS in previous:
+        raise ReconcileError("dual-lane target appears in previous class map")
+    if set(current) != set(previous) | {PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS}:
+        raise ReconcileError("dual-lane class envelope set is not exact +1")
+    for mapping in (previous, current):
+        for class_id, digest in mapping.items():
+            if (
+                not isinstance(class_id, str)
+                or not isinstance(digest, str)
+                or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            ):
+                raise ReconcileError("dual-lane root envelope binding invalid")
+
+    overrides = active.get("managed_artifact_overrides")
+    if (
+        not isinstance(overrides, dict)
+        or set(overrides) != PADATASET_SCIENTIFIC_DUAL_OVERRIDE_DESTINATIONS
+    ):
+        raise ReconcileError("dual-lane override destination set invalid")
+    predecessor = scientific_active["managed_artifact_overrides"]
+    for destination, binding in overrides.items():
+        if not isinstance(binding, dict) or set(binding) != {
+            "prior_sha256", "sha256", "mode"
+        }:
+            raise ReconcileError(
+                f"dual-lane override binding invalid: {destination}"
+            )
+        if binding.get("prior_sha256") != predecessor[destination]["sha256"]:
+            raise ReconcileError(
+                f"dual-lane prior digest mismatch: {destination}"
+            )
+        if binding.get("mode") != predecessor[destination]["mode"]:
+            raise ReconcileError(
+                f"dual-lane override mode mismatch: {destination}"
+            )
+        if re.fullmatch(r"[0-9a-f]{64}", str(binding.get("sha256", ""))) is None:
+            raise ReconcileError(
+                f"dual-lane override digest invalid: {destination}"
+            )
+
+    additions = active.get("managed_artifact_additions")
+    if (
+        not isinstance(additions, dict)
+        or set(additions) != PADATASET_SCIENTIFIC_DUAL_ADDITION_DESTINATIONS
+    ):
+        raise ReconcileError("dual-lane addition destination set invalid")
+    for destination, binding in additions.items():
+        if not isinstance(binding, dict) or set(binding) != {"sha256", "mode"}:
+            raise ReconcileError(
+                f"dual-lane addition binding invalid: {destination}"
+            )
+        if binding.get("mode") != "0644":
+            raise ReconcileError(
+                f"dual-lane addition mode invalid: {destination}"
+            )
+        if re.fullmatch(r"[0-9a-f]{64}", str(binding.get("sha256", ""))) is None:
+            raise ReconcileError(
+                f"dual-lane addition digest invalid: {destination}"
+            )
+    return active
 
 
 def _verify_padataset_scientific_effective_state(
