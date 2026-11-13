@@ -370,11 +370,27 @@ def _load_authority(
 
 
 def _consume_authority(value: dict[str, Any], raw: bytes) -> pathlib.Path:
+    base._ensure_private_dir(AUTHORITY_ROOT)
+    marker = AUTHORITY_ROOT / f"{value['authorization_id']}.json"
+    record = {
+        "schema_version": 1,
+        "authorization_id": value["authorization_id"],
+        "operation": value["operation"],
+        "authority_sha256": _sha(raw),
+        "consumed_at": datetime.now(timezone.utc).isoformat(),
+    }
     try:
-        base._ensure_private_dir(AUTHORITY_ROOT)
-        return base._consume_authority(value, raw)
-    except base.ScientificActivationError as exc:
-        raise DualLaneActivationError(str(exc)) from exc
+        fd = os.open(marker, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    except FileExistsError as exc:
+        raise DualLaneActivationError(
+            "dual-lane authorization already consumed"
+        ) from exc
+    with os.fdopen(fd, "wb") as handle:
+        handle.write(base._canonical(record))
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.chown(marker, 0, 0)
+    return marker
 
 
 def _validate_preflight(path: pathlib.Path) -> tuple[dict[str, Any], bytes]:
