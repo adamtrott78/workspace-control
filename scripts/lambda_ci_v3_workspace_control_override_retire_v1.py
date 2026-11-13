@@ -173,6 +173,37 @@ def executable_for_pid(pid: int) -> pathlib.Path:
     return pathlib.Path(os.path.realpath(f"/proc/{pid}/exe"))
 
 
+def wait_target_executable(
+    expected_path: pathlib.Path,
+    expected_sha256: str,
+) -> tuple[dict[str, str], pathlib.Path, str]:
+    last_service: dict[str, str] = {}
+    last_path = pathlib.Path("/")
+    last_sha = ""
+    for _ in range(80):
+        last_service = systemctl_show(TARGET_SERVICE)
+        pid = int(last_service.get("MainPID") or 0)
+        if (
+            last_service.get("ActiveState") == "active"
+            and last_service.get("SubState") == "running"
+            and pid > 0
+        ):
+            proc_exe = pathlib.Path(f"/proc/{pid}/exe")
+            try:
+                last_path = executable_for_pid(pid)
+                last_sha = sha256(proc_exe.read_bytes())
+            except (FileNotFoundError, PermissionError, OSError):
+                pass
+            else:
+                if last_path == expected_path and last_sha == expected_sha256:
+                    return last_service, last_path, last_sha
+        time.sleep(0.25)
+    raise OverrideRetireError(
+        "target executable did not converge to expected controller: "
+        f"path={last_path} sha={last_sha} service={last_service}"
+    )
+
+
 def current_policy_nonterminal_records(root: pathlib.Path = STATE_ROOT) -> list[pathlib.Path]:
     result: list[pathlib.Path] = []
     if not root.exists():
@@ -287,7 +318,10 @@ def restore_override(
             os.replace(backup_dropin, STALE_DROPIN)
         subprocess.run(["systemctl", "daemon-reload"], check=True)
         subprocess.run(["systemctl", "start", TARGET_SERVICE], check=True)
-        wait_target("running")
+        wait_target_executable(
+            STALE_OVERRIDE_BINARY,
+            STALE_OVERRIDE_SHA256,
+        )
         receipt["phase"] = "ROLLED_BACK_BEFORE_SCHEDULER_MUTATION"
         write_receipt(receipt_path, receipt)
     except Exception:
@@ -354,14 +388,10 @@ def apply(repo: pathlib.Path, expected_head: str) -> pathlib.Path:
 
         subprocess.run(["systemctl", "daemon-reload"], check=True)
         subprocess.run(["systemctl", "start", TARGET_SERVICE], check=True)
-        target_after = wait_target("running")
-        pid = int(target_after["MainPID"])
-        live_path = executable_for_pid(pid)
-        live_sha = sha256(pathlib.Path(f"/proc/{pid}/exe").read_bytes())
-        if live_path != SHARED_BINARY or live_sha != SHARED_SHA256:
-            raise OverrideRetireError(
-                f"target did not start exact shared controller: path={live_path} sha={live_sha}"
-            )
+        target_after, live_path, live_sha = wait_target_executable(
+            SHARED_BINARY,
+            SHARED_SHA256,
+        )
 
         siblings_after = snapshot_siblings()
         if siblings_after != evidence["siblings_before"]:
