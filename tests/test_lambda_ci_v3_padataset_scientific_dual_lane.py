@@ -4,6 +4,10 @@ import pathlib
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / "scripts"
+import sys
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
 
 def load_module(name, rel):
     spec = importlib.util.spec_from_file_location(name, ROOT / rel)
@@ -15,7 +19,6 @@ def load_module(name, rel):
 compiler = load_module('lambda_ci_policy_compiler_dual_test', 'scripts/lambda_ci_policy_compiler.py')
 
 # The activation helper imports sibling modules by normal name.
-import sys
 sys.modules['lambda_ci_policy_compiler'] = compiler
 reconciler = load_module('lambda_ci_v3_reconciler', 'scripts/lambda_ci_v3_reconciler.py')
 sys.modules['lambda_ci_v3_reconciler'] = reconciler
