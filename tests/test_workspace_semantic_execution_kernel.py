@@ -361,6 +361,59 @@ class WaitTests(unittest.TestCase):
         self.assertEqual(process["generation"], 1)
         self.assertEqual(process["state"], "WAITING_EXTERNAL")
         self.assertEqual(process["wait_key"], "experiment:E1")
+
+        with self.assertRaises(kernel.KernelContractError):
+            kernel.claim(
+                graph,
+                "R-recover-wait",
+                worker_id="W2",
+                lease_id="L2",
+                expected_generation=1,
+            )
+
+        graph = kernel.wake_external(
+            graph,
+            "R-recover-wait",
+            wait_key="experiment:E1",
+            event_id="experiment:E1:complete",
+        )
+        self.assertEqual(
+            graph["processes"]["R-recover-wait"]["state"],
+            "READY_TO_RESUME",
+        )
+
+    def test_recovery_does_not_satisfy_external_wait(self):
+        graph = kernel.new_graph([kernel.new_process("R-recover-wait")])
+        graph = kernel.claim(
+            graph,
+            "R-recover-wait",
+            worker_id="W",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = kernel.start(
+            graph,
+            "R-recover-wait",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = kernel.wait_external(
+            graph,
+            "R-recover-wait",
+            wait_key="experiment:E1",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = kernel.recover(
+            graph,
+            "R-recover-wait",
+            expected_generation=0,
+            reason="process restart while experiment still running",
+        )
+        process = graph["processes"]["R-recover-wait"]
+        self.assertEqual(process["generation"], 1)
+        self.assertEqual(process["state"], "WAITING_EXTERNAL")
+        self.assertEqual(process["wait_key"], "experiment:E1")
         with self.assertRaises(kernel.KernelContractError):
             kernel.claim(
                 graph,
