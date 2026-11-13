@@ -105,7 +105,7 @@ class EffectiveGenerationVerificationTests(unittest.TestCase):
                 "mode": "V3_SUBSTRATE_INSTALL_INACTIVE",
                 "source_head": "a" * 40,
                 "root_policy_sha256": "b" * 64,
-                "runner_class_count": 10,
+                "runner_class_count": 11,
                 "entries": [
                     {
                         "destination": str(controller),
