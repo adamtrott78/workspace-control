@@ -183,7 +183,7 @@ def verify_migration(root: pathlib.Path = ROOT) -> dict[str, Any]:
             "root_launch_semantics": "EXACT_EQUIVALENT",
         })
 
-    _require(len(rows) == 24, "expected 24 route equivalence proofs")
+    _require(len(rows) == 25, "expected 25 route equivalence proofs")
     return {
         "decision": "PASS",
         "route_count": len(rows),
