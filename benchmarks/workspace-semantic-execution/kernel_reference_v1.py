@@ -441,12 +441,27 @@ def recover(
         raise KernelContractError(f"recover_terminal_state:{process['state']}")
     if not reason:
         raise KernelContractError("recovery_reason_required")
+
+    previous_state = process["state"]
     process["generation"] += 1
-    process["state"] = "READY_TO_RESUME"
     process["worker_id"] = None
     process["lease_id"] = None
-    process["wait_key"] = None
-    _append_event(next_graph, process, "RECOVER", reason=reason)
+
+    if previous_state == "WAITING_EXTERNAL":
+        process["state"] = "WAITING_EXTERNAL"
+    elif previous_state == "WAITING_DEPENDENCIES":
+        process["state"] = "WAITING_DEPENDENCIES"
+    else:
+        process["state"] = "READY_TO_RESUME"
+        process["wait_key"] = None
+
+    _append_event(
+        next_graph,
+        process,
+        "RECOVER",
+        reason=reason,
+        previous_state=previous_state,
+    )
     validate_graph(next_graph)
     return next_graph
 
