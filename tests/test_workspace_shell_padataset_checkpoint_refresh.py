@@ -21,10 +21,10 @@ class PadatasetCheckpointRefreshContractTests(unittest.TestCase):
         self.assertEqual(cp.returncode, 0, cp.stdout + cp.stderr)
         source = SCRIPT.read_text()
         for marker in (
-            'EXPECTED_OLD_AUTHORITY_SHA="\${1:-}"',
-            'EXPECTED_NEW_AUTHORITY_SHA="\${2:-}"',
-            'EXPECTED_OLD_PAD_SHA="\${3:-}"',
-            'EXPECTED_NEW_PAD_SHA="\${4:-}"',
+            'EXPECTED_OLD_AUTHORITY_SHA="${1:-}"',
+            'EXPECTED_NEW_AUTHORITY_SHA="${2:-}"',
+            'EXPECTED_OLD_PAD_SHA="${3:-}"',
+            'EXPECTED_NEW_PAD_SHA="${4:-}"',
             'AUTHORITY_ROOT="/etc/workspace-shell/authority"',
             'PAD_ROOT="/srv/workspace-shell/PADataset"',
             'merge-base --is-ancestor "$EXPECTED_OLD_AUTHORITY_SHA" "$EXPECTED_NEW_AUTHORITY_SHA"',
