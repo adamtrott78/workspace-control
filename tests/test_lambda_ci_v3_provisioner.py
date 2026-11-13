@@ -121,9 +121,9 @@ class V3ProvisionerTests(unittest.TestCase):
             },
         )
 
-    def test_all_ten_controller_uids_reserve_only_their_root_owned_class(self):
-        self.assertEqual(len(self.class_ids), 10)
-        self.assertEqual(len(set(self.uid_by_class.values())), 10)
+    def test_all_eleven_controller_uids_reserve_only_their_root_owned_class(self):
+        self.assertEqual(len(self.class_ids), 11)
+        self.assertEqual(len(set(self.uid_by_class.values())), 11)
         for index, class_id in enumerate(self.class_ids, start=1):
             response = self.reserve(class_id, index)
             self.assertEqual(response["status"], "RESERVED", class_id)
@@ -196,11 +196,14 @@ class V3ProvisionerTests(unittest.TestCase):
         self.assertEqual(conflict["error_code"], "REPLAY_CONFLICT")
 
     def test_host_capacity_busy_is_request_local_and_creates_no_record(self):
-        first, second = self.class_ids[:2]
+        first = "workspace-control-control-small-v1"
+        second = "research-cpu-public-v1"
+        third = "padataset-cpu-public-v1"
         self.assertEqual(self.reserve(first, 105)["status"], "RESERVED")
-        busy = self.reserve(second, 106)
+        self.assertEqual(self.reserve(second, 106)["status"], "RESERVED")
+        busy = self.reserve(third, 107)
         self.assertEqual(busy["status"], "BUSY")
-        self.assertIsNone(self.store.read(self.request_id(106)))
+        self.assertIsNone(self.store.read(self.request_id(107)))
 
     def test_reservation_expires_and_fresh_request_can_allocate(self):
         first, second = self.class_ids[:2]
@@ -276,7 +279,7 @@ class V3ProvisionerTests(unittest.TestCase):
         self.assertIsNone(self.store.read(self.request_id(114)))
 
     def test_missing_supervisor_and_runner_after_grace_quarantines_and_holds(self):
-        class_id = self.class_ids[0]
+        class_id = "padataset-gpu-single-public-v1"
         self.assertEqual(self.reserve(class_id, 115)["status"], "RESERVED")
         self.assertEqual(self.launch(class_id, 115)["status"], "PREPARING")
         self.service.unit_probe = lambda _unit: False
@@ -288,7 +291,7 @@ class V3ProvisionerTests(unittest.TestCase):
         self.assertFalse(record["cleanup_verified"])
         self.assertIn(class_id, self.store.quarantines())
 
-        other = self.class_ids[1]
+        other = "padataset-scientific-single-gpu-v1"
         self.assertEqual(self.reserve(other, 116)["status"], "BUSY")
 
     def test_worker_consumes_jit_and_persists_terminal_without_raw_jit(self):
@@ -374,7 +377,7 @@ class V3ProvisionerTests(unittest.TestCase):
             cls["controller_peer"]["unix_user"]
             for cls in self.root["runner_classes"].values()
         ]
-        self.assertEqual(len(users), 10)
+        self.assertEqual(len(users), 11)
         with self.assertRaisesRegex(provider.V3ServiceError, "maps to both"):
             provider.build_controller_uid_map(
                 self.root,
