@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "benchmark_id": "workspace-gpt6-instant-characterization-v1",
+  "status": "DESIGN_FROZEN_PENDING_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Empirically characterize the GPT-6 Sol / Instant execution envelope that matters to decomposition, retry, synthesis and stronger-effort routing without attempting to infer undocumented hidden reasoning budgets.",
+  "logical_executor": "OPENAI_CHAT_INSTANT_CURRENT",
+  "current_executor_identity": {
+    "provider": "OpenAI",
+    "surface": "ChatGPT Chat",
+    "model_family": "GPT-6 Sol",
+    "configuration": "Instant",
+    "matched_control": {
+      "model_family": "GPT-6 Sol",
+      "configuration": "High"
+    },
+    "identity_rule": "Record the exact surface-reported identity at every run; mismatch invalidates the run for current-profile calibration."
+  },
+  "evidence_classes": [
+    "DOCUMENTED",
+    "EMPIRICALLY_OBSERVED",
+    "UNKNOWN_CALIBRATE"
+  ],
+  "non_goals": [
+    "infer exact hidden reasoning-token limits",
+    "claim Instant and High are globally equivalent",
+    "measure browser RAM or operator UX",
+    "re-run every historical GPT-5.6 screening fixture",
+    "treat tool/transport failure as model reasoning failure"
+  ],
+  "causal_axes": [
+    {
+      "id": "R_reasoning_coupling",
+      "description": "Increase the number of mutually dependent constraints required for one irreducible decision while keeping context/horizon bounded."
+    },
+    {
+      "id": "H_horizon",
+      "description": "Increase independent sequential/parallel work units while keeping each unit easy and low-coupling."
+    },
+    {
+      "id": "C_context",
+      "description": "Increase supplied context volume and distractors while holding the relevant reasoning problem constant."
+    },
+    {
+      "id": "B_branching",
+      "description": "Increase independent branch count and compare whole-task execution with decomposition."
+    },
+    {
+      "id": "S_synthesis_fanin",
+      "description": "Increase the number of already-validated leaf results that one synthesizer must integrate."
+    },
+    {
+      "id": "T_tool_depth",
+      "description": "Increase serial tool-call/action depth while holding reasoning difficulty roughly constant."
+    },
+    {
+      "id": "V_validator_repair",
+      "description": "Measure recovery after one or more objective validator failures with bounded feedback."
+    },
+    {
+      "id": "P_persistence",
+      "description": "Compare persistent-chat continuation with fresh durable-resume quanta under identical packets."
+    }
+  ],
+  "matched_treatments": {
+    "instant": {
+      "logical_executor": "OPENAI_CHAT_INSTANT_CURRENT",
+      "model_family": "GPT-6 Sol",
+      "configuration": "Instant"
+    },
+    "high_control": {
+      "model_family": "GPT-6 Sol",
+      "configuration": "High"
+    },
+    "rule": "Keep surface, tools, fixture, packet compiler, validation and authority constant; vary thinking configuration only for causal Instant-vs-High comparisons."
+  },
+  "experiment_families": [
+    {
+      "id": "E1_coupling_staircase",
+      "primary_axis": "R_reasoning_coupling",
+      "levels": [
+        1,
+        2,
+        4,
+        8,
+        12
+      ],
+      "compare": [
+        "Instant",
+        "High"
+      ],
+      "outcome": "Find the earliest level where Instant validated success/reliability diverges materially from High."
+    },
+    {
+      "id": "E2_horizon_decomposition",
+      "primary_axis": "H_horizon",
+      "levels": [
+        4,
+        8,
+        16,
+        32
+      ],
+      "treatments": [
+        "Instant_monolith",
+        "Instant_decomposed_parallel",
+        "High_monolith"
+      ],
+      "outcome": "Measure whether decomposition restores Instant quality when horizon rather than intrinsic coupling is the cause."
+    },
+    {
+      "id": "E3_context_staircase",
+      "primary_axis": "C_context",
+      "levels": [
+        "minimal",
+        "2x",
+        "4x",
+        "8x"
+      ],
+      "treatments": [
+        "Instant_raw_context",
+        "Instant_bounded_packet",
+        "High_bounded_packet"
+      ],
+      "outcome": "Calibrate packet-size/progressive-disclosure policy and distinguish context overload from reasoning limits."
+    },
+    {
+      "id": "E4_synthesis_fanin",
+      "primary_axis": "S_synthesis_fanin",
+      "levels": [
+        2,
+        4,
+        8,
+        16,
+        32
+      ],
+      "compare": [
+        "Instant_synthesizer",
+        "High_synthesizer"
+      ],
+      "outcome": "Calibrate maximum reliable Instant synthesis fan-in and when hierarchical synthesis is required."
+    },
+    {
+      "id": "E5_tool_chain_depth",
+      "primary_axis": "T_tool_depth",
+      "levels": [
+        1,
+        2,
+        4,
+        8,
+        16
+      ],
+      "compare": [
+        "Instant",
+        "High"
+      ],
+      "outcome": "Determine whether serial tool depth creates a distinct reliability envelope that should trigger decomposition/checkpointing."
+    },
+    {
+      "id": "E6_validator_repair",
+      "primary_axis": "V_validator_repair",
+      "levels": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "compare": [
+        "Instant_repair",
+        "High_repair"
+      ],
+      "outcome": "Calibrate bounded same-tier repair attempts before re-decomposition or stronger-effort routing."
+    },
+    {
+      "id": "E7_persistence_resume",
+      "primary_axis": "P_persistence",
+      "treatments": [
+        "Instant_persistent",
+        "Instant_fresh_durable_resume"
+      ],
+      "outcome": "Quantify whether continuity materially improves validated outcome after packet/state externalization."
+    }
+  ],
+  "metrics": [
+    "objective validator score/pass",
+    "constraint omission count",
+    "premature terminal/convergence count",
+    "tool calls and failed tool calls",
+    "reasoning quanta",
+    "validator repair attempts",
+    "decomposition decisions",
+    "false escalation",
+    "unsafe under-escalation",
+    "context bytes supplied",
+    "wall clock excluding deliberate waits",
+    "time-to-first-visible-output when observable",
+    "session rotations",
+    "repeated work after durable resume"
+  ],
+  "hard_gates": [
+    "same exact GPT-6 Sol generation/surface for Instant and High matched controls",
+    "same connected tool capability set",
+    "objective/domain validation before COMPLETE",
+    "zero authority/provenance violations",
+    "zero hidden-oracle exposure for claim-bearing runs",
+    "no model polling during WAITING_EXTERNAL",
+    "no use of hidden reasoning-token estimates as ground truth"
+  ],
+  "initial_execution_order": [
+    "E1_coupling_staircase",
+    "E2_horizon_decomposition",
+    "E4_synthesis_fanin",
+    "E6_validator_repair",
+    "E3_context_staircase",
+    "E5_tool_chain_depth",
+    "E7_persistence_resume"
+  ],
+  "production_profile_rule": "Route Instant based on the validated envelope by phenotype. Re-run a compact sentinel subset after any model/surface/toolset change; run the full profile only when sentinel behavior materially shifts.",
+  "source_refs": [
+    "https://help.openai.com/en/articles/20001354-gpt-6-and-other-models-in-chatgpt",
+    "https://help.openai.com/en/articles/6825453-chatgpt-release-notes",
+    "https://developers.openai.com/api/docs/guides/reasoning",
+    "https://developers.openai.com/api/docs/guides/deployment-checklist",
+    "https://developers.openai.com/api/docs/guides/latest-model"
+  ]
+}
