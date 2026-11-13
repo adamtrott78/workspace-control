@@ -1,5 +1,6 @@
 """Infrastructure adapters for Workspace Semantic Execution."""
 
+from .dbos_runtime import DBOSDurableRuntime
 from .in_memory import (
     DeterministicFakeExecutor,
     DeterministicSemanticProjection,
@@ -20,6 +21,7 @@ from .serialization import (
 )
 
 __all__ = [
+    "DBOSDurableRuntime",
     "DeterministicFakeExecutor",
     "DeterministicSemanticProjection",
     "FakeClock",
