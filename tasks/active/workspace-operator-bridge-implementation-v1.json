@@ -1,0 +1,1511 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-operator-bridge-implementation-v1",
+  "title": "Workspace Operator Bridge Implementation v1",
+  "status": "IN_PROGRESS",
+  "goal": "Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-first Windows/Firefox system: .NET 10 helper, typed Native Messaging/named-pipe BrowserPort, least-privilege Firefox MV3 adapter, deterministic fake-worker simulator, recovery/fault closure, packaging/rollback, empirical performance/usability evidence, optional WebView2 comparison, and gated real-account calibration without changing the frozen manual Ctrl+V + Enter or authority/security boundaries.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-semantic-execution-migration-v1",
+  "current_stage": "impl_10_usability_trial_execution",
+  "acceptance_criteria": [
+    "Implementation remains traceable to the UX-13 freeze at exact workspace-control SHA 0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
+    "Every stage has explicit dependencies, outputs, validation, and exact-head durable evidence before promotion.",
+    "The child task mutates only its explicit task/program/code/CI/benchmark/test paths; frozen UX design artifacts are read-only inputs.",
+    "The .NET helper and Firefox adapter preserve ports-and-adapters dependency direction and cannot create execution authority.",
+    "The production browser adapter has no ChatGPT DOM/content/output extraction, synthetic input, automatic Send, credential/token extraction, private endpoint use, or safeguard/auth bypass.",
+    "Routine operation remains one scheduler command followed by manual Ctrl+V and Enter.",
+    "Local preparation never implies durable worker acknowledgment and lack of acknowledgment never triggers automatic resend.",
+    "Unknown/stale session or generation state fails closed and old-generation evidence cannot advance current state.",
+    "CI and simulator testing do not require a ChatGPT account or account credentials.",
+    "The UX-10 simulator required contract tests pass before any real-account calibration.",
+    "The UX-09 empirical performance budget is executed and evaluated before production promotion.",
+    "The UX-11 human-in-loop usability suite passes with zero hard correctness/safety failures before production promotion.",
+    "Installation/update/rollback are per-user, bounded to owned files/registry state, and do not require routine administrator authority.",
+    "Any real-account test occurs only after built-artifact security review, target-host smoke, fresh policy/product review, signed install state, normal manual authentication, and authorized OperatorBridge transport.",
+    "Final production promotion requires an explicit Stage 13 verdict; completion of implementation alone does not imply production readiness."
+  ],
+  "constraints": [
+    "Do not mutate UX-00 through UX-13 frozen design artifacts from this child task. If implementation evidence invalidates a frozen contract, stop and reopen the owning design through a separately reviewed change.",
+    "Do not self-widen the mutation scope recorded in this capsule.",
+    "Do not use browser DOM/accessibility/screenshot/page-source/output inspection against ChatGPT.",
+    "Do not synthesize paste, typing, mouse input, Enter, or Send against ChatGPT.",
+    "Do not read arbitrary prior clipboard content or implement automatic clipboard snapshot/restore in v0.",
+    "Do not read or import browser cookies, passwords, tokens, localStorage, IndexedDB, or credential/profile databases.",
+    "Do not call undocumented/private ChatGPT consumer endpoints or replay consumer requests.",
+    "Do not evade identity-provider, product, rate-limit, CAPTCHA, auth, or safety restrictions.",
+    "No real ChatGPT account is used before impl_12_real_account_calibration and its explicit predecessor gates.",
+    "No simulator-only SIM_HUMAN_SUBMIT or fault-control capability may be reachable through production BrowserPort, Native Messaging, helper packaging, or production runtime configuration.",
+    "No unauthenticated inbound TCP/HTTP listener is introduced by the operator bridge.",
+    "No automatic self-updater is introduced in v0.",
+    "No new runtime dependency beyond the frozen stack is introduced without a bounded stage rationale, version pin, and security/maintenance review.",
+    "Do not modify unrelated workspace-control workflows, policies, schemas, controllers, GitRunner, Workspace Shell, research-engine, PADataset, or course repositories.",
+    "Cross-chat recovery uses this capsule, exact Git SHAs, and validation evidence; conversation memory is never required."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+      "remote": {
+        "branch": "workspace-semantic-execution-migration-v1",
+        "checkpoint_sha": "f952a4b0dfea079469ad9d15f32efa51e9ca053b",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-operator-bridge-implementation-v1.json",
+        "tasks/active/workspace-operator-bridge-implementation-v1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json",
+        "architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json",
+        "operator-bridge/**",
+        ".github/workflows/operator-bridge-validation.yml",
+        "benchmarks/workspace-semantic-execution/operator_bridge/**",
+        "tests/test_workspace_semantic_execution_operator_bridge*.py"
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "id": "impl_00_program_authority_and_contract_freeze",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "UX-13 design freeze workspace-control@0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+        "explicit operator authorization to create the implementation program/task"
+      ],
+      "outputs": [
+        "child v2 task capsule + derived handoff",
+        "implementation program",
+        "stage plan",
+        "traceability matrix"
+      ],
+      "validation": [
+        {
+          "check": "Implementation program/task bootstrap",
+          "result": "PASS",
+          "evidence": [
+            "Stage-00 content committed at workspace-control@2ff35d02ec823744937dc8fdd82d69c44bb3cb69.",
+            "Workspace Control Validation run 42757555992 / #2377 SUCCESS on the exact Stage-00 content head, including changed task-contract, unit-regression, pinned Lambda controller, and full integration-contract checks.",
+            "The child capsule authorizes only its own task/program artifacts, operator-bridge/**, one dedicated operator-bridge CI workflow, bounded operator-bridge benchmark results, and bounded bridge tests.",
+            "The parent UX-13 design freeze remains pinned at workspace-control@0a110b570410d6d3310afc8ef4591e4aa383c0b8."
+          ]
+        }
+      ],
+      "resume_condition": "Child implementation task is handoff-safe enough to begin repository/bootstrap work and no code path is authorized outside its explicit scope."
+    },
+    {
+      "id": "impl_01_repository_bootstrap_and_contract_harness",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_00_program_authority_and_contract_freeze"
+      ],
+      "outputs": [
+        "operator-bridge solution/project skeleton",
+        "operator-bridge-validation GitHub Actions workflow",
+        "frozen protocol copy or generated artifact with drift check",
+        "initial test projects",
+        "manifest/security static-test scaffolding"
+      ],
+      "validation": [
+        {
+          "check": "Stage 01 repository/bootstrap/contract harness",
+          "result": "PASS",
+          "evidence": [
+            "Stage-01 implementation content committed at workspace-control@0fabe069aa39914f84b00ac78a2f26f57238ef4c.",
+            "Operator Bridge Validation run 42758655547 / #1 SUCCESS on the exact Stage-01 code head: Windows .NET 10 setup, Python frozen-contract/security tests, restore, Release build, and dotnet test all passed.",
+            "Workspace Control Validation run 42758654957 / #2379 SUCCESS on the exact Stage-01 code head, including changed task contracts, repository unit regression, pinned Lambda controller, and full integration contracts.",
+            "The implementation copy operator-bridge/protocol/browser_adapter_v1.schema.json is JSON-equivalent to the UX-12 frozen protocol and enforced by a repository static test.",
+            "Firefox manifest static tests enforce MV3, exact permissions nativeMessaging/tabs/sessions, no host/content-script keys, fixed extension ID, ESR 153 minimum, and required data-collection declaration none.",
+            "The dedicated Operator Bridge Validation workflow contains no secrets.* or OpenAI/ChatGPT credential dependency and runs on windows-latest.",
+            "The .NET 10 solution skeleton, WinForms helper skeleton, SharedContracts project, three MSTest projects, Firefox adapter skeleton, README, and dedicated CI workflow are present without Stage-02+ behavior."
+          ]
+        }
+      ],
+      "resume_condition": "Empty/minimal implementation compiles and CI can deterministically enforce frozen contracts."
+    },
+    {
+      "id": "impl_02_windows_helper_kernel",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_01_repository_bootstrap_and_contract_harness"
+      ],
+      "outputs": [
+        "primary helper process",
+        "hotkey port/adapter",
+        "clipboard port/adapter",
+        "tray/operator shell",
+        "single-flight dispatch application service",
+        "content-free diagnostics"
+      ],
+      "validation": [
+        {
+          "check": "Stage 02 Windows helper kernel",
+          "result": "PASS",
+          "evidence": [
+            "Stage-02 helper-kernel implementation validated at workspace-control@82e5463587efcaaf8471f352a3ad3eb5a3b70537.",
+            "Operator Bridge Validation run 42759788865 / #6 SUCCESS on the exact Stage-02 code head: frozen-contract/security tests, .NET 10 restore, Release build, MSTest suite, and helper idle-resource smoke measurement all passed.",
+            "Workspace Control Validation run 42759788845 / #2384 SUCCESS on the exact Stage-02 code head.",
+            "RegisterHotKey adapter uses Ctrl+B with MOD_NOREPEAT, fails closed on registration conflicts, and supports deterministic register/unregister tests through a bounded native API seam.",
+            "Bridge master toggle owns hotkey registration and forces state OFF when registration fails; bridge-OFF dispatch performs zero action/browser/clipboard side effects.",
+            "Single-flight dispatch rejects a concurrent second press without a second claim, and clipboard staging occurs only after browser preparation plus action/generation revalidation and immediately before final focus.",
+            "The WinForms clipboard adapter is write-only and static tests prohibit Clipboard.Get/GetText/GetDataObject usage.",
+            "Structured diagnostics expose only allowlisted metadata and tests prove packet text and exception messages are not emitted.",
+            "The runtime browser/action adapters remain Stage-02 no-work/noop placeholders; Native Messaging, named pipes, Firefox lifecycle, simulator behavior, and real-account interaction are still absent.",
+            "CI idle smoke sample recorded 43.293 MiB max Working Set and 1.4973% mean CPU of one logical CPU over 7.305 seconds on windows-latest. This is a short CI smoke sample only and neither passes nor fails the later UX-09 target-machine production budget."
+          ]
+        }
+      ],
+      "resume_condition": "Helper kernel satisfies UX-05 local behavior using fake ports; no browser dependency is required."
+    },
+    {
+      "id": "impl_03_native_messaging_and_local_ipc",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_02_windows_helper_kernel"
+      ],
+      "outputs": [
+        "native-host proxy mode",
+        "named-pipe server/client",
+        "protocol parser/validator",
+        "native host manifest generator/registration helper"
+      ],
+      "validation": [
+        {
+          "check": "Stage 03 Native Messaging and local IPC",
+          "result": "PASS",
+          "evidence": [
+            "Stage-03 IPC implementation validated at workspace-control@c001bbda287f05ce3f2ceae7e003e3552903fd9c.",
+            "Operator Bridge Validation run 42761641406 / #10 SUCCESS on the exact Stage-03 code head: static/security tests, .NET 10 restore, Release build, 8 Protocol.Tests, 18 WorkspaceOperator.Tests, 1 Integration.Tests, and idle smoke all passed.",
+            "Workspace Control Validation run 42761641430 / #2388 SUCCESS on the exact Stage-03 code head.",
+            "Protocol framing is uint32 little-endian length + UTF-8 JSON with a hard 65,536-byte ceiling; malformed, truncated, empty, oversize, unknown-version, unknown-message, and unknown top-level/payload fields fail closed.",
+            "Protocol validation recursively rejects packet/clipboard/raw-URL/path/query/fragment/title/favicon/page-content/output/credential/token/cookie/password field names.",
+            "HELLO/HELLO_ACK negotiates only protocol 1.0; PING/PONG is bounded and content-free.",
+            "IdempotencyRegistry distinguishes FIRST, DUPLICATE_SAME, and CONFLICT for request_id/idempotency_key pairs.",
+            "The primary tray helper owns a NamedPipeServerStream configured with PipeOptions.CurrentUserOnly; pipe names are additionally elevation-scoped so standard and elevated helper/proxy processes cannot alias.",
+            "The server remains alive across a client/proxy disconnect and accepts a second connection in the same process lifetime.",
+            "NativeHostRegistration generates a per-user Firefox native-host manifest bound only to workspace-control-operator@adamtrott78.local and registers under HKCU Software\\\\Mozilla\\\\NativeMessagingHosts\\\\com.workspacecontrol.operator_bridge.",
+            "The same helper executable supports explicit --native-host-proxy mode and a redirected-stdio detection path; target-host Firefox launch semantics remain a later signed-profile smoke gate and are not claimed here.",
+            "No TCP/HTTP listener, Firefox tab lifecycle, ChatGPT interaction, packet extraction, or execution authority was introduced."
+          ]
+        }
+      ],
+      "resume_condition": "Browser adapter can communicate with helper through bounded typed IPC without authority leakage."
+    },
+    {
+      "id": "impl_04_firefox_mv3_adapter",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_03_native_messaging_and_local_ipc"
+      ],
+      "outputs": [
+        "manifest.json",
+        "background event-page implementation",
+        "Native Messaging connection",
+        "create/activate/reload/discard/close/inventory operations",
+        "sessions binding metadata",
+        "managed-origin classification"
+      ],
+      "validation": [
+        {
+          "check": "Stage 04 Firefox MV3 browser adapter",
+          "result": "PASS",
+          "evidence": [
+            "Stage-04 Firefox adapter implementation validated at workspace-control@ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436.",
+            "Operator Bridge Validation run 42762550362 / #12 SUCCESS on the exact Stage-04 code head.",
+            "Workspace Control Validation run 42762550131 / #2390 SUCCESS on the exact Stage-04 code head.",
+            "The dedicated Node 24 test gate ran 10 mocked-browser tests with 10 PASS / 0 FAIL.",
+            "Firefox manifest permissions remain exactly nativeMessaging, tabs, sessions; no host_permissions, content_scripts, activeTab, scripting, webNavigation, webRequest, cookies, or clipboard permissions are present.",
+            "Managed tabs are recognized only through the extension-owned sessions metadata key workspaceControlOperatorBindingV1; an unmanaged ChatGPT tab is never adopted based on URL.",
+            "CREATE/ENSURE uses a fixed reviewed https://chatgpt.com/ start URL and accepts no arbitrary command-supplied URL.",
+            "Session metadata is limited to managed, binding_ref, binding_generation, worker_slot_id, session_generation and contains no packet, clipboard, URL, credential, token, cookie, or password data.",
+            "Adapter operations implement ensure/create/activate/reload-or-restore/discard/close/inventory with worker-slot/session-generation matching and optional binding-generation fencing.",
+            "Duplicate request_id + identical idempotency_key returns the cached result without repeating browser effects; a different key for the same request is rejected as IDEMPOTENCY_CONFLICT.",
+            "Active managed tabs fail closed for discard, and close/activate/reload can act only on matching managed bindings.",
+            "Raw tab URL/navigation metadata is reduced immediately to CHATGPT_ORIGIN/OFF_CHATGPT_ORIGIN/UNKNOWN before events/results are emitted; mocked tests prove raw origins/paths/query text do not appear in emitted payloads.",
+            "Background transport performs HELLO/HELLO_ACK before accepting BROWSER_COMMAND, returns correlated BROWSER_RESULT, emits content-free BROWSER_EVENT, and reconnects Native Messaging after bounded disconnect.",
+            "The existing .NET suite also remained green: 8 Protocol.Tests, 18 WorkspaceOperator.Tests, 1 Integration.Tests."
+          ]
+        }
+      ],
+      "resume_condition": "Firefox BrowserPort implementation exists and remains inside UX-08 least-privilege boundary."
+    },
+    {
+      "id": "impl_05_simulator_and_fake_worker",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_04_firefox_mv3_adapter"
+      ],
+      "outputs": [
+        "fake worker surface/service",
+        "scenario controller",
+        "fake action/session/durable event stores",
+        "SIM_HUMAN_SUBMIT deterministic CI boundary",
+        "fault injection",
+        "trace hashing"
+      ],
+      "validation": [
+        {
+          "check": "Stage 05 deterministic simulator and fake worker",
+          "result": "PASS",
+          "evidence": [
+            "Stage-05 deterministic simulator validated at workspace-control@8bf4c2b6d13dc9d917ee831828c718fbca57648a.",
+            "Operator Bridge Validation run 42763800602 / #15 SUCCESS on the exact Stage-05 code head.",
+            "Workspace Control Validation run 42763800575 / #2393 SUCCESS on the exact Stage-05 code head.",
+            "The simulator solution is physically separated from the production WorkspaceOperatorBridge.slnx; production project references do not include WorkspaceOperator.Simulator or Simulator.Tests.",
+            "Frozen UX-10 L0/L1 coverage is machine-checked: stage05-l0-l1-catalog.json covers exactly all 36 E2E tests whose frozen matrix includes L0 or L1.",
+            "Simulator.Tests passed 38/38: 36 deterministic scenario rows plus virtual-clock and catalog integrity tests.",
+            "Every scenario is executed twice and must produce the same content-free SHA-256 trace, proving deterministic replay for the Stage-05 fixture set.",
+            "Fake state includes OperatorAction-like queue/claim/terminal transitions, logical session generation/continuity, durable-event deduplication/fencing, virtual time, fault injection, fake worker service, and a simulator-only fake worker surface.",
+            "SIM_HUMAN_SUBMIT exists only in the WorkspaceOperator.Simulator assembly. Static release-boundary tests prove the production source tree and frozen production protocol contain neither SIM_HUMAN_SUBMIT nor FaultInjector.",
+            "Payload-hash mismatch produces only a simulator diagnostic trace and cannot append a valid durable event or advance the waiting action.",
+            "Late/wrong-generation durable events are preserved as stale evidence but cannot advance current generation; duplicate durable events are idempotent.",
+            "Recovery generation advancement is keyed by recovery ID and cannot advance the same logical session twice.",
+            "The production Firefox mocked-browser suite and production .NET suites remained green after adding the simulator."
+          ]
+        }
+      ],
+      "resume_condition": "Full deterministic fake-worker environment exists without a ChatGPT account."
+    },
+    {
+      "id": "impl_06_integrated_local_bridge_e2e",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_05_simulator_and_fake_worker"
+      ],
+      "outputs": [
+        "integrated local runner",
+        "Firefox test profile setup",
+        "L2/L3 trace/result artifacts"
+      ],
+      "validation": [
+        {
+          "check": "Stage 06 real-helper + Firefox + fake-worker integration",
+          "result": "PASS",
+          "evidence": [
+            "Stage-06 integrated implementation validated at workspace-control@8c0f97f23e181b850728b2b42c970b71d93c3991.",
+            "Operator Bridge Validation run 42767850738 / #24 SUCCESS on the exact Stage-06 code head.",
+            "Workspace Control Validation run 42767850719 / #2402 SUCCESS on the exact Stage-06 code head.",
+            "Static/security boundary checks passed and the Stage-06 catalog exactly covers all 11 frozen UX-10 CORE/AUTHORITY/ACK/INPUT/IDENTITY obligations that require L2 or L3.",
+            "Firefox mocked-browser suite passed 14/14, including managed-binding ambiguity fail-closed behavior, prepare-without-early-focus, simulator-only worker URL override isolation, and Firefox tabs.discard no-return-value semantics.",
+            "Simulator.Tests passed 38/38; production Protocol.Tests passed 8/8, WorkspaceOperator.Tests 20/20, and Integration.Tests 1/1.",
+            "Layer-2 Windows integration tests passed 5/5 using the real helper application services, actual OS clipboard access, and actual Ctrl+B RegisterHotKey registration.",
+            "Layer-3 Firefox 159.0.1 integration connected through the real Native Messaging host/proxy/named-pipe BrowserPort to a test-only loopback fake worker and returned PASS.",
+            "Layer-3 PASS predicates include SERVICE_EXISTING, CREATE_AND_SERVICE, discard/restore without generation change, unmanaged-lookalike rejection, ambiguous-binding fail-closed, executor-identity fail-closed, adapter terminal-state parity, zero background clipboard mutation, and zero background helper browser effects.",
+            "Real Firefox discard/restore evidence: seed APPLIED, discard APPLIED, restore dispatch LOCAL_PREPARED, simulator human submit accepted, restore delta 1, generation remained 0.",
+            "Adapter parity recorded COMPLETED/TRUSTED for both in-memory and Firefox adapters with no local binding IDs in authoritative state.",
+            "The Stage-06 deterministic trace SHA-256 is 4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477 and the result is content-free.",
+            "No real ChatGPT account, credentials, DOM inspection, synthetic paste/Enter, or ChatGPT content extraction was used."
+          ]
+        }
+      ],
+      "resume_condition": "Routine bridge mechanics work end-to-end against fake workers with real OS/browser adapters."
+    },
+    {
+      "id": "impl_07_recovery_and_fault_closure",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_06_integrated_local_bridge_e2e"
+      ],
+      "outputs": [
+        "recovery coordinator implementation",
+        "restart/reinventory handling",
+        "auth-domain freeze/reconcile/generation-advance implementation",
+        "content-free recovery traces"
+      ],
+      "validation": [
+        {
+          "check": "Stage 07 recovery and fault closure",
+          "result": "PASS",
+          "evidence": [
+            "Stage-07 exact clean promotion head is workspace-control@5166fdf44af3548ae1f9bc3e773f948f22f212e1.",
+            "Operator Bridge Validation run 42770844304 / #30 SUCCESS on the exact Stage-07 promotion head.",
+            "Workspace Control Validation run 42770844310 / #2408 SUCCESS on the exact Stage-07 promotion head.",
+            "Underlying Stage-07 implementation code head 7d8bd99bbd23eafa834a0a676d86156382ad8c1e had already passed Operator Bridge Validation #29 and Workspace Control Validation #2407.",
+            "Frozen recovery/crash/auth/generation/control-plane catalog covers exactly 14 UX-10 fixtures at all required implemented L0-L3 layers.",
+            "Simulator.Tests passed 38/38, preserving L0/L1 generation-fencing, stale-evidence, auth-recovery, restart, and idempotency contracts.",
+            "Production tests passed: Protocol.Tests 8/8, WorkspaceOperator.Tests 24/24, Integration.Tests 1/1.",
+            "Layer-2 real-helper suite passed 12/12 total, including explicit Stage-07 SIM-008, SIM-021, SIM-022, SIM-023, SIM-024, SIM-033, and SIM-034 recovery/crash coverage.",
+            "SIM-022 Layer-2 proves an unknown CREATE side-effect outcome becomes BLOCKED/recovery, performs exactly one create effect, writes no clipboard packet, and cannot create a duplicate on a second dispatch.",
+            "Blocking recovery is checked before ClaimNext: Ctrl+B opens/focuses recovery only, with zero action claim, browser effect, packet staging, or clipboard mutation.",
+            "Recovery state is content-free and durable; completed freeze/reconcile/generation steps survive helper restart and are not replayed.",
+            "Scoped recovery ignores unrelated ambiguous bindings; ambiguity is evaluated only for affected/replacement session generations.",
+            "Real Firefox 159.0.1 + Native Messaging Stage-07 Layer-3 integration PASS with web-ext 10.8.0.",
+            "Layer-3 recovery predicates PASS for managed-tab loss, browser loss, adapter disconnect/reinventory, unknown-create no-duplicate, metadata-only auth entry, profile-wide auth refresh, and cold restart/no stale replay.",
+            "Auth refresh reconciled once and advanced exactly two affected session generations once each; manual auth return did not restore TRUSTED continuity.",
+            "Cold restart retained the outstanding action claim count at exactly 1; stale local cache was not replayed.",
+            "No background clipboard mutation or helper browser effect occurred during the quiet interval.",
+            "No real ChatGPT account, DOM/accessibility/page-content inspection, credential/token access, synthetic paste/Enter, or authentication automation was used."
+          ]
+        }
+      ],
+      "resume_condition": "Single-component and auth-domain failures have bounded tested recovery with no authority duplication."
+    },
+    {
+      "id": "impl_08_packaging_install_update_rollback",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_07_recovery_and_fault_closure"
+      ],
+      "outputs": [
+        "self-contained win-x64 publish",
+        "per-user install/uninstall scripts",
+        "native host registration",
+        "signed-XPI installation procedure",
+        "explicit update/rollback procedure"
+      ],
+      "validation": [
+        {
+          "check": "Stage 08 per-user packaging, install/update/uninstall, and rollback",
+          "result": "PASS",
+          "evidence": [
+            "Stage-08 exact clean promotion head is workspace-control@26284233edb00c4a7005dac3d5c52b2add814156.",
+            "Operator Bridge Validation run 42784908906 / #36 SUCCESS on the exact Stage-08 promotion head.",
+            "Workspace Control Validation run 42784909185 / #2414 SUCCESS on the exact Stage-08 promotion head.",
+            "Underlying Stage-08 implementation head cac009bd18960c01f9dc4d2a20bac34eb6a0a175 passed Operator Bridge Validation #34 and Workspace Control Validation #2412.",
+            "Stage-08 implementation exact head is workspace-control@cac009bd18960c01f9dc4d2a20bac34eb6a0a175.",
+            "Operator Bridge Validation run 42784245574 / #34 SUCCESS on the exact Stage-08 implementation head.",
+            "Workspace Control Validation run 42784245795 / #2412 SUCCESS on the exact Stage-08 implementation head.",
+            "Stage-08 content-free workflow artifact 13747726653 is named operator-bridge-stage08-cac009bd18960c01f9dc4d2a20bac34eb6a0a175 and binds package manifests/evidence to the exact source SHA.",
+            "Self-contained win-x64 package build PASS.",
+            "Clean per-user install smoke PASS with dedicated HKCU Native Messaging registration.",
+            "Upgrade smoke PASS with immutable versioned releases and previous release retention.",
+            "Rollback to the previous helper/XPI release PASS.",
+            "Uninstall owned-scope-only PASS; unrelated filesystem and sibling registry sentinels remained unchanged.",
+            "Unrelated Firefox profile sentinel remained unchanged; install/update/rollback/uninstall perform no direct Firefox profile mutation.",
+            "Normal install/update/uninstall surface requires no administrator authority and introduces no automatic self-updater.",
+            "Frozen Firefox extension identity workspace-control-operator@adamtrott78.local, permission set [nativeMessaging,tabs,sessions], and native host com.workspacecontrol.operator_bridge remain unchanged.",
+            "Production packaging excludes simulator-only controls; recovery/install state remains content-free.",
+            "CI uses an explicit CI_UNSIGNED_FIXTURE only and makes no Mozilla-signature claim. Production signed-XPI flow requires manual Firefox installation/signature verification from an XPI whose embedded production source matches the exact reviewed checkout.",
+            "Operator Bridge #33 intentionally failed rollback because the native-host manifest still contained the temporary staging path; install.ps1 was repaired to rewrite the manifest at the final immutable release path, and unchanged strict rollback validation passed in #34."
+          ]
+        }
+      ],
+      "resume_condition": "A reviewed per-user baseline can be installed, updated, and rolled back safely."
+    },
+    {
+      "id": "impl_09_performance_benchmark_execution",
+      "status": "SUSPENDED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_08_packaging_install_update_rollback"
+      ],
+      "outputs": [
+        "content-free benchmark result set",
+        "latency/resource summary",
+        "budget pass/fail findings"
+      ],
+      "validation": [
+        {
+          "check": "Stage 09 benchmark infrastructure and non-target regression evidence",
+          "result": "PASS",
+          "evidence": [
+            "Validated Stage-09 target-matrix infrastructure checkpoint: workspace-control@832777a8015d6ef9ee2bdedf22553e28a6549553.",
+            "Operator Bridge Validation run 42794816523 / #50 SUCCESS on the exact checkpoint.",
+            "Workspace Control Validation run 42794816623 / #2428 SUCCESS on the exact checkpoint.",
+            "Performance harness and target matrix remain outside the production package; production packaging remains simulator/performance-harness free.",
+            "Stage-09 GitHub-hosted Windows regression plus target-matrix PlanOnly smoke passed and uploaded content-free artifact 13753443601.",
+            "CI evidence remains explicitly non-target and target_contract_complete=false.",
+            "Full target matrix runner is implemented and locally validates exact frozen windows/counts/order, no same-name process contamination, background CPU validity, Firefox extension-overhead baseline, Chrome parity resources, five discard/restore reps, exact latency counts, and every frozen budget.",
+            "The target matrix temporarily binds only the dedicated HKCU Native Messaging host key to the exact checked-out helper and restores the prior Stage-08 registration in cleanup.",
+            "The existing workflow exposes an opt-in self-hosted target-performance job that is inert on PRs and ordinary workflow runs, depends on exact-head validation, and uploads target evidence even on budget failure.",
+            "UX-P003 cold-start capability is implemented and target-only 10-trial probing remains part of the full target matrix."
+          ]
+        },
+        {
+          "check": "Stage 09 AMO-compatible fake-worker adapter and signing gate",
+          "result": "PASS",
+          "evidence": [
+            "Validated corrected Stage-09 implementation source head: workspace-control@96be6cf95706f784f7f20c3a5a61a7671b36fa27.",
+            "Workspace Control Validation run 42806204793 SUCCESS on exact source head 96be6cf95706f784f7f20c3a5a61a7671b36fa27.",
+            "Operator Bridge Validation run 42806204561 SUCCESS on exact source head 96be6cf95706f784f7f20c3a5a61a7671b36fa27.",
+            "Stage-09 account-free performance smoke PASS and fake-worker Mozilla signing input build PASS on the validated source line.",
+            "Performance adapter is identity-fenced as FIREFOX_EXTENSION / 0.1.9-perf before any browser command can be accepted; wrong/stale/production adapters are rejected with ADAPTER_IDENTITY_REJECTED.",
+            "Stage-09 target profile preparation verifies the signed XPI payload against exact repo source, rejects any retained production ChatGPT worker URL, and refuses to mutate a Firefox profile without the Stage-09 ownership marker.",
+            "Target matrix registry/native-host override and Chrome HighEfficiencyMode policy changes are inside reversible cleanup scope.",
+            "AMO manifest name was shortened to Workspace Operator Performance Adapter and a regression test now enforces the 45-character limit.",
+            "Mozilla AMO approval email confirms Workspace Operator Performance Adapter version 0.1.9 passed automated screening and is available in the Developer Hub for download."
+          ]
+        },
+        {
+          "check": "Stage 09 target execution reached Firefox adapter preflight",
+          "result": "FAIL",
+          "evidence": [
+            "Exact target source head: 3fd98235678a7d6f0f728d82b4611eed8697152e.",
+            "Workspace Control Validation #2459 / run 42814425643 SUCCESS on the exact head.",
+            "Operator Bridge Validation #85 / run 42814425603 SUCCESS on the exact head.",
+            "Triggered Operator Bridge run 42815030650 completed validation SUCCESS before scheduling target-performance.",
+            "target-performance job 129827357688 passed exact-head checkout, .NET 10 setup, Python setup, interactive runner preconditions, and entered Execute frozen Stage 09 target matrix.",
+            "Target log emitted STAGE09_TARGET_PROFILE_VERIFIED=PASS.",
+            "Target log then emitted Target Firefox adapter identity preflight failed.",
+            "Cleanup warned Firefox remains running after collector cleanup; reject this target run.",
+            "No stage09-target-evidence.json was produced; upload step completed with warning that no matching file was found.",
+            "No UX-09 measurement window or frozen budget evaluation completed."
+          ]
+        },
+        {
+          "check": "Stage 09 run #185 missing-latency diagnosis and fail-fast replicate-boundary repair",
+          "result": "PASS",
+          "evidence": [
+            "Operator Bridge Validation run 43075229854 / #185 executed target-performance job 130715185761 on exact source head 819011a0e52dc6816eb5bf918e8ff63fd10fd936 and ended FAILURE after the real target matrix ran from 2026-11-11T18:14:11Z to 2026-11-11T20:37:42Z.",
+            "The target job passed exact-head checkout, interactive runner preconditions, STAGE09_TARGET_PROFILE_VERIFIED=PASS, STAGE09_TARGET_ADAPTER_PREFLIGHT=PASS, and the early unrelated-CPU validity gate with mean 18.573549673616743 percent <= the frozen 20 percent limit.",
+            "The matrix completed deep Firefox/Chrome resource execution but emitted no stage09-target-evidence.json; final fail-closed error was: Full Firefox replicate is missing exact latency evidence.",
+            "Run #185 proves Firefox replicate 1 reached aggregate validation without the required exact latency payload. Because the child collector stdout/stderr were redirected and the temporary replicate files were removed during cleanup, repository evidence does not establish whether the inner cause was a structured COLLECTOR_FAILURE envelope or another incomplete TARGET_FIREFOX_PARTIAL result.",
+            "Source inspection showed Invoke-FirefoxReplicate accepted any TARGET_FIREFOX_PARTIAL with target_contract_complete=false and content_policy=CONTENT_FREE, including the collector-failure envelope, without immediately validating result status or required replicate-1 latency/cold-start fields.",
+            "Repair head e244efad098df6559dae5874b5783782a305cf32 now fails immediately on result=COLLECTOR_FAILURE with bounded STAGE09_FIREFOX_REPLICATE_COLLECTOR_FAILURE metadata, and fails immediately on missing required replicate-1 latency/hotkey/cold-start shape with STAGE09_FIREFOX_REPLICATE_INCOMPLETE.",
+            "The repair does not weaken ADAPTER_IDENTITY_REJECTED, fake-worker-only boundaries, process ownership, content-free evidence rules, exact-head binding, the <=20 percent unrelated-CPU validity limit, or any frozen UX-09 performance budget.",
+            "Workspace Control Validation #2557 and Operator Bridge Validation #186 both passed SUCCESS on exact repair head e244efad098df6559dae5874b5783782a305cf32."
+          ]
+        }
+      ],
+      "resume_condition": "Resume the authoritative long-form UX-09 target benchmark after impl_12_real_account_calibration and before impl_13_production_readiness_review; every frozen UX-09 budget remains mandatory for production promotion."
+    },
+    {
+      "id": "impl_10_usability_trial_execution",
+      "status": "IN_PROGRESS",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": "gpt-5.6-sol",
+      "selected_surface": "chat+github+local",
+      "inputs": [
+        "validated stage impl_08_packaging_install_update_rollback",
+        "operator-authorized sequencing amendment deferring long-form UX-09 target benchmarking until final production gating"
+      ],
+      "outputs": [
+        "UT-01 through UT-12 result records as required",
+        "feedback/checklist results",
+        "hotkey retain/rebind decision"
+      ],
+      "validation": [
+        {
+          "check": "Stage 10 UT-01 primary loop + recovery hardening checkpoint",
+          "result": "PASS",
+          "evidence": [
+            "UT-11 PASS: Operator Bridge run #194 / stage10-usability job 130809245969 emitted OBJECTIVE_PASS with zero wrong-worker, wrong-packet, or rejected submissions.",
+            "UT-01 happy path PASS on recovery-guard head b5d9ae62b15d5496925f634aa4582dd435b23c0e: Operator Bridge run #208 / stage10-usability job 130950231898 completed 5/5 actions with 5/5 durable acknowledgments and OBJECTIVE_PASS.",
+            "Single-job recovery rerun job 130952654587 on b5d9ae62 completed 5 actions with 5 durable acknowledgments and blocked 8 repeated Ctrl+B presses, but OBJECTIVE_FAIL recorded 2 rejected submissions. Operator observed Ctrl+B was blocked before paste but could still move tabs after paste and before Enter.",
+            "Repair head 62e9260f2451d51cdc8b2d724cabbe5691e39ef9 adds authoritative AwaitingDurableAck-driven same-worker refocus for repeated Ctrl+B until Enter/durable acknowledgment.",
+            "Repair head 62e9260f passed Workspace Control Validation #2572 and Operator Bridge Validation #209.",
+            "Operator Bridge run #210 / stage10-usability job 130957988034 on 62e9260f reached STAGE10_USABILITY_READY=UT-01, then exceeded the 30-minute bounded trial window with no result artifact because the final human recovery sequence was not completed before executor handoff. This is NOT a product failure verdict.",
+            "UT-01 recovery validation PASS: Operator Bridge run #210 attempt 2 / stage10-usability job 131196644208 on exact implementation head 62e9260f2451d51cdc8b2d724cabbe5691e39ef9 emitted OBJECTIVE_PASS.",
+            "Structured counters: 5/5 actions completed, 5/5 valid durable acknowledgments, 7 hotkey presses, 2 handoff-blocked presses, 2 handoff refocuses, 2 safely recovered repeat presses, zero wrong-worker dispatches, zero wrong-packet dispatches, zero rejected state submissions, zero dispatch failures, and zero clipboard-failed dispatches.",
+            "Operator deliberately exercised Ctrl+B -> Ctrl+V -> Ctrl+B before Enter and confirmed the second Ctrl+B stayed/refocused the same pending fake-worker/action; the operator then reported the main operational loop was working as intended.",
+            "Content-free Stage-10 artifact 13946895810 was uploaded by run #210 attempt 2. A permanent repository result record is stored at benchmarks/workspace-semantic-execution/operator_bridge/stage10-ut01-result.62e9260f.json.",
+            "The frozen subjective 1-7 feedback ratings were not supplied in this observation and remain explicitly pending; no rating is inferred."
+          ]
+        },
+        {
+          "check": "Stage 10 physical hotkey binding acceptance",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Ctrl+B UT-10 on Operator Bridge run #214 / stage10-usability job 131209297790 completed 20/20 intended actions with 20 valid durable acknowledgments but emitted OBJECTIVE_FAIL because it recorded 21 hotkey presses, 1 handoff-blocked/refocus press, and 1 rejected state submission.",
+            "The operator explicitly rejected Ctrl+B for ergonomics because the Ctrl+B -> Ctrl+V transition requires an uncomfortable pointer-finger stretch, explicitly proposed Ctrl+Space, reported having tried the motion, and said it felt like a good compromise.",
+            "The scheduler hotkey is now runtime-configurable; Ctrl+Space is the current Stage-10 candidate and helper default for this candidate branch while preserving configurability for future rebinds.",
+            "Per the frozen UX-11 binding rule, the Ctrl+B result is a physical-binding rejection rather than a bridge-architecture failure. Ctrl+Space remains pending until hotkey-sensitive reruns and representative-work collision testing pass.",
+            "Fresh evidence is required for UT-01, UT-02, UT-03, UT-09, and UT-10. UT-11 will also be rerun to verify Bridge OFF releases Ctrl+Space normally.",
+            "Ctrl+Space UT-10 is now empirically accepted for motor rhythm: run #226 produced a clean OBJECTIVE_PASS and operator ratings 1/7 friction, 7/7 worker-selection confidence, 7/7 physical comfort.",
+            "Final Ctrl+Space retention remains pending the remaining hotkey-sensitive Stage-10 coverage and UT-09 representative-work collision/interference test."
+          ]
+        },
+        {
+          "check": "Stage 10 Ctrl+Space UT-10 motor-rhythm acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Operator Bridge run #226 / workflow run 43260666074 / stage10-usability job 131332961359 executed on exact source head ae7f94d8f2e327da12874ffde3f680b5328bd8d9 and completed SUCCESS.",
+            "Structured UT-10 result emitted OBJECTIVE_PASS with 20/20 intended actions completed, 20/20 valid durable acknowledgments, and exactly 20 hotkey presses.",
+            "The run recorded zero no-action presses, zero busy presses, zero handoff-blocked/refocus/recovered-repeat presses, zero wrong-worker dispatches, zero wrong-packet dispatches, zero rejected state submissions, zero dispatch failures, and zero clipboard-failed dispatches.",
+            "Structured trace SHA-256: c49868a0970aeec374fe8761bd9fce6ceeb0e73a2081e725686f2b5174ee4577. Content policy remained CONTENT_FREE.",
+            "Operator ratings after the clean run: routine rhythm friction 1/7 (target <=2), worker-selection confidence 7/7 (target >=6), physical comfort 7/7 (target >=6). All three subjective UT-10 thresholds pass.",
+            "The operator reported the loop could be executed quickly with no mistakes.",
+            "UT-10 intentionally seeds one trusted slot and queues all 20 actions as SERVICE_EXISTING against slot-1; reuse of a single fake-worker tab is expected trial behavior and is not a tab-creation failure.",
+            "GitHub Actions artifact 13963358712 retained the content-free Stage-10 result for run #226."
+          ]
+        },
+        {
+          "check": "Stage 10 Ctrl+Space UT-02 mixed-batch + minimize-on-empty acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Operator Bridge run #237 / workflow run 43288769135 / stage10-usability job 131431294172 executed on exact source head acc61e9b5b9cdc50d6ff53538588e652c68c52c1 and completed SUCCESS.",
+            "Structured UT-02 result emitted OBJECTIVE_PASS with 20/20 total actions completed, 16/16 valid durable service acknowledgments, 4/4 local-only actions drained, and six distinct service workers.",
+            "The run recorded 17 hotkey presses total: 16 service presses plus exactly one explicit READY=0 no-action press.",
+            "The READY=0 press recorded no_work_minimize_attempts=1 and no_work_minimize_successes=1; last_dispatch_outcome=NoAction.",
+            "The run recorded zero wrong-worker dispatches, zero wrong-packet dispatches, zero rejected state submissions, zero dispatch failures, and zero clipboard-failed dispatches.",
+            "Structured trace SHA-256: 70088c5390a2b634f8a56215f775bce78a0a3c3a8791ed8a1d8a35abbed2fcaa. Content policy remained CONTENT_FREE.",
+            "GitHub Actions artifact 13978146719 retained the content-free Stage-10 result.",
+            "Operator confirmed the final extra Ctrl+Space made the dedicated WorkspaceWorkers Firefox window disappear as intended, understood that the safety action is minimization rather than browser termination, and rated the resulting behavior 10/10.",
+            "The interactive workspace-operator-target runner is persistent; completion of this job is not evidence that runner re-registration is required."
+          ]
+        },
+        {
+          "check": "Stage 10 Ctrl+Space UT-03 interruption recovery acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Operator Bridge run #243 / workflow run 43296982057 / stage10-usability job 131462981442 executed on exact source head bc4ec0e1dad7a55148224ffd7ffaf6e246615fdc and completed SUCCESS.",
+            "Structured UT-03 result emitted OBJECTIVE_PASS with 6/6 intended actions completed, 6/6 valid durable acknowledgments, three distinct service workers, and all five required interruption prompts issued.",
+            "The run recorded 15 hotkey presses total: 6 productive service presses, 8 safely recovered same-action refocus presses while durable acknowledgment was pending, and one final no-action press.",
+            "All 8 repeated presses were handoff-blocked/refocused to the same pending action; zero rejected state submissions occurred.",
+            "The final no-action press recorded one minimize attempt and one minimize success with last_dispatch_outcome=NoAction.",
+            "The run recorded zero wrong-worker dispatches, zero wrong-packet dispatches, zero dispatch failures, and zero clipboard-failed dispatches.",
+            "Structured trace SHA-256: ccbfd2f8dff0f4881c89778ceac1cb267b4c6c4c0647c971945186766f2d0054. Content policy remained CONTENT_FREE.",
+            "GitHub Actions artifact 13981151249 retained the content-free Stage-10 result.",
+            "Operator reported the test went well. Detailed subjective/manual observation counts remain pending and are not inferred."
+          ]
+        },
+        {
+          "check": "Stage 10 Ctrl+Space UT-04 multiple SENT/UNCONFIRMED acceptance",
+          "result": "PASS",
+          "evidence": [
+            "Operator Bridge run #251 / workflow run 43455915773 / stage10-usability job 131991701505 executed on exact source head f952a4b0dfea079469ad9d15f32efa51e9ca053b and completed SUCCESS.",
+            "Structured UT-04 result emitted OBJECTIVE_PASS with 6/6 actions completed and 6/6 valid durable acknowledgments across five distinct service workers.",
+            "The fixture began with two pre-existing SENT/UNCONFIRMED workers while four fresh service actions remained ready; multiple_sent_unconfirmed_with_ready_observed=true and max_sent_unconfirmed=3 prove coexistence.",
+            "The operator completed four normal Ctrl+Space -> Ctrl+V -> Enter service cycles without revisiting or resolving the two earlier unconfirmed workers; both simulated late durable acknowledgments were later applied automatically.",
+            "The run recorded 5 hotkey presses total: four productive fresh-service presses and one final no-action press. There were zero handoff blocks/refocuses, zero busy presses, zero rejected state submissions, zero wrong-worker or wrong-packet dispatches, zero dispatch failures, and zero clipboard failures.",
+            "The final no-action press recorded one minimize attempt and one minimize success with last_dispatch_outcome=NoAction.",
+            "Trace SHA-256: 6b24ce27bc12bfa67edf89d36c81b788ffa1112d2667ac14841266d3a21d520a. Content policy remained CONTENT_FREE.",
+            "GitHub Actions artifact 14055075456 retained the content-free Stage-10 result.",
+            "Operator completed the trial successfully but did not provide detailed subjective ratings; none are inferred."
+          ]
+        }
+      ],
+      "resume_condition": "Ctrl+Space UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, UT-03 interruption recovery, and UT-04 multiple SENT/UNCONFIRMED coexistence are objectively accepted. Continue UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and representative-work UT-09 before final binding retention."
+    },
+    {
+      "id": "impl_11_webview2_comparison_spike",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_10_usability_trial_execution"
+      ],
+      "outputs": [
+        "bounded WebView2 adapter spike",
+        "UX-10 parity results",
+        "UX-09 comparison measurements",
+        "promotion/reject disposition"
+      ],
+      "validation": [],
+      "resume_condition": "WebView2 is REJECTED/DEFERRED or remains a promotion candidate; Firefox baseline is unaffected."
+    },
+    {
+      "id": "impl_12_real_account_calibration",
+      "status": "PLANNED",
+      "execution_owner": "operator+chatgpt",
+      "selected_executor": null,
+      "selected_surface": "chat+github+local",
+      "inputs": [
+        "validated stage impl_10_usability_trial_execution"
+      ],
+      "outputs": [
+        "fresh policy/product review record",
+        "implementation security checklist",
+        "Firefox target-host API smoke results",
+        "manual authentication/recovery calibration",
+        "real ChatGPT latency/RAM calibration",
+        "bounded real-account verdict"
+      ],
+      "validation": [],
+      "resume_condition": "Real-account baseline is explicitly PASS/BLOCKED/REVISE with no policy/security workaround."
+    },
+    {
+      "id": "impl_13_production_readiness_review",
+      "status": "PLANNED",
+      "execution_owner": "chatgpt",
+      "selected_executor": null,
+      "selected_surface": "github",
+      "inputs": [
+        "validated stage impl_12_real_account_calibration"
+      ],
+      "outputs": [
+        "implementation review",
+        "open findings ledger",
+        "promotion/hold/revise decision",
+        "recovery/rollback checkpoint"
+      ],
+      "validation": [],
+      "resume_condition": "Explicit PROMOTE_V0, HOLD, or REVISE decision. No implicit production promotion."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "parent-ux13-freeze",
+      "kind": "git_commit",
+      "identity": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Control Validation #2376 SUCCESS at this head.",
+        "UX-00 through UX-13 operator design is frozen; implementation evidence must not silently change those contracts."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "832777a8015d6ef9ee2bdedf22553e28a6549553",
+      "required_for_resume": true,
+      "evidence": [
+        "Stage 09 full target-matrix infrastructure is exact-head green at 832777a8015d6ef9ee2bdedf22553e28a6549553.",
+        "Operator Bridge Validation #50 SUCCESS.",
+        "Workspace Control Validation #2428 SUCCESS.",
+        "The existing Operator Bridge Validation workflow now contains an opt-in self-hosted Windows target-performance job guarded by workflow_dispatch inputs and needs: validation.",
+        "Full target execution remains NOT_RUN because the actual Windows operator workstation has not yet been explicitly registered/connected as the interactive workspace-operator-target runner."
+      ]
+    },
+    {
+      "id": "impl-00-program-authority-freeze",
+      "kind": "git_commit",
+      "identity": "2ff35d02ec823744937dc8fdd82d69c44bb3cb69",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Control Validation #2377 SUCCESS.",
+        "Implementation program, staged plan, traceability matrix, child capsule, and derived handoff are durable."
+      ]
+    },
+    {
+      "id": "impl-01-bootstrap-contract-harness",
+      "kind": "git_commit",
+      "identity": "0fabe069aa39914f84b00ac78a2f26f57238ef4c",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #1 SUCCESS.",
+        "Workspace Control Validation #2379 SUCCESS.",
+        "Stage 01 build/test/contract infrastructure is validated; no helper/browser runtime behavior beyond skeleton exists."
+      ]
+    },
+    {
+      "id": "impl-02-windows-helper-kernel",
+      "kind": "git_commit",
+      "identity": "82e5463587efcaaf8471f352a3ad3eb5a3b70537",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #6 SUCCESS.",
+        "Workspace Control Validation #2384 SUCCESS.",
+        "Stage 02 helper kernel validated with no browser/Native Messaging implementation."
+      ]
+    },
+    {
+      "id": "impl-03-native-messaging-local-ipc",
+      "kind": "git_commit",
+      "identity": "c001bbda287f05ce3f2ceae7e003e3552903fd9c",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #10 SUCCESS.",
+        "Workspace Control Validation #2388 SUCCESS.",
+        "Stage 03 protocol/native-host/named-pipe boundary validated; Firefox tab lifecycle remains unimplemented."
+      ]
+    },
+    {
+      "id": "impl-04-firefox-mv3-adapter",
+      "kind": "git_commit",
+      "identity": "ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #12 SUCCESS.",
+        "Workspace Control Validation #2390 SUCCESS.",
+        "Stage 04 Firefox BrowserPort adapter validated with mocked browser APIs and frozen least-privilege permissions."
+      ]
+    },
+    {
+      "id": "impl-05-simulator-fake-worker",
+      "kind": "git_commit",
+      "identity": "8bf4c2b6d13dc9d917ee831828c718fbca57648a",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #15 SUCCESS.",
+        "Workspace Control Validation #2393 SUCCESS.",
+        "Stage 05 simulator solution passed 38/38 deterministic tests and exact frozen L0/L1 coverage check."
+      ]
+    },
+    {
+      "id": "impl-06-integrated-local-bridge-e2e",
+      "kind": "git_commit",
+      "identity": "8c0f97f23e181b850728b2b42c970b71d93c3991",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #24 SUCCESS.",
+        "Workspace Control Validation #2402 SUCCESS.",
+        "Layer-2 real-helper mechanics 5/5 PASS; real Firefox/native-host Layer-3 integration PASS."
+      ]
+    },
+    {
+      "id": "impl-07-recovery-and-fault-closure",
+      "kind": "git_commit",
+      "identity": "5166fdf44af3548ae1f9bc3e773f948f22f212e1",
+      "required_for_resume": true,
+      "evidence": [
+        "Stage-07 implementation code was validated at 7d8bd99bbd23eafa834a0a676d86156382ad8c1e by Operator Bridge Validation #29 and Workspace Control Validation #2407.",
+        "Stage-07 promotion/task-evidence head 5166fdf44af3548ae1f9bc3e773f948f22f212e1 passed Operator Bridge Validation #30 and Workspace Control Validation #2408.",
+        "All frozen Stage-07 recovery/crash/auth/generation obligations passed at required implemented layers."
+      ]
+    },
+    {
+      "id": "impl-08-packaging-install-update-rollback",
+      "kind": "git_commit",
+      "identity": "26284233edb00c4a7005dac3d5c52b2add814156",
+      "required_for_resume": true,
+      "evidence": [
+        "Stage-08 implementation code was validated at cac009bd18960c01f9dc4d2a20bac34eb6a0a175 by Operator Bridge Validation #34 and Workspace Control Validation #2412.",
+        "Stage-08 promotion/task-evidence head 26284233edb00c4a7005dac3d5c52b2add814156 passed Operator Bridge Validation #36 and Workspace Control Validation #2414.",
+        "Clean install, bounded uninstall, upgrade, rollback, per-user/no-admin registration, frozen identity/permissions, simulator separation, and unrelated Firefox/profile non-mutation all passed."
+      ]
+    },
+    {
+      "id": "impl-09-performance-benchmark-infrastructure",
+      "kind": "git_commit",
+      "identity": "832777a8015d6ef9ee2bdedf22553e28a6549553",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge Validation #50 SUCCESS on the exact Stage-09 target-matrix/self-hosted workflow checkpoint.",
+        "Workspace Control Validation #2428 SUCCESS on the exact checkpoint.",
+        "GitHub-hosted Stage-09 regression/PlanOnly smoke PASS with artifact 13753443601 named operator-bridge-stage09-ci-832777a8015d6ef9ee2bdedf22553e28a6549553.",
+        "Full target matrix runner validates exact 60s/120s/1Hz windows, F->C/C->F/F->C order, 3 browser resource reps, 5 discard reps, exact 50/30/30/10/100 latency counts, all frozen budget checks, background-noise rejection, and final content-free evidence validation.",
+        "Opt-in self-hosted target job requires label workspace-operator-target, interactive Windows user session, exact github.sha checkout, AC confirmation, Chrome Memory Saver disabled confirmation, and exact-head validation first.",
+        "Complete target-machine UX-09 acceptance remains NOT_RUN until that runner is explicitly registered and the target job is dispatched."
+      ]
+    },
+    {
+      "id": "impl-10-ut02-minimize-on-empty",
+      "kind": "git_commit",
+      "identity": "acc61e9b5b9cdc50d6ff53538588e652c68c52c1",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge run #237 / job 131431294172 completed SUCCESS with structured OBJECTIVE_PASS.",
+        "UT-02 completed 20/20 actions and 16/16 durable service acknowledgments across six service workers with four local-only actions drained.",
+        "Exactly one READY=0 NoAction press produced one minimize attempt and one minimize success with zero rejected stale submissions or routing/dispatch/clipboard failures.",
+        "Operator rated the resulting minimize-on-empty behavior 10/10."
+      ]
+    },
+    {
+      "id": "impl-10-ut03-interruption-recovery",
+      "kind": "git_commit",
+      "identity": "bc4ec0e1dad7a55148224ffd7ffaf6e246615fdc",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge run #243 / job 131462981442 completed SUCCESS with structured OBJECTIVE_PASS.",
+        "UT-03 completed 6/6 actions and 6/6 durable acknowledgments with all five interruption prompts issued.",
+        "Eight repeated Ctrl+Space presses while awaiting durable acknowledgment were safely refocused to the same pending action with zero rejected submissions.",
+        "The final no-work press minimized the captured WorkspaceWorkers Firefox window successfully.",
+        "Operator reported the trial went well."
+      ]
+    },
+    {
+      "id": "impl-10-ut04-sent-unconfirmed",
+      "kind": "git_commit",
+      "identity": "f952a4b0dfea079469ad9d15f32efa51e9ca053b",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator Bridge run #251 / job 131991701505 completed SUCCESS with structured OBJECTIVE_PASS.",
+        "Two pre-existing SENT/UNCONFIRMED workers coexisted with four fresh ready service actions without blocking scheduler progress.",
+        "max_sent_unconfirmed=3 and multiple_sent_unconfirmed_with_ready_observed=true.",
+        "Zero wrong-worker, wrong-packet, rejected-state, dispatch, or clipboard failures were recorded."
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md",
+      "state": "IMPLEMENTATION_PROGRAM_FROZEN",
+      "role": "construction principles, repository/build/test strategy, promotion discipline, real-account boundary",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "versioned implementation-program revision only after reviewed contract change",
+      "review_requirement": "Any change that alters frozen UX behavior reopens the owning UX/security design rather than silently editing this program.",
+      "evidence": [
+        "Created from UX-13 freeze at 0a110b570410d6d3310afc8ef4591e4aa383c0b8."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json",
+      "state": "IMPLEMENTATION_STAGE_PLAN_FROZEN",
+      "role": "machine-readable staged work breakdown, dependencies, deliverables, validation, exit gates",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "versioned stage-plan revision with explicit operator/review authority",
+      "review_requirement": "Stage dependency or gate weakening requires review.",
+      "evidence": [
+        "Stages impl_00 through impl_13 defined before implementation code."
+      ]
+    },
+    {
+      "path": "architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json",
+      "state": "IMPLEMENTATION_TRACEABILITY_BASELINE",
+      "role": "maps frozen UX requirements/contracts to implementation stages and verification evidence",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "update only to add concrete code/test evidence without weakening frozen requirements",
+      "review_requirement": "No requirement may be marked satisfied without mapped evidence.",
+      "evidence": [
+        "Frozen UX requirements mapped to construction and verification stages."
+      ]
+    },
+    {
+      "path": "operator-bridge/WorkspaceOperatorBridge.slnx",
+      "state": "STAGE_01_VALIDATED",
+      "role": ".NET 10 solution skeleton for helper/contracts/tests",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by implementation stages",
+      "review_requirement": "Project/dependency additions must remain inside staged implementation authority.",
+      "evidence": [
+        "Release build and dotnet test passed in Operator Bridge Validation #1."
+      ]
+    },
+    {
+      "path": ".github/workflows/operator-bridge-validation.yml",
+      "state": "STAGE_01_VALIDATED",
+      "role": "dedicated path-filtered Windows/.NET operator bridge validation workflow",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by implementation task",
+      "review_requirement": "Must remain credential-independent until explicit real-account calibration stage.",
+      "evidence": [
+        "Operator Bridge Validation #1 SUCCESS with no account-secret dependency."
+      ]
+    },
+    {
+      "path": "operator-bridge/protocol/browser_adapter_v1.schema.json",
+      "state": "FROZEN_PROTOCOL_COPY_VALIDATED",
+      "role": "implementation-local copy of frozen Browser Adapter Protocol v1",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "copy only from reviewed architecture protocol revision",
+      "review_requirement": "Drift test must remain exact JSON-equivalence with frozen source.",
+      "evidence": [
+        "Protocol drift static test passed in Operator Bridge Validation #1."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/FirefoxAdapter/manifest.json",
+      "state": "STAGE_01_SECURITY_BASELINE_VALIDATED",
+      "role": "least-privilege Firefox MV3 manifest skeleton",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "changed only by authorized browser-adapter stages",
+      "review_requirement": "Any permission/host/content-script expansion reopens security review.",
+      "evidence": [
+        "Manifest static security tests passed in Operator Bridge Validation #1."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage02-helper-idle-ci.json",
+      "state": "STAGE_02_CI_SMOKE_MEASUREMENT",
+      "role": "content-free Windows CI idle resource sample for the Stage-02 helper kernel",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "re-run dedicated Operator Bridge Validation measurement when helper-kernel behavior materially changes",
+      "review_requirement": "Do not treat this CI smoke sample as the UX-09 target-machine production measurement.",
+      "evidence": [
+        "Operator Bridge Validation #6 emitted max_working_set_mib=43.293 and cpu_percent_one_logical_cpu_mean=1.4973 over duration_seconds=7.305 on windows-latest."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/SharedContracts/Protocol/**",
+      "state": "STAGE_03_VALIDATED",
+      "role": "content-free protocol parser, validator, framing codec, and idempotency registry",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by protocol-authorized implementation stages",
+      "review_requirement": "Any protocol-field or authority expansion must remain equivalent to the frozen protocol or reopen reviewed design.",
+      "evidence": [
+        "Operator Bridge Validation #10 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/WorkspaceOperator/Ipc/**",
+      "state": "STAGE_03_VALIDATED",
+      "role": "CurrentUserOnly named-pipe primary server, Native Messaging proxy, elevation scoping, HELLO/PING session processor, and per-user native-host registration helpers",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by Stage 03+ implementation under child authority",
+      "review_requirement": "No unauthenticated network listener, credentials, arbitrary endpoint, or browser authority may be added.",
+      "evidence": [
+        "Operator Bridge Validation #10 SUCCESS.",
+        "Workspace Control Validation #2388 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/FirefoxAdapter/adapter_core.js",
+      "state": "STAGE_04_VALIDATED",
+      "role": "content-blind managed Firefox BrowserPort lifecycle core",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by browser-adapter implementation stages",
+      "review_requirement": "Any new browser API, permission, arbitrary navigation target, content access, or authority-bearing field requires security/design review.",
+      "evidence": [
+        "Node 24 mocked-browser tests 10/10 PASS in Operator Bridge Validation #12."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/FirefoxAdapter/background.js",
+      "state": "STAGE_04_VALIDATED",
+      "role": "Native Messaging handshake/result/event transport and browser event wiring",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by browser-adapter implementation stages",
+      "review_requirement": "Must remain content-blind and preserve HELLO gate before browser-command execution.",
+      "evidence": [
+        "Operator Bridge Validation #12 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/tests/FirefoxAdapter.Tests/firefox_adapter.test.js",
+      "state": "STAGE_04_VALIDATED",
+      "role": "mocked-browser behavioral test suite for managed lifecycle, idempotency, fencing, and URL reduction",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "extend as browser-adapter behavior expands",
+      "review_requirement": "Tests must remain account-independent and must not require real ChatGPT access.",
+      "evidence": [
+        "10 tests PASS / 0 FAIL in Operator Bridge Validation #12."
+      ]
+    },
+    {
+      "path": "operator-bridge/WorkspaceOperatorBridge.Simulator.slnx",
+      "state": "STAGE_05_VALIDATED",
+      "role": "separate simulator-only build graph that cannot be linked by the production solution",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by simulator/integration stages",
+      "review_requirement": "Production solution/package must remain free of simulator project references and test-only control endpoints.",
+      "evidence": [
+        "Operator Bridge Validation #15 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/simulator/**",
+      "state": "STAGE_05_VALIDATED",
+      "role": "deterministic fake actions/sessions/durable events, virtual clock, fault injection, fake worker service/surface, scenario controller, and content-free trace hashing",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by simulator/integration/recovery stages",
+      "review_requirement": "Simulator-only controls must never become reachable from production BrowserPort, Native Messaging, helper packaging, or production protocol.",
+      "evidence": [
+        "Simulator.Tests 38/38 PASS.",
+        "Frozen L0/L1 catalog coverage 36/36."
+      ]
+    },
+    {
+      "path": "operator-bridge/tests/Simulator.Tests/**",
+      "state": "STAGE_05_VALIDATED",
+      "role": "deterministic UX-10 L0/L1 scenario and virtual-time tests",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "extend only as frozen simulator obligations are implemented",
+      "review_requirement": "Scenario PASS must be based on state predicates and deterministic trace evidence, not hard-coded success.",
+      "evidence": [
+        "38 tests PASS / 0 FAIL in Operator Bridge Validation #15."
+      ]
+    },
+    {
+      "path": "operator-bridge/WorkspaceOperatorBridge.Integration.slnx",
+      "state": "STAGE_06_VALIDATED",
+      "role": "separate Stage-06 integration build graph joining production helper services with simulator test infrastructure without contaminating the production solution",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by integration/recovery stages",
+      "review_requirement": "Production WorkspaceOperatorBridge.slnx must remain free of simulator/integration project references.",
+      "evidence": [
+        "Operator Bridge Validation #24 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/integration/**",
+      "state": "STAGE_06_VALIDATED",
+      "role": "bounded account-free integration runner and test ports for helper/Native Messaging/Firefox/fake-worker end-to-end validation",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by integration/recovery stages",
+      "review_requirement": "Integration-only controls and fake durable services must remain unreachable from production packaging/runtime.",
+      "evidence": [
+        "Layer-3 Firefox/native-host integration PASS in Operator Bridge Validation #24."
+      ]
+    },
+    {
+      "path": "operator-bridge/tests/LocalBridgeE2E.Tests/**",
+      "state": "STAGE_06_VALIDATED",
+      "role": "Layer-2 real-helper Windows mechanics tests using real clipboard and hotkey adapters",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "extend only for bounded local/recovery obligations",
+      "review_requirement": "Tests must preserve the human submit boundary and may not synthesize ChatGPT input.",
+      "evidence": [
+        "5/5 PASS in Operator Bridge Validation #24."
+      ]
+    },
+    {
+      "path": "operator-bridge/simulator/FirefoxProfile/**",
+      "state": "STAGE_06_VALIDATED",
+      "role": "test-only Firefox profile/extension wrapper and loopback fake-worker surface for account-free Layer-3 validation",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained only for simulator/integration validation",
+      "review_requirement": "Loopback worker URL override remains simulator-only; production default remains reviewed https://chatgpt.com/.",
+      "evidence": [
+        "Firefox 159.0.1 + Native Messaging Layer-3 PASS."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage06-l2-validation.8c0f97f2.json",
+      "state": "STAGE_06_VALIDATED",
+      "role": "durable content-free Layer-2 validation summary",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "regenerate only from exact validated Stage-06 runs",
+      "review_requirement": "Must bind exact code SHA and workflow evidence.",
+      "evidence": [
+        "Operator Bridge Validation #24."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage06-l3-firefox-result.8c0f97f2.json",
+      "state": "STAGE_06_VALIDATED",
+      "role": "durable content-free real-Firefox Layer-3 terminal report",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "regenerate only from exact validated Stage-06 runs",
+      "review_requirement": "No raw URL, packet text, page content, credentials, or ChatGPT account data.",
+      "evidence": [
+        "Operator Bridge Validation #24; trace SHA-256 4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/WorkspaceOperator/Application/RecoveryCoordinator.cs",
+      "state": "STAGE_07_VALIDATED",
+      "role": "content-free recovery state machine coordinating freeze, durable reconciliation, generation fencing, manual-auth return, reinventory, and READY_TO_RESUME",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by recovery/packaging stages",
+      "review_requirement": "Must never create authority; all supersession/generation advancement remains delegated to IRecoveryAuthorityPort.",
+      "evidence": [
+        "Operator Bridge Validation #29 SUCCESS."
+      ]
+    },
+    {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/JsonRecoveryStateStore.cs",
+      "state": "STAGE_07_VALIDATED",
+      "role": "per-user atomic content-free recovery incident persistence",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by recovery/packaging stages",
+      "review_requirement": "Persist recovery metadata only; never packet/clipboard/page/URL/credential content.",
+      "evidence": [
+        "WorkspaceOperator recovery persistence tests PASS in Operator Bridge Validation #29."
+      ]
+    },
+    {
+      "path": "operator-bridge/simulator/Scenarios/stage07-recovery-catalog.json",
+      "state": "STAGE_07_VALIDATED",
+      "role": "exact 14-fixture frozen UX-10 recovery/crash/auth/generation implementation catalog",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only if frozen recovery contract changes under separate authority",
+      "review_requirement": "Must remain exact against frozen UX-10 matrix.",
+      "evidence": [
+        "Static recovery catalog contract PASS in Operator Bridge Validation #29."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage07-l2-recovery-validation.7d8bd99b.json",
+      "state": "STAGE_07_VALIDATED",
+      "role": "durable content-free Stage-07 real-helper L2 recovery validation summary",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only from exact validated Stage-07 run evidence",
+      "review_requirement": "Bind exact code SHA and workflow run.",
+      "evidence": [
+        "Operator Bridge Validation #29."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage07-l3-firefox-result.7d8bd99b.json",
+      "state": "STAGE_07_VALIDATED",
+      "role": "durable content-free Stage-07 real-Firefox recovery terminal summary",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only from exact validated Stage-07 run evidence",
+      "review_requirement": "No packet, clipboard, page, raw URL, credential, token, or account content.",
+      "evidence": [
+        "Operator Bridge Validation #29."
+      ]
+    },
+    {
+      "path": "operator-bridge/packaging/**",
+      "state": "STAGE_08_VALIDATED",
+      "role": "self-contained win-x64 package builder, per-user install/uninstall/rollback scripts, reviewed signed-XPI procedure, and bounded lifecycle smoke",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained by packaging-authorized implementation stages",
+      "review_requirement": "Must remain per-user, content-free, simulator-free in production packaging, and may not directly mutate unrelated Firefox/profile state or introduce automatic update authority.",
+      "evidence": [
+        "Operator Bridge Validation #34 SUCCESS.",
+        "Workspace Control Validation #2412 SUCCESS.",
+        "Stage-08 workflow artifact 13747726653 binds content-free package manifests/evidence to exact source SHA cac009bd18960c01f9dc4d2a20bac34eb6a0a175."
+      ]
+    },
+    {
+      "path": "tests/test_workspace_semantic_execution_operator_bridge_packaging.py",
+      "state": "STAGE_08_VALIDATED",
+      "role": "static packaging/security boundary tests for per-user scope, frozen identities, signed-XPI procedure, production/simulator separation, and exact-head CI wiring",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "extend only when reviewed Stage-08 packaging obligations change",
+      "review_requirement": "Do not weaken per-user, least-privilege, content-free, or manual Firefox signature-verification boundaries.",
+      "evidence": [
+        "Static packaging/security suite passed in Operator Bridge Validation #34."
+      ]
+    },
+    {
+      "path": "operator-bridge/performance/**",
+      "state": "STAGE_09_TARGET_MATRIX_INFRASTRUCTURE_VALIDATED_TARGET_NOT_RUN",
+      "role": "account-free performance harness, strict target-evidence schema/validator, full Firefox+Chrome target matrix, and target-only cold-start probe",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintained only under Stage-09 performance authority",
+      "review_requirement": "Must never label GitHub-hosted Windows as target evidence or collect page/content/credential/synthetic-input telemetry.",
+      "evidence": [
+        "Operator Bridge Validation #50 SUCCESS.",
+        "Workspace Control Validation #2428 SUCCESS.",
+        "Target matrix PlanOnly executed successfully in CI and exact frozen order/counts remained unchanged."
+      ]
+    },
+    {
+      "path": "operator-bridge/tools/run-stage09-ci.ps1",
+      "state": "STAGE_09_NON_TARGET_REGRESSION_VALIDATED",
+      "role": "shortened GitHub-hosted Windows content-free regression smoke",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "rerun on operator-bridge changes",
+      "review_requirement": "Output remains GITHUB_HOSTED_WINDOWS_CI and target_contract_complete=false.",
+      "evidence": [
+        "Operator Bridge Validation #50 Stage-09 CI regression + target PlanOnly smoke PASS.",
+        "Artifact 13753443601 uploaded with non-target regression evidence and target plan."
+      ]
+    },
+    {
+      "path": "operator-bridge/tools/run-stage09-target-firefox.ps1",
+      "state": "STAGE_09_TARGET_PREFLIGHT_EXECUTED_FAILED",
+      "role": "strict target-Windows Firefox/helper collector and bounded adapter identity preflight",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "repair and revalidate under Stage-09 authority before another full target run",
+      "review_requirement": "Preserve identity fence, content-free evidence, no profile/content scraping, and no adoption/killing of unrelated Firefox processes.",
+      "evidence": [
+        "Run 42815030650 / target job 129827357688 reached PreflightOnly after profile verification.",
+        "Preflight failed before any full UX-09 measurement window.",
+        "Current failure evidence is insufficient because temporary preflight logs are deleted during cleanup; next repair should persist bounded content-free diagnostics."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-regression.339788d1.json",
+      "state": "STAGE_09_NON_TARGET_REGRESSION_EVIDENCE",
+      "role": "durable shortened GitHub-hosted Windows performance regression sample",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "regenerate only as explicitly non-target CI evidence",
+      "review_requirement": "Values are regression signals only and must not be promoted as frozen UX-09 target acceptance facts.",
+      "evidence": [
+        "Content-free regression evidence from Operator Bridge #41.",
+        "Exact-head reruns #42/#43/#45 preserved the Stage-09 CI smoke."
+      ]
+    },
+    {
+      "path": "operator-bridge/tools/run-stage09-target-matrix.ps1",
+      "state": "STAGE_09_TARGET_EXECUTION_REACHED_PREFLIGHT_BLOCKED",
+      "role": "canonical full target-workstation UX-09 orchestrator",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "rerun only after isolated Firefox adapter preflight PASS",
+      "review_requirement": "Do not bypass preflight or weaken frozen target requirements to obtain a measurement.",
+      "evidence": [
+        "Exact head 3fd98235678a7d6f0f728d82b4611eed8697152e passed Workspace Control #2459 and Operator Bridge #85.",
+        "Triggered target run 42815030650 passed runner/bootstrap/precondition gates and entered the matrix.",
+        "Matrix stopped fail-closed at Firefox adapter identity preflight; no target evidence file was produced."
+      ]
+    },
+    {
+      "path": "operator-bridge/performance/validate-stage09-target.py",
+      "state": "STAGE_09_TARGET_EVIDENCE_VALIDATOR_VALIDATED",
+      "role": "local validator for completed target evidence shape, exact frozen counts/windows, budget-check set, and content-free keys",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "maintain only with reviewed Stage-09 target-evidence contract changes",
+      "review_requirement": "Must fail closed on incomplete target evidence or forbidden persisted content fields.",
+      "evidence": [
+        "Static tests and Operator Bridge Validation #50 PASS."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage09-signed-xpi-verification.json",
+      "state": "STAGE_09_MOZILLA_SIGNED_XPI_VERIFIED",
+      "role": "durable verification record for Mozilla-signed Stage-09 fake-worker adapter",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "regenerate only when the Mozilla-signed Stage-09 XPI or validated source revision changes",
+      "review_requirement": "Payload must remain source-bound, fake-worker-only, and identity-fenced; production chatgpt.com worker URL must remain absent.",
+      "evidence": [
+        "Signed XPI SHA-256 0eafc6017352f7081e5445ebe602b03a112fa0924a8ee8e199d82cf1de2bf50f.",
+        "Mozilla production signing chain present for workspace-control-operator@adamtrott78.local.",
+        "background.js and adapter_core.js matched submitted payload byte-for-byte; manifest was semantically identical with only terminal newline normalization.",
+        "Adapter identity remains FIREFOX_EXTENSION / 0.1.9-perf and fake-worker URL remains 127.0.0.1."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage10-ut02-result.acc61e9b.json",
+      "state": "STAGE_10_UT02_MINIMIZE_ON_EMPTY_VALIDATED",
+      "role": "durable content-free UT-02 mixed-batch and READY=0 minimize-on-empty result",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only from exact completed Stage-10 UT-02 evidence",
+      "review_requirement": "Bind exact source SHA/workflow/job/artifact and preserve content-free/manual-submit boundaries.",
+      "evidence": [
+        "Operator Bridge run #237 / workflow run 43288769135 / job 131431294172.",
+        "Source head acc61e9b5b9cdc50d6ff53538588e652c68c52c1.",
+        "Artifact 13978146719.",
+        "Trace SHA-256 70088c5390a2b634f8a56215f775bce78a0a3c3a8791ed8a1d8a35abbed2fcaa."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage10-ut03-result.bc4ec0e1.json",
+      "state": "STAGE_10_UT03_INTERRUPTION_VALIDATED",
+      "role": "durable content-free UT-03 interruption/recovery result",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only from exact completed Stage-10 UT-03 evidence",
+      "review_requirement": "Bind exact source SHA/workflow/job/artifact and preserve content-free/manual-submit boundaries.",
+      "evidence": [
+        "Operator Bridge run #243 / workflow run 43296982057 / job 131462981442.",
+        "Source head bc4ec0e1dad7a55148224ffd7ffaf6e246615fdc.",
+        "Artifact 13981151249.",
+        "Trace SHA-256 ccbfd2f8dff0f4881c89778ceac1cb267b4c6c4c0647c971945186766f2d0054."
+      ]
+    },
+    {
+      "path": "benchmarks/workspace-semantic-execution/operator_bridge/stage10-ut04-result.f952a4b0.json",
+      "state": "STAGE_10_UT04_SENT_UNCONFIRMED_VALIDATED",
+      "role": "durable content-free UT-04 multiple SENT/UNCONFIRMED result",
+      "origin": "workspace-operator-bridge-implementation-v1",
+      "persistence": "Git",
+      "regeneration": "only from exact completed Stage-10 UT-04 evidence",
+      "review_requirement": "Bind exact source SHA/workflow/job/artifact and preserve content-free/manual-submit boundaries.",
+      "evidence": [
+        "Operator Bridge run #251 / workflow run 43455915773 / job 131991701505.",
+        "Source head f952a4b0dfea079469ad9d15f32efa51e9ca053b.",
+        "Artifact 14055075456.",
+        "Trace SHA-256 6b24ce27bc12bfa67edf89d36c81b788ffa1112d2667ac14841266d3a21d520a."
+      ]
+    }
+  ],
+  "validation": [
+    {
+      "check": "Explicit operator authorization",
+      "result": "PASS",
+      "evidence": [
+        "Operator accepted the artifact -> staged plan -> authorized task -> staged execution workflow and explicitly instructed the system to proceed."
+      ]
+    },
+    {
+      "check": "Parent design freeze",
+      "result": "PASS",
+      "evidence": [
+        "Parent UX task is frozen/validated at workspace-control@0a110b570410d6d3310afc8ef4591e4aa383c0b8.",
+        "Workspace Control Validation #2376 reported SUCCESS on that exact head."
+      ]
+    },
+    {
+      "check": "Scope separation",
+      "result": "PASS",
+      "evidence": [
+        "Child mutation scope names only its task/program artifacts, operator-bridge code tree, one dedicated CI workflow, operator-bridge benchmark results, and bounded bridge tests.",
+        "Frozen UX design artifacts and unrelated workspace-control/research/course/runtime surfaces are excluded from child mutation authority."
+      ]
+    },
+    {
+      "check": "Stage 00 exact-head validation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation #2377 SUCCESS at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69.",
+        "Child JSON/Markdown synchronization and repository regressions passed."
+      ]
+    },
+    {
+      "check": "Stage 01 exact-head code validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c.",
+        "Stage 01 exit criterion satisfied: minimal implementation compiles and CI deterministically enforces frozen contracts."
+      ]
+    },
+    {
+      "check": "Stage 02 exact-head helper-kernel validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #6 and Workspace Control Validation #2384 both passed at 82e5463587efcaaf8471f352a3ad3eb5a3b70537.",
+        "Stage 02 exit criterion satisfied: helper kernel implements the UX-05 local behavior against fake/no-work ports with no browser dependency."
+      ]
+    },
+    {
+      "check": "Stage 03 exact-head IPC validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #10 and Workspace Control Validation #2388 both passed at c001bbda287f05ce3f2ceae7e003e3552903fd9c.",
+        "Stage 03 exit criterion satisfied: the browser adapter can connect through bounded typed Native Messaging/named-pipe transport without granting execution authority; actual Firefox BrowserPort lifecycle begins in Stage 04."
+      ]
+    },
+    {
+      "check": "Stage 04 exact-head Firefox adapter validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #12 and Workspace Control Validation #2390 both passed at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436.",
+        "Stage 04 exit criterion satisfied: Firefox BrowserPort implementation exists inside the UX-08 least-privilege boundary and remains content-blind/account-independent."
+      ]
+    },
+    {
+      "check": "Stage 05 exact-head simulator validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #15 and Workspace Control Validation #2393 both passed at 8bf4c2b6d13dc9d917ee831828c718fbca57648a.",
+        "Stage 05 exit criterion satisfied: the complete deterministic fake-worker environment exists without a ChatGPT account and all frozen UX-10 L0/L1 obligations are represented and green."
+      ]
+    },
+    {
+      "check": "Stage 06 exact-head integrated local bridge validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #24 and Workspace Control Validation #2402 both passed at 8c0f97f23e181b850728b2b42c970b71d93c3991.",
+        "Stage 06 exit criterion satisfied: routine bridge mechanics operate end-to-end against fake workers through real Windows helper services, real Native Messaging/local IPC, and real Firefox lifecycle APIs without a ChatGPT account."
+      ]
+    },
+    {
+      "check": "Stage 07 exact-head recovery/fault validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #30 and Workspace Control Validation #2408 both passed at 5166fdf44af3548ae1f9bc3e773f948f22f212e1.",
+        "The implementation code beneath the promotion head was previously validated by Operator Bridge Validation #29 and Workspace Control Validation #2407 at 7d8bd99bbd23eafa834a0a676d86156382ad8c1e.",
+        "Stage 07 exit criterion satisfied: single-component, auth-domain, stale-generation, helper-restart, and browser-recovery failures have bounded tested recovery without authority duplication."
+      ]
+    },
+    {
+      "check": "Stage 08 exact-head packaging lifecycle validation",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #36 and Workspace Control Validation #2414 both passed at exact durable Stage-08 promotion head 26284233edb00c4a7005dac3d5c52b2add814156.",
+        "Underlying implementation head cac009bd18960c01f9dc4d2a20bac34eb6a0a175 passed Operator Bridge Validation #34 and Workspace Control Validation #2412.",
+        "Stage 08 exit evidence passed for self-contained packaging, clean install, upgrade, rollback, bounded uninstall, per-user/no-admin surface, Firefox-profile non-mutation, frozen identities/permissions, simulator exclusion, and content-free state.",
+        "Mozilla signing is not claimed by CI; the production flow explicitly requires manual Firefox signature verification of the reviewed signed XPI."
+      ]
+    },
+    {
+      "check": "Stage 09 benchmark infrastructure checkpoint",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge Validation #45 and Workspace Control Validation #2423 both passed at c2e06d8b5efdffc3e35f17879651d0f058281463.",
+        "CI regression measurement and target collector infrastructure are validated without ChatGPT account access or content collection.",
+        "Complete UX-09 target-workstation acceptance is intentionally not claimed and remains the Stage-09 exit gate."
+      ]
+    },
+    {
+      "check": "Stage 09 current exact-head validation and environmental gate",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation #2520 and Operator Bridge Validation #153 both passed on exact head 0891a0fde2da7f763a0589c03ef3daf63ef5b3c7.",
+        "Prior Firefox adapter/profile, ownership-lineage, launcher, and child ExitCode defects were corrected without weakening the frozen UX-09 contract.",
+        "Operator Bridge #151 / target-performance job 130585620068 reached the real target matrix and failed closed solely on sustained unrelated CPU above the frozen 20 percent validity ceiling.",
+        "Current head adds a 10-second early background-CPU gate plus scenario-specific unrelated-CPU diagnostics; the 20 percent acceptance threshold is unchanged."
+      ]
+    },
+    {
+      "check": "Stage 09 handoff checkpoint before active run #180 interpretation",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation #2550 and Operator Bridge Validation #179 passed on exact head b26dd24c6d3a7b056c75dbce5f90f6f8f735083f.",
+        "The current Stage-09 harness uses structured content-free Firefox result evidence plus clean browser state as completion authority instead of unreliable Windows Process.ExitCode.",
+        "A persistent TARGET_FIREFOX_PARTIAL collector failure envelope records normalized phase/error metadata and steady/cold result existence without page content, credentials, cookies, tokens, DOM, accessibility, or profile secrets.",
+        "Persistent build servers are disabled for target builds; the quiet gate measures unrelated CPU and may wait through bounded settle windows without changing the frozen <=20 percent acceptance threshold.",
+        "Operator Bridge run #180 / target-performance job 130680498381 was launched on this exact validated head and is reported by the operator as still running at handoff time; no result or Stage-09 promotion is claimed."
+      ]
+    },
+    {
+      "check": "Stage 09 run #180 cancellation root-cause classification",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge run #180 / target-performance job 130680498381 completed with conclusion CANCELLED on source head b26dd24c6d3a7b056c75dbce5f90f6f8f735083f; it did not produce stage09-target-evidence.json and therefore supplies no Stage-09 acceptance verdict.",
+        "Before cancellation the run passed profile verification, signed adapter preflight, and unrelated-CPU settle attempt 2 at mean 17.118918803664997% <= 20%, then progressed into browser resource measurement.",
+        "The cancellation log shows Windows PowerShell interrupted in Stop-TrackedProcessName at run-stage09-target-matrix.ps1 line 326 followed by 'The operation was canceled.'",
+        "Operator Bridge workflow concurrency is PR-scoped with cancel-in-progress:true, and task/handoff files are pull_request trigger paths.",
+        "Handoff commit 25f598d094309cd99550d0eb2be7fdd368fe5abe triggered Operator Bridge run #181 at 2026-11-11T17:55:47Z; sync commit 06c37ac44d4dd5616d1bf3c7a554e9750f87c9c9 triggered run #182 at 17:55:58Z. Run #181 was itself cancelled by #182, and active run #180 was cancelled under the same concurrency group. Repository evidence therefore attributes #180 cancellation to branch mutations during the active target run, not to operator behavior."
+      ]
+    },
+    {
+      "check": "Stage 10 UT-02 minimize-on-empty exact-source verification",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge run #237 / job 131431294172 completed SUCCESS on source head acc61e9b5b9cdc50d6ff53538588e652c68c52c1.",
+        "Structured result was OBJECTIVE_PASS with no_work_minimize_attempts=1 and no_work_minimize_successes=1.",
+        "No wrong-worker, wrong-packet, rejected-state, dispatch, or clipboard failure was recorded.",
+        "Human observation confirmed the intended dedicated worker-window minimization behavior and rated it 10/10."
+      ]
+    },
+    {
+      "check": "Stage 10 UT-03 exact-source verification",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge run #243 / job 131462981442 completed SUCCESS on source head bc4ec0e1dad7a55148224ffd7ffaf6e246615fdc.",
+        "Structured result was OBJECTIVE_PASS with interruption_prompts_required=5 and interruption_prompts_issued=5.",
+        "Eight repeat hotkey presses were safely recovered as same-action refocuses; no wrong-worker, wrong-packet, rejected-state, dispatch, or clipboard failure was recorded.",
+        "Operator reported the trial went well; subjective/manual observation ratings remain pending rather than inferred."
+      ]
+    },
+    {
+      "check": "Stage 10 UT-04 exact-source verification",
+      "result": "PASS",
+      "evidence": [
+        "Operator Bridge run #251 / job 131991701505 completed SUCCESS on source head f952a4b0dfea079469ad9d15f32efa51e9ca053b.",
+        "Structured result was OBJECTIVE_PASS with two pre-existing SENT/UNCONFIRMED workers, four fresh service cycles, max_sent_unconfirmed=3, and both late background acknowledgments applied.",
+        "No handoff blocking, wrong-worker, wrong-packet, rejected-state, dispatch, or clipboard failure was recorded."
+      ]
+    }
+  ],
+  "blockers": [
+    "Ctrl+Space passed UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, UT-03 interruption recovery, and UT-04 multiple SENT/UNCONFIRMED coexistence. Final binding retention still requires UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing.",
+    "The production helper still uses NoWorkOperatorActionPort and an empty workload-status provider. An explicitly authorized production OperatorBridge action/status transport is required before real-account Stage 12 can service actual scheduler work.",
+    "The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass."
+  ],
+  "remaining_work": [
+    "impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials",
+    "impl_11_webview2_comparison_spike: Conditional WebView2 custom-shell comparison",
+    "impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration",
+    "impl_09_performance_benchmark_execution: Deferred authoritative UX-09 performance/resource benchmark before production readiness",
+    "impl_13_production_readiness_review: Integrated implementation review and promotion decision"
+  ],
+  "next_safe_action": "Continue Stage 10 by implementing/executing UT-05 judgment-gate handling, UT-06/UT-07/UT-08 recovery trials, UT-12 no-work/background acknowledgment, the full Bridge-OFF UT-11 Ctrl+Space release check, and UT-09 60-minute representative-work collision testing. In parallel, define a separately authorized production OperatorBridge action/status transport to replace NoWorkOperatorActionPort/empty workload status before Stage 12 real-account calibration. Do not use a real ChatGPT account until Stage 10 and the Stage-12 predecessor gates are satisfied.",
+  "last_executor": "gpt-5.6-sol",
+  "last_surface": "github+heartbeat",
+  "notes": "This child task is the implementation authority created after UX-13 design freeze. It is intentionally separate from the parent design task and may not modify frozen UX artifacts. Stage 00 exists to make the construction program and mutation authority durable before code begins.\n\n2026-11-09 STAGE 00 COMPLETE: Child implementation program/task authority committed at 2ff35d02ec823744937dc8fdd82d69c44bb3cb69 and Workspace Control Validation #2377 passed SUCCESS. Stage 01 repository/bootstrap/contract harness is now active. No production bridge code has been implemented yet.\n\n2026-11-09 STAGE 01 COMPLETE: Repository/bootstrap/contract harness committed at 0fabe069aa39914f84b00ac78a2f26f57238ef4c. Operator Bridge Validation #1 and Workspace Control Validation #2379 both passed SUCCESS. Stage 02 Windows helper kernel is active; Native Messaging/browser/simulator/real-account work remains out of scope until later stages.\n\n2026-11-10 STAGE 02 COMPLETE: Windows helper kernel validated at 82e5463587efcaaf8471f352a3ad3eb5a3b70537. Operator Bridge Validation #6 and Workspace Control Validation #2384 passed SUCCESS. The helper now owns tray/master toggle, Ctrl+B RegisterHotKey with MOD_NOREPEAT, write-only clipboard staging, single-flight dispatch, monotonic timing, and content-free diagnostics behind fake/no-work ports. CI idle smoke measured 43.293 MiB max Working Set and 1.4973% mean one-logical-CPU usage over 7.305 seconds; UX-09 target-machine measurement remains authoritative. Stage 03 Native Messaging/local IPC is active.\n\n2026-11-10 STAGE 03 COMPLETE: Native Messaging/local IPC validated at c001bbda287f05ce3f2ceae7e003e3552903fd9c. Operator Bridge Validation #10 and Workspace Control Validation #2388 passed SUCCESS. Protocol v1 framing/validation, CurrentUserOnly + elevation-scoped named pipes, HELLO/PING negotiation, idempotency registry, same-exe native-host proxy mode, server reconnect behavior, and per-user native-host registration helpers are now implemented. No Firefox tab lifecycle or real-account behavior is claimed. Stage 04 Firefox MV3 adapter is active.\n\n2026-11-10 STAGE 04 COMPLETE: Firefox MV3 BrowserPort adapter validated at ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436. Operator Bridge Validation #12 and Workspace Control Validation #2390 passed SUCCESS. Node 24 mocked-browser suite passed 10/10, proving managed-only lifecycle, fixed reviewed worker URL, content-free sessions metadata, duplicate-command idempotency, generation fencing, discard safety, and raw-URL-to-origin-enum reduction. Stage 05 deterministic simulator/fake worker is active; no real-account behavior is claimed.\n\n2026-11-10 STAGE 05 COMPLETE: Deterministic simulator/fake worker validated at 8bf4c2b6d13dc9d917ee831828c718fbca57648a. Operator Bridge Validation #15 and Workspace Control Validation #2393 passed SUCCESS. The simulator build graph is separate from production, all 36 frozen UX-10 L0/L1 E2E obligations are catalog-covered, Simulator.Tests passed 38/38, traces are deterministic SHA-256, payload mismatch cannot ack, and generation/durable-event idempotency is enforced. Stage 06 real-helper + Firefox + fake-worker integration is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 06 COMPLETE: Real helper + Firefox + fake-worker integration validated at 8c0f97f23e181b850728b2b42c970b71d93c3991. Operator Bridge Validation #24 and Workspace Control Validation #2402 passed SUCCESS. Layer-2 real-helper Windows tests passed 5/5 with actual clipboard and Ctrl+B registration; Firefox mocked-browser tests passed 14/14; the real Firefox 159.0.1 Native Messaging Layer-3 run passed every Stage-06 predicate, including create/reuse/discard/restore, managed identity fail-closed behavior, adapter parity, and zero background clipboard/browser effects. The Firefox tabs.discard return-semantics defect found by the real-browser run was corrected and regression-tested. Stage 07 recovery/fault closure is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 07 COMPLETE: Recovery/fault closure validated at 7d8bd99bbd23eafa834a0a676d86156382ad8c1e. Operator Bridge Validation #29 and Workspace Control Validation #2407 passed SUCCESS. The frozen 14-fixture recovery/crash/auth/generation catalog is covered at all required implemented L0-L3 layers. Layer-2 real-helper tests passed 12/12 total, including explicit unknown-create fail-closed/no-duplicate coverage; real Firefox 159.0.1 Native Messaging recovery integration passed tab/browser/adapter loss, auth refresh, unknown-create, and cold-restart predicates. Recovery state persists content-free completed steps, generation advancement is exact-once, stale old-generation evidence cannot advance current state, cold restart does not replay local cache, and Ctrl+B during blocking recovery cannot claim or stage a worker packet. Stage 08 per-user packaging/install/update/rollback is active; no real ChatGPT account is authorized.\n\n2026-11-10 STAGE 07 PROMOTION VERIFIED: Exact durable promotion head 5166fdf44af3548ae1f9bc3e773f948f22f212e1 passed Operator Bridge Validation #30 and Workspace Control Validation #2408. The authoritative resume checkpoint and derived handoff were corrected to this exact head. Stage 08 per-user packaging/install/update/rollback remains active.\n\n2026-11-10 STAGE 08 IMPLEMENTATION COMPLETE: Per-user packaging/install/update/rollback validated at cac009bd18960c01f9dc4d2a20bac34eb6a0a175. Operator Bridge Validation #34 and Workspace Control Validation #2412 passed SUCCESS. Self-contained win-x64 packaging, clean install, HKCU native-host registration, upgrade, previous helper/XPI rollback, owned-scope uninstall, no-admin surface, unrelated filesystem/registry/profile preservation, frozen extension/native-host identities, simulator exclusion, and content-free state all passed. CI uses an explicitly marked unsigned fixture only and does not claim Mozilla signing; the production procedure requires manual Firefox signature verification. Stage-08 durable promotion metadata is being committed; Stage 09 must not execute until that promotion head itself passes both validators.\n\n2026-11-10 STAGE 08 PROMOTION VERIFIED: Exact durable promotion head 26284233edb00c4a7005dac3d5c52b2add814156 passed Operator Bridge Validation #36 and Workspace Control Validation #2414. The authoritative restore checkpoint, Stage-08 checkpoint, traceability record, and derived handoff are corrected to this exact promotion head while preserving implementation head cac009bd18960c01f9dc4d2a20bac34eb6a0a175 and its #34/#2412 evidence. Stage 09 UX-09 performance benchmark execution is now the next authorized stage.\n\n2026-11-10 STAGE 09 INFRASTRUCTURE CHECKPOINT: Exact checkpoint c2e06d8b5efdffc3e35f17879651d0f058281463 passed Operator Bridge Validation #45 and Workspace Control Validation #2423. The account-free performance harness, strict target-evidence schema, non-target CI regression smoke, Firefox target collector, bounded production WorkspaceWorkers cold-start launcher, and exact 10-trial target cold-start probe are implemented and validated. GitHub-hosted Windows evidence remains explicitly non-target and cannot satisfy UX-09 acceptance. Stage 09 remains IN_PROGRESS and Stage 10 remains blocked until the complete frozen benchmark is executed on the authorized target Windows operator workstation and every mechanical budget is evaluated.\n\n2026-11-10 STAGE 09 TARGET PATH READY: Exact checkpoint 832777a8015d6ef9ee2bdedf22553e28a6549553 passed Operator Bridge Validation #50 and Workspace Control Validation #2428. Full Firefox+Chrome target matrix, target evidence validator, PlanOnly CI smoke, exact-head native-host rebinding/restoration, and opt-in workflow-dispatch self-hosted target job are validated. Workspace Shell authority was not widened; a read-only attempt for this child task failed TASK_NOT_FOUND in the trusted authority root, and no tool can mint signed reviewed-helper approval. The sanctioned target path is GitHub self-hosted Windows, which still requires explicit operator registration/connection of the real workstation. Stage 09 remains IN_PROGRESS and Stage 10 remains blocked.\n\n2026-11-10 STAGE 09 TARGET ATTEMPT ADVANCED TO REAL MATRIX PREFLIGHT: Exact source head 3fd98235678a7d6f0f728d82b4611eed8697152e passed Workspace Control Validation #2459 and Operator Bridge Validation #85. Triggered Operator Bridge run 42815030650 then scheduled target-performance job 129827357688 on the interactive Windows workstation. Checkout, .NET/Python setup, runner preconditions, and Stage-09 profile verification all passed. The matrix failed at Firefox adapter identity preflight after STAGE09_TARGET_PROFILE_VERIFIED=PASS; cleanup warned that Firefox remained running. stage09-target-evidence.json was not produced. The consumed stage09-target PR label was removed after the run. Next executor must diagnose/persist bounded preflight diagnostics before another full target attempt.\n\n2026-11-10 STAGE 09 PREFLIGHT ROOT-CAUSE NARROWED: Exact head 8d50ef0b87b85480d10452d88965a0a616e2c2af passed Workspace Control Validation #2474 and Operator Bridge Validation #105. Isolated target-preflight job 129889811928 / run 42833594686 passed with TARGET_ADAPTER_PREFLIGHT, FIREFOX_EXTENSION, 0.1.9-perf. Full target-performance job 129894144174 / run 42834251364 then failed before measurements at the same preflight. Immediate isolated reproduction job 129896159398 / run 42835407614 also failed. Preserved artifact 13773931227 classifies ADAPTER_CONNECTION_NOT_OBSERVED with clean launcher/process teardown and no identity rejection, proving the signed extension stopped connecting after the earlier successful launch. Head 544911b724aa0c943786a285a6e38213a861667e adds bounded extensions.json runtime-state verification; target-preflight job 129899072941 is queued awaiting the interactive Windows runner. Full Stage-09 matrix remains blocked.\n\n2026-11-11 STAGE 09 CODE PATH VALIDATED; ENVIRONMENTAL QUIET-WINDOW BLOCKER: Exact head 0891a0fde2da7f763a0589c03ef3daf63ef5b3c7 passed Workspace Control Validation #2520 and Operator Bridge Validation #153. The preceding target-debug sequence corrected Firefox first-run baseline state, historical browser PID-lineage attribution, and transient null Start-Process ExitCode handling, and added content-free browser lifecycle/child-failure diagnostics. Operator Bridge #151 / target-performance job 130585620068 progressed into the real frozen target matrix and then failed closed because sustained unrelated CPU exceeded the frozen 20 percent validity limit; no target evidence artifact was produced. The current head adds a 10-second early background-CPU preflight and scenario-specific CPU rejection diagnostics while preserving the frozen threshold. Stage 09 remains IN_PROGRESS; the next authoritative attempt requires only a short controlled quiet-workstation window, not further code weakening or Stage-10 work.\n\n2026-11-11 STAGE 09 ACTIVE-RUN HANDOFF: Exact head b26dd24c6d3a7b056c75dbce5f90f6f8f735083f passed Workspace Control Validation #2550 and Operator Bridge Validation #179. Since the earlier 0891a0fd checkpoint, target debugging corrected benchmark-owned CPU self-pollution, persistent dotnet/MSBuild/Roslyn build servers, bounded quiet-window settling while preserving the frozen <=20% unrelated-CPU rule, historical browser PID lineage, repeated Windows Process.ExitCode authority failures, and missing inner Firefox collector observability. Firefox target completion now trusts validated structured content-free result evidence plus clean browser state, and run-stage09-target-firefox.ps1 persists a TARGET_FIREFOX_PARTIAL COLLECTOR_FAILURE envelope with normalized_phase, normalized_error_type, normalized_message, steady_result_exists, and cold_result_exists if collection aborts. Operator Bridge run #180 / target-performance job 130680498381 is running on this exact head according to the operator console at handoff time. The current executor was explicitly instructed not to poll it. The next executor must not retrigger/cancel/poll while it remains active; wait until the operator reports completion, then inspect the completed run exactly once and either validate/promote Stage 09 on valid stage09-target-evidence.json or repair only the first demonstrated fail-closed marker. Stage 10+ remain blocked.\n\n2026-11-11 STAGE 09 RUN #180 CANCELLATION INTERPRETATION: Run #180 / target-performance job 130680498381 on b26dd24c6d3a7b056c75dbce5f90f6f8f735083f is INVALID FOR ACCEPTANCE because it was externally cancelled before stage09-target-evidence.json was written. It was not a benchmark failure: validation, signed profile verification, adapter preflight, and CPU validity gate passed, and browser-resource measurement advanced substantially. The cancellation occurred while PowerShell was in Stop-TrackedProcessName and GitHub emitted 'The operation was canceled.' Root cause is the Operator Bridge workflow concurrency policy, not operator action: the workflow uses one PR-scoped concurrency group with cancel-in-progress:true, and task/handoff changes trigger that workflow. The prior executor committed 25f598d0... and 06c37ac4... while #180 was active, producing runs #181/#182 and thereby cancelling #180. New invariant: NEVER mutate this PR branch or trigger another Operator Bridge run while an authoritative Stage-09 target-performance job is active. Wait for completion first, then update durable state.\n\n2026-11-11 STAGE 09 RUN #185 DIAGNOSIS + FAIL-FAST REPAIR: Operator Bridge #185 / target-performance job 130715185761 ran on 819011a0e52dc6816eb5bf918e8ff63fd10fd936 from 18:14:11Z to 20:37:42Z and failed before target evidence emission. Profile verification, performance-adapter preflight, and early unrelated-CPU validity all passed; the run then advanced through deep Firefox/Chrome resource measurement and finally failed with 'Full Firefox replicate is missing exact latency evidence.' The run proves replicate 1 lacked required exact latency at aggregation, but its redirected child logs/temporary result were not preserved, so the inner collector root cause is not established. Source inspection found the matrix accepted TARGET_FIREFOX_PARTIAL based only on evidence class/content policy/completion flag and did not reject result=COLLECTOR_FAILURE or missing required replicate-1 fields at the replicate boundary. Repair e244efad098df6559dae5874b5783782a305cf32 adds immediate bounded content-free rejection markers STAGE09_FIREFOX_REPLICATE_COLLECTOR_FAILURE and STAGE09_FIREFOX_REPLICATE_INCOMPLETE without changing frozen thresholds or authority/security boundaries. Workspace Control #2557 and Operator Bridge #186 both passed SUCCESS on that exact repair head. Stage 09 remains IN_PROGRESS; a fresh target run is required.\n\n\n2026-11-11 STAGE SEQUENCING AMENDMENT: By explicit operator direction, the multi-hour authoritative UX-09 target benchmark is no longer an intermediate development gate. Stage 09 is SUSPENDED, Stage 10 human-in-loop usability is now active, and Stages 10-12 may proceed without Stage-09 validation. This does not waive, weaken, or alter any UX-09 budget: Stage 09 must resume and validate before Stage 13 production readiness can pass. Run #185 already consumed ~2h23m of target execution and reached deep Firefox/Chrome resource measurement, but no final target evidence artifact was emitted and the raw Working Set summaries were temporary/not logged, so those RAM values cannot be promoted or reliably recovered.\n\n2026-11-12 STAGE 10 HUMAN LOOP + RECOVERY HANDOFF: The primary real Windows operator loop is functional. UT-01 happy path passed 5/5 actions and 5/5 durable acknowledgments on b5d9ae62b15d5496925f634aa4582dd435b23c0e (Operator Bridge run #208 / job 130950231898). A single-job recovery rerun (job 130952654587) proved repeated Ctrl+B before paste can be blocked (8 recovered presses) but exposed that Ctrl+B after paste and before Enter could still move tabs; fake-worker code confirms paste alone is not acknowledgment and only Enter submits. Current repair head 62e9260f2451d51cdc8b2d724cabbe5691e39ef9 uses authoritative AwaitingDurableAck state to refocus the same worker/action until Enter/durable acknowledgment and passed Workspace Control #2572 plus Operator Bridge #209. Follow-up Operator Bridge #210 / job 130957988034 reached STAGE10_USABILITY_READY and then timed out after 30 minutes with no result because the final human sequence was not completed; no product verdict should be inferred. Next action is a focused rerun of only that Stage-10 job, preferably via GitHub rerun-job rather than label cycling, with deliberate Ctrl+B -> Ctrl+V -> Ctrl+B before Enter. Stage 09 remains deferred and must not be rerun during this work.\n\n\n2026-11-12 STAGE 10 UT-01 RECOVERY VALIDATED: Operator Bridge run #210 attempt 2 / stage10-usability job 131196644208 executed on exact implementation head 62e9260f2451d51cdc8b2d724cabbe5691e39ef9 and completed SUCCESS with structured OBJECTIVE_PASS. The result recorded 5/5 actions, 5/5 durable acknowledgments, 7 hotkey presses, 2 handoff-blocked presses, 2 same-action refocuses, 2 safely recovered repeat presses, and zero wrong-worker, wrong-packet, rejected-state, dispatch, or clipboard failures. The operator deliberately tested Ctrl+B -> Ctrl+V -> Ctrl+B before Enter and confirmed the second hotkey stayed/refocused the same pending fake worker/action, then reported the main operational loop was working as intended. Artifact 13946895810 preserves the content-free generated result and the repository now stores a durable result record. Subjective 1-7 ratings remain pending and are not inferred. UT-10 is the next implemented human trial; Stage 10 remains IN_PROGRESS.\n\n2026-11-12 HOTKEY REBIND DECISION: Ctrl+B UT-10 (#214 / job 131209297790) serviced 20/20 actions with 20/20 durable acknowledgments but recorded 21 hotkey presses and 1 rejected state submission, producing OBJECTIVE_FAIL. The operator explicitly rejected the Ctrl+B -> Ctrl+V transition as uncomfortable and selected Ctrl+Space as the replacement candidate. The implementation now supports runtime-configurable scheduler hotkeys; Ctrl+Space is selected as the default and Stage-10 candidate. Scheduler semantics, manual paste/Enter, authority boundaries, browser behavior, and security invariants are unchanged. Ctrl+Space must pass fresh hotkey-sensitive trials and representative-work collision testing before retention.\n\n2026-11-12 HOTKEY PROVENANCE CORRECTION: the operator explicitly rejected Ctrl+B for finger-stretch ergonomics, explicitly proposed Ctrl+Space, reported having tried the motion, and said it felt like a good compromise. Ctrl+Space is therefore operator-selected as the candidate binding; final retention still requires empirical usability/collision acceptance.\n\n2026-11-12 STAGE 10 UT-02 MINIMIZE-ON-EMPTY VALIDATED: Operator Bridge run #237 / workflow 43288769135 / stage10-usability job 131431294172 completed SUCCESS on exact source head acc61e9b5b9cdc50d6ff53538588e652c68c52c1 with structured OBJECTIVE_PASS. The run completed 20/20 actions, 16/16 durable service acknowledgments, four local-only actions, six service workers, and 17 hotkey presses. The one explicit READY=0 press produced NoAction with no_work_minimize_attempts=1 and no_work_minimize_successes=1. Wrong-worker, wrong-packet, rejected-state, dispatch, and clipboard failure counters were all zero; trace SHA-256 is 70088c5390a2b634f8a56215f775bce78a0a3c3a8791ed8a1d8a35abbed2fcaa and artifact 13978146719 is content-free. The operator confirmed the dedicated WorkspaceWorkers Firefox window disappeared as intended, explicitly understood that this is minimization rather than termination, and rated the behavior 10/10. Runner topology correction is durable: workspace-operator-target is a persistent interactive Windows runner and must not be re-registered merely because a Stage-10 job completes.\n\n2026-11-12 STAGE 10 UT-03 INTERRUPTION RECOVERY VALIDATED: Operator Bridge run #243 / workflow 43296982057 / stage10-usability job 131462981442 completed SUCCESS on exact source head bc4ec0e1dad7a55148224ffd7ffaf6e246615fdc with structured OBJECTIVE_PASS. The run completed 6/6 actions and 6/6 durable acknowledgments across three service workers and issued all five required interruption prompts. Fifteen hotkey presses were recorded: six productive service presses, eight safely recovered repeat presses that were handoff-blocked/refocused to the same pending action, and one final NoAction press. The repeated presses caused zero rejected submissions, wrong-worker/packet events, dispatch failures, or clipboard failures. The final NoAction produced no_work_minimize_attempts=1 and no_work_minimize_successes=1. Trace SHA-256 is ccbfd2f8dff0f4881c89778ceac1cb267b4c6c4c0647c971945186766f2d0054 and artifact 13981151249 is content-free. The operator reported the test went well. Detailed subjective/manual-count ratings were not supplied and are not inferred.\n\n2026-11-13 STAGE 10 UT-04 MULTIPLE SENT/UNCONFIRMED VALIDATED: Operator Bridge run #251 / workflow 43455915773 / stage10-usability job 131991701505 completed SUCCESS on exact source head f952a4b0dfea079469ad9d15f32efa51e9ca053b with structured OBJECTIVE_PASS. The fixture started with two pre-existing SENT/UNCONFIRMED workers while four fresh service actions were ready. The operator completed four normal Ctrl+Space -> Ctrl+V -> Enter cycles without revisiting the older unconfirmed workers. max_sent_unconfirmed=3 and multiple_sent_unconfirmed_with_ready_observed=true prove concurrent unconfirmed work did not block fresh scheduler progress. Both late background acknowledgments were later applied. The run recorded five hotkey presses total, including one final NoAction/minimize press, with zero handoff blocks/refocuses, wrong-worker/packet dispatches, rejected submissions, dispatch failures, or clipboard failures. Trace SHA-256 is 6b24ce27bc12bfa67edf89d36c81b788ffa1112d2667ac14841266d3a21d520a and artifact 14055075456 is content-free. Detailed subjective ratings were not supplied and are not inferred.\n"
+}

@@ -1,0 +1,556 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-semantic-execution-operator-native-messaging-protocol-v0.1",
+  "title": "Workspace Control Operator Browser Adapter Protocol v1",
+  "type": "object",
+  "description": "Versioned content-free protocol used across Firefox Native Messaging and the current-user named-pipe proxy. Browser-local identity is non-authoritative.",
+  "protocol": {
+    "major": 1,
+    "minor": 0,
+    "max_frame_bytes": 65536,
+    "serialization": "UTF-8 JSON",
+    "native_messaging_framing": "browser/native-host framing as defined by Firefox",
+    "named_pipe_framing": "uint32 little-endian byte length followed by UTF-8 JSON",
+    "unknown_major_behavior": "FAIL_CLOSED",
+    "unknown_message_behavior": "FAIL_CLOSED_AND_RECORD_PROTOCOL_ERROR"
+  },
+  "security": {
+    "native_host_name": "com.workspacecontrol.operator_bridge",
+    "extension_id": "workspace-control-operator@adamtrott78.local",
+    "named_pipe_option": "CurrentUserOnly",
+    "packet_body_allowed": false,
+    "raw_url_allowed": false,
+    "page_content_allowed": false,
+    "credentials_allowed": false,
+    "authority_commands_from_extension_allowed": false
+  },
+  "required": [
+    "protocol_version",
+    "message_type",
+    "message_id",
+    "sent_at_monotonic_ms"
+  ],
+  "properties": {
+    "protocol_version": {
+      "const": "1.0"
+    },
+    "message_type": {
+      "enum": [
+        "HELLO",
+        "HELLO_ACK",
+        "BROWSER_COMMAND",
+        "BROWSER_RESULT",
+        "BROWSER_EVENT",
+        "PING",
+        "PONG",
+        "PROTOCOL_ERROR"
+      ]
+    },
+    "message_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "request_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
+    "correlation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
+    "sent_at_monotonic_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "helper_instance_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
+    "adapter_instance_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 128
+    },
+    "payload": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "message_type": {
+            "const": "HELLO"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "adapter_kind",
+              "adapter_version",
+              "supported_protocol_versions",
+              "capabilities"
+            ],
+            "properties": {
+              "adapter_kind": {
+                "enum": [
+                  "FIREFOX_EXTENSION",
+                  "CUSTOM_SHELL",
+                  "IN_MEMORY_SIMULATOR"
+                ]
+              },
+              "adapter_version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "supported_protocol_versions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "maxItems": 8
+              },
+              "capabilities": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "discard",
+                  "persistent_binding_metadata",
+                  "origin_classification",
+                  "profile_isolation"
+                ],
+                "properties": {
+                  "discard": {
+                    "type": "boolean"
+                  },
+                  "persistent_binding_metadata": {
+                    "type": "boolean"
+                  },
+                  "origin_classification": {
+                    "type": "boolean"
+                  },
+                  "profile_isolation": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "message_type": {
+            "const": "HELLO_ACK"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "accepted_protocol_version",
+              "bridge_state"
+            ],
+            "properties": {
+              "accepted_protocol_version": {
+                "const": "1.0"
+              },
+              "bridge_state": {
+                "enum": [
+                  "ON",
+                  "OFF",
+                  "RECOVERING",
+                  "BLOCKED"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "message_type": {
+            "const": "BROWSER_COMMAND"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "request_id"
+        ],
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operation",
+              "idempotency_key"
+            ],
+            "properties": {
+              "operation": {
+                "enum": [
+                  "ENSURE_WORKER_SURFACE",
+                  "CREATE_WORKER_BINDING",
+                  "ACTIVATE_WORKER_BINDING",
+                  "RELOAD_OR_RESTORE_WORKER_BINDING",
+                  "DISCARD_WORKER_BINDING",
+                  "CLOSE_WORKER_BINDING",
+                  "INVENTORY_MANAGED_BINDINGS"
+                ]
+              },
+              "idempotency_key": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "worker_slot_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 128
+              },
+              "session_generation": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "expected_binding_generation": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "message_type": {
+            "const": "BROWSER_RESULT"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "request_id"
+        ],
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "operation",
+              "outcome"
+            ],
+            "properties": {
+              "operation": {
+                "enum": [
+                  "ENSURE_WORKER_SURFACE",
+                  "CREATE_WORKER_BINDING",
+                  "ACTIVATE_WORKER_BINDING",
+                  "RELOAD_OR_RESTORE_WORKER_BINDING",
+                  "DISCARD_WORKER_BINDING",
+                  "CLOSE_WORKER_BINDING",
+                  "INVENTORY_MANAGED_BINDINGS"
+                ]
+              },
+              "outcome": {
+                "enum": [
+                  "APPLIED",
+                  "NOT_APPLIED",
+                  "UNKNOWN",
+                  "REJECTED"
+                ]
+              },
+              "normalized_error": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 128
+              },
+              "worker_slot_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 128
+              },
+              "session_generation": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "binding_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 128
+              },
+              "binding_generation": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "origin_classification": {
+                "enum": [
+                  "CHATGPT_ORIGIN",
+                  "OFF_CHATGPT_ORIGIN",
+                  "UNKNOWN",
+                  null
+                ]
+              },
+              "discarded": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "active": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "inventory": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "maxItems": 64,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "binding_ref",
+                    "binding_generation",
+                    "worker_slot_id",
+                    "session_generation",
+                    "origin_classification",
+                    "discarded",
+                    "active"
+                  ],
+                  "properties": {
+                    "binding_ref": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "binding_generation": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "worker_slot_id": {
+                      "type": "string",
+                      "maxLength": 128
+                    },
+                    "session_generation": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "origin_classification": {
+                      "enum": [
+                        "CHATGPT_ORIGIN",
+                        "OFF_CHATGPT_ORIGIN",
+                        "UNKNOWN"
+                      ]
+                    },
+                    "discarded": {
+                      "type": "boolean"
+                    },
+                    "active": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "message_type": {
+            "const": "BROWSER_EVENT"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "event_type"
+            ],
+            "properties": {
+              "event_type": {
+                "enum": [
+                  "ADAPTER_READY",
+                  "BINDING_CLOSED",
+                  "BINDING_DISCARDED",
+                  "BINDING_ACTIVATED",
+                  "ORIGIN_CLASS_CHANGED"
+                ]
+              },
+              "worker_slot_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 128
+              },
+              "session_generation": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "binding_ref": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 128
+              },
+              "binding_generation": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "origin_classification": {
+                "enum": [
+                  "CHATGPT_ORIGIN",
+                  "OFF_CHATGPT_ORIGIN",
+                  "UNKNOWN",
+                  null
+                ]
+              },
+              "normalized_reason": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 128
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "message_type": {
+            "enum": [
+              "PING",
+              "PONG"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "nonce": {
+                "type": "string",
+                "maxLength": 128
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "message_type": {
+            "const": "PROTOCOL_ERROR"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "code"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "maxLength": 128
+              },
+              "related_message_id": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 128
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "invariants": [
+    "Every BROWSER_RESULT must correlate to one outstanding request_id; unmatched results are diagnostics only and cannot mutate authoritative state.",
+    "BROWSER_EVENT is non-authoritative and may only trigger bounded recovery/reinventory logic.",
+    "No message contains packet text or clipboard contents.",
+    "No message contains raw URL/path/query/fragment/title/favicon.",
+    "CREATE_WORKER_BINDING accepts no arbitrary URL; adapter uses reviewed local worker start configuration.",
+    "worker_slot_id + session_generation identify intended logical target; binding_ref is local cache only.",
+    "Unknown operation/version/message fails closed.",
+    "Duplicate request_id with same idempotency_key must not duplicate local browser effects.",
+    "Extension/native host cannot claim OperatorActions or create execution authority."
+  ]
+}

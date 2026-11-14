@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "matrix_id": "workspace-resumable-reasoning-p0-p3-v1",
+  "status": "PROVENANCE_PROFILE_REFROZEN_FULL_RESCREEN_REQUIRED",
+  "taxonomy_ref": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
+  "family": "research_iterate",
+  "design": "Matched synthetic system-diagnosis fixtures vary horizon/load, separability, and reasoning coupling while preserving the same worker-visible experiment/result interface and deterministic objective evaluator.",
+  "fixtures": [
+    {
+      "phenotype": "P0_easy_control",
+      "fixture_id": "research-iterate-timeout-control-p0-v1",
+      "fixture": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json",
+        "blob_sha": "b33e0afa98d0051e5f41241eead770622c2c9eb0"
+      },
+      "oracle": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_oracle_v1.json",
+        "blob_sha": "92437c0b05d6918796beafc202aa9fa8c419ec9b"
+      },
+      "taxonomy_profile": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json",
+        "blob_sha": "b887ff6e05e1076b44ac874d38d48ba8956bc109"
+      },
+      "primary_signal": "Competent executor sanity control; no decomposition or frontier escalation should be necessary."
+    },
+    {
+      "phenotype": "P1_horizon_heavy_decomposable",
+      "fixture_id": "research-iterate-shard-rollout-p1-v1",
+      "fixture": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json",
+        "blob_sha": "766a414e01197f6054e68c02f2fe856f710044b0"
+      },
+      "oracle": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_oracle_v1.json",
+        "blob_sha": "348db4eefcffcebd90248e2190ca9cc931c0bf90"
+      },
+      "taxonomy_profile": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.taxonomy.json",
+        "blob_sha": "11aea24d489b119518d514382dfd48047a7998b1"
+      },
+      "primary_signal": "Primary TOO_LARGE/decomposition test; broad independent leaves with low-coupling synthesis."
+    },
+    {
+      "phenotype": "P2_reasoning_heavy_coupled",
+      "fixture_id": "research-iterate-retry-pooling-v1",
+      "fixture": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+        "blob_sha": "389fd2ecd5bfe78e8258ecccb03dea759c043296"
+      },
+      "oracle": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+        "blob_sha": "acc914d4fa9862a7f1ad0eabac21dbbf7aa84d68"
+      },
+      "taxonomy_profile": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
+        "blob_sha": "4416013ea8f553d3a971f592ce0fbf7faf30c59e"
+      },
+      "primary_signal": "Primary short/coupled causal-reasoning test; candidate intrinsic reasoning boundary."
+    },
+    {
+      "phenotype": "P3_mixed_long_hard",
+      "fixture_id": "research-iterate-cross-region-feedback-p3-v1",
+      "fixture": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json",
+        "blob_sha": "2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958"
+      },
+      "oracle": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_oracle_v1.json",
+        "blob_sha": "8712ab9ea94e67d757d554036e44fc0df8e47097"
+      },
+      "taxonomy_profile": {
+        "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.taxonomy.json",
+        "blob_sha": "54c63ee2d0fd7990312517fd90d2d1197cf75df1"
+      },
+      "primary_signal": "Decompose broad regional leaves first, then test whether a coupled residual justifies stronger reasoning."
+    }
+  ],
+  "paired_comparisons": [
+    {
+      "question": "Q1_horizon_externalization",
+      "arms": [
+        "B_instant_persistent_chat",
+        "C_instant_stateless_resume"
+      ],
+      "fixtures": [
+        "P0_easy_control",
+        "P1_horizon_heavy_decomposable",
+        "P2_reasoning_heavy_coupled",
+        "P3_mixed_long_hard"
+      ]
+    },
+    {
+      "question": "Q2_decomposition_effect",
+      "arms": [
+        "C_instant_stateless_resume",
+        "D_instant_decompose_critic"
+      ],
+      "fixtures": [
+        "P1_horizon_heavy_decomposable",
+        "P3_mixed_long_hard"
+      ]
+    },
+    {
+      "question": "Q3_intrinsic_reasoning_boundary",
+      "arms": [
+        "D_instant_decompose_critic",
+        "A_frontier_long_horizon"
+      ],
+      "fixtures": [
+        "P2_reasoning_heavy_coupled",
+        "P3_mixed_long_hard"
+      ],
+      "note": "Compare matched residual reasoning only after reasonable decomposition; do not compare whole-task cost as if it isolated reasoning tier."
+    },
+    {
+      "question": "Q5_escalation_calibration",
+      "arms": [
+        "D_instant_decompose_critic",
+        "E_hybrid_escalation"
+      ],
+      "fixtures": [
+        "P0_easy_control",
+        "P1_horizon_heavy_decomposable",
+        "P2_reasoning_heavy_coupled",
+        "P3_mixed_long_hard"
+      ]
+    }
+  ],
+  "scoring_protocol": {
+    "oracle_unexposed_worker_required": true,
+    "authoring_control_chat_eligible_as_scored_worker": false,
+    "minimum_reasoning_replicates_per_arm_fixture": 3,
+    "quality_gate_before_efficiency": true,
+    "hard_gates": [
+      "authority/provenance",
+      "no stale completion",
+      "no model polling while waiting",
+      "objective terminal validator"
+    ],
+    "static_oracle_claim_ceiling": "Suitable for controlled pilot comparisons. Strong general capability claims still require stronger hidden/ephemeral evaluator isolation and broader workflow families."
+  },
+  "next_extension_families": [
+    "architecture_diagnosis",
+    "artifact_revision",
+    "software_debug_repair",
+    "unseen_extension_fixture"
+  ],
+  "provenance_refreeze": {
+    "reason": "All P0-P3 taxonomy profiles still referenced pre-terminal-schema fixture blob SHAs after the clarified fixture files were written. Exact public-input provenance therefore did not close.",
+    "corrected_fixture_profile_bindings": {
+      "P0": "b33e0afa98d0051e5f41241eead770622c2c9eb0",
+      "P1": "766a414e01197f6054e68c02f2fe856f710044b0",
+      "P2": "389fd2ecd5bfe78e8258ecccb03dea759c043296",
+      "P3": "2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958"
+    },
+    "consequence": "All prior P0 primary/supplementary screening remains protocol-defect/mechanics evidence only and is superseded for frozen comparability. Started P1 screen-001 runs are invalidated. P2/P3 prelaunch slots must be rebound before use.",
+    "required_action": "Fresh affected screening under a new source checkpoint."
+  }
+}

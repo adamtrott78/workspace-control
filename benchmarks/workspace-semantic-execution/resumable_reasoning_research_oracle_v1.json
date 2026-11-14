@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-iterate-retry-pooling-v1",
+  "visibility": "evaluator_only_do_not_supply_to_reasoning_worker",
+  "experiment_results": {
+    "E_queue_4x": {
+      "p95_latency_ms": 405,
+      "mean_retries": 3,
+      "interpretation_hint": "Queue capacity changes little at the same concurrency."
+    },
+    "E_disable_pool_reuse": {
+      "p95_latency_ms": 228,
+      "mean_retries": 1.1,
+      "interpretation_hint": "Breaking pooled lifecycle reuse largely removes the regression."
+    },
+    "E_force_retry_reset": {
+      "p95_latency_ms": 219,
+      "mean_retries": 1,
+      "interpretation_hint": "Resetting retry state at request boundaries removes the regression while retaining pooling."
+    },
+    "E_clock_quantization": {
+      "p95_latency_ms": 401,
+      "mean_retries": 3,
+      "interpretation_hint": "Higher-resolution timestamps do not materially change the regression."
+    },
+    "E_half_concurrency": {
+      "p95_latency_ms": 286,
+      "mean_retries": 3,
+      "interpretation_hint": "Lower load reduces latency but leaves abnormal retry amplification intact."
+    }
+  },
+  "terminal_criteria": {
+    "expected_hypothesis": "H_retry_state",
+    "minimum_unique_experiments": 2,
+    "required_experiment_groups": [
+      [
+        "E_disable_pool_reuse",
+        "E_force_retry_reset"
+      ],
+      [
+        "E_queue_4x",
+        "E_clock_quantization"
+      ]
+    ],
+    "required_rejected_hypotheses": [
+      "H_queue"
+    ],
+    "required_addressed_observations": [
+      "O2"
+    ]
+  },
+  "seal_note": "Process-level seal for pilot v1: benchmark worker packets must omit this file. Strong tool-enforced evaluator isolation remains a later harness hardening step."
+}

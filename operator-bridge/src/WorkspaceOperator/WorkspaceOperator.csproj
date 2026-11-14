@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>WorkspaceControl.OperatorBridge</RootNamespace>
+    <AssemblyName>WorkspaceOperator</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../SharedContracts/SharedContracts.csproj" />
+  </ItemGroup>
+</Project>

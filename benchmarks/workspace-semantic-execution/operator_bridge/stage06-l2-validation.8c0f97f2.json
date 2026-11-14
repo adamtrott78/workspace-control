@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "stage": "impl_06_integrated_local_bridge_e2e",
+  "layer": "L2_REAL_HELPER_FAKE_WORKER",
+  "source_sha": "8c0f97f23e181b850728b2b42c970b71d93c3991",
+  "workflow": {
+    "name": "Operator Bridge Validation",
+    "run_id": 42767850738,
+    "run_number": 24,
+    "conclusion": "SUCCESS"
+  },
+  "result": "PASS",
+  "tests": {
+    "passed": 5,
+    "failed": 0
+  },
+  "real_adapters": {
+    "os_clipboard": true,
+    "ctrl_b_register_hotkey": true
+  },
+  "frozen_obligations": [
+    "SIM-004",
+    "SIM-006",
+    "SIM-007",
+    "SIM-015",
+    "SIM-016"
+  ],
+  "negative_invariants": {
+    "no_work_clipboard_mutation": true,
+    "no_work_browser_effect": true,
+    "held_repeat_duplicate_dispatch": false,
+    "second_press_duplicate_claim": false,
+    "judgment_worker_packet": false
+  },
+  "content_policy": "CONTENT_FREE"
+}

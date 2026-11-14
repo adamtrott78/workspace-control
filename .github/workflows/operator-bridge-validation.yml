@@ -1,0 +1,580 @@
+name: Operator Bridge Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    branches:
+      - main
+    paths:
+      - 'operator-bridge/**'
+      - '.github/workflows/operator-bridge-validation.yml'
+      - 'tasks/active/workspace-operator-bridge-implementation-v1.json'
+      - 'tasks/active/workspace-operator-bridge-implementation-v1.md'
+      - 'architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md'
+      - 'architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json'
+      - 'architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json'
+      - 'benchmarks/workspace-semantic-execution/operator_bridge/**'
+      - 'tests/test_workspace_semantic_execution_operator_bridge*.py'
+  workflow_dispatch:
+    inputs:
+      repair_target_profile:
+        description: 'Recreate the owned Stage-09 WorkspaceWorkers Firefox profile and verify the reviewed signed adapter'
+        required: false
+        default: false
+        type: boolean
+      run_target_preflight:
+        description: 'Run only the Stage-09 Firefox adapter identity preflight on the interactive Windows target runner'
+        required: false
+        default: false
+        type: boolean
+      run_target_benchmark:
+        description: 'Run Stage-09 target benchmark on the registered interactive Windows target runner'
+        required: false
+        default: false
+        type: boolean
+      confirm_ac_power:
+        description: 'Operator confirms target workstation is on AC power'
+        required: false
+        default: false
+        type: boolean
+      confirm_chrome_memory_saver_disabled:
+        description: 'Operator confirms Chrome Memory Saver is disabled'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: operator-bridge-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validation:
+    name: validation
+    runs-on: windows-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout tested tree
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up .NET 10 LTS
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Validate frozen protocol, authority scope, and security baseline
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p "test_workspace_semantic_execution_operator_bridge*.py" -v
+
+      - name: Parse Stage 09 PowerShell target tooling
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $targets = @(
+            "operator-bridge/performance/prepare-stage09-target-profile.ps1",
+            "operator-bridge/tools/run-stage09-target-firefox.ps1",
+            "operator-bridge/tools/run-stage09-target-matrix.ps1",
+            "operator-bridge/tools/run-stage10-usability.ps1"
+          )
+          foreach ($target in $targets) {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              (Resolve-Path $target),
+              [ref]$tokens,
+              [ref]$errors
+            )
+            if ($errors.Count -gt 0) {
+              $messages = ($errors | ForEach-Object { $_.Message }) -join "; "
+              throw "PowerShell parse failed for ${target}: $messages"
+            }
+          }
+
+      - name: Set up Node 24 for Firefox adapter tests
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Test Firefox adapter with mocked browser APIs
+        shell: pwsh
+        run: node --test operator-bridge/tests/FirefoxAdapter.Tests/firefox_adapter.test.js
+
+      - name: Restore simulator solution
+        shell: pwsh
+        run: dotnet restore operator-bridge/WorkspaceOperatorBridge.Simulator.slnx
+
+      - name: Build simulator solution
+        shell: pwsh
+        run: dotnet build operator-bridge/WorkspaceOperatorBridge.Simulator.slnx --configuration Release --no-restore
+
+      - name: Test deterministic simulator
+        shell: pwsh
+        run: dotnet test operator-bridge/WorkspaceOperatorBridge.Simulator.slnx --configuration Release --no-build
+
+      - name: Restore production solution
+        shell: pwsh
+        run: dotnet restore operator-bridge/WorkspaceOperatorBridge.slnx
+
+      - name: Build production solution
+        shell: pwsh
+        run: dotnet build operator-bridge/WorkspaceOperatorBridge.slnx --configuration Release --no-restore
+
+      - name: Test production solution
+        shell: pwsh
+        run: dotnet test operator-bridge/WorkspaceOperatorBridge.slnx --configuration Release --no-build
+
+      - name: Restore Stage 07 integration solution
+        shell: pwsh
+        run: dotnet restore operator-bridge/WorkspaceOperatorBridge.Integration.slnx
+
+      - name: Build Stage 07 integration solution
+        shell: pwsh
+        run: dotnet build operator-bridge/WorkspaceOperatorBridge.Integration.slnx --configuration Release --no-restore
+
+      - name: Test Stage 07 Layer 2 recovery mechanics
+        shell: pwsh
+        run: dotnet test operator-bridge/tests/LocalBridgeE2E.Tests/LocalBridgeE2E.Tests.csproj --configuration Release --no-build
+
+      - name: Run Stage 07 Layer 3 Firefox recovery integration
+        shell: pwsh
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/tools/run-stage07-firefox.ps1 -RepositoryRoot "${{ github.workspace }}" -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage07-firefox-result.json"
+
+      - name: Upload Stage 07 content-free recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage07-${{ github.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage07-firefox-result.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Run Stage 08 per-user packaging/install/upgrade/rollback smoke
+        shell: pwsh
+        env:
+          OPERATOR_BRIDGE_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/packaging/stage08-smoke.ps1 -RepositoryRoot "${{ github.workspace }}" -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage08-packaging-evidence.json"
+
+      - name: Upload Stage 08 content-free packaging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage08-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            benchmarks/workspace-semantic-execution/operator_bridge/stage08-packaging-evidence.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage08-package-a.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage08-package-b.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Run Stage 09 account-free CI performance smoke
+        shell: pwsh
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/tools/run-stage09-ci.ps1 -RepositoryRoot "${{ github.workspace }}" -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-performance.json"
+
+      - name: Build Stage 09 fake-worker Mozilla signing input
+        shell: pwsh
+        run: |
+          ./operator-bridge/performance/build-stage09-performance-xpi.ps1 `
+            -RepositoryRoot "${{ github.workspace }}" `
+            -OutputPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage09-performance-unsigned.xpi"
+
+      - name: Upload Stage 09 non-target content-free performance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage09-ci-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-performance.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-target-plan.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-performance-unsigned.xpi
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-performance-unsigned.xpi.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Measure helper idle resource sample
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $exe = Resolve-Path "operator-bridge/src/WorkspaceOperator/bin/Release/net10.0-windows/WorkspaceOperator.exe"
+          $process = Start-Process -FilePath $exe -ArgumentList "--idle-probe-ms=7000" -PassThru
+          Start-Sleep -Seconds 1
+          $process.Refresh()
+          $startCpu = $process.TotalProcessorTime.TotalSeconds
+          $started = Get-Date
+          $workingSets = @()
+
+          1..5 | ForEach-Object {
+            Start-Sleep -Milliseconds 900
+            if (-not $process.HasExited) {
+              $process.Refresh()
+              $workingSets += $process.WorkingSet64
+            }
+          }
+
+          $process.WaitForExit()
+          $process.Refresh()
+          $elapsed = [Math]::Max(((Get-Date) - $started).TotalSeconds, 0.001)
+          $cpuSeconds = [Math]::Max($process.TotalProcessorTime.TotalSeconds - $startCpu, 0)
+          $cpuPercentOneLogicalCpu = [Math]::Round(($cpuSeconds / $elapsed) * 100, 4)
+          $maxWorkingSetMiB = if ($workingSets.Count -gt 0) {
+            [Math]::Round((($workingSets | Measure-Object -Maximum).Maximum / 1MB), 3)
+          } else {
+            0
+          }
+
+          $measurement = [ordered]@{
+            schema_version = 1
+            measurement = "stage02_helper_idle_ci_sample"
+            duration_seconds = [Math]::Round($elapsed, 3)
+            max_working_set_mib = $maxWorkingSetMiB
+            cpu_percent_one_logical_cpu_mean = $cpuPercentOneLogicalCpu
+            runner = "windows-latest"
+            interpretation = "CI smoke measurement only; UX-09 target-machine measurement remains authoritative for production promotion."
+          }
+          $json = $measurement | ConvertTo-Json -Compress
+          Write-Host "OPERATOR_BRIDGE_IDLE_MEASUREMENT=$json"
+  target-profile-repair:
+    name: target-profile-repair
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && inputs.repair_target_profile) ||
+        (github.event_name == 'pull_request' &&
+         github.event.action == 'labeled' &&
+         github.event.label.name == 'stage09-profile-repair' &&
+         github.event.pull_request.number == 590 &&
+         github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1')
+      }}
+    runs-on: [self-hosted, windows, x64, workspace-operator-target]
+    timeout-minutes: 20
+    env:
+      PSExecutionPolicyPreference: Bypass
+
+    steps:
+      - name: Checkout exact profile-repair head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Validate interactive profile-repair runner
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $head = (git rev-parse HEAD).Trim()
+          $expectedHead = "${{ github.event.pull_request.head.sha || github.sha }}"
+          if ($head -ne $expectedHead) {
+            throw "Profile-repair runner checkout is not bound to the exact requested source SHA."
+          }
+          if (-not [Environment]::UserInteractive) {
+            throw "Profile repair must run interactively in the WorkspaceWorkers Windows user session."
+          }
+          foreach ($name in @("firefox", "WorkspaceOperator")) {
+            if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+              throw "Profile repair requires no pre-existing $name process."
+            }
+          }
+
+      - name: Recreate and verify owned Stage 09 Firefox profile
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $repo = "${{ github.workspace }}"
+          $signedXpi = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage09\workspace-control-operator-performance-signed.xpi"
+          $repairEvidence = Join-Path $repo "benchmarks\workspace-semantic-execution\operator_bridge\stage09-profile-repair.json"
+
+          ./operator-bridge/performance/prepare-stage09-target-profile.ps1 `
+            -RepositoryRoot $repo `
+            -SignedXpiPath $signedXpi `
+            -InteractiveInstall
+
+          $launchDeadline = (Get-Date).AddSeconds(45)
+          while (-not (Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $launchDeadline) {
+            Start-Sleep -Milliseconds 250
+          }
+          if (-not (Get-Process firefox -ErrorAction SilentlyContinue)) {
+            throw "Stage 09 profile repair did not open Firefox signed-add-on installation UI."
+          }
+
+          Write-Host "STAGE09_TARGET_PROFILE_REPAIR_WAITING_FOR_OPERATOR=TRUE"
+          Write-Host "Accept the reviewed Workspace Operator Performance Adapter installation in Firefox, then close Firefox."
+
+          $closeDeadline = (Get-Date).AddMinutes(12)
+          while ((Get-Process firefox -ErrorAction SilentlyContinue) -and (Get-Date) -lt $closeDeadline) {
+            Start-Sleep -Milliseconds 500
+          }
+          if (Get-Process firefox -ErrorAction SilentlyContinue) {
+            throw "Stage 09 profile repair timed out waiting for Firefox to close."
+          }
+
+          ./operator-bridge/performance/prepare-stage09-target-profile.ps1 `
+            -RepositoryRoot $repo `
+            -SignedXpiPath $signedXpi `
+            -VerifyOnly
+
+          New-Item (Split-Path -Parent $repairEvidence) -ItemType Directory -Force | Out-Null
+          [ordered]@{
+            schema_version = 1
+            evidence_class = "TARGET_PROFILE_REPAIR"
+            source_sha = (git rev-parse HEAD).Trim().ToLowerInvariant()
+            profile_name = "WorkspaceWorkers"
+            extension_id = "workspace-control-operator@adamtrott78.local"
+            extension_version = "0.1.9"
+            adapter_version = "0.1.9-perf"
+            status = "PASS"
+          } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $repairEvidence -Encoding UTF8
+          Write-Host "STAGE09_TARGET_PROFILE_REPAIR=PASS"
+
+      - name: Upload Stage 09 profile-repair evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage09-profile-repair-${{ github.event.pull_request.head.sha || github.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage09-profile-repair.json
+          if-no-files-found: ignore
+          retention-days: 30
+
+  target-preflight:
+    name: target-preflight
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && inputs.run_target_preflight) ||
+        (github.event_name == 'pull_request' &&
+         github.event.action == 'labeled' &&
+         github.event.label.name == 'stage09-preflight' &&
+         github.event.pull_request.number == 590 &&
+         github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1')
+      }}
+    # Debug-only identity preflight is intentionally independent of the full hosted suite.
+    # Promotion/full target execution remains validation-gated below.
+    runs-on: [self-hosted, windows, x64, workspace-operator-target]
+    timeout-minutes: 30
+    env:
+      PSExecutionPolicyPreference: Bypass
+
+    steps:
+      - name: Checkout exact adapter-preflight head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up .NET 10 LTS
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Validate interactive adapter-preflight runner
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $head = (git rev-parse HEAD).Trim()
+          $expectedHead = "${{ github.event.pull_request.head.sha || github.sha }}"
+          if ($head -ne $expectedHead) {
+            throw "Adapter preflight runner checkout is not bound to the exact requested source SHA."
+          }
+          if (-not [Environment]::UserInteractive) {
+            throw "Adapter preflight runner must be launched interactively in the WorkspaceWorkers Windows user session."
+          }
+          foreach ($name in @("firefox", "WorkspaceOperator")) {
+            if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+              throw "Adapter preflight requires no pre-existing $name process."
+            }
+          }
+
+      - name: Execute isolated Stage 09 Firefox adapter preflight
+        shell: powershell
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/tools/run-stage09-target-matrix.ps1 `
+            -RepositoryRoot "${{ github.workspace }}" `
+            -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage09-adapter-preflight.json" `
+            -PreflightOnly
+
+      - name: Upload Stage 09 adapter-preflight evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage09-preflight-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-adapter-preflight.json
+            benchmarks/workspace-semantic-execution/operator_bridge/stage09-preflight-diagnostics/**
+          if-no-files-found: warn
+          retention-days: 30
+
+  stage10-usability:
+    name: stage10-usability
+    if: >-
+      ${{
+        github.event_name == 'pull_request' &&
+        github.event.action == 'labeled' &&
+        (github.event.label.name == 'stage10-ut11' ||
+         github.event.label.name == 'stage10-ut01' ||
+         github.event.label.name == 'stage10-ut02' ||
+         github.event.label.name == 'stage10-ut03' ||
+         github.event.label.name == 'stage10-ut04' ||
+         github.event.label.name == 'stage10-ut10') &&
+        github.event.pull_request.number == 590 &&
+        github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1'
+      }}
+    needs: validation
+    runs-on: [self-hosted, windows, x64, workspace-operator-target]
+    timeout-minutes: 35
+    env:
+      PSExecutionPolicyPreference: Bypass
+      STAGE10_SCHEDULER_HOTKEY: Ctrl+Space
+
+    steps:
+      - name: Checkout exact Stage 10 usability head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up .NET 10 LTS
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Set up Node 24 for temporary Firefox usability adapter
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+
+      - name: Validate interactive Stage 10 runner
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $head = (git rev-parse HEAD).Trim()
+          $expectedHead = "${{ github.event.pull_request.head.sha }}"
+          if ($head -ne $expectedHead) {
+            throw "Stage 10 runner checkout is not bound to the exact requested source SHA."
+          }
+          if (-not [Environment]::UserInteractive) {
+            throw "Stage 10 usability runner must be launched interactively in the Windows user session."
+          }
+          foreach ($name in @("firefox", "WorkspaceOperator")) {
+            if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+              throw "Stage 10 usability trial requires no pre-existing $name process."
+            }
+          }
+
+      - name: Execute Stage 10 human-in-loop usability trial
+        shell: powershell
+        run: |
+          $label = "${{ github.event.label.name }}"
+          $trial = switch ($label) {
+            "stage10-ut11" { "UT-11" }
+            "stage10-ut01" { "UT-01" }
+            "stage10-ut02" { "UT-02" }
+            "stage10-ut03" { "UT-03" }
+            "stage10-ut04" { "UT-04" }
+            "stage10-ut10" { "UT-10" }
+            default { throw "Unsupported Stage 10 usability label: $label" }
+          }
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          $result = "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage10-$($trial.ToLowerInvariant())-result.json"
+          ./operator-bridge/tools/run-stage10-usability.ps1 `
+            -RepositoryRoot "${{ github.workspace }}" `
+            -TrialId $trial `
+            -ResultPath $result `
+            -SchedulerHotkey "$env:STAGE10_SCHEDULER_HOTKEY"
+          Write-Host "STAGE10_USABILITY_TRIAL=$trial"
+
+      - name: Upload Stage 10 content-free usability evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage10-usability-${{ github.event.label.name }}-${{ github.event.pull_request.head.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage10-*-result.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  target-performance:
+    name: target-performance
+    if: >-
+      ${{
+        (github.event_name == 'workflow_dispatch' && inputs.run_target_benchmark) ||
+        (github.event_name == 'pull_request' &&
+         github.event.action == 'labeled' &&
+         github.event.label.name == 'stage09-target' &&
+         github.event.pull_request.number == 590 &&
+         github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1')
+      }}
+    needs: validation
+    runs-on: [self-hosted, windows, x64, workspace-operator-target]
+    timeout-minutes: 300
+    env:
+      PSExecutionPolicyPreference: Bypass
+
+    steps:
+      - name: Checkout exact target benchmark head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up .NET 10 LTS
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Set up Python for content-free target tooling
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Validate interactive target-runner preconditions
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $head = (git rev-parse HEAD).Trim()
+          $expectedHead = "${{ github.event.pull_request.head.sha || github.sha }}"
+          if ($head -ne $expectedHead) {
+            throw "Target runner checkout is not bound to the exact requested source SHA."
+          }
+          if (-not [Environment]::UserInteractive) {
+            throw "Target runner must be launched interactively in the WorkspaceWorkers Windows user session."
+          }
+          $isPrLabelTrigger = (
+            "${{ github.event_name }}" -eq "pull_request" -and
+            "${{ github.event.action }}" -eq "labeled" -and
+            "${{ github.event.label.name }}" -eq "stage09-target"
+          )
+          if (-not $isPrLabelTrigger -and "${{ inputs.confirm_ac_power }}" -ne "true") {
+            throw "Target benchmark requires explicit AC-power confirmation."
+          }
+          if (-not $isPrLabelTrigger -and "${{ inputs.confirm_chrome_memory_saver_disabled }}" -ne "true") {
+            throw "Target benchmark requires explicit Chrome Memory Saver disabled confirmation."
+          }
+          foreach ($name in @("firefox", "chrome", "WorkspaceOperator")) {
+            if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
+              throw "Target benchmark requires no pre-existing $name process."
+            }
+          }
+
+      - name: Execute frozen Stage 09 target matrix
+        shell: powershell
+        run: |
+          New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
+          ./operator-bridge/tools/run-stage09-target-matrix.ps1 `
+            -RepositoryRoot "${{ github.workspace }}" `
+            -ResultPath "${{ github.workspace }}/benchmarks/workspace-semantic-execution/operator_bridge/stage09-target-evidence.json" `
+            -ConfirmAcPower `
+            -ConfirmChromeMemorySaverDisabled
+
+      - name: Upload Stage 09 target-workstation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-bridge-stage09-target-${{ github.event.pull_request.head.sha || github.sha }}
+          path: benchmarks/workspace-semantic-execution/operator_bridge/stage09-target-evidence.json
+          if-no-files-found: warn
+          retention-days: 30
+

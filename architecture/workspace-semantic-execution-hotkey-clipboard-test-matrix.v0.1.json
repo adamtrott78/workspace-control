@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-hotkey-clipboard-test-matrix-v0.1",
+  "status": "UX_05_DESIGN_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "default_binding": "CTRL+B",
+  "clipboard_restore_policy": "NO_AUTOMATIC_SNAPSHOT_OR_RESTORE_V0",
+  "tests": [
+    {
+      "id": "HK-001",
+      "scenario": "bridge_off_ctrl_b",
+      "preconditions": [
+        "bridge=OFF"
+      ],
+      "expected": [
+        "workspace hotkey not registered",
+        "foreground app receives normal Ctrl+B",
+        "clipboard unchanged",
+        "focus unchanged",
+        "no action claim"
+      ]
+    },
+    {
+      "id": "HK-002",
+      "scenario": "bridge_on_no_work",
+      "preconditions": [
+        "bridge=ON",
+        "ready=0"
+      ],
+      "expected": [
+        "fresh state query",
+        "no action claim",
+        "clipboard unchanged",
+        "focus unchanged",
+        "Firefox not launched"
+      ]
+    },
+    {
+      "id": "HK-003",
+      "scenario": "reuse_existing",
+      "preconditions": [
+        "bridge=ON",
+        "trusted compatible active worker ready"
+      ],
+      "expected": [
+        "single atomic claim",
+        "browser target prepared before clipboard",
+        "clipboard packet written",
+        "target focused",
+        "LOCAL_PREPARED/AWAITING_DURABLE_ACK"
+      ]
+    },
+    {
+      "id": "HK-004",
+      "scenario": "cold_firefox",
+      "preconditions": [
+        "bridge=ON",
+        "Firefox stopped",
+        "create action ready"
+      ],
+      "expected": [
+        "single Firefox launch",
+        "clipboard unchanged during startup",
+        "packet written only after target prepared",
+        "final target focus",
+        "no duplicate claim"
+      ]
+    },
+    {
+      "id": "HK-005",
+      "scenario": "held_hotkey_repeat",
+      "preconditions": [
+        "Ctrl+B held"
+      ],
+      "expected": [
+        "one dispatch maximum",
+        "OS repeat suppressed",
+        "no repeated clipboard mutation"
+      ]
+    },
+    {
+      "id": "HK-006",
+      "scenario": "second_press_while_preparing",
+      "preconditions": [
+        "local dispatch in flight"
+      ],
+      "expected": [
+        "second press coalesced/ignored busy",
+        "no second claim",
+        "clipboard not overwritten by second press"
+      ]
+    },
+    {
+      "id": "HK-007",
+      "scenario": "second_deliberate_press_after_ready_to_paste",
+      "preconditions": [
+        "previous action LOCAL_PREPARED/AWAITING_DURABLE_ACK",
+        "another independent action READY"
+      ],
+      "expected": [
+        "new fresh claim allowed",
+        "previous action remains unconfirmed",
+        "next packet may replace clipboard",
+        "no inference that previous packet was submitted"
+      ]
+    },
+    {
+      "id": "HK-008",
+      "scenario": "clipboard_write_failure",
+      "preconditions": [
+        "browser target prepared",
+        "clipboard adapter fails"
+      ],
+      "expected": [
+        "worker not presented ready-to-paste",
+        "final target focus not performed",
+        "record local failure",
+        "no durable delivery inference"
+      ]
+    },
+    {
+      "id": "HK-009",
+      "scenario": "stale_after_browser_prepare_before_clipboard",
+      "preconditions": [
+        "action becomes stale after target preparation"
+      ],
+      "expected": [
+        "revalidation fails",
+        "clipboard unchanged",
+        "no final focus",
+        "record stale/recovery outcome"
+      ]
+    },
+    {
+      "id": "HK-010",
+      "scenario": "judgment_gate",
+      "preconditions": [
+        "OPEN_JUDGMENT_GATE highest priority"
+      ],
+      "expected": [
+        "operator console focused",
+        "clipboard unchanged",
+        "ChatGPT worker not focused",
+        "routine rhythm suspended"
+      ]
+    },
+    {
+      "id": "HK-011",
+      "scenario": "recovery_action",
+      "preconditions": [
+        "OPEN_RECOVERY next"
+      ],
+      "expected": [
+        "recovery UI focused",
+        "clipboard unchanged",
+        "no arbitrary worker selected"
+      ]
+    },
+    {
+      "id": "HK-012",
+      "scenario": "local_only_drain_then_service",
+      "preconditions": [
+        "RETIRE_SESSION then independent service action"
+      ],
+      "expected": [
+        "retire completes",
+        "fresh scheduler query",
+        "service action claimed",
+        "one final packet write",
+        "one worker focus",
+        "one Ctrl+B total"
+      ]
+    },
+    {
+      "id": "HK-013",
+      "scenario": "local_only_failure",
+      "preconditions": [
+        "retire/discard local step fails"
+      ],
+      "expected": [
+        "dispatch stops",
+        "no later action claimed with ambiguous browser state",
+        "clipboard unchanged unless prior valid human action already prepared"
+      ]
+    },
+    {
+      "id": "HK-014",
+      "scenario": "toggle_off_during_preparation_no_side_effects",
+      "preconditions": [
+        "dispatch in flight",
+        "bridge toggled OFF",
+        "no local side effects"
+      ],
+      "expected": [
+        "no remaining local steps",
+        "no clipboard/focus",
+        "definite local abort recorded",
+        "no new claims"
+      ]
+    },
+    {
+      "id": "HK-015",
+      "scenario": "toggle_off_during_preparation_unknown_effect",
+      "preconditions": [
+        "dispatch in flight",
+        "bridge toggled OFF",
+        "local effect outcome unknown"
+      ],
+      "expected": [
+        "fail closed BLOCKED/reconcile",
+        "no additional side effects",
+        "no new claims"
+      ]
+    },
+    {
+      "id": "HK-016",
+      "scenario": "hotkey_registration_conflict",
+      "preconditions": [
+        "configured global binding unavailable"
+      ],
+      "expected": [
+        "bridge ON fails visibly",
+        "no partial hotkey mode",
+        "user may rebind"
+      ]
+    },
+    {
+      "id": "HK-017",
+      "scenario": "packet_integrity",
+      "preconditions": [
+        "service action current"
+      ],
+      "expected": [
+        "payload hash/ref checked",
+        "action/session generation revalidated immediately before write",
+        "telemetry stores hash/ref not packet text"
+      ]
+    },
+    {
+      "id": "HK-018",
+      "scenario": "prior_clipboard_privacy",
+      "preconditions": [
+        "clipboard contains arbitrary sensitive text"
+      ],
+      "expected": [
+        "helper does not read/store prior content for restoration",
+        "content replaced only on explicit valid service hotkey"
+      ]
+    },
+    {
+      "id": "HK-019",
+      "scenario": "bridge_on_without_hotkey",
+      "preconditions": [
+        "bridge transitions OFF->ON"
+      ],
+      "expected": [
+        "no claim",
+        "no Firefox focus",
+        "no clipboard write",
+        "hotkey merely registered"
+      ]
+    },
+    {
+      "id": "HK-020",
+      "scenario": "background_worker_ack",
+      "preconditions": [
+        "durable ack arrives while user in another app"
+      ],
+      "expected": [
+        "counts update only",
+        "no focus steal",
+        "no clipboard mutation"
+      ]
+    }
+  ]
+}

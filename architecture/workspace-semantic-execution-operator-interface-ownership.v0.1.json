@@ -1,0 +1,338 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-interface-ownership-v0.1",
+  "status": "UX_02_ARCHITECTURE_BASELINE_DESIGN_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "rules": [
+    "ONE_AUTHORITATIVE_OWNER_PER_STATE_CLASS",
+    "LOCAL_BROWSER_STATE_IS_NON_AUTHORITATIVE_CACHE",
+    "SEMANTIC_PROJECTION_IS_REBUILDABLE",
+    "PLATFORM_ADAPTERS_DEPEND_ON_CORE_PORTS",
+    "UNKNOWN_CONTINUITY_FAILS_CLOSED"
+  ],
+  "components": [
+    {
+      "id": "orchestration_core",
+      "process_boundary": "workspace_control",
+      "owns": [
+        "eligibility",
+        "authority_filtering",
+        "routing_decision",
+        "reasoning_process_transition",
+        "wait_event_semantics",
+        "validation_gate"
+      ],
+      "does_not_own": [
+        "browser_state",
+        "clipboard",
+        "hotkeys",
+        "chat_page_state"
+      ]
+    },
+    {
+      "id": "operator_application_service",
+      "process_boundary": "workspace_control",
+      "owns": [
+        "operator_use_cases",
+        "operator_action_claim_coordination",
+        "local_dispatch_recording",
+        "judgment_gate_application_flow"
+      ],
+      "ports": [
+        "OperatorBridgePort",
+        "SessionRegistryPort",
+        "DurableAckPort",
+        "NotificationProjectionPort"
+      ]
+    },
+    {
+      "id": "semantic_projection",
+      "process_boundary": "workspace_control_or_durable_projection",
+      "owns": [
+        "rebuildable_semantic_read_model"
+      ],
+      "authority": "NONE_FOR_PERMISSION_GRANT",
+      "source": "authoritative_project_task_workflow_evidence_state"
+    },
+    {
+      "id": "semantic_packet_compiler",
+      "process_boundary": "workspace_control",
+      "owns": [
+        "bounded_worker_packet_generation"
+      ],
+      "inputs": [
+        "semantic_projection",
+        "reasoning_process",
+        "evidence_refs",
+        "authority_refs",
+        "validator_contract"
+      ]
+    },
+    {
+      "id": "session_broker",
+      "process_boundary": "workspace_control",
+      "owns": [
+        "logical_worker_slot",
+        "session_generation",
+        "role_affinity",
+        "task_process_affinity",
+        "executor_requirement",
+        "continuity_policy",
+        "reuse_create_rotate_retire_decision"
+      ],
+      "does_not_own": [
+        "firefox_tab_id",
+        "firefox_window_id"
+      ]
+    },
+    {
+      "id": "durable_session_registry",
+      "process_boundary": "durable_control_state",
+      "owns": [
+        "logical_session_record",
+        "generation",
+        "last_acknowledged_checkpoint",
+        "continuity_classification",
+        "lifecycle_intent"
+      ]
+    },
+    {
+      "id": "operator_action_store",
+      "process_boundary": "durable_control_state",
+      "owns": [
+        "operator_action_lifecycle",
+        "action_generation",
+        "claim_state",
+        "ack_state"
+      ]
+    },
+    {
+      "id": "durable_ack_observer",
+      "process_boundary": "workspace_control",
+      "owns": [
+        "mapping_durable_worker_events_to_operator_action_acknowledgment"
+      ],
+      "forbidden": [
+        "chatgpt_dom_completion_detection"
+      ]
+    },
+    {
+      "id": "native_operator_helper",
+      "process_boundary": "windows_local",
+      "owns": [
+        "global_hotkey_registration",
+        "bridge_master_toggle",
+        "clipboard_write",
+        "tray_shell",
+        "local_console_shell",
+        "local_dispatch_receipts",
+        "browser_bridge_calls"
+      ],
+      "state_class": "NON_AUTHORITATIVE_LOCAL"
+    },
+    {
+      "id": "firefox_webextension",
+      "process_boundary": "firefox_workspaceworkers_profile",
+      "owns": [
+        "browser_chrome_operations",
+        "ephemeral_tab_window_mapping",
+        "browser_operation_result"
+      ],
+      "state_class": "NON_AUTHORITATIVE_LOCAL",
+      "forbidden": [
+        "chatgpt_response_scraping",
+        "chatgpt_text_injection",
+        "chatgpt_send_click"
+      ]
+    },
+    {
+      "id": "human_operator",
+      "process_boundary": "human",
+      "owns": [
+        "explicit_service_invocation",
+        "manual_paste_submit",
+        "unavoidable_authentication",
+        "substantive_judgment"
+      ]
+    },
+    {
+      "id": "chatgpt_instant_worker",
+      "process_boundary": "external_chatgpt",
+      "owns": [
+        "bounded_reasoning_quantum_output"
+      ],
+      "authority": "NONE_BEYOND_REFERENCED_EXISTING_AUTHORITY"
+    }
+  ],
+  "ports": [
+    {
+      "id": "OperatorBridgePort",
+      "direction": "local_adapter_to_application",
+      "commands": [
+        "ClaimNextOperatorAction",
+        "RecordLocalPrepared",
+        "RecordLocalFailure",
+        "RequestSessionRecovery"
+      ],
+      "queries": [
+        "GetOperatorStatus",
+        "GetReadyManualCycleCount"
+      ]
+    },
+    {
+      "id": "SessionRegistryPort",
+      "direction": "application_to_durable_state",
+      "commands": [
+        "CreateLogicalSession",
+        "AdvanceGeneration",
+        "RecordContinuityState",
+        "SetLifecycleIntent"
+      ],
+      "queries": [
+        "GetCompatibleSessions",
+        "GetSession"
+      ]
+    },
+    {
+      "id": "SemanticContextPort",
+      "direction": "application_to_projection",
+      "queries": [
+        "GetBoundedContext",
+        "GetDependencies",
+        "GetAuthorityRefs",
+        "GetCapabilityRequirements"
+      ]
+    },
+    {
+      "id": "DurableAckPort",
+      "direction": "durable_events_to_application",
+      "events": [
+        "WorkerTransitionObserved",
+        "ExternalResultPublished",
+        "ValidationCompleted"
+      ]
+    },
+    {
+      "id": "BrowserPort",
+      "direction": "helper_to_browser_adapter",
+      "commands": [
+        "EnsureWorkerProfile",
+        "CreateTab",
+        "ActivateTab",
+        "CloseTab",
+        "DiscardTab",
+        "ReloadTab",
+        "InventoryManagedTabs"
+      ]
+    },
+    {
+      "id": "ClipboardPort",
+      "direction": "helper_to_os",
+      "commands": [
+        "WritePacket"
+      ]
+    },
+    {
+      "id": "HotkeyPort",
+      "direction": "helper_to_os",
+      "commands": [
+        "Register",
+        "Unregister"
+      ]
+    },
+    {
+      "id": "NotificationPort",
+      "direction": "application_or_helper_to_presentation",
+      "commands": [
+        "UpdateCounts",
+        "ShowBlocked",
+        "ShowReadyToPaste",
+        "OpenJudgmentGate"
+      ]
+    },
+    {
+      "id": "TelemetryPort",
+      "direction": "adapters_to_metrics_sink",
+      "commands": [
+        "RecordAllowlistedMetric"
+      ]
+    },
+    {
+      "id": "ClockPort",
+      "direction": "core_to_clock_adapter",
+      "queries": [
+        "Now",
+        "MonotonicNow"
+      ]
+    }
+  ],
+  "state_classes": [
+    {
+      "state": "task_workflow_truth",
+      "owner": "owning_project_or_task_sources",
+      "durability": "durable",
+      "authoritative": true
+    },
+    {
+      "state": "semantic_graph_projection",
+      "owner": "semantic_projection",
+      "durability": "rebuildable",
+      "authoritative": false
+    },
+    {
+      "state": "operator_action_lifecycle",
+      "owner": "operator_action_store",
+      "durability": "durable",
+      "authoritative": true
+    },
+    {
+      "state": "logical_session_identity",
+      "owner": "durable_session_registry",
+      "durability": "durable",
+      "authoritative": true
+    },
+    {
+      "state": "session_policy_decision",
+      "owner": "session_broker",
+      "durability": "durable_or_reproducible",
+      "authoritative_for_routing": true
+    },
+    {
+      "state": "browser_tab_window_binding",
+      "owner": "firefox_webextension",
+      "durability": "local_cache",
+      "authoritative": false
+    },
+    {
+      "state": "bridge_enabled_state",
+      "owner": "native_operator_helper",
+      "durability": "local_preference",
+      "authoritative_for_local_hotkey_only": true
+    },
+    {
+      "state": "clipboard_contents",
+      "owner": "operating_system",
+      "durability": "ephemeral",
+      "authoritative": false
+    },
+    {
+      "state": "durable_worker_ack",
+      "owner": "durable_control_state",
+      "durability": "durable",
+      "authoritative": true
+    },
+    {
+      "state": "tray_badge_counts",
+      "owner": "presentation_projection",
+      "durability": "derived",
+      "authoritative": false
+    }
+  ],
+  "restart_behavior": {
+    "orchestration_core": "RECOVER_FROM_DURABLE_STATE",
+    "semantic_projection": "REBUILD",
+    "native_operator_helper": "REQUERY_AND_REHYDRATE_LOCAL_CACHE",
+    "firefox_webextension": "REINVENTORY_MANAGED_BROWSER_STATE",
+    "lost_chat_continuity": "FAIL_CLOSED_AND_ROTATE_OR_RECREATE_FROM_DURABLE_CHECKPOINT"
+  }
+}

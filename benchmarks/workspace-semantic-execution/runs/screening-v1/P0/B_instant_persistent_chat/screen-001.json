@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P0-B-001",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P0_easy_control",
+  "arm": "B_instant_persistent_chat",
+  "replicate_id": "screen-001",
+  "fixture_id": "research-iterate-timeout-control-p0-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json",
+    "fixture_blob_sha": "ee443a5f9d943c9a77568f70c91bd646f838cfd8",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 2,
+  "status": "CONTAMINATED_SESSION",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "enabled_with_prior_benchmark_context",
+    "continuity": "persistent_chat"
+  },
+  "continuity_regime": "persistent_chat",
+  "started_at": "2026-11-02T16:28:00-05:00",
+  "completed_at": "2026-11-02T16:28:00-05:00",
+  "invocations": [],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
+      "note": "Control-created clean-worker slot; no oracle result has been published."
+    },
+    {
+      "kind": "EXECUTOR_CONTRACT_BOUND",
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
+      "expected_executor": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_or_temporary_chat",
+        "continuity": "persistent_chat"
+      }
+    },
+    {
+      "kind": "PROTOCOL_CHECKPOINT_VALIDATED",
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
+      "validation_run_id": 41526074412,
+      "conclusion": "success"
+    },
+    {
+      "kind": "RUN_CLAIMED",
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
+      "note": "Assigned worker claimed the screening slot; execution remains confined to the listed public inputs and allowed mutation path."
+    },
+    {
+      "kind": "CONTAMINATED_SESSION",
+      "source_checkpoint_sha": "74dc3c8ed31fbf6e9e8eaa4613c3141d0adc05b4",
+      "reason": "Bootstrap requires Temporary Chat or Memory disabled and mandates discard if prior benchmark/control-chat memory appears. This worker session contains prior Workspace benchmark/control context, so fixture execution is prohibited."
+    }
+  ],
+  "pending_external": null,
+  "external_results": {},
+  "established_findings": [],
+  "open_hypotheses": [],
+  "unresolved_questions": [],
+  "evidence_refs": [],
+  "candidate_actions": [],
+  "next_safe_action": "Discard this screening attempt and rerun the assigned slot from a clean Temporary Chat or a chat with Memory disabled, using only GitHub and the durable run packet.",
+  "terminal_submission": null,
+  "validator_results": [],
+  "metrics": {
+    "reasoning_invocations": 0,
+    "experiment_requests": 0,
+    "retries": 0,
+    "decomposition_count": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0
+  },
+  "control_evaluator": {
+    "status": "NOT_YET_NEEDED",
+    "note": "Control chat owns deterministic result publication/scoring. Worker must not access evaluator-only oracle."
+  },
+  "protocol_checkpoint_validation": {
+    "run_id": 41526074412,
+    "run_number": 1764,
+    "conclusion": "success",
+    "status": "VALIDATED"
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-001.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_or_temporary_chat",
+    "continuity": "persistent_chat"
+  }
+}

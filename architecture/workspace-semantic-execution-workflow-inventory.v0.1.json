@@ -1,0 +1,849 @@
+{
+  "schema_version": 1,
+  "inventory_id": "workspace-semantic-execution-workflow-inventory-v0.1",
+  "status": "DRAFT_EVIDENCE_INVENTORY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Machine-readable representative inventory of current Workspace Control workflow families and project-specific workflows. This is open-world evidence for migration design, not a closed registry or authority source.",
+  "open_world": true,
+  "unknown_workflow_behavior": "UNREGISTERED_OR_UNSUPPORTED; preserve source state and require an explicit adapter rather than guessing a known domain",
+  "common_fields": [
+    "workflow_id",
+    "owner_repository",
+    "source_refs",
+    "domain_extension",
+    "intent_class",
+    "semantic_types",
+    "authority_sources",
+    "required_capabilities",
+    "reasoning_profile",
+    "execution_surfaces",
+    "artifact_or_result_roles",
+    "validators",
+    "async_waits",
+    "recovery_semantics",
+    "external_consequence",
+    "migration_target"
+  ],
+  "workflows": [
+    {
+      "workflow_id": "course-assessment-preparation-v1",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:workflows/course-assessment-preparation.v1.json",
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:procedures/course_assessment_preparation.md"
+      ],
+      "domain_extension": "tutor",
+      "intent_class": "ASSESSMENT_PREPARATION",
+      "semantic_types": [
+        "Assessment",
+        "Skill",
+        "Prerequisite",
+        "MasteryState",
+        "LearningEvidence",
+        "Plan"
+      ],
+      "authority_sources": [
+        "project-owned current assessment scope",
+        "course/instructor authority",
+        "project mastery state"
+      ],
+      "required_capabilities": [
+        "repository-read",
+        "reasoning"
+      ],
+      "reasoning_profile": "MODERATE; prioritize from scope/relevance/dependencies/mastery",
+      "execution_surfaces": [
+        "GitHub",
+        "interactive tutor"
+      ],
+      "artifact_or_result_roles": [
+        "readiness plan",
+        "practice/assessment artifacts",
+        "updated preparation state"
+      ],
+      "validators": [
+        "current scope alignment",
+        "skill/dependency coverage",
+        "mastery evidence honesty"
+      ],
+      "async_waits": [],
+      "recovery_semantics": "recover project-owned assessment scope and mastery state",
+      "external_consequence": "NONE unless separate submission/communication is requested",
+      "migration_target": "tutor extension over generic Workflow/Plan/Artifact/Validation primitives"
+    },
+    {
+      "workflow_id": "course-study-session-v1",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:workflows/course-study-session.v1.json",
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:policies/TUTORING_CONTRACT.md"
+      ],
+      "domain_extension": "tutor",
+      "intent_class": "LEARNING",
+      "semantic_types": [
+        "Skill",
+        "Prerequisite",
+        "MasteryState",
+        "Misconception",
+        "LearningEvidence",
+        "StudentAttempt"
+      ],
+      "authority_sources": [
+        "project course authority",
+        "shared tutoring contract"
+      ],
+      "required_capabilities": [
+        "repository-read",
+        "interactive-reasoning",
+        "repository-write"
+      ],
+      "reasoning_profile": "MODERATE interactive diagnosis/remediation/transfer",
+      "execution_surfaces": [
+        "Chat/Instant/frontier tutor",
+        "GitHub"
+      ],
+      "artifact_or_result_roles": [
+        "learning record",
+        "mastery snapshot",
+        "mastery log"
+      ],
+      "validators": [
+        "behavioral evidence",
+        "fresh transfer",
+        "completion/mastery firewall"
+      ],
+      "async_waits": [
+        "student response"
+      ],
+      "recovery_semantics": "resume from durable skill/mastery/learning state; prior chat not authoritative",
+      "external_consequence": "NONE",
+      "migration_target": "resumable reasoning process with tutor-specific semantic extension"
+    },
+    {
+      "workflow_id": "course-assignment-work-v1",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:workflows/course-assignment-work.v1.json",
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:procedures/course_assignment_work.md"
+      ],
+      "domain_extension": "tutor",
+      "intent_class": "ASSIGNMENT_WORK",
+      "semantic_types": [
+        "Assignment",
+        "Skill",
+        "LearningEvidence",
+        "Artifact",
+        "Validation",
+        "SubmissionState"
+      ],
+      "authority_sources": [
+        "exact assignment/instructor source",
+        "project assignment context",
+        "tutoring contract"
+      ],
+      "required_capabilities": [
+        "repository-read",
+        "interactive-reasoning",
+        "artifact-build",
+        "repository-write"
+      ],
+      "reasoning_profile": "LOW to HIGH depending on subject; completion and mastery remain separate",
+      "execution_surfaces": [
+        "Chat model",
+        "GitHub",
+        "local runtime",
+        "artifact builder"
+      ],
+      "artifact_or_result_roles": [
+        "solution",
+        "code",
+        "figures",
+        "report",
+        "learning records"
+      ],
+      "validators": [
+        "assignment requirements",
+        "reproducibility",
+        "artifact QA",
+        "mastery evidence firewall"
+      ],
+      "async_waits": [
+        "student response",
+        "build/runtime completion"
+      ],
+      "recovery_semantics": "recover assignment context + LEARNING + mastery + artifact state",
+      "external_consequence": "external submission is separate gate",
+      "migration_target": "composed tutor + artifact workflows over generic process substrate"
+    },
+    {
+      "workflow_id": "course-content-ingestion-v1",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:workflows/course-content-ingestion.v1.json"
+      ],
+      "domain_extension": "tutor",
+      "intent_class": "SOURCE_INGESTION",
+      "semantic_types": [
+        "Source",
+        "Evidence",
+        "Observation",
+        "Artifact"
+      ],
+      "authority_sources": [
+        "original source bytes",
+        "project source hierarchy"
+      ],
+      "required_capabilities": [
+        "repository-read",
+        "source-read",
+        "repository-write",
+        "source-interpretation",
+        "reasoning"
+      ],
+      "reasoning_profile": "LOW/MODERATE semantic synthesis; original evidence remains authority",
+      "execution_surfaces": [
+        "multimodal model",
+        "OCR/Mathpix when explicitly permitted",
+        "GitHub"
+      ],
+      "artifact_or_result_roles": [
+        "preserved original",
+        "derived transcription/synthesis",
+        "promoted course state"
+      ],
+      "validators": [
+        "source identity/hash",
+        "provenance",
+        "uncertainty labeling"
+      ],
+      "async_waits": [
+        "paid/external conversion when authorized"
+      ],
+      "recovery_semantics": "source identity enables idempotent re-ingestion",
+      "external_consequence": "possible spend gate for paid OCR",
+      "migration_target": "generic source/evidence pipeline plus tutor extension"
+    },
+    {
+      "workflow_id": "course-cheat-sheet-build-v1",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:workflows/course-cheat-sheet-build.v1.json"
+      ],
+      "domain_extension": "tutor+document",
+      "intent_class": "ASSESSMENT_ARTIFACT",
+      "semantic_types": [
+        "Assessment",
+        "Artifact",
+        "Revision",
+        "QualityCriterion"
+      ],
+      "authority_sources": [
+        "assessment scope",
+        "course facts",
+        "project artifact owner"
+      ],
+      "required_capabilities": [
+        "repository-read",
+        "reasoning",
+        "repository-write",
+        "artifact-build",
+        "artifact-render",
+        "artifact-inspection",
+        "artifact-visual-inspection"
+      ],
+      "reasoning_profile": "MODERATE content selection + artifact iteration",
+      "execution_surfaces": [
+        "Chat model",
+        "document builder",
+        "render/visual QA"
+      ],
+      "artifact_or_result_roles": [
+        "cheat sheet source",
+        "rendered artifact"
+      ],
+      "validators": [
+        "scope relevance",
+        "structural constraints",
+        "visual QA"
+      ],
+      "async_waits": [
+        "build/render"
+      ],
+      "recovery_semantics": "resume from source/artifact/check results",
+      "external_consequence": "delivery/printing separate if applicable",
+      "migration_target": "composition of tutor semantic state and generic document artifact primitive"
+    },
+    {
+      "workflow_id": "document-artifact-build-v1",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:workflows/document-artifact-build.v1.json",
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:procedures/document_artifact_build.md"
+      ],
+      "domain_extension": "document",
+      "intent_class": "ARTIFACT_PRODUCTION",
+      "semantic_types": [
+        "Artifact",
+        "Revision",
+        "Validation",
+        "QualityCriterion",
+        "Deliverable"
+      ],
+      "authority_sources": [
+        "project-local domain/content owner",
+        "artifact/source owner"
+      ],
+      "required_capabilities": [
+        "repository-read",
+        "repository-write",
+        "artifact-build",
+        "artifact-inspection",
+        "artifact-render",
+        "artifact-visual-inspection"
+      ],
+      "reasoning_profile": "LOW/MODERATE bounded revision; domain meaning remains external",
+      "execution_surfaces": [
+        "deterministic build",
+        "render",
+        "visual model",
+        "GitHub"
+      ],
+      "artifact_or_result_roles": [
+        "source",
+        "build",
+        "render",
+        "validated artifact"
+      ],
+      "validators": [
+        "build freshness",
+        "structural/static checks",
+        "rendered visual QA"
+      ],
+      "async_waits": [
+        "build/render"
+      ],
+      "recovery_semantics": "resume from latest source/build/render/QA checkpoint",
+      "external_consequence": "delivery/submission separate gate",
+      "migration_target": "generic kernel primitive"
+    },
+    {
+      "workflow_id": "evidence-first-solution-research-v1",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:workflows/evidence-first-solution-research.v1.json",
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:procedures/evidence_first_solution_research.md"
+      ],
+      "domain_extension": "core/engineering",
+      "intent_class": "ARCHITECTURE_RESEARCH",
+      "semantic_types": [
+        "Question",
+        "Evidence",
+        "Alternative",
+        "Finding",
+        "Decision",
+        "Plan",
+        "CandidateAction"
+      ],
+      "authority_sources": [
+        "owning task/project constraints",
+        "current external evidence"
+      ],
+      "required_capabilities": [
+        "project-context-read",
+        "task-state-read",
+        "current-web-research",
+        "scholarly-or-primary-source-research",
+        "repository-or-implementation-research",
+        "reasoning",
+        "task-state-write"
+      ],
+      "reasoning_profile": "MODERATE/HIGH synthesis; implementation authority remains separate",
+      "execution_surfaces": [
+        "Web",
+        "Scholar",
+        "GitHub",
+        "Chat model"
+      ],
+      "artifact_or_result_roles": [
+        "evidence survey",
+        "architecture families",
+        "shortlist",
+        "benchmark contract"
+      ],
+      "validators": [
+        "coverage of alternatives",
+        "source quality",
+        "constraint preservation",
+        "promotion gates"
+      ],
+      "async_waits": [
+        "external evidence availability if needed"
+      ],
+      "recovery_semantics": "durable local evidence/exclusion matrix + architecture state",
+      "external_consequence": "NONE until separate implementation/activation task",
+      "migration_target": "first-class cognitive workflow on resumable reasoning substrate"
+    },
+    {
+      "workflow_id": "padataset-experiment-framework",
+      "owner_repository": "PADataset",
+      "source_refs": [
+        "PADataset@35e6f451fe36f039b5f6461f7469f0eed1e79e43:README.md",
+        "PADataset@35e6f451fe36f039b5f6461f7469f0eed1e79e43:experiments/CONTEXT.md"
+      ],
+      "domain_extension": "research",
+      "intent_class": "SCIENTIFIC_EXPERIMENT",
+      "semantic_types": [
+        "ResearchQuestion",
+        "Hypothesis",
+        "ExperimentDesign",
+        "ScientificExecution",
+        "ScientificResult",
+        "Metric",
+        "Interpretation"
+      ],
+      "authority_sources": [
+        "PADataset scientific/data contracts",
+        "saved run configs/results",
+        "exact code/data/runtime provenance"
+      ],
+      "required_capabilities": [
+        "repository-read",
+        "code-reasoning",
+        "runtime",
+        "CPU/GPU",
+        "statistical-analysis",
+        "repository-write"
+      ],
+      "reasoning_profile": "MODERATE/HIGH for experiment design/interpretation; deterministic for execution/reduction",
+      "execution_surfaces": [
+        "GitHub",
+        "Lambda/GitRunner",
+        "MATLAB/Python",
+        "local models"
+      ],
+      "artifact_or_result_roles": [
+        "config",
+        "checkpoint",
+        "CSV/results",
+        "figures",
+        "analysis evidence"
+      ],
+      "validators": [
+        "scientific contract",
+        "exact provenance",
+        "result integrity",
+        "statistical checks"
+      ],
+      "async_waits": [
+        "training",
+        "capture",
+        "GPU experiment",
+        "CI"
+      ],
+      "recovery_semantics": "saved config/result/run identity; no model polling during runtime",
+      "external_consequence": "scientific trigger may require separate authority",
+      "migration_target": "research extension + generic async execution/validation"
+    },
+    {
+      "workflow_id": "padataset-paper-composition",
+      "owner_repository": "PADataset",
+      "source_refs": [
+        "PADataset@35e6f451fe36f039b5f6461f7469f0eed1e79e43:papers/CONTEXT.md"
+      ],
+      "domain_extension": "publication",
+      "intent_class": "PAPER_PRODUCTION",
+      "semantic_types": [
+        "Claim",
+        "Argument",
+        "Section",
+        "Citation",
+        "Figure",
+        "Table",
+        "ReviewerFinding",
+        "Revision",
+        "VenueConstraint"
+      ],
+      "authority_sources": [
+        "paper ground truth/evidence map",
+        "experiment results",
+        "reference sources"
+      ],
+      "required_capabilities": [
+        "reasoning",
+        "writing",
+        "literature-analysis",
+        "LaTeX/build",
+        "figure-generation",
+        "PDF-render",
+        "visual-QA",
+        "citation-check"
+      ],
+      "reasoning_profile": "MODERATE/HIGH synthesis and reviewer-oriented revision",
+      "execution_surfaces": [
+        "Chat model",
+        "GitHub",
+        "LaTeX",
+        "rendering tools",
+        "OCR/reference ingestion"
+      ],
+      "artifact_or_result_roles": [
+        "manuscript source",
+        "PDF",
+        "figures",
+        "tables",
+        "reference packages",
+        "review notes"
+      ],
+      "validators": [
+        "claim/evidence alignment",
+        "citations",
+        "page limit",
+        "visual QA",
+        "hostile-reader audit"
+      ],
+      "async_waits": [
+        "build/render/reference conversion"
+      ],
+      "recovery_semantics": "revision/hash/evidence-map checkpoints",
+      "external_consequence": "submission separate gate",
+      "migration_target": "publication extension + generic artifact/revision/validation primitives"
+    },
+    {
+      "workflow_id": "padataset-presentation-production",
+      "owner_repository": "PADataset",
+      "source_refs": [
+        "PADataset@milcom-presentation:presentations/milcom2026/README.md",
+        "PADataset@milcom-presentation:presentations/milcom2026/PRESENTATION_PLAN.md"
+      ],
+      "domain_extension": "presentation",
+      "intent_class": "PRESENTATION_PRODUCTION",
+      "semantic_types": [
+        "Presentation",
+        "Audience",
+        "Narrative",
+        "Slide",
+        "AudienceTakeaway",
+        "VisualAsset",
+        "SpeakerScript",
+        "Transition",
+        "LayoutConstraint"
+      ],
+      "authority_sources": [
+        "scientific evidence",
+        "presentation plan/production contract"
+      ],
+      "required_capabilities": [
+        "reasoning",
+        "writing",
+        "visual-production",
+        "PPTX/slide-tooling",
+        "render",
+        "visual-QA"
+      ],
+      "reasoning_profile": "MODERATE narrative/visual design",
+      "execution_surfaces": [
+        "Chat model",
+        "artifact tools",
+        "render/visual QA",
+        "GitHub"
+      ],
+      "artifact_or_result_roles": [
+        "slide sources",
+        "assets",
+        "deck",
+        "previews",
+        "script",
+        "study guide"
+      ],
+      "validators": [
+        "claim boundaries",
+        "visual hierarchy",
+        "legibility",
+        "narrative coverage"
+      ],
+      "async_waits": [
+        "render/build"
+      ],
+      "recovery_semantics": "slide-level source/asset/review checkpoints",
+      "external_consequence": "external presentation/upload separate",
+      "migration_target": "presentation extension + generic artifact lifecycle"
+    },
+    {
+      "workflow_id": "research-engine-automated-research",
+      "owner_repository": "research-engine",
+      "source_refs": [
+        "research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4:README.md",
+        "research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4:src/research_engine/orchestration.py"
+      ],
+      "domain_extension": "research",
+      "intent_class": "AUTOMATED_RESEARCH",
+      "semantic_types": [
+        "ResearchProgram",
+        "Source",
+        "Evidence",
+        "Finding",
+        "Question",
+        "Attempt",
+        "ExternalWait",
+        "Result"
+      ],
+      "authority_sources": [
+        "research-engine source/evidence records",
+        "workspace-control owning task/gates"
+      ],
+      "required_capabilities": [
+        "discovery",
+        "acquisition",
+        "extraction",
+        "verification",
+        "synthesis",
+        "novelty-search",
+        "local/runtime execution"
+      ],
+      "reasoning_profile": "tiered CHEAP/STANDARD/STRONG/HUMAN in current implementation",
+      "execution_surfaces": [
+        "PostgreSQL workers",
+        "Codex/ChatGPT",
+        "local Qwen",
+        "deterministic executors",
+        "web"
+      ],
+      "artifact_or_result_roles": [
+        "research jobs",
+        "source artifacts",
+        "evidence objects",
+        "checkpoints",
+        "synthesis/gaps"
+      ],
+      "validators": [
+        "source grounding",
+        "verification",
+        "provenance",
+        "job dependency/lease state"
+      ],
+      "async_waits": [
+        "worker execution",
+        "document processing",
+        "model runs"
+      ],
+      "recovery_semantics": "PostgreSQL queue, leases, attempts, idempotency",
+      "external_consequence": "human gate for production/scientific scope where required",
+      "migration_target": "retain as research runtime initially; expose generic execution semantics through adapters"
+    },
+    {
+      "workflow_id": "workspace-engineering-task-loop",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:procedures/task_capsule.md",
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:policies/OPERATOR_WORKFLOW.md",
+        "workspace-control@d47a7922aa8d47d3a22b55c19ce4d6af7309a964:procedures/validation_routing.md"
+      ],
+      "domain_extension": "engineering",
+      "intent_class": "ENGINEER_VALIDATE_REPAIR",
+      "semantic_types": [
+        "Requirement",
+        "ArchitectureDecision",
+        "Implementation",
+        "Test",
+        "Validation",
+        "ReviewFinding",
+        "Attempt"
+      ],
+      "authority_sources": [
+        "task capsule",
+        "operator workflow",
+        "project-local source",
+        "review/validation policy"
+      ],
+      "required_capabilities": [
+        "GitHub-read/write",
+        "code-reasoning",
+        "CI-observe",
+        "review",
+        "bounded shell when authorized"
+      ],
+      "reasoning_profile": "LOW to HIGH; must distinguish decomposition from escalation",
+      "execution_surfaces": [
+        "GitHub",
+        "GitRunner",
+        "Workspace Shell",
+        "Chat/Instant/frontier"
+      ],
+      "artifact_or_result_roles": [
+        "code",
+        "tests",
+        "PR",
+        "validation receipt",
+        "review disposition"
+      ],
+      "validators": [
+        "validation profile",
+        "tests/CI",
+        "independent review when required"
+      ],
+      "async_waits": [
+        "CI",
+        "review",
+        "runtime operation"
+      ],
+      "recovery_semantics": "task capsule + exact Git/CI state; conversation not authoritative",
+      "external_consequence": "deployment/live mutation separately gated",
+      "migration_target": "generic work/reasoning/action primitives + engineering extension"
+    },
+    {
+      "workflow_id": "workspace-gitrunner-validation",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@github-actions-control-plane-protocol-redesign-v1:architecture/lambda-ci-execution-contracts.v1.json",
+        "workspace-control@github-actions-control-plane-protocol-redesign-v1:architecture/lambda-ci-project-workspace-control.v1.json"
+      ],
+      "domain_extension": "execution",
+      "intent_class": "CI_VALIDATION",
+      "semantic_types": [
+        "CandidateAction",
+        "AuthorityDecision",
+        "Attempt",
+        "Result",
+        "Receipt",
+        "ExternalWait"
+      ],
+      "authority_sources": [
+        "root-installed policy",
+        "typed controller/provisioner protocol",
+        "exact workflow/PR/head attestation"
+      ],
+      "required_capabilities": [
+        "GitHub-control-plane",
+        "self-hosted CPU/GPU as contract permits"
+      ],
+      "reasoning_profile": "NONE for scheduler/runtime; reasoning only creates candidate work outside this protocol",
+      "execution_surfaces": [
+        "GitHub Actions",
+        "GitRunner controller",
+        "root provisioner/payload broker"
+      ],
+      "artifact_or_result_roles": [
+        "workflow run",
+        "job result",
+        "controller/root receipts"
+      ],
+      "validators": [
+        "exact route/workflow/actor/head policy",
+        "resource contract",
+        "cleanup"
+      ],
+      "async_waits": [
+        "queued/running GitHub job"
+      ],
+      "recovery_semantics": "typed lifecycle, generation exclusion, rollback/quarantine, durable receipts",
+      "external_consequence": "bounded compute; canary/activation separately authorized",
+      "migration_target": "retain as execution substrate behind generic router"
+    },
+    {
+      "workflow_id": "workspace-shell-bounded-execution",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control PR #573 acceptance comment 6565110368",
+        "accepted execution/authority SHA 01a95b61410e2f427b9885a19e6a0b9c5ee60a38"
+      ],
+      "domain_extension": "execution",
+      "intent_class": "BOUNDED_HOST_EXECUTION",
+      "semantic_types": [
+        "CandidateAction",
+        "AuthorityDecision",
+        "Attempt",
+        "Receipt",
+        "Result"
+      ],
+      "authority_sources": [
+        "trusted authority snapshot",
+        "exact source SHA",
+        "fixed profile/helper authority"
+      ],
+      "required_capabilities": [
+        "typed-read-inspection",
+        "bounded-exec",
+        "reviewed-helper transport when separately authorized"
+      ],
+      "reasoning_profile": "NONE at execution layer",
+      "execution_surfaces": [
+        "Workspace Shell MCP"
+      ],
+      "artifact_or_result_roles": [
+        "structured response",
+        "secret-minimized receipt"
+      ],
+      "validators": [
+        "expected SHA",
+        "profile grammar",
+        "receipt authorization",
+        "cgroup cleanup"
+      ],
+      "async_waits": [],
+      "recovery_semantics": "durable receipts and exact source/authority binding",
+      "external_consequence": "privileged helper path only under exact reviewed approval",
+      "migration_target": "retain as bounded execution surface"
+    },
+    {
+      "workflow_id": "workspace-resumable-reasoning",
+      "owner_repository": "workspace-control",
+      "source_refs": [
+        "workspace-control@workspace-semantic-execution-migration-v1:benchmarks/workspace-semantic-execution/resumable_reasoning_v1.json",
+        "workspace-control@workspace-semantic-execution-migration-v1:architecture/workspace-semantic-execution-resumable-reasoning.v0.1.md"
+      ],
+      "domain_extension": "core",
+      "intent_class": "LONG_HORIZON_REASONING",
+      "semantic_types": [
+        "Question",
+        "Finding",
+        "Alternative",
+        "CandidateAction",
+        "ReasoningRequirement",
+        "ContextRequirement",
+        "ExternalWait"
+      ],
+      "authority_sources": [
+        "referenced owning task/policy only; reasoning process itself has none"
+      ],
+      "required_capabilities": [
+        "reasoning",
+        "durable-state-read/write",
+        "evidence retrieval"
+      ],
+      "reasoning_profile": "dynamic LOW/MODERATE/HIGH with TOO_LARGE vs INTRINSICALLY_DIFFICULT split",
+      "execution_surfaces": [
+        "Instant",
+        "local model",
+        "frontier",
+        "human"
+      ],
+      "artifact_or_result_roles": [
+        "reasoning checkpoint",
+        "findings",
+        "child processes",
+        "routing/escalation evidence"
+      ],
+      "validators": [
+        "domain/objective validator",
+        "state recovery",
+        "provenance",
+        "authority escape=0"
+      ],
+      "async_waits": [
+        "CI",
+        "experiment",
+        "render",
+        "human/external input"
+      ],
+      "recovery_semantics": "durable state + generation fencing + stateless resume",
+      "external_consequence": "NONE unless separately authorized action is routed",
+      "migration_target": "new generic cognitive primitive"
+    }
+  ],
+  "coverage_notes": [
+    "This inventory is representative, not exhaustive.",
+    "Course bootstrap/communications workflows are present in workspace-control and should be added as deeper migration coverage when needed.",
+    "PADataset waveform/capture/banking workflows are not yet individually expanded here; they remain covered by project-local research/data execution and should be decomposed before final migration acceptance.",
+    "Additional future workflows must register as extensions rather than modify a closed domain list."
+  ]
+}

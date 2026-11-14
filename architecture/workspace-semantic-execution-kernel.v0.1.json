@@ -1,0 +1,412 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-kernel-v0.1",
+  "status": "EXECUTABLE_REFERENCE_CONTRACT_CORRECTED",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Freeze the dangerous orchestration-kernel semantics before production backend implementation. This contract is executor/model/runtime agnostic and deliberately excludes infrastructure choices.",
+  "authority_boundary": {
+    "reasoning_output": "CandidateAction",
+    "deterministic_boundary": [
+      "AuthorityDecision",
+      "ActionSpec"
+    ],
+    "rule": "CandidateAction and model output are non-authoritative. ActionSpec compilation requires an explicit ALLOW authority decision bound to exact action, process generation, target, and scope; unknown/missing/mismatched authority fails closed."
+  },
+  "process_states": [
+    "READY",
+    "CLAIMED",
+    "RUNNING",
+    "WAITING_EXTERNAL",
+    "WAITING_DEPENDENCIES",
+    "READY_TO_RESUME",
+    "TERMINAL_CANDIDATE",
+    "VALIDATING",
+    "COMPLETED",
+    "FAILED",
+    "AUTHORITY_BLOCKED"
+  ],
+  "transition_contract": [
+    {
+      "from": [
+        "READY",
+        "READY_TO_RESUME"
+      ],
+      "event": "CLAIM",
+      "to": "CLAIMED",
+      "guards": [
+        "generation_matches",
+        "no_current_lease",
+        "dependencies_satisfied"
+      ],
+      "effects": [
+        "bind_worker",
+        "bind_lease"
+      ]
+    },
+    {
+      "from": [
+        "CLAIMED"
+      ],
+      "event": "START",
+      "to": "RUNNING",
+      "guards": [
+        "generation_matches",
+        "lease_matches"
+      ]
+    },
+    {
+      "from": [
+        "RUNNING"
+      ],
+      "event": "WAIT_EXTERNAL",
+      "to": "WAITING_EXTERNAL",
+      "guards": [
+        "generation_matches",
+        "lease_matches",
+        "wait_key_nonempty"
+      ],
+      "effects": [
+        "release_worker_and_lease",
+        "record_wait_key"
+      ]
+    },
+    {
+      "from": [
+        "WAITING_EXTERNAL"
+      ],
+      "event": "WAKE_EXTERNAL",
+      "to": "READY_TO_RESUME",
+      "guards": [
+        "wait_key_matches",
+        "event_id_nonempty"
+      ],
+      "effects": [
+        "record_wake_event",
+        "clear_wait_key"
+      ]
+    },
+    {
+      "from": [
+        "RUNNING"
+      ],
+      "event": "DECOMPOSE",
+      "to": "WAITING_DEPENDENCIES",
+      "guards": [
+        "generation_matches",
+        "lease_matches",
+        "children_nonempty"
+      ],
+      "effects": [
+        "release_worker_and_lease",
+        "record_children"
+      ]
+    },
+    {
+      "from": [
+        "WAITING_DEPENDENCIES"
+      ],
+      "event": "DEPENDENCIES_SATISFIED",
+      "to": "READY_TO_RESUME",
+      "guards": [
+        "all_children_completed"
+      ],
+      "effects": [
+        "record_dependency_wake"
+      ]
+    },
+    {
+      "from": [
+        "RUNNING"
+      ],
+      "event": "RECORD_EFFECT",
+      "to": "RUNNING",
+      "guards": [
+        "generation_matches",
+        "lease_matches",
+        "action_identity_bound",
+        "idempotency_key_nonempty"
+      ],
+      "effects": [
+        "append_effect_receipt_once"
+      ]
+    },
+    {
+      "from": [
+        "RUNNING"
+      ],
+      "event": "PROPOSE_TERMINAL",
+      "to": "TERMINAL_CANDIDATE",
+      "guards": [
+        "generation_matches",
+        "lease_matches",
+        "at_least_one_effect_receipt"
+      ],
+      "effects": [
+        "release_worker_and_lease"
+      ]
+    },
+    {
+      "from": [
+        "TERMINAL_CANDIDATE"
+      ],
+      "event": "BEGIN_VALIDATION",
+      "to": "VALIDATING",
+      "guards": [
+        "receipt_present"
+      ]
+    },
+    {
+      "from": [
+        "VALIDATING"
+      ],
+      "event": "VALIDATION_PASS",
+      "to": "COMPLETED",
+      "guards": [
+        "receipt_present",
+        "validation_evidence_present"
+      ],
+      "effects": [
+        "record_validation"
+      ]
+    },
+    {
+      "from": [
+        "VALIDATING"
+      ],
+      "event": "VALIDATION_FAIL",
+      "to": "READY_TO_RESUME",
+      "guards": [
+        "validation_evidence_present"
+      ],
+      "effects": [
+        "record_validation",
+        "record_repair_required"
+      ]
+    },
+    {
+      "from": [
+        "READY",
+        "CLAIMED",
+        "RUNNING",
+        "READY_TO_RESUME"
+      ],
+      "event": "AUTHORITY_BLOCK",
+      "to": "AUTHORITY_BLOCKED",
+      "guards": [
+        "authority_reason_nonempty"
+      ],
+      "effects": [
+        "release_worker_and_lease"
+      ]
+    },
+    {
+      "from": [
+        "READY",
+        "CLAIMED",
+        "RUNNING",
+        "WAITING_EXTERNAL",
+        "WAITING_DEPENDENCIES",
+        "READY_TO_RESUME",
+        "TERMINAL_CANDIDATE",
+        "VALIDATING"
+      ],
+      "event": "FAIL",
+      "to": "FAILED",
+      "guards": [
+        "failure_reason_nonempty"
+      ],
+      "effects": [
+        "release_worker_and_lease"
+      ]
+    },
+    {
+      "from": [
+        "CLAIMED",
+        "RUNNING",
+        "READY_TO_RESUME",
+        "TERMINAL_CANDIDATE",
+        "VALIDATING"
+      ],
+      "event": "RECOVER",
+      "to": "READY_TO_RESUME",
+      "guards": [
+        "generation_matches",
+        "not_terminal"
+      ],
+      "effects": [
+        "increment_generation",
+        "release_worker_and_lease",
+        "preserve_receipts_and_history"
+      ]
+    },
+    {
+      "from": [
+        "WAITING_EXTERNAL"
+      ],
+      "event": "RECOVER",
+      "to": "WAITING_EXTERNAL",
+      "guards": [
+        "generation_matches",
+        "wait_key_nonempty"
+      ],
+      "effects": [
+        "increment_generation",
+        "release_worker_and_lease",
+        "preserve_wait_key",
+        "preserve_receipts_and_history"
+      ]
+    },
+    {
+      "from": [
+        "WAITING_DEPENDENCIES"
+      ],
+      "event": "RECOVER",
+      "to": "WAITING_DEPENDENCIES",
+      "guards": [
+        "generation_matches",
+        "children_nonempty"
+      ],
+      "effects": [
+        "increment_generation",
+        "release_worker_and_lease",
+        "preserve_children",
+        "preserve_receipts_and_history"
+      ]
+    }
+  ],
+  "invariants": [
+    {
+      "id": "K-001",
+      "text": "A stale generation cannot mutate, record an effect for, validate, or complete the current process."
+    },
+    {
+      "id": "K-002",
+      "text": "At most one current lease exists for a process generation."
+    },
+    {
+      "id": "K-003",
+      "text": "A process cannot be claimed until all declared dependency processes are COMPLETED."
+    },
+    {
+      "id": "K-004",
+      "text": "A duplicate effect receipt with the same idempotency key and identical effect identity is a no-op; a conflicting duplicate fails closed."
+    },
+    {
+      "id": "K-005",
+      "text": "COMPLETED requires at least one EffectReceipt and a passing ValidationResult with evidence."
+    },
+    {
+      "id": "K-006",
+      "text": "WAITING_EXTERNAL and WAITING_DEPENDENCIES own no worker lease and consume no model-polling quanta."
+    },
+    {
+      "id": "K-007",
+      "text": "CandidateAction never grants authority. Only explicit AuthorityDecision=ALLOW may compile an ActionSpec."
+    },
+    {
+      "id": "K-008",
+      "text": "Unknown states, events, transitions, or authority outcomes fail closed."
+    },
+    {
+      "id": "K-009",
+      "text": "Recovery fences prior workers by incrementing generation and preserving durable receipts/history."
+    },
+    {
+      "id": "K-010",
+      "text": "A decomposed parent resumes only after every recorded child reaches COMPLETED; failed/blocked children do not count as satisfied."
+    },
+    {
+      "id": "K-011",
+      "text": "Recovery cannot satisfy an unresolved external wait or dependency wait; it may fence ownership but must preserve the wait until its actual wake condition is met."
+    },
+    {
+      "id": "K-012",
+      "text": "CandidateAction, AuthorityDecision, ActionSpec, and EffectReceipt must bind the same current process generation; an action authorized for a stale generation cannot execute or complete current work."
+    }
+  ],
+  "effect_receipt_required_fields": [
+    "action_id",
+    "idempotency_key",
+    "target_ref",
+    "effect_hash",
+    "executor_id",
+    "generation",
+    "observed_at"
+  ],
+  "validation_result_required_fields": [
+    "validator_id",
+    "passed",
+    "evidence_ref",
+    "observed_at"
+  ],
+  "action_spec_required_fields": [
+    "action_id",
+    "process_id",
+    "process_generation",
+    "target_ref",
+    "executor_type",
+    "authority_decision_id",
+    "authority_scope_ref",
+    "idempotency_key",
+    "preconditions",
+    "expected_effect",
+    "postcondition_validator"
+  ],
+  "runtime_ports": [
+    "DurableRuntimePort",
+    "StateStorePort",
+    "AuthorityEvaluatorPort",
+    "ExecutorPort",
+    "SemanticProjectionPort",
+    "TelemetryPort",
+    "ClockPort"
+  ],
+  "explicitly_not_frozen": [
+    "DBOS_vs_Restate_vs_Temporal",
+    "PostgreSQL_schema",
+    "backend_language",
+    "graph_database",
+    "vector_database",
+    "executor_model",
+    "worker_count"
+  ],
+  "first_reference_implementation": {
+    "path": "benchmarks/workspace-semantic-execution/kernel_reference_v1.py",
+    "status": "NON_PRODUCTION_EXECUTABLE_SPEC",
+    "rule": "Production code must satisfy this contract but must not import the benchmark reference implementation."
+  },
+  "recovery_semantics": {
+    "correction": "Recovery fences stale workers but never satisfies an unresolved external or dependency wait.",
+    "rules": [
+      "CLAIMED/RUNNING/READY_TO_RESUME/TERMINAL_CANDIDATE/VALIDATING recover to READY_TO_RESUME with generation increment.",
+      "WAITING_EXTERNAL recovers in WAITING_EXTERNAL, preserving the exact wait_key while incrementing generation.",
+      "WAITING_DEPENDENCIES recovers in WAITING_DEPENDENCIES, preserving child dependencies while incrementing generation.",
+      "Only the matching external wake event or completed child set may satisfy a wait."
+    ],
+    "discovered_during": "packet_compiler_and_executor_registry implementation review"
+  },
+  "candidate_action_required_fields": [
+    "action_id",
+    "process_id",
+    "process_generation",
+    "target_ref",
+    "executor_type",
+    "idempotency_key",
+    "preconditions",
+    "expected_effect",
+    "postcondition_validator"
+  ],
+  "authority_decision_required_fields": [
+    "decision_id",
+    "outcome",
+    "action_id",
+    "process_id",
+    "process_generation",
+    "target_ref",
+    "authority_scope_ref"
+  ],
+  "generation_bound_effect_chain": {
+    "chain": "ReasoningProcess(generation) -> CandidateAction(process_generation) -> AuthorityDecision(process_generation) -> ActionSpec(process_generation) -> EffectReceipt(generation)",
+    "rule": "Every boundary must preserve exact process identity + generation. Recovery advances generation and thereby fences all prior candidate/authority/action specifications."
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "evidence_id": "instant-durable-worker-mechanics-v1",
+  "status": "VALIDATED_MECHANICS_ONLY",
+  "scope": "Prior ChatGPT Instant / durable-worker evidence recovered for workspace-resumable-reasoning-v1.",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+  "claims": [
+    "Instant can inspect repository state and use connected tools for bounded engineering work.",
+    "Instant can implement, observe exact-head CI, diagnose a concrete failure, repair it, and revalidate.",
+    "Durable queue state can survive bounded continuation and classify mixed outcomes into execute/decompose/escalate.",
+    "Exact-head CAS permits independent concurrent workers without shared conversational state.",
+    "Generation fencing prevents stale owners from completing after recovery.",
+    "Multiple workers can complete eight independent validated leaves with durable exact-head evidence."
+  ],
+  "non_claims": [
+    "This evidence does not establish frontier-equivalent reasoning quality.",
+    "It does not prove repeated continuation compensates for intrinsically difficult reasoning.",
+    "It does not freeze the semantic execution architecture.",
+    "It does not grant production authority or Research GPU authority."
+  ],
+  "benchmarks": [
+    {
+      "benchmark": "INSTANT_WORKER_SMOKE_V1",
+      "pr": 574,
+      "head_sha": "3c0d88a1322a387526ebf34ceaf23485f13a1c8e",
+      "validation_run": 41360103932,
+      "validation": "SUCCESS",
+      "result": "FULL_LOOP_PASS"
+    },
+    {
+      "benchmark": "INSTANT_AUTONOMOUS_CODING_V1",
+      "pr": 575,
+      "head_sha": "31dbce01278952de9cf5009f9a305cf590a40741",
+      "initial_failed_validation_run": 41360553663,
+      "final_validation_run": 41360610899,
+      "validation": "SUCCESS",
+      "repair_iterations": 1,
+      "result": "AUTONOMOUS_GREEN_PASS"
+    },
+    {
+      "benchmark": "INSTANT_MULTI_LEAF_QUEUE_V1",
+      "pr": 577,
+      "head_sha": "c0fa03ce0d31e5fdd4de92f719de82d8bf901ab7",
+      "validation_run": 41363523831,
+      "validation": "SUCCESS",
+      "result": "MULTI_LEAF_QUEUE_PASS",
+      "durable_result_comment": 6565693174,
+      "terminal_actions": {
+        "A": "COMPLETE",
+        "B": "COMPLETE",
+        "C": "COMPLETE",
+        "D": "DECOMPOSED",
+        "E": "ESCALATE_REASONING"
+      },
+      "decomposed_children": [
+        "D.1",
+        "D.2",
+        "D.3"
+      ]
+    },
+    {
+      "benchmark": "INSTANT_CONCURRENT_EXECUTION_V1",
+      "result": "PASS",
+      "workers": [
+        {
+          "pr": 578,
+          "head_sha": "ad3479da49ec277d164c4eb5dc217274a3bf5352",
+          "validation_run": 41365696966,
+          "validation": "SUCCESS"
+        },
+        {
+          "pr": 579,
+          "head_sha": "4ccb6804cc453f3e4ec3af5855e0948afd82976a",
+          "validation_run": 41365779932,
+          "validation": "SUCCESS"
+        }
+      ]
+    },
+    {
+      "benchmark": "INSTANT_WORKER_LEASE_RECOVERY_V1",
+      "result": "PASS",
+      "generation_0_stale": {
+        "pr": 580,
+        "head_sha": "723363567420ccea0027cd51c9ad906601381caa",
+        "validation_run": 41366619408,
+        "validation": "SUCCESS"
+      },
+      "generation_1_recovery": {
+        "pr": 581,
+        "head_sha": "98a0ea26911d4c5216f6dc9df95b2da98f0e3d3f",
+        "validation_run": 41367274890,
+        "validation": "SUCCESS"
+      }
+    },
+    {
+      "benchmark": "INSTANT_MULTI_WORKER_SCALE_V1",
+      "result": "PASS",
+      "validated_leaves": [
+        {
+          "action": "A",
+          "pr": 582,
+          "head_sha": "f03f4bb05a450d5c7ddd966f1bc9f9ea09834e38",
+          "validation_run": 41369523943
+        },
+        {
+          "action": "B",
+          "pr": 583,
+          "head_sha": "f819530af2b342525f039654e0aab2ec280e0da1",
+          "validation_run": 41369537934
+        },
+        {
+          "action": "C",
+          "pr": 584,
+          "head_sha": "8ccf03b04d859c45a7899f726cf6f3076ecc1387",
+          "validation_run": 41369640488
+        },
+        {
+          "action": "D",
+          "pr": 585,
+          "head_sha": "767005e1d43baebcd771bdfba08e4b52955257f7",
+          "validation_run": 41369696016
+        },
+        {
+          "action": "E",
+          "pr": 586,
+          "head_sha": "a2ef2885e96a407e0498078481c20e81ce70e7c1",
+          "validation_run": 41369699896
+        },
+        {
+          "action": "F",
+          "pr": 587,
+          "head_sha": "6d3ab88014b19a80e4c05bdddeb769ab33939bc6",
+          "validation_run": 41369801135
+        },
+        {
+          "action": "G",
+          "pr": 588,
+          "head_sha": "e174c0d1372d688370dab5a19d0db72563425b83",
+          "validation_run": 41369832915
+        },
+        {
+          "action": "H",
+          "pr": 589,
+          "head_sha": "cb9330d1042a7aadc6533ae03ef45d1e544dc112",
+          "validation_run": 41369879169
+        }
+      ]
+    }
+  ],
+  "benchmark_boundary": {
+    "proven_mechanics": [
+      "bounded connected-tool engineering",
+      "exact-head CI repair loop",
+      "multi-leaf continuation",
+      "stateless durable recovery",
+      "concurrent CAS claiming/completion",
+      "lease generation fencing",
+      "multi-worker scaling"
+    ],
+    "not_yet_proven": [
+      "quality equivalence on realistic hard research/design/test/evaluate loops",
+      "reliable distinction between TOO_LARGE and INTRINSICALLY_DIFFICULT under objective quality scoring",
+      "scarce-frontier savings without quality regression"
+    ]
+  }
+}

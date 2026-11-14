@@ -1,0 +1,1387 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P1-D-002",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P1_horizon_heavy_decomposable",
+  "arm": "D_instant_decompose_critic",
+  "replicate_id": "screen-002",
+  "fixture_id": "research-iterate-shard-rollout-p1-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.json",
+    "fixture_blob_sha": "766a414e01197f6054e68c02f2fe856f710044b0",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "11aea24d489b119518d514382dfd48047a7998b1",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat; Memory was disabled before this conversation was opened; GPT-5.6 Sol Instant was selected for this conversation."
+  },
+  "continuity_regime": "fresh_or_role_isolated_instant_workers",
+  "treatment_contract": {
+    "mode": "instant_decompose_critic",
+    "quantum_policy": "Every role invocation uses a fresh clean GPT-5.6 Sol / Instant chat and persists its output into the assigned run state.",
+    "resume_policy": "Role handoff is durable only; no role may depend on another role's chat transcript.",
+    "role_contract": {
+      "decomposer": "Classify as LEAF_EXECUTABLE or TOO_LARGE and create independently verifiable leaves when needed.",
+      "leaf_worker": "Work one READY leaf/quantum and request at most one external experiment before stopping.",
+      "independent_critic": "Review durable proposed synthesis/evidence independently.",
+      "synthesizer": "Produce terminal candidate only after required evidence and independent critique are durable."
+    },
+    "escalation_policy": "No frontier escalation in this arm. Intrinsically difficult residuals may be recorded but remain unsolved by stronger tier here."
+  },
+  "treatment_state": {
+    "role_queue": [
+      {
+        "role": "decomposer",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-001",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-002",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-003",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-004",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-005",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-006",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "leaf_worker",
+        "process_id": "screening-v1-P1-D-002-leaf-007",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "independent_critic",
+        "status": "COMPLETED"
+      },
+      {
+        "role": "synthesizer",
+        "status": "COMPLETED"
+      }
+    ],
+    "active_role": null,
+    "leaf_processes": [
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-001",
+        "leaf": "shard-1",
+        "status": "COMPLETED",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-1 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s1",
+        "evidence_refs": [
+          "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+          "fixture:starting_observations:O2"
+        ],
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Reverting only shard-1 request-policy configuration lowers shard-1 p95 latency to 205 ms while no other shard changes, reversing the shard-1 regression locally.",
+            "evidence_refs": [
+              "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This is strong shard-local evidence for H_shard_policy on shard 1, but by itself does not exclude a shared dependency as a contributor to the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-001 is complete; do not perform further work in this worker session."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-002",
+        "leaf": "shard-2",
+        "status": "COMPLETED",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-2 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s2",
+        "evidence_refs": [
+          "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+          "fixture:starting_observations:O2"
+        ],
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Reverting only shard-2 request-policy configuration lowers shard-2 p95 latency to 211 ms while no other shard changes, reversing the shard-2 regression locally.",
+            "evidence_refs": [
+              "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This is strong shard-local evidence for H_shard_policy on shard 2, but by itself does not exclude a shared dependency as a contributor to the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-002 is complete; do not perform further work in this worker session."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-003",
+        "leaf": "shard-3",
+        "status": "COMPLETED",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-3 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s3",
+        "evidence_refs": [
+          "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+          "fixture:starting_observations:O2"
+        ],
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Reverting only shard-3 request-policy configuration lowers shard-3 p95 latency to 207 ms while no other shard changes, reversing the shard-3 regression locally.",
+            "evidence_refs": [
+              "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This is strong shard-local evidence for H_shard_policy on shard 3, but by itself does not exclude a shared dependency as a contributor to the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-003 is complete; do not perform further work in this worker session."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-004",
+        "leaf": "shard-4",
+        "status": "COMPLETED",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-4 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s4",
+        "evidence_refs": [
+          "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+          "fixture:starting_observations:O2"
+        ],
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Reverting only shard-4 request-policy configuration lowers shard-4 p95 latency to 214 ms while no other shard changes, reversing the shard-4 regression locally.",
+            "evidence_refs": [
+              "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This is strong shard-local evidence for H_shard_policy on shard 4, but by itself does not exclude a shared dependency as a contributor to the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-004 is complete; do not perform further work in this worker session."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-005",
+        "leaf": "shard-5",
+        "status": "COMPLETED",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-5 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s5",
+        "evidence_refs": [
+          "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+          "fixture:starting_observations:O2"
+        ],
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Reverting only shard-5 request-policy configuration lowers shard-5 p95 latency to 209 ms while no other shard changes, reversing the shard-5 regression locally.",
+            "evidence_refs": [
+              "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This is strong shard-local evidence for H_shard_policy on shard 5, but by itself does not exclude a shared dependency as a contributor to the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-005 is complete; do not perform further work in this worker session."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-006",
+        "leaf": "shard-6",
+        "status": "COMPLETED",
+        "generation": 0,
+        "owner": null,
+        "objective": "Test whether reverting only shard-6 request-policy configuration reverses that shard's latency regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_revert_s6",
+        "evidence_refs": [
+          "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+          "fixture:starting_observations:O2"
+        ],
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Reverting only shard-6 request-policy configuration lowers shard-6 p95 latency to 206 ms while no other shard changes, reversing the shard-6 regression locally.",
+            "evidence_refs": [
+              "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This is strong shard-local evidence for H_shard_policy on shard 6, but by itself does not exclude a shared dependency as a contributor to the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-006 is complete; do not perform further work in this worker session."
+      },
+      {
+        "process_id": "screening-v1-P1-D-002-leaf-007",
+        "leaf": "shared-control",
+        "status": "COMPLETED",
+        "generation": 0,
+        "owner": null,
+        "objective": "Run one shared-infrastructure control that discriminates a shared dependency from shard-local request-policy regression; request at most one external experiment.",
+        "candidate_experiment_id": "E_scale_shared_db",
+        "evidence_refs": [
+          "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+          "fixture:starting_observations:O2"
+        ],
+        "established_findings": [
+          {
+            "id": "L1",
+            "finding": "Scaling the shared database changes p95 latency by only -4 ms across all shards while shard policies remain unchanged, so the selected shared-database capacity control does not materially reverse the six-shard regression.",
+            "evidence_refs": [
+              "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+              "fixture:starting_observations:O2"
+            ]
+          },
+          {
+            "id": "L2",
+            "finding": "This shared-control result is evidence against shared-database capacity as the primary mechanism for the regression; it does not by itself adjudicate other shared-dependency hypotheses.",
+            "evidence_refs": [
+              "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+              "fixture:starting_observations:O2"
+            ]
+          }
+        ],
+        "next_safe_action": "Leaf screening-v1-P1-D-002-leaf-007 is complete; do not perform further work in this worker session."
+      }
+    ],
+    "independent_critic": {
+      "status": "COMPLETED",
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "fixture:starting_observations:O2",
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+        "fixture:starting_observations:O2"
+      ],
+      "verdict": "SUPPORTED_WITH_LIMITATIONS",
+      "findings": [
+        {
+          "id": "C1",
+          "finding": "The six completed shard-local policy-revert results consistently reverse the latency regression on the targeted shard without changing other shards, providing strong replicated evidence for H_shard_policy across shards 1 through 6.",
+          "evidence_refs": [
+            "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+            "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+            "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+            "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+            "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+            "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+            "fixture:starting_observations:O2"
+          ]
+        },
+        {
+          "id": "C2",
+          "finding": "The shared-database scaling control changes all-shard p95 by only -4 ms, which weighs against shared-database capacity as the primary regression mechanism.",
+          "evidence_refs": [
+            "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+            "fixture:starting_observations:O2"
+          ]
+        },
+        {
+          "id": "C3",
+          "finding": "The durable evidence does not exclude other shared-dependency mechanisms, including H_network_fabric; synthesis must not generalize the shared-database control into rejection of all shared-dependency hypotheses.",
+          "evidence_refs": [
+            "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+            "fixture:starting_observations:O2"
+          ]
+        }
+      ],
+      "next_safe_action": "Independent critic role is complete; do not perform synthesizer work in this session."
+    },
+    "synthesizer": {
+      "status": "COMPLETED",
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+      ],
+      "verdict": "TERMINAL_CANDIDATE",
+      "terminal_submission": {
+        "final_hypothesis": "H_shard_policy",
+        "rejected_hypotheses": [
+          "H_shared_db"
+        ],
+        "observed_results": {
+          "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+          "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+          "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+          "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+          "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+          "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+          "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+        },
+        "addressed_observations": [
+          "O2"
+        ],
+        "rationale": "Across all six independently tested shards, reverting only the newly deployed request-policy configuration reverses the latency regression on the targeted shard without changing the others, providing replicated shard-local evidence for H_shard_policy. Doubling shared-database capacity while shard policies remain unchanged changes all-shard p95 by only -4 ms, weighing against H_shared_db as the primary mechanism. This control does not test or reject other shared-dependency mechanisms; H_network_fabric therefore remains open."
+      }
+    }
+  },
+  "started_at": "2026-11-04T18:18:00-05:00",
+  "completed_at": null,
+  "invocations": [
+    {
+      "generation": 0,
+      "role": "decomposer",
+      "worker_id": "screening-v1-P1-D-002-decomposer-g0",
+      "classification": "TOO_LARGE",
+      "outcome": "DECOMPOSED",
+      "leaf_process_ids": [
+        "screening-v1-P1-D-002-leaf-001",
+        "screening-v1-P1-D-002-leaf-002",
+        "screening-v1-P1-D-002-leaf-003",
+        "screening-v1-P1-D-002-leaf-004",
+        "screening-v1-P1-D-002-leaf-005",
+        "screening-v1-P1-D-002-leaf-006",
+        "screening-v1-P1-D-002-leaf-007"
+      ],
+      "external_experiment_requested": false
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "worker_id": "screening-v1-P1-D-002-leaf-001-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s1",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s1"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "worker_id": "screening-v1-P1-D-002-leaf-001-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_revert_s1",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "worker_id": "screening-v1-P1-D-002-leaf-002-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s2",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "worker_id": "screening-v1-P1-D-002-leaf-002-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_revert_s2",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "worker_id": "screening-v1-P1-D-002-leaf-003-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s3",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s3"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "worker_id": "screening-v1-P1-D-002-leaf-003-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_revert_s3",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "worker_id": "screening-v1-P1-D-002-leaf-004-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s4",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s4"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "worker_id": "screening-v1-P1-D-002-leaf-004-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_revert_s4",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-005",
+      "worker_id": "screening-v1-P1-D-002-leaf-005-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s5",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s5"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-005",
+      "worker_id": "screening-v1-P1-D-002-leaf-005-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_revert_s5",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-006",
+      "worker_id": "screening-v1-P1-D-002-leaf-006-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_revert_s6",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s6"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-006",
+      "worker_id": "screening-v1-P1-D-002-leaf-006-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_revert_s6",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "worker_id": "screening-v1-P1-D-002-leaf-007-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "WAITING_EXTERNAL",
+      "experiment_id": "E_scale_shared_db",
+      "external_experiment_requested": true,
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_scale_shared_db"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "worker_id": "screening-v1-P1-D-002-leaf-007-resume-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "experiment_id": "E_scale_shared_db",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "independent_critic",
+      "worker_id": "screening-v1-P1-D-002-independent-critic-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "COMPLETED",
+      "external_experiment_requested": false,
+      "verdict": "SUPPORTED_WITH_LIMITATIONS",
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+      ]
+    },
+    {
+      "generation": 0,
+      "role": "synthesizer",
+      "worker_id": "screening-v1-P1-D-002-synthesizer-g0",
+      "classification": "LEAF_EXECUTABLE",
+      "outcome": "TERMINAL_CANDIDATE",
+      "external_experiment_requested": false,
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2",
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh provenance-refrozen P1 D_instant_decompose_critic replacement slot. screen-001 evidence is preserved as invalidated by PUBLIC_INPUT_PROVENANCE_MISMATCH."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-decomposer-g0",
+      "role": "decomposer"
+    },
+    {
+      "kind": "DECOMPOSITION",
+      "generation": 0,
+      "role": "decomposer",
+      "classification": "TOO_LARGE",
+      "leaf_count": 7,
+      "depth": 1,
+      "leaf_process_ids": [
+        "screening-v1-P1-D-002-leaf-001",
+        "screening-v1-P1-D-002-leaf-002",
+        "screening-v1-P1-D-002-leaf-003",
+        "screening-v1-P1-D-002-leaf-004",
+        "screening-v1-P1-D-002-leaf-005",
+        "screening-v1-P1-D-002-leaf-006",
+        "screening-v1-P1-D-002-leaf-007"
+      ]
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "decomposer",
+      "outcome": "DECOMPOSED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-001-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "experiment_id": "E_revert_s1",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s1"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-001-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "experiment_id": "E_revert_s1",
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "conclusion": "Shard-1 request-policy revert reverses the shard-1 latency regression locally; evidence supports H_shard_policy for shard 1 but does not alone exclude shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-001",
+      "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-002-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "experiment_id": "E_revert_s2",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s2"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-002-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "experiment_id": "E_revert_s2",
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "conclusion": "Shard-2 request-policy revert reverses the shard-2 latency regression locally; evidence supports H_shard_policy for shard 2 but does not alone exclude shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-002",
+      "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-003-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "experiment_id": "E_revert_s3",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s3"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s3",
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-003-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "experiment_id": "E_revert_s3",
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "conclusion": "Shard-3 request-policy revert reverses the shard-3 latency regression locally; evidence supports H_shard_policy for shard 3 but does not alone exclude shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-003",
+      "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-004-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-004-E_revert_s4-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "experiment_id": "E_revert_s4",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s4"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-004-E_revert_s4-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s4",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-004-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "experiment_id": "E_revert_s4",
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "conclusion": "Shard-4 request-policy revert reverses the shard-4 latency regression locally; evidence supports H_shard_policy for shard 4 but does not alone exclude shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-004",
+      "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-005-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-005"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-005-E_revert_s5-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-005",
+      "experiment_id": "E_revert_s5",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s5"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-005-E_revert_s5-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s5",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-005-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-005"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-005",
+      "experiment_id": "E_revert_s5",
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "conclusion": "Shard-5 request-policy revert reverses the shard-5 latency regression locally; evidence supports H_shard_policy for shard 5 but does not alone exclude shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-005",
+      "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-006-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-006"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-006-E_revert_s6-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-006",
+      "experiment_id": "E_revert_s6",
+      "payload_ref": "fixture:experiment_catalog:E_revert_s6"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-006-E_revert_s6-g0",
+      "generation": 0,
+      "experiment_id": "E_revert_s6",
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-006-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-006"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-006",
+      "experiment_id": "E_revert_s6",
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "conclusion": "Shard-6 request-policy revert reverses the shard-6 latency regression locally; evidence supports H_shard_policy for shard 6 but does not alone exclude shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-006",
+      "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-007-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "experiment_id": "E_scale_shared_db",
+      "payload_ref": "fixture:experiment_catalog:E_scale_shared_db"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
+      "generation": 0,
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-leaf-007-resume-g0",
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007"
+    },
+    {
+      "kind": "LEAF_CONCLUSION",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "experiment_id": "E_scale_shared_db",
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+      "conclusion": "Scaling shared-database capacity changes all-shard p95 by only -4 ms and does not materially reverse the regression; this weighs against shared-database capacity as the primary mechanism but does not adjudicate other shared-dependency hypotheses."
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "leaf_worker",
+      "process_id": "screening-v1-P1-D-002-leaf-007",
+      "outcome": "COMPLETED"
+    },
+    {
+      "kind": "CONTROL_ROLE_READY",
+      "generation": 0,
+      "role": "independent_critic",
+      "reason": "all_leaf_workers_completed"
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "independent_critic",
+      "outcome": "COMPLETED",
+      "verdict": "SUPPORTED_WITH_LIMITATIONS"
+    },
+    {
+      "kind": "CONTROL_ROLE_READY",
+      "generation": 0,
+      "role": "synthesizer",
+      "reason": "independent_critic_completed"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P1-D-002-synthesizer-g0",
+      "role": "synthesizer"
+    },
+    {
+      "kind": "ROLE_COMPLETED",
+      "generation": 0,
+      "role": "synthesizer",
+      "outcome": "TERMINAL_CANDIDATE"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "role": "synthesizer",
+      "submission": {
+        "final_hypothesis": "H_shard_policy",
+        "rejected_hypotheses": [
+          "H_shared_db"
+        ],
+        "observed_results": {
+          "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+          "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+          "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+          "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+          "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+          "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+          "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+        },
+        "addressed_observations": [
+          "O2"
+        ],
+        "rationale": "Across all six independently tested shards, reverting only the newly deployed request-policy configuration reverses the latency regression on the targeted shard without changing the others, providing replicated shard-local evidence for H_shard_policy. Doubling shared-database capacity while shard policies remain unchanged changes all-shard p95 by only -4 ms, weighing against H_shared_db as the primary mechanism. This control does not test or reject other shared-dependency mechanisms; H_network_fabric therefore remains open."
+      }
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_revert_s1": {
+      "request_id": "screening-v1-P1-D-002-leaf-001-E_revert_s1-g0",
+      "experiment_id": "E_revert_s1",
+      "result": {
+        "shard": "s1",
+        "p95_latency_ms": 205,
+        "other_shards_changed": false
+      },
+      "result_hash": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s2": {
+      "request_id": "screening-v1-P1-D-002-leaf-002-E_revert_s2-g0",
+      "experiment_id": "E_revert_s2",
+      "result": {
+        "shard": "s2",
+        "p95_latency_ms": 211,
+        "other_shards_changed": false
+      },
+      "result_hash": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s3": {
+      "request_id": "screening-v1-P1-D-002-leaf-003-E_revert_s3-g0",
+      "experiment_id": "E_revert_s3",
+      "result": {
+        "shard": "s3",
+        "p95_latency_ms": 207,
+        "other_shards_changed": false
+      },
+      "result_hash": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s4": {
+      "request_id": "screening-v1-P1-D-002-leaf-004-E_revert_s4-g0",
+      "experiment_id": "E_revert_s4",
+      "result": {
+        "shard": "s4",
+        "p95_latency_ms": 214,
+        "other_shards_changed": false
+      },
+      "result_hash": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s5": {
+      "request_id": "screening-v1-P1-D-002-leaf-005-E_revert_s5-g0",
+      "experiment_id": "E_revert_s5",
+      "result": {
+        "shard": "s5",
+        "p95_latency_ms": 209,
+        "other_shards_changed": false
+      },
+      "result_hash": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_revert_s6": {
+      "request_id": "screening-v1-P1-D-002-leaf-006-E_revert_s6-g0",
+      "experiment_id": "E_revert_s6",
+      "result": {
+        "shard": "s6",
+        "p95_latency_ms": 206,
+        "other_shards_changed": false
+      },
+      "result_hash": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "publication_scope": "requested experiment only"
+    },
+    "E_scale_shared_db": {
+      "request_id": "screening-v1-P1-D-002-leaf-007-E_scale_shared_db-g0",
+      "experiment_id": "E_scale_shared_db",
+      "result": {
+        "all_shards_p95_delta_ms": -4
+      },
+      "result_hash": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "D1",
+      "finding": "TOO_LARGE: the objective requires at least seven experiment cycles across a high-width horizon and should be decomposed rather than attempted monolithically.",
+      "evidence_refs": [
+        "fixture:worker_contract.minimum_experiment_cycles_before_terminal_claim",
+        "taxonomy:horizon_load"
+      ]
+    },
+    {
+      "id": "D2",
+      "finding": "Six shard-local policy-revert experiments are independently executable and independently validatable leaves.",
+      "evidence_refs": [
+        "fixture:experiment_catalog:E_revert_s1..E_revert_s6",
+        "fixture:worker_contract.decomposition_hint"
+      ]
+    },
+    {
+      "id": "D3",
+      "finding": "At least one separate shared-infrastructure control leaf is required before synthesis; E_scale_shared_db is selected as the initial shared-control candidate.",
+      "evidence_refs": [
+        "fixture:objective",
+        "fixture:experiment_catalog:E_scale_shared_db",
+        "fixture:worker_contract.decomposition_hint"
+      ]
+    },
+    {
+      "id": "L1_s1",
+      "finding": "Shard-1 policy revert lowered only shard 1 p95 latency to 205 ms; this supports a shard-local request-policy mechanism for shard 1 but does not alone exclude a shared dependency.",
+      "evidence_refs": [
+        "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "id": "L1_s2",
+      "finding": "Shard-2 policy revert lowered only shard 2 p95 latency to 211 ms; this supports a shard-local request-policy mechanism for shard 2 but does not alone exclude a shared dependency.",
+      "evidence_refs": [
+        "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "id": "L1_s3",
+      "finding": "Shard-3 policy revert lowered only shard 3 p95 latency to 207 ms; this supports a shard-local request-policy mechanism for shard 3 but does not alone exclude a shared dependency.",
+      "evidence_refs": [
+        "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "id": "L1_s4",
+      "finding": "Shard-4 policy revert lowered only shard 4 p95 latency to 214 ms; this supports a shard-local request-policy mechanism for shard 4 but does not alone exclude a shared dependency.",
+      "evidence_refs": [
+        "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "id": "L1_s5",
+      "finding": "Shard-5 policy revert lowered only shard 5 p95 latency to 209 ms; this supports a shard-local request-policy mechanism for shard 5 but does not alone exclude a shared dependency.",
+      "evidence_refs": [
+        "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "id": "L1_s6",
+      "finding": "Shard-6 policy revert lowered only shard 6 p95 latency to 206 ms; this supports a shard-local request-policy mechanism for shard 6 but does not alone exclude a shared dependency.",
+      "evidence_refs": [
+        "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+        "fixture:starting_observations:O2"
+      ]
+    },
+    {
+      "id": "L_shared_control",
+      "finding": "Scaling shared-database capacity changed all-shard p95 latency by only -4 ms; the selected shared-database control does not materially reverse the regression and weighs against shared-database capacity as the primary mechanism, without adjudicating other shared-dependency hypotheses.",
+      "evidence_refs": [
+        "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea",
+        "fixture:starting_observations:O2"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "status": "REJECTED_AS_PRIMARY"
+    },
+    {
+      "id": "H_network_fabric",
+      "status": "OPEN"
+    },
+    {
+      "id": "H_shard_policy",
+      "status": "SUPPORTED"
+    }
+  ],
+  "unresolved_questions": [
+    "H_network_fabric remains untested by the completed shared-database control and is not rejected by this synthesis."
+  ],
+  "evidence_refs": [
+    "external_results:E_revert_s4:ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+    "external_results:E_revert_s1:a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+    "external_results:E_revert_s2:c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+    "external_results:E_revert_s3:601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+    "fixture:starting_observations:O2",
+    "fixture:experiment_catalog:E_revert_s5",
+    "external_results:E_revert_s5:b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+    "fixture:experiment_catalog:E_revert_s6",
+    "external_results:E_revert_s6:2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+    "fixture:experiment_catalog:E_scale_shared_db",
+    "external_results:E_scale_shared_db:f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+  ],
+  "candidate_actions": [],
+  "next_safe_action": "Screening run complete. Preserve this P1 D run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_shard_policy",
+    "rejected_hypotheses": [
+      "H_shared_db"
+    ],
+    "observed_results": {
+      "E_revert_s1": "a4b7e5045b316dcff067f0637ad2ec489fe95c29a6141e944bd50412a8006a21",
+      "E_revert_s2": "c1c7dabf9cbcbfbef52d7804ac4e7ef07d66ddf2f9f2fa60d307ddaa21673ac6",
+      "E_revert_s3": "601a627937960039ea79d185f768c4ccd273324eec070400679a9fdb6f11be9c",
+      "E_revert_s4": "ba2623c491e4c390f5de614b81416106ba552b068626b72ef6fe6d530d3ed4c6",
+      "E_revert_s5": "b7eb365ca205de2a886b4ebd72078902b9af9dd2476b6c1a77b61a02c38ab60c",
+      "E_revert_s6": "2071b7e57aa57c1c9ee61ca6136be6829830043f948c0c53fa23c1512de7cf20",
+      "E_scale_shared_db": "f5e455ea690eca1c709417b0d421e4a92ecd66a3a803d45eaca622c0a37e81ea"
+    },
+    "addressed_observations": [
+      "O2"
+    ],
+    "rationale": "Across all six independently tested shards, reverting only the newly deployed request-policy configuration reverses the latency regression on the targeted shard without changing the others, providing replicated shard-local evidence for H_shard_policy. Doubling shared-database capacity while shard policies remain unchanged changes all-shard p95 by only -4 ms, weighing against H_shared_db as the primary mechanism. This control does not test or reject other shared-dependency mechanisms; H_network_fabric therefore remains open."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 17,
+    "experiment_requests": 7,
+    "retries": 0,
+    "decomposition_count": 1,
+    "decomposition_depth": 1,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 19
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "5949fac1e45e0241b4d9df684eeda253360ed48d20db2b191cb23338a5628ae7",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/D_instant_decompose_critic/screen-002.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "fresh_or_role_isolated_instant_workers",
+    "tier": "INSTANT",
+    "roles": [
+      "decomposer",
+      "leaf_worker",
+      "independent_critic",
+      "synthesizer"
+    ]
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": true,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  },
+  "active_role": null
+}

@@ -1,0 +1,133 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using WorkspaceControl.OperatorBridge.Windows.Hotkey;
+
+namespace WorkspaceControl.OperatorBridge.Tests;
+
+[TestClass]
+public sealed class WindowsHotkeyRegistrarTests
+{
+    [TestMethod]
+    public void RegisterUsesDefaultControlSpaceAndNoRepeatThenUnregisters()
+    {
+        var native = new FakeNativeApi();
+        var registrar = new WindowsHotkeyRegistrar((nint)123, native);
+
+        registrar.Register();
+
+        Assert.IsTrue(registrar.IsRegistered);
+        Assert.AreEqual((nint)123, native.RegisterHandle);
+        Assert.AreEqual(WindowsHotkeyRegistrar.HotkeyId, native.RegisterId);
+        Assert.AreEqual(
+            SchedulerHotkeyBinding.ModControl | WindowsHotkeyRegistrar.ModNoRepeat,
+            native.RegisterModifiers);
+        Assert.AreEqual((uint)0x20, native.RegisterVirtualKey);
+        Assert.AreEqual("Ctrl+Space", SchedulerHotkeyBinding.Default.DisplayName);
+
+        registrar.Unregister();
+
+        Assert.IsFalse(registrar.IsRegistered);
+        Assert.AreEqual(1, native.UnregisterCalls);
+    }
+
+    [TestMethod]
+    public void ParseSupportsControlSpaceBinding()
+    {
+        var binding = SchedulerHotkeyBinding.Parse("Ctrl+Space");
+
+        Assert.AreEqual(SchedulerHotkeyBinding.ModControl, binding.Modifiers);
+        Assert.AreEqual((uint)0x20, binding.VirtualKey);
+        Assert.AreEqual("Ctrl+Space", binding.DisplayName);
+    }
+
+    [TestMethod]
+    public void RegisterUsesConfiguredControlAltXBinding()
+    {
+        var native = new FakeNativeApi();
+        var binding = SchedulerHotkeyBinding.Parse("Ctrl+Alt+X");
+        var registrar = new WindowsHotkeyRegistrar((nint)123, binding, native);
+
+        registrar.Register();
+
+        Assert.AreEqual(
+            SchedulerHotkeyBinding.ModControl |
+            SchedulerHotkeyBinding.ModAlt |
+            WindowsHotkeyRegistrar.ModNoRepeat,
+            native.RegisterModifiers);
+        Assert.AreEqual((uint)'X', native.RegisterVirtualKey);
+        Assert.AreEqual("Ctrl+Alt+X", binding.DisplayName);
+    }
+
+    [TestMethod]
+    public void ParseRejectsModifierOnlyHotkey()
+    {
+        ArgumentException? caught = null;
+        try
+        {
+            SchedulerHotkeyBinding.Parse("Ctrl+Alt");
+        }
+        catch (ArgumentException exception)
+        {
+            caught = exception;
+        }
+
+        Assert.IsNotNull(caught);
+    }
+
+    [TestMethod]
+    public void RegistrationConflictFailsClosedWithNativeError()
+    {
+        var native = new FakeNativeApi
+        {
+            RegisterResult = false,
+            LastError = 1409
+        };
+        var registrar = new WindowsHotkeyRegistrar((nint)123, native);
+
+        HotkeyRegistrationException? caught = null;
+        try
+        {
+            registrar.Register();
+        }
+        catch (HotkeyRegistrationException exception)
+        {
+            caught = exception;
+        }
+
+        Assert.IsNotNull(caught);
+        Assert.AreEqual(1409, caught.NativeError);
+        Assert.IsFalse(registrar.IsRegistered);
+        Assert.AreEqual(0, native.UnregisterCalls);
+    }
+
+    private sealed class FakeNativeApi : IHotkeyNativeApi
+    {
+        public bool RegisterResult { get; init; } = true;
+        public int LastError { get; init; }
+        public nint RegisterHandle { get; private set; }
+        public int RegisterId { get; private set; }
+        public uint RegisterModifiers { get; private set; }
+        public uint RegisterVirtualKey { get; private set; }
+        public int UnregisterCalls { get; private set; }
+
+        public bool RegisterHotKey(
+            nint windowHandle,
+            int id,
+            uint modifiers,
+            uint virtualKey)
+        {
+            RegisterHandle = windowHandle;
+            RegisterId = id;
+            RegisterModifiers = modifiers;
+            RegisterVirtualKey = virtualKey;
+            return RegisterResult;
+        }
+
+        public bool UnregisterHotKey(nint windowHandle, int id)
+        {
+            UnregisterCalls++;
+            return true;
+        }
+
+        public int GetLastError() => LastError;
+    }
+}

@@ -1,0 +1,469 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P2-B-003",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P2_reasoning_heavy_coupled",
+  "arm": "B_instant_persistent_chat",
+  "replicate_id": "screen-003",
+  "fixture_id": "research-iterate-retry-pooling-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+    "fixture_blob_sha": "389fd2ecd5bfe78e8258ecccb03dea759c043296",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
+  "continuity_regime": "persistent_chat",
+  "treatment_contract": {
+    "mode": "instant_persistent_chat",
+    "quantum_policy": "Use the same clean GPT-5.6 Sol / Instant chat across bounded reasoning quanta.",
+    "resume_policy": "Resume the same persistent chat after control-published external results.",
+    "decomposition_policy": "Not forced by treatment; record decomposition only if the task itself requires it.",
+    "escalation_policy": "No frontier escalation in this arm."
+  },
+  "treatment_state": {
+    "phase": "PRIMARY",
+    "persistent_chat": true
+  },
+  "started_at": "2026-11-05T19:37:00-05:00",
+  "completed_at": null,
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-001",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1248,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_disable_pool_reuse"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-002",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1536,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+        "E_force_retry_reset"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-003",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1536,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "E_force_retry_reset:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-004",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1536,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "validator:missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization",
+        "E_clock_quantization"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-B-003-inv-005",
+      "generation": 0,
+      "owner": "screening-v1-P2-B-003-worker",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat"
+      },
+      "context_bytes": 1536,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "E_clock_quantization:b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh replacement P2 B_instant_persistent_chat slot after screen-002 persistent-chat continuity loss."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-B-003-exp-001",
+      "generation": 0,
+      "payload_ref": "E_disable_pool_reuse"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-B-003-exp-001",
+      "generation": 0,
+      "experiment_id": "E_disable_pool_reuse",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-B-003-exp-002",
+      "generation": 0,
+      "payload_ref": "E_force_retry_reset"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-B-003-exp-002",
+      "generation": 0,
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 5
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-B-003-exp-003",
+      "generation": 0,
+      "payload_ref": "E_clock_quantization"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-B-003-exp-003",
+      "generation": 0,
+      "experiment_id": "E_clock_quantization",
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "screening-v1-P2-B-003-worker"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 6
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_disable_pool_reuse": {
+      "request_id": "screening-v1-P2-B-003-exp-001",
+      "experiment_id": "E_disable_pool_reuse",
+      "result": {
+        "p95_latency_ms": 228,
+        "mean_retries": 1.1
+      },
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "publication_scope": "requested experiment only"
+    },
+    "E_force_retry_reset": {
+      "request_id": "screening-v1-P2-B-003-exp-002",
+      "experiment_id": "E_force_retry_reset",
+      "result": {
+        "p95_latency_ms": 219,
+        "mean_retries": 1
+      },
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "publication_scope": "requested experiment only"
+    },
+    "E_clock_quantization": {
+      "request_id": "screening-v1-P2-B-003-exp-003",
+      "experiment_id": "E_clock_quantization",
+      "result": {
+        "p95_latency_ms": 401,
+        "mean_retries": 3
+      },
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "F_initial",
+      "statement": "O1 shows high latency/retries at concurrency 64; O3 shows CPU below 48% and queue occupancy below 62%, weakening queue-capacity saturation as the primary mechanism."
+    },
+    {
+      "id": "F_pool_reuse",
+      "statement": "Control-published E_disable_pool_reuse result: p95 latency 228 ms and mean retries 1.1 versus O1 baseline 412 ms and 3.1. Pool reuse is therefore materially involved in the regression, while this intervention alone does not isolate retained retry state from other reuse-linked mechanisms.",
+      "result_hash": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c"
+    },
+    {
+      "id": "F_retry_reset",
+      "statement": "Control-published E_force_retry_reset result: with pool reuse enabled, resetting retry state at each request boundary yields p95 latency 219 ms and mean retries 1.0. This reproduces and slightly exceeds the improvement from disabling pool reuse, isolating retained retry state across pooled request lifecycles as the primary mechanism.",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "id": "F_clock_quantization",
+      "statement": "Control-published E_clock_quantization result: replacing quantized timeout timestamps with monotonic high-resolution timestamps yields p95 latency 401 ms and mean retries 3.0, close to O1 baseline 412 ms and 3.1. Timestamp quantization therefore does not materially explain the regression.",
+      "result_hash": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "selected_primary",
+      "basis": "Disabling pool reuse improves p95/retries to 228 ms/1.1, and resetting retry state while preserving reuse improves them to 219 ms/1.0; the mechanism-specific reset isolates retained retry state."
+    },
+    {
+      "id": "H_queue",
+      "status": "rejected_primary",
+      "basis": "O3 shows CPU below 48% and queue occupancy below 62%; fixed-concurrency retry-state interventions remove the regression, while O2 is non-discriminating load relief."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "rejected",
+      "basis": "E_clock_quantization changes the proposed clock mechanism but leaves p95/retries near baseline at 401 ms/3.0."
+    }
+  ],
+  "unresolved_questions": [],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3",
+    "E_disable_pool_reuse:7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+    "E_force_retry_reset:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "E_clock_quantization:b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+  ],
+  "candidate_actions": [],
+  "next_safe_action": "Screening run complete. Preserve this P2 B replacement run as non-claim-bearing protocol-screening evidence; persistent-chat continuity is no longer required.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
+      "H_queue",
+      "H_clock_bucket"
+    ],
+    "observed_results": {
+      "E_disable_pool_reuse": "7f42dfe675809352aa634a18b7387e8a138d989e866b836df49ff880c1feae4c",
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "E_clock_quantization": "b590b361298c6683d7c03db86ba9c83f50404b54bffcf23c76e7e08946836c17"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "O1 shows the regression at 412 ms p95 with 3.1 retries/request, while O3 shows CPU below 48% and queue occupancy below 62%, weakening queue saturation. E_disable_pool_reuse at fixed concurrency/retry policy reduces p95 to 228 ms and retries to 1.1, implicating reuse-linked state. E_force_retry_reset preserves pool reuse but resets retry state at request boundaries and reduces p95 to 219 ms and retries to 1.0, specifically isolating retained retry state as causal rather than pooling generically. The required discriminating E_clock_quantization intervention changes timestamp quantization yet leaves p95 at 401 ms and retries at 3.0, near baseline, directly rejecting H_clock_bucket. O2's improvement from halving concurrency is therefore genuine load relief but non-discriminating: it reduces symptom severity without identifying the primary mechanism. The convergent interventions support H_retry_state and reject H_queue and H_clock_bucket as primary explanations."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_queue_4x|E_clock_quantization"
+      ],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 5,
+    "experiment_requests": 3,
+    "retries": 1,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 2
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/B_instant_persistent_chat/screen-003.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "INSTANT"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": false,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

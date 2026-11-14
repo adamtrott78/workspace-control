@@ -1,0 +1,399 @@
+{
+  "schema_version": 1,
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "status": "PROVENANCE_REFROZEN_P0_PRIMARY_SCREENING_IN_PROGRESS",
+  "benchmark_id": "workspace-resumable-reasoning-v1",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "frozen_inputs": {
+    "taxonomy": {
+      "path": "benchmarks/workspace-semantic-execution/experiment_taxonomy_v1.json",
+      "blob_sha": "1d3fe351a7e1de5b3963add2ef14e2258a03f67a"
+    },
+    "harness": {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+      "blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2"
+    },
+    "fixture_matrix": {
+      "path": "benchmarks/workspace-semantic-execution/resumable_reasoning_fixture_matrix_v1.json",
+      "blob_sha": "2fa11f2905a42a60fb58b7cf7feb0ac29d589bab"
+    }
+  },
+  "execution_stages": [
+    {
+      "id": "protocol_screening",
+      "purpose": "Catch worker-packet, wait/wake, evaluator, state-persistence, and fixture-contract defects before expensive replication.",
+      "runs_per_arm_fixture": 1,
+      "arms": [
+        "A_frontier_long_horizon",
+        "B_instant_persistent_chat",
+        "C_instant_stateless_resume",
+        "D_instant_decompose_critic",
+        "E_hybrid_escalation"
+      ],
+      "phenotypes": [
+        "P0_easy_control",
+        "P1_horizon_heavy_decomposable",
+        "P2_reasoning_heavy_coupled",
+        "P3_mixed_long_hard"
+      ],
+      "claim_bearing": false,
+      "freeze_rule": "Any fixture/prompt/harness/protocol change after screening invalidates screening comparability and requires a fresh screening pass.",
+      "supplementary_screening_arms": [
+        "B6_gpt6_instant_persistent_chat"
+      ],
+      "screening_findings": {
+        "prior_completed_runs": [
+          "screening-v1-P0-B6-001",
+          "screening-v1-P0-B-002"
+        ],
+        "finding": "Terminal submission shape was under-specified: observed_results had named field only, while the frozen evaluator requires experiment_id -> raw result_hash string.",
+        "consequence": "Prior completed P0 runs remain valid non-claim-bearing evidence that the protocol caught and recovered from the defect, but they do not constitute a frozen comparable screening pass after the protocol clarification.",
+        "required_action": "Re-screen affected matched P0 Instant persistent-chat arms under the clarified public terminal_output_schema before expanding or scoring.",
+        "clarified_p0_re_screen": {
+          "status": "SUPERSEDED_FOR_FROZEN_COMPARABILITY_BY_TAXONOMY_PROVENANCE_REFREEZE",
+          "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+          "gpt56_run": "screening-v1-P0-B-003",
+          "gpt6_run": "screening-v1-P0-B6-002",
+          "completion_commit": "57d49bdc76a2c92092e49068a3c60c400a1ff5ae",
+          "validation_run": 41564259142,
+          "result": "Both runs passed research_iterate_objective_v1 with score 1.0, zero violations, 3 reasoning invocations, 2 experiment requests, 0 retries, 0 frontier escalations, 0 model polling, 0 manual state relays, and 0 authority/provenance violations."
+        },
+        "p0_primary_a_e": {
+          "status": "SUPERSEDED_FOR_FROZEN_COMPARABILITY_BY_TAXONOMY_PROVENANCE_REFREEZE",
+          "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+          "arms": {
+            "A": {
+              "run_id": "screening-v1-P0-A-001",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 3,
+              "experiment_requests": 2,
+              "retries": 0
+            },
+            "B": {
+              "run_id": "screening-v1-P0-B-003",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 3,
+              "experiment_requests": 2,
+              "retries": 0
+            },
+            "C": {
+              "run_id": "screening-v1-P0-C-001",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 3,
+              "experiment_requests": 2,
+              "retries": 0
+            },
+            "D": {
+              "run_id": "screening-v1-P0-D-001",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 4,
+              "experiment_requests": 2,
+              "retries": 0
+            },
+            "E": {
+              "run_id": "screening-v1-P0-E-001",
+              "result": "PASS_SCORE_1_ZERO_VIOLATIONS",
+              "reasoning_invocations": 4,
+              "experiment_requests": 2,
+              "retries": 1,
+              "frontier_escalations": 0
+            }
+          },
+          "completion_commit": "7f7c9c8136cf8509de5310222bbb5a380399c4ea",
+          "validation_run": 41570296752,
+          "interpretation": "Retained as non-claim-bearing mechanics/protocol-defect evidence only. Exact provenance was invalid because the bound taxonomy profile referenced the pre-clarification fixture blob."
+        },
+        "public_input_provenance_defect_v1": {
+          "status": "FOUND_AND_CORRECTED_PENDING_FRESH_SCREEN",
+          "affected_phenotypes": [
+            "P0_easy_control",
+            "P1_horizon_heavy_decomposable",
+            "P2_reasoning_heavy_coupled",
+            "P3_mixed_long_hard"
+          ],
+          "defect": "taxonomy_profile.fixture_blob_sha referenced the pre-clarification fixture blob while the run/matrix bound the clarified fixture blob",
+          "hard_gate": "exact public-input provenance",
+          "resolution": "Correct all four taxonomy profile bindings, update the fixture-matrix profile blob SHAs, refreeze a new source checkpoint, and rerun affected screening."
+        },
+        "provenance_refrozen_p0_primary": {
+          "status": "IN_PROGRESS",
+          "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+          "active_runs": {
+            "A": {
+              "run_id": "screening-v1-P0-A-002",
+              "status": "READY_TO_RESUME",
+              "external_results": [
+                "E_restore_timeout"
+              ],
+              "continuity": "same persistent GPT-5.6 Sol High chat"
+            },
+            "B": {
+              "run_id": "screening-v1-P0-B-004",
+              "status": "READY_TO_RESUME",
+              "external_results": [
+                "E_restore_timeout"
+              ],
+              "continuity": "same persistent GPT-5.6 Sol Instant chat"
+            },
+            "C": {
+              "run_id": "screening-v1-P0-C-002",
+              "status": "READY_TO_RESUME",
+              "external_results": [
+                "E_restore_timeout"
+              ],
+              "continuity": "brand-new GPT-5.6 Sol Instant chat for quantum 1"
+            },
+            "D": {
+              "run_id": "screening-v1-P0-D-002",
+              "status": "READY_TO_RESUME",
+              "role": "leaf_worker",
+              "process_id": "screening-v1-P0-D-002-leaf-001",
+              "continuity": "brand-new GPT-5.6 Sol Instant role chat"
+            },
+            "E": {
+              "run_id": "screening-v1-P0-E-002",
+              "status": "READY_TO_RESUME",
+              "external_results": [
+                "E_restore_timeout"
+              ],
+              "continuity": "brand-new GPT-5.6 Sol Instant lower-tier chat",
+              "frontier_escalation_authorized": false
+            }
+          },
+          "control_result_commit": "f0bd5786c3127d15f1be42ea9aacf3b02016176c",
+          "control_result_validation_run": 41723477493,
+          "note": "A/B/C/E first E_restore_timeout results were durably published before control-chat interruption. D decomposer completed LEAF_EXECUTABLE and awaits leaf_worker. No replay is required."
+        }
+      },
+      "next_action": "Resume provenance-refrozen P0 primary screening from durable state: A/B same persistent chats; C fresh stateless quantum-1 chat; D fresh leaf_worker chat; E fresh lower-tier Instant chat. Service subsequent WAITING_EXTERNAL/role/terminal boundaries from control state."
+    },
+    {
+      "id": "scored_replicates",
+      "purpose": "Estimate validated quality, reliability, routing behavior, and resource use under a frozen protocol.",
+      "minimum_independent_replicates_per_selected_arm_fixture": 3,
+      "claim_bearing": true,
+      "prerequisite": "protocol_screening completes with no hard-gate failure and no protocol changes pending.",
+      "comparison_plan": [
+        {
+          "question": "Q1_horizon_externalization",
+          "pairs": [
+            [
+              "B_instant_persistent_chat",
+              "C_instant_stateless_resume"
+            ]
+          ],
+          "phenotypes": [
+            "P0_easy_control",
+            "P1_horizon_heavy_decomposable",
+            "P2_reasoning_heavy_coupled",
+            "P3_mixed_long_hard"
+          ]
+        },
+        {
+          "question": "Q2_decomposition_effect",
+          "pairs": [
+            [
+              "C_instant_stateless_resume",
+              "D_instant_decompose_critic"
+            ]
+          ],
+          "phenotypes": [
+            "P1_horizon_heavy_decomposable",
+            "P3_mixed_long_hard"
+          ]
+        },
+        {
+          "question": "Q3_intrinsic_reasoning_boundary",
+          "pairs": [
+            [
+              "D_instant_decompose_critic",
+              "A_frontier_long_horizon"
+            ]
+          ],
+          "phenotypes": [
+            "P2_reasoning_heavy_coupled",
+            "P3_mixed_long_hard"
+          ],
+          "comparison_unit": "matched residual after reasonable decomposition"
+        },
+        {
+          "question": "Q5_escalation_calibration",
+          "pairs": [
+            [
+              "D_instant_decompose_critic",
+              "E_hybrid_escalation"
+            ]
+          ],
+          "phenotypes": [
+            "P0_easy_control",
+            "P1_horizon_heavy_decomposable",
+            "P2_reasoning_heavy_coupled",
+            "P3_mixed_long_hard"
+          ]
+        }
+      ]
+    }
+  ],
+  "worker_isolation": {
+    "clean_oracle_unexposed_session_required": true,
+    "control_authoring_chat_eligible": false,
+    "allowed_inputs": [
+      "selected public fixture",
+      "current durable run state",
+      "bounded context packet",
+      "exact evidence refs named by run state"
+    ],
+    "forbidden_inputs": [
+      "any evaluator oracle",
+      "full prior control-chat transcript",
+      "other arms' terminal answers",
+      "unbounded repository dump"
+    ],
+    "worker_repository_read_rule": "Workers may read only benchmark paths explicitly named by their run packet; evaluator/oracle paths are excluded.",
+    "memory_rule": "Use a brand-new regular ChatGPT chat with Memory disabled before launch. Unpersonalized Temporary Chat is invalid because plugins are disabled; Personalized Temporary Chat is invalid because existing memory may be used.",
+    "plugin_rule": "Required plugin/app transport must remain available. For current screening arms, GitHub must be enabled; other connectors remain forbidden unless the run packet explicitly requires them."
+  },
+  "state_path_template": "benchmarks/workspace-semantic-execution/runs/matrix-v1/{phenotype}/{arm}/{replicate_id}.json",
+  "required_run_identity": [
+    "run_id",
+    "runset_id",
+    "phenotype",
+    "arm",
+    "replicate_id",
+    "fixture_id",
+    "fixture_blob_sha",
+    "harness_blob_sha",
+    "source_checkpoint_sha",
+    "generation",
+    "owner",
+    "executor_identity",
+    "status",
+    "invocations",
+    "events",
+    "validator_results",
+    "metrics"
+  ],
+  "hard_gates": [
+    "zero oracle exposure",
+    "zero execution-authority/provenance escape",
+    "zero manual state relay",
+    "zero stale-generation completion",
+    "zero model polling while WAITING_EXTERNAL",
+    "objective terminal validator required for COMPLETE",
+    "frontier escalation requires lower-tier evidence and explicit residual reason"
+  ],
+  "analysis_order": [
+    "hard-gate eligibility",
+    "objective quality",
+    "reliability across replicates",
+    "routing/decomposition/escalation correctness",
+    "context/work quanta",
+    "frontier/local/hosted resource use",
+    "wall-clock excluding deliberate external waits"
+  ],
+  "claim_limits": [
+    "Static synthetic research_iterate fixtures cannot establish workspace-wide executor equivalence.",
+    "P0-P3 matrix can establish phenotype-specific comparative behavior under the frozen harness.",
+    "Broader claims require architecture_diagnosis, artifact_revision, software_debug_repair, and unseen-workflow extension suites.",
+    "Stronger frontier-equivalence claims require hidden ephemeral or externally blinded evaluator isolation."
+  ],
+  "executor_configurations": {
+    "primary_causal_controls": {
+      "A_frontier_long_horizon": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "FRONTIER_MATCHED_SURFACE",
+        "rationale": "Primary stronger-reasoning control keeps the ChatGPT chat surface and GitHub affordance matched to Instant arms; only reasoning configuration/continuity treatment should differ."
+      },
+      "B_instant_persistent_chat": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT"
+      },
+      "C_instant_stateless_resume": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_chat_per_reasoning_quantum",
+        "tier": "INSTANT"
+      },
+      "D_instant_decompose_critic": {
+        "provider": "OpenAI",
+        "model_family": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "fresh_or_role_isolated_instant_workers",
+        "tier": "INSTANT",
+        "roles": [
+          "decomposer",
+          "leaf_worker",
+          "independent_critic",
+          "synthesizer"
+        ]
+      },
+      "E_hybrid_escalation": {
+        "provider": "OpenAI",
+        "default_model_family": "GPT-5.6 Sol",
+        "default_chat_configuration": "Instant",
+        "escalation_model_family": "GPT-5.6 Sol",
+        "escalation_chat_configuration": "High",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "tier": "HYBRID",
+        "escalation_rule": "Only objectively evidenced INTRINSICALLY_DIFFICULT residuals may route to the matched-surface High control."
+      }
+    },
+    "supplementary_ceiling_not_primary_causal_control": {
+      "id": "A2_best_available_agentic_ceiling",
+      "provider": "OpenAI",
+      "model_family": "GPT-6 Astra",
+      "configuration": "Work",
+      "surface": "ChatGPT Work",
+      "status": "PLANNED_EXPLORATORY",
+      "rationale": "Useful as a best-available ceiling, but not the primary causal control because Work changes the execution surface and agent affordances in addition to model capability."
+    },
+    "runtime_identity_rule": "Persist the exact model name and configuration reported by the surface. For GPT-5.6 on paid ChatGPT surfaces, `GPT-5.6 Sol` with `Instant` is the expected B/C/D default identity; compare configuration as well as model family. If the actual treatment differs, mark EXECUTOR_IDENTITY_MISMATCH.",
+    "supplementary_instant_controls": {
+      "B6_gpt6_instant_persistent_chat": {
+        "provider": "OpenAI",
+        "model_family": "GPT-6",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "status": "PLANNED_SCREENING",
+        "rationale": "Supplementary same-surface Instant comparison against GPT-5.6 Sol / Instant. This does not replace the primary B arm; it measures model-generation effect at Instant configuration."
+      }
+    }
+  }
+}

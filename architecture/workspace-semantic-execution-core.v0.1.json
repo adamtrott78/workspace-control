@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-core-v0.1",
+  "status": "DESIGN_CANDIDATE_NOT_FROZEN",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Define the smallest open-world semantic contract needed to project heterogeneous Workspace Control work into a common query/routing surface without replacing project-local truth or creating execution authority.",
+  "principles": [
+    "Project-local authoritative records remain authoritative.",
+    "The semantic representation is rebuildable unless a separately reviewed contract explicitly states otherwise.",
+    "Semantic/model inference never creates or widens execution authority.",
+    "The stable core remains small; domain-specific meaning is added through versioned extensions.",
+    "Unknown extensions fail structurally rather than being guessed into a known domain.",
+    "Every material assertion retains exact provenance and temporal/supersession metadata.",
+    "Contradictory assertions may coexist; current-state views must not silently erase disagreement.",
+    "Execution, artifact correctness, scientific support, tutoring mastery, and external delivery remain distinct states."
+  ],
+  "namespaces": {
+    "core": "workspace",
+    "extension_format": "<extension_id>:<type_or_relation>",
+    "examples": [
+      "workspace:Artifact",
+      "workspace:CandidateAction",
+      "research:Hypothesis",
+      "tutor:MasteryState",
+      "publication:Citation",
+      "presentation:Slide",
+      "engineering:ArchitectureDecision"
+    ]
+  },
+  "layer_model": {
+    "epistemic": {
+      "authority": "NON_EXECUTABLE",
+      "purpose": "What is observed, claimed, inferred, supported, contradicted, unresolved, or decided as knowledge.",
+      "core_types": [
+        "Source",
+        "Evidence",
+        "Observation",
+        "Claim",
+        "Finding",
+        "Question",
+        "Unknown",
+        "Alternative"
+      ]
+    },
+    "intent_and_work": {
+      "authority": "NON_EXECUTABLE",
+      "purpose": "What outcome is desired and what work structure is proposed or represented.",
+      "core_types": [
+        "Intent",
+        "Goal",
+        "Requirement",
+        "Constraint",
+        "Plan",
+        "Workflow",
+        "WorkItem",
+        "Artifact",
+        "Deliverable",
+        "QualityCriterion",
+        "AcceptanceCriterion"
+      ]
+    },
+    "normative": {
+      "authority": "SOURCE_DERIVED_ONLY",
+      "purpose": "Authority-owned permission, prohibition, review, scope, consequence and gate semantics.",
+      "core_types": [
+        "PolicyRule",
+        "Permission",
+        "Prohibition",
+        "ReviewRequirement",
+        "AuthorityReference",
+        "Gate"
+      ],
+      "critical_rule": "No MODEL_INFERRED or EPISTEMIC_ONLY assertion may create/widen Permission, remove Prohibition, satisfy ReviewRequirement, or turn a CandidateAction into executable authority."
+    },
+    "execution": {
+      "authority": "OBSERVATIONAL",
+      "purpose": "What was actually attempted, waited on, completed, validated, produced, or received.",
+      "core_types": [
+        "Attempt",
+        "ExternalWait",
+        "Result",
+        "Receipt",
+        "Validation",
+        "Revision"
+      ]
+    },
+    "resource_and_executor": {
+      "authority": "ROUTING_CONTEXT_ONLY",
+      "purpose": "What capabilities/resources/executor surfaces are available and what a work item requires.",
+      "core_types": [
+        "Capability",
+        "ReasoningRequirement",
+        "ContextRequirement",
+        "ResourceRequirement",
+        "Executor",
+        "ExecutorSurface",
+        "Provider",
+        "Model",
+        "Harness",
+        "Tool",
+        "QuotaPool",
+        "UsageRecord"
+      ]
+    },
+    "decision_bridge": {
+      "authority": "NONE_UNTIL_EXTERNAL_EVALUATION",
+      "purpose": "Bridge proposed work to deterministic eligibility/authority/routing decisions.",
+      "core_types": [
+        "CandidateAction",
+        "EligibilityEvaluation",
+        "AuthorityDecision",
+        "RoutingDecision"
+      ],
+      "rules": [
+        "CandidateAction authority is NONE.",
+        "EligibilityEvaluation may derive readiness/dependency/capability facts but not grant permission.",
+        "AuthorityDecision must reference an existing authority-owned policy/task contract/evaluator.",
+        "RoutingDecision selects among already-eligible executors and does not widen action authority."
+      ]
+    }
+  },
+  "core_relations": {
+    "provenance": [
+      "derived_from",
+      "generated_by",
+      "used",
+      "associated_with",
+      "supersedes",
+      "contradicts",
+      "supports",
+      "weakens"
+    ],
+    "work_structure": [
+      "requires",
+      "depends_on",
+      "decomposes_into",
+      "produces",
+      "revises",
+      "validated_by",
+      "satisfies",
+      "blocks"
+    ],
+    "reasoning_and_routing": [
+      "requires_capability",
+      "requires_reasoning",
+      "requires_context",
+      "requires_resource",
+      "candidate_for",
+      "evaluated_by",
+      "routed_to",
+      "executed_by"
+    ],
+    "authority": [
+      "permits",
+      "forbids",
+      "requires_review_before",
+      "authorizes_exact_scope",
+      "satisfies_gate"
+    ]
+  },
+  "assertion_metadata_contract": {
+    "required_fields": [
+      "assertion_id",
+      "subject_id",
+      "relation",
+      "object_id",
+      "assertion_kind",
+      "source_refs",
+      "valid_from",
+      "valid_until",
+      "superseded_by",
+      "derivation_rule",
+      "authority_class"
+    ],
+    "optional_fields": [
+      "confidence",
+      "context_id",
+      "observed_at",
+      "created_by_executor",
+      "extension_id"
+    ],
+    "assertion_kinds": [
+      "AUTHORITATIVE_SOURCE",
+      "OBSERVED_EXECUTION",
+      "INDEPENDENT_REVIEW_FINDING",
+      "DERIVED_DETERMINISTIC",
+      "MODEL_INFERRED",
+      "USER_REPORTED",
+      "EXTERNAL_SOURCE"
+    ],
+    "authority_classes": [
+      "NONE",
+      "EPISTEMIC_ONLY",
+      "WORKFLOW_CONTEXT",
+      "POLICY_CONTEXT",
+      "EXECUTION_AUTHORITY_REFERENCE"
+    ],
+    "provenance_rule": "Every assertion has at least one exact source reference; deterministic/model-derived assertions retain immediate parent assertion IDs.",
+    "contradiction_rule": "Contradictory assertions remain simultaneously representable with provenance and temporal context.",
+    "supersession_rule": "Supersession affects current-view selection but never deletes historical assertions."
+  },
+  "provenance_alignment": {
+    "note": "PROV-O is conceptual prior art; v0.1 does not require RDF storage.",
+    "mappings": {
+      "prov:Entity": [
+        "Source",
+        "Evidence",
+        "Artifact",
+        "Result",
+        "Plan"
+      ],
+      "prov:Activity": [
+        "Attempt",
+        "Validation",
+        "Revision"
+      ],
+      "prov:Agent": [
+        "Executor",
+        "Provider",
+        "human or service extension types"
+      ],
+      "prov:Plan": [
+        "Plan",
+        "Workflow"
+      ]
+    }
+  },
+  "extension_contract": {
+    "required_metadata": [
+      "extension_id",
+      "version",
+      "owner_repository",
+      "compatible_core_version",
+      "source_of_truth_boundary",
+      "type_definitions",
+      "relation_definitions",
+      "validation_contract",
+      "migration_policy"
+    ],
+    "may_add": [
+      "semantic types",
+      "semantic relations",
+      "workflow descriptors",
+      "artifact/result roles",
+      "domain validators",
+      "capability declarations",
+      "query views"
+    ],
+    "may_not": [
+      "create Permission through inference",
+      "remove Prohibition through inference",
+      "satisfy ReviewRequirement through inference",
+      "widen task or runtime authority",
+      "replace project-local authoritative sources without explicit migration authority",
+      "make unknown extension data executable by fallback guessing"
+    ],
+    "unknown_extension_behavior": "UNSUPPORTED_EXTENSION_FAIL_CLOSED",
+    "core_kernel_rule": "Adding a conforming domain/workflow extension must not require adding an if/elif/switch branch on domain identity to the generic scheduler/execution kernel."
+  },
+  "example_extensions": {
+    "research": {
+      "types": [
+        "ResearchProgram",
+        "ResearchQuestion",
+        "Hypothesis",
+        "ExperimentDesign",
+        "ScientificExecution",
+        "ScientificResult",
+        "Interpretation",
+        "BeliefUpdate"
+      ]
+    },
+    "tutor": {
+      "types": [
+        "Course",
+        "Skill",
+        "Prerequisite",
+        "MasteryState",
+        "LearningEvidence",
+        "Misconception",
+        "Assessment",
+        "StudentAttempt"
+      ]
+    },
+    "publication": {
+      "types": [
+        "Argument",
+        "Section",
+        "Citation",
+        "Figure",
+        "Table",
+        "ReviewerFinding",
+        "VenueConstraint"
+      ]
+    },
+    "presentation": {
+      "types": [
+        "Presentation",
+        "Narrative",
+        "Slide",
+        "VisualAsset",
+        "SpeakerScript",
+        "AudienceTakeaway",
+        "LayoutConstraint"
+      ]
+    },
+    "engineering": {
+      "types": [
+        "Architecture",
+        "ArchitectureDecision",
+        "Component",
+        "Interface",
+        "Implementation",
+        "Test",
+        "Deployment",
+        "Incident"
+      ]
+    },
+    "data_science": {
+      "types": [
+        "Dataset",
+        "DataSlice",
+        "Feature",
+        "ModelFit",
+        "Evaluation",
+        "Metric",
+        "ErrorAnalysis",
+        "StatisticalAssumption"
+      ]
+    }
+  },
+  "workflow_projection_contract": {
+    "required_generic_fields": [
+      "workflow_id",
+      "owner",
+      "semantic_inputs",
+      "stages",
+      "stage_transition_conditions",
+      "required_capabilities",
+      "reasoning_requirements",
+      "artifact_or_result_roles",
+      "validators",
+      "authority_refs",
+      "terminal_conditions",
+      "recursive_expansion_points"
+    ],
+    "rule": "The generic scheduler consumes these fields; domain-specific meaning remains in the extension/owner."
+  },
+  "storage_boundary": {
+    "v0_1_requirement": "No graph database migration.",
+    "allowed_initial_projection": [
+      "in-memory graph",
+      "JSON/JSONL projection",
+      "PostgreSQL relational projection",
+      "existing research-engine graph reference structures"
+    ],
+    "reason": "Validate semantic and routing utility before selecting a physical graph technology."
+  },
+  "required_queries": [
+    "WHAT_IS_CURRENT_OBJECTIVE",
+    "WHAT_EVIDENCE_SUPPORTS_THIS",
+    "WHAT_CONTRADICTS_THIS",
+    "WHAT_REMAINS_UNRESOLVED",
+    "WHAT_WORK_DEPENDS_ON_THIS",
+    "WHAT_IS_READY",
+    "WHAT_IS_BLOCKED_AND_WHY",
+    "WHAT_AUTHORITY_APPLIES",
+    "WHAT_EXECUTOR_CAPABILITIES_ARE_REQUIRED",
+    "WHY_WAS_THIS_EXECUTOR_SELECTED",
+    "TRACE_ARTIFACT_TO_SOURCES_AND_ATTEMPTS",
+    "CURRENT_STATE_WITH_SUPERSESSION"
+  ],
+  "acceptance_tests_before_freeze": [
+    "Represent research, tutoring, publication, presentation, engineering and data-science fixtures without changing core type/dispatch code.",
+    "Add one previously unseen synthetic extension and workflow without kernel change.",
+    "Reject an extension that attempts to infer Permission.",
+    "Preserve two contradictory assertions in the same current query context.",
+    "Rebuild projection deterministically from authoritative fixtures.",
+    "Produce bounded context slice for one resumable reasoning process.",
+    "Trace one artifact/result through source -> work -> attempt -> validation.",
+    "Demonstrate missing/unknown extension fails closed."
+  ]
+}

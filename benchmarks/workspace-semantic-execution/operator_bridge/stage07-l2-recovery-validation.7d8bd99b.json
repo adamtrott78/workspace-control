@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "stage": "impl_07_recovery_and_fault_closure",
+  "layer": "L2_REAL_HELPER_RECOVERY",
+  "source_sha": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e",
+  "workflow": {
+    "name": "Operator Bridge Validation",
+    "run_id": 42770472988,
+    "run_number": 29,
+    "conclusion": "SUCCESS"
+  },
+  "result": "PASS",
+  "full_local_bridge_suite": {
+    "passed": 12,
+    "failed": 0
+  },
+  "stage07_fixtures": [
+    "SIM-008",
+    "SIM-021",
+    "SIM-022",
+    "SIM-023",
+    "SIM-024",
+    "SIM-033",
+    "SIM-034"
+  ],
+  "invariants": {
+    "ctrl_b_during_blocking_recovery_claims_action": false,
+    "ctrl_b_during_blocking_recovery_mutates_clipboard": false,
+    "unknown_create_second_effect": false,
+    "unknown_create_packet_staged": false,
+    "helper_restart_resets_action_in_place": false,
+    "clipboard_side_effect_implies_submit": false,
+    "orchestrator_outage_executes_stale_queue": false,
+    "cold_restart_replays_stale_cache": false,
+    "recovery_generation_advanced_more_than_once": false
+  },
+  "content_policy": "CONTENT_FREE"
+}

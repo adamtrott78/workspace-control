@@ -1,0 +1,878 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P3-B-003",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P3_mixed_long_hard",
+  "arm": "B_instant_persistent_chat",
+  "replicate_id": "screen-003",
+  "fixture_id": "research-iterate-cross-region-feedback-p3-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json",
+    "fixture_blob_sha": "2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "54c63ee2d0fd7990312517fd90d2d1197cf75df1",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "INSTANT",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol Instant was selected for this conversation."
+    ]
+  },
+  "continuity_regime": "persistent_chat",
+  "treatment_contract": {
+    "mode": "instant_persistent_chat",
+    "quantum_policy": "Use the same clean GPT-5.6 Sol / Instant chat across bounded reasoning quanta.",
+    "resume_policy": "Resume the same persistent chat after control-published external results.",
+    "decomposition_policy": "Not forced by treatment; record decomposition only if the task itself requires it.",
+    "escalation_policy": "No frontier escalation in this arm."
+  },
+  "treatment_state": {
+    "phase": "PRIMARY",
+    "persistent_chat": true
+  },
+  "started_at": "2026-11-05T21:04:00-05:00",
+  "completed_at": null,
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P3-B-003-q001",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r1"
+      ],
+      "reasoning_summary": "O2 and O3 weaken capacity as the primary cause but do not satisfy the required control. O4 leaves retry-state propagation and timer synchronization live. Begin with an independent regional isolation leaf; later synthesis must include at least one coupled-residual intervention and one competing-mechanism/control intervention.",
+      "experiment_id": "E_isolate_r1"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q002",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r2"
+      ],
+      "reasoning_summary": "E_isolate_r1 materially reduced r1 latency and retries without materially changing other regions, supporting a cross-region propagation contribution. Because one regional leaf cannot establish generality or distinguish retained retry state from synchronized timers, request an independent second-region isolation before coupled-residual discrimination.",
+      "experiment_id": "E_isolate_r2"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q003",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_global_retry_reset"
+      ],
+      "reasoning_summary": "E_isolate_r2 independently replicates the regional isolation improvement, so further identical regional replication has lower discriminating value. Request the coupled-residual retry-state reset intervention to test whether retained cross-region retry state is the mechanism linking the regional effects.",
+      "experiment_id": "E_global_retry_reset"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q004",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_desynchronize_timers"
+      ],
+      "reasoning_summary": "Global retry-state reset normalizes latency and retries, strongly supporting retained cross-region retry feedback. Request timer desynchronization next as the direct competing coupled-mechanism discriminator; a capacity control and the six-cycle minimum remain outstanding.",
+      "experiment_id": "E_desynchronize_timers"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q005",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_capacity_2x"
+      ],
+      "reasoning_summary": "Timer desynchronization leaves the regression essentially intact, discriminating against H_clock_sync as primary. Request the global 2x-capacity control to test the remaining capacity explanation; one further experiment cycle will still be required by the six-cycle minimum.",
+      "experiment_id": "E_capacity_2x"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q006",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r3"
+      ],
+      "reasoning_summary": "Global 2x capacity leaves latency and retry amplification high, rejecting capacity saturation as primary and satisfying the required control. The protocol still requires a sixth experiment cycle, so request a third independent regional isolation replication before terminal synthesis.",
+      "experiment_id": "E_isolate_r3"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q007",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "E_isolate_r3:e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+        "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+        "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+        "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+      ],
+      "reasoning_summary": "Six experiment cycles are complete. Three independent regional isolation probes reduce latency/retries; resetting retry state at cross-region boundaries globally normalizes both; timer desynchronization and doubled capacity leave the regression high. Retained cross-region retry state causing positive feedback is therefore the primary mechanism; clock synchronization and capacity saturation are rejected as primary explanations."
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q008",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "validator:missing_required_discriminating_experiment:E_isolate_r4",
+        "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r4"
+      ],
+      "reasoning_summary": "The public objective validator rejected the terminal candidate solely for missing required discriminating experiment E_isolate_r4. Request exactly that experiment; do not alter the substantive hypothesis from validator information beyond this explicit requirement.",
+      "experiment_id": "E_isolate_r4"
+    },
+    {
+      "invocation_id": "screening-v1-P3-B-003-q009",
+      "generation": 0,
+      "owner": "p3-b-persistent-worker-screen-003",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": [
+          "This is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat.",
+          "Memory was disabled before this conversation was opened.",
+          "GPT-5.6 Sol Instant was selected for this conversation."
+        ]
+      },
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "E_isolate_r4:65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+        "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+        "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+        "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+      ],
+      "reasoning_summary": "The required E_isolate_r4 result replicates the regional isolation effect, completing all four regional leaves. Update the existing terminal submission with its exact published hash; the substantive conclusion remains retained cross-region retry-state positive feedback, with clock synchronization and capacity saturation rejected as primary."
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh replacement P3 B_instant_persistent_chat slot after screen-002 persistent-chat continuity loss."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-001",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r1",
+      "experiment_id": "E_isolate_r1"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-001",
+      "generation": 0,
+      "experiment_id": "E_isolate_r1",
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_isolate_r1",
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-002",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r2",
+      "experiment_id": "E_isolate_r2"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-002",
+      "generation": 0,
+      "experiment_id": "E_isolate_r2",
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_isolate_r2",
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-003",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_global_retry_reset",
+      "experiment_id": "E_global_retry_reset"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-003",
+      "generation": 0,
+      "experiment_id": "E_global_retry_reset",
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_global_retry_reset",
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-004",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_desynchronize_timers",
+      "experiment_id": "E_desynchronize_timers"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-004",
+      "generation": 0,
+      "experiment_id": "E_desynchronize_timers",
+      "result_hash": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_desynchronize_timers",
+      "result_hash": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-005",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_capacity_2x",
+      "experiment_id": "E_capacity_2x"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-005",
+      "generation": 0,
+      "experiment_id": "E_capacity_2x",
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_capacity_2x",
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-006",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r3",
+      "experiment_id": "E_isolate_r3"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-006",
+      "generation": 0,
+      "experiment_id": "E_isolate_r3",
+      "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_isolate_r3",
+      "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "final_hypothesis": "H_retry_feedback"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_isolate_r4"
+      ],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "validator_violation",
+      "violation": "missing_required_discriminating_experiment:E_isolate_r4",
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P3-B-003-exp-007",
+      "generation": 0,
+      "payload_ref": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json#E_isolate_r4",
+      "experiment_id": "E_isolate_r4"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P3-B-003-exp-007",
+      "generation": 0,
+      "experiment_id": "E_isolate_r4",
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "resume_from": "E_isolate_r4",
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "worker_id": "p3-b-persistent-worker-screen-003",
+      "final_hypothesis": "H_retry_feedback",
+      "revision_reason": "added_required_E_isolate_r4",
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_isolate_r1": {
+      "request_id": "screening-v1-P3-B-003-exp-001",
+      "experiment_id": "E_isolate_r1",
+      "result": {
+        "region": "r1",
+        "p95_latency_ms": 315,
+        "mean_retries": 1.9,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r2": {
+      "request_id": "screening-v1-P3-B-003-exp-002",
+      "experiment_id": "E_isolate_r2",
+      "result": {
+        "region": "r2",
+        "p95_latency_ms": 322,
+        "mean_retries": 2,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+      "publication_scope": "requested experiment only"
+    },
+    "E_global_retry_reset": {
+      "request_id": "screening-v1-P3-B-003-exp-003",
+      "experiment_id": "E_global_retry_reset",
+      "result": {
+        "all_regions_p95_ms_range": [
+          215,
+          235
+        ],
+        "mean_retries_range": [
+          0.9,
+          1.1
+        ]
+      },
+      "result_hash": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "publication_scope": "requested experiment only"
+    },
+    "E_desynchronize_timers": {
+      "request_id": "screening-v1-P3-B-003-exp-004",
+      "experiment_id": "E_desynchronize_timers",
+      "result": {
+        "all_regions_p95_ms_range": [
+          425,
+          462
+        ],
+        "mean_retries_range": [
+          2.7,
+          3.2
+        ]
+      },
+      "result_hash": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+      "publication_scope": "requested experiment only"
+    },
+    "E_capacity_2x": {
+      "request_id": "screening-v1-P3-B-003-exp-005",
+      "experiment_id": "E_capacity_2x",
+      "result": {
+        "all_regions_p95_ms_range": [
+          420,
+          455
+        ],
+        "mean_retries_range": [
+          2.7,
+          3.1
+        ]
+      },
+      "result_hash": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r3": {
+      "request_id": "screening-v1-P3-B-003-exp-006",
+      "experiment_id": "E_isolate_r3",
+      "result": {
+        "region": "r3",
+        "p95_latency_ms": 318,
+        "mean_retries": 1.8,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+      "publication_scope": "requested experiment only"
+    },
+    "E_isolate_r4": {
+      "request_id": "screening-v1-P3-B-003-exp-007",
+      "experiment_id": "E_isolate_r4",
+      "result": {
+        "region": "r4",
+        "p95_latency_ms": 326,
+        "mean_retries": 2,
+        "other_regions_materially_changed": false
+      },
+      "result_hash": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "F1",
+      "statement": "The starting observations do not support primary regional capacity saturation: CPU and queue occupancy are moderate, and per-region concurrency relief reduces latency but leaves retry amplification.",
+      "evidence_refs": [
+        "O2",
+        "O3"
+      ]
+    },
+    {
+      "id": "F2",
+      "statement": "Cross-region temporal correlation after failover makes a propagated retry-state mechanism and a synchronized-timer mechanism the principal live alternatives.",
+      "evidence_refs": [
+        "O4"
+      ]
+    },
+    {
+      "id": "F3",
+      "statement": "Isolating region 1 from cross-region retry propagation lowered r1 p95 latency to 315 ms and mean retries to 1.9 while other regions did not materially change. This supports a cross-region propagation contribution and is inconsistent with purely local capacity saturation as a sufficient explanation.",
+      "evidence_refs": [
+        "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4"
+      ]
+    },
+    {
+      "id": "F4",
+      "statement": "Region 2 independently replicates the isolation effect: p95 latency fell to 322 ms and mean retries to 2.0 while other regions did not materially change. The repeated locality of the intervention effect strengthens evidence that cross-region propagation drives the regression rather than a shared local-capacity deficit.",
+      "evidence_refs": [
+        "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99"
+      ]
+    },
+    {
+      "id": "F5",
+      "statement": "Resetting retry state at every cross-region boundary while preserving failover and pooling collapses the regression globally: all-region p95 latency is 215–235 ms and mean retries 0.9–1.1. This is direct coupled evidence that retained cross-region retry state is a causal mechanism.",
+      "evidence_refs": [
+        "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+      ]
+    },
+    {
+      "id": "F6",
+      "statement": "Timer desynchronization does not materially resolve the regression: all-region p95 remains 425–462 ms and mean retries 2.7–3.2. Contrasted with global normalization under retry-state reset, this rejects clock/timer synchronization as the primary mechanism.",
+      "evidence_refs": [
+        "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+        "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696"
+      ]
+    },
+    {
+      "id": "F7",
+      "statement": "Doubling global capacity does not materially resolve the regression: all-region p95 remains 420–455 ms and mean retries 2.7–3.1. Together with moderate CPU/queue occupancy and persistent retry amplification under concurrency relief, this rejects capacity saturation as the primary mechanism.",
+      "evidence_refs": [
+        "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+        "O2",
+        "O3"
+      ]
+    },
+    {
+      "id": "F8",
+      "statement": "Region 3 independently replicates the cross-region isolation effect: p95 latency falls to 318 ms and mean retries to 1.8 while other regions do not materially change. Three independent regional leaves therefore support a general cross-region propagation contribution.",
+      "evidence_refs": [
+        "E_isolate_r3:e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a"
+      ]
+    },
+    {
+      "id": "F9",
+      "statement": "Region 4 independently replicates the cross-region isolation effect: p95 latency falls to 326 ms and mean retries to 2.0 while other regions do not materially change. All four regional isolation leaves therefore support the cross-region propagation mechanism.",
+      "evidence_refs": [
+        "E_isolate_r4:65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_feedback",
+      "status": "SELECTED_PRIMARY",
+      "reason": "All four independent regional isolation probes improve their affected regions; global cross-region retry-state reset normalizes all regions, while timer desynchronization and doubled capacity fail to resolve the regression."
+    },
+    {
+      "id": "H_clock_sync",
+      "status": "REJECTED_PRIMARY",
+      "reason": "Timer desynchronization leaves latency/retry amplification high, unlike retry-state reset which normalizes both."
+    },
+    {
+      "id": "H_capacity",
+      "status": "REJECTED_PRIMARY",
+      "reason": "Global 2x capacity leaves latency/retry amplification high; O2/O3 already showed load relief without eliminating retry amplification."
+    }
+  ],
+  "unresolved_questions": [],
+  "evidence_refs": [
+    "O1",
+    "O2",
+    "O3",
+    "O4",
+    "E_isolate_r1:060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+    "E_isolate_r2:e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+    "E_global_retry_reset:026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+    "E_desynchronize_timers:90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+    "E_capacity_2x:5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+    "E_isolate_r3:e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+    "E_isolate_r4:65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+  ],
+  "candidate_actions": [
+    {
+      "experiment_id": "E_isolate_r1",
+      "purpose": "First independently testable regional leaf; establish whether blocking cross-region retry propagation changes the abnormal amplification."
+    },
+    {
+      "experiment_id": "E_isolate_r2",
+      "purpose": "Independent regional replication."
+    },
+    {
+      "experiment_id": "E_isolate_r3",
+      "purpose": "Independent regional replication."
+    },
+    {
+      "experiment_id": "E_isolate_r4",
+      "purpose": "Independent regional replication."
+    },
+    {
+      "experiment_id": "E_global_retry_reset",
+      "purpose": "Coupled-residual discriminator for retained retry state."
+    },
+    {
+      "experiment_id": "E_desynchronize_timers",
+      "purpose": "Competing coupled-residual discriminator for timer synchronization."
+    },
+    {
+      "experiment_id": "E_capacity_2x",
+      "purpose": "Competing-mechanism control for capacity saturation."
+    }
+  ],
+  "next_safe_action": "Screening run complete. Preserve this P3 B run as non-claim-bearing protocol-screening evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_feedback",
+    "rejected_hypotheses": [
+      "H_clock_sync",
+      "H_capacity"
+    ],
+    "observed_results": {
+      "E_isolate_r1": "060a0b1fc89c29230996c53a04e1e916657d1addf34dc3d9b75f609f56a0caa4",
+      "E_isolate_r2": "e0e8835a79c43d823bc3373bafb09736f035af5684a5bb0f2e9704880f4bef99",
+      "E_global_retry_reset": "026ee7ef0e290abc20d2a7c87c23b93a609f2b95edca813dcbb8c0fe1cc28696",
+      "E_desynchronize_timers": "90cefe1d2825336bb0e1cf1be8dd30b706e6b8430b76ac0b01c2563e4e03d897",
+      "E_capacity_2x": "5dc9c02420a0099573708fff567d68e31ddecd199d22ea3ef686a15aaa0e9499",
+      "E_isolate_r3": "e18f92dce94488e1730333420fc30a468bcdac8413fd4794d060f67c915b1a0a",
+      "E_isolate_r4": "65e2e567e2658846ae317dc3206f69d7c9390db38fd03a69f4017cea137045f5"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3",
+      "O4"
+    ],
+    "rationale": "The primary mechanism is retained retry state propagating across cross-region failover boundaries and creating a positive feedback loop. Independent isolation of r1, r2, r3, and r4 lowers each isolated region's latency and retries without materially changing other regions, establishing the required four-region cross-region propagation evidence. The discriminating coupled intervention, E_global_retry_reset, collapses all-region p95 latency to 215–235 ms and retries to 0.9–1.1 while preserving failover and pooling. In contrast, E_desynchronize_timers leaves p95 at 425–462 ms and retries at 2.7–3.2, rejecting clock/timer synchronization as primary. E_capacity_2x leaves p95 at 420–455 ms and retries at 2.7–3.1; together with O2, where concurrency relief lowers latency but not abnormal retry amplification, and O3's moderate CPU/queue occupancy, this rejects capacity saturation as primary. O4's correlated post-failover bursts are explained by propagated retry state, and O1 is resolved by the global retry-state reset."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.8,
+      "violations": [
+        "missing_required_discriminating_experiment:E_isolate_r4"
+      ],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    },
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 9,
+    "experiment_requests": 7,
+    "retries": 1,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 2
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "70fa013fddab1f3ce4538060aa312ea3ebe6a7d1b94c7d2830961aa5140a14ba",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/B_instant_persistent_chat/screen-003.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "INSTANT"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": false,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

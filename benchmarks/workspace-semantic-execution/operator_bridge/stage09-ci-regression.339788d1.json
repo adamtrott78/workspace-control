@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "stage": "impl_09_performance_benchmark_execution",
+  "source_sha": "339788d1c73991c59a6796710aaa530703024ddc",
+  "workflow_run_id": 42788272584,
+  "workflow_run_number": 41,
+  "artifact_id": 13751665146,
+  "artifact_name": "operator-bridge-stage09-ci-339788d1c73991c59a6796710aaa530703024ddc",
+  "evidence_class": "GITHUB_HOSTED_WINDOWS_CI",
+  "target_contract_complete": false,
+  "content_policy": "CONTENT_FREE",
+  "measurement": {
+    "warmup_ms": 250,
+    "sample_ms": 1200,
+    "sample_interval_ms": 200
+  },
+  "trial_counts": {
+    "reuse": 5,
+    "restore": 3,
+    "create": 3,
+    "primitive": 10
+  },
+  "regression_metrics": {
+    "helper_idle_working_set_mib_p95": 24.8515625,
+    "helper_idle_cpu_percent_one_logical_cpu_mean": 0,
+    "firefox_two_worker_working_set_mib_p95": 1068.1640625,
+    "firefox_two_worker_cpu_percent_one_logical_cpu_mean": 5.02929298016571,
+    "firefox_four_worker_working_set_mib_p95": 1113.7265625,
+    "discard_three_of_four_p95_reduction_percent": 11.794229676550433,
+    "reuse_ready_ms": {
+      "p50": 5.2562,
+      "p95": 30.101
+    },
+    "restore_ready_ms": {
+      "p95": 23.6242
+    },
+    "create_ready_ms": {
+      "p95": 41.4179
+    },
+    "existing_tab_activate_ms": {
+      "p95": 9.8377
+    },
+    "clipboard_write_ms": {
+      "p95": 1.0479
+    },
+    "no_work_ms": {
+      "p95": 0.0766
+    },
+    "hotkey_queue_to_callback_proxy_ms": {
+      "p95": 266.8171
+    }
+  },
+  "cold_firefox_start": {
+    "status": "IMPLEMENTATION_GAP",
+    "pass_fail": "FAIL",
+    "reason": "Current production helper has no reviewed Firefox process-launch path; no timing is fabricated."
+  },
+  "target_contract_incomplete_reasons": [
+    "GitHub-hosted Windows is not the target operator workstation.",
+    "Only shortened regression windows/counts were used.",
+    "Firefox/Chrome three-replicate order alternation was not run.",
+    "Chrome Memory Saver parity control was not run.",
+    "Cold Firefox startup remains an implementation gap."
+  ],
+  "interpretation": "Regression evidence only. Numeric values must not be used as UX-09 target acceptance facts."
+}

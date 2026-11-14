@@ -1,0 +1,355 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-ux-usability-v1",
+  "status": "UX_11_USABILITY_BENCHMARK_CONTRACT_NOT_YET_EXECUTED",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "simulator_ref": "architecture/workspace-semantic-execution-operator-simulator.v0.1.md",
+  "metrics_ref": "architecture/workspace-semantic-execution-operator-ux-metrics.v0.1.json",
+  "purpose": "Measure whether the operator can service routine and interrupted work with the intended low-attention rhythm, with zero wrong-worker/wrong-packet errors and without manual browser/task-state reconstruction.",
+  "test_population": {
+    "primary_operator": "the intended daily operator of Workspace Control",
+    "note": "v0 acceptance is an expert single-operator workflow test, not a population-level consumer usability study. Additional operators may be added later for transferability evidence."
+  },
+  "invariant_failures": [
+    "wrong worker receives packet",
+    "wrong packet/hash staged for current action",
+    "manual tab search needed for routine service",
+    "manual durable-state relay/reconstruction needed",
+    "background focus steal without explicit operator action",
+    "background clipboard mutation without explicit operator action",
+    "automatic resend without durable acknowledgment",
+    "stale/old generation advances current state",
+    "ChatGPT/fake-worker content automation introduced"
+  ],
+  "measurement_rules": {
+    "routine_interpretation_event": "Count when the operator must inspect tray/console/task/browser state to decide which worker/action to service before the next routine cycle. Merely noticing the ready count is not an interpretation event.",
+    "manual_tab_search_event": "Count when the operator scans/selects browser tabs to locate the intended worker rather than using the scheduler command.",
+    "wrong_worker_dispatch": "Packet is locally prepared/focused for a worker slot/generation other than the authoritative selected action.",
+    "wrong_packet_dispatch": "Clipboard packet hash/ref does not match the authoritative current action immediately before paste.",
+    "accidental_scheduler_dispatch": "Scheduler command invoked when the operator intended an application-local shortcut or no scheduler action.",
+    "abandoned_cycle": "Operator starts a service cycle but stops because target, packet, or required next physical action is unclear.",
+    "recovery_state_reconstruction_event": "Operator manually inspects multiple worker tabs/task records to determine which work survived instead of following bounded recovery guidance.",
+    "subjective_scale": "1=none/excellent, 7=severe/unacceptable"
+  },
+  "frozen_acceptance_thresholds": {
+    "correctness": {
+      "wrong_worker_dispatches": 0,
+      "wrong_packet_dispatches": 0,
+      "stale_generation_advancements": 0,
+      "automatic_resends_without_ack": 0,
+      "background_focus_steals": 0,
+      "background_clipboard_mutations": 0
+    },
+    "routine_attention": {
+      "manual_tab_searches_per_routine_cycle": 0,
+      "manual_prompt_edits_per_routine_cycle": 0,
+      "manual_worker_selection_decisions_per_routine_cycle": 0,
+      "manual_state_relay_events_per_workflow": 0,
+      "routine_interpretation_events_in_20_action_trial": 0,
+      "abandoned_cycles_in_20_action_trial": 0
+    },
+    "recovery": {
+      "manual_state_reconstruction_events": 0,
+      "wrong_old_generation_reuses": 0,
+      "maximum_distinct_recovery_instruction_steps_before_return_to_routine": 3,
+      "recovery_return_requirement": "After required human recovery/auth action, operator returns to the same scheduler-hotkey -> Ctrl+V -> Enter rhythm without choosing worker state manually."
+    },
+    "hotkey_binding": {
+      "unintended_scheduler_dispatches_in_representative_work_trial": 0,
+      "required_native_shortcut_collisions_in_representative_work_trial": 0,
+      "retention_rule": "Retain Ctrl+B only if both counts are zero and operator interference rating <=2/7. Otherwise choose a new configurable binding and rerun all hotkey-sensitive trials; this is a binding failure, not a bridge architecture failure."
+    },
+    "subjective": {
+      "routine_rhythm_friction_max_7": 2,
+      "worker_selection_confidence_min_7": 6,
+      "recovery_clarity_min_7": 6,
+      "scheduler_state_clarity_min_7": 6,
+      "clipboard_disruption_max_7": 2,
+      "hotkey_interference_max_7": 2
+    }
+  },
+  "trials": [
+    {
+      "id": "UT-01",
+      "name": "five_action_clean_batch",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 5,
+      "workload": [
+        "SERVICE_EXISTING",
+        "CREATE_AND_SERVICE",
+        "SERVICE_EXISTING",
+        "RESTORE_AND_SERVICE",
+        "SERVICE_EXISTING"
+      ],
+      "injected_faults": [],
+      "required_observations": [
+        "manual cycle count",
+        "wrong worker/packet",
+        "tab search",
+        "prompt edit",
+        "interpretation event",
+        "abandoned cycle",
+        "subjective friction"
+      ],
+      "pass": [
+        "5/5 valid durable acknowledgments",
+        "0 invariant failures",
+        "0 tab searches",
+        "0 interpretation events",
+        "0 abandoned cycles"
+      ]
+    },
+    {
+      "id": "UT-02",
+      "name": "twenty_action_mixed_batch",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 20,
+      "workload_policy": "deterministic mix of reuse/create/restore plus at least 2 local-only retire/discard drains and at least 2 independent outstanding workers",
+      "injected_faults": [],
+      "required_observations": [
+        "all correctness and routine-attention metrics",
+        "sent/unconfirmed peak",
+        "new/reuse/restore counts"
+      ],
+      "pass": [
+        "20/20 intended actions serviced or explicitly gated",
+        "0 wrong-worker dispatches",
+        "0 wrong-packet dispatches",
+        "0 routine interpretation events",
+        "0 manual tab searches",
+        "0 manual state relay",
+        "0 abandoned cycles"
+      ]
+    },
+    {
+      "id": "UT-03",
+      "name": "interruption_between_cycles",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 10,
+      "workload_policy": "routine service with five scripted 15-90 second interruptions between completed local dispatch returns",
+      "interruptions": [
+        "switch to another application",
+        "read/edit unrelated text",
+        "short idle",
+        "open console intentionally",
+        "return from background"
+      ],
+      "pass": [
+        "0 wrong-worker/packet",
+        "0 manual tab search",
+        "operator resumes next cycle using only scheduler command + paste + Enter",
+        "0 background focus/clipboard events"
+      ]
+    },
+    {
+      "id": "UT-04",
+      "name": "second_press_and_unconfirmed_pressure",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 6,
+      "workload_policy": "at least two actions remain AWAITING_DURABLE_ACK while independent work becomes ready",
+      "pass": [
+        "operator does not need to remember which worker is next",
+        "0 cross-worker ack confusion",
+        "0 assumption that prior packet was submitted",
+        "sent/unconfirmed display sufficient without tab inspection"
+      ]
+    },
+    {
+      "id": "UT-05",
+      "name": "judgment_gate_transition",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 5,
+      "workload_policy": "routine cycles interrupted by OPEN_JUDGMENT_GATE",
+      "pass": [
+        "Ctrl+B opens exact gate",
+        "clipboard unchanged",
+        "no worker focused",
+        "operator can identify that substantive decision is required",
+        "routine resumes after owning authority path completes"
+      ]
+    },
+    {
+      "id": "UT-06",
+      "name": "bounded_recovery_tab_loss",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 6,
+      "injected_faults": [
+        "close one managed worker tab after LOCAL_PREPARED or while idle, per fixture"
+      ],
+      "pass": [
+        "0 manual state reconstruction",
+        "0 old-generation reuse",
+        "recovery guidance <=3 distinct instruction steps",
+        "return to normal rhythm"
+      ]
+    },
+    {
+      "id": "UT-07",
+      "name": "auth_all_tabs_refresh_recovery",
+      "mode": "HUMAN_IN_LOOP_SIMULATED_AUTH",
+      "actions": 6,
+      "injected_faults": [
+        "UX-10 simulated profile-wide auth invalidation"
+      ],
+      "pass": [
+        "reuse freezes",
+        "durable acknowledgments reconciled once",
+        "operator performs only simulated/manual auth recovery instruction",
+        "0 manual worker-state reconstruction",
+        "replacement generations service normally",
+        "return to rhythm"
+      ]
+    },
+    {
+      "id": "UT-08",
+      "name": "helper_or_browser_restart_recovery",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 6,
+      "injected_faults": [
+        "helper restart",
+        "browser/adapter restart in separate replicate"
+      ],
+      "pass": [
+        "no duplicate local effects",
+        "no stale cache replay",
+        "operator does not inspect tabs to reconstruct work",
+        "bounded recovery returns to normal rhythm"
+      ]
+    },
+    {
+      "id": "UT-09",
+      "name": "representative_work_hotkey_collision",
+      "mode": "HUMAN_IN_LOOP",
+      "duration_minutes": 60,
+      "foreground_applications": [
+        "Chrome or primary general browser",
+        "VS Code",
+        "JupyterLab/notebook environment",
+        "terminal",
+        "document/editor used in normal work"
+      ],
+      "instructions": "Perform representative normal work with bridge ON when safe simulator actions are available. Record every time the operator intends the scheduler command, every time they intend an application-local use of the configured binding, and every accidental scheduler invocation.",
+      "pass": [
+        "0 unintended scheduler dispatches",
+        "0 required native-shortcut collisions",
+        "hotkey interference <=2/7"
+      ],
+      "failure_action": "Rebind scheduler command and repeat UT-01, UT-02, UT-03, UT-09, and UT-10 with the new binding."
+    },
+    {
+      "id": "UT-10",
+      "name": "hotkey_motor_rhythm",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 20,
+      "workload_policy": "simple service-ready loop intended to measure physical rhythm rather than reasoning/recovery",
+      "pass": [
+        "0 key-sequence errors",
+        "0 unintended second dispatches",
+        "routine rhythm friction <=2/7",
+        "operator reports worker-selection confidence >=6/7"
+      ]
+    },
+    {
+      "id": "UT-11",
+      "name": "bridge_off_normal_shortcuts",
+      "mode": "HUMAN_IN_LOOP",
+      "duration_minutes": 15,
+      "instructions": "Turn bridge OFF and verify configured binding is fully released to foreground applications.",
+      "pass": [
+        "0 scheduler dispatches",
+        "application-local binding behavior restored",
+        "clipboard/focus unchanged by bridge"
+      ]
+    },
+    {
+      "id": "UT-12",
+      "name": "no_work_and_background_ack",
+      "mode": "HUMAN_IN_LOOP",
+      "actions": 4,
+      "workload_policy": "include no-work presses and durable acknowledgments while another app has focus",
+      "pass": [
+        "no-work leaves focus/clipboard unchanged",
+        "background ack changes counts only",
+        "0 focus steal",
+        "0 interpretation needed"
+      ]
+    }
+  ],
+  "execution_order": [
+    "UT-11",
+    "UT-01",
+    "UT-10",
+    "UT-02",
+    "UT-03",
+    "UT-04",
+    "UT-05",
+    "UT-06",
+    "UT-07",
+    "UT-08",
+    "UT-12",
+    "UT-09"
+  ],
+  "stop_conditions": [
+    "Any wrong-worker or wrong-packet dispatch stops the trial and blocks UX production acceptance until root cause is fixed and affected trials rerun.",
+    "Any stale-generation advancement, automatic resend, background focus steal, or background clipboard mutation is a hard safety failure.",
+    "Any hotkey collision in UT-09 rejects the physical binding; it does not require redesign of the scheduler command."
+  ],
+  "evidence_capture": {
+    "automatic_allowlist": [
+      "scenario/trial ID",
+      "action ID/type",
+      "slot/generation",
+      "hotkey timestamp",
+      "local prepare duration",
+      "browser operation result",
+      "clipboard write result",
+      "durable ack latency",
+      "bridge toggle",
+      "recovery classification",
+      "ready count",
+      "sent/unconfirmed count"
+    ],
+    "manual_counts": [
+      "tab searches",
+      "prompt edits",
+      "interpretation events",
+      "abandoned cycles",
+      "accidental scheduler dispatches",
+      "native shortcut collisions",
+      "recovery reconstruction events"
+    ],
+    "forbidden": [
+      "clipboard contents",
+      "response/page text",
+      "keystroke stream",
+      "mouse trajectory",
+      "unrelated browsing history"
+    ]
+  },
+  "result_schema": {
+    "trial_id": "string",
+    "adapter_id": "string",
+    "configured_hotkey": "string",
+    "start_timestamp": "RFC3339",
+    "result": "PASS|FAIL|INVALID",
+    "actions_intended": "integer",
+    "valid_durable_acks": "integer",
+    "wrong_worker_dispatches": "integer",
+    "wrong_packet_dispatches": "integer",
+    "tab_searches": "integer",
+    "prompt_edits": "integer",
+    "routine_interpretation_events": "integer",
+    "abandoned_cycles": "integer",
+    "accidental_scheduler_dispatches": "integer",
+    "native_shortcut_collisions": "integer",
+    "recovery_state_reconstruction_events": "integer",
+    "subjective_ratings": "object",
+    "trace_sha256": "string|null",
+    "notes": "redacted text|null"
+  },
+  "execution_state": {
+    "empirical_results": "NOT_RUN",
+    "prerequisite": "UX-10 simulator plus UX-12 local helper/browser-adapter implementation",
+    "production_gate": "Required usability trials must pass before UX-13 production UX freeze."
+  }
+}

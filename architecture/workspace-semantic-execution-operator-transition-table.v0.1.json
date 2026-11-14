@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-transition-table-v0.1",
+  "status": "UX_03_DESIGN_CANDIDATE",
+  "action_statuses": [
+    "QUEUED",
+    "CLAIMED_LOCAL",
+    "LOCAL_PREPARED",
+    "AWAITING_DURABLE_ACK",
+    "ACKNOWLEDGED",
+    "COMPLETED",
+    "FAILED_LOCAL",
+    "CLAIM_EXPIRED",
+    "BLOCKED",
+    "STALE",
+    "SUPERSEDED"
+  ],
+  "terminal_statuses": [
+    "COMPLETED",
+    "FAILED_LOCAL",
+    "CLAIM_EXPIRED",
+    "BLOCKED",
+    "STALE",
+    "SUPERSEDED"
+  ],
+  "deterministic_queue_order": [
+    "lowest priority_rank",
+    "lowest queue_sequence",
+    "lexicographically smallest action_id as final deterministic tie-break"
+  ],
+  "valid_transitions": [
+    {
+      "from": "QUEUED",
+      "to": "CLAIMED_LOCAL",
+      "event": "CLAIM",
+      "guards": [
+        "bridge action remains scheduler-eligible",
+        "action generation and session_generation are current",
+        "not_before satisfied",
+        "stale_after not exceeded",
+        "atomic compare-and-set succeeds"
+      ],
+      "effects": [
+        "persist claim object"
+      ],
+      "notes": "Only the application service may perform the durable claim."
+    },
+    {
+      "from": "QUEUED",
+      "to": "STALE",
+      "event": "INVALIDATE_STALE",
+      "guards": [
+        "generation/session generation no longer current OR stale_after exceeded before claim"
+      ],
+      "effects": [
+        "terminalize predecessor"
+      ]
+    },
+    {
+      "from": "QUEUED",
+      "to": "SUPERSEDED",
+      "event": "SUPERSEDE",
+      "guards": [
+        "replacement action exists and references predecessor"
+      ],
+      "effects": [
+        "record superseded_by_action_id"
+      ]
+    },
+    {
+      "from": "QUEUED",
+      "to": "BLOCKED",
+      "event": "FAIL_CLOSED_PRECONDITION",
+      "guards": [
+        "required safe precondition is unavailable and scheduler chooses terminal replacement rather than wait"
+      ],
+      "effects": [
+        "record failure code"
+      ]
+    },
+    {
+      "from": "CLAIMED_LOCAL",
+      "to": "LOCAL_PREPARED",
+      "event": "RECORD_LOCAL_SUCCESS",
+      "guards": [
+        "claim identity matches",
+        "all local_plan steps required before human interaction have confirmed idempotent receipts",
+        "action/session generation still current"
+      ],
+      "effects": [
+        "persist local dispatch receipt",
+        "clear or archive active claim"
+      ]
+    },
+    {
+      "from": "CLAIMED_LOCAL",
+      "to": "FAILED_LOCAL",
+      "event": "RECORD_LOCAL_FAILURE",
+      "guards": [
+        "definite local failure is known"
+      ],
+      "effects": [
+        "record failure and local_effect_state"
+      ],
+      "notes": "Retry is a new replacement action, never mutation back to QUEUED."
+    },
+    {
+      "from": "CLAIMED_LOCAL",
+      "to": "CLAIM_EXPIRED",
+      "event": "CLAIM_TIMEOUT",
+      "guards": [
+        "claim lease expired"
+      ],
+      "effects": [
+        "record whether local effect state is NONE_CONFIRMED or UNKNOWN"
+      ],
+      "notes": "Never auto-requeue. Scheduler may issue a replacement after reconciliation."
+    },
+    {
+      "from": "CLAIMED_LOCAL",
+      "to": "STALE",
+      "event": "INVALIDATE_BEFORE_LOCAL_EFFECT",
+      "guards": [
+        "generation became stale AND adapter confirms no local effects were applied"
+      ],
+      "effects": [
+        "terminalize predecessor"
+      ]
+    },
+    {
+      "from": "CLAIMED_LOCAL",
+      "to": "BLOCKED",
+      "event": "LOCAL_OUTCOME_UNKNOWN",
+      "guards": [
+        "claim lost/expired or continuity changed and local side-effect outcome cannot be proven"
+      ],
+      "effects": [
+        "fail closed and require recovery/reconciliation"
+      ]
+    },
+    {
+      "from": "LOCAL_PREPARED",
+      "to": "AWAITING_DURABLE_ACK",
+      "event": "ARM_ACK_WAIT",
+      "guards": [
+        "post_local_success == AWAIT_DURABLE_ACK",
+        "ack_mode != NONE"
+      ],
+      "effects": [
+        "register exact durable_ack_condition"
+      ],
+      "notes": "This does not assert that Ctrl+V/Enter occurred; it means local preparation is complete and the system now waits for an authoritative durable event."
+    },
+    {
+      "from": "LOCAL_PREPARED",
+      "to": "COMPLETED",
+      "event": "COMPLETE_LOCAL_ONLY",
+      "guards": [
+        "ack_mode == NONE",
+        "post_local_success in [COMPLETE_AND_REQUERY, COMPLETE_AND_STOP]"
+      ],
+      "effects": [
+        "complete local-only action"
+      ]
+    },
+    {
+      "from": "LOCAL_PREPARED",
+      "to": "SUPERSEDED",
+      "event": "SUPERSEDE_AFTER_PREP",
+      "guards": [
+        "scheduler intentionally replaces action before durable ack is accepted"
+      ],
+      "effects": [
+        "record replacement; ignore late ack for control progression"
+      ]
+    },
+    {
+      "from": "AWAITING_DURABLE_ACK",
+      "to": "ACKNOWLEDGED",
+      "event": "DURABLE_ACK_MATCH",
+      "guards": [
+        "durable event satisfies durable_ack_condition",
+        "task/action/session generation match",
+        "event provenance is acceptable"
+      ],
+      "effects": [
+        "bind durable acknowledgment evidence"
+      ]
+    },
+    {
+      "from": "AWAITING_DURABLE_ACK",
+      "to": "SUPERSEDED",
+      "event": "RECOVERY_REPLACEMENT",
+      "guards": [
+        "scheduler creates a newer recovery/retry action and explicitly supersedes predecessor"
+      ],
+      "effects": [
+        "late predecessor acknowledgments become stale/orphan evidence, not control progression"
+      ]
+    },
+    {
+      "from": "ACKNOWLEDGED",
+      "to": "COMPLETED",
+      "event": "POST_ACK_ACCEPT",
+      "guards": [
+        "acknowledgment has passed required deterministic transition/validation checks"
+      ],
+      "effects": [
+        "complete action",
+        "update session affinity/checkpoint when applicable"
+      ]
+    }
+  ],
+  "retry_rule": {
+    "invariant": "RETRY_NEVER_MUTATES_TERMINAL_OR_DISPATCHED_ACTION_BACK_TO_QUEUED",
+    "method": "create new OperatorAction with new action_id and generation as needed, referencing supersedes_action_id",
+    "predecessor_preservation": true
+  },
+  "local_only_drain_rule": {
+    "description": "One Ctrl+B dispatch may execute zero or more atomic local-only actions with post_local_success=COMPLETE_AND_REQUERY, then re-query and claim at most one human-interaction action.",
+    "motivation": "Preserves one-hotkey UX for retire/discard/maintenance without hiding partial failure in one composite durable action.",
+    "stop_conditions": [
+      "human_requirement != NONE",
+      "post_local_success == COMPLETE_AND_STOP",
+      "NO_ACTION",
+      "BLOCKED",
+      "JUDGMENT/RECOVERY console action",
+      "configured safety iteration cap reached"
+    ]
+  },
+  "claim_expiry_rule": {
+    "automatic_requeue": false,
+    "rationale": "A helper may have applied a side effect before losing the receipt. Reconciliation precedes any replacement."
+  },
+  "late_ack_rule": {
+    "predecessor_statuses_accepted_for_progression": [
+      "AWAITING_DURABLE_ACK"
+    ],
+    "terminal_or_superseded_ack_behavior": "record as stale/orphan evidence; do not advance control state"
+  }
+}
