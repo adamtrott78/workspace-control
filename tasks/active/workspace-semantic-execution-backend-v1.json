@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "read_only_effect_executor",
+  "current_stage": "fault_resource_and_architecture_review_v03",
   "acceptance_criteria": [
     "The production domain kernel has no dependency on DBOS, PostgreSQL, GitHub, browser/UI, model-provider SDKs, GPU libraries, or other infrastructure adapters.",
     "Production kernel behavior satisfies the validated parent executable reference contract at workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723.",
@@ -51,7 +51,7 @@
       "base_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "8e8caf543cff000275bd2cf543f57f89ad9ff3e5",
+        "checkpoint_sha": "cf7a2393cc57c55e8bfb317afdf99d3fa89cd175",
         "verified": true
       },
       "local": null,
@@ -241,7 +241,7 @@
     },
     {
       "id": "read_only_effect_executor",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": null,
       "selected_surface": null,
@@ -255,12 +255,23 @@
         "exact postcondition validator",
         "fault-injection coverage"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Exact immutable read effect with independent postcondition",
+          "result": "PASS",
+          "evidence": [
+            "Read-only repository executor binds target to exact repo@40-char-SHA/path and rejects mutable refs/path traversal.",
+            "EffectReceipt hashes observed bytes plus repository/revision/path/blob metadata.",
+            "Independent validator rereads exact source and must reproduce effect hash before completion.",
+            "Workspace Control Validation #2742 passed the read-only adapter unit regression; Semantic Execution Validation #17 passed DBOS/Postgres and GPU-blind integration."
+          ]
+        }
+      ],
       "resume_condition": "Read-only real effects are completed only after exact observed postconditions and duplicate/stale events are safe."
     },
     {
       "id": "research_engine_shadow_canary",
-      "status": "PLANNED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": null,
       "selected_surface": null,
@@ -275,12 +286,25 @@
         "shadow routing/decomposition trace",
         "zero-mutation proof"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Real Research Engine exact-source shadow canary",
+          "result": "PASS",
+          "evidence": [
+            "Pinned source research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4, src/research_engine/orchestration.py.",
+            "Source Git blob SHA 0d051fa50960708e0e773f6871c7e924c5796394 matched the frozen workspace-control canary blob exactly.",
+            "Production read-only executor + independent validator passed over the real bytes.",
+            "Production kernel projected the real DISCOVERY/SCREEN/ACQUIRE/EXTRACT/VERIFY/CHECKPOINT/SYNTHESIZE/GAP/NOVELTY/HUMAN_REVIEW workflow dependencies without a Research-Engine-specific schema branch.",
+            "Workspace Control Validation #2748 SUCCESS on exact canary head cf7a2393cc57c55e8bfb317afdf99d3fa89cd175.",
+            "research-engine remained read-only and was not mutated."
+          ]
+        }
+      ],
       "resume_condition": "A real Research Engine workflow is observed and represented without lost dependencies, authority changes, or source-repository mutation."
     },
     {
       "id": "fault_resource_and_architecture_review_v03",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": null,
       "selected_surface": null,
@@ -370,14 +394,37 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "8e8caf543cff000275bd2cf543f57f89ad9ff3e5",
+      "id": "read-only-effect-validated",
+      "kind": "implementation_checkpoint",
+      "identity": "workspace-control@a08aea73a53cd9533aa73637b5a53108fb3b1f07",
       "required_for_resume": true,
       "evidence": [
-        "kernel, packet/router, in-memory runtime, and dbos_postgres_spike are VALIDATED.",
-        "First unfinished stage is read_only_effect_executor.",
-        "Research Engine, GitRunner/controller, and Operator Bridge remain unmodified by the backend child."
+        "Workspace Control #2742 SUCCESS.",
+        "Semantic Execution #17 SUCCESS.",
+        "Exact read-only effect and independent postcondition validation are implemented."
+      ]
+    },
+    {
+      "id": "research-engine-shadow-canary-validated",
+      "kind": "real_workflow_checkpoint",
+      "identity": "workspace-control@cf7a2393cc57c55e8bfb317afdf99d3fa89cd175",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Control #2748 SUCCESS.",
+        "Frozen Research Engine source blob equals upstream blob 0d051fa50960708e0e773f6871c7e924c5796394.",
+        "Production read-only executor, validator, and production kernel projection passed.",
+        "No research-engine mutation."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "workspace-control@cf7a2393cc57c55e8bfb317afdf99d3fa89cd175",
+      "required_for_resume": true,
+      "evidence": [
+        "read_only_effect_executor VALIDATED.",
+        "research_engine_shadow_canary VALIDATED.",
+        "First unfinished stage is fault_resource_and_architecture_review_v03."
       ]
     }
   ],
@@ -417,12 +464,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement first read-only exact-effect executor plus receipt/postcondition validator.",
-    "Run the real Research Engine shadow canary with zero source mutation.",
-    "Run crash/fault/resource acceptance and Architecture Review v0.3."
+    "Run explicit fault-injection acceptance for death after claim, death after effect before checkpoint, duplicate/delayed/out-of-order events, stale generations, executor/session loss, validator timeout, and durable recovery.",
+    "Add semantic-execution-specific CI coverage for read-only/canary/fault tests plus resource gates.",
+    "Measure/control-plane CPU/RSS/GPU-blindness targets and record evidence.",
+    "Perform Architecture Review v0.3 from real implementation/canary/fault evidence and choose/retain/revise DBOS+PostgreSQL provisionally.",
+    "Define the next bounded write-capable slice only if v0.3 evidence supports it."
   ],
-  "next_safe_action": "Implement the first read-only exact-effect executor behind ExecutorPort. Bind every read to an exact immutable source identity, produce an EffectReceipt from observed bytes/metadata, and require an independent postcondition validator before terminal completion. Start with repository/file observation only; no writes. Keep GitHub/provider transport behind an injected read port so domain/application code remains provider-agnostic. Then use the exact research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4 workflow source as the first real shadow canary without mutating research-engine.",
+  "next_safe_action": "Implement the fault/resource acceptance suite under tests/test_workspace_semantic_execution_backend_faults.py and extend .github/workflows/semantic-execution-validation.yml to run backend kernel/runtime/read-only/research-engine-shadow/fault tests explicitly. Cover crash after claim, crash after effect before checkpoint, duplicate/delayed/out-of-order event behavior, stale-generation fencing, executor/session disappearance, validator failure/timeout semantics, durable restart/reconciliation, and control-plane GPU blindness/resource-budget checks. Do not add write authority. After the suite is green, produce Architecture Review v0.3 from measured evidence.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n\n2026-11-13 GENERATION-BOUND EFFECT CHAIN CORRECTION: While defining ExecutorPort, the implementation review found that ActionSpec bound process_id but not process_generation, which could allow a previously authorized action to survive recovery into a newer generation. Corrected CandidateAction, AuthorityDecision and ActionSpec to bind exact process_generation; compilation now fails closed on process/generation/action/target mismatch and EffectReceipt generation completes the fence. workspace-control@e927fbc8117ddb7caed114b2136eb5408ce1fe29 passed Workspace Control Validation #2697 including full unit/integration regression. Runtime-port implementation resumes only from this corrected boundary.\n\n2026-11-13 RUNTIME PORTS / IN-MEMORY SLICE VALIDATED: workspace-control@752351d064f815e600dcdf19f2ba154f7234211f passed Workspace Control Validation #2702. StateStorePort CAS, DurableRuntimePort event publication/reconciliation, RuntimeCoordinator, fake clock/telemetry, deterministic semantic projection, static fail-closed authority and deterministic fake executor are implemented and tested. Fault coverage includes stale writer, event-before-wait, restart while waiting, duplicate event, generation recovery and stale executor completion. The design remains database/runtime independent. Next stage is a provisional DBOS+PostgreSQL adapter spike behind the validated ports.\n\n2026-11-13 DBOS+POSTGRES FIRST SUBSTRATE SPIKE VALIDATED: exact head workspace-control@8e8caf543cff000275bd2cf543f57f89ad9ff3e5 passed Workspace Control #2722 and Semantic Execution #7. The spike pins DBOS Python 3.5.0 + psycopg 3.3.9 and separates DurableRuntimePort (bounded idempotent work) from EventLedgerPort (external wake evidence). PostgreSQL provides deterministic JSONB current-state CAS plus immutable wake-event evidence. DBOS work IDs are idempotent and stored workflow inputs are verified to reject conflicting reuse. A hard-kill subprocess probe exited via os._exit while a workflow was RUNNING and a fresh process recovered/completed that exact workflow from PostgreSQL. Semantic external waits deliberately do not use DBOS.recv. DBOS+PostgreSQL is therefore the provisional first substrate, still behind ports and still reversible until Architecture Review v0.3.\n"
+  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n\n2026-11-13 GENERATION-BOUND EFFECT CHAIN CORRECTION: While defining ExecutorPort, the implementation review found that ActionSpec bound process_id but not process_generation, which could allow a previously authorized action to survive recovery into a newer generation. Corrected CandidateAction, AuthorityDecision and ActionSpec to bind exact process_generation; compilation now fails closed on process/generation/action/target mismatch and EffectReceipt generation completes the fence. workspace-control@e927fbc8117ddb7caed114b2136eb5408ce1fe29 passed Workspace Control Validation #2697 including full unit/integration regression. Runtime-port implementation resumes only from this corrected boundary.\n\n2026-11-13 RUNTIME PORTS / IN-MEMORY SLICE VALIDATED: workspace-control@752351d064f815e600dcdf19f2ba154f7234211f passed Workspace Control Validation #2702. StateStorePort CAS, DurableRuntimePort event publication/reconciliation, RuntimeCoordinator, fake clock/telemetry, deterministic semantic projection, static fail-closed authority and deterministic fake executor are implemented and tested. Fault coverage includes stale writer, event-before-wait, restart while waiting, duplicate event, generation recovery and stale executor completion. The design remains database/runtime independent. Next stage is a provisional DBOS+PostgreSQL adapter spike behind the validated ports.\n\n2026-11-13 DBOS+POSTGRES FIRST SUBSTRATE SPIKE VALIDATED: exact head workspace-control@8e8caf543cff000275bd2cf543f57f89ad9ff3e5 passed Workspace Control #2722 and Semantic Execution #7. The spike pins DBOS Python 3.5.0 + psycopg 3.3.9 and separates DurableRuntimePort (bounded idempotent work) from EventLedgerPort (external wake evidence). PostgreSQL provides deterministic JSONB current-state CAS plus immutable wake-event evidence. DBOS work IDs are idempotent and stored workflow inputs are verified to reject conflicting reuse. A hard-kill subprocess probe exited via os._exit while a workflow was RUNNING and a fresh process recovered/completed that exact workflow from PostgreSQL. Semantic external waits deliberately do not use DBOS.recv. DBOS+PostgreSQL is therefore the provisional first substrate, still behind ports and still reversible until Architecture Review v0.3.\n\n2026-11-13 REAL CANARY VALIDATED: The first production read-only effect adapter and exact Research Engine shadow canary are validated. The upstream Research Engine orchestration file at 1031861c03b2af8cff5cf72939bbbc83a95e65a4 has Git blob 0d051fa50960708e0e773f6871c7e924c5796394; the frozen canary copy has the same blob identity. The production executor generated a receipt from those real bytes, the independent validator reread and validated the same source, and the production kernel projected the real workflow dependency shape. Workspace Control #2748 passed full unit/controller/integration validation. No Research Engine write occurred. Next active stage is explicit fault/resource acceptance plus Architecture Review v0.3.\n"
 }
