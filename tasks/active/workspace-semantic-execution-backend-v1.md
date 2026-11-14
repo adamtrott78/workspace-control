@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 8e8caf543cff000275bd2cf543f57f89ad9ff3e5
+- Remote checkpoint: cf7a2393cc57c55e8bfb317afdf99d3fa89cd175
 - Remote verified: true
 
 ### research-engine
@@ -36,13 +36,15 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement the first read-only exact-effect executor behind ExecutorPort. Bind every read to an exact immutable source identity, produce an EffectReceipt from observed bytes/metadata, and require an independent postcondition validator before terminal completion. Start with repository/file observation only; no writes. Keep GitHub/provider transport behind an injected read port so domain/application code remains provider-agnostic. Then use the exact research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4 workflow source as the first real shadow canary without mutating research-engine.
+Implement the fault/resource acceptance suite under tests/test_workspace_semantic_execution_backend_faults.py and extend .github/workflows/semantic-execution-validation.yml to run backend kernel/runtime/read-only/research-engine-shadow/fault tests explicitly. Cover crash after claim, crash after effect before checkpoint, duplicate/delayed/out-of-order event behavior, stale-generation fencing, executor/session disappearance, validator failure/timeout semantics, durable restart/reconciliation, and control-plane GPU blindness/resource-budget checks. Do not add write authority. After the suite is green, produce Architecture Review v0.3 from measured evidence.
 
 ## Remaining work
 
-- Implement first read-only exact-effect executor plus receipt/postcondition validator.
-- Run the real Research Engine shadow canary with zero source mutation.
-- Run crash/fault/resource acceptance and Architecture Review v0.3.
+- Run explicit fault-injection acceptance for death after claim, death after effect before checkpoint, duplicate/delayed/out-of-order events, stale generations, executor/session loss, validator timeout, and durable recovery.
+- Add semantic-execution-specific CI coverage for read-only/canary/fault tests plus resource gates.
+- Measure/control-plane CPU/RSS/GPU-blindness targets and record evidence.
+- Perform Architecture Review v0.3 from real implementation/canary/fault evidence and choose/retain/revise DBOS+PostgreSQL provisionally.
+- Define the next bounded write-capable slice only if v0.3 evidence supports it.
 
 ## Blockers / gates
 
