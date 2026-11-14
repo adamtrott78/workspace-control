@@ -252,18 +252,26 @@ class ResearchEngineProductionShadowCanary(unittest.TestCase):
                 expected_generation=0,
             )
 
-    def test_shadow_canary_has_no_research_engine_write_surface(self):
-        source = Path(__file__).read_text()
-        forbidden = (
-            "research-engine.git",
-            "git push",
-            "update_file(",
-            "create_file(",
-            "delete_file(",
+    def test_shadow_canary_uses_structurally_read_only_contract(self):
+        action = source_action()
+        self.assertEqual(action.executor_type, "REPOSITORY_READ_ONLY")
+        self.assertEqual(
+            action.expected_effect,
+            "observe exact Research Engine orchestration bytes",
         )
-        for token in forbidden:
-            with self.subTest(token=token):
-                self.assertNotIn(token, source)
+
+        observation = RepositoryFileObservation(
+            repository="adamtrott78/research-engine",
+            revision=RESEARCH_ENGINE_SHA,
+            path=SOURCE_PATH,
+            blob_id=SOURCE_BLOB_SHA,
+            content=self.source_bytes,
+        )
+        reader = StaticRepositoryReader((observation,))
+        self.assertTrue(callable(reader.read_exact))
+        for mutator_name in ("write", "create", "update", "delete", "push"):
+            with self.subTest(mutator_name=mutator_name):
+                self.assertFalse(hasattr(reader, mutator_name))
 
 
 if __name__ == "__main__":
