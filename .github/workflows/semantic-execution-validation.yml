@@ -7,8 +7,9 @@ on:
     paths:
       - 'semantic-execution/**'
       - '.github/workflows/semantic-execution-validation.yml'
-      - 'tests/test_workspace_semantic_execution_backend_dbos_postgres.py'
-      - 'tests/test_workspace_semantic_execution_backend_serialization.py'
+      - 'tests/test_workspace_semantic_execution_backend_*.py'
+      - 'benchmarks/workspace-semantic-execution/backend/**'
+      - 'benchmarks/workspace-semantic-execution/research_engine_kernel_canary_v1.json'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
@@ -16,8 +17,9 @@ on:
     paths:
       - 'semantic-execution/**'
       - '.github/workflows/semantic-execution-validation.yml'
-      - 'tests/test_workspace_semantic_execution_backend_dbos_postgres.py'
-      - 'tests/test_workspace_semantic_execution_backend_serialization.py'
+      - 'tests/test_workspace_semantic_execution_backend_*.py'
+      - 'benchmarks/workspace-semantic-execution/backend/**'
+      - 'benchmarks/workspace-semantic-execution/research_engine_kernel_canary_v1.json'
   workflow_dispatch:
 
 permissions:
@@ -82,11 +84,20 @@ jobs:
           print("SEMANTIC_EXECUTION_GPU_BLIND=PASS")
           PY
 
-      - name: Run deterministic codec and runtime unit slice
+      - name: Run semantic execution kernel runtime canary and fault suite
         run: |
           python -m unittest -v \
+            tests/test_workspace_semantic_execution_backend_kernel.py \
+            tests/test_workspace_semantic_execution_backend_packets_router.py \
+            tests/test_workspace_semantic_execution_backend_runtime.py \
             tests/test_workspace_semantic_execution_backend_serialization.py \
-            tests/test_workspace_semantic_execution_backend_runtime.py
+            tests/test_workspace_semantic_execution_backend_read_only.py \
+            tests/test_workspace_semantic_execution_backend_research_engine_shadow.py \
+            tests/test_workspace_semantic_execution_backend_faults.py
+
+      - name: Run bounded control plane resource probe
+        run: |
+          python benchmarks/workspace-semantic-execution/backend/control_plane_resource_probe_v1.py
 
       - name: Run PostgreSQL and DBOS integration spike
         run: |
