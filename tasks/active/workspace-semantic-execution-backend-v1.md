@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: cef754dbd2484081b641c194f1dd0020d85dfc78
+- Remote checkpoint: 34028182aaf1dc56d40cc607f8561c2337e16bf8
 - Remote verified: true
 
 ### research-engine
@@ -36,16 +36,18 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement RESEARCH_ENGINE_COORDINATED_READ_ONLY_VERTICAL_SLICE_V1 under semantic-execution/** and tests/test_workspace_semantic_execution_backend*.py. Reuse the validated DomainKernel, RuntimeCoordinator, ExecutorRegistry, SemanticPacketCompiler, StaticAuthorityEvaluator, exact Research Engine repository read executor, and independent postcondition validator. The service must return structured routing/packet/authority/receipt/validation evidence and reach COMPLETED only after validator PASS. Add negative tests for unknown authority, stale generation, no eligible executor, changed-source validation failure, duplicate-effect safety, and deterministic packet hashing. Do not mutate research-engine and do not add write authority.
+Implement RECURSIVE_TASK_TREE_CONTRACT_AND_FANIN_V1 under semantic-execution/** and tests/test_workspace_semantic_execution_backend*.py. Add typed durable process/work contract metadata sufficient to preserve objective, mandatory constraints, provenance/evidence refs, authority refs, validator contract and output schema across recursive decomposition. Define durable disposition semantics that distinguish TOO_LARGE (decompose again) from INTRINSICALLY_DIFFICULT (escalation required). Reuse DomainKernel/RuntimeCoordinator dependency waits and generation fencing; prove two-level decomposition, independent leaf completion, fan-in only after all children validate, recovery during dependency wait, and fail-closed attempts to drop inherited obligations. Do not add Research Engine writes or executor authority.
 
 ## Remaining work
 
-- Implement and validate the coordinated Research Engine read-only vertical slice described by Architecture Review v0.3.
-- Add production session-broker semantics and recovery tests after the coordinated slice proves router/packet/runtime composition.
-- Bind the backend action/status transport to the independently owned Operator Bridge only through its authorized child task.
-- Integrate subscription Codex as an executor only after its runtime/auth child clears the PR #627 lineage gate.
-- Measure real-workflow control-plane CPU/RSS and repeat fault injection on the integrated slice.
-- Propose a separately authorized low-consequence write-capable slice only after coordinated read-only evidence passes.
+- Implement and validate recursive task-tree/decomposition contract semantics with inherited constraints, provenance refs, authority refs and validator obligations.
+- Add durable TOO_LARGE -> DECOMPOSE and INTRINSICALLY_DIFFICULT -> ESCALATION_REQUIRED classification without conflating the two.
+- Prove multi-level fan-out/fan-in, generation fencing, recovery and independent leaf completion under the production RuntimeCoordinator.
+- Implement production session-broker semantics and recovery tests after the recursive task tree is durable.
+- Bind backend action/status transport to the independently owned Operator Bridge through its authorized child task.
+- Integrate subscription Codex only after its runtime/auth child clears the PR #627 lineage gate.
+- Run the first mixed-executor Research Engine research-iterate slice and real-workflow resource/fault measurements.
+- Propose a separately authorized low-consequence write-capable slice only after read-only decomposition/mixed-executor evidence passes.
 
 ## Blockers / gates
 
