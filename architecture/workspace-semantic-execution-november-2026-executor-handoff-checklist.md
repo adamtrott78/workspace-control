@@ -50,13 +50,15 @@
 
 ### A. Operator Bridge / Instant — immediate coding lane
 
-- [ ] **A1 — Implement Stage-10 harness support for UT-05 and UT-12 first.**
-  - Current `operator-bridge/tools/run-stage10-usability.ps1` ValidateSet supports only `UT-11, UT-01, UT-02, UT-03, UT-04, UT-10`.
-  - UT-05 = judgment-gate behavior.
-  - UT-12 = no-work/background-ack behavior.
-  - Add deterministic fake-worker scenario + structured result evidence; preserve Ctrl+Space and frozen security boundaries.
-- [ ] **A2 — Implement harness support for UT-06, UT-07, UT-08 recovery scenarios.**
-- [ ] **A3 — Validate each coherent harness slice at exact head before asking the user to run it.**
+- [x] **A1 — Implement Stage-10 harness support for UT-05 and UT-12 first.**
+  - Implementation head `4c2e458f40bf205b70a293c02e1bde3b552bb254`.
+  - Exact-head validation: Workspace Control #2853 PASS; Semantic Execution #182 PASS; Operator Bridge #441 PASS.
+  - UT-05 has a distinct bounded judgment surface with zero judgment-phase clipboard/browser service effects; UT-12 has deterministic READY=0 + delayed background durable-ack evidence with zero clipboard/focus effects.
+- [x] **A2 — Implement harness support for UT-06, UT-07, UT-08 recovery scenarios.**
+  - Implementation head `3a075ebd05f16e34c754dbcc1600aa8fa620b04f`.
+  - UT-06 uses managed-tab-loss fencing + exact generation advance; UT-07 uses auth-domain fencing + manual-auth return with no credential automation; UT-08 rehydrates a persisted cold-restart recovery incident before dispatch.
+- [x] **A3 — Validate each coherent harness slice at exact head before asking the user to run it.**
+  - Exact A2 validation: Workspace Control #2854 PASS; Semantic Execution #183 PASS; Operator Bridge #442 PASS.
 - [ ] **A4 — Run/accept UT-05 through UT-08 and UT-12.**
 - [ ] **A5 — Run/accept Bridge-OFF UT-11 and representative-work collision UT-09.**
 - [ ] Preserve accepted behavior: Ctrl+Space -> Ctrl+V -> Enter; no tab search; repeated scheduler presses refocus/block pending action; READY=0 extra press minimizes only WorkspaceWorkers Firefox.
