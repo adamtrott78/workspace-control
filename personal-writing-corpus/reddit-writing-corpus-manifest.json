@@ -1,0 +1,37 @@
+{
+  "format": "JSON Lines (one original Reddit comment object per line)",
+  "record_order": "source account order (watson7878, JoeBidensAlt, I_FEEL_LlKE_PABLO); within each source original order",
+  "source_files": [
+    {
+      "file": "u_watson7878_comments.jsonl",
+      "records": 7635,
+      "original_bytes": 10412526,
+      "sha256": "a4e4bd9382c990c283dd24b33af5bc91272372c88138d883e331ac452cebf635"
+    },
+    {
+      "file": "u_JoeBidensAlt_comments.jsonl",
+      "records": 1229,
+      "original_bytes": 1715492,
+      "sha256": "40d299990b127f02123659f237ccba59370c6f499757307e255b75153be9d019"
+    },
+    {
+      "file": "u_I_FEEL_LlKE_PABLO_comments.jsonl",
+      "records": 2614,
+      "original_bytes": 5018420,
+      "sha256": "9a901263152be77552a605b72cd73c48d2b904b7de809de4d4ec50260f6f85f1"
+    }
+  ],
+  "combined": {
+    "file": "reddit-writing-corpus-11478-comments.jsonl",
+    "records": 11478,
+    "bytes": 17146438,
+    "sha256": "f5119453999d8d2738328e8f9b1d9339d83556fe4bc603c23671ba367a58a29a",
+    "duplicate_comment_ids": 0
+  },
+  "counts_by_author": {
+    "watson7878": 7635,
+    "JoeBidensAlt": 1229,
+    "I_FEEL_LlKE_PABLO": 2614
+  },
+  "created_utc": "2026-11-15T18:32:35.936348+00:00"
+}
