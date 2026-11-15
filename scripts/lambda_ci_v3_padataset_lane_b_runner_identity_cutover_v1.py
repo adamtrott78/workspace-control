@@ -50,6 +50,11 @@ RECONCILER_INSTALLED = reconciler.RECONCILER_SCRIPT
 RECONCILER_OVERRIDE = reconciler.RECONCILER_OVERRIDE_ACTIVE_RECEIPT
 PROVISIONER_UNIT = "workspace-ci-v3-provisioner.service"
 INSTALLED_RUNTIME = pathlib.Path("/opt/workspace-ci/v3/provisioner/lambda_ci_runtime.py")
+SHARED_PROJECT_ROOTS = (
+    pathlib.Path("/srv/workspace-ci/padataset/jobs"),
+    pathlib.Path("/srv/workspace-ci/padataset/staging-cache"),
+    pathlib.Path("/srv/workspace-ci/padataset/logs"),
+)
 
 STATE_ROOT = pathlib.Path(
     "/var/lib/workspace-ci/v3/padataset-scientific/lane-b-runner-identity"
@@ -182,6 +187,56 @@ def _validate_identity_delta(
             )
 
     return previous, current
+
+
+def _repair_shared_project_roots() -> None:
+    owner = pwd.getpwnam("ci-padataset")
+    group = grp.getgrnam("ci-padataset")
+    lane_b = pwd.getpwnam("ci-padataset-2")
+
+    if lane_b.pw_gid != group.gr_gid:
+        raise RunnerIdentityCutoverError(
+            "lane-B primary group no longer matches shared PADataset group"
+        )
+
+    for path in SHARED_PROJECT_ROOTS:
+        if not path.is_dir():
+            raise RunnerIdentityCutoverError(
+                f"shared PADataset runtime root missing: {path}"
+            )
+        st = path.stat()
+        if st.st_uid != owner.pw_uid or st.st_gid != group.gr_gid:
+            raise RunnerIdentityCutoverError(
+                f"shared PADataset runtime root ownership mismatch: {path}"
+            )
+        mode = st.st_mode & 0o777
+        if mode not in {0o700, 0o710}:
+            raise RunnerIdentityCutoverError(
+                f"unexpected shared PADataset runtime root mode {mode:04o}: {path}"
+            )
+        os.chmod(path, 0o710)
+
+
+def _verify_shared_project_roots() -> None:
+    owner = pwd.getpwnam("ci-padataset")
+    group = grp.getgrnam("ci-padataset")
+    lane_b = pwd.getpwnam("ci-padataset-2")
+
+    if lane_b.pw_gid != group.gr_gid:
+        raise RunnerIdentityCutoverError(
+            "lane-B primary group no longer matches shared PADataset group"
+        )
+
+    for path in SHARED_PROJECT_ROOTS:
+        st = path.stat()
+        if st.st_uid != owner.pw_uid or st.st_gid != group.gr_gid:
+            raise RunnerIdentityCutoverError(
+                f"shared PADataset runtime root ownership mismatch: {path}"
+            )
+        if (st.st_mode & 0o777) != 0o710:
+            raise RunnerIdentityCutoverError(
+                f"shared PADataset runtime root mode must be 0710: {path}"
+            )
 
 
 def _verify_uid_guards() -> None:
@@ -490,8 +545,10 @@ def cutover(
 
         base._run_root_tool(["systemd-sysusers", str(SYSUSERS)])
         base._run_root_tool(["systemd-tmpfiles", "--create", str(TMPFILES)])
+        _repair_shared_project_roots()
         base._run_root_tool(["systemctl", "daemon-reload"])
         _verify_runner_user()
+        _verify_shared_project_roots()
         _verify_uid_guards()
 
         systemd.start(PROVISIONER_UNIT)
@@ -592,6 +649,7 @@ def main() -> int:
     print("LANE_B_RUNNER_USER=ci-padataset-2")
     print("LANE_B_PRIMARY_GROUP=ci-padataset")
     print("UID_SCOPED_GUARDS=PRESERVED")
+    print("SHARED_PADATASET_ROOTS=0710 ci-padataset:ci-padataset")
     print(f"TRANSACTION_RECEIPT={receipt}")
     return 0
 
