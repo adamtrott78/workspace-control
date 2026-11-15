@@ -289,7 +289,7 @@ class DurableOperatorPacketTests(unittest.TestCase):
 
         with self.assertRaisesRegex(
             RuntimeError,
-            "session_not_ready",
+            "operator_dispatch_process_owned_elsewhere",
         ):
             p.plan_service_existing(
                 task_id="task:research-iterate",
