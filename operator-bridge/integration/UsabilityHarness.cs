@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using WorkspaceControl.OperatorBridge.Application;
 using WorkspaceControl.OperatorBridge.Ipc;
+using WorkspaceControl.OperatorBridge.Ports;
 using WorkspaceControl.OperatorBridge.Simulator.Scenarios;
 using WorkspaceControl.OperatorBridge.Simulator.State;
 using WorkspaceControl.OperatorBridge.Windows;
@@ -283,6 +284,42 @@ internal static class UsabilityHarness
                 world.Queue("ut04-03", "RESTORE_AND_SERVICE", "slot-5", 0);
                 world.Queue("ut04-04", "SERVICE_EXISTING", "slot-3", 0);
                 return;
+            case "UT-05":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Queue(
+                    "ut05-judgment-01",
+                    "OPEN_JUDGMENT_GATE",
+                    "slot-1",
+                    0);
+                world.Queue(
+                    "ut05-service-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                return;
+            case "UT-12":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                var pendingTwelve = world.Queue(
+                    "ut12-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                var claimedTwelve = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedTwelve, pendingTwelve) ||
+                    !world.Actions.MarkLocalPrepared(pendingTwelve))
+                {
+                    throw new InvalidOperationException(
+                        "UT12_PENDING_SEED_FAILED");
+                }
+                return;
             case "UT-02":
                 world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, bindingPresent: true);
                 world.Sessions.Add("slot-2", 0, SimContinuity.NotEstablished, bindingPresent: false);
@@ -460,7 +497,9 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private readonly TimeSpan _duration;
     private readonly SimulatorWorld _world;
     private readonly ConcurrentQueue<UsabilitySubmissionRequest> _submissions;
-    private readonly IpcBrowserPort _browser;
+    private readonly UsabilityBrowserPort _browser;
+    private readonly UsabilityClipboardWriter _clipboard;
+    private readonly UsabilityOperatorSurface _operatorSurface;
     private readonly BridgeController _bridgeController;
     private readonly SingleFlightDispatchCoordinator _dispatch;
     private readonly HotkeyMessageWindow _hotkeyWindow;
@@ -477,6 +516,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private bool _finishing;
     private int _maxSentUnconfirmed;
     private bool _multipleSentUnconfirmedWithReadyObserved;
+    private DateTimeOffset? _ut12NoWorkObservedAt;
 
     public UsabilityApplicationContext(
         string trialId,
@@ -494,7 +534,9 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         _duration = TimeSpan.FromSeconds(durationSeconds);
         _world = world;
         _submissions = submissions;
-        _browser = browser;
+        _browser = new UsabilityBrowserPort(browser);
+        _clipboard = new UsabilityClipboardWriter();
+        _operatorSurface = new UsabilityOperatorSurface(world);
         _workerWindowSafety = new WorkerWindowSafetyController(
             new Win32WorkerWindowSafetyPort());
 
@@ -513,10 +555,11 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         _dispatch = new SingleFlightDispatchCoordinator(
             bridgeState,
             new SimulatorOperatorActionPort(world),
-            browser,
-            new WinFormsClipboardWriter(),
+            _browser,
+            _clipboard,
             new SystemMonotonicClock(),
-            diagnostics);
+            diagnostics,
+            _operatorSurface);
 
         _hotkeyWindow.HotkeyPressed += HotkeyPressed;
 
@@ -570,6 +613,14 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public int HandoffRefocuses { get; private set; }
     public int InterruptionPromptsIssued { get; private set; }
     public int Ut04BackgroundAcksApplied { get; private set; }
+    public int Ut05JudgmentGateOpens { get; private set; }
+    public int Ut05JudgmentClipboardWrites { get; private set; }
+    public int Ut05JudgmentBrowserEffects { get; private set; }
+    public int Ut12BackgroundAcksApplied { get; private set; }
+    public int Ut12NoWorkClipboardWrites { get; private set; }
+    public int Ut12NoWorkBrowserEffects { get; private set; }
+    public int Ut12BackgroundAckClipboardWrites { get; private set; }
+    public int Ut12BackgroundAckBrowserEffects { get; private set; }
     public int MaxSentUnconfirmed => _maxSentUnconfirmed;
     public bool MultipleSentUnconfirmedWithReadyObserved =>
         _multipleSentUnconfirmedWithReadyObserved;
@@ -585,6 +636,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private async void HotkeyPressed(object? sender, EventArgs e)
     {
         HotkeyPresses++;
+        var clipboardWritesBeforeDispatch = _clipboard.WriteCount;
+        var browserEffectsBeforeDispatch = _browser.EffectCount;
 
         if (Volatile.Read(ref _awaitingHumanSubmit) != 0)
         {
@@ -639,6 +692,14 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                 Volatile.Write(ref _awaitingHumanSubmit, 1);
                 _workerWindowSafety.RecordPreparedWorkerWindow();
             }
+            else if (result.Outcome == DispatchOutcome.JudgmentGateOpened)
+            {
+                Ut05JudgmentGateOpens++;
+                Ut05JudgmentClipboardWrites +=
+                    _clipboard.WriteCount - clipboardWritesBeforeDispatch;
+                Ut05JudgmentBrowserEffects +=
+                    _browser.EffectCount - browserEffectsBeforeDispatch;
+            }
             else if (result.Outcome == DispatchOutcome.NoAction)
             {
                 NoActionPresses++;
@@ -647,6 +708,13 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                 if (minimized)
                 {
                     NoWorkMinimizeSuccesses++;
+                }
+                if (_trialId == "UT-12" &&
+                    _ut12NoWorkObservedAt is null)
+                {
+                    _ut12NoWorkObservedAt = DateTimeOffset.UtcNow;
+                    Ut12NoWorkClipboardWrites = _clipboard.WriteCount;
+                    Ut12NoWorkBrowserEffects = _browser.EffectCount;
                 }
                 _notifyIcon.ShowBalloonTip(
                     1500,
@@ -702,6 +770,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             }
 
             ApplyUt04BackgroundAcksIfReady();
+            ApplyUt12BackgroundAckIfReady();
             RefreshWorkloadPresentation();
 
             if (ShouldFinish())
@@ -824,6 +893,38 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         }
     }
 
+    private void ApplyUt12BackgroundAckIfReady()
+    {
+        if (_trialId != "UT-12" ||
+            Ut12BackgroundAcksApplied >= 1 ||
+            _ut12NoWorkObservedAt is null ||
+            DateTimeOffset.UtcNow - _ut12NoWorkObservedAt.Value <
+                TimeSpan.FromSeconds(3))
+        {
+            return;
+        }
+
+        var pending = _world.Actions.Actions.SingleOrDefault(action =>
+            action.ActionId == "ut12-pending-01" &&
+            action.Status == SimActionStatus.AwaitingDurableAck);
+        if (pending is null)
+        {
+            return;
+        }
+
+        var clipboardBefore = _clipboard.WriteCount;
+        var browserEffectsBefore = _browser.EffectCount;
+        if (_world.Actions.ApplyAck(pending))
+        {
+            ValidDurableAcks++;
+            Ut12BackgroundAcksApplied++;
+            Ut12BackgroundAckClipboardWrites +=
+                _clipboard.WriteCount - clipboardBefore;
+            Ut12BackgroundAckBrowserEffects +=
+                _browser.EffectCount - browserEffectsBefore;
+        }
+    }
+
     private bool ShouldFinish()
     {
         if (_trialId == "UT-11")
@@ -873,6 +974,28 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
               WrongPacketDispatches == 0 &&
               RejectedStateSubmissions == 0 &&
               DispatchFailures == 0 &&
+              (_trialId != "UT-05" ||
+               (intended == 2 &&
+                serviceActionsIntended == 1 &&
+                Ut05JudgmentGateOpens == 1 &&
+                _operatorSurface.JudgmentOpenCount == 1 &&
+                _operatorSurface.JudgmentDecisionCount == 1 &&
+                _operatorSurface.ExactGateObserved &&
+                Ut05JudgmentClipboardWrites == 0 &&
+                Ut05JudgmentBrowserEffects == 0)) &&
+              (_trialId != "UT-12" ||
+               (intended == 1 &&
+                serviceActionsIntended == 1 &&
+                NoActionPresses >= 1 &&
+                NoWorkMinimizeAttempts >= 1 &&
+                NoWorkMinimizeSuccesses >= 1 &&
+                Ut12BackgroundAcksApplied == 1 &&
+                Ut12NoWorkClipboardWrites == 0 &&
+                Ut12NoWorkBrowserEffects == 0 &&
+                Ut12BackgroundAckClipboardWrites == 0 &&
+                Ut12BackgroundAckBrowserEffects == 0 &&
+                _clipboard.WriteCount == 0 &&
+                _browser.EffectCount == 0)) &&
               (_trialId != "UT-04" ||
                (intended == 6 &&
                 serviceActionsIntended == 6 &&
@@ -929,6 +1052,38 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                         _trialId == "UT-04" ? 2 : 0,
                     ut04_background_acks_applied =
                         Ut04BackgroundAcksApplied,
+                    ut05_judgment_gate_opens =
+                        Ut05JudgmentGateOpens,
+                    ut05_operator_surface_opens =
+                        _operatorSurface.JudgmentOpenCount,
+                    ut05_judgment_decisions =
+                        _operatorSurface.JudgmentDecisionCount,
+                    ut05_exact_gate_observed =
+                        _operatorSurface.ExactGateObserved,
+                    ut05_judgment_action_id =
+                        _operatorSurface.LastJudgmentActionId,
+                    ut05_judgment_clipboard_writes =
+                        Ut05JudgmentClipboardWrites,
+                    ut05_judgment_browser_effects =
+                        Ut05JudgmentBrowserEffects,
+                    ut12_no_work_observed =
+                        _ut12NoWorkObservedAt is not null,
+                    ut12_background_acks_applied =
+                        Ut12BackgroundAcksApplied,
+                    ut12_no_work_clipboard_writes =
+                        Ut12NoWorkClipboardWrites,
+                    ut12_no_work_browser_effects =
+                        Ut12NoWorkBrowserEffects,
+                    ut12_background_ack_clipboard_writes =
+                        Ut12BackgroundAckClipboardWrites,
+                    ut12_background_ack_browser_effects =
+                        Ut12BackgroundAckBrowserEffects,
+                    bridge_clipboard_writes =
+                        _clipboard.WriteCount,
+                    bridge_browser_effects =
+                        _browser.EffectCount,
+                    bridge_browser_focus_commands =
+                        _browser.FocusCount,
                     max_sent_unconfirmed =
                         MaxSentUnconfirmed,
                     multiple_sent_unconfirmed_with_ready_observed =
@@ -1014,4 +1169,170 @@ internal sealed record UsabilitySubmissionRequest(
 {
     public TaskCompletionSource<bool> Completion { get; } =
         new(TaskCreationOptions.RunContinuationsAsynchronously);
+}
+
+
+internal sealed class UsabilityClipboardWriter : IClipboardWriter
+{
+    private readonly WinFormsClipboardWriter _inner = new();
+
+    public int WriteCount { get; private set; }
+
+    public void WriteText(string text)
+    {
+        _inner.WriteText(text);
+        WriteCount++;
+    }
+}
+
+internal sealed class UsabilityBrowserPort :
+    IBrowserPort,
+    IManagedBrowserInventory
+{
+    private readonly IpcBrowserPort _inner;
+
+    public UsabilityBrowserPort(IpcBrowserPort inner)
+    {
+        _inner = inner;
+    }
+
+    public int PrepareCount { get; private set; }
+    public int FocusCount { get; private set; }
+    public int CreateCount { get; private set; }
+    public int RestoreCount { get; private set; }
+    public int DiscardCount { get; private set; }
+    public int CloseCount { get; private set; }
+    public int InventoryCount { get; private set; }
+
+    public int EffectCount =>
+        PrepareCount +
+        FocusCount +
+        CreateCount +
+        RestoreCount +
+        DiscardCount +
+        CloseCount;
+
+    public async Task<BrowserResult> PrepareTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        PrepareCount++;
+        return await _inner.PrepareTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> FocusTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        FocusCount++;
+        return await _inner.FocusTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> CreateTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        CreateCount++;
+        return await _inner.CreateTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> RestoreTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        RestoreCount++;
+        return await _inner.RestoreTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> DiscardTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        DiscardCount++;
+        return await _inner.DiscardTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> CloseTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        CloseCount++;
+        return await _inner.CloseTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<BrowserInventoryEntry>> InventoryAsync(
+        CancellationToken cancellationToken = default)
+    {
+        InventoryCount++;
+        return await _inner.InventoryAsync(cancellationToken);
+    }
+}
+
+internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
+{
+    private readonly SimulatorWorld _world;
+
+    public UsabilityOperatorSurface(SimulatorWorld world)
+    {
+        _world = world;
+    }
+
+    public int JudgmentOpenCount { get; private set; }
+    public int JudgmentDecisionCount { get; private set; }
+    public int RecoveryOpenCount { get; private set; }
+    public bool ExactGateObserved { get; private set; }
+    public string? LastJudgmentActionId { get; private set; }
+
+    public Task OpenJudgmentAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var action = _world.Actions.Actions.SingleOrDefault(item =>
+            item.ActionType == "OPEN_JUDGMENT_GATE" &&
+            item.Status == SimActionStatus.ClaimedLocal);
+        if (action is null)
+        {
+            throw new InvalidOperationException(
+                "UT05_EXACT_JUDGMENT_GATE_NOT_FOUND");
+        }
+
+        JudgmentOpenCount++;
+        ExactGateObserved = true;
+        LastJudgmentActionId = action.ActionId;
+
+        var decision = MessageBox.Show(
+            $"UT-05 judgment gate\n\nAction: {action.ActionId}\n\n" +
+            "Choose Yes to record the bounded simulator-authority judgment. " +
+            "No worker packet is serviced at this gate.",
+            "Workspace Worker Bridge - Judgment Gate",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button1);
+
+        if (decision != DialogResult.Yes)
+        {
+            throw new InvalidOperationException(
+                "UT05_JUDGMENT_REJECTED_BY_OPERATOR");
+        }
+        if (action.Status != SimActionStatus.ClaimedLocal)
+        {
+            throw new InvalidOperationException(
+                "UT05_JUDGMENT_GATE_STATE_CHANGED");
+        }
+
+        JudgmentDecisionCount++;
+        _world.Trace.Record(
+            "usability_judgment_authority",
+            "JUDGMENT_DECISION_APPLIED",
+            action.ActionId,
+            action.WorkerSlotId,
+            action.SessionGeneration);
+        return Task.CompletedTask;
+    }
+
+    public Task OpenRecoveryAsync(CancellationToken cancellationToken)
+    {
+        RecoveryOpenCount++;
+        return Task.CompletedTask;
+    }
 }

@@ -92,7 +92,9 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("stage10-ut02", workflow)
         self.assertIn("stage10-ut03", workflow)
         self.assertIn("stage10-ut04", workflow)
+        self.assertIn("stage10-ut05", workflow)
         self.assertIn("stage10-ut10", workflow)
+        self.assertIn("stage10-ut12", workflow)
         self.assertIn("STAGE10_SCHEDULER_HOTKEY: Ctrl+Space", workflow)
         self.assertIn("needs: validation", workflow)
         self.assertIn(
@@ -161,6 +163,45 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn('"UT-04"', script)
         self.assertIn('$TrialId -eq "UT-04"', script)
         self.assertIn("stage10-ut04", workflow)
+        self.assertNotIn("SendKeys", harness)
+        self.assertNotIn("KeyboardEvent", harness)
+        self.assertNotIn("MouseEvent", harness)
+
+    def test_stage10_ut05_and_ut12_are_bounded_and_content_free(self):
+        harness = (
+            ROOT / "operator-bridge" / "integration" / "UsabilityHarness.cs"
+        ).read_text(encoding="utf-8")
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage10-usability.ps1"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT / ".github" / "workflows" / "operator-bridge-validation.yml"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('case "UT-05":', harness)
+        self.assertIn('"ut05-judgment-01"', harness)
+        self.assertIn('"OPEN_JUDGMENT_GATE"', harness)
+        self.assertIn("UsabilityOperatorSurface", harness)
+        self.assertIn("JUDGMENT_DECISION_APPLIED", harness)
+        self.assertIn("Ut05JudgmentClipboardWrites == 0", harness)
+        self.assertIn("Ut05JudgmentBrowserEffects == 0", harness)
+        self.assertIn("ut05_exact_gate_observed", harness)
+        self.assertIn('case "UT-12":', harness)
+        self.assertIn('"ut12-pending-01"', harness)
+        self.assertIn("ApplyUt12BackgroundAckIfReady", harness)
+        self.assertIn("TimeSpan.FromSeconds(3)", harness)
+        self.assertIn("Ut12BackgroundAcksApplied == 1", harness)
+        self.assertIn("Ut12NoWorkClipboardWrites == 0", harness)
+        self.assertIn("Ut12NoWorkBrowserEffects == 0", harness)
+        self.assertIn("Ut12BackgroundAckClipboardWrites == 0", harness)
+        self.assertIn("Ut12BackgroundAckBrowserEffects == 0", harness)
+        self.assertIn("bridge_browser_focus_commands", harness)
+        self.assertIn('"UT-05"', script)
+        self.assertIn('"UT-12"', script)
+        self.assertIn('$TrialId -eq "UT-05"', script)
+        self.assertIn('$TrialId -eq "UT-12"', script)
+        self.assertIn("stage10-ut05", workflow)
+        self.assertIn("stage10-ut12", workflow)
         self.assertNotIn("SendKeys", harness)
         self.assertNotIn("KeyboardEvent", harness)
         self.assertNotIn("MouseEvent", harness)

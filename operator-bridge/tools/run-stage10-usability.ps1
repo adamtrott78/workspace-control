@@ -2,7 +2,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$RepositoryRoot,
   [Parameter(Mandatory = $true)]
-  [ValidateSet("UT-11", "UT-01", "UT-02", "UT-03", "UT-04", "UT-10")]
+  [ValidateSet("UT-11", "UT-01", "UT-02", "UT-03", "UT-04", "UT-05", "UT-10", "UT-12")]
   [string]$TrialId,
   [string]$ResultPath,
   [int]$DurationSeconds = 900,
@@ -134,6 +134,10 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
     Write-Host "UT-03 interruption trial is ready. Complete six normal service cycles. After each of the first five durable acknowledgments, follow the tray interruption prompt: switch to another normal app for 30-60 seconds or take a short idle, then return and resume only with $SchedulerHotkey. Do not search worker tabs or reconstruct scheduler state."
   } elseif ($TrialId -eq "UT-04") {
     Write-Host "UT-04 multiple SENT/UNCONFIRMED trial is ready. The tray starts with two independent sent/unconfirmed workers while four new service actions are ready. Complete four normal $SchedulerHotkey -> Ctrl+V -> Enter cycles. Do not choose, revisit, or resolve the prior unconfirmed workers; the simulator will deliver their late durable acknowledgments after the ready work is complete."
+  } elseif ($TrialId -eq "UT-05") {
+    Write-Host "UT-05 judgment-gate trial is ready. Press $SchedulerHotkey once. A distinct bounded judgment surface must open for exact gate ut05-judgment-01 without preparing a worker or changing the clipboard. Choose Yes to record the simulator-authority judgment, then complete one normal $SchedulerHotkey -> Ctrl+V -> Enter worker cycle."
+  } elseif ($TrialId -eq "UT-12") {
+    Write-Host "UT-12 no-work/background-ack trial is ready. One fake worker is already SENT/UNCONFIRMED and there is no READY action. Press $SchedulerHotkey once; the accepted READY=0 behavior may minimize only WorkspaceWorkers Firefox. Then switch to another normal app and leave it foreground. After about 3 seconds the simulator will apply the durable ack in the background. Do not paste or press Enter; verify no focus steal or clipboard disruption."
   } else {
     Write-Host "For each cycle: press $SchedulerHotkey, then Ctrl+V, then Enter. Do not manually choose or search browser tabs."
   }

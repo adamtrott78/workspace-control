@@ -421,7 +421,9 @@ jobs:
          github.event.label.name == 'stage10-ut02' ||
          github.event.label.name == 'stage10-ut03' ||
          github.event.label.name == 'stage10-ut04' ||
-         github.event.label.name == 'stage10-ut10') &&
+         github.event.label.name == 'stage10-ut05' ||
+         github.event.label.name == 'stage10-ut10' ||
+         github.event.label.name == 'stage10-ut12') &&
         github.event.pull_request.number == 590 &&
         github.event.pull_request.head.ref == 'workspace-semantic-execution-migration-v1'
       }}
@@ -476,7 +478,9 @@ jobs:
             "stage10-ut02" { "UT-02" }
             "stage10-ut03" { "UT-03" }
             "stage10-ut04" { "UT-04" }
+            "stage10-ut05" { "UT-05" }
             "stage10-ut10" { "UT-10" }
+            "stage10-ut12" { "UT-12" }
             default { throw "Unsupported Stage 10 usability label: $label" }
           }
           New-Item "benchmarks/workspace-semantic-execution/operator_bridge" -ItemType Directory -Force | Out-Null
