@@ -139,7 +139,7 @@ public sealed class HttpOperatorBridgeClient :
 
         using var response = await _httpClient.PostAsJsonAsync(
             ActionPath(identity.ActionId, "revalidate"),
-            IdentityRequest(identity, generation),
+            BuildIdentityRequest(identity, generation),
             JsonOptions,
             cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -223,7 +223,7 @@ public sealed class HttpOperatorBridgeClient :
         var generation = GetGeneration(identity.ActionId);
         using var response = await _httpClient.PostAsJsonAsync(
             ActionPath(identity.ActionId, operation),
-            IdentityRequest(identity, generation),
+            BuildIdentityRequest(identity, generation),
             JsonOptions,
             cancellationToken);
         response.EnsureSuccessStatusCode();
@@ -269,7 +269,7 @@ public sealed class HttpOperatorBridgeClient :
         return generation;
     }
 
-    private static IdentityRequest IdentityRequest(
+    private static IdentityRequest BuildIdentityRequest(
         ActionIdentity identity,
         long generation)
     {
