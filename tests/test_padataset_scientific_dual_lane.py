@@ -50,6 +50,10 @@ class PadatasetScientificDualLaneTests(unittest.TestCase):
         b = p['runner_classes']['padataset-scientific-single-gpu-2-v1']
         self.assertNotEqual(a['scale_set_name'], b['scale_set_name'])
         self.assertNotEqual(a['controller_peer']['unix_user'], b['controller_peer']['unix_user'])
+        self.assertEqual(
+            b['runner_identity'],
+            {'unix_user': 'ci-padataset-2', 'unix_group': 'ci-padataset'},
+        )
         self.assertEqual(p['routes']['scientific-single-gpu-2']['ingress']['command'], '/lambda-scientific-2')
         overlay = load('architecture/lambda-ci-deployment-overlay.v1.json')
         self.assertEqual(overlay['classes']['padataset-scientific-single-gpu-2-v1']['install_state'], 'NOT_INSTALLED')
