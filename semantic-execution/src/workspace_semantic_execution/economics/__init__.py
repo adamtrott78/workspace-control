@@ -1,5 +1,10 @@
 """Reasoning Economy metrics and policy primitives."""
 
+from .codex_trace import (
+    CodexExecTraceSummary,
+    CodexTraceError,
+    parse_codex_exec_jsonl,
+)
 from .ledger import (
     AllowanceWindowDelta,
     EconomicsInvariantError,
@@ -12,6 +17,9 @@ from .ledger import (
 )
 
 __all__ = [
+    "CodexExecTraceSummary",
+    "CodexTraceError",
+    "parse_codex_exec_jsonl",
     "AllowanceWindowDelta",
     "EconomicsInvariantError",
     "ExecutionEconomics",
