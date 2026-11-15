@@ -113,8 +113,14 @@ if (-not $webExtCacheHit) {
       Stop-Process -Id $npmProcess.Id -Force -ErrorAction SilentlyContinue
       throw "Pinned web-ext@10.8.0 install exceeded the 120-second bootstrap bound."
     }
-    if ($npmProcess.ExitCode -ne 0) {
-      throw "Pinned web-ext@10.8.0 install failed."
+    # Refresh after the bounded wait before reading ExitCode. On the Windows
+    # self-hosted runner, the Process object can otherwise retain a null/stale
+    # exit-code value even though cmd/npm has already exited successfully.
+    $npmProcess.WaitForExit()
+    $npmProcess.Refresh()
+    $npmExitCode = $npmProcess.ExitCode
+    if ($npmExitCode -ne 0) {
+      throw "Pinned web-ext@10.8.0 install failed with exit code $npmExitCode."
     }
 
     $stagedPackage = Join-Path $webExtStage "node_modules\web-ext\package.json"
