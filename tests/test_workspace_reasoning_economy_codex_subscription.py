@@ -380,6 +380,10 @@ class ExecutorTests(unittest.TestCase):
         observation = caught.exception.observation
         self.assertEqual(observation.returncode, 1)
         self.assertEqual(observation.trace.turns_failed, 1)
+        self.assertIsNone(observation.trace.token_usage.total_tokens)
+        self.assertIsNone(
+            observation.trace.token_usage.reasoning_output_tokens
+        )
         self.assertEqual(
             observation.usage_before.token_summary.lifetime_tokens,
             1000,
