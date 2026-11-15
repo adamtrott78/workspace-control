@@ -24,6 +24,8 @@ from workspace_semantic_execution.domain import (  # noqa: E402
     EffectReceipt,
     ProcessState,
     ValidationResult,
+    WorkContract,
+    WorkDisposition,
 )
 
 
@@ -138,10 +140,89 @@ class GraphCodecTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(loads_work_graph(first), graph)
         payload = json.loads(first)
-        self.assertEqual(payload["schema_version"], 1)
+        self.assertEqual(payload["schema_version"], 2)
         self.assertEqual(
             [item["process_id"] for item in payload["processes"]],
             ["complete", "waiting"],
+        )
+
+    def test_schema_v2_preserves_work_contract_and_disposition(self):
+        contract = WorkContract(
+            objective="Synthesize exact evidence",
+            mandatory_constraints=("no writes",),
+            provenance_refs=("git:repo@sha",),
+            authority_refs=("scope:read-only",),
+            validator_contracts=("validator:exact",),
+            output_schema_refs=("schema:summary-v1",),
+        )
+        graph = DomainKernel.create_graph(
+            [
+                DomainKernel.create_process(
+                    "contracted",
+                    work_contract=contract,
+                )
+            ]
+        )
+        graph = DomainKernel.claim(
+            graph,
+            "contracted",
+            worker_id="W",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = DomainKernel.start(
+            graph,
+            "contracted",
+            lease_id="L",
+            expected_generation=0,
+        )
+        graph = DomainKernel.classify_work(
+            graph,
+            "contracted",
+            disposition=WorkDisposition.INTRINSICALLY_DIFFICULT,
+            reason="coupled reasoning requires stronger executor",
+            lease_id="L",
+            expected_generation=0,
+        )
+
+        decoded = loads_work_graph(dumps_work_graph(graph))
+        process = decoded.processes["contracted"]
+
+        self.assertEqual(decoded, graph)
+        self.assertEqual(process.work_contract, contract)
+        self.assertEqual(
+            process.disposition,
+            WorkDisposition.INTRINSICALLY_DIFFICULT,
+        )
+        self.assertEqual(
+            process.disposition_reason,
+            "coupled reasoning requires stronger executor",
+        )
+        self.assertEqual(process.state, ProcessState.READY_TO_RESUME)
+
+    def test_schema_v1_legacy_graph_remains_decodable(self):
+        graph = rich_graph()
+        payload = encode_work_graph(graph)
+        payload["schema_version"] = 1
+        for process in payload["processes"]:
+            process.pop("work_contract", None)
+            process.pop("disposition", None)
+            process.pop("disposition_reason", None)
+
+        decoded = decode_work_graph(payload)
+
+        self.assertEqual(decoded, graph)
+        self.assertTrue(
+            all(
+                process.work_contract is None
+                for process in decoded.processes.values()
+            )
+        )
+        self.assertTrue(
+            all(
+                process.disposition == WorkDisposition.UNCLASSIFIED
+                for process in decoded.processes.values()
+            )
         )
 
     def test_unknown_schema_version_fails_closed(self):
