@@ -10,7 +10,9 @@ Permit at most two concurrent PADataset scientific experiments while preserving 
 
 - Lane A remains `padataset-scientific-single-gpu-v1`, pinned to GPU0 `GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea`.
 - Lane B is `padataset-scientific-single-gpu-2-v1`, pinned to GPU1 `GPU-cfed3394-a935-63aa-9325-c4cae7b568b6`.
-- Lane B uses its own controller Unix user, scale set, runner prefix, execution contract, systemd profile, trusted workflow, route, and artifact namespace.
+- Lane B uses its own controller Unix user, runner Unix user, scale set, runner prefix, execution contract, systemd profile, trusted workflow, route, and artifact namespace.
+- Lane A runs as `ci-padataset`; lane B runs as `ci-padataset-2`. Both retain the bounded PADataset primary group `ci-padataset`.
+- Distinct runner UIDs are mandatory because runtime admission and terminal cleanup are UID-scoped (`pgrep -u` / `pkill -u`); sharing one runner UID would make concurrent lanes reject or kill each other.
 - Both lanes bind the same exact read-only `padataset-dnns-v1` runtime and trusted scientific-data profile.
 - The root provisioner remains the only physical-resource allocator.
 

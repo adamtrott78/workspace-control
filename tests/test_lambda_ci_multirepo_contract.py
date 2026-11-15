@@ -174,7 +174,7 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
         )
         self.assertEqual(
             scientific_2["trusted_workflow"]["blob_sha"],
-            "6b710d36a7bcd59bfba7224ab4a068411398edfd",
+            "6280a6e7b2ad8cc379277fa320e8839a94f360ec",
         )
         self.assertEqual(
             scientific_2["trigger"]["command"],

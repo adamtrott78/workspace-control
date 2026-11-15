@@ -115,7 +115,7 @@
       "trusted_workflow": {
         "path": ".github/workflows/lambda-ci-scientific-2.yml",
         "default_branch": "main",
-        "blob_sha": "6b710d36a7bcd59bfba7224ab4a068411398edfd"
+        "blob_sha": "6280a6e7b2ad8cc379277fa320e8839a94f360ec"
       },
       "trigger": {
         "event_name": "issue_comment",

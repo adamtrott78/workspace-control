@@ -140,7 +140,7 @@ PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS = "padataset-scientific-single-gpu-2-v1"
 PADATASET_SCIENTIFIC_DUAL_TARGET_ROUTE = "padataset:scientific-single-gpu-2"
 PADATASET_SCIENTIFIC_DUAL_TARGET_SCALE_SET = "lambda-padataset-scientific-single-gpu-2"
 PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH = ".github/workflows/lambda-ci-scientific-2.yml"
-PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB = "6b710d36a7bcd59bfba7224ab4a068411398edfd"
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB = "6280a6e7b2ad8cc379277fa320e8839a94f360ec"
 PADATASET_SCIENTIFIC_DUAL_GPU0 = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
 PADATASET_SCIENTIFIC_DUAL_GPU1 = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
 PADATASET_SCIENTIFIC_DUAL_OVERRIDE_DESTINATIONS = set(
@@ -953,7 +953,29 @@ def render_sysusers(
     groups = _project_groups(migration)
     classes = compiled["root_projection"]["runner_classes"]
     users: dict[str, str] = {}
+    runner_users: dict[str, tuple[str, str]] = {}
     broker_users: dict[str, tuple[str, str]] = {}
+
+    for class_id, policy in sorted(classes.items()):
+        runner = policy.get("project_runner_identity")
+        if not isinstance(runner, dict) or set(runner) != {"user", "group"}:
+            raise ReconcileError(f"{class_id}: project runner identity invalid")
+        runner_user = _validate_sysuser_name(
+            str(runner["user"]),
+            label=f"{class_id} runner user",
+        )
+        runner_group = _validate_sysuser_name(
+            str(runner["group"]),
+            label=f"{class_id} runner group",
+        )
+        current = (policy["project_id"], runner_group)
+        prior = runner_users.get(runner_user)
+        if prior is not None and prior != current:
+            raise ReconcileError(
+                f"runner Unix user {runner_user} reused across project/group identities"
+            )
+        runner_users[runner_user] = current
+
     _validate_sysuser_name(V3_SOCKET_GROUP, label="v3 provisioner socket group")
     lines = [
         "# Generated from compiled Lambda CI v3 root policy.\n",
@@ -961,10 +983,22 @@ def render_sysusers(
     ]
     for group in sorted(groups.values()):
         lines.append(f"g {group} -\n")
+    for group in sorted({runner_group for _, runner_group in runner_users.values()}):
+        lines.append(f"g {group} -\n")
+    for runner_user, (project, runner_group) in sorted(runner_users.items()):
+        lines.append(
+            f'u {runner_user} -:{runner_group} "Workspace CI v3 runner {project}" '
+            "- /usr/sbin/nologin\n"
+        )
+
     for class_id, policy in sorted(classes.items()):
         user = policy["controller_peer"]["unix_user"]
         project = policy["project_id"]
         _validate_sysuser_name(user, label=f"{class_id} controller user")
+        if user in runner_users:
+            raise ReconcileError(
+                f"{class_id}: controller Unix user collides with runner user {user}"
+            )
         if user in users:
             raise ReconcileError(
                 f"controller Unix user {user} reused by {users[user]} and {class_id}"
@@ -998,6 +1032,10 @@ def render_sysusers(
             if broker_group != policy["project_runner_identity"]["group"]:
                 raise ReconcileError(
                     f"{class_id}: payload broker group differs from runner group"
+                )
+            if broker_user in runner_users:
+                raise ReconcileError(
+                    f"{class_id}: payload broker user collides with runner user"
                 )
             if broker_user in users:
                 raise ReconcileError(
