@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using WorkspaceControl.OperatorBridge.Application;
 using WorkspaceControl.OperatorBridge.Ipc;
@@ -1687,7 +1688,7 @@ internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
         ExactGateObserved = true;
         LastJudgmentActionId = action.ActionId;
 
-        var decision = MessageBox.Show(
+        var decision = ShowOperatorDialog(
             $"UT-05 judgment gate\n\nAction: {action.ActionId}\n\n" +
             "Choose Yes to record the bounded simulator-authority judgment. " +
             "No worker packet is serviced at this gate.",
@@ -1730,7 +1731,7 @@ internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
         LastRecoveryId = _recovery.Current?.RecoveryId;
 
         RecoveryInstructionSteps++;
-        MessageBox.Show(
+        ShowOperatorDialog(
             RecoveryInstruction(),
             "Workspace Worker Bridge - Recovery",
             MessageBoxButtons.OK,
@@ -1751,7 +1752,7 @@ internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
 
             ManualAuthPrompts++;
             RecoveryInstructionSteps++;
-            MessageBox.Show(
+            ShowOperatorDialog(
                 "UT-07 simulated profile-wide authentication boundary. " +
                 "Production recovery requires normal manual login here; " +
                 "this fake-worker trial performs no credential automation. " +
@@ -1785,6 +1786,40 @@ internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
             _clipboard.WriteCount - clipboardBefore;
         RecoveryBrowserEffects +=
             _browser.EffectCount - browserEffectsBefore;
+    }
+
+    private static DialogResult ShowOperatorDialog(
+        string text,
+        string caption,
+        MessageBoxButtons buttons,
+        MessageBoxIcon icon,
+        MessageBoxDefaultButton defaultButton = MessageBoxDefaultButton.Button1)
+    {
+        var owner = ForegroundWindowOwner.Capture();
+        return owner is null
+            ? MessageBox.Show(text, caption, buttons, icon, defaultButton)
+            : MessageBox.Show(owner, text, caption, buttons, icon, defaultButton);
+    }
+
+    private sealed class ForegroundWindowOwner : IWin32Window
+    {
+        private ForegroundWindowOwner(IntPtr handle)
+        {
+            Handle = handle;
+        }
+
+        public IntPtr Handle { get; }
+
+        public static ForegroundWindowOwner? Capture()
+        {
+            var handle = GetForegroundWindow();
+            return handle == IntPtr.Zero
+                ? null
+                : new ForegroundWindowOwner(handle);
+        }
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
     }
 
     private string RecoveryInstruction() =>
