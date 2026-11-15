@@ -24,7 +24,7 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: fc5bdb47f2ba31c1c64c06eca4c1612397d2ce26
+- Remote checkpoint: 65709645abfb14b88a51f01296bc3b9600aca919
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,20 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 ## Next safe action
 
-Implement a Codex subscription auth inspector using read-only account/read, fail closed unless account.type=chatgpt, and a codex exec --json trace parser that captures thread id, turn success/failure, input/cached/output/reasoning-output tokens, command/MCP/web/collab/file-change counts, and errors. Then implement a subscription-only executor wrapper that strips OPENAI_API_KEY, refuses unknown/API-key auth, snapshots account usage before/after, and returns structured execution economics. Unit-test all behavior with fixture processes before any live login/invocation.
+Implement RESEARCH_ENGINE_POLICY_EXPERIMENT_TRACE_ADAPTER_V1 without invoking a live model. Bind the existing provenance-refrozen P0-P3 resumable-reasoning matrix, fixture/oracle blob identities, arm/run identities and objective validator outputs into typed policy experiment records. Join those records to ExecutionEconomics only when exact work/run identity and a comparable weekly allowance delta are available; otherwise mark allowance UNKNOWN. Produce matched-policy summaries and holdout-ready rows, but do not promote a policy or infer shared ChatGPT/Codex accounting until live calibration exists. Keep Codex live runtime suspended on PR #627/#630 lineage.
 
 ## Remaining work
 
-- Implement subscription-only Codex executor with ChatGPT-auth guard and JSONL trace ingestion.
-- Calibrate account/usage/read and rate-limit deltas against controlled ChatGPT/Codex/Instant actions.
-- Run Research Engine routing/decomposition experiments.
-- Implement weekly burn governor and recursive policy promotion.
+- Build the frozen P0-P3 Research Engine/research-iterate policy-trace adapter using exact fixture/oracle provenance and objective validator results.
+- Produce policy experiment reports that preserve UNKNOWN allowance when a run lacks a comparable calibrated weekly meter delta; do not synthesize costs from token counts.
+- When PR #627/#630 lineage clears, run the reserved Workspace Control zero-inference Codex bootstrap/auth preflight and prove ChatGPT Plus account telemetry.
+- Calibrate controlled Codex/Instant actions against account/rate-limit snapshots to determine which meter tracks the shared allowance; preserve unknown mappings explicitly.
+- Feed calibrated real traces into the weekly governor and matched holdout promotion protocol.
+- Compare verified progress per scarce allowance against an all-strong/frontier control policy and promote only if quality floors and holdout criteria pass.
 
 ## Blockers / gates
 
-- None.
+- LIVE CODEX LINEAGE AUTHORITY: PR #627 and stacked PR #630 remain open drafts at their validated SHAs. Live Codex runtime/auth is suspended until the reserved-capacity lineage reaches a trusted/default-branch promotion path; API billing and manual runner/sidecar bypass remain forbidden.
 
 ## Fresh-chat initialization
 

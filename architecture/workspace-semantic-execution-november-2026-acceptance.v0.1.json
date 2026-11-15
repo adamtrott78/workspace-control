@@ -77,7 +77,8 @@
         "Recursive dependency-wait recovery preserves generation-fenced WorkContract and waits until both validated leaves complete.",
         "Semantic #152 proves manual Instant dispatch atomically owns the process lease and stale recovered worker-result publications cannot mutate current generations; exact duplicate publication is idempotent.",
         "Semantic #160 forces process/session recovery after Instant local-prepared: old generation action becomes STALE, late old candidate is rejected pre-mutation, replacement generation completes from durable state.",
-        "Semantic #163 adds durable generation-bound scheduler specs, duplicate-plan rejection, PostgreSQL scheduler restart, duplicate candidate idempotency and pre-mutation observation mismatch rejection."
+        "Semantic #163 adds durable generation-bound scheduler specs, duplicate-plan rejection, PostgreSQL scheduler restart, duplicate candidate idempotency and pre-mutation observation mismatch rejection.",
+        "Semantic #167 proves production scheduler recovery cannot reuse a stale generation plan; old candidate delivery is non-mutating and explicit replacement session/generation is required."
       ]
     },
     {
@@ -162,7 +163,8 @@
       "status": "PARTIAL",
       "requirement": "Subscription-only Codex executor performs bounded jobs and returns structured JSONL-derived thread/token/tool/error telemetry.",
       "evidence": [
-        "Codex subscription adapter and trace tests exist; Workspace Control live runtime binding remains."
+        "Codex subscription adapter and trace tests exist; Workspace Control live runtime binding remains.",
+        "Workspace #2844 full unit regression proves subscription executor auth/command/execution fixtures: ChatGPT Plus accepted; API-key, non-Plus, other-provider, signed-out and unknown auth fail closed; OPENAI_API_KEY is stripped and usage snapshots bracket execution. Live reserved-runner preflight remains pending."
       ]
     },
     {
@@ -181,15 +183,21 @@
     },
     {
       "id": "ECON-02",
-      "status": "PENDING",
+      "status": "PARTIAL",
       "requirement": "Weekly burn governor projects allowance use, reserves headroom, and routes/rejects expensive work without buying credits or using API billing.",
-      "evidence": []
+      "evidence": [
+        "workspace-control@65709645… implements a deterministic weekly burn governor with same-reset projection, reserved headroom, max single-action cap, explicit API-billing rejection and fail-closed unknown telemetry/calibration.",
+        "PASS requires feeding it calibrated live account allowance observations and enforcing the resulting decisions in the live proving workflow."
+      ]
     },
     {
       "id": "ECON-03",
-      "status": "PENDING",
+      "status": "PARTIAL",
       "requirement": "Routing promotes cheaper executors only when objective validation meets the required quality floor.",
-      "evidence": []
+      "evidence": [
+        "Governor tests prove least-scarce executor selection only after validator-backed minimum sample count/quality floor; a cheaper executor below quality floor is rejected.",
+        "Holdout promotion requires matched tasks, no candidate failures, no disallowed quality regression and strictly lower scarce allowance. Real Research Engine policy traces/holdout promotion remain pending."
+      ]
     },
     {
       "id": "INST-01",
@@ -253,7 +261,8 @@
         "Production fault tests already cover several dangerous boundaries; database/session/full vertical-slice injection remains.",
         "Semantic Execution #100 passes stale-generation race fencing after routing/packet compilation in addition to existing crash/event/validator fault coverage.",
         "Semantic #160 adds an end-to-end persistent-chat continuity-loss fault after local-prepared, stale result rejection, explicit replacement, and successful resumed completion.",
-        "Semantic #163 validates scheduler restart, duplicate candidate delivery, exact observation mismatch rejection and wait no-poll behavior through the production scheduler."
+        "Semantic #163 validates scheduler restart, duplicate candidate delivery, exact observation mismatch rejection and wait no-poll behavior through the production scheduler.",
+        "Semantic #167 adds scheduler-level stale-generation recovery, late immutable candidate rejection and replacement-session completion."
       ]
     },
     {
@@ -262,7 +271,8 @@
       "requirement": "Control plane is GPU-blind and meets CPU/RAM/task budgets under the first real workflow.",
       "evidence": [
         "Semantic #158/#160 control-plane probes remained GPU blind; recovery head max RSS was 18.5546875 MiB at ~1 observed CPU core. Live-host/soak budget proof remains.",
-        "Semantic #163 production scheduler resource probe remained GPU blind at max RSS 18.51171875 MiB and ~1 CPU core; live-host/soak evidence remains."
+        "Semantic #163 production scheduler resource probe remained GPU blind at max RSS 18.51171875 MiB and ~1 CPU core; live-host/soak evidence remains.",
+        "Semantic #167 runs a 1,000-cycle WAITING_EXTERNAL scheduler soak with zero durable mutation/reasoning; control-plane probe stayed GPU blind at max RSS 18.46875 MiB and ~1 CPU core."
       ]
     },
     {
@@ -372,5 +382,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@0afd7837f15ccc573d9dba8ce0422aa5a2d0b061"
+  "latest_validated_checkpoint": "workspace-control@65709645abfb14b88a51f01296bc3b9600aca919"
 }
