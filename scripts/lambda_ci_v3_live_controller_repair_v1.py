@@ -281,17 +281,15 @@ def verify_topology(
         after_n=int(now.get("NRestarts") or "0")
         delta=after_n-before_n
         deltas[cid]=delta
-        if delta<0:
+        if cid in active_before and after_n != 0:
             raise ControllerRepairError(
-                f"controller restart counter regressed: {cid}"
+                f"controller auto-restarted after intentional restore: {cid} "
+                f"NRestarts={after_n}"
             )
-        if before_n==0 and delta!=0:
+        if cid not in active_before and after_n != before_n:
             raise ControllerRepairError(
-                f"previously-stable controller restarted during refresh: {cid}"
-            )
-        if before_n>0 and delta>1:
-            raise ControllerRepairError(
-                f"pre-existing restarting controller exceeded bounded restart delta: {cid}"
+                f"inactive controller restart counter changed without activation: {cid} "
+                f"before={before_n} after={after_n}"
             )
     return deltas
 
