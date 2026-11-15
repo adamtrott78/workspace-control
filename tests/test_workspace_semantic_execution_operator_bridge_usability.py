@@ -228,6 +228,8 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertNotIn("$npmExitCode = $npmProcess.ExitCode", script)
         self.assertIn("$stagedMetadata.version -ne \"10.8.0\"", script)
         self.assertIn("build_fingerprint=", script)
+        self.assertIn("[System.BitConverter]::ToString", script)
+        self.assertNotIn("[Convert]::ToHexString", script)
         self.assertIn("ls-tree -r HEAD", script)
         self.assertIn("--prefer-offline", script)
         self.assertIn("stage10-ut05", workflow)
