@@ -14,7 +14,7 @@ import queue
 import shutil
 import subprocess
 import threading
-from typing import Any, Mapping, Protocol, Sequence
+from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from ..ports.usage import (
     AccountTokenUsageSummary,
@@ -248,8 +248,8 @@ def parse_usage_response(
 
 @dataclass
 class CodexUsageCollector:
-    session_factory: callable
-    clock: callable = lambda: datetime.now(timezone.utc)
+    session_factory: Callable[[], JsonRpcSession]
+    clock: Callable[[], datetime] = lambda: datetime.now(timezone.utc)
 
     def read_snapshot(
         self,
@@ -293,6 +293,14 @@ class CodexUsageCollector:
         )
 
 
+def sanitized_codex_environment(
+    environment: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    child_env = dict(environment or os.environ)
+    child_env.pop("OPENAI_API_KEY", None)
+    return child_env
+
+
 class CodexAppServerStdioSession:
     """Minimal newline-delimited JSON-RPC client for one Codex app-server."""
 
@@ -314,9 +322,8 @@ class CodexAppServerStdioSession:
         if not resolved:
             raise CodexUsageError("codex_command_required")
 
-        child_env = dict(environment or os.environ)
         # A ChatGPT-plan collector must never accidentally inherit API billing.
-        child_env.pop("OPENAI_API_KEY", None)
+        child_env = sanitized_codex_environment(environment)
 
         self._process = subprocess.Popen(
             resolved,
