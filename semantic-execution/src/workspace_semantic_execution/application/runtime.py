@@ -9,6 +9,7 @@ from ..domain import (
     ProcessState,
     ReasoningProcess,
     ValidationResult,
+    WorkDisposition,
     WorkGraph,
 )
 from ..ports import (
@@ -257,6 +258,27 @@ class RuntimeCoordinator:
             after_version=after.version,
         )
         return after
+
+    def classify_work(
+        self,
+        process_id: str,
+        *,
+        disposition: WorkDisposition,
+        reason: str,
+        lease_id: str,
+        expected_generation: int,
+    ) -> StateSnapshot:
+        return self._apply(
+            "process.classified",
+            lambda graph: DomainKernel.classify_work(
+                graph,
+                process_id,
+                disposition=disposition,
+                reason=reason,
+                lease_id=lease_id,
+                expected_generation=expected_generation,
+            ),
+        )
 
     def decompose(
         self,
