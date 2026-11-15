@@ -5,6 +5,18 @@ from .codex_trace import (
     CodexTraceError,
     parse_codex_exec_jsonl,
 )
+from .experiments import (
+    FrozenResearchFixture,
+    PolicyExperimentError,
+    PolicyExperimentSummary,
+    PolicyRunAccounting,
+    PolicyRunTrace,
+    ResearchPolicyExperimentReport,
+    allowed_policy_ids,
+    build_research_policy_report,
+    holdout_rows_from_report,
+    parse_frozen_research_work_bank,
+)
 from .governor import (
     BillingMode,
     BurnProjectionState,
@@ -36,6 +48,16 @@ from .ledger import (
 )
 
 __all__ = [
+    "FrozenResearchFixture",
+    "PolicyExperimentError",
+    "PolicyExperimentSummary",
+    "PolicyRunAccounting",
+    "PolicyRunTrace",
+    "ResearchPolicyExperimentReport",
+    "allowed_policy_ids",
+    "build_research_policy_report",
+    "holdout_rows_from_report",
+    "parse_frozen_research_work_bank",
     "BillingMode",
     "BurnProjectionState",
     "ExecutorCalibrationEvidence",
