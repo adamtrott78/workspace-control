@@ -7,7 +7,7 @@ RUNTIME=(ROOT/"scripts/lambda_ci_runtime.py").read_text()
 
 class PADatasetScientificRuntimeRepairTests(unittest.TestCase):
     def test_runtime_accepts_scientific_profile_only_through_single_gpu_path(self):
-        self.assertIn('SINGLE_GPU_EXECUTION_PROFILES = frozenset({"gpu-small", "gpu-scientific-single"})',RUNTIME)
+        self.assertIn('SINGLE_GPU_EXECUTION_PROFILES = frozenset({"gpu-small", "gpu-scientific-single", "gpu-scientific-single-2"})',RUNTIME)
         self.assertIn('if profile in SINGLE_GPU_EXECUTION_PROFILES:',RUNTIME)
         self.assertIn('GPU_EXECUTION_PROFILES = SINGLE_GPU_EXECUTION_PROFILES',RUNTIME)
 
