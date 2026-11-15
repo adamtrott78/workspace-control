@@ -24,6 +24,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly Func<WorkloadStatusSnapshot> _workloadStatusProvider;
     private readonly string _configuredHotkey;
     private readonly WorkerWindowSafetyController _workerWindowSafety;
+    private readonly IDisposable? _operatorActionLifetime;
     private Icon? _statusIcon;
     private readonly CancellationTokenSource _ipcCancellation = new();
     private readonly Task _ipcTask;
@@ -33,7 +34,9 @@ public sealed class TrayApplicationContext : ApplicationContext
     public TrayApplicationContext(
         int? idleProbeMilliseconds = null,
         SchedulerHotkeyBinding? schedulerHotkey = null,
-        Func<WorkloadStatusSnapshot>? workloadStatusProvider = null)
+        Func<WorkloadStatusSnapshot>? workloadStatusProvider = null,
+        IOperatorActionPort? operatorActionPort = null,
+        IDisposable? operatorActionLifetime = null)
     {
         _diagnostics = JsonLineDiagnosticsSink.CreateDefault();
         _hotkeyWindow = new HotkeyMessageWindow();
@@ -43,6 +46,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         _configuredHotkey = binding.DisplayName;
         _workloadStatusProvider =
             workloadStatusProvider ?? (() => WorkloadStatusSnapshot.Empty);
+        _operatorActionLifetime = operatorActionLifetime;
         _workerWindowSafety = new WorkerWindowSafetyController(
             new Win32WorkerWindowSafetyPort());
         var hotkey = new WindowsHotkeyRegistrar(
@@ -65,7 +69,7 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         _dispatch = new SingleFlightDispatchCoordinator(
             bridgeState,
-            new NoWorkOperatorActionPort(),
+            operatorActionPort ?? new NoWorkOperatorActionPort(),
             browserPort,
             new WinFormsClipboardWriter(),
             new SystemMonotonicClock(),
@@ -233,6 +237,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         _notifyIcon.Dispose();
         _statusIcon?.Dispose();
         _hotkeyWindow.Dispose();
+        _operatorActionLifetime?.Dispose();
         _diagnostics.Dispose();
         _ipcCancellation.Dispose();
         base.ExitThreadCore();

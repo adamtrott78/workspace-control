@@ -1,6 +1,7 @@
 using WorkspaceControl.OperatorBridge.Ipc;
 using WorkspaceControl.OperatorBridge.Windows;
 using WorkspaceControl.OperatorBridge.Windows.Hotkey;
+using WorkspaceControl.OperatorBridge.Windows.Remote;
 
 namespace WorkspaceControl.OperatorBridge;
 
@@ -22,10 +23,33 @@ internal static class Program
         ApplicationConfiguration.Initialize();
         var idleProbeMilliseconds = ParseIdleProbe(args);
         var schedulerHotkey = ParseSchedulerHotkey(args);
-        System.Windows.Forms.Application.Run(
-            new TrayApplicationContext(
-                idleProbeMilliseconds,
-                schedulerHotkey));
+        var remoteConfiguration =
+            RemoteOperatorBridgeConfiguration.Parse(
+                args,
+                $"workspaceoperator-{Guid.NewGuid():N}");
+        HttpOperatorBridgeClient? remoteClient = null;
+
+        try
+        {
+            remoteClient = remoteConfiguration is null
+                ? null
+                : HttpOperatorBridgeClient.Create(remoteConfiguration);
+
+            System.Windows.Forms.Application.Run(
+                new TrayApplicationContext(
+                    idleProbeMilliseconds,
+                    schedulerHotkey,
+                    workloadStatusProvider: remoteClient is null
+                        ? null
+                        : () => remoteClient.CurrentStatus,
+                    operatorActionPort: remoteClient,
+                    operatorActionLifetime: remoteClient));
+        }
+        catch
+        {
+            remoteClient?.Dispose();
+            throw;
+        }
     }
 
     private static SchedulerHotkeyBinding ParseSchedulerHotkey(string[] args)

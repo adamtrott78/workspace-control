@@ -23,6 +23,19 @@ public sealed class RuntimeModeDetectorTests
     }
 
     [TestMethod]
+    public void RemoteTransportArgumentsSelectUiModeWithRedirectedStdio()
+    {
+        Assert.IsFalse(
+            RuntimeModeDetector.IsNativeHostProxy(
+                new[]
+                {
+                    "--operator-bridge-url=https://workspace-control.tailnet.invalid/"
+                },
+                inputRedirected: true,
+                outputRedirected: true));
+    }
+
+    [TestMethod]
     public void FirefoxOriginArgumentsStillSelectProxyWithRedirectedStdio()
     {
         Assert.IsTrue(

@@ -25,6 +25,9 @@ public static class RuntimeModeDetector
         if (args.Any(arg =>
                 arg.StartsWith(
                     "--idle-probe-ms=",
+                    StringComparison.OrdinalIgnoreCase) ||
+                arg.StartsWith(
+                    "--operator-bridge-url=",
                     StringComparison.OrdinalIgnoreCase)))
         {
             return false;
