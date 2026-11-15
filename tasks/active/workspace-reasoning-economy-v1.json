@@ -1,0 +1,231 @@
+{
+  "schema_version": 2,
+  "task_id": "workspace-reasoning-economy-v1",
+  "title": "Workspace Reasoning Economy v1",
+  "status": "IN_PROGRESS",
+  "goal": "Build and empirically tune a subscription-aware reasoning economy layer for Workspace Semantic Execution. Programmatically observe Codex/ChatGPT-backed account usage and rate-limit state through the authenticated Codex app-server; record per-task execution economics; route/decompose work toward the least-scarce capable executor; and use Research Engine as the first CPU-only learning workload while preserving verified quality.",
+  "execution_topology": "remote_only",
+  "workflow": null,
+  "parent_execution_owner": "workspace-semantic-execution-backend-v1",
+  "current_stage": "usage_telemetry_contract_and_collector",
+  "acceptance_criteria": [
+    "No OpenAI API-key billing, pay-as-you-go fallback, purchased credits, paid reset consumption, or automatic billing path is authorized.",
+    "Codex execution is authorized only when backed by the user's included ChatGPT subscription allowance.",
+    "A read-only usage collector supports account/rateLimits/read and account/usage/read over the official Codex app-server protocol without scraping the ChatGPT Usage webpage.",
+    "Rate-limit windows are classified by reported windowDurationMins rather than assuming primary=5h and secondary=weekly.",
+    "Account usage snapshots preserve upstream null/unknown values and never convert unavailable metrics to zero.",
+    "A calibration harness can compare programmatic snapshots before/after controlled regular ChatGPT, Codex, and Instant actions to determine which telemetry surface tracks the shared allowance after the December accounting transition.",
+    "Per-task economics records executor/model/surface, durable work item, input/cached/output/reasoning token fields when observable, wall time, retries, validator outcome, decomposition depth, and before/after allowance snapshots.",
+    "WAITING_EXTERNAL and other unchanged-world waits consume zero model invocations and zero reasoning quanta.",
+    "The router optimizes expected verified progress per scarce subscription allowance, not API-dollar cost.",
+    "Large-but-easy work is decomposed before escalation; intrinsically difficult residuals may escalate.",
+    "Unknown executor capability/usage telemetry fails closed or defers; it is never treated as free capacity.",
+    "Initial routing remains deterministic and evidence-based; no learned router is promoted until enough holdout traces exist.",
+    "Research Engine is the first real economics workload; PADataset GPU lanes are not used.",
+    "Workspace Control orchestration/validation uses only workspace-control-control-small-v1 / lambda-workspace-control-control-small when self-hosted execution is needed.",
+    "The system records enough durable traces to compare routing policies recursively and promote only objectively better policies."
+  ],
+  "constraints": [
+    "Never set or require OPENAI_API_KEY for Codex subscription execution.",
+    "Never consume/reset/purchase credits or call a paid reset endpoint.",
+    "Never use lambda-padataset-scientific-single-gpu or lambda-padataset-scientific-single-gpu-2.",
+    "Never target either physical GPU UUID or PADataset scientific controller identities.",
+    "Control-plane and economics collection must remain CPU-only and GPU-blind.",
+    "Do not scrape/authenticate through undocumented private ChatGPT endpoints when an official app-server protocol method exists.",
+    "Do not store OAuth/access/refresh tokens, session cookies, or account identity secrets in Git, task capsules, test fixtures, telemetry, or logs.",
+    "Do not assume account/usage/read exactly equals the future shared ChatGPT/Codex allowance until calibrated against authoritative account state.",
+    "Do not infer weighted allowance consumption directly from raw token totals; learn the relationship empirically.",
+    "Do not spend model tokens polling jobs, timers, experiments, child workers, or other external state.",
+    "Do not mutate Research Engine or PADataset as part of telemetry setup without separate authority."
+  ],
+  "repositories": [
+    {
+      "name": "workspace-control",
+      "intent": "mutate",
+      "base_sha": "991f0c76497670f27482459463ebc6933d1aa95f",
+      "remote": {
+        "branch": "workspace-semantic-execution-migration-v1",
+        "checkpoint_sha": "991f0c76497670f27482459463ebc6933d1aa95f",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": [
+        "tasks/active/workspace-reasoning-economy-v1.json",
+        "tasks/active/workspace-reasoning-economy-v1.md",
+        "architecture/workspace-reasoning-economy-*.md",
+        "architecture/workspace-reasoning-economy-*.json",
+        "semantic-execution/src/workspace_semantic_execution/economics/**",
+        "semantic-execution/src/workspace_semantic_execution/ports/usage.py",
+        "semantic-execution/src/workspace_semantic_execution/ports/__init__.py",
+        "semantic-execution/src/workspace_semantic_execution/adapters/codex_usage.py",
+        "semantic-execution/src/workspace_semantic_execution/adapters/__init__.py",
+        "tests/test_workspace_reasoning_economy*.py",
+        "benchmarks/workspace-semantic-execution/economics/**",
+        ".github/workflows/reasoning-economy-validation.yml"
+      ]
+    },
+    {
+      "name": "research-engine",
+      "intent": "read",
+      "base_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+      "remote": {
+        "branch": "main",
+        "checkpoint_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+        "verified": true
+      },
+      "local": null,
+      "allowed_mutation_scope": []
+    }
+  ],
+  "stages": [
+    {
+      "id": "usage_telemetry_contract_and_collector",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-reasoning-economy",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "Codex app-server account/rateLimits/read",
+        "Codex app-server account/usage/read",
+        "workspace semantic-execution executor/resource contracts"
+      ],
+      "outputs": [
+        "UsageSnapshot and RateLimitWindow domain contracts",
+        "Codex app-server read-only usage collector",
+        "null/unknown-preserving normalization",
+        "collector protocol tests"
+      ],
+      "validation": [],
+      "resume_condition": "Collector deterministically parses both rate-limit and account-token-activity responses without credentials in logs or fixtures."
+    },
+    {
+      "id": "economics_ledger",
+      "status": "PLANNED",
+      "execution_owner": "workspace-reasoning-economy",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated usage collector",
+        "semantic execution receipts/validation"
+      ],
+      "outputs": [
+        "ExecutionEconomics record",
+        "before/after allowance snapshots",
+        "waste classification",
+        "durable experiment rows"
+      ],
+      "validation": [],
+      "resume_condition": "Every bounded work item can produce a stable economics record without requiring API billing data."
+    },
+    {
+      "id": "codex_subscription_executor",
+      "status": "PLANNED",
+      "execution_owner": "workspace-reasoning-economy",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "validated usage collector",
+        "included ChatGPT-plan Codex authentication"
+      ],
+      "outputs": [
+        "subscription-only Codex executor",
+        "codex exec --json trace ingestion",
+        "billing-mode fail-closed guard"
+      ],
+      "validation": [],
+      "resume_condition": "Executor refuses API-key-only/payg configuration and produces structured token/tool/validator telemetry."
+    },
+    {
+      "id": "research_engine_policy_experiments",
+      "status": "PLANNED",
+      "execution_owner": "workspace-reasoning-economy",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "economics ledger",
+        "Codex subscription executor",
+        "Research Engine read-only workload bank"
+      ],
+      "outputs": [
+        "policy A/B traces",
+        "verified-progress-per-allowance metrics",
+        "decomposition/escalation evidence"
+      ],
+      "validation": [],
+      "resume_condition": "Multiple routing policies are compared on frozen real Research Engine tasks with objective validators."
+    },
+    {
+      "id": "budget_governor_and_recursive_improvement",
+      "status": "PLANNED",
+      "execution_owner": "workspace-reasoning-economy",
+      "selected_executor": null,
+      "selected_surface": null,
+      "inputs": [
+        "policy experiment traces",
+        "weekly rate-limit snapshots"
+      ],
+      "outputs": [
+        "weekly burn governor",
+        "reserve policy",
+        "deterministic adaptive router",
+        "holdout promotion protocol"
+      ],
+      "validation": [],
+      "resume_condition": "Router changes are promoted only when holdout verified-progress-per-allowance improves without violating quality floor."
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": "origin",
+      "kind": "implementation_handoff",
+      "identity": "workspace-control@991f0c76497670f27482459463ebc6933d1aa95f",
+      "required_for_resume": true,
+      "evidence": [
+        "Parent semantic backend has validated real Research Engine shadow canary and event-driven zero-poll waits.",
+        "Dedicated CPU-only Workspace Control runner reservation is live; PR #627 Phase-B evidence records DUAL_SCIENCE_PLUS_CONTROL_READY=1."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "workspace-control@991f0c76497670f27482459463ebc6933d1aa95f",
+      "required_for_resume": true,
+      "evidence": [
+        "First unfinished stage is usage_telemetry_contract_and_collector.",
+        "No Reasoning Economy production code existed at this checkpoint."
+      ]
+    }
+  ],
+  "artifacts": [],
+  "validation": [
+    {
+      "check": "User execution authority",
+      "result": "PASS",
+      "evidence": [
+        "User explicitly instructed the system to get the reasoning-economy setup implemented.",
+        "User explicitly constrained Codex to included ChatGPT Plus usage and rejected API pay-as-you-go."
+      ]
+    },
+    {
+      "check": "Compute isolation",
+      "result": "PASS",
+      "evidence": [
+        "PR #627 Phase-B operator evidence states host max=3, PADataset max=2, Workspace Control max=1, reserved workspace-control slots=1, DUAL_SCIENCE_PLUS_CONTROL_READY=1.",
+        "Reasoning Economy task forbids both PADataset scientific runner classes and all GPU targeting."
+      ]
+    }
+  ],
+  "blockers": [],
+  "remaining_work": [
+    "Implement usage/rate-limit contracts and Codex app-server collector.",
+    "Implement execution economics ledger and waste classification.",
+    "Implement subscription-only Codex executor with JSONL trace ingestion.",
+    "Calibrate account/usage/read and rate-limit deltas against controlled ChatGPT/Codex/Instant actions.",
+    "Run Research Engine routing/decomposition experiments.",
+    "Implement weekly burn governor and recursive policy promotion."
+  ],
+  "next_safe_action": "Implement the read-only usage telemetry contract and Codex app-server collector. Support account/rateLimits/read and account/usage/read; preserve null/unknown values; classify windows by duration; redact identity/credential material; never call reset-credit or mutation methods. Add deterministic fixture tests before attempting one-time live ChatGPT-backed Codex authentication/calibration.",
+  "last_executor": "chatgpt",
+  "last_surface": "github",
+  "notes": "2026-11-15 ACTIVATED: Reasoning Economy is a dedicated child track of semantic execution. Immediate objective is to remove manual Usage-page transcription by consuming official Codex app-server read-only account telemetry. account/rateLimits/read exposes rate-limit windows; account/usage/read exposes account token-activity summary/daily buckets and optional thread usage in the current public Codex protocol. Whether these values perfectly track the December shared ChatGPT/Codex allowance is intentionally UNKNOWN until controlled calibration. No API billing is authorized."
+}
