@@ -16,6 +16,13 @@ from .packet_compiler import (
 )
 from .router import ExecutorRegistry, route_executor
 from .runtime import RuntimeCoordinator
+from .vertical_slice import (
+    CoordinatedActionService,
+    CoordinatedExecutionError,
+    CoordinatedExecutionRequest,
+    CoordinatedExecutionResult,
+    PostconditionValidator,
+)
 
 __all__ = [
     "CompiledPacket",
@@ -26,6 +33,11 @@ __all__ = [
     "QuestionRecord",
     "SemanticPacketCompiler",
     "RuntimeCoordinator",
+    "CoordinatedActionService",
+    "CoordinatedExecutionError",
+    "CoordinatedExecutionRequest",
+    "CoordinatedExecutionResult",
+    "PostconditionValidator",
     "initial_executor_profiles",
     "machine_llm_profile",
     "openai_chat_instant_current_profile",
