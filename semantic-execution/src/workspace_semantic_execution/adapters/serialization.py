@@ -1,7 +1,7 @@
 """Deterministic JSON codec for durable WorkGraph state.
 
 This codec is infrastructure-neutral and intentionally avoids pickle or
-runtime-specific object serialization. Schema v6 adds durable worker-result publications while retaining v1-v5 decode compatibility.
+runtime-specific object serialization. Schema v7 adds typed worker-result publication targets to durable packet sources while retaining v1-v6 decode compatibility.
 """
 from __future__ import annotations
 
@@ -31,14 +31,15 @@ from ..domain import (
     WorkerChildProposal,
     WorkerResultKind,
     WorkerResultPublication,
+    WorkerResultPublicationContract,
     WorkContract,
     WorkDisposition,
     WorkGraph,
 )
 
 
-SCHEMA_VERSION = 6
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6}
+SCHEMA_VERSION = 7
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7}
 
 
 class GraphCodecError(ValueError):
@@ -239,6 +240,33 @@ def _encode_packet_source(
         "validator_contract": source.validator_contract,
         "output_schema": source.output_schema,
         "next_safe_boundary": source.next_safe_boundary,
+        "result_publication": (
+            None
+            if source.result_publication is None
+            else {
+                "publication_id": (
+                    source.result_publication.publication_id
+                ),
+                "action_id": source.result_publication.action_id,
+                "action_generation": (
+                    source.result_publication.action_generation
+                ),
+                "process_generation": (
+                    source.result_publication.process_generation
+                ),
+                "worker_slot_id": (
+                    source.result_publication.worker_slot_id
+                ),
+                "session_generation": (
+                    source.result_publication.session_generation
+                ),
+                "schema_ref": source.result_publication.schema_ref,
+                "target_ref": source.result_publication.target_ref,
+                "candidate_only": (
+                    source.result_publication.candidate_only
+                ),
+            }
+        ),
     }
 
 
@@ -654,6 +682,61 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
                 )
                 for item in raw.get("unresolved_questions", [])
             )
+            raw_publication = raw.get("result_publication")
+            result_publication = None
+            if schema_version >= 7 and raw_publication is not None:
+                if not isinstance(raw_publication, dict):
+                    raise GraphCodecError(
+                        "packet_result_publication_must_be_object"
+                    )
+                try:
+                    result_publication = (
+                        WorkerResultPublicationContract(
+                            publication_id=str(
+                                raw_publication["publication_id"]
+                            ),
+                            action_id=str(
+                                raw_publication["action_id"]
+                            ),
+                            action_generation=int(
+                                raw_publication[
+                                    "action_generation"
+                                ]
+                            ),
+                            process_generation=int(
+                                raw_publication[
+                                    "process_generation"
+                                ]
+                            ),
+                            worker_slot_id=str(
+                                raw_publication[
+                                    "worker_slot_id"
+                                ]
+                            ),
+                            session_generation=int(
+                                raw_publication[
+                                    "session_generation"
+                                ]
+                            ),
+                            schema_ref=str(
+                                raw_publication["schema_ref"]
+                            ),
+                            target_ref=str(
+                                raw_publication["target_ref"]
+                            ),
+                            candidate_only=bool(
+                                raw_publication.get(
+                                    "candidate_only",
+                                    True,
+                                )
+                            ),
+                        )
+                    )
+                except (KeyError, TypeError, ValueError) as exc:
+                    raise GraphCodecError(
+                        "invalid_packet_result_publication"
+                    ) from exc
+
             packet_sources[payload_ref] = SemanticPacketSource(
                 payload_ref=payload_ref,
                 process_id=str(raw.get("process_id", "")),
@@ -692,6 +775,7 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
                 next_safe_boundary=str(
                     raw.get("next_safe_boundary", "")
                 ),
+                result_publication=result_publication,
             )
 
     worker_results: dict[str, WorkerResultPublication] = {}

@@ -128,6 +128,19 @@ class SemanticPacketQuestion:
 
 
 @dataclass(frozen=True)
+class WorkerResultPublicationContract:
+    publication_id: str
+    action_id: str
+    action_generation: int
+    process_generation: int
+    worker_slot_id: str
+    session_generation: int
+    schema_ref: str
+    target_ref: str
+    candidate_only: bool = True
+
+
+@dataclass(frozen=True)
 class SemanticPacketSource:
     payload_ref: str
     process_id: str
@@ -146,6 +159,7 @@ class SemanticPacketSource:
     validator_contract: str = ""
     output_schema: str = "WORKSPACE_REASONING_RESULT_V1"
     next_safe_boundary: str = ""
+    result_publication: WorkerResultPublicationContract | None = None
 
 
 @dataclass(frozen=True)

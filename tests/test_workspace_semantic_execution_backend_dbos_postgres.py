@@ -17,6 +17,7 @@ import textwrap
 import time
 from threading import Thread
 import unittest
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 import uuid
 
@@ -28,9 +29,11 @@ sys.path.insert(0, str(SRC))
 from workspace_semantic_execution.adapters import (  # noqa: E402
     DBOSDurableRuntime,
     FakeClock,
+    ImmutableWorkerResultCandidate,
     PostgresEventLedger,
     PostgresStateStore,
     RecordingTelemetry,
+    WorkerResultCandidateAdapter,
 )
 from workspace_semantic_execution.application import (  # noqa: E402
     DurableOperatorPacketMaterializer,
@@ -429,6 +432,225 @@ class PostgresAdapterIntegrationTests(unittest.TestCase):
             server.shutdown()
             server.server_close()
             thread.join(timeout=2)
+
+    def test_instant_candidate_full_loop_survives_postgres_restart(self):
+        state_key = f"instant-e2e-{uuid.uuid4()}"
+        process_id = "instant-postgres-process"
+        slot_id = "instant-postgres-slot"
+        action_id = "action:instant-postgres"
+        validator_id = "validator:instant-postgres"
+        target_ref = (
+            "github-candidate://adamtrott78/workspace-control/"
+            "worker-results/candidates/instant-postgres.json"
+        )
+        identity = "operator@example.invalid"
+
+        store1 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator1 = RuntimeCoordinator(
+            state_store=store1,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        coordinator1.initialize(
+            DomainKernel.create_graph(
+                [DomainKernel.create_process(process_id)]
+            )
+        )
+        profile = openai_chat_instant_current_profile()
+        registry = ExecutorRegistry((profile,))
+        PersistentExecutorSessionBroker(coordinator1).ensure_session(
+            profile=profile,
+            slot_id=slot_id,
+            session_id="instant-postgres-session",
+        )
+        planned = OperatorDispatchPlanner(
+            runtime=coordinator1,
+            registry=registry,
+        ).plan_service_existing(
+            task_id="task:instant-postgres",
+            action_id=action_id,
+            action_generation=0,
+            process_id=process_id,
+            process_generation=0,
+            worker_slot_id=slot_id,
+            session_generation=0,
+            executor_id=profile.executor_id,
+            packet_input=PacketCompilationInput(
+                process_id=process_id,
+                source_checkpoint="checkpoint:instant-postgres",
+                objective="Complete the durable Instant candidate loop.",
+                constraints=("candidate-only publication",),
+                evidence_refs=("evidence:instant-postgres",),
+                authority_refs=("scope:proposal-only",),
+                allowed_actions=("publish-candidate-result",),
+                validator_contract=validator_id,
+                output_schema="WORKER_RESULT_V1",
+                next_safe_boundary="publish immutable candidate",
+            ),
+            priority_rank=1,
+            queue_sequence=1,
+            created_at="T0",
+            result_publication_target_ref=target_ref,
+        )
+
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            port = int(probe.getsockname()[1])
+        server = build_operator_bridge_server(
+            OperatorBridgeServerConfig(
+                postgres_dsn=POSTGRES_DSN,
+                expected_tailscale_login=identity,
+                state_key=state_key,
+                port=port,
+            )
+        )
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            claim_body = json.dumps(
+                {
+                    "helperInstanceId": "windows-helper",
+                    "claimId": "claim-instant-postgres",
+                    "claimedAt": "T1",
+                    "expiresAt": "T2",
+                }
+            ).encode("utf-8")
+            claim_request = Request(
+                (
+                    f"http://127.0.0.1:{port}/"
+                    "operator-bridge/v1/actions/claim"
+                ),
+                data=claim_body,
+                headers={
+                    "Content-Type": "application/json",
+                    "Tailscale-User-Login": identity,
+                },
+                method="POST",
+            )
+            with urlopen(claim_request, timeout=2) as response:
+                claimed = json.loads(response.read().decode("utf-8"))
+            self.assertEqual(claimed["actionId"], action_id)
+            self.assertEqual(
+                claimed["packetText"],
+                planned.packet.text,
+            )
+
+            prepared_body = json.dumps(
+                {
+                    "generation": 0,
+                    "workerSlotId": slot_id,
+                    "sessionGeneration": 0,
+                }
+            ).encode("utf-8")
+            prepared_request = Request(
+                (
+                    f"http://127.0.0.1:{port}/"
+                    "operator-bridge/v1/actions/"
+                    f"{quote(action_id, safe='')}/local-prepared"
+                ),
+                data=prepared_body,
+                headers={
+                    "Content-Type": "application/json",
+                    "Tailscale-User-Login": identity,
+                },
+                method="POST",
+            )
+            with urlopen(prepared_request, timeout=2) as response:
+                prepared = json.loads(response.read().decode("utf-8"))
+            self.assertEqual(
+                prepared["status"],
+                "AWAITING_DURABLE_ACK",
+            )
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+        store2 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator2 = RuntimeCoordinator(
+            state_store=store2,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=10),
+        )
+
+        class Validator:
+            def validate(self, publication, packet_source):
+                self.packet_sha256 = packet_source.packet_sha256
+                return ValidationResult(
+                    validator_id=validator_id,
+                    passed=True,
+                    evidence_ref="evidence:instant-postgres-valid",
+                    observed_at="T5",
+                )
+
+        contract = planned.packet_source.result_publication
+        self.assertIsNotNone(contract)
+        assert contract is not None
+        candidate_bytes = json.dumps(
+            {
+                "publication_id": contract.publication_id,
+                "action_id": action_id,
+                "action_generation": 0,
+                "process_id": process_id,
+                "process_generation": 0,
+                "executor_id": profile.executor_id,
+                "worker_slot_id": slot_id,
+                "session_generation": 0,
+                "packet_sha256": planned.packet.packet_sha256,
+                "kind": "RESULT",
+                "observed_at": "T4",
+                "result_payload_ref": (
+                    "github://instant-postgres-result@blob"
+                ),
+                "result_payload_sha256": "e" * 64,
+                "evidence_refs": (
+                    ["github://instant-postgres-evidence@blob"]
+                ),
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        validator = Validator()
+        outcome = WorkerResultCandidateAdapter(
+            intake=WorkerResultIntakeService(
+                runtime=coordinator2,
+                validators={validator_id: validator},
+            )
+        ).ingest(
+            ImmutableWorkerResultCandidate(
+                target_ref=target_ref,
+                immutable_revision="f" * 40,
+                raw_bytes=candidate_bytes,
+            )
+        )
+
+        self.assertEqual(outcome.process_state, ProcessState.COMPLETED)
+        self.assertEqual(
+            validator.packet_sha256,
+            planned.packet.packet_sha256,
+        )
+        store3 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        restored = store3.load().graph
+        self.assertEqual(
+            restored.processes[process_id].state,
+            ProcessState.COMPLETED,
+        )
+        self.assertEqual(
+            restored.operator_actions[action_id].status,
+            OperatorActionState.COMPLETED,
+        )
+        self.assertEqual(
+            restored.executor_sessions[slot_id].state,
+            ExecutorSessionState.READY,
+        )
+        self.assertEqual(
+            restored.worker_results[
+                contract.publication_id
+            ].source_ref,
+            f"{target_ref}@{'f' * 40}",
+        )
 
     def test_worker_result_intake_survives_postgres_adapter_reinstantiation(self):
         state_key = f"result-{uuid.uuid4()}"

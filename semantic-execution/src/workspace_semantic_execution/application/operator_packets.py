@@ -1,7 +1,7 @@
 """Deterministic packet-source persistence and OperatorAction planning."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from ..domain import (
     OperatorAckMode,
@@ -14,6 +14,7 @@ from ..domain import (
     SemanticPacketFinding,
     SemanticPacketQuestion,
     SemanticPacketSource,
+    WorkerResultPublicationContract,
 )
 from .packet_compiler import (
     CompiledPacket,
@@ -166,6 +167,11 @@ class OperatorDispatchPlanner:
         priority_rank: int,
         queue_sequence: int,
         created_at: str,
+        result_publication_target_ref: str | None = None,
+        result_publication_schema_ref: str = (
+            "architecture/"
+            "workspace-semantic-execution-worker-result.v0.1.json"
+        ),
     ) -> PlannedOperatorDispatch:
         if packet_input.process_id != process_id:
             raise ValueError("packet_process_mismatch")
@@ -173,10 +179,35 @@ class OperatorDispatchPlanner:
             raise ValueError("action_generation_invalid")
         if priority_rank < 0 or queue_sequence < 0:
             raise ValueError("queue_order_invalid")
+        if packet_input.result_publication is not None:
+            raise ValueError(
+                "result_publication_contract_owned_by_dispatch_planner"
+            )
+
+        publication_contract = None
+        if result_publication_target_ref is not None:
+            publication_contract = WorkerResultPublicationContract(
+                publication_id=(
+                    f"worker-result:{action_id}:"
+                    f"{action_generation}"
+                ),
+                action_id=action_id,
+                action_generation=action_generation,
+                process_generation=process_generation,
+                worker_slot_id=worker_slot_id,
+                session_generation=session_generation,
+                schema_ref=result_publication_schema_ref,
+                target_ref=result_publication_target_ref,
+                candidate_only=True,
+            )
+        effective_packet_input = replace(
+            packet_input,
+            result_publication=publication_contract,
+        )
 
         executor = self._registry.get(executor_id)
         packet = self._compiler.compile(
-            packet_input,
+            effective_packet_input,
             executor=executor,
         )
         payload_ref = (
@@ -187,7 +218,7 @@ class OperatorDispatchPlanner:
             payload_ref=payload_ref,
             process_generation=process_generation,
             packet=packet,
-            packet_input=packet_input,
+            packet_input=effective_packet_input,
         )
         action = OperatorAction(
             action_id=action_id,
@@ -286,6 +317,7 @@ def _packet_source(
         validator_contract=packet_input.validator_contract,
         output_schema=packet_input.output_schema,
         next_safe_boundary=packet_input.next_safe_boundary,
+        result_publication=packet_input.result_publication,
     )
 
 
@@ -328,4 +360,5 @@ def _compilation_input(
         validator_contract=source.validator_contract,
         output_schema=source.output_schema,
         next_safe_boundary=source.next_safe_boundary,
+        result_publication=source.result_publication,
     )

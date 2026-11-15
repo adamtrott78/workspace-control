@@ -86,6 +86,50 @@ class PacketSourceKernel:
             if any(not isinstance(value, str) or not value for value in values):
                 raise PacketSourceError(f"packet_source_{name}_invalid")
 
+        contract = source.result_publication
+        if contract is not None:
+            required_contract = (
+                contract.publication_id,
+                contract.action_id,
+                contract.worker_slot_id,
+                contract.schema_ref,
+                contract.target_ref,
+            )
+            if not all(
+                isinstance(value, str) and value
+                for value in required_contract
+            ):
+                raise PacketSourceError(
+                    "packet_source_result_publication_required_fields"
+                )
+            if (
+                contract.action_generation < 0
+                or contract.process_generation < 0
+                or contract.session_generation < 0
+            ):
+                raise PacketSourceError(
+                    "packet_source_result_publication_generation_invalid"
+                )
+            if contract.process_generation != source.process_generation:
+                raise PacketSourceError(
+                    "packet_source_result_publication_process_generation_mismatch"
+                )
+            if not contract.candidate_only:
+                raise PacketSourceError(
+                    "packet_source_result_publication_must_be_candidate_only"
+                )
+            if (
+                not contract.target_ref.startswith(
+                    "github-candidate://"
+                )
+                or ".." in contract.target_ref
+                or "?" in contract.target_ref
+                or "#" in contract.target_ref
+            ):
+                raise PacketSourceError(
+                    "packet_source_result_publication_target_invalid"
+                )
+
     @classmethod
     def validate_graph(cls, graph: WorkGraph) -> None:
         for payload_ref, source in graph.packet_sources.items():

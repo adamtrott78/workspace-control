@@ -42,6 +42,14 @@ from .read_only_repository import (
     observation_effect_hash,
     parse_repository_target,
 )
+from .worker_result_candidate import (
+    ImmutableWorkerResultCandidate,
+    WorkerResultCandidateAdapter,
+)
+from .worker_result_json import (
+    WorkerResultJsonError,
+    parse_worker_result_json,
+)
 from .serialization import (
     GraphCodecError,
     decode_work_graph,
@@ -87,6 +95,10 @@ __all__ = [
     "RepositoryReadPostconditionValidator",
     "StaticAuthorityEvaluator",
     "StaticRepositoryReader",
+    "ImmutableWorkerResultCandidate",
+    "WorkerResultCandidateAdapter",
+    "WorkerResultJsonError",
+    "parse_worker_result_json",
     "decode_work_graph",
     "dumps_work_graph",
     "encode_work_graph",

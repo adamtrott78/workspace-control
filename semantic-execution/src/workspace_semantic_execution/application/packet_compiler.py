@@ -5,7 +5,11 @@ from dataclasses import asdict, dataclass
 import hashlib
 import json
 
-from ..domain import ExecutorProfile, SessionMode
+from ..domain import (
+    ExecutorProfile,
+    SessionMode,
+    WorkerResultPublicationContract,
+)
 
 
 @dataclass(frozen=True)
@@ -45,6 +49,7 @@ class PacketCompilationInput:
     validator_contract: str = ""
     output_schema: str = "WORKSPACE_REASONING_RESULT_V1"
     next_safe_boundary: str = ""
+    result_publication: WorkerResultPublicationContract | None = None
 
 
 @dataclass(frozen=True)
@@ -109,6 +114,20 @@ class SemanticPacketCompiler:
             for item in source.decisions
         ):
             raise ValueError("invalid_decision")
+        contract = source.result_publication
+        if contract is not None:
+            if (
+                not contract.publication_id
+                or not contract.action_id
+                or not contract.worker_slot_id
+                or not contract.schema_ref
+                or not contract.target_ref
+                or contract.action_generation < 0
+                or contract.process_generation < 0
+                or contract.session_generation < 0
+                or not contract.candidate_only
+            ):
+                raise ValueError("invalid_result_publication_contract")
 
     def compile(
         self,
@@ -137,6 +156,11 @@ class SemanticPacketCompiler:
                 "output_schema": source.output_schema,
                 "next_safe_boundary": source.next_safe_boundary,
             },
+            "result_publication": (
+                None
+                if source.result_publication is None
+                else asdict(source.result_publication)
+            ),
             "executor": {
                 "executor_id": executor.executor_id,
                 "provider_id": executor.provider_id,
@@ -170,6 +194,15 @@ class SemanticPacketCompiler:
                     "Do not repeat an unchanged reasoning attempt. A retry must "
                     "be justified by new evidence, changed context, validator "
                     "feedback, a new branch, or changed resource/authority state."
+                ),
+                "result_publication_rule": (
+                    "If result_publication is non-null, publish exactly one JSON "
+                    "candidate matching its schema at its target_ref. Copy the "
+                    "packet_sha256 header value into the candidate packet_sha256 "
+                    "field. Do not include source_ref/source_sha256 in worker JSON; "
+                    "the intake adapter binds those from immutable bytes. Do not "
+                    "modify task capsules, authority/policy state, runtime control "
+                    "state, or any path other than the exact candidate target."
                 ),
             },
         }

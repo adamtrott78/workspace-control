@@ -69,6 +69,28 @@ class WorkerResultIntakeService:
                 "worker_result_packet_source_missing"
             )
 
+        contract = source.result_publication
+        if contract is not None:
+            if (
+                publication.publication_id
+                != contract.publication_id
+                or publication.action_id != contract.action_id
+                or publication.action_generation
+                != contract.action_generation
+                or publication.process_generation
+                != contract.process_generation
+                or publication.worker_slot_id
+                != contract.worker_slot_id
+                or publication.session_generation
+                != contract.session_generation
+                or not publication.source_ref.startswith(
+                    contract.target_ref + "@"
+                )
+            ):
+                raise WorkerResultIntakeError(
+                    "worker_result_publication_contract_mismatch"
+                )
+
         validator: WorkerResultValidator | None = None
         if publication.kind == WorkerResultKind.RESULT:
             validator = self._validators.get(
