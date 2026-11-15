@@ -555,8 +555,7 @@ def _require_provisioner_active(systemd: Systemd) -> None:
         raise ScientificActivationError("shared v3 provisioner is not active/running")
 
 
-def _require_provisioner_socket()
-    _require_provisioner_path_traversable() -> None:
+def _require_provisioner_socket() -> None:
     st = PROVISIONER_SOCKET.lstat()
     if not stat.S_ISSOCK(st.st_mode):
         raise ScientificActivationError("v3 provisioner path is not a Unix socket")
@@ -992,7 +991,7 @@ def expand_inactive(
         provisioner_started_on_new_generation = True
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
-    _require_provisioner_path_traversable()
+        _require_provisioner_path_traversable()
         _require_active_controller_socket_group(systemd, existing_class_ids)
 
         controller_after = _controller_snapshot(systemd, existing_class_ids)
@@ -1195,7 +1194,7 @@ def activate(
         _require_controller_snapshot_preserved(existing_before, existing_after)
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
-    _require_provisioner_path_traversable()
+        _require_provisioner_path_traversable()
         _require_active_controller_socket_group(
             systemd, [*existing_ids, TARGET_CLASS]
         )
