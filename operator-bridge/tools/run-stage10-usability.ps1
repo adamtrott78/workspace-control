@@ -13,9 +13,16 @@ $ErrorActionPreference = "Stop"
 
 $repo = [System.IO.Path]::GetFullPath($RepositoryRoot)
 $bridgeRoot = Join-Path $repo "operator-bridge"
-$runnerDll = Join-Path $bridgeRoot "integration/bin/Release/net10.0-windows/WorkspaceOperator.IntegrationHarness.dll"
-$helperExe = Join-Path $bridgeRoot "src/WorkspaceOperator/bin/Release/net10.0-windows/WorkspaceOperator.exe"
+$sourceSha = (git -C $repo rev-parse HEAD).Trim().ToLowerInvariant()
+if ($LASTEXITCODE -ne 0 -or $sourceSha -notmatch '^[0-9a-f]{40}$') {
+  throw "Stage 10 usability trial requires an exact Git source SHA."
+}
+$cacheRoot = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage10"
+$buildCache = Join-Path $cacheRoot ("build\" + $sourceSha)
+$runnerDll = Join-Path $buildCache "integration\WorkspaceOperator.IntegrationHarness.dll"
+$helperExe = Join-Path $buildCache "helper\WorkspaceOperator.exe"
 $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
+New-Item $cacheRoot -ItemType Directory -Force | Out-Null
 
 if (-not $ResultPath) {
   $ResultPath = Join-Path $repo ("benchmarks\workspace-semantic-execution\operator_bridge\stage10-" + $TrialId.ToLowerInvariant() + "-result.json")
@@ -33,10 +40,43 @@ if (-not (Test-Path $firefox)) {
   throw "Stage 10 usability trial requires Firefox to be installed at $firefox."
 }
 
-dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.Integration.slnx") --configuration Release
-if ($LASTEXITCODE -ne 0) {
-  throw "Stage 10 integration build failed."
+$buildCacheHit = (Test-Path $runnerDll) -and (Test-Path $helperExe)
+if (-not $buildCacheHit) {
+  $buildStage = Join-Path $cacheRoot ("build-staging-" + [guid]::NewGuid().ToString("N"))
+  try {
+    dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.Integration.slnx") --configuration Release
+    if ($LASTEXITCODE -ne 0) {
+      throw "Stage 10 integration build failed."
+    }
+
+    New-Item $buildStage -ItemType Directory -Force | Out-Null
+    Copy-Item `
+      (Join-Path $bridgeRoot "integration\bin\Release\net10.0-windows") `
+      (Join-Path $buildStage "integration") `
+      -Recurse
+    Copy-Item `
+      (Join-Path $bridgeRoot "src\WorkspaceOperator\bin\Release\net10.0-windows") `
+      (Join-Path $buildStage "helper") `
+      -Recurse
+
+    if (-not (Test-Path (Join-Path $buildStage "integration\WorkspaceOperator.IntegrationHarness.dll"))) {
+      throw "Stage 10 build cache staging is missing the integration harness."
+    }
+    if (-not (Test-Path (Join-Path $buildStage "helper\WorkspaceOperator.exe"))) {
+      throw "Stage 10 build cache staging is missing the native helper."
+    }
+
+    New-Item (Split-Path -Parent $buildCache) -ItemType Directory -Force | Out-Null
+    Remove-Item $buildCache -Recurse -Force -ErrorAction SilentlyContinue
+    Move-Item $buildStage $buildCache
+  }
+  finally {
+    if ($buildStage -and (Test-Path $buildStage)) {
+      Remove-Item $buildStage -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
 }
+Write-Host ("STAGE10_BUILD_CACHE=" + $(if ($buildCacheHit) { "HIT" } else { "MISS" }) + " source_sha=" + $sourceSha)
 
 $work = Join-Path $env:TEMP ("workspace-operator-stage10-" + [guid]::NewGuid().ToString("N"))
 New-Item $work -ItemType Directory -Force | Out-Null
@@ -44,19 +84,59 @@ $extensionStage = Join-Path $work "extension"
 Copy-Item (Join-Path $bridgeRoot "usability\FirefoxProfile\extension") $extensionStage -Recurse
 Copy-Item (Join-Path $bridgeRoot "src\FirefoxAdapter\adapter_core.js") (Join-Path $extensionStage "adapter_core.js")
 
-$webExtRoot = Join-Path $work "web-ext-tool"
-New-Item $webExtRoot -ItemType Directory -Force | Out-Null
-Push-Location $webExtRoot
-try {
-  npm.cmd init -y | Out-Null
-  if ($LASTEXITCODE -ne 0) { throw "npm init failed." }
-  npm.cmd install --no-audit --no-fund --save-exact web-ext@10.8.0 | Out-Null
-  if ($LASTEXITCODE -ne 0) { throw "Pinned web-ext@10.8.0 install failed." }
-}
-finally {
-  Pop-Location
-}
+$webExtRoot = Join-Path $cacheRoot "web-ext-10.8.0"
 $webExt = Join-Path $webExtRoot "node_modules\.bin\web-ext.cmd"
+$webExtPackage = Join-Path $webExtRoot "node_modules\web-ext\package.json"
+$webExtCacheHit = $false
+if ((Test-Path $webExt) -and (Test-Path $webExtPackage)) {
+  try {
+    $webExtMetadata = Get-Content $webExtPackage -Raw | ConvertFrom-Json
+    $webExtCacheHit = $webExtMetadata.version -eq "10.8.0"
+  }
+  catch {
+    $webExtCacheHit = $false
+  }
+}
+
+if (-not $webExtCacheHit) {
+  $webExtStage = Join-Path $cacheRoot ("web-ext-staging-" + [guid]::NewGuid().ToString("N"))
+  try {
+    New-Item $webExtStage -ItemType Directory -Force | Out-Null
+    '{"private":true}' | Set-Content (Join-Path $webExtStage "package.json") -Encoding ASCII
+
+    $npmProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @(
+      "/d",
+      "/c",
+      "npm.cmd install --no-audit --no-fund --prefer-offline --save-exact web-ext@10.8.0"
+    ) -WorkingDirectory $webExtStage -NoNewWindow -PassThru
+    if (-not $npmProcess.WaitForExit(120000)) {
+      Stop-Process -Id $npmProcess.Id -Force -ErrorAction SilentlyContinue
+      throw "Pinned web-ext@10.8.0 install exceeded the 120-second bootstrap bound."
+    }
+    if ($npmProcess.ExitCode -ne 0) {
+      throw "Pinned web-ext@10.8.0 install failed."
+    }
+
+    $stagedPackage = Join-Path $webExtStage "node_modules\web-ext\package.json"
+    $stagedBinary = Join-Path $webExtStage "node_modules\.bin\web-ext.cmd"
+    if (-not (Test-Path $stagedPackage) -or -not (Test-Path $stagedBinary)) {
+      throw "Pinned web-ext cache staging is incomplete."
+    }
+    $stagedMetadata = Get-Content $stagedPackage -Raw | ConvertFrom-Json
+    if ($stagedMetadata.version -ne "10.8.0") {
+      throw "Pinned web-ext cache staging resolved an unexpected version."
+    }
+
+    Remove-Item $webExtRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Move-Item $webExtStage $webExtRoot
+  }
+  finally {
+    if ($webExtStage -and (Test-Path $webExtStage)) {
+      Remove-Item $webExtStage -Recurse -Force -ErrorAction SilentlyContinue
+    }
+  }
+}
+Write-Host ("STAGE10_WEB_EXT_CACHE=" + $(if ($webExtCacheHit) { "HIT" } else { "MISS" }) + " version=10.8.0")
 
 $nativeManifest = Join-Path $work "native-host.json"
 [ordered]@{
