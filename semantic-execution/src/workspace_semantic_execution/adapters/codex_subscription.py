@@ -31,6 +31,18 @@ class CodexSubscriptionError(RuntimeError):
     """Fail-closed subscription executor error."""
 
 
+class CodexSubscriptionExecutionFailed(CodexSubscriptionError):
+    """Failed Codex turn with measurable subscription consumption."""
+
+    def __init__(
+        self,
+        message: str,
+        observation: "CodexSubscriptionRunObservation",
+    ) -> None:
+        super().__init__(message)
+        self.observation = observation
+
+
 @dataclass(frozen=True)
 class CodexSubscriptionAuthInfo:
     account_type: str
@@ -140,8 +152,9 @@ class CodexSubscriptionAuthGuard:
 
     def require_authorized(self) -> CodexSubscriptionAuthInfo:
         info = self.inspect()
-        if info.requires_openai_auth:
-            raise CodexSubscriptionError("chatgpt_auth_required")
+        # requiresOpenAIAuth describes the active provider's credential
+        # requirement; it is normally true for ChatGPT-backed providers.
+        # Actual signed-in subscription identity is established by account.type.
         if info.account_type != "chatgpt":
             raise CodexSubscriptionError(
                 f"subscription_auth_required:found={info.account_type}"
@@ -300,17 +313,7 @@ class CodexSubscriptionExecutor:
         trace = parse_codex_exec_jsonl(result.stdout)
         final_message = extract_last_agent_message(result.stdout)
 
-        if result.returncode != 0 or trace.turns_failed or trace.fatal_errors:
-            raise CodexSubscriptionError(
-                "codex_exec_failed:"
-                f"returncode={result.returncode}:"
-                f"turn_failures={trace.turns_failed}:"
-                f"fatal_errors={trace.fatal_errors}"
-            )
-        if trace.turns_completed < 1:
-            raise CodexSubscriptionError("codex_exec_missing_completed_turn")
-
-        return CodexSubscriptionRunObservation(
+        observation = CodexSubscriptionRunObservation(
             model_id=model_id,
             started_at=started,
             ended_at=ended,
@@ -320,6 +323,21 @@ class CodexSubscriptionExecutor:
             returncode=result.returncode,
             final_agent_message=final_message,
         )
+        if result.returncode != 0 or trace.turns_failed or trace.fatal_errors:
+            raise CodexSubscriptionExecutionFailed(
+                "codex_exec_failed:"
+                f"returncode={result.returncode}:"
+                f"turn_failures={trace.turns_failed}:"
+                f"fatal_errors={trace.fatal_errors}",
+                observation,
+            )
+        if trace.turns_completed < 1:
+            raise CodexSubscriptionExecutionFailed(
+                "codex_exec_missing_completed_turn",
+                observation,
+            )
+
+        return observation
 
     def _now(self) -> str:
         value = self._clock()
