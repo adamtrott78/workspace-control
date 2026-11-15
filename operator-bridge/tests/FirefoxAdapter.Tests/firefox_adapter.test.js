@@ -17,7 +17,7 @@ class MockBrowser {
     this.calls = [];
 
     for (const tab of initialTabs) {
-      this.tabsById.set(tab.id, { discarded: false, active: false, ...tab });
+      this.tabsById.set(tab.id, { discarded: false, active: false, windowId: 1, ...tab });
       this.nextTabId = Math.max(this.nextTabId, tab.id + 1);
     }
 
@@ -29,7 +29,8 @@ class MockBrowser {
           id: this.nextTabId++,
           url: createProperties.url,
           active: Boolean(createProperties.active),
-          discarded: false
+          discarded: false,
+          windowId: 1
         };
         this.tabsById.set(tab.id, tab);
         return { ...tab };
@@ -60,6 +61,13 @@ class MockBrowser {
         this.requireTab(tabId);
         this.tabsById.delete(tabId);
         this.tabValues.delete(tabId);
+      }
+    };
+
+    this.windows = {
+      update: async (windowId, updateInfo) => {
+        this.calls.push(["windows.update", windowId, structuredClone(updateInfo)]);
+        return { id: windowId, ...updateInfo };
       }
     };
 
@@ -274,6 +282,48 @@ test("active managed tab is not discarded", async () => {
   assert.equal(
     browser.calls.filter(call => call[0] === "tabs.discard").length,
     0);
+});
+
+test("activating managed worker also focuses its Firefox window", async () => {
+  const browser = new MockBrowser([
+    { id: 8, url: "https://chatgpt.com/", active: false, windowId: 42 }
+  ]);
+  browser.seedManaged(8, managedMetadata("binding-focus"));
+  const adapter = new FirefoxAdapterCore(browser);
+
+  const result = await adapter.handleCommand(command(
+    "req-focus",
+    "ACTIVATE_WORKER_BINDING",
+    { worker_slot_id: "slot-1", session_generation: 7 }
+  ));
+
+  assert.equal(result.outcome, "APPLIED");
+  assert.deepEqual(
+    browser.calls.find(call => call[0] === "tabs.update"),
+    ["tabs.update", 8, { active: true }]
+  );
+  assert.deepEqual(
+    browser.calls.find(call => call[0] === "windows.update"),
+    ["windows.update", 42, { focused: true }]
+  );
+});
+
+test("worker activation fails closed when Firefox window focus fails", async () => {
+  const browser = new MockBrowser([
+    { id: 18, url: "https://chatgpt.com/", active: false, windowId: 77 }
+  ]);
+  browser.seedManaged(18, managedMetadata("binding-focus-fail"));
+  browser.windows.update = async () => { throw new Error("focus denied"); };
+  const adapter = new FirefoxAdapterCore(browser);
+
+  const result = await adapter.handleCommand(command(
+    "req-focus-fail",
+    "ACTIVATE_WORKER_BINDING",
+    { worker_slot_id: "slot-1", session_generation: 7 }
+  ));
+
+  assert.equal(result.outcome, "NOT_APPLIED");
+  assert.equal(result.normalized_error, "WINDOW_FOCUS_FAILED");
 });
 
 test("binding generation mismatch rejects lifecycle mutation", async () => {
