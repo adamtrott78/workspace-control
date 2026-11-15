@@ -875,12 +875,6 @@ class DomainKernel:
                 if process.worker_id is not None or process.lease_id is not None:
                     raise KernelError("terminal_state_has_lease")
 
-            if (
-                process.disposition == WorkDisposition.INTRINSICALLY_DIFFICULT
-                and process.worker_id is not None
-            ):
-                raise KernelError("intrinsically_difficult_cannot_hold_lease")
-
         for process_id, process in graph.processes.items():
             if process.parent_process_id is None:
                 continue
