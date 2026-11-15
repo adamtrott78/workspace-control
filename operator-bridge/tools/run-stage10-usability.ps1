@@ -2,7 +2,7 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$RepositoryRoot,
   [Parameter(Mandatory = $true)]
-  [ValidateSet("UT-11", "UT-01", "UT-02", "UT-03", "UT-04", "UT-05", "UT-10", "UT-12")]
+  [ValidateSet("UT-11", "UT-01", "UT-02", "UT-03", "UT-04", "UT-05", "UT-06", "UT-07", "UT-08", "UT-10", "UT-12")]
   [string]$TrialId,
   [string]$ResultPath,
   [int]$DurationSeconds = 900,
@@ -136,6 +136,12 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
     Write-Host "UT-04 multiple SENT/UNCONFIRMED trial is ready. The tray starts with two independent sent/unconfirmed workers while four new service actions are ready. Complete four normal $SchedulerHotkey -> Ctrl+V -> Enter cycles. Do not choose, revisit, or resolve the prior unconfirmed workers; the simulator will deliver their late durable acknowledgments after the ready work is complete."
   } elseif ($TrialId -eq "UT-05") {
     Write-Host "UT-05 judgment-gate trial is ready. Press $SchedulerHotkey once. A distinct bounded judgment surface must open for exact gate ut05-judgment-01 without preparing a worker or changing the clipboard. Choose Yes to record the simulator-authority judgment, then complete one normal $SchedulerHotkey -> Ctrl+V -> Enter worker cycle."
+  } elseif ($TrialId -eq "UT-06") {
+    Write-Host "UT-06 managed-tab-loss recovery is ready. Press $SchedulerHotkey once; use only the explicit recovery surface and click OK. Do not search Firefox tabs or reconstruct state. After the tray shows one ready cycle, complete exactly one normal $SchedulerHotkey -> Ctrl+V -> Enter cycle."
+  } elseif ($TrialId -eq "UT-07") {
+    Write-Host "UT-07 profile-wide auth-refresh recovery is ready. Press $SchedulerHotkey once; click OK on the recovery surface, then click OK on the simulated manual-auth-return boundary. The fake-worker trial performs no credential automation. Do not inspect worker tabs. Then complete exactly one normal $SchedulerHotkey -> Ctrl+V -> Enter cycle."
+  } elseif ($TrialId -eq "UT-08") {
+    Write-Host "UT-08 cold-restart recovery is ready. The recovery incident has been rehydrated from durable simulator state. Press $SchedulerHotkey once and click OK on the explicit recovery surface; do not inspect tabs or replay the old packet. Then complete exactly one normal $SchedulerHotkey -> Ctrl+V -> Enter cycle."
   } elseif ($TrialId -eq "UT-12") {
     Write-Host "UT-12 no-work/background-ack trial is ready. One fake worker is already SENT/UNCONFIRMED and there is no READY action. Press $SchedulerHotkey once; the accepted READY=0 behavior may minimize only WorkspaceWorkers Firefox. Then switch to another normal app and leave it foreground. After about 3 seconds the simulator will apply the durable ack in the background. Do not paste or press Enter; verify no focus steal or clipboard disruption."
   } else {

@@ -301,6 +301,92 @@ internal static class UsabilityHarness
                     "slot-1",
                     0);
                 return;
+            case "UT-06":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                var pendingSix = world.Queue(
+                    "ut06-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                var claimedSix = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedSix, pendingSix) ||
+                    !world.Actions.MarkLocalPrepared(pendingSix))
+                {
+                    throw new InvalidOperationException(
+                        "UT06_PENDING_SEED_FAILED");
+                }
+                return;
+            case "UT-07":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-3",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+
+                var pendingSevenOne = world.Queue(
+                    "ut07-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                var claimedSevenOne = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedSevenOne, pendingSevenOne) ||
+                    !world.Actions.MarkLocalPrepared(pendingSevenOne))
+                {
+                    throw new InvalidOperationException(
+                        "UT07_PENDING_ONE_SEED_FAILED");
+                }
+
+                var pendingSevenTwo = world.Queue(
+                    "ut07-pending-02",
+                    "SERVICE_EXISTING",
+                    "slot-2",
+                    0);
+                var claimedSevenTwo = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedSevenTwo, pendingSevenTwo) ||
+                    !world.Actions.MarkLocalPrepared(pendingSevenTwo))
+                {
+                    throw new InvalidOperationException(
+                        "UT07_PENDING_TWO_SEED_FAILED");
+                }
+                return;
+            case "UT-08":
+                world.Sessions.Add(
+                    "slot-1",
+                    2,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                var pendingEight = world.Queue(
+                    "ut08-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    2);
+                var claimedEight = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedEight, pendingEight) ||
+                    !world.Actions.MarkLocalPrepared(pendingEight))
+                {
+                    throw new InvalidOperationException(
+                        "UT08_PENDING_SEED_FAILED");
+                }
+                return;
             case "UT-12":
                 world.Sessions.Add(
                     "slot-1",
@@ -379,13 +465,50 @@ internal static class UsabilityHarness
             return;
         }
 
+        var slotOneGeneration = trialId == "UT-08" ? 2 : 0;
         RequireApplied(
             browser.CreateTargetAsync(
-                    new BrowserTarget("slot-1", 0),
+                    new BrowserTarget("slot-1", slotOneGeneration),
                     CancellationToken.None)
                 .GetAwaiter()
                 .GetResult(),
             "seed slot-1");
+
+        if (trialId == "UT-06")
+        {
+            RequireApplied(
+                browser.CloseTargetAsync(
+                        new BrowserTarget("slot-1", 0),
+                        CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult(),
+                "simulate UT-06 managed tab loss");
+        }
+
+        if (trialId == "UT-07")
+        {
+            foreach (var slot in new[] { "slot-2", "slot-3" })
+            {
+                RequireApplied(
+                    browser.CreateTargetAsync(
+                            new BrowserTarget(slot, 0),
+                            CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult(),
+                    $"seed {slot}");
+            }
+        }
+
+        if (trialId == "UT-08")
+        {
+            RequireApplied(
+                browser.CreateTargetAsync(
+                        new BrowserTarget("slot-2", 0),
+                        CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult(),
+                "seed slot-2");
+        }
 
         if (trialId is "UT-01" or "UT-02" or "UT-03")
         {
@@ -500,6 +623,9 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private readonly UsabilityBrowserPort _browser;
     private readonly UsabilityClipboardWriter _clipboard;
     private readonly UsabilityOperatorSurface _operatorSurface;
+    private readonly RecoveryCoordinator? _recovery;
+    private readonly SimulatorRecoveryAuthorityPort? _recoveryAuthority;
+    private readonly bool _ut08RecoveryRehydrated;
     private readonly BridgeController _bridgeController;
     private readonly SingleFlightDispatchCoordinator _dispatch;
     private readonly HotkeyMessageWindow _hotkeyWindow;
@@ -517,6 +643,92 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private int _maxSentUnconfirmed;
     private bool _multipleSentUnconfirmedWithReadyObserved;
     private DateTimeOffset? _ut12NoWorkObservedAt;
+
+    private static (
+        RecoveryCoordinator? Coordinator,
+        SimulatorRecoveryAuthorityPort? Authority,
+        bool Ut08Rehydrated) CreateRecoverySetup(
+            string trialId,
+            SimulatorWorld world,
+            IManagedBrowserInventory inventory,
+            CaptureDiagnostics diagnostics)
+    {
+        if (trialId is not ("UT-06" or "UT-07" or "UT-08"))
+        {
+            return (null, null, false);
+        }
+
+        var stateStore = new InMemoryRecoveryStateStore();
+        var authority = new SimulatorRecoveryAuthorityPort(world);
+
+        if (trialId == "UT-06")
+        {
+            var recovery = new RecoveryCoordinator(
+                stateStore,
+                authority,
+                inventory,
+                diagnostics);
+            recovery.BeginAsync(
+                    "ut06-managed-tab-loss",
+                    RecoveryScope.SessionScoped,
+                    RecoverySignal.ManagedTabClosed,
+                    [new RecoverySessionRef("slot-1", 0)])
+                .GetAwaiter()
+                .GetResult();
+            return (recovery, authority, false);
+        }
+
+        if (trialId == "UT-07")
+        {
+            var recovery = new RecoveryCoordinator(
+                stateStore,
+                authority,
+                inventory,
+                diagnostics);
+            recovery.BeginAsync(
+                    "ut07-profile-auth-refresh",
+                    RecoveryScope.AuthDomainScoped,
+                    RecoverySignal.OperatorReportedAuthRefresh,
+                    [
+                        new RecoverySessionRef("slot-1", 0),
+                        new RecoverySessionRef("slot-2", 0)
+                    ])
+                .GetAwaiter()
+                .GetResult();
+            return (recovery, authority, false);
+        }
+
+        var first = new RecoveryCoordinator(
+            stateStore,
+            authority,
+            inventory,
+            diagnostics);
+        first.BeginAsync(
+                "ut08-cold-restart",
+                RecoveryScope.LocalBridgeGlobal,
+                RecoverySignal.SystemResumeOrHelperColdStart,
+                [new RecoverySessionRef("slot-1", 2)])
+            .GetAwaiter()
+            .GetResult();
+
+        var restarted = new RecoveryCoordinator(
+            stateStore,
+            authority,
+            inventory,
+            diagnostics);
+        var loaded = restarted.InitializeAsync()
+            .GetAwaiter()
+            .GetResult();
+        var rehydrated =
+            loaded is not null &&
+            string.Equals(
+                loaded.RecoveryId,
+                "ut08-cold-restart",
+                StringComparison.Ordinal) &&
+            restarted.BlocksDispatch;
+
+        return (restarted, authority, rehydrated);
+    }
 
     public UsabilityApplicationContext(
         string trialId,
@@ -536,7 +748,20 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         _submissions = submissions;
         _browser = new UsabilityBrowserPort(browser);
         _clipboard = new UsabilityClipboardWriter();
-        _operatorSurface = new UsabilityOperatorSurface(world);
+        var recoverySetup = CreateRecoverySetup(
+            trialId,
+            world,
+            _browser,
+            diagnostics);
+        _recovery = recoverySetup.Coordinator;
+        _recoveryAuthority = recoverySetup.Authority;
+        _ut08RecoveryRehydrated = recoverySetup.Ut08Rehydrated;
+        _operatorSurface = new UsabilityOperatorSurface(
+            trialId,
+            world,
+            _recovery,
+            _clipboard,
+            _browser);
         _workerWindowSafety = new WorkerWindowSafetyController(
             new Win32WorkerWindowSafetyPort());
 
@@ -559,7 +784,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             _clipboard,
             new SystemMonotonicClock(),
             diagnostics,
-            _operatorSurface);
+            _operatorSurface,
+            _recovery);
 
         _hotkeyWindow.HotkeyPressed += HotkeyPressed;
 
@@ -925,6 +1151,22 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         }
     }
 
+    private bool IsExpectedRecoverySuperseded(SimAction action) =>
+        _trialId switch
+        {
+            "UT-06" => action.ActionId == "ut06-pending-01",
+            "UT-07" => action.ActionId is
+                "ut07-pending-01" or
+                "ut07-pending-02",
+            "UT-08" => action.ActionId == "ut08-pending-01",
+            _ => false
+        };
+
+    private bool IsTerminalForTrial(SimAction action) =>
+        action.Status == SimActionStatus.Completed ||
+        (IsExpectedRecoverySuperseded(action) &&
+         action.Status == SimActionStatus.Superseded);
+
     private bool ShouldFinish()
     {
         if (_trialId == "UT-11")
@@ -933,8 +1175,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         }
 
         var allCompleted = _world.Actions.Actions.Count > 0 &&
-            _world.Actions.Actions.All(action =>
-                action.Status == SimActionStatus.Completed);
+            _world.Actions.Actions.All(IsTerminalForTrial);
         if (!allCompleted)
         {
             _allCompletedAt = null;
@@ -958,7 +1199,11 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         var intended = _world.Actions.Actions.Count;
         var completed = _world.Actions.Actions.Count(
             action => action.Status == SimActionStatus.Completed);
+        var terminal = _world.Actions.Actions.Count(IsTerminalForTrial);
         var serviceActionsIntended = _world.Actions.Actions.Count(IsServiceAction);
+        var serviceActionsExpectedToAck = _world.Actions.Actions.Count(action =>
+            IsServiceAction(action) &&
+            !IsExpectedRecoverySuperseded(action));
         var localOnlyActionsIntended = _world.Actions.Actions.Count(action =>
             action.ActionType is "DISCARD_SESSION" or "RETIRE_SESSION");
         var distinctServiceWorkers = _world.Actions.Actions
@@ -968,8 +1213,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             .Count();
         var objectivePass = _trialId == "UT-11"
             ? true
-            : completed == intended &&
-              ValidDurableAcks == serviceActionsIntended &&
+            : terminal == intended &&
+              ValidDurableAcks == serviceActionsExpectedToAck &&
               WrongWorkerDispatches == 0 &&
               WrongPacketDispatches == 0 &&
               RejectedStateSubmissions == 0 &&
@@ -983,6 +1228,81 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                 _operatorSurface.ExactGateObserved &&
                 Ut05JudgmentClipboardWrites == 0 &&
                 Ut05JudgmentBrowserEffects == 0)) &&
+              (_trialId != "UT-06" ||
+               (intended == 2 &&
+                completed == 1 &&
+                serviceActionsIntended == 2 &&
+                serviceActionsExpectedToAck == 1 &&
+                _operatorSurface.RecoveryOpenCount == 1 &&
+                _operatorSurface.RecoveryDecisionCount == 1 &&
+                _operatorSurface.RecoveryReadyCount == 1 &&
+                _operatorSurface.RecoveryInstructionSteps <= 3 &&
+                _operatorSurface.RecoveryClipboardWrites == 0 &&
+                _operatorSurface.RecoveryBrowserEffects == 0 &&
+                _recoveryAuthority?.FreezeCount == 1 &&
+                _recoveryAuthority.ReconcileCount == 1 &&
+                _recoveryAuthority.AdvanceCount == 1 &&
+                _world.Sessions.Get("slot-1")?.Generation == 1 &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut06-pending-01" &&
+                    action.Status == SimActionStatus.Superseded &&
+                    action.ClaimCount == 1) &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut06-service-01" &&
+                    action.SessionGeneration == 1 &&
+                    action.Status == SimActionStatus.Completed))) &&
+              (_trialId != "UT-07" ||
+               (intended == 3 &&
+                completed == 1 &&
+                serviceActionsIntended == 3 &&
+                serviceActionsExpectedToAck == 1 &&
+                _operatorSurface.RecoveryOpenCount == 1 &&
+                _operatorSurface.RecoveryDecisionCount == 1 &&
+                _operatorSurface.RecoveryReadyCount == 1 &&
+                _operatorSurface.ManualAuthPrompts == 1 &&
+                _operatorSurface.RecoveryInstructionSteps <= 3 &&
+                _operatorSurface.RecoveryClipboardWrites == 0 &&
+                _operatorSurface.RecoveryBrowserEffects == 0 &&
+                _world.AuthAutomationCount == 0 &&
+                _recoveryAuthority?.FreezeCount == 1 &&
+                _recoveryAuthority.ReconcileCount == 1 &&
+                _recoveryAuthority.AdvanceCount == 2 &&
+                _world.Sessions.Get("slot-1")?.Generation == 1 &&
+                _world.Sessions.Get("slot-2")?.Generation == 1 &&
+                _world.Actions.Actions.Count(action =>
+                    action.ActionId.StartsWith(
+                        "ut07-pending-",
+                        StringComparison.Ordinal) &&
+                    action.Status == SimActionStatus.Superseded &&
+                    action.ClaimCount == 1) == 2 &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut07-service-01" &&
+                    action.WorkerSlotId == "slot-3" &&
+                    action.Status == SimActionStatus.Completed))) &&
+              (_trialId != "UT-08" ||
+               (intended == 2 &&
+                completed == 1 &&
+                serviceActionsIntended == 2 &&
+                serviceActionsExpectedToAck == 1 &&
+                _ut08RecoveryRehydrated &&
+                _operatorSurface.RecoveryOpenCount == 1 &&
+                _operatorSurface.RecoveryDecisionCount == 1 &&
+                _operatorSurface.RecoveryReadyCount == 1 &&
+                _operatorSurface.RecoveryInstructionSteps <= 3 &&
+                _operatorSurface.RecoveryClipboardWrites == 0 &&
+                _operatorSurface.RecoveryBrowserEffects == 0 &&
+                _recoveryAuthority?.FreezeCount == 1 &&
+                _recoveryAuthority.ReconcileCount == 1 &&
+                _recoveryAuthority.AdvanceCount == 1 &&
+                _world.Sessions.Get("slot-1")?.Generation == 3 &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut08-pending-01" &&
+                    action.Status == SimActionStatus.Superseded &&
+                    action.ClaimCount == 1) &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut08-service-01" &&
+                    action.WorkerSlotId == "slot-2" &&
+                    action.Status == SimActionStatus.Completed))) &&
               (_trialId != "UT-12" ||
                (intended == 1 &&
                 serviceActionsIntended == 1 &&
@@ -1031,7 +1351,10 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                     end_timestamp = DateTimeOffset.UtcNow,
                     actions_intended = intended,
                     actions_completed = completed,
+                    actions_terminal = terminal,
                     service_actions_intended = serviceActionsIntended,
+                    service_actions_expected_durable_acks =
+                        serviceActionsExpectedToAck,
                     local_only_actions_intended = localOnlyActionsIntended,
                     distinct_service_workers = distinctServiceWorkers,
                     valid_durable_acks = ValidDurableAcks,
@@ -1078,6 +1401,48 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                         Ut12BackgroundAckClipboardWrites,
                     ut12_background_ack_browser_effects =
                         Ut12BackgroundAckBrowserEffects,
+                    recovery_surface_opens =
+                        _operatorSurface.RecoveryOpenCount,
+                    recovery_decisions =
+                        _operatorSurface.RecoveryDecisionCount,
+                    recovery_ready_count =
+                        _operatorSurface.RecoveryReadyCount,
+                    recovery_instruction_steps =
+                        _operatorSurface.RecoveryInstructionSteps,
+                    recovery_manual_auth_prompts =
+                        _operatorSurface.ManualAuthPrompts,
+                    recovery_clipboard_writes =
+                        _operatorSurface.RecoveryClipboardWrites,
+                    recovery_browser_effects =
+                        _operatorSurface.RecoveryBrowserEffects,
+                    recovery_last_status =
+                        _operatorSurface.LastRecoveryStatus,
+                    recovery_last_id =
+                        _operatorSurface.LastRecoveryId,
+                    recovery_authority_freeze_count =
+                        _recoveryAuthority?.FreezeCount ?? 0,
+                    recovery_authority_reconcile_count =
+                        _recoveryAuthority?.ReconcileCount ?? 0,
+                    recovery_authority_generation_advances =
+                        _recoveryAuthority?.AdvanceCount ?? 0,
+                    ut08_recovery_rehydrated =
+                        _ut08RecoveryRehydrated,
+                    ut06_slot1_generation =
+                        _trialId == "UT-06"
+                            ? _world.Sessions.Get("slot-1")?.Generation
+                            : null,
+                    ut07_slot1_generation =
+                        _trialId == "UT-07"
+                            ? _world.Sessions.Get("slot-1")?.Generation
+                            : null,
+                    ut07_slot2_generation =
+                        _trialId == "UT-07"
+                            ? _world.Sessions.Get("slot-2")?.Generation
+                            : null,
+                    ut08_slot1_generation =
+                        _trialId == "UT-08"
+                            ? _world.Sessions.Get("slot-1")?.Generation
+                            : null,
                     bridge_clipboard_writes =
                         _clipboard.WriteCount,
                     bridge_browser_effects =
@@ -1270,18 +1635,40 @@ internal sealed class UsabilityBrowserPort :
 
 internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
 {
+    private readonly string _trialId;
     private readonly SimulatorWorld _world;
+    private readonly RecoveryCoordinator? _recovery;
+    private readonly UsabilityClipboardWriter _clipboard;
+    private readonly UsabilityBrowserPort _browser;
+    private bool _recoveryResumeActionQueued;
 
-    public UsabilityOperatorSurface(SimulatorWorld world)
+    public UsabilityOperatorSurface(
+        string trialId,
+        SimulatorWorld world,
+        RecoveryCoordinator? recovery,
+        UsabilityClipboardWriter clipboard,
+        UsabilityBrowserPort browser)
     {
+        _trialId = trialId;
         _world = world;
+        _recovery = recovery;
+        _clipboard = clipboard;
+        _browser = browser;
     }
 
     public int JudgmentOpenCount { get; private set; }
     public int JudgmentDecisionCount { get; private set; }
     public int RecoveryOpenCount { get; private set; }
+    public int RecoveryDecisionCount { get; private set; }
+    public int RecoveryReadyCount { get; private set; }
+    public int RecoveryInstructionSteps { get; private set; }
+    public int ManualAuthPrompts { get; private set; }
+    public int RecoveryClipboardWrites { get; private set; }
+    public int RecoveryBrowserEffects { get; private set; }
     public bool ExactGateObserved { get; private set; }
     public string? LastJudgmentActionId { get; private set; }
+    public string? LastRecoveryStatus { get; private set; }
+    public string? LastRecoveryId { get; private set; }
 
     public Task OpenJudgmentAsync(CancellationToken cancellationToken)
     {
@@ -1330,9 +1717,127 @@ internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
         return Task.CompletedTask;
     }
 
-    public Task OpenRecoveryAsync(CancellationToken cancellationToken)
+    public async Task OpenRecoveryAsync(CancellationToken cancellationToken)
     {
         RecoveryOpenCount++;
-        return Task.CompletedTask;
+        if (_recovery is null)
+        {
+            return;
+        }
+
+        var clipboardBefore = _clipboard.WriteCount;
+        var browserEffectsBefore = _browser.EffectCount;
+        LastRecoveryId = _recovery.Current?.RecoveryId;
+
+        RecoveryInstructionSteps++;
+        MessageBox.Show(
+            RecoveryInstruction(),
+            "Workspace Worker Bridge - Recovery",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+        RecoveryDecisionCount++;
+
+        RecoveryIncident result;
+        if (_trialId == "UT-07")
+        {
+            var waiting = await _recovery.ReconcileAsync(
+                cancellationToken);
+            LastRecoveryStatus = waiting.Status.ToString();
+            if (waiting.Status != RecoveryStatus.AwaitingManualAuth)
+            {
+                throw new InvalidOperationException(
+                    "UT07_EXPECTED_MANUAL_AUTH_BOUNDARY");
+            }
+
+            ManualAuthPrompts++;
+            RecoveryInstructionSteps++;
+            MessageBox.Show(
+                "UT-07 simulated profile-wide authentication boundary. " +
+                "Production recovery requires normal manual login here; " +
+                "this fake-worker trial performs no credential automation. " +
+                "Click OK to record that the operator returned from authentication.",
+                "Workspace Worker Bridge - Manual Auth Boundary",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            _world.ProveNoAuthAutomation();
+
+            result = await _recovery.MarkManualAuthReturnedAsync(
+                cancellationToken);
+        }
+        else
+        {
+            result = await _recovery.ReconcileAsync(
+                cancellationToken);
+        }
+
+        LastRecoveryStatus = result.Status.ToString();
+        if (result.Status != RecoveryStatus.ReadyToResume)
+        {
+            throw new InvalidOperationException(
+                "STAGE10_RECOVERY_NOT_READY_TO_RESUME");
+        }
+
+        RecoveryReadyCount++;
+        QueuePostRecoveryAction();
+        await _recovery.MarkHealthyAsync(cancellationToken);
+
+        RecoveryClipboardWrites +=
+            _clipboard.WriteCount - clipboardBefore;
+        RecoveryBrowserEffects +=
+            _browser.EffectCount - browserEffectsBefore;
+    }
+
+    private string RecoveryInstruction() =>
+        _trialId switch
+        {
+            "UT-06" =>
+                "UT-06 managed worker surface loss is fenced. " +
+                "Click OK to reconcile durable state and advance the lost " +
+                "session generation. Do not inspect or search Firefox tabs.",
+            "UT-07" =>
+                "UT-07 profile-wide auth refresh is fenced across two " +
+                "sent/unconfirmed sessions. Click OK to reconcile durable " +
+                "state. Do not inspect worker tabs or reconstruct state.",
+            "UT-08" =>
+                "UT-08 helper cold-restart incident was rehydrated from " +
+                "durable recovery state. Click OK to reconcile it. " +
+                "Do not inspect worker tabs or replay the old packet.",
+            _ =>
+                "Recovery is required. Click OK to reconcile durable state."
+        };
+
+    private void QueuePostRecoveryAction()
+    {
+        if (_recoveryResumeActionQueued)
+        {
+            return;
+        }
+
+        switch (_trialId)
+        {
+            case "UT-06":
+                _world.Queue(
+                    "ut06-service-01",
+                    "CREATE_AND_SERVICE",
+                    "slot-1",
+                    1);
+                break;
+            case "UT-07":
+                _world.Queue(
+                    "ut07-service-01",
+                    "SERVICE_EXISTING",
+                    "slot-3",
+                    0);
+                break;
+            case "UT-08":
+                _world.Queue(
+                    "ut08-service-01",
+                    "SERVICE_EXISTING",
+                    "slot-2",
+                    0);
+                break;
+        }
+
+        _recoveryResumeActionQueued = true;
     }
 }

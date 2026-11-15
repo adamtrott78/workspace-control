@@ -422,6 +422,9 @@ jobs:
          github.event.label.name == 'stage10-ut03' ||
          github.event.label.name == 'stage10-ut04' ||
          github.event.label.name == 'stage10-ut05' ||
+         github.event.label.name == 'stage10-ut06' ||
+         github.event.label.name == 'stage10-ut07' ||
+         github.event.label.name == 'stage10-ut08' ||
          github.event.label.name == 'stage10-ut10' ||
          github.event.label.name == 'stage10-ut12') &&
         github.event.pull_request.number == 590 &&
@@ -479,6 +482,9 @@ jobs:
             "stage10-ut03" { "UT-03" }
             "stage10-ut04" { "UT-04" }
             "stage10-ut05" { "UT-05" }
+            "stage10-ut06" { "UT-06" }
+            "stage10-ut07" { "UT-07" }
+            "stage10-ut08" { "UT-08" }
             "stage10-ut10" { "UT-10" }
             "stage10-ut12" { "UT-12" }
             default { throw "Unsupported Stage 10 usability label: $label" }

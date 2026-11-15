@@ -93,6 +93,9 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("stage10-ut03", workflow)
         self.assertIn("stage10-ut04", workflow)
         self.assertIn("stage10-ut05", workflow)
+        self.assertIn("stage10-ut06", workflow)
+        self.assertIn("stage10-ut07", workflow)
+        self.assertIn("stage10-ut08", workflow)
         self.assertIn("stage10-ut10", workflow)
         self.assertIn("stage10-ut12", workflow)
         self.assertIn("STAGE10_SCHEDULER_HOTKEY: Ctrl+Space", workflow)
@@ -202,6 +205,46 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn('$TrialId -eq "UT-12"', script)
         self.assertIn("stage10-ut05", workflow)
         self.assertIn("stage10-ut12", workflow)
+        self.assertNotIn("SendKeys", harness)
+        self.assertNotIn("KeyboardEvent", harness)
+        self.assertNotIn("MouseEvent", harness)
+
+    def test_stage10_ut06_ut07_ut08_recovery_trials_use_durable_authority(self):
+        harness = (
+            ROOT / "operator-bridge" / "integration" / "UsabilityHarness.cs"
+        ).read_text(encoding="utf-8")
+        script = (
+            ROOT / "operator-bridge" / "tools" / "run-stage10-usability.ps1"
+        ).read_text(encoding="utf-8")
+        workflow = (
+            ROOT / ".github" / "workflows" / "operator-bridge-validation.yml"
+        ).read_text(encoding="utf-8")
+
+        for trial in ("UT-06", "UT-07", "UT-08"):
+            self.assertIn(f'case "{trial}":', harness)
+            self.assertIn(f'"{trial}"', script)
+            self.assertIn(f'$TrialId -eq "{trial}"', script)
+            self.assertIn(
+                "stage10-" + trial.lower().replace("ut-", "ut"),
+                workflow,
+            )
+
+        self.assertIn("RecoveryCoordinator", harness)
+        self.assertIn("RecoverySignal.ManagedTabClosed", harness)
+        self.assertIn("RecoverySignal.OperatorReportedAuthRefresh", harness)
+        self.assertIn("RecoverySignal.SystemResumeOrHelperColdStart", harness)
+        self.assertIn("InitializeAsync()", harness)
+        self.assertIn("_ut08RecoveryRehydrated", harness)
+        self.assertIn("MarkManualAuthReturnedAsync", harness)
+        self.assertIn("ProveNoAuthAutomation", harness)
+        self.assertIn("RecoveryInstructionSteps <= 3", harness)
+        self.assertIn("RecoveryClipboardWrites == 0", harness)
+        self.assertIn("RecoveryBrowserEffects == 0", harness)
+        self.assertIn("_recoveryAuthority.AdvanceCount == 2", harness)
+        self.assertIn("SimActionStatus.Superseded", harness)
+        self.assertIn("service_actions_expected_durable_acks", harness)
+        self.assertIn("recovery_authority_generation_advances", harness)
+        self.assertIn("ut08_recovery_rehydrated", harness)
         self.assertNotIn("SendKeys", harness)
         self.assertNotIn("KeyboardEvent", harness)
         self.assertNotIn("MouseEvent", harness)
