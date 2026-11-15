@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: cf7a2393cc57c55e8bfb317afdf99d3fa89cd175
+- Remote checkpoint: cef754dbd2484081b641c194f1dd0020d85dfc78
 - Remote verified: true
 
 ### research-engine
@@ -36,15 +36,16 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement the fault/resource acceptance suite under tests/test_workspace_semantic_execution_backend_faults.py and extend .github/workflows/semantic-execution-validation.yml to run backend kernel/runtime/read-only/research-engine-shadow/fault tests explicitly. Cover crash after claim, crash after effect before checkpoint, duplicate/delayed/out-of-order event behavior, stale-generation fencing, executor/session disappearance, validator failure/timeout semantics, durable restart/reconciliation, and control-plane GPU blindness/resource-budget checks. Do not add write authority. After the suite is green, produce Architecture Review v0.3 from measured evidence.
+Implement RESEARCH_ENGINE_COORDINATED_READ_ONLY_VERTICAL_SLICE_V1 under semantic-execution/** and tests/test_workspace_semantic_execution_backend*.py. Reuse the validated DomainKernel, RuntimeCoordinator, ExecutorRegistry, SemanticPacketCompiler, StaticAuthorityEvaluator, exact Research Engine repository read executor, and independent postcondition validator. The service must return structured routing/packet/authority/receipt/validation evidence and reach COMPLETED only after validator PASS. Add negative tests for unknown authority, stale generation, no eligible executor, changed-source validation failure, duplicate-effect safety, and deterministic packet hashing. Do not mutate research-engine and do not add write authority.
 
 ## Remaining work
 
-- Run explicit fault-injection acceptance for death after claim, death after effect before checkpoint, duplicate/delayed/out-of-order events, stale generations, executor/session loss, validator timeout, and durable recovery.
-- Add semantic-execution-specific CI coverage for read-only/canary/fault tests plus resource gates.
-- Measure/control-plane CPU/RSS/GPU-blindness targets and record evidence.
-- Perform Architecture Review v0.3 from real implementation/canary/fault evidence and choose/retain/revise DBOS+PostgreSQL provisionally.
-- Define the next bounded write-capable slice only if v0.3 evidence supports it.
+- Implement and validate the coordinated Research Engine read-only vertical slice described by Architecture Review v0.3.
+- Add production session-broker semantics and recovery tests after the coordinated slice proves router/packet/runtime composition.
+- Bind the backend action/status transport to the independently owned Operator Bridge only through its authorized child task.
+- Integrate subscription Codex as an executor only after its runtime/auth child clears the PR #627 lineage gate.
+- Measure real-workflow control-plane CPU/RSS and repeat fault injection on the integrated slice.
+- Propose a separately authorized low-consequence write-capable slice only after coordinated read-only evidence passes.
 
 ## Blockers / gates
 
