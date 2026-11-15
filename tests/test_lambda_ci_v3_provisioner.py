@@ -199,11 +199,40 @@ class V3ProvisionerTests(unittest.TestCase):
         first = "workspace-control-control-small-v1"
         second = "research-cpu-public-v1"
         third = "padataset-cpu-public-v1"
+        fourth = "padataset-scientific-single-gpu-v1"
         self.assertEqual(self.reserve(first, 105)["status"], "RESERVED")
         self.assertEqual(self.reserve(second, 106)["status"], "RESERVED")
-        busy = self.reserve(third, 107)
+        self.assertEqual(self.reserve(third, 107)["status"], "RESERVED")
+        busy = self.reserve(fourth, 108)
         self.assertEqual(busy["status"], "BUSY")
-        self.assertIsNone(self.store.read(self.request_id(107)))
+        self.assertIsNone(self.store.read(self.request_id(108)))
+
+    def test_two_science_lanes_leave_reserved_workspace_control_slot(self):
+        science0 = "padataset-scientific-single-gpu-v1"
+        science1 = "padataset-scientific-single-gpu-2-v1"
+        research = "research-cpu-public-v1"
+        control = "workspace-control-control-small-v1"
+
+        self.assertEqual(self.reserve(science0, 201)["status"], "RESERVED")
+        self.assertEqual(self.reserve(science1, 202)["status"], "RESERVED")
+        blocked = self.reserve(research, 203)
+        self.assertEqual(blocked["status"], "BUSY")
+        self.assertIsNone(self.store.read(self.request_id(203)))
+        self.assertEqual(self.reserve(control, 204)["status"], "RESERVED")
+
+    def test_control_first_then_two_science_lanes_fill_three_host_slots(self):
+        self.assertEqual(
+            self.reserve("workspace-control-control-small-v1", 205)["status"],
+            "RESERVED",
+        )
+        self.assertEqual(
+            self.reserve("padataset-scientific-single-gpu-v1", 206)["status"],
+            "RESERVED",
+        )
+        self.assertEqual(
+            self.reserve("padataset-scientific-single-gpu-2-v1", 207)["status"],
+            "RESERVED",
+        )
 
     def test_reservation_expires_and_fresh_request_can_allocate(self):
         first, second = self.class_ids[:2]

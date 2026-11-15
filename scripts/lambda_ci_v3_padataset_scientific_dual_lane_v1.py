@@ -2,7 +2,7 @@
 """Drained two-phase activation for PADataset scientific lane B.
 
 Phase A expands the already-live scientific generation from 10 to 11 classes,
-raises only the host and PADataset project concurrency ceilings from 1 to 2,
+raises the host ceiling from 1 to 3 while raising only PADataset project concurrency from 1 to 2 and reserving one host slot for Workspace Control,
 and installs lane B inactive/disabled. Phase B separately activates lane B
 after a fresh GitHub/scale-set/runtime preflight. Both phases require exact,
 root-owned one-shot operator authority and fail closed on nonterminal work.
@@ -133,8 +133,8 @@ def _validate_generation(
         raise DualLaneActivationError("host resource policy missing")
     if current_host.get("migration_mode", {}).get("host_max_active_runners") != 1:
         raise DualLaneActivationError("predecessor host max is not 1")
-    if candidate_host.get("migration_mode", {}).get("host_max_active_runners") != 2:
-        raise DualLaneActivationError("candidate host max is not 2")
+    if candidate_host.get("migration_mode", {}).get("host_max_active_runners") != 3:
+        raise DualLaneActivationError("candidate host max is not 3")
     if current_host.get("project_limits", {}).get("padataset", {}).get("max_active_runners") != 1:
         raise DualLaneActivationError("predecessor PADataset max is not 1")
     if candidate_host.get("project_limits", {}).get("padataset", {}).get("max_active_runners") != 2:
@@ -149,6 +149,13 @@ def _validate_generation(
             )
     if current_host.get("exclusive_resources") != candidate_host.get("exclusive_resources"):
         raise DualLaneActivationError("exclusive GPU resource inventory drift")
+    reserved = candidate_host.get("reservation_policy", {}).get(
+        "reserved_project_slots"
+    )
+    if reserved != {"workspace-control": 1}:
+        raise DualLaneActivationError(
+            "candidate workspace-control reservation mismatch"
+        )
 
     previous: dict[str, str] = {}
     current: dict[str, str] = {}
@@ -465,8 +472,9 @@ def expand_inactive(
         "candidate_root_policy_sha256": compiled["root_projection"]["root_policy_sha256"],
         "target_class_id": TARGET_CLASS,
         "target_route_key": TARGET_ROUTE,
-        "host_max_active_runners": 2,
+        "host_max_active_runners": 3,
         "padataset_max_active_runners": 2,
+        "reserved_project_slots": {"workspace-control": 1},
         "scientific_active_receipt_sha256": receipt["scientific_active_receipt_sha256"],
         "scientific_workflow_refresh_receipt_sha256":
             receipt["scientific_workflow_refresh_receipt_sha256"],

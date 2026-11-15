@@ -746,8 +746,13 @@ def _verify_padataset_scientific_dual_lane_effective_state(
     host = root_policy.get("host_resource_policy")
     if not isinstance(host, dict):
         raise ReconcileError("PADataset dual-lane host resource policy missing")
-    if host.get("migration_mode", {}).get("host_max_active_runners") != 2:
+    if host.get("migration_mode", {}).get("host_max_active_runners") != 3:
         raise ReconcileError("PADataset dual-lane host concurrency ceiling mismatch")
+    reserved = host.get("reservation_policy", {}).get("reserved_project_slots")
+    if reserved != {"workspace-control": 1}:
+        raise ReconcileError(
+            "PADataset dual-lane workspace-control reservation mismatch"
+        )
     limits = host.get("project_limits")
     if not isinstance(limits, dict):
         raise ReconcileError("PADataset dual-lane project limits missing")

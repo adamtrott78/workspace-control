@@ -61,6 +61,15 @@ class PadatasetScientificDualLaneActivationTests(unittest.TestCase):
         self.assertIn(dual.TARGET_CLASS, current)
         self.assertEqual(len(current), len(previous) + 1)
 
+    def test_generation_requires_reserved_workspace_control_slot(self):
+        candidate = self.candidate()
+        candidate['host_resource_policy']['reservation_policy']['reserved_project_slots'] = {}
+        with self.assertRaisesRegex(
+            dual.DualLaneActivationError,
+            'workspace-control reservation mismatch',
+        ):
+            dual._validate_generation(self.predecessor(), candidate)
+
     def test_generation_rejects_unrelated_project_limit_widening(self):
         candidate = self.candidate()
         candidate['host_resource_policy']['project_limits']['research-engine']['max_active_runners'] = 2
