@@ -50,11 +50,11 @@ RECONCILER_INSTALLED = reconciler.RECONCILER_SCRIPT
 RECONCILER_OVERRIDE = reconciler.RECONCILER_OVERRIDE_ACTIVE_RECEIPT
 PROVISIONER_UNIT = "workspace-ci-v3-provisioner.service"
 INSTALLED_RUNTIME = pathlib.Path("/opt/workspace-ci/v3/provisioner/lambda_ci_runtime.py")
-SHARED_PROJECT_ROOTS = (
-    pathlib.Path("/srv/workspace-ci/padataset/jobs"),
-    pathlib.Path("/srv/workspace-ci/padataset/staging-cache"),
-    pathlib.Path("/srv/workspace-ci/padataset/logs"),
-)
+SHARED_PROJECT_ROOT_MODES = {
+    pathlib.Path("/srv/workspace-ci/padataset/jobs"): 0o750,
+    pathlib.Path("/srv/workspace-ci/padataset/staging-cache"): 0o710,
+    pathlib.Path("/srv/workspace-ci/padataset/logs"): 0o710,
+}
 
 STATE_ROOT = pathlib.Path(
     "/var/lib/workspace-ci/v3/padataset-scientific/lane-b-runner-identity"
@@ -199,7 +199,7 @@ def _repair_shared_project_roots() -> None:
             "lane-B primary group no longer matches shared PADataset group"
         )
 
-    for path in SHARED_PROJECT_ROOTS:
+    for path, expected_mode in SHARED_PROJECT_ROOT_MODES.items():
         if not path.is_dir():
             raise RunnerIdentityCutoverError(
                 f"shared PADataset runtime root missing: {path}"
@@ -210,11 +210,11 @@ def _repair_shared_project_roots() -> None:
                 f"shared PADataset runtime root ownership mismatch: {path}"
             )
         mode = st.st_mode & 0o777
-        if mode not in {0o700, 0o710}:
+        if mode not in {0o700, expected_mode}:
             raise RunnerIdentityCutoverError(
                 f"unexpected shared PADataset runtime root mode {mode:04o}: {path}"
             )
-        os.chmod(path, 0o710)
+        os.chmod(path, expected_mode)
 
 
 def _verify_shared_project_roots() -> None:
@@ -227,15 +227,16 @@ def _verify_shared_project_roots() -> None:
             "lane-B primary group no longer matches shared PADataset group"
         )
 
-    for path in SHARED_PROJECT_ROOTS:
+    for path, expected_mode in SHARED_PROJECT_ROOT_MODES.items():
         st = path.stat()
         if st.st_uid != owner.pw_uid or st.st_gid != group.gr_gid:
             raise RunnerIdentityCutoverError(
                 f"shared PADataset runtime root ownership mismatch: {path}"
             )
-        if (st.st_mode & 0o777) != 0o710:
+        if (st.st_mode & 0o777) != expected_mode:
             raise RunnerIdentityCutoverError(
-                f"shared PADataset runtime root mode must be 0710: {path}"
+                f"shared PADataset runtime root mode must be "
+                f"{expected_mode:04o}: {path}"
             )
 
 
@@ -649,7 +650,9 @@ def main() -> int:
     print("LANE_B_RUNNER_USER=ci-padataset-2")
     print("LANE_B_PRIMARY_GROUP=ci-padataset")
     print("UID_SCOPED_GUARDS=PRESERVED")
-    print("SHARED_PADATASET_ROOTS=0710 ci-padataset:ci-padataset")
+    print("SHARED_PADATASET_JOBS=0750 ci-padataset:ci-padataset")
+    print("SHARED_PADATASET_STAGING_CACHE=0710 ci-padataset:ci-padataset")
+    print("SHARED_PADATASET_LOGS=0710 ci-padataset:ci-padataset")
     print(f"TRANSACTION_RECEIPT={receipt}")
     return 0
 

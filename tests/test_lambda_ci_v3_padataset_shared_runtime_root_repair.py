@@ -19,7 +19,13 @@ class PadatasetSharedRuntimeRootRepairTests(unittest.TestCase):
         self.assertNotIn("chmod -R", source)
         self.assertNotIn("chown(", source)
 
-    def test_group_receives_traverse_only(self):
+    def test_jobs_parent_is_group_readable_and_traversable(self):
+        mode = 0o750
+        self.assertEqual(mode & 0o070, 0o050)
+        self.assertEqual(mode & 0o020, 0)
+        self.assertEqual(mode & 0o007, 0)
+
+    def test_cache_and_logs_remain_traverse_only_for_group(self):
         mode = 0o710
         self.assertEqual(mode & 0o070, 0o010)
         self.assertEqual(mode & 0o060, 0)
@@ -30,7 +36,15 @@ class PadatasetSharedRuntimeRootRepairTests(unittest.TestCase):
         self.assertIn("_repair_shared_project_roots()", source)
         self.assertIn("_verify_shared_project_roots()", source)
         self.assertIn(
-            'SHARED_PADATASET_ROOTS=0710 ci-padataset:ci-padataset',
+            'SHARED_PADATASET_JOBS=0750 ci-padataset:ci-padataset',
+            source,
+        )
+        self.assertIn(
+            'SHARED_PADATASET_STAGING_CACHE=0710 ci-padataset:ci-padataset',
+            source,
+        )
+        self.assertIn(
+            'SHARED_PADATASET_LOGS=0710 ci-padataset:ci-padataset',
             source,
         )
 

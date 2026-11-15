@@ -15,11 +15,11 @@ import pathlib
 import pwd
 import stat
 
-ROOTS = (
-    pathlib.Path("/srv/workspace-ci/padataset/jobs"),
-    pathlib.Path("/srv/workspace-ci/padataset/staging-cache"),
-    pathlib.Path("/srv/workspace-ci/padataset/logs"),
-)
+ROOT_MODES = {
+    pathlib.Path("/srv/workspace-ci/padataset/jobs"): 0o750,
+    pathlib.Path("/srv/workspace-ci/padataset/staging-cache"): 0o710,
+    pathlib.Path("/srv/workspace-ci/padataset/logs"): 0o710,
+}
 
 
 class RepairError(RuntimeError):
@@ -32,12 +32,15 @@ def verify() -> None:
     lane_b = pwd.getpwnam("ci-padataset-2")
     if lane_b.pw_gid != group.gr_gid:
         raise RepairError("lane-B primary group mismatch")
-    for path in ROOTS:
+    for path, expected_mode in ROOT_MODES.items():
         st = path.stat()
         if st.st_uid != owner.pw_uid or st.st_gid != group.gr_gid:
             raise RepairError(f"ownership mismatch: {path}")
-        if stat.S_IMODE(st.st_mode) != 0o710:
-            raise RepairError(f"mode mismatch: {path}")
+        if stat.S_IMODE(st.st_mode) != expected_mode:
+            raise RepairError(
+                f"mode mismatch {stat.S_IMODE(st.st_mode):04o} != "
+                f"{expected_mode:04o}: {path}"
+            )
 
 
 def repair() -> None:
@@ -49,7 +52,7 @@ def repair() -> None:
     if lane_b.pw_gid != group.gr_gid:
         raise RepairError("lane-B primary group mismatch")
 
-    for path in ROOTS:
+    for path, expected_mode in ROOT_MODES.items():
         if not path.is_dir():
             raise RepairError(f"required shared root missing: {path}")
         st = path.stat()
@@ -59,7 +62,7 @@ def repair() -> None:
         if mode not in {0o700, 0o710}:
             raise RepairError(f"unexpected pre-repair mode {mode:04o}: {path}")
 
-    for path in ROOTS:
+    for path, expected_mode in ROOT_MODES.items():
         os.chmod(path, 0o710)
 
     verify()
@@ -76,7 +79,9 @@ def main() -> int:
         repair()
 
     print("PADATASET_SHARED_RUNTIME_ROOT_REPAIR=PASS")
-    print("MODE=0710")
+    print("JOBS_MODE=0750")
+    print("STAGING_CACHE_MODE=0710")
+    print("LOGS_MODE=0710")
     print("OWNER=ci-padataset")
     print("GROUP=ci-padataset")
     print("LANE_B_GROUP_TRAVERSE=PASS")
