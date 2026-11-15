@@ -86,10 +86,15 @@ def _require(condition: bool, message: str) -> None:
 def _generic_systemd_common(
     profiles: dict[str, Any],
     manifest: dict[str, Any],
-    runner_identity: dict[str, str],
+    runner_identity: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     common = copy.deepcopy(profiles["common"])
     roots = manifest["roots"]
+    if runner_identity is None:
+        runner_identity = {
+            "user": manifest["derived_identity"]["runner_user"],
+            "group": manifest["derived_identity"]["runner_group"],
+        }
     common["User"] = runner_identity["user"]
     common["Group"] = runner_identity["group"]
     common["Environment"] = [
