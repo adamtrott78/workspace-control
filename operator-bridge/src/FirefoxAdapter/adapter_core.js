@@ -266,6 +266,26 @@
       }
 
       const tab = await this.browser.tabs.update(match.tabId, { active: true });
+      if (!Number.isInteger(tab.windowId)) {
+        return createResult("ACTIVATE_WORKER_BINDING", "NOT_APPLIED", {
+          normalized_error: "WINDOW_FOCUS_TARGET_UNAVAILABLE",
+          worker_slot_id: match.metadata.worker_slot_id,
+          session_generation: match.metadata.session_generation,
+          binding_ref: match.metadata.binding_ref,
+          binding_generation: match.metadata.binding_generation
+        });
+      }
+      try {
+        await this.browser.windows.update(tab.windowId, { focused: true });
+      } catch {
+        return createResult("ACTIVATE_WORKER_BINDING", "NOT_APPLIED", {
+          normalized_error: "WINDOW_FOCUS_FAILED",
+          worker_slot_id: match.metadata.worker_slot_id,
+          session_generation: match.metadata.session_generation,
+          binding_ref: match.metadata.binding_ref,
+          binding_generation: match.metadata.binding_generation
+        });
+      }
       this.emitBindingEvent("BINDING_ACTIVATED", match.tabId, match.metadata, tab);
       return this.resultFor(
         "ACTIVATE_WORKER_BINDING",
