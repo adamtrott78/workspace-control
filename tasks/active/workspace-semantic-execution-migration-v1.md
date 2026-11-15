@@ -18,6 +18,12 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Design, benchmark, and incrementally migrate Workspace Control to an open-world semantic execution architecture that preserves current research, engineering, tutoring, publication, presentation, document, data-science, and operations workflows while minimizing scarce frontier-model allowance through deterministic execution, resumable Instant/local reasoning, bounded context, capability-aware routing, and explicit escalation—without weakening project-local truth, provenance, authority, GitRunner/Workspace Shell security, or rollback.
 
+## Workflow
+
+- Repository: workspace-control
+- Path: workflows/evidence-first-solution-research.v1.json
+- Checkpoint: d47a7922aa8d47d3a22b55c19ce4d6af7309a964
+
 ## Repositories
 
 ### workspace-control
