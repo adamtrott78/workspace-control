@@ -547,6 +547,7 @@ def expand_inactive(
         provisioner_stopped = False
         base._require_provisioner_active(systemd)
         base._require_provisioner_socket()
+        base._require_active_controller_socket_group(systemd, existing_ids)
         reconciler.verify_installed(BASE_MANIFEST)
 
         after = base._controller_snapshot(systemd, existing_ids)
@@ -699,6 +700,9 @@ def activate(
 
         base._require_provisioner_active(systemd)
         base._require_provisioner_socket()
+        base._require_active_controller_socket_group(
+            systemd, [*existing_ids, TARGET_CLASS]
+        )
         existing_after = base._controller_snapshot(systemd, existing_ids)
         base._require_controller_snapshot_preserved(existing_before, existing_after)
         reconciler.verify_installed(BASE_MANIFEST)
