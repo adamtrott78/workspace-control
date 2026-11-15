@@ -42,6 +42,12 @@ from .read_only_repository import (
     observation_effect_hash,
     parse_repository_target,
 )
+from .github_candidate import (
+    GitHubCandidateError,
+    GitHubCandidateEventService,
+    GitHubCandidateObservation,
+    GitHubCandidateReaderPort,
+)
 from .worker_result_candidate import (
     ImmutableWorkerResultCandidate,
     WorkerResultCandidateAdapter,
@@ -95,6 +101,10 @@ __all__ = [
     "RepositoryReadPostconditionValidator",
     "StaticAuthorityEvaluator",
     "StaticRepositoryReader",
+    "GitHubCandidateError",
+    "GitHubCandidateEventService",
+    "GitHubCandidateObservation",
+    "GitHubCandidateReaderPort",
     "ImmutableWorkerResultCandidate",
     "WorkerResultCandidateAdapter",
     "WorkerResultJsonError",

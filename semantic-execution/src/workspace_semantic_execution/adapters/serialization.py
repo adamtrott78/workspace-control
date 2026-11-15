@@ -1,7 +1,7 @@
 """Deterministic JSON codec for durable WorkGraph state.
 
 This codec is infrastructure-neutral and intentionally avoids pickle or
-runtime-specific object serialization. Schema v7 adds typed worker-result publication targets to durable packet sources while retaining v1-v6 decode compatibility.
+runtime-specific object serialization. Schema v8 adds durable production-scheduler dispatch specifications while retaining v1-v7 decode compatibility.
 """
 from __future__ import annotations
 
@@ -9,10 +9,16 @@ import json
 from typing import Any
 
 from ..domain import (
+    CandidateAction,
     DomainKernel,
     EffectReceipt,
+    ExecutionRequirement,
+    ExecutorLifecycle,
+    ExecutorLocality,
     ExecutorSession,
     ExecutorSessionState,
+    InvocationMode,
+    MemoryResetPolicy,
     OperatorAckMode,
     OperatorAction,
     OperatorActionClaim,
@@ -20,12 +26,18 @@ from ..domain import (
     OperatorActionType,
     OperatorHumanRequirement,
     OperatorPostLocalSuccess,
+    PrivacyClass,
     ProcessState,
     ReasoningProcess,
     SemanticPacketDecision,
     SemanticPacketFinding,
     SemanticPacketQuestion,
     SemanticPacketSource,
+    SchedulerDeterministicSpec,
+    SchedulerDispatchSpec,
+    SchedulerOperatorSpec,
+    SchedulerPacketSpec,
+    SessionMode,
     TransitionRecord,
     ValidationResult,
     WorkerChildProposal,
@@ -38,8 +50,8 @@ from ..domain import (
 )
 
 
-SCHEMA_VERSION = 7
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7}
+SCHEMA_VERSION = 8
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8}
 
 
 class GraphCodecError(ValueError):
@@ -314,6 +326,420 @@ def _encode_worker_result(
     }
 
 
+def _encode_execution_requirement(
+    requirement: ExecutionRequirement,
+) -> dict[str, Any]:
+    return {
+        "required_capabilities": sorted(
+            requirement.required_capabilities
+        ),
+        "allowed_invocation_modes": sorted(
+            item.value
+            for item in requirement.allowed_invocation_modes
+        ),
+        "allowed_session_modes": sorted(
+            item.value
+            for item in requirement.allowed_session_modes
+        ),
+        "allowed_lifecycles": sorted(
+            item.value
+            for item in requirement.allowed_lifecycles
+        ),
+        "allowed_memory_reset_policies": sorted(
+            item.value
+            for item in requirement.allowed_memory_reset_policies
+        ),
+        "allowed_localities": sorted(
+            item.value
+            for item in requirement.allowed_localities
+        ),
+        "privacy_class": requirement.privacy_class.value,
+        "minimum_context_capacity": (
+            requirement.minimum_context_capacity
+        ),
+        "required_resource_classes": sorted(
+            requirement.required_resource_classes
+        ),
+        "require_human_launch": requirement.require_human_launch,
+    }
+
+
+def _decode_execution_requirement(
+    raw: object,
+) -> ExecutionRequirement:
+    if not isinstance(raw, dict):
+        raise GraphCodecError(
+            "scheduler_execution_requirement_must_be_object"
+        )
+    try:
+        return ExecutionRequirement(
+            required_capabilities=frozenset(
+                _decode_string_tuple(
+                    raw.get("required_capabilities"),
+                    "scheduler_required_capabilities",
+                )
+            ),
+            allowed_invocation_modes=frozenset(
+                InvocationMode(value)
+                for value in _decode_string_tuple(
+                    raw.get("allowed_invocation_modes"),
+                    "scheduler_allowed_invocation_modes",
+                )
+            ),
+            allowed_session_modes=frozenset(
+                SessionMode(value)
+                for value in _decode_string_tuple(
+                    raw.get("allowed_session_modes"),
+                    "scheduler_allowed_session_modes",
+                )
+            ),
+            allowed_lifecycles=frozenset(
+                ExecutorLifecycle(value)
+                for value in _decode_string_tuple(
+                    raw.get("allowed_lifecycles"),
+                    "scheduler_allowed_lifecycles",
+                )
+            ),
+            allowed_memory_reset_policies=frozenset(
+                MemoryResetPolicy(value)
+                for value in _decode_string_tuple(
+                    raw.get("allowed_memory_reset_policies"),
+                    "scheduler_allowed_memory_reset_policies",
+                )
+            ),
+            allowed_localities=frozenset(
+                ExecutorLocality(value)
+                for value in _decode_string_tuple(
+                    raw.get("allowed_localities"),
+                    "scheduler_allowed_localities",
+                )
+            ),
+            privacy_class=PrivacyClass(
+                str(
+                    raw.get(
+                        "privacy_class",
+                        PrivacyClass.PUBLIC.value,
+                    )
+                )
+            ),
+            minimum_context_capacity=(
+                None
+                if raw.get("minimum_context_capacity") is None
+                else int(raw["minimum_context_capacity"])
+            ),
+            required_resource_classes=frozenset(
+                _decode_string_tuple(
+                    raw.get("required_resource_classes"),
+                    "scheduler_required_resource_classes",
+                )
+            ),
+            require_human_launch=raw.get("require_human_launch"),
+        )
+    except (TypeError, ValueError) as exc:
+        raise GraphCodecError(
+            "invalid_scheduler_execution_requirement"
+        ) from exc
+
+
+def _encode_candidate_action(
+    action: CandidateAction,
+) -> dict[str, Any]:
+    return {
+        "action_id": action.action_id,
+        "process_id": action.process_id,
+        "process_generation": action.process_generation,
+        "target_ref": action.target_ref,
+        "executor_type": action.executor_type,
+        "idempotency_key": action.idempotency_key,
+        "preconditions": list(action.preconditions),
+        "expected_effect": action.expected_effect,
+        "postcondition_validator": action.postcondition_validator,
+        "authorization_state": action.authorization_state,
+    }
+
+
+def _decode_candidate_action(
+    raw: object,
+) -> CandidateAction:
+    if not isinstance(raw, dict):
+        raise GraphCodecError(
+            "scheduler_candidate_action_must_be_object"
+        )
+    try:
+        return CandidateAction(
+            action_id=str(raw["action_id"]),
+            process_id=str(raw["process_id"]),
+            process_generation=int(raw["process_generation"]),
+            target_ref=str(raw["target_ref"]),
+            executor_type=str(raw["executor_type"]),
+            idempotency_key=str(raw["idempotency_key"]),
+            preconditions=_decode_string_tuple(
+                raw.get("preconditions"),
+                "scheduler_candidate_preconditions",
+            ),
+            expected_effect=str(raw["expected_effect"]),
+            postcondition_validator=str(
+                raw["postcondition_validator"]
+            ),
+            authorization_state=str(
+                raw.get("authorization_state", "UNDECIDED")
+            ),
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise GraphCodecError(
+            "invalid_scheduler_candidate_action"
+        ) from exc
+
+
+def _encode_scheduler_packet(
+    packet: SchedulerPacketSpec,
+) -> dict[str, Any]:
+    return {
+        "source_checkpoint": packet.source_checkpoint,
+        "objective": packet.objective,
+        "findings": [
+            {
+                "finding_id": item.finding_id,
+                "text": item.text,
+                "evidence_refs": list(item.evidence_refs),
+            }
+            for item in packet.findings
+        ],
+        "decisions": [
+            {
+                "decision_id": item.decision_id,
+                "decision": item.decision,
+                "rationale": item.rationale,
+                "evidence_refs": list(item.evidence_refs),
+                "alternatives": list(item.alternatives),
+            }
+            for item in packet.decisions
+        ],
+        "unresolved_questions": [
+            {
+                "question_id": item.question_id,
+                "text": item.text,
+            }
+            for item in packet.unresolved_questions
+        ],
+        "constraints": list(packet.constraints),
+        "evidence_refs": list(packet.evidence_refs),
+        "authority_refs": list(packet.authority_refs),
+        "allowed_actions": list(packet.allowed_actions),
+        "validator_contract": packet.validator_contract,
+        "output_schema": packet.output_schema,
+        "next_safe_boundary": packet.next_safe_boundary,
+    }
+
+
+def _decode_scheduler_packet(
+    raw: object,
+) -> SchedulerPacketSpec:
+    if not isinstance(raw, dict):
+        raise GraphCodecError("scheduler_packet_must_be_object")
+    findings = tuple(
+        SemanticPacketFinding(
+            finding_id=str(item.get("finding_id", "")),
+            text=str(item.get("text", "")),
+            evidence_refs=_decode_string_tuple(
+                item.get("evidence_refs"),
+                "scheduler_finding_evidence_refs",
+            ),
+        )
+        for item in raw.get("findings", [])
+    )
+    decisions = tuple(
+        SemanticPacketDecision(
+            decision_id=str(item.get("decision_id", "")),
+            decision=str(item.get("decision", "")),
+            rationale=str(item.get("rationale", "")),
+            evidence_refs=_decode_string_tuple(
+                item.get("evidence_refs"),
+                "scheduler_decision_evidence_refs",
+            ),
+            alternatives=_decode_string_tuple(
+                item.get("alternatives"),
+                "scheduler_decision_alternatives",
+            ),
+        )
+        for item in raw.get("decisions", [])
+    )
+    questions = tuple(
+        SemanticPacketQuestion(
+            question_id=str(item.get("question_id", "")),
+            text=str(item.get("text", "")),
+        )
+        for item in raw.get("unresolved_questions", [])
+    )
+    return SchedulerPacketSpec(
+        source_checkpoint=str(raw.get("source_checkpoint", "")),
+        objective=str(raw.get("objective", "")),
+        findings=findings,
+        decisions=decisions,
+        unresolved_questions=questions,
+        constraints=_decode_string_tuple(
+            raw.get("constraints"),
+            "scheduler_constraints",
+        ),
+        evidence_refs=_decode_string_tuple(
+            raw.get("evidence_refs"),
+            "scheduler_evidence_refs",
+        ),
+        authority_refs=_decode_string_tuple(
+            raw.get("authority_refs"),
+            "scheduler_authority_refs",
+        ),
+        allowed_actions=_decode_string_tuple(
+            raw.get("allowed_actions"),
+            "scheduler_allowed_actions",
+        ),
+        validator_contract=str(
+            raw.get("validator_contract", "")
+        ),
+        output_schema=str(raw.get("output_schema", "")),
+        next_safe_boundary=str(
+            raw.get("next_safe_boundary", "")
+        ),
+    )
+
+
+def _encode_scheduler_dispatch(
+    spec: SchedulerDispatchSpec,
+) -> dict[str, Any]:
+    operator = None
+    if spec.operator is not None:
+        operator = {
+            "task_id": spec.operator.task_id,
+            "action_id": spec.operator.action_id,
+            "action_generation": spec.operator.action_generation,
+            "worker_slot_id": spec.operator.worker_slot_id,
+            "session_generation": spec.operator.session_generation,
+            "priority_rank": spec.operator.priority_rank,
+            "queue_sequence": spec.operator.queue_sequence,
+            "created_at": spec.operator.created_at,
+            "candidate_repository": (
+                spec.operator.candidate_repository
+            ),
+            "candidate_ref": spec.operator.candidate_ref,
+            "candidate_path": spec.operator.candidate_path,
+            "candidate_schema_ref": (
+                spec.operator.candidate_schema_ref
+            ),
+        }
+    deterministic = None
+    if spec.deterministic is not None:
+        deterministic = {
+            "worker_id": spec.deterministic.worker_id,
+            "lease_id": spec.deterministic.lease_id,
+            "candidate_action": _encode_candidate_action(
+                spec.deterministic.candidate_action
+            ),
+        }
+    return {
+        "dispatch_id": spec.dispatch_id,
+        "process_id": spec.process_id,
+        "process_generation": spec.process_generation,
+        "requirement_id": spec.requirement_id,
+        "requirement": _encode_execution_requirement(
+            spec.requirement
+        ),
+        "packet": _encode_scheduler_packet(spec.packet),
+        "operator": operator,
+        "deterministic": deterministic,
+    }
+
+
+def _decode_scheduler_dispatch(
+    raw: object,
+) -> SchedulerDispatchSpec:
+    if not isinstance(raw, dict):
+        raise GraphCodecError(
+            "scheduler_dispatch_must_be_object"
+        )
+    raw_operator = raw.get("operator")
+    operator = None
+    if raw_operator is not None:
+        if not isinstance(raw_operator, dict):
+            raise GraphCodecError(
+                "scheduler_operator_must_be_object"
+            )
+        try:
+            operator = SchedulerOperatorSpec(
+                task_id=str(raw_operator["task_id"]),
+                action_id=str(raw_operator["action_id"]),
+                action_generation=int(
+                    raw_operator["action_generation"]
+                ),
+                worker_slot_id=str(
+                    raw_operator["worker_slot_id"]
+                ),
+                session_generation=int(
+                    raw_operator["session_generation"]
+                ),
+                priority_rank=int(
+                    raw_operator["priority_rank"]
+                ),
+                queue_sequence=int(
+                    raw_operator["queue_sequence"]
+                ),
+                created_at=str(raw_operator["created_at"]),
+                candidate_repository=str(
+                    raw_operator["candidate_repository"]
+                ),
+                candidate_ref=str(
+                    raw_operator["candidate_ref"]
+                ),
+                candidate_path=str(
+                    raw_operator["candidate_path"]
+                ),
+                candidate_schema_ref=str(
+                    raw_operator["candidate_schema_ref"]
+                ),
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            raise GraphCodecError(
+                "invalid_scheduler_operator"
+            ) from exc
+    raw_deterministic = raw.get("deterministic")
+    deterministic = None
+    if raw_deterministic is not None:
+        if not isinstance(raw_deterministic, dict):
+            raise GraphCodecError(
+                "scheduler_deterministic_must_be_object"
+            )
+        try:
+            deterministic = SchedulerDeterministicSpec(
+                worker_id=str(raw_deterministic["worker_id"]),
+                lease_id=str(raw_deterministic["lease_id"]),
+                candidate_action=_decode_candidate_action(
+                    raw_deterministic["candidate_action"]
+                ),
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            raise GraphCodecError(
+                "invalid_scheduler_deterministic"
+            ) from exc
+    try:
+        return SchedulerDispatchSpec(
+            dispatch_id=str(raw["dispatch_id"]),
+            process_id=str(raw["process_id"]),
+            process_generation=int(
+                raw["process_generation"]
+            ),
+            requirement_id=str(raw["requirement_id"]),
+            requirement=_decode_execution_requirement(
+                raw["requirement"]
+            ),
+            packet=_decode_scheduler_packet(raw["packet"]),
+            operator=operator,
+            deterministic=deterministic,
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise GraphCodecError(
+            "invalid_scheduler_dispatch"
+        ) from exc
+
+
 def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
     DomainKernel.validate(graph)
     processes: list[dict[str, Any]] = []
@@ -408,6 +834,13 @@ def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
             for publication in sorted(
                 graph.worker_results.values(),
                 key=lambda item: item.publication_id,
+            )
+        ],
+        "scheduler_dispatches": [
+            _encode_scheduler_dispatch(spec)
+            for spec in sorted(
+                graph.scheduler_dispatches.values(),
+                key=lambda item: item.dispatch_id,
             )
         ],
     }
@@ -879,12 +1312,28 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
                     "invalid_worker_result"
                 ) from exc
 
+    scheduler_dispatches: dict[str, SchedulerDispatchSpec] = {}
+    if schema_version >= 8:
+        raw_dispatches = payload.get("scheduler_dispatches", [])
+        if not isinstance(raw_dispatches, list):
+            raise GraphCodecError(
+                "scheduler_dispatches_must_be_list"
+            )
+        for raw in raw_dispatches:
+            spec = _decode_scheduler_dispatch(raw)
+            if spec.dispatch_id in scheduler_dispatches:
+                raise GraphCodecError(
+                    f"duplicate_scheduler_dispatch:{spec.dispatch_id}"
+                )
+            scheduler_dispatches[spec.dispatch_id] = spec
+
     graph = WorkGraph(
         processes=processes,
         executor_sessions=executor_sessions,
         operator_actions=operator_actions,
         packet_sources=packet_sources,
         worker_results=worker_results,
+        scheduler_dispatches=scheduler_dispatches,
         event_seq=int(payload.get("event_seq", 0)),
         graph_history=_decode_value(payload.get("graph_history", [])),
     )

@@ -20,6 +20,8 @@ from ..domain import (
     WorkerResultKind,
     WorkerResultKernel,
     WorkerResultPublication,
+    SchedulerDispatchKernel,
+    SchedulerDispatchSpec,
     WorkGraph,
 )
 from ..ports import (
@@ -668,6 +670,18 @@ class RuntimeCoordinator:
         return self._apply(
             "worker_result.accepted",
             transition,
+        )
+
+    def register_scheduler_dispatch(
+        self,
+        spec: SchedulerDispatchSpec,
+    ) -> StateSnapshot:
+        return self._apply(
+            "scheduler_dispatch.registered",
+            lambda graph: SchedulerDispatchKernel.register(
+                graph,
+                spec,
+            ),
         )
 
     def enqueue_operator_action(self, action: OperatorAction) -> StateSnapshot:

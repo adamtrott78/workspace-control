@@ -42,6 +42,12 @@ from .session_broker import (
     SessionBrokerError,
 )
 from .task_tree import ChildWorkSpec, TaskTreeCoordinator, TaskTreeStatus
+from .production_scheduler import (
+    ProductionSchedulerError,
+    ProductionSchedulerService,
+    SchedulerTickResult,
+    candidate_target_ref,
+)
 from .worker_results import (
     WorkerResultIntakeError,
     WorkerResultIntakeOutcome,
@@ -85,6 +91,10 @@ __all__ = [
     "ChildWorkSpec",
     "TaskTreeCoordinator",
     "TaskTreeStatus",
+    "ProductionSchedulerError",
+    "ProductionSchedulerService",
+    "SchedulerTickResult",
+    "candidate_target_ref",
     "WorkerResultIntakeError",
     "WorkerResultIntakeOutcome",
     "WorkerResultIntakeService",

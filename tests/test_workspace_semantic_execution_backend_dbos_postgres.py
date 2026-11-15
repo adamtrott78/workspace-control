@@ -29,33 +29,46 @@ sys.path.insert(0, str(SRC))
 from workspace_semantic_execution.adapters import (  # noqa: E402
     DBOSDurableRuntime,
     FakeClock,
+    GitHubCandidateEventService,
+    GitHubCandidateObservation,
     ImmutableWorkerResultCandidate,
     PostgresEventLedger,
     PostgresStateStore,
     RecordingTelemetry,
+    StaticAuthorityEvaluator,
     WorkerResultCandidateAdapter,
 )
 from workspace_semantic_execution.application import (  # noqa: E402
     DurableOperatorPacketMaterializer,
+    ExecutorDispatchCoordinator,
     ExecutorRegistry,
     OperatorActionService,
     OperatorDispatchPlanner,
     PacketCompilationInput,
     PersistentExecutorSessionBroker,
+    ProductionSchedulerService,
     RuntimeCoordinator,
+    SemanticPacketCompiler,
     WorkerResultIntakeService,
     openai_chat_instant_current_profile,
 )
 from workspace_semantic_execution.domain import (  # noqa: E402
     DomainKernel,
+    ExecutionRequirement,
     ExecutorSessionState,
+    InvocationMode,
     OperatorAckMode,
     OperatorAction,
     OperatorActionState,
     OperatorActionType,
     OperatorHumanRequirement,
     OperatorPostLocalSuccess,
+    PrivacyClass,
     ProcessState,
+    SchedulerDispatchSpec,
+    SchedulerOperatorSpec,
+    SchedulerPacketSpec,
+    SessionMode,
     ValidationResult,
     WorkerResultKind,
     WorkerResultPublication,
@@ -782,6 +795,250 @@ class PostgresAdapterIntegrationTests(unittest.TestCase):
             restored.processes["result-process"].state,
             ProcessState.COMPLETED,
         )
+
+    def test_production_scheduler_candidate_loop_survives_postgres_restarts(self):
+        state_key = f"scheduler-{uuid.uuid4()}"
+        process_id = "scheduler-postgres-process"
+        slot_id = "scheduler-postgres-slot"
+        dispatch_id = "scheduler-postgres-dispatch"
+        action_id = "action:scheduler-postgres"
+        validator_id = "validator:scheduler-postgres"
+        repository = "adamtrott78/workspace-control"
+        candidate_ref = "refs/heads/worker-result-candidates-v1"
+        candidate_path = (
+            "worker-results/candidates/"
+            "scheduler-postgres-process.json"
+        )
+
+        store1 = PostgresStateStore(
+            POSTGRES_DSN,
+            state_key=state_key,
+        )
+        runtime1 = RuntimeCoordinator(
+            state_store=store1,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        runtime1.initialize(
+            DomainKernel.create_graph(
+                [DomainKernel.create_process(process_id)]
+            )
+        )
+        profile = openai_chat_instant_current_profile()
+        PersistentExecutorSessionBroker(runtime1).ensure_session(
+            profile=profile,
+            slot_id=slot_id,
+            session_id="scheduler-postgres-session",
+        )
+        dispatcher1 = ExecutorDispatchCoordinator(
+            runtime=runtime1,
+            registry=ExecutorRegistry((profile,)),
+            packet_compiler=SemanticPacketCompiler(),
+            authority_evaluator=StaticAuthorityEvaluator(),
+            executor_ports={},
+            validators={},
+        )
+        scheduler1 = ProductionSchedulerService(
+            runtime=runtime1,
+            dispatcher=dispatcher1,
+        )
+        spec = SchedulerDispatchSpec(
+            dispatch_id=dispatch_id,
+            process_id=process_id,
+            process_generation=0,
+            requirement_id="requirement:scheduler-postgres",
+            requirement=ExecutionRequirement(
+                required_capabilities=frozenset(
+                    {"reasoning.bounded"}
+                ),
+                allowed_invocation_modes=frozenset(
+                    {InvocationMode.HUMAN_ASSISTED}
+                ),
+                allowed_session_modes=frozenset(
+                    {SessionMode.PERSISTENT_CHAT}
+                ),
+                privacy_class=PrivacyClass.INTERNAL,
+                require_human_launch=True,
+            ),
+            packet=SchedulerPacketSpec(
+                source_checkpoint="scheduler-postgres@0",
+                objective="Return one immutable candidate.",
+                constraints=("candidate-only publication",),
+                evidence_refs=("evidence:scheduler-postgres",),
+                authority_refs=("scope:proposal-only",),
+                allowed_actions=("publish-candidate-result",),
+                validator_contract=validator_id,
+                output_schema="WORKER_RESULT_V1",
+                next_safe_boundary="publish immutable candidate JSON",
+            ),
+            operator=SchedulerOperatorSpec(
+                task_id="scheduler-postgres-task",
+                action_id=action_id,
+                action_generation=0,
+                worker_slot_id=slot_id,
+                session_generation=0,
+                priority_rank=10,
+                queue_sequence=1,
+                created_at="T0",
+                candidate_repository=repository,
+                candidate_ref=candidate_ref,
+                candidate_path=candidate_path,
+            ),
+        )
+        scheduler1.register(spec)
+
+        store2 = PostgresStateStore(
+            POSTGRES_DSN,
+            state_key=state_key,
+        )
+        runtime2 = RuntimeCoordinator(
+            state_store=store2,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=10),
+        )
+        dispatcher2 = ExecutorDispatchCoordinator(
+            runtime=runtime2,
+            registry=ExecutorRegistry((profile,)),
+            packet_compiler=SemanticPacketCompiler(),
+            authority_evaluator=StaticAuthorityEvaluator(),
+            executor_ports={},
+            validators={},
+        )
+        tick = ProductionSchedulerService(
+            runtime=runtime2,
+            dispatcher=dispatcher2,
+        ).run_once()
+        self.assertEqual(tick.outcome, "DISPATCHED")
+        self.assertEqual(tick.dispatch_id, dispatch_id)
+        self.assertEqual(tick.dispatch_mode, "OPERATOR_ACTION")
+
+        runtime2.claim_next_operator_action(
+            helper_instance_id="windows-helper",
+            claim_id="scheduler-postgres-claim",
+            claimed_at="T1",
+            expires_at="T2",
+        )
+        runtime2.record_operator_action_local_prepared(
+            action_id=action_id,
+            generation=0,
+            worker_slot_id=slot_id,
+            session_generation=0,
+            observed_at="T1.5",
+        )
+        graph2 = runtime2.snapshot().graph
+        action = graph2.operator_actions[action_id]
+        source = graph2.packet_sources[action.payload_ref]
+        publication_contract = source.result_publication
+        self.assertIsNotNone(publication_contract)
+        assert publication_contract is not None
+
+        candidate_bytes = json.dumps(
+            {
+                "publication_id": (
+                    publication_contract.publication_id
+                ),
+                "action_id": action_id,
+                "action_generation": 0,
+                "process_id": process_id,
+                "process_generation": 0,
+                "executor_id": profile.executor_id,
+                "worker_slot_id": slot_id,
+                "session_generation": 0,
+                "packet_sha256": action.payload_sha256,
+                "kind": "RESULT",
+                "observed_at": "T3",
+                "result_payload_ref": (
+                    "github://scheduler-postgres-result@blob"
+                ),
+                "result_payload_sha256": "a" * 64,
+                "evidence_refs": [
+                    "github://scheduler-postgres-evidence@blob"
+                ],
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        commit_sha = "b" * 40
+
+        class Reader:
+            def read_exact(
+                self,
+                *,
+                repository: str,
+                ref: str,
+                path: str,
+                commit_sha: str,
+            ):
+                return GitHubCandidateObservation(
+                    repository=repository,
+                    ref=ref,
+                    path=path,
+                    commit_sha=commit_sha,
+                    content=candidate_bytes,
+                )
+
+        class Validator:
+            def validate(self, publication, packet_source):
+                return ValidationResult(
+                    validator_id=validator_id,
+                    passed=True,
+                    evidence_ref=(
+                        "validated:scheduler-postgres:"
+                        f"{publication.source_sha256}"
+                    ),
+                    observed_at="T4",
+                )
+
+        store3 = PostgresStateStore(
+            POSTGRES_DSN,
+            state_key=state_key,
+        )
+        runtime3 = RuntimeCoordinator(
+            state_store=store3,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=20),
+        )
+        outcome = GitHubCandidateEventService(
+            runtime=runtime3,
+            intake=WorkerResultIntakeService(
+                runtime=runtime3,
+                validators={validator_id: Validator()},
+            ),
+            reader=Reader(),
+        ).ingest(
+            dispatch_id=dispatch_id,
+            commit_sha=commit_sha,
+        )
+        self.assertEqual(
+            outcome.process_state,
+            ProcessState.COMPLETED,
+        )
+
+        store4 = PostgresStateStore(
+            POSTGRES_DSN,
+            state_key=state_key,
+        )
+        restored = store4.load().graph
+        self.assertEqual(
+            restored.scheduler_dispatches[dispatch_id],
+            spec,
+        )
+        self.assertEqual(
+            restored.processes[process_id].state,
+            ProcessState.COMPLETED,
+        )
+        self.assertEqual(
+            restored.operator_actions[action_id].status,
+            OperatorActionState.COMPLETED,
+        )
+        self.assertEqual(
+            restored.executor_sessions[slot_id].state,
+            ExecutorSessionState.READY,
+        )
+        self.assertEqual(len(restored.worker_results), 1)
 
     def test_external_event_is_immutable_and_visible_after_restart(self):
         ledger1 = PostgresEventLedger(POSTGRES_DSN)

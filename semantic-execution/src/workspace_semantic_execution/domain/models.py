@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from .._compat import StrEnum
 from typing import Any
+from .executors import ExecutionRequirement
 
 
 class ProcessState(StrEnum):
@@ -240,6 +241,60 @@ class CandidateAction:
 
 
 @dataclass(frozen=True)
+class SchedulerPacketSpec:
+    source_checkpoint: str
+    objective: str
+    findings: tuple[SemanticPacketFinding, ...] = ()
+    decisions: tuple[SemanticPacketDecision, ...] = ()
+    unresolved_questions: tuple[SemanticPacketQuestion, ...] = ()
+    constraints: tuple[str, ...] = ()
+    evidence_refs: tuple[str, ...] = ()
+    authority_refs: tuple[str, ...] = ()
+    allowed_actions: tuple[str, ...] = ()
+    validator_contract: str = ""
+    output_schema: str = "WORKSPACE_REASONING_RESULT_V1"
+    next_safe_boundary: str = ""
+
+
+@dataclass(frozen=True)
+class SchedulerOperatorSpec:
+    task_id: str
+    action_id: str
+    action_generation: int
+    worker_slot_id: str
+    session_generation: int
+    priority_rank: int
+    queue_sequence: int
+    created_at: str
+    candidate_repository: str
+    candidate_ref: str
+    candidate_path: str
+    candidate_schema_ref: str = (
+        "architecture/"
+        "workspace-semantic-execution-worker-result.v0.1.json"
+    )
+
+
+@dataclass(frozen=True)
+class SchedulerDeterministicSpec:
+    worker_id: str
+    lease_id: str
+    candidate_action: CandidateAction
+
+
+@dataclass(frozen=True)
+class SchedulerDispatchSpec:
+    dispatch_id: str
+    process_id: str
+    process_generation: int
+    requirement_id: str
+    requirement: ExecutionRequirement
+    packet: SchedulerPacketSpec
+    operator: SchedulerOperatorSpec | None = None
+    deterministic: SchedulerDeterministicSpec | None = None
+
+
+@dataclass(frozen=True)
 class AuthorityDecision:
     decision_id: str
     outcome: AuthorityOutcome
@@ -353,5 +408,6 @@ class WorkGraph:
     operator_actions: dict[str, OperatorAction] = field(default_factory=dict)
     packet_sources: dict[str, SemanticPacketSource] = field(default_factory=dict)
     worker_results: dict[str, WorkerResultPublication] = field(default_factory=dict)
+    scheduler_dispatches: dict[str, SchedulerDispatchSpec] = field(default_factory=dict)
     event_seq: int = 0
     graph_history: list[dict[str, Any]] = field(default_factory=list)
