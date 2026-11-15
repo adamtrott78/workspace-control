@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 65709645abfb14b88a51f01296bc3b9600aca919
+- Remote checkpoint: 41d320100a0c2ee3890c900ed5295a94b08213af
 - Remote verified: true
 
 ### research-engine
@@ -36,16 +36,15 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Advance INTEGRATED_RELIABILITY_AND_LIVE_PROVING_PREPARATION without bypassing the suspended live-host authority gate. Add scheduler-level stale-generation/restart/duplicate-candidate/session-replacement fault coverage and a bounded no-GPU soak over durable PostgreSQL state. Prepare the exact live research-iterate proving fixture and rollback/provenance checklist. Separately re-check the Codex PR #627 lineage and Operator Bridge remaining Stage-10 gates under their owning tasks; do not mutate live semantic host/Tailscale state while Workspace Shell returns TASK_NOT_FOUND.
+BACKEND IS REPOSITORY-COMPLETE FOR THE CURRENT CRITICAL PATH. Preserve validated scheduler/recovery state. Do not add speculative backend features or reactivate live transport via generic shell. Resume only when an exact reviewed/default-branch Workspace Shell authority route exists for the semantic task; then launch the validated localhost Operator Bridge server, bind reviewed private Tailscale Serve, prove one fake-worker round trip, and run the live mixed Research Engine research-iterate fault/provenance/resource fixture. Meanwhile allow Operator Bridge and Reasoning Economy child tasks to advance independently.
 
 ## Remaining work
 
-- Run scheduler-level fault/soak campaign covering stale dispatch generation, duplicate immutable candidate delivery, scheduler restart, external wait no-poll behavior, and session replacement composition.
-- Prepare exact live proving fixture and rollback/provenance checklist without activating any host route.
-- Resume live Operator Bridge backend + Tailscale fake-worker proof only when Workspace Shell trusted authority contains the semantic task.
-- Finish remaining Operator Bridge Stage-10 trials and bounded Stage-12 real-account calibration under its owning task.
-- Resume Workspace Control subscription Codex child if/when PR #627 lineage authority clears.
-- Run live mixed Research Engine proving workflow, allowance/economics comparison, soak/resource acceptance and final PROD-03 review.
+- Wait for exact reviewed/default-branch Workspace Shell authority for semantic live-host activation; do not bypass TASK_NOT_FOUND.
+- When authority exists: launch validated localhost backend + reviewed Tailscale Serve and prove fake-worker action/status/result round trip before any real account.
+- Run the live mixed Research Engine research-iterate workflow with one forced Instant session/process loss and no manual state reconstruction.
+- Capture live resource/soak/provenance/rollback evidence and feed calibrated economics into the November acceptance matrix.
+- Participate in final PROD-03 PROMOTE_V0/HOLD/REVISE review.
 
 ## Blockers / gates
 
@@ -60,7 +59,7 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-semantic-execution-backend-v1.json
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Start by recovering exact GitHub state; trust the capsule/checklist plus verified repository/runtime evidence over chat prose.
+Read architecture/workspace-semantic-execution-november-2026-executor-handoff-checklist.md before choosing work.
+Do not redo items listed under DO NOT REDO.
+Follow the capsule's next_safe_action and continue autonomously until a real authority/policy/user-only gate.

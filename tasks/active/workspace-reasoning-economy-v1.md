@@ -24,7 +24,7 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 65709645abfb14b88a51f01296bc3b9600aca919
+- Remote checkpoint: 41d320100a0c2ee3890c900ed5295a94b08213af
 - Remote verified: true
 
 ### research-engine
@@ -36,16 +36,16 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 ## Next safe action
 
-Implement RESEARCH_ENGINE_POLICY_EXPERIMENT_TRACE_ADAPTER_V1 without invoking a live model. Bind the existing provenance-refrozen P0-P3 resumable-reasoning matrix, fixture/oracle blob identities, arm/run identities and objective validator outputs into typed policy experiment records. Join those records to ExecutionEconomics only when exact work/run identity and a comparable weekly allowance delta are available; otherwise mark allowance UNKNOWN. Produce matched-policy summaries and holdout-ready rows, but do not promote a policy or infer shared ChatGPT/Codex accounting until live calibration exists. Keep Codex live runtime suspended on PR #627/#630 lineage.
+CONTINUE FROM validated Reasoning Economy base workspace-control@41d320100a0c2ee3890c900ed5295a94b08213af. Do not rebuild the weekly governor (65709645…), frozen Research Engine policy-trace adapter (fadadcc0…), shared-allowance calibration harness (59d69e0f…), claim-bearing runset readiness gate (31f138a8…), or dispatch-time allowance admission (41d32010…). Continue only exact claim-bearing P0-P3 screening/runset readiness and holdout preparation; superseded/refrozen-but-incomplete runs are NOT promotion evidence and allowance remains UNKNOWN without comparable calibrated meter deltas. Codex live runtime stays SUSPENDED until PR #627/#630 lineage authority clears. When it clears, run zero-inference bootstrap/auth, then controlled isolated Codex/Instant snapshots and feed only calibrated observations into the governor/holdout promotion protocol.
 
 ## Remaining work
 
-- Build the frozen P0-P3 Research Engine/research-iterate policy-trace adapter using exact fixture/oracle provenance and objective validator results.
-- Produce policy experiment reports that preserve UNKNOWN allowance when a run lacks a comparable calibrated weekly meter delta; do not synthesize costs from token counts.
-- When PR #627/#630 lineage clears, run the reserved Workspace Control zero-inference Codex bootstrap/auth preflight and prove ChatGPT Plus account telemetry.
-- Calibrate controlled Codex/Instant actions against account/rate-limit snapshots to determine which meter tracks the shared allowance; preserve unknown mappings explicitly.
-- Feed calibrated real traces into the weekly governor and matched holdout promotion protocol.
-- Compare verified progress per scarce allowance against an all-strong/frontier control policy and promote only if quality floors and holdout criteria pass.
+- Complete claim-bearing P0-P3 screening/runset prerequisites with exact source checkpoint/run set/hard-gate manifest; incomplete or superseded screening cannot promote policy.
+- Preserve UNKNOWN allowance for traces without controlled comparable meter deltas; never infer shared allowance from raw tokens.
+- When PR #627/#630 lineage clears, run reserved Workspace Control zero-inference Codex bootstrap and prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, no API billing/fallback.
+- Run isolated controlled Codex and Instant actions bracketed by official account/rate-limit/usage snapshots; determine which meter actually moves and keep unresolved mappings unknown.
+- Feed calibrated traces into weekly governor + matched holdout protocol and compare validated progress per scarce allowance against all-strong/frontier control.
+- Promote a routing policy only with claim-bearing comparable evidence, quality-floor PASS and strictly lower scarce allowance.
 
 ## Blockers / gates
 
@@ -60,7 +60,7 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-reasoning-economy-v1.json
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Start by recovering exact GitHub state; trust the capsule/checklist plus verified repository/runtime evidence over chat prose.
+Read architecture/workspace-semantic-execution-november-2026-executor-handoff-checklist.md before choosing work.
+Do not redo items listed under DO NOT REDO.
+Follow the capsule's next_safe_action and continue autonomously until a real authority/policy/user-only gate.

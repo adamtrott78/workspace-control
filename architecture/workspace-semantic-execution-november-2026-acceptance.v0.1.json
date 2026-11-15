@@ -171,14 +171,18 @@
       "id": "CODEX-04",
       "status": "PENDING",
       "requirement": "Controlled actions calibrate account/usage/read and rate-limit deltas; unknown allowance mappings remain explicitly unknown.",
-      "evidence": []
+      "evidence": [
+        "Calibration harness exists at 59d69e0f… and conservatively treats zero movement as below-resolution/UNKNOWN; live controlled Codex/Instant actions remain required."
+      ]
     },
     {
       "id": "ECON-01",
       "status": "PARTIAL",
       "requirement": "Every model attempt can produce a stable economics record with executor, usage, result, validator outcome, and known allowance delta.",
       "evidence": [
-        "Usage collector and economics ledger are validated."
+        "Usage collector and economics ledger are validated.",
+        "Frozen policy-trace adapter fadadcc0… binds exact fixture/oracle/run identity and objective validator evidence to ExecutionEconomics; allowance remains UNKNOWN unless exact comparable meter evidence exists.",
+        "Shared allowance calibration harness 59d69e0f… binds isolated actions to ordered official usage snapshots without deriving allowance from raw tokens."
       ]
     },
     {
@@ -187,7 +191,8 @@
       "requirement": "Weekly burn governor projects allowance use, reserves headroom, and routes/rejects expensive work without buying credits or using API billing.",
       "evidence": [
         "workspace-control@65709645… implements a deterministic weekly burn governor with same-reset projection, reserved headroom, max single-action cap, explicit API-billing rejection and fail-closed unknown telemetry/calibration.",
-        "PASS requires feeding it calibrated live account allowance observations and enforcing the resulting decisions in the live proving workflow."
+        "PASS requires feeding it calibrated live account allowance observations and enforcing the resulting decisions in the live proving workflow.",
+        "Dispatch admission 41d32010… enforces governor budget/missing-meter denial before process/session/action mutation and cannot widen the base executor eligibility set."
       ]
     },
     {
@@ -196,7 +201,8 @@
       "requirement": "Routing promotes cheaper executors only when objective validation meets the required quality floor.",
       "evidence": [
         "Governor tests prove least-scarce executor selection only after validator-backed minimum sample count/quality floor; a cheaper executor below quality floor is rejected.",
-        "Holdout promotion requires matched tasks, no candidate failures, no disallowed quality regression and strictly lower scarce allowance. Real Research Engine policy traces/holdout promotion remain pending."
+        "Holdout promotion requires matched tasks, no candidate failures, no disallowed quality regression and strictly lower scarce allowance. Real Research Engine policy traces/holdout promotion remain pending.",
+        "Claim-bearing runset gate 31f138a8… blocks policy promotion until completed protocol screening, claim-bearing scored replicates, exact source/run-set identity and hard-gate manifest exist."
       ]
     },
     {
@@ -245,7 +251,9 @@
       "id": "INST-05",
       "status": "PENDING",
       "requirement": "Remaining Stage-10 trials UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and representative-work UT-09 pass.",
-      "evidence": []
+      "evidence": [
+        "Current Stage-10 PowerShell runner supports UT-11/01/02/03/04/10 only; UT-05–08/UT-12 require harness implementation before trial execution."
+      ]
     },
     {
       "id": "INST-06",
@@ -327,7 +335,8 @@
         "Production transport code preserves ownership boundaries: backend loopback-only HTTP, outbound-only Windows client, no app bearer credential, no authority endpoint, and explicit opt-in activation.",
         "Candidate target/revision/source bytes, process/action/session generations, packet hash, and independent validator are mechanically bound end-to-end at d3f6e283….",
         "Mixed-executor routing and recovery provenance is exact at workspace-control@a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7; stale session/action generations cannot be reused.",
-        "Production scheduler provenance is generation-bound and candidate evidence binds exact repository/ref/path/commit/content at workspace-control@0afd7837f15ccc573d9dba8ce0422aa5a2d0b061; live route provenance remains authority-gated."
+        "Production scheduler provenance is generation-bound and candidate evidence binds exact repository/ref/path/commit/content at workspace-control@0afd7837f15ccc573d9dba8ce0422aa5a2d0b061; live route provenance remains authority-gated.",
+        "workspace-control@41d32010… is 3/3 green (#2849/#178/#437) and integrates scarcity admission without allowing the governor to widen executor capability/privacy/session eligibility."
       ]
     },
     {
@@ -382,5 +391,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@65709645abfb14b88a51f01296bc3b9600aca919"
+  "latest_validated_checkpoint": "workspace-control@41d320100a0c2ee3890c900ed5295a94b08213af"
 }

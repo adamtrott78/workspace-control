@@ -1,0 +1,129 @@
+# November 2026 Integrated v0 — Executor Handoff Checklist
+
+**Parent task:** `workspace-semantic-execution-migration-v1`  
+**Branch:** `workspace-semantic-execution-migration-v1`  
+**Validated execution base before this handoff documentation:** `41d320100a0c2ee3890c900ed5295a94b08213af`  
+**Validated workflows on that base:** Workspace Control #2849 PASS; Semantic Execution #178 PASS; Operator Bridge #437 PASS.  
+**Deadline:** 2026-11-30.  
+**Definition of done:** every mandatory requirement in `architecture/workspace-semantic-execution-november-2026-acceptance.v0.1.json` is PASS and the integrated review records explicit `PROMOTE_V0`.  
+**Current acceptance matrix before this handoff commit:** 8 PASS / 13 PARTIAL / 1 BLOCKED / 10 PENDING.
+
+## Fresh-chat recovery protocol
+
+1. Recover the exact GitHub head first. Trust the task capsules, this checklist, exact Git/CI/runtime evidence, and authority-owned policy over chat prose.
+2. Verify the current `workspace-semantic-execution-migration-v1` head descends from `41d320100a0c2ee3890c900ed5295a94b08213af`. If it does not, reconcile before acting.
+3. Read these authoritative children before choosing work:
+   - `tasks/active/workspace-semantic-execution-backend-v1.json`
+   - `tasks/active/workspace-operator-bridge-implementation-v1.json`
+   - `tasks/active/workspace-reasoning-economy-v1.json`
+   - Codex child `tasks/active/workspace-reasoning-economy-codex-runtime-v1.json` on its stacked branch when that lane is touched.
+4. Keep Heartbeat on `workspace-semantic-execution-november-integration-plan-v1` while executing substantial work.
+5. Continue autonomously through eligible repository work; stop only for a real authority/policy gate, stronger reasoning requirement, external wait, or genuinely user-only trial/action.
+
+## DO NOT REDO — already implemented and validated
+
+- [x] Durable ReasoningProcess/domain kernel and fail-closed transitions.
+- [x] Recursive `TOO_LARGE` decomposition with inherited constraints/provenance/authority/validators and validated fan-in.
+- [x] Durable distinction between `TOO_LARGE` and `INTRINSICALLY_DIFFICULT`.
+- [x] Event-driven `WAIT_EXTERNAL` with no reasoning polling.
+- [x] Deterministic packet compilation from typed durable state.
+- [x] Persistent session broker, generation fencing, explicit replacement, transcript-independent recovery.
+- [x] Durable OperatorAction lifecycle and backend action/status API.
+- [x] Outbound HTTPS Windows Operator Bridge production client; no inbound Windows listener or app credential store.
+- [x] Durable packet-source materialization with no packet text at rest.
+- [x] Immutable worker-result/candidate publication and independent validation path; no ChatGPT-page scraping.
+- [x] Repository-side Instant loop: scheduler -> HTTP claim -> local prepared -> immutable candidate -> intake -> validator -> completion.
+- [x] PostgreSQL restart/idempotency/stale-generation coverage for the Instant loop.
+- [x] Generic executor dispatch across deterministic exact-source and persistent Instant without model-name scheduler branches.
+- [x] Mixed Research Engine `research-iterate` production-component proof: Instant decomposition -> deterministic exact-source read -> Instant analysis -> fan-in -> Instant synthesis.
+- [x] Forced persistent-Instant session loss: stale old action/result fenced; replacement generation reconstructs from durable state and completes.
+- [x] Production scheduler + explicit immutable GitHub candidate namespace at `0afd7837…`.
+- [x] Scheduler stale-plan/replacement-session recovery and 1,000-cycle wait/no-poll soak at `d28b620e…` (#2843/#167/#431).
+- [x] Weekly allowance governor at `65709645…` (#2844/#169/#432): reserve/headroom, burn projection, subscription-only routing, quality floors, matched holdout promotion logic.
+- [x] Frozen Research Engine P0–P3 policy-trace adapter at `fadadcc0…`.
+- [x] Controlled shared-allowance calibration harness at `59d69e0f…`: isolated actions + ordered snapshots; zero movement remains UNKNOWN/below-resolution; never derive allowance from raw tokens.
+- [x] Claim-bearing runset promotion gate at `31f138a8…`: incomplete/superseded screening cannot become promotion evidence.
+- [x] Reasoning Economy dispatch admission at `41d32010…` (#2849/#178/#437): governor may only choose among base-eligible executors; budget/meter denial occurs before process/session/action mutation.
+- [x] Codex inert bootstrap implementation/static contract tests exist; do **not** implement another bootstrap workflow.
+
+## ACTIVE AGENDA — execute in this order where gates allow
+
+### A. Operator Bridge / Instant — immediate coding lane
+
+- [ ] **A1 — Implement Stage-10 harness support for UT-05 and UT-12 first.**
+  - Current `operator-bridge/tools/run-stage10-usability.ps1` ValidateSet supports only `UT-11, UT-01, UT-02, UT-03, UT-04, UT-10`.
+  - UT-05 = judgment-gate behavior.
+  - UT-12 = no-work/background-ack behavior.
+  - Add deterministic fake-worker scenario + structured result evidence; preserve Ctrl+Space and frozen security boundaries.
+- [ ] **A2 — Implement harness support for UT-06, UT-07, UT-08 recovery scenarios.**
+- [ ] **A3 — Validate each coherent harness slice at exact head before asking the user to run it.**
+- [ ] **A4 — Run/accept UT-05 through UT-08 and UT-12.**
+- [ ] **A5 — Run/accept Bridge-OFF UT-11 and representative-work collision UT-09.**
+- [ ] Preserve accepted behavior: Ctrl+Space -> Ctrl+V -> Enter; no tab search; repeated scheduler presses refocus/block pending action; READY=0 extra press minimizes only WorkspaceWorkers Firefox.
+
+### B. Reasoning Economy — parallel, repository-safe lane
+
+- [ ] **B1 — Continue claim-bearing P0–P3 screening/runset readiness only.**
+  - Preserve exact fixture/oracle/source/run identities.
+  - Superseded/refrozen-but-incomplete runs are NOT promotion evidence.
+  - No policy promotion until claim-bearing scored replicates + exact run set + hard-gate manifest exist.
+- [ ] **B2 — Preserve UNKNOWN allowance when no controlled comparable meter delta exists.**
+- [ ] **B3 — Do not rebuild governor / trace adapter / calibration harness / runset gate / dispatch admission.**
+- [ ] **B4 — When calibrated live traces exist, exercise matched holdout promotion and compare validated progress per scarce allowance against all-strong/frontier control.**
+
+### C. Codex subscription executor — authority-gated lane
+
+- [ ] **C1 — Wait for lineage authority.** PR #627 is open draft at `acd420758eb0124646988ee8776939572c88a82d`; stacked PR #630 is open draft at `9d206a8f608ed86b416473e0ff66fabd99fea884`.
+- [ ] **C2 — Do not bypass PR #627/#630** with manual runner creation, sidecar, generic root policy, PADataset/GPU borrowing, API billing, credits, or `OPENAI_API_KEY`.
+- [ ] **C3 — Once lineage reaches reviewed/default-branch authority:** promote/bind the inert workflow blob, activate only through reviewed v3 authority, run zero-inference bootstrap.
+- [ ] **C4 — If login absent, user performs one ChatGPT device-code authorization.**
+- [ ] **C5 — Prove `account.type=chatgpt`, `planType=plus`, `OPENAI_API_KEY` absent, no API fallback, programmatic usage/rate-limit reads, zero model inference during bootstrap.
+- [ ] **C6 — Run controlled isolated Codex/Instant calibration actions bracketed by official snapshots; only then feed real allowance observations into the governor.**
+
+### D. Live semantic/Instant host — authority-gated lane
+
+- [ ] **D1 — Do not activate while Workspace Shell semantic task authority is absent / TASK_NOT_FOUND.**
+- [ ] **D2 — When exact reviewed/default-branch authority exists:** launch validated localhost backend and reviewed private Tailscale Serve route.
+- [ ] **D3 — Prove one exact-host fake-worker action/status/result round trip before touching a real ChatGPT account.**
+- [ ] **D4 — Then run bounded Stage-12 real-account calibration with no widened browser permissions, DOM/content automation, or security workaround.**
+
+### E. Integrated live proving + final November acceptance
+
+- [ ] **E1 — Run live mixed Research Engine `research-iterate`:** decomposition -> routing -> deterministic exact-source executor + Instant reasoning -> validated fan-in -> synthesis.
+- [ ] **E2 — Inject at least one persistent-worker/session/process loss into that live run; recover from durable state without manual reconstruction.**
+- [ ] **E3 — Capture live CPU/RAM/task/GPU-blind resource and soak evidence.**
+- [ ] **E4 — Run calibrated economics comparison versus all-strong/frontier control.**
+- [ ] **E5 — Run authoritative target-machine UX-09 performance benchmark.**
+- [ ] **E6 — Mechanically check exact SHA/blob/route provenance, authority boundaries, rollback paths, and unresolved violations.**
+- [ ] **E7 — Reconcile every requirement in the November acceptance matrix to PASS or record why promotion is impossible.**
+- [ ] **E8 — Explicit integrated review: `PROMOTE_V0`, `HOLD`, or `REVISE`. November Integrated v0 is complete only on `PROMOTE_V0`.**
+
+## Current gates / non-negotiable boundaries
+
+- **Live semantic host:** suspended until Workspace Shell has exact reviewed authority for this task.
+- **Codex:** suspended until PR #627/#630 lineage is trusted/promoted; subscription-only, no API billing.
+- **Operator real account:** no Stage-12 until remaining Stage-10 harness/trials and exact-host fake-worker transport are complete.
+- **Frontier-equivalence claims:** remain blocked without evaluator-only isolation and claim-bearing replicated scoring.
+- **GitRunner modernization:** deferred; do not rewrite/widen GitRunner authority from this task.
+- **PADataset GPUs:** do not touch for this program; Workspace Control remains CPU-only control lane.
+
+## Exact validated evidence worth preserving
+
+- `d28b620e…`: Workspace #2843 / Semantic #167 / Operator #431 PASS — scheduler recovery + 1,000 wait/no-poll soak.
+- `65709645…`: Workspace #2844 / Semantic #169 / Operator #432 PASS — weekly allowance governor.
+- `fadadcc0…`: Workspace #2846 / Semantic #172 PASS — frozen policy-trace adapter; later descendants fully validate the ancestry.
+- `59d69e0f…`: Workspace #2847 / Semantic #174 PASS — shared allowance calibration harness; later descendants fully validate the ancestry.
+- `31f138a8…`: Workspace #2848 / Semantic #176 / Operator #436 PASS — claim-bearing runset gate.
+- `41d320100a0c2ee3890c900ed5295a94b08213af`: Workspace #2849 / Semantic #178 / Operator #437 PASS — allowance admission integrated at dispatch; current validated cross-task base.
+
+## Handoff behavior for the next executor
+
+- Work from durable state, not conversation memory.
+- Prefer connected GitHub/Workspace Shell evidence over asking the user to relay logs/SHAs.
+- Keep Heartbeat current during long execution.
+- Validate exact heads before promoting a milestone.
+- Do not report implementation presence as live activation.
+- Do not bypass authority gates.
+- Continue through independent eligible lanes rather than waiting idly on Codex/live-host gates.
+- Do not return merely because CI is running if another independent safe action exists.
+- If blocked, state the exact gate and smallest authorized next action.

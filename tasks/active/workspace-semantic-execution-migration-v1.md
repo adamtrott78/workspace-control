@@ -18,19 +18,13 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Design, benchmark, and incrementally migrate Workspace Control to an open-world semantic execution architecture that preserves current research, engineering, tutoring, publication, presentation, document, data-science, and operations workflows while minimizing scarce frontier-model allowance through deterministic execution, resumable Instant/local reasoning, bounded context, capability-aware routing, and explicit escalation—without weakening project-local truth, provenance, authority, GitRunner/Workspace Shell security, or rollback.
 
-## Workflow
-
-- Repository: workspace-control
-- Path: workflows/evidence-first-solution-research.v1.json
-- Checkpoint: d47a7922aa8d47d3a22b55c19ce4d6af7309a964
-
 ## Repositories
 
 ### workspace-control
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 34028182aaf1dc56d40cc607f8561c2337e16bf8
+- Remote checkpoint: 41d320100a0c2ee3890c900ed5295a94b08213af
 - Remote verified: true
 
 ### PADataset
@@ -70,40 +64,19 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-EXECUTE NOVEMBER INTEGRATED V0 CRITICAL PATH. Backend: continue workspace-semantic-execution-backend-v1 at RECURSIVE_TASK_TREE_CONTRACT_AND_FANIN_V1, preserving inherited constraints/provenance/authority/validator obligations and proving multi-level decomposition/fan-in plus TOO_LARGE vs INTRINSICALLY_DIFFICULT. Parallel lanes remain active rather than serialized: Codex runtime must advance only through the PR #627 owning promotion authority, and Operator Bridge production transport must advance only through workspace-operator-bridge-implementation-v1. Use architecture/workspace-semantic-execution-november-2026-acceptance.v0.1.json as the Definition of Done and do not admit work that cannot map to a November requirement or demonstrated blocker.
+CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED BASE workspace-control@41d320100a0c2ee3890c900ed5295a94b08213af. First read architecture/workspace-semantic-execution-november-2026-executor-handoff-checklist.md and recover the exact current branch head; the current head must descend from 41d32010… before reusing its evidence. PRIMARY ACTIVE LANE: Operator Bridge Stage-10. Do not attempt unsupported trials yet: operator-bridge/tools/run-stage10-usability.ps1 currently accepts only UT-11/UT-01/UT-02/UT-03/UT-04/UT-10. Implement bounded harness support for UT-05 judgment-gate behavior and UT-12 no-work/background-ack behavior first, then UT-06–UT-08 recovery scenarios. Validate each addition before running the human trial. Then execute UT-05–UT-08, UT-12, Bridge-OFF UT-11, and representative-work UT-09. PARALLEL REASONING-ECONOMY LANE: do not rebuild the governor, policy-trace adapter, shared-allowance calibration harness, claim-bearing runset gate, or allowance admission—they are implemented in the 65709645→fadadcc0→59d69e0f→31f138a8→41d32010 ancestry. Continue only claim-bearing P0-P3 evidence/readiness and live calibration when its gates are satisfied. CODEX LANE REMAINS SUSPENDED: PR #627 is open draft at acd420758eb0124646988ee8776939572c88a82d and stacked PR #630 is open draft at 9d206a8f608ed86b416473e0ff66fabd99fea884. Do not use API billing, manual runner creation, sidecars, GPU/PADataset capacity, or root-policy bypass. When lineage authority clears, perform zero-inference bootstrap/auth and controlled subscription calibration. LIVE SEMANTIC/INSTANT HOST ACTIVATION REMAINS SUSPENDED while Workspace Shell does not authorize the semantic task. Do not activate Tailscale Serve or a real ChatGPT account via an unreviewed path. After authority exists, run exact-host fake-worker transport first, then bounded Stage-12 real-account calibration. FINAL PROVING ORDER: live mixed Research Engine research-iterate with one forced session/process loss; calibrated allowance/economics comparison versus all-strong/frontier control; target-machine UX-09 and resource/soak evidence; complete acceptance matrix; explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
 
 ## Remaining work
 
-- NOVEMBER INTEGRATED V0 CRITICAL PATH: finish recursive task-tree/decomposition + fan-in first, with inherited constraints/provenance/authority/validator obligations and explicit TOO_LARGE vs INTRINSICALLY_DIFFICULT semantics.
-- NOVEMBER INTEGRATED V0 PARALLEL CODEX LANE: resolve the PR #627 promotion-lineage gate through its owning authority, then complete Workspace Control ChatGPT-Plus Codex runtime/auth, subscription executor, usage calibration, and weekly burn governor.
-- NOVEMBER INTEGRATED V0 PARALLEL INSTANT LANE: replace NoWorkOperatorActionPort/empty workload status with an authorized production backend transport, finish remaining Stage-10 trials, then Stage-12 real-account calibration.
-- NOVEMBER INTEGRATED V0 RED LINE: complete the first full Research Engine research-iterate path with recursive decomposition/routing/validation/synthesis by 2026-11-23; if missed, stop secondary feature/architecture work until the gate is reached.
-- NOVEMBER INTEGRATED V0 FINAL GATE: by 2026-11-30 run the complete acceptance matrix, integrated fault/resource/soak evidence and explicit PROMOTE_V0/HOLD/REVISE review.
-- FIRST REAL VERTICAL SLICE: use Research Engine / research-iterate as the proving workflow. Implement one end-to-end path from strategic ReasoningProcess -> tactical decomposition -> executor routing -> deterministic packet compilation -> worker result -> CandidateAction -> ActionSpec -> read-only/low-consequence effect -> EffectReceipt -> postcondition validation -> repair/synthesis/resume.
-- PACKET COMPILER: build executor-specific packets deterministically from typed durable state, DecisionRecords, constraints, evidence refs, authority refs and validator contracts. Do not require a separate LLM merely to author routine worker prompts.
-- EXECUTOR-AGNOSTIC REGISTRY: support explicit lifecycle/session/resource semantics including HUMAN_ASSISTED_PERSISTENT_CHAT, MACHINE_STATELESS, MACHINE_SESSION_SCOPED, PERSISTENT_SERVICE, BATCH_QUEUED, DETERMINISTIC, FRONTIER_REASONING and HUMAN_JUDGMENT. Current ChatGPT GPT-6 Instant is one profile; future department-H100/Harmony/local/HPC models slot in behind ExecutorPort.
-- FUTURE INSTITUTIONAL MODEL EXECUTORS: treat any approved department H100 or UMass Harmony inference service as optional executor adapters, not architecture dependencies. Record model, quantization, context/session reset policy, GPU allocation, locality/privacy, queue/latency, tool harness and measured capability in the executor registry.
-- DEFERRED GITRUNNER MODERNIZATION REVIEW: after the first semantic-execution vertical slice and Architecture Review v0.3, compare the current GitRunner/controller against the new modular-monolith, durable-runtime, hot-state, ports/adapters, fitness-function, fault-injection and assumption-register principles. Preserve current authority/working controller meanwhile; do not reopen or widen GitRunner migration authority from this task.
-- SECOND-PASS ARCHITECTURE DISCIPLINE: implement the v0.2 freeze boundary and engineering fitness functions; do not let provisional substrate choices become implicit invariants.
-- FORMAL KERNEL: write a small state-machine specification for work transitions, dependencies, leases, generations, stale-worker fencing, retry/idempotency, wait/wake, effect completion, and compensation; derive executable invariants/tests from it.
-- MODULAR MONOLITH SPIKE: implement pure domain modules plus DurableRuntimePort, StateStorePort, AuthorityEvaluatorPort, ExecutorPort, SemanticProjectionPort, TelemetryPort and ClockPort; first adapters are DBOS, PostgreSQL, existing GitHub/Workspace Shell/operator surfaces.
-- RELIABILITY FIRST: add Hypothesis/property-based state-machine testing, deterministic fake clock/runtime, adapter contract tests, injected crashes at durable/effect boundaries, duplicate/delayed/out-of-order events, database disconnect, stale generations, and session/executor loss.
-- COMPUTE BUDGET: run the control plane GPU-blind (`CUDA_VISIBLE_DEVICES=""`), enforce cgroup/systemd CPU/memory/task limits, measure resource use on the first real workflow, and keep heavy CPU/GPU work in separate explicit executors.
-- ASSUMPTION GOVERNANCE: maintain the falsifiable assumption register; every high-risk premise needs an observable invalidation signal and fallback.
-- ACCELERATED BACKEND LANE: implement the deterministic orchestration kernel from workspace-semantic-execution-orchestrator-implementation-plan.v0.1.md Phase 1: WorkItem/ReasoningProcess/Attempt/Lease/Event/WaitCondition/RoutingDecision/ExecutorSession/ValidationResult plus CAS/generation fencing, stale-worker rejection, idempotent transitions, event-driven waits, and fail-closed unknown transitions.
-- ACCELERATED BACKEND LANE: implement executable task-tree decomposition semantics and recursive TOO_LARGE -> DECOMPOSE behavior, preserving inherited constraints, provenance, validator contracts, authority refs, and dependency edges.
-- ACCELERATED BACKEND LANE: implement the executor registry/resource router, semantic packet compiler, persistent session broker, and validator/event service so disposable Instant workers can process bounded leaves and publish durable results.
-- ACCELERATED BACKEND LANE: replay the already-proven multi-worker queue/CAS/lease-recovery fixtures through the new kernel, then add one end-to-end decomposed workflow where multiple Instant-worker leaves complete independently and a synthesizer consumes validated outputs.
-- PARALLEL CALIBRATION LANE: finish remaining Operator Bridge Stage-10 UX trials only as required for real-account/production promotion; do not serialize backend development behind them.
-- PARALLEL CLAIM-BEARING BENCHMARK LANE: provision evaluator-only hidden runtime storage and run replicated capability scoring before making strong Instant-vs-frontier equivalence claims.
-- Close Workspace Shell recovery-plane lifecycle gaps discovered by the power outage: persistent tmpfiles/boot recovery and a narrow standing/reviewed-helper authority model that removes routine operator sudo relay without exposing generic root shell or allowing model reasoning to mint authority.
-- Explicitly determine whether repeated durable Instant reasoning quanta can match frontier long-horizon effectiveness for iterative research/design/test/evaluate loops; separate TOO_LARGE/decompose-again from INTRINSICALLY_DIFFICULT/escalate.
-- Run an independent architecture review of the preferred hybrid semantic-projection hypothesis and challenge whether a different execution substrate/agent/workflow framework materially improves reliability or allowance efficiency.
-- Freeze and implement the smallest stable semantic core, versioned domain/workflow extension contract, durable ReasoningProcess, executor/provider/model/surface/harness capability model, resource/quota router, task-tree/lease/CAS semantics, and evidence-based escalation policy.
-- Operator UX design UX-00 through UX-13 is frozen and child implementation authority is established. Continue workspace-operator-bridge-implementation-v1 through its staged implementation, fake-worker validation, UX-09/UX-11 empirical gates, and bounded real-account calibration before any production promotion.
-- Migrate representative workflows incrementally across: automated research/evaluate/iterate loops; systems engineering and coding; data science/ML experiments; PADataset/research-engine; paper drafting/evidence/citation pipelines; slide/presentation creation; tutoring and homework/assignment generation for MTH602/EAS501/CIS560; generic document/artifact production; GitRunner/Lambda operations; Workspace Shell maintenance; and future workflows not known today.
-- Preserve project-local truth, exact provenance/SHA bindings, authority firewalls, rollback, objective validators, and semantic ontology/graph extensions while minimizing scarce frontier usage.
-- Measure executor effectiveness and scarce frontier allowance continuously; route DETERMINISTIC -> Instant/local -> cheaper hosted -> frontier only when capability/reasoning evidence requires escalation.
+- OPERATOR IMMEDIATE: add Stage-10 harness support for UT-05 and UT-12 first, then UT-06–UT-08; validate exact head before human trials.
+- OPERATOR TRIALS: run UT-05–UT-08, UT-12, Bridge-OFF UT-11, and representative-work UT-09; preserve Ctrl+Space -> Ctrl+V -> Enter, no tab search, minimize-on-empty, and stale-submit protection.
+- REASONING ECONOMY: continue claim-bearing P0-P3 runset readiness using exact fixture/oracle/run provenance; incomplete/superseded screening is never promotion evidence and unknown allowance remains UNKNOWN.
+- CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
+- LIVE INSTANT: after Workspace Shell authority exists, activate reviewed localhost backend + private Tailscale route and prove one exact-host fake-worker action/status/result round trip before real-account use.
+- REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
+- LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
+- ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
+- PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
 
 ## Blockers / gates
 
@@ -123,7 +96,7 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-semantic-execution-migration-v1.json
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Start by recovering exact GitHub state; trust the capsule/checklist plus verified repository/runtime evidence over chat prose.
+Read architecture/workspace-semantic-execution-november-2026-executor-handoff-checklist.md before choosing work.
+Do not redo items listed under DO NOT REDO.
+Follow the capsule's next_safe_action and continue autonomously until a real authority/policy/user-only gate.

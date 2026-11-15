@@ -24,26 +24,30 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: b5695e8c42c546d549742279a54e5668874fdacc
+- Remote checkpoint: 41d320100a0c2ee3890c900ed5295a94b08213af
 - Remote verified: true
 
 ## Next safe action
 
-Continue remaining Stage-10 usability gates (UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing) while the backend completes durable packet-source materialization and server composition. Then run a separately reviewed exact-host Tailscale transport preflight using a fake worker before Stage-12 real-account calibration. Do not enable a real ChatGPT account or widen browser permissions before those predecessor gates pass.
+IMPLEMENT THE MISSING STAGE-10 TRIAL HARNESS BEFORE ASKING THE OPERATOR TO RUN UNSUPPORTED TRIALS. Current operator-bridge/tools/run-stage10-usability.ps1 ValidateSet supports only UT-11, UT-01, UT-02, UT-03, UT-04 and UT-10. Add bounded deterministic fake-worker support and structured objective evidence for UT-05 judgment-gate behavior and UT-12 no-work/background-ack behavior first; then UT-06, UT-07 and UT-08 recovery scenarios. Preserve the frozen security boundary and Ctrl+Space motor loop. Validate exact head after each coherent slice. Then run UT-05–UT-08, UT-12, Bridge-OFF UT-11 and representative-work UT-09. Only after those pass and the semantic live-host authority route exists may exact-host Tailscale fake-worker preflight and Stage-12 real-account calibration proceed.
 
 ## Remaining work
 
-- impl_10_usability_trial_execution: Execute UX-11 human-in-loop simulator trials
-- impl_11_webview2_comparison_spike: Conditional WebView2 custom-shell comparison
-- impl_12_real_account_calibration: Bounded real-account security/policy/authentication calibration
-- impl_09_performance_benchmark_execution: Deferred authoritative UX-09 performance/resource benchmark before production readiness
-- impl_13_production_readiness_review: Integrated implementation review and promotion decision
+- impl_10 harness: add supported TrialId/scenario/result-contract coverage for UT-05 and UT-12 first.
+- impl_10 harness: add UT-06, UT-07 and UT-08 recovery scenarios without widening browser/native-host authority.
+- impl_10 trials: execute/accept UT-05–UT-08 and UT-12 on the validated harness.
+- impl_10 trials: execute Bridge-OFF UT-11 and representative-work collision UT-09; preserve no-response/no-wrong-window guarantees.
+- live transport gate: after Workspace Shell semantic authority exists, prove exact-host Tailscale fake-worker transport before real-account use.
+- impl_12: bounded real-account calibration with no DOM/content automation, no added browser permissions and no security workaround.
+- impl_09: authoritative target-machine UX-09 performance/resource benchmark after real-account calibration.
+- impl_13: explicit PROMOTE_V0/HOLD/REVISE production-readiness review.
 
 ## Blockers / gates
 
 - Ctrl+Space passed UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, UT-03 interruption recovery, and UT-04 multiple SENT/UNCONFIRMED coexistence. Final binding retention still requires UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing.
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
 - Production action/status transport is now implemented and validated in code, but the real Tailscale Serve -> localhost backend path has not yet been activated/preflighted on the Linux Workspace Control host and Windows WorkspaceWorkers client. INST-01 remains PARTIAL until that exact-host path carries a fake-worker action end-to-end.
+- Stage-10 HARNESS GAP: operator-bridge/tools/run-stage10-usability.ps1 currently accepts only UT-11, UT-01, UT-02, UT-03, UT-04 and UT-10. UT-05/UT-06/UT-07/UT-08/UT-12 cannot be validly executed until bounded harness/scenario/result support is implemented and repository-validated.
 
 ## Fresh-chat initialization
 
@@ -54,7 +58,7 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-operator-bridge-implementation-v1.json
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Start by recovering exact GitHub state; trust the capsule/checklist plus verified repository/runtime evidence over chat prose.
+Read architecture/workspace-semantic-execution-november-2026-executor-handoff-checklist.md before choosing work.
+Do not redo items listed under DO NOT REDO.
+Follow the capsule's next_safe_action and continue autonomously until a real authority/policy/user-only gate.
