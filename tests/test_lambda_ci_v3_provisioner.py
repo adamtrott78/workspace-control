@@ -199,11 +199,13 @@ class V3ProvisionerTests(unittest.TestCase):
         first = "workspace-control-control-small-v1"
         second = "research-cpu-public-v1"
         third = "padataset-cpu-public-v1"
+        fourth = "padataset-scientific-single-gpu-v1"
         self.assertEqual(self.reserve(first, 105)["status"], "RESERVED")
         self.assertEqual(self.reserve(second, 106)["status"], "RESERVED")
-        busy = self.reserve(third, 107)
+        self.assertEqual(self.reserve(third, 107)["status"], "RESERVED")
+        busy = self.reserve(fourth, 108)
         self.assertEqual(busy["status"], "BUSY")
-        self.assertIsNone(self.store.read(self.request_id(107)))
+        self.assertIsNone(self.store.read(self.request_id(108)))
 
     def test_two_science_lanes_leave_reserved_workspace_control_slot(self):
         science0 = "padataset-scientific-single-gpu-v1"
