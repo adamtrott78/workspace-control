@@ -20,11 +20,32 @@ class ProcessState(StrEnum):
     AUTHORITY_BLOCKED = "AUTHORITY_BLOCKED"
 
 
+class WorkDisposition(StrEnum):
+    """Durable reasoning classification, distinct from process lifecycle."""
+
+    UNCLASSIFIED = "UNCLASSIFIED"
+    EXECUTABLE = "EXECUTABLE"
+    TOO_LARGE = "TOO_LARGE"
+    INTRINSICALLY_DIFFICULT = "INTRINSICALLY_DIFFICULT"
+
+
 class AuthorityOutcome(StrEnum):
     ALLOW = "ALLOW"
     DENY = "DENY"
     ABSTAIN = "ABSTAIN"
     UNKNOWN = "UNKNOWN"
+
+
+@dataclass(frozen=True)
+class WorkContract:
+    """Non-droppable work obligations carried through decomposition."""
+
+    objective: str
+    mandatory_constraints: tuple[str, ...] = ()
+    provenance_refs: tuple[str, ...] = ()
+    authority_refs: tuple[str, ...] = ()
+    validator_contracts: tuple[str, ...] = ()
+    output_schema_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -111,6 +132,9 @@ class ReasoningProcess:
     repair_required: bool = False
     history: list[TransitionRecord] = field(default_factory=list)
     parent_process_id: str | None = None
+    work_contract: WorkContract | None = None
+    disposition: WorkDisposition = WorkDisposition.UNCLASSIFIED
+    disposition_reason: str | None = None
 
 
 @dataclass
