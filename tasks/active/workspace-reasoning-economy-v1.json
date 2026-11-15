@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-backend-v1",
-  "current_stage": "usage_telemetry_contract_and_collector",
+  "current_stage": "economics_ledger",
   "acceptance_criteria": [
     "No OpenAI API-key billing, pay-as-you-go fallback, purchased credits, paid reset consumption, or automatic billing path is authorized.",
     "Codex execution is authorized only when backed by the user's included ChatGPT subscription allowance.",
@@ -45,7 +45,7 @@
       "base_sha": "991f0c76497670f27482459463ebc6933d1aa95f",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "991f0c76497670f27482459463ebc6933d1aa95f",
+        "checkpoint_sha": "8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45",
         "verified": true
       },
       "local": null,
@@ -80,7 +80,7 @@
   "stages": [
     {
       "id": "usage_telemetry_contract_and_collector",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-reasoning-economy",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -95,12 +95,26 @@
         "null/unknown-preserving normalization",
         "collector protocol tests"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Read-only Codex app-server usage telemetry",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control@8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45",
+            "Workspace Control Validation #2756 SUCCESS, including full unit regression and integration contracts.",
+            "Collector allowlists only account/rateLimits/read and account/usage/read.",
+            "OPENAI_API_KEY is stripped from the child app-server environment.",
+            "Window classification uses windowDurationMins, not primary/secondary position.",
+            "Null/unknown upstream usage metrics are preserved rather than coerced to zero.",
+            "Account identity, upsell data, and reset-credit details are intentionally excluded from normalized telemetry."
+          ]
+        }
+      ],
       "resume_condition": "Collector deterministically parses both rate-limit and account-token-activity responses without credentials in logs or fixtures."
     },
     {
       "id": "economics_ledger",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-reasoning-economy",
       "selected_executor": null,
       "selected_surface": null,
@@ -186,13 +200,24 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "workspace-control@991f0c76497670f27482459463ebc6933d1aa95f",
+      "id": "usage-telemetry-validated",
+      "kind": "implementation_checkpoint",
+      "identity": "workspace-control@8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45",
       "required_for_resume": true,
       "evidence": [
-        "First unfinished stage is usage_telemetry_contract_and_collector.",
-        "No Reasoning Economy production code existed at this checkpoint."
+        "Workspace Control Validation #2756 SUCCESS.",
+        "Codex account/rate-limit collector and fixture tests are validated."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "workspace-control@8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45",
+      "required_for_resume": true,
+      "evidence": [
+        "usage_telemetry_contract_and_collector VALIDATED.",
+        "First unfinished stage is economics_ledger.",
+        "No live account authentication has been attempted yet."
       ]
     }
   ],
@@ -217,15 +242,14 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement usage/rate-limit contracts and Codex app-server collector.",
     "Implement execution economics ledger and waste classification.",
     "Implement subscription-only Codex executor with JSONL trace ingestion.",
     "Calibrate account/usage/read and rate-limit deltas against controlled ChatGPT/Codex/Instant actions.",
     "Run Research Engine routing/decomposition experiments.",
     "Implement weekly burn governor and recursive policy promotion."
   ],
-  "next_safe_action": "Implement the read-only usage telemetry contract and Codex app-server collector. Support account/rateLimits/read and account/usage/read; preserve null/unknown values; classify windows by duration; redact identity/credential material; never call reset-credit or mutation methods. Add deterministic fixture tests before attempting one-time live ChatGPT-backed Codex authentication/calibration.",
+  "next_safe_action": "Implement ExecutionEconomics, UsageDelta, allowance-window delta matching, token/tool/retry/validator metrics, and waste classifications under semantic-execution/src/workspace_semantic_execution/economics/. Preserve UNKNOWN for missing/reset/ambiguous telemetry. Add deterministic tests for weekly-window deltas, reset boundaries, null token totals, zero-token WAITING_EXTERNAL/IDLE/POLLING policy, and verified-progress-per-allowance calculations. Do not attempt live Codex authentication until the ledger is validated.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-15 ACTIVATED: Reasoning Economy is a dedicated child track of semantic execution. Immediate objective is to remove manual Usage-page transcription by consuming official Codex app-server read-only account telemetry. account/rateLimits/read exposes rate-limit windows; account/usage/read exposes account token-activity summary/daily buckets and optional thread usage in the current public Codex protocol. Whether these values perfectly track the December shared ChatGPT/Codex allowance is intentionally UNKNOWN until controlled calibration. No API billing is authorized."
+  "notes": "2026-11-15 ACTIVATED: Reasoning Economy is a dedicated child track of semantic execution. Immediate objective is to remove manual Usage-page transcription by consuming official Codex app-server read-only account telemetry. account/rateLimits/read exposes rate-limit windows; account/usage/read exposes account token-activity summary/daily buckets and optional thread usage in the current public Codex protocol. Whether these values perfectly track the December shared ChatGPT/Codex allowance is intentionally UNKNOWN until controlled calibration. No API billing is authorized.\n\n2026-11-15 USAGE TELEMETRY VALIDATED: Official Codex app-server read-only account telemetry is implemented and passed Workspace Control Validation #2756 at 8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45. The collector reads account/rateLimits/read plus account/usage/read, strips OPENAI_API_KEY, excludes identity/upsell/reset-credit data, classifies windows by duration, and preserves unknown/null metrics. Next stage is the economics ledger; shared ChatGPT/Codex allowance equivalence remains an empirical calibration question.\n"
 }
