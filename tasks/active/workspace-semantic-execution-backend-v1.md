@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: e1a91804f6cb5b1cdcd6b24c5bd454dae5790e2e
+- Remote checkpoint: e9a1f976370ce5b91a2c0785ab4413d68667cc8e
 - Remote verified: true
 
 ### research-engine
@@ -36,16 +36,16 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement DURABLE_WORKER_RESULT_PUBLICATION_AND_INTAKE_V1. Manual Instant dispatch must atomically claim/start the target ReasoningProcess using a deterministic operator worker/lease identity before packet/session/action publication. Add a strict WorkerResultPublication contract bound to immutable source bytes plus exact action_generation/process_generation/session_generation/packet_sha256. Result intake may propose RESULT, TOO_LARGE, INTRINSICALLY_DIFFICULT, or WAIT_EXTERNAL only; it cannot grant authority. On valid durable publication, atomically acknowledge the session + OperatorAction and apply the corresponding process transition. RESULT must become TERMINAL_CANDIDATE and complete only after an independent validator. Exact duplicate publications must be idempotent; stale/mismatched/unknown-field publications fail closed. Prove schema-v6 compatibility and PostgreSQL adapter-restart intake. Do not scrape ChatGPT or activate live Tailscale transport.
+Implement INSTANT_CANDIDATE_PUBLICATION_CONTRACT_AND_E2E_V1. Extend deterministic packet compilation with a typed publication contract supplied by the dispatch planner: exact publication_id/action_id/action_generation/process_generation/worker_slot_id/session_generation, worker-result schema ref, and a candidate-only target ref. Do not embed packet_sha256 inside the canonical payload (the worker must copy the packet_sha256 header into its publication) to avoid self-reference. The target must be proposal-only and must explicitly forbid task-capsule/authority mutation. Add an exact-source candidate adapter that parses immutable bytes with source_ref/source_sha256 and invokes WorkerResultIntakeService. Prove the complete fake-worker loop through the production HTTP claim/local-prepared boundary and PostgreSQL restart. Do not activate live Tailscale transport or real ChatGPT account yet.
 
 ## Remaining work
 
-- Implement and validate durable worker-result publication/intake with exact action/process/session/packet generation fencing and no consumer-UI scraping.
-- Make manual Instant dispatch own the ReasoningProcess lease atomically with packet/session/action planning so another executor cannot race the same leaf.
-- Drive RESULT -> terminal candidate -> independent validator -> COMPLETED/repair-ready; TOO_LARGE -> recursive decomposition; INTRINSICALLY_DIFFICULT -> stronger-tier resume; WAIT_EXTERNAL -> event-driven wait.
-- Add strict worker-result JSON codec/schema and future immutable GitHub candidate/intake adapter; worker output must never mutate authoritative task state directly or grant authority.
+- Embed a typed non-authoritative result-publication contract in Instant packets, including exact action/process/session generations and schema/candidate target while avoiding self-referential packet hashing.
+- Implement a candidate-source adapter that binds immutable result bytes/source SHA and feeds WorkerResultIntakeService; candidate publication must not mutate authoritative task state or authority fields.
+- Prove one full fake-worker Instant loop: atomic dispatch -> production HTTP claim -> local prepared -> immutable candidate result -> exact-source parse -> durable intake -> independent validation -> process/action/session completion.
+- Repeat the full loop across PostgreSQL adapter recreation and stale candidate/recovery faults.
 - After a reviewed default-branch activation route exists, run exact-host Tailscale fake-worker transport preflight and close INST-01.
-- Finish remaining Operator Bridge Stage-10 gates and Stage-12 real-account calibration.
+- Finish remaining Operator Bridge Stage-10 trials and Stage-12 real-account calibration.
 - Advance subscription Codex only after PR #627 lineage authority clears.
 - Run mixed-executor Research Engine research-iterate and remaining November reliability/soak acceptance.
 
