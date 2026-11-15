@@ -24,21 +24,24 @@ Add a bounded, CPU-only Codex runtime/bootstrap capability to the existing Works
 
 - Intent: mutate
 - Remote branch: workspace-reasoning-economy-codex-runtime-v1
-- Remote checkpoint: acd420758eb0124646988ee8776939572c88a82d
+- Remote checkpoint: 164c039b73a1433370802d962eaf949a688eb0a5
 - Remote verified: true
 
 ## Next safe action
 
-Implement the inert lambda-ci-workspace-control-codex-bootstrap.yml workflow on this stacked branch. Reuse the exact same-repository PR-head and control-small isolation gates from the accepted control-validation workflow; pin Codex 0.155.1 and its official SHA-256; write runtime/CODEX_HOME only under the Workspace Control project home; force ChatGPT auth; perform no model inference; emit only a redacted receipt. Add static tests proving no API key, GPU, sibling-project, or capacity widening behavior. Do not add the live root route until this workflow is validated and promoted to an exact default-branch blob.
+DO NOT implement another bootstrap workflow: it already exists at exact head 164c039b73a1433370802d962eaf949a688eb0a5. First add tests/test_workspace_reasoning_economy_codex_runtime.py that statically prove the workflow preserves the frozen safety/resource contract (control-small only; no PADataset/GPU/Docker/sibling access; OPENAI_API_KEY unset; ChatGPT-only auth; Codex 0.155.1 + exact release digest; persistent paths only under Workspace Control home; zero model inference; redacted receipt; no capacity/root-policy widening). Then run repository validation on the exact candidate. If green, open/continue a stacked PR whose base is PR #627 head branch padataset-dual-science-control-reserve-v1 at acd420758eb0124646988ee8776939572c88a82d. Do not add or activate the live root route until the inert workflow is validated and promoted to an exact default-branch blob.
 
 ## Remaining work
 
-- Implement and repository-validate the inert pinned Codex bootstrap workflow.
-- Promote the inert workflow to main and bind its exact blob.
-- Add and validate the bootstrap route on the existing control-small class while preserving PR #627 capacity invariants.
-- Activate the additive route through the reviewed v3 root-policy mechanism.
-- Run bootstrap; if needed perform one device-code ChatGPT authorization.
-- Prove Plus auth and programmatic account/rate-limit/usage reads with zero model inference.
+- Add tests/test_workspace_reasoning_economy_codex_runtime.py with static contract tests for exact runner class, no GPU/Docker/sibling access, OPENAI_API_KEY stripping, ChatGPT-only auth, pinned Codex version/digest, no model inference, redacted receipt, and absence of capacity/root-authority widening.
+- Repository-validate the inert bootstrap workflow candidate on the stacked branch; do not treat implementation presence as validation.
+- Open/validate the Codex runtime PR stacked on PR #627 head padataset-dual-science-control-reserve-v1@acd420758eb0124646988ee8776939572c88a82d without modifying PR #627.
+- Promote the validated inert workflow to default branch and bind its exact blob before adding any trusted route.
+- Add and validate an additive /workspace-codex-bootstrap route on workspace-control-control-small-v1 while preserving host=3, PADataset=2, Workspace Control=1, reserved=1.
+- Activate only through reviewed v3 root-policy/provisioner authority; no manual runner or sidecar bypass.
+- Run zero-inference bootstrap; if login is absent, user performs one device-code ChatGPT authorization.
+- Prove account.type=chatgpt, planType=plus, and programmatic rate-limit/usage reads without leaking credential/account identity material.
+- Return to parent workspace-reasoning-economy-v1 codex_subscription_executor stage after runtime/auth preflight succeeds.
 
 ## Blockers / gates
 
