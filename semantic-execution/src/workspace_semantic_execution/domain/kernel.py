@@ -14,6 +14,8 @@ from .models import (
     AuthorityOutcome,
     CandidateAction,
     EffectReceipt,
+    ExecutorSession,
+    ExecutorSessionState,
     ProcessState,
     ReasoningProcess,
     TransitionRecord,
@@ -100,6 +102,13 @@ class DomainKernel:
             raise KernelError(f"unknown_process:{process_id}") from exc
 
     @staticmethod
+    def _session(graph: WorkGraph, slot_id: str) -> ExecutorSession:
+        try:
+            return graph.executor_sessions[slot_id]
+        except KeyError as exc:
+            raise KernelError(f"unknown_session_slot:{slot_id}") from exc
+
+    @staticmethod
     def _guard_generation(
         process: ReasoningProcess,
         expected_generation: int,
@@ -108,6 +117,18 @@ class DomainKernel:
             raise KernelError(
                 "stale_generation:"
                 f"expected={expected_generation}:current={process.generation}"
+            )
+
+    @staticmethod
+    def _guard_session_generation(
+        session: ExecutorSession,
+        expected_session_generation: int,
+    ) -> None:
+        if expected_session_generation != session.session_generation:
+            raise KernelError(
+                "stale_session_generation:"
+                f"expected={expected_session_generation}:"
+                f"current={session.session_generation}"
             )
 
     @staticmethod
@@ -195,6 +216,55 @@ class DomainKernel:
             ):
                 return False
         return True
+
+    @staticmethod
+    def _clear_session_binding(session: ExecutorSession) -> None:
+        session.bound_process_id = None
+        session.bound_process_generation = None
+        session.bound_packet_sha256 = None
+
+    @staticmethod
+    def _graph_event(
+        graph: WorkGraph,
+        event: str,
+        **details: object,
+    ) -> None:
+        graph.event_seq += 1
+        graph.graph_history.append(
+            {"seq": graph.event_seq, "event": event, "details": deepcopy(details)}
+        )
+
+    @classmethod
+    def _fence_sessions_for_process(
+        cls,
+        graph: WorkGraph,
+        *,
+        process_id: str,
+        process_generation: int,
+        reason: str,
+    ) -> None:
+        for session in graph.executor_sessions.values():
+            if (
+                session.state == ExecutorSessionState.BOUND
+                and session.bound_process_id == process_id
+                and session.bound_process_generation == process_generation
+            ):
+                old_generation = session.session_generation
+                session.session_generation += 1
+                session.session_id = None
+                session.state = ExecutorSessionState.NEEDS_REPLACEMENT
+                session.retirement_reason = reason
+                cls._clear_session_binding(session)
+                cls._graph_event(
+                    graph,
+                    "SESSION_FENCED_BY_PROCESS_RECOVERY",
+                    slot_id=session.slot_id,
+                    old_session_generation=old_generation,
+                    new_session_generation=session.session_generation,
+                    process_id=process_id,
+                    process_generation=process_generation,
+                    reason=reason,
+                )
 
     @classmethod
     def _dependencies_satisfied(
@@ -519,6 +589,127 @@ class DomainKernel:
         return next_graph
 
     @classmethod
+    def register_executor_session(
+        cls, graph: WorkGraph, *, slot_id: str, executor_id: str, session_id: str,
+    ) -> WorkGraph:
+        if not slot_id or not executor_id or not session_id:
+            raise KernelError("session_identity_required")
+        next_graph = cls._copy(graph)
+        if slot_id in next_graph.executor_sessions:
+            raise KernelError(f"duplicate_session_slot:{slot_id}")
+        next_graph.executor_sessions[slot_id] = ExecutorSession(
+            slot_id=slot_id, executor_id=executor_id, session_id=session_id
+        )
+        cls._graph_event(next_graph, "SESSION_REGISTER", slot_id=slot_id, executor_id=executor_id, session_generation=0)
+        cls.validate(next_graph)
+        return next_graph
+
+    @classmethod
+    def bind_executor_session(
+        cls, graph: WorkGraph, *, slot_id: str, expected_session_generation: int,
+        process_id: str, process_generation: int, packet_sha256: str,
+    ) -> WorkGraph:
+        next_graph = cls._copy(graph)
+        session = cls._session(next_graph, slot_id)
+        cls._guard_session_generation(session, expected_session_generation)
+        if session.state != ExecutorSessionState.READY:
+            raise KernelError(f"session_not_ready:{session.state}")
+        if session.session_id is None:
+            raise KernelError("session_id_required")
+        process = cls._process(next_graph, process_id)
+        cls._guard_generation(process, process_generation)
+        if len(packet_sha256) != 64 or any(ch not in "0123456789abcdef" for ch in packet_sha256):
+            raise KernelError("packet_sha256_required")
+        session.state = ExecutorSessionState.BOUND
+        session.bound_process_id = process_id
+        session.bound_process_generation = process_generation
+        session.bound_packet_sha256 = packet_sha256
+        cls._graph_event(next_graph, "SESSION_BIND", slot_id=slot_id, session_generation=session.session_generation, process_id=process_id, process_generation=process_generation, packet_sha256=packet_sha256)
+        cls.validate(next_graph)
+        return next_graph
+
+    @classmethod
+    def acknowledge_executor_session(
+        cls, graph: WorkGraph, *, slot_id: str, expected_session_generation: int,
+        process_id: str, process_generation: int, ack_id: str,
+    ) -> WorkGraph:
+        if not ack_id:
+            raise KernelError("session_ack_id_required")
+        next_graph = cls._copy(graph)
+        session = cls._session(next_graph, slot_id)
+        cls._guard_session_generation(session, expected_session_generation)
+        if session.state != ExecutorSessionState.BOUND:
+            raise KernelError(f"session_not_bound:{session.state}")
+        if session.bound_process_id != process_id or session.bound_process_generation != process_generation:
+            raise KernelError("session_ack_binding_mismatch")
+        process = cls._process(next_graph, process_id)
+        cls._guard_generation(process, process_generation)
+        session.last_ack_id = ack_id
+        session.last_ack_process_id = process_id
+        session.last_ack_process_generation = process_generation
+        session.state = ExecutorSessionState.READY
+        cls._clear_session_binding(session)
+        cls._graph_event(next_graph, "SESSION_ACK", slot_id=slot_id, session_generation=session.session_generation, process_id=process_id, process_generation=process_generation, ack_id=ack_id)
+        cls.validate(next_graph)
+        return next_graph
+
+    @classmethod
+    def invalidate_executor_session(
+        cls, graph: WorkGraph, *, slot_id: str, expected_session_generation: int, reason: str,
+    ) -> WorkGraph:
+        if not reason:
+            raise KernelError("session_retirement_reason_required")
+        next_graph = cls._copy(graph)
+        session = cls._session(next_graph, slot_id)
+        cls._guard_session_generation(session, expected_session_generation)
+        if session.state == ExecutorSessionState.RETIRED:
+            raise KernelError("session_already_retired")
+        old_generation = session.session_generation
+        session.session_generation += 1
+        session.session_id = None
+        session.state = ExecutorSessionState.NEEDS_REPLACEMENT
+        session.retirement_reason = reason
+        cls._clear_session_binding(session)
+        cls._graph_event(next_graph, "SESSION_INVALIDATE", slot_id=slot_id, old_session_generation=old_generation, new_session_generation=session.session_generation, reason=reason)
+        cls.validate(next_graph)
+        return next_graph
+
+    @classmethod
+    def replace_executor_session(
+        cls, graph: WorkGraph, *, slot_id: str, expected_session_generation: int, session_id: str,
+    ) -> WorkGraph:
+        if not session_id:
+            raise KernelError("session_id_required")
+        next_graph = cls._copy(graph)
+        session = cls._session(next_graph, slot_id)
+        cls._guard_session_generation(session, expected_session_generation)
+        if session.state != ExecutorSessionState.NEEDS_REPLACEMENT:
+            raise KernelError(f"session_replace_invalid_state:{session.state}")
+        session.session_id = session_id
+        session.state = ExecutorSessionState.READY
+        session.retirement_reason = None
+        cls._graph_event(next_graph, "SESSION_REPLACE", slot_id=slot_id, session_generation=session.session_generation)
+        cls.validate(next_graph)
+        return next_graph
+
+    @classmethod
+    def retire_executor_session(
+        cls, graph: WorkGraph, *, slot_id: str, expected_session_generation: int, reason: str,
+    ) -> WorkGraph:
+        if not reason:
+            raise KernelError("session_retirement_reason_required")
+        next_graph = cls._copy(graph)
+        session = cls._session(next_graph, slot_id)
+        cls._guard_session_generation(session, expected_session_generation)
+        session.session_id = None
+        session.state = ExecutorSessionState.RETIRED
+        session.retirement_reason = reason
+        cls._clear_session_binding(session)
+        cls._graph_event(next_graph, "SESSION_RETIRE", slot_id=slot_id, session_generation=session.session_generation, reason=reason)
+        cls.validate(next_graph)
+        return next_graph
+
+    @classmethod
     def record_effect(
         cls,
         graph: WorkGraph,
@@ -682,7 +873,14 @@ class DomainKernel:
             raise KernelError("recovery_reason_required")
 
         previous_state = process.state
+        previous_generation = process.generation
         process.generation += 1
+        cls._fence_sessions_for_process(
+            next_graph,
+            process_id=process_id,
+            process_generation=previous_generation,
+            reason=f"process_recovered:{reason}",
+        )
         process.worker_id = None
         process.lease_id = None
 
@@ -891,3 +1089,46 @@ class DomainKernel:
                     process.work_contract,
                 ):
                     raise KernelError("inherited_work_contract_dropped")
+
+        for slot_id, session in graph.executor_sessions.items():
+            if session.slot_id != slot_id:
+                raise KernelError("session_slot_identity_mismatch")
+            if not session.slot_id or not session.executor_id:
+                raise KernelError("session_identity_required")
+            if session.session_generation < 0:
+                raise KernelError("invalid_session_generation")
+            if session.state not in set(ExecutorSessionState):
+                raise KernelError(f"unknown_session_state:{session.state}")
+            bound_values = (session.bound_process_id, session.bound_process_generation, session.bound_packet_sha256)
+            if session.state == ExecutorSessionState.BOUND:
+                if session.session_id is None:
+                    raise KernelError("bound_session_missing_session_id")
+                if any(value is None for value in bound_values):
+                    raise KernelError("bound_session_incomplete")
+                process = graph.processes.get(session.bound_process_id)
+                if process is None:
+                    raise KernelError("bound_session_unknown_process")
+                if process.generation != session.bound_process_generation:
+                    raise KernelError("bound_session_stale_process_generation")
+                packet_hash = session.bound_packet_sha256 or ""
+                if len(packet_hash) != 64 or any(ch not in "0123456789abcdef" for ch in packet_hash):
+                    raise KernelError("bound_session_invalid_packet_hash")
+                if session.retirement_reason is not None:
+                    raise KernelError("bound_session_has_retirement_reason")
+            elif session.state == ExecutorSessionState.READY:
+                if session.session_id is None:
+                    raise KernelError("ready_session_missing_session_id")
+                if any(value is not None for value in bound_values):
+                    raise KernelError("ready_session_has_binding")
+                if session.retirement_reason is not None:
+                    raise KernelError("ready_session_has_retirement_reason")
+            elif session.state in {ExecutorSessionState.NEEDS_REPLACEMENT, ExecutorSessionState.RETIRED}:
+                if session.session_id is not None:
+                    raise KernelError("inactive_session_has_session_id")
+                if any(value is not None for value in bound_values):
+                    raise KernelError("inactive_session_has_binding")
+                if not session.retirement_reason:
+                    raise KernelError("inactive_session_missing_reason")
+            ack_values = (session.last_ack_id, session.last_ack_process_id, session.last_ack_process_generation)
+            if any(value is None for value in ack_values) and any(value is not None for value in ack_values):
+                raise KernelError("partial_session_ack")

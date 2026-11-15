@@ -29,6 +29,13 @@ class WorkDisposition(StrEnum):
     INTRINSICALLY_DIFFICULT = "INTRINSICALLY_DIFFICULT"
 
 
+class ExecutorSessionState(StrEnum):
+    READY = "READY"
+    BOUND = "BOUND"
+    NEEDS_REPLACEMENT = "NEEDS_REPLACEMENT"
+    RETIRED = "RETIRED"
+
+
 class AuthorityOutcome(StrEnum):
     ALLOW = "ALLOW"
     DENY = "DENY"
@@ -117,6 +124,24 @@ class ActionSpec:
 
 
 @dataclass
+class ExecutorSession:
+    """Durable session-slot metadata; never an authority record."""
+
+    slot_id: str
+    executor_id: str
+    session_generation: int = 0
+    session_id: str | None = None
+    state: ExecutorSessionState = ExecutorSessionState.READY
+    bound_process_id: str | None = None
+    bound_process_generation: int | None = None
+    bound_packet_sha256: str | None = None
+    last_ack_id: str | None = None
+    last_ack_process_id: str | None = None
+    last_ack_process_generation: int | None = None
+    retirement_reason: str | None = None
+
+
+@dataclass
 class ReasoningProcess:
     process_id: str
     state: ProcessState = ProcessState.READY
@@ -140,5 +165,6 @@ class ReasoningProcess:
 @dataclass
 class WorkGraph:
     processes: dict[str, ReasoningProcess]
+    executor_sessions: dict[str, ExecutorSession] = field(default_factory=dict)
     event_seq: int = 0
     graph_history: list[dict[str, Any]] = field(default_factory=list)

@@ -1,8 +1,7 @@
 """Deterministic JSON codec for durable WorkGraph state.
 
 This codec is infrastructure-neutral and intentionally avoids pickle or
-runtime-specific object serialization. Schema v2 adds durable work-contract
-and reasoning-disposition metadata while retaining v1 decode compatibility.
+runtime-specific object serialization. Schema v3 adds durable executor-session slots while retaining v1/v2 decode compatibility.
 """
 from __future__ import annotations
 
@@ -12,6 +11,8 @@ from typing import Any
 from ..domain import (
     DomainKernel,
     EffectReceipt,
+    ExecutorSession,
+    ExecutorSessionState,
     ProcessState,
     ReasoningProcess,
     TransitionRecord,
@@ -22,8 +23,8 @@ from ..domain import (
 )
 
 
-SCHEMA_VERSION = 2
-SUPPORTED_SCHEMA_VERSIONS = {1, 2}
+SCHEMA_VERSION = 3
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3}
 
 
 class GraphCodecError(ValueError):
@@ -123,6 +124,23 @@ def _decode_work_contract(raw: object) -> WorkContract | None:
     )
 
 
+def _encode_executor_session(session: ExecutorSession) -> dict[str, Any]:
+    return {
+        "slot_id": session.slot_id,
+        "executor_id": session.executor_id,
+        "session_generation": session.session_generation,
+        "session_id": session.session_id,
+        "state": session.state.value,
+        "bound_process_id": session.bound_process_id,
+        "bound_process_generation": session.bound_process_generation,
+        "bound_packet_sha256": session.bound_packet_sha256,
+        "last_ack_id": session.last_ack_id,
+        "last_ack_process_id": session.last_ack_process_id,
+        "last_ack_process_generation": session.last_ack_process_generation,
+        "retirement_reason": session.retirement_reason,
+    }
+
+
 def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
     DomainKernel.validate(graph)
     processes: list[dict[str, Any]] = []
@@ -191,6 +209,13 @@ def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
         "event_seq": graph.event_seq,
         "graph_history": _encode_value(graph.graph_history),
         "processes": processes,
+        "executor_sessions": [
+            _encode_executor_session(session)
+            for session in sorted(
+                graph.executor_sessions.values(),
+                key=lambda item: item.slot_id,
+            )
+        ],
     }
 
 
@@ -314,8 +339,41 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
         )
         processes[process_id] = process
 
+    executor_sessions: dict[str, ExecutorSession] = {}
+    if schema_version >= 3:
+        raw_sessions = payload.get("executor_sessions", [])
+        if not isinstance(raw_sessions, list):
+            raise GraphCodecError("executor_sessions_must_be_list")
+        for raw in raw_sessions:
+            if not isinstance(raw, dict):
+                raise GraphCodecError("executor_session_must_be_object")
+            slot_id = raw.get("slot_id")
+            if not isinstance(slot_id, str) or not slot_id:
+                raise GraphCodecError("session_slot_id_required")
+            if slot_id in executor_sessions:
+                raise GraphCodecError(f"duplicate_session_slot:{slot_id}")
+            try:
+                session_state = ExecutorSessionState(str(raw["state"]))
+            except (KeyError, ValueError) as exc:
+                raise GraphCodecError("invalid_executor_session_state") from exc
+            executor_sessions[slot_id] = ExecutorSession(
+                slot_id=slot_id,
+                executor_id=str(raw.get("executor_id", "")),
+                session_generation=int(raw.get("session_generation", 0)),
+                session_id=raw.get("session_id"),
+                state=session_state,
+                bound_process_id=raw.get("bound_process_id"),
+                bound_process_generation=(None if raw.get("bound_process_generation") is None else int(raw["bound_process_generation"])),
+                bound_packet_sha256=raw.get("bound_packet_sha256"),
+                last_ack_id=raw.get("last_ack_id"),
+                last_ack_process_id=raw.get("last_ack_process_id"),
+                last_ack_process_generation=(None if raw.get("last_ack_process_generation") is None else int(raw["last_ack_process_generation"])),
+                retirement_reason=raw.get("retirement_reason"),
+            )
+
     graph = WorkGraph(
         processes=processes,
+        executor_sessions=executor_sessions,
         event_seq=int(payload.get("event_seq", 0)),
         graph_history=_decode_value(payload.get("graph_history", [])),
     )

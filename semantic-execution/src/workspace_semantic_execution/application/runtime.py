@@ -7,6 +7,7 @@ from ..domain import (
     DomainKernel,
     EffectReceipt,
     ProcessState,
+    ExecutorSession,
     ReasoningProcess,
     ValidationResult,
     WorkDisposition,
@@ -328,6 +329,24 @@ class RuntimeCoordinator:
                 reason=reason,
             ),
         )
+
+    def register_executor_session(self, *, slot_id: str, executor_id: str, session_id: str) -> StateSnapshot:
+        return self._apply("session.registered", lambda graph: DomainKernel.register_executor_session(graph, slot_id=slot_id, executor_id=executor_id, session_id=session_id))
+
+    def bind_executor_session(self, *, slot_id: str, expected_session_generation: int, process_id: str, process_generation: int, packet_sha256: str) -> StateSnapshot:
+        return self._apply("session.bound", lambda graph: DomainKernel.bind_executor_session(graph, slot_id=slot_id, expected_session_generation=expected_session_generation, process_id=process_id, process_generation=process_generation, packet_sha256=packet_sha256))
+
+    def acknowledge_executor_session(self, *, slot_id: str, expected_session_generation: int, process_id: str, process_generation: int, ack_id: str) -> StateSnapshot:
+        return self._apply("session.acknowledged", lambda graph: DomainKernel.acknowledge_executor_session(graph, slot_id=slot_id, expected_session_generation=expected_session_generation, process_id=process_id, process_generation=process_generation, ack_id=ack_id))
+
+    def invalidate_executor_session(self, *, slot_id: str, expected_session_generation: int, reason: str) -> StateSnapshot:
+        return self._apply("session.invalidated", lambda graph: DomainKernel.invalidate_executor_session(graph, slot_id=slot_id, expected_session_generation=expected_session_generation, reason=reason))
+
+    def replace_executor_session(self, *, slot_id: str, expected_session_generation: int, session_id: str) -> StateSnapshot:
+        return self._apply("session.replaced", lambda graph: DomainKernel.replace_executor_session(graph, slot_id=slot_id, expected_session_generation=expected_session_generation, session_id=session_id))
+
+    def retire_executor_session(self, *, slot_id: str, expected_session_generation: int, reason: str) -> StateSnapshot:
+        return self._apply("session.retired", lambda graph: DomainKernel.retire_executor_session(graph, slot_id=slot_id, expected_session_generation=expected_session_generation, reason=reason))
 
     def record_effect(
         self,

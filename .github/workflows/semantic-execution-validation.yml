@@ -95,6 +95,7 @@ jobs:
             tests/test_workspace_semantic_execution_backend_research_engine_shadow.py \
             tests/test_workspace_semantic_execution_backend_vertical_slice.py \
             tests/test_workspace_semantic_execution_backend_task_tree.py \
+            tests/test_workspace_semantic_execution_backend_sessions.py \
             tests/test_workspace_semantic_execution_backend_faults.py
 
       - name: Run bounded control plane resource probe

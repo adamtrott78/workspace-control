@@ -16,6 +16,11 @@ from .packet_compiler import (
 )
 from .router import ExecutorRegistry, route_executor
 from .runtime import RuntimeCoordinator
+from .session_broker import (
+    PersistentExecutorSessionBroker,
+    SessionBinding,
+    SessionBrokerError,
+)
 from .task_tree import ChildWorkSpec, TaskTreeCoordinator, TaskTreeStatus
 from .vertical_slice import (
     CoordinatedActionService,
@@ -34,6 +39,9 @@ __all__ = [
     "QuestionRecord",
     "SemanticPacketCompiler",
     "RuntimeCoordinator",
+    "PersistentExecutorSessionBroker",
+    "SessionBinding",
+    "SessionBrokerError",
     "ChildWorkSpec",
     "TaskTreeCoordinator",
     "TaskTreeStatus",

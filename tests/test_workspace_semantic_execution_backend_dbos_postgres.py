@@ -28,9 +28,14 @@ from workspace_semantic_execution.adapters import (  # noqa: E402
     PostgresStateStore,
     RecordingTelemetry,
 )
-from workspace_semantic_execution.application import RuntimeCoordinator  # noqa: E402
+from workspace_semantic_execution.application import (  # noqa: E402
+    PersistentExecutorSessionBroker,
+    RuntimeCoordinator,
+    openai_chat_instant_current_profile,
+)
 from workspace_semantic_execution.domain import (  # noqa: E402
     DomainKernel,
+    ExecutorSessionState,
     ProcessState,
 )
 from workspace_semantic_execution.ports import (  # noqa: E402
@@ -91,6 +96,60 @@ class PostgresAdapterIntegrationTests(unittest.TestCase):
                 expected_version=stale.version,
                 graph=stale.graph,
             )
+
+    def test_persistent_session_slot_survives_adapter_reinstantiation(self):
+        state_key = f"session-{uuid.uuid4()}"
+        store1 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator1 = RuntimeCoordinator(
+            state_store=store1,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        coordinator1.initialize(
+            DomainKernel.create_graph([DomainKernel.create_process("R")])
+        )
+        broker1 = PersistentExecutorSessionBroker(coordinator1)
+        profile = openai_chat_instant_current_profile()
+        broker1.ensure_session(
+            profile=profile,
+            slot_id="instant-slot",
+            session_id="session-a",
+        )
+        broker1.bind(
+            profile=profile,
+            slot_id="instant-slot",
+            expected_session_generation=0,
+            process_id="R",
+            process_generation=0,
+            packet_sha256="a" * 64,
+        )
+
+        store2 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator2 = RuntimeCoordinator(
+            state_store=store2,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=10),
+        )
+        restored = coordinator2.snapshot().graph.executor_sessions["instant-slot"]
+        self.assertEqual(restored.state, ExecutorSessionState.BOUND)
+        self.assertEqual(restored.session_generation, 0)
+        self.assertEqual(restored.bound_process_id, "R")
+        self.assertEqual(restored.bound_packet_sha256, "a" * 64)
+
+        recovered = coordinator2.recover(
+            "R",
+            expected_generation=0,
+            reason="restart-fence",
+        )
+        fenced = recovered.graph.executor_sessions["instant-slot"]
+        self.assertEqual(
+            fenced.state,
+            ExecutorSessionState.NEEDS_REPLACEMENT,
+        )
+        self.assertEqual(fenced.session_generation, 1)
+        self.assertIsNone(fenced.bound_process_id)
 
     def test_external_event_is_immutable_and_visible_after_restart(self):
         ledger1 = PostgresEventLedger(POSTGRES_DSN)
