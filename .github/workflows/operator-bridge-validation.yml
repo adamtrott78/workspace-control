@@ -474,6 +474,54 @@ jobs:
             Pop-Location
           }
 
+      - name: Bind persistent Stage 10 runner toolchain
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $dotnetCandidates = @(
+            (Join-Path $env:USERPROFILE ".dotnet\dotnet.exe"),
+            "C:\Program Files\dotnet\dotnet.exe"
+          )
+          $dotnetExe = $dotnetCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $dotnetExe) {
+            throw "Stage 10 runner has no local dotnet.exe in the approved persistent locations."
+          }
+          $dotnetDir = Split-Path -Parent $dotnetExe
+          $env:DOTNET_ROOT = $dotnetDir
+          $env:PATH = "$dotnetDir;$env:PATH"
+          Add-Content -LiteralPath $env:GITHUB_PATH -Value $dotnetDir
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value "DOTNET_ROOT=$dotnetDir"
+
+          $nodeCommand = Get-Command node.exe -ErrorAction SilentlyContinue
+          if ($nodeCommand) {
+            $nodeDir = Split-Path -Parent $nodeCommand.Source
+          } else {
+            $toolCache = if ($env:RUNNER_TOOL_CACHE) {
+              $env:RUNNER_TOOL_CACHE
+            } else {
+              Join-Path $env:USERPROFILE "actions-runner\_work\_tool"
+            }
+            $nodeRoot = Join-Path $toolCache "node"
+            $nodeCandidates = @(
+              Get-ChildItem $nodeRoot -Directory -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name -match '^24\.\d+\.\d+$' } |
+                Sort-Object { [version]$_.Name } -Descending
+            )
+            $nodeDir = $null
+            foreach ($candidate in $nodeCandidates) {
+              $candidateDir = Join-Path $candidate.FullName "x64"
+              if (Test-Path (Join-Path $candidateDir "node.exe")) {
+                $nodeDir = $candidateDir
+                break
+              }
+            }
+          }
+          if (-not $nodeDir) {
+            throw "Stage 10 runner has no local Node 24 toolcache entry."
+          }
+          $env:PATH = "$nodeDir;$env:PATH"
+          Add-Content -LiteralPath $env:GITHUB_PATH -Value $nodeDir
+          Write-Host "STAGE10_RUNNER_TOOLCHAIN_BOUND=PASS dotnet_dir=$dotnetDir node_dir=$nodeDir"
       - name: Validate persistent interactive Stage 10 runner
         shell: powershell
         run: |
