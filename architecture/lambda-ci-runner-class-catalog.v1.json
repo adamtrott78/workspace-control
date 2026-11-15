@@ -529,6 +529,10 @@
           "bindings": {
             "model_id": null,
             "runtime_id": "padataset-dnns-v1"
+          },
+          "runner_identity": {
+            "unix_user": "ci-padataset-2",
+            "unix_group": "ci-padataset"
           }
         }
       },
