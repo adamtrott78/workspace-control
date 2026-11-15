@@ -838,6 +838,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     public int BusyPresses { get; private set; }
     public int HandoffBlockedPresses { get; private set; }
     public int HandoffRefocuses { get; private set; }
+    public int NativeForegroundAttempts { get; private set; }
+    public int NativeForegroundSuccesses { get; private set; }
     public int InterruptionPromptsIssued { get; private set; }
     public int Ut04BackgroundAcksApplied { get; private set; }
     public int Ut05JudgmentGateOpens { get; private set; }
@@ -899,6 +901,17 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                 return;
             }
 
+            NativeForegroundAttempts++;
+            if (!_workerWindowSafety.ForegroundPreparedWorkerWindow())
+            {
+                DispatchFailures++;
+                LastDispatchOutcome = "HandoffNativeForegroundFailed";
+                LastDispatchError = "WORKER_WINDOW_NOT_FOREGROUNDED";
+                Finish();
+                return;
+            }
+
+            NativeForegroundSuccesses++;
             HandoffRefocuses++;
             return;
         }
@@ -919,6 +932,18 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             {
                 _awaitingActionId = result.ActionId;
                 Volatile.Write(ref _awaitingHumanSubmit, 1);
+
+                NativeForegroundAttempts++;
+                if (!_workerWindowSafety.ForegroundPreparedWorkerWindow())
+                {
+                    DispatchFailures++;
+                    LastDispatchOutcome = "NativeForegroundFailed";
+                    LastDispatchError = "WORKER_WINDOW_NOT_FOREGROUNDED";
+                    Finish();
+                    return;
+                }
+
+                NativeForegroundSuccesses++;
                 _workerWindowSafety.RecordPreparedWorkerWindow();
             }
             else if (result.Outcome == DispatchOutcome.JudgmentGateOpened)
@@ -1464,6 +1489,10 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
                         _browser.EffectCount,
                     bridge_browser_focus_commands =
                         _browser.FocusCount,
+                    native_foreground_attempts =
+                        NativeForegroundAttempts,
+                    native_foreground_successes =
+                        NativeForegroundSuccesses,
                     max_sent_unconfirmed =
                         MaxSentUnconfirmed,
                     multiple_sent_unconfirmed_with_ready_observed =
