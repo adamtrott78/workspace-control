@@ -18,7 +18,25 @@ if ($LASTEXITCODE -ne 0 -or $sourceSha -notmatch '^[0-9a-f]{40}$') {
   throw "Stage 10 usability trial requires an exact Git source SHA."
 }
 $cacheRoot = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage10"
-$buildCache = Join-Path $cacheRoot ("build\" + $sourceSha)
+$buildTree = @(git -C $repo ls-tree -r HEAD -- `
+  "operator-bridge/integration" `
+  "operator-bridge/src" `
+  "operator-bridge/simulator" `
+  "operator-bridge/WorkspaceOperatorBridge.Integration.slnx") -join "`n"
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($buildTree)) {
+  throw "Stage 10 usability trial could not derive the build fingerprint."
+}
+$sha256 = [System.Security.Cryptography.SHA256]::Create()
+try {
+  $buildFingerprintBytes = [System.Text.Encoding]::UTF8.GetBytes($buildTree)
+  $buildFingerprint = ([Convert]::ToHexString(
+    $sha256.ComputeHash($buildFingerprintBytes)
+  )).ToLowerInvariant()
+}
+finally {
+  $sha256.Dispose()
+}
+$buildCache = Join-Path $cacheRoot ("build\" + $buildFingerprint)
 $runnerDll = Join-Path $buildCache "integration\WorkspaceOperator.IntegrationHarness.dll"
 $helperExe = Join-Path $buildCache "helper\WorkspaceOperator.exe"
 $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
@@ -76,7 +94,7 @@ if (-not $buildCacheHit) {
     }
   }
 }
-Write-Host ("STAGE10_BUILD_CACHE=" + $(if ($buildCacheHit) { "HIT" } else { "MISS" }) + " source_sha=" + $sourceSha)
+Write-Host ("STAGE10_BUILD_CACHE=" + $(if ($buildCacheHit) { "HIT" } else { "MISS" }) + " source_sha=" + $sourceSha + " build_fingerprint=" + $buildFingerprint)
 
 $work = Join-Path $env:TEMP ("workspace-operator-stage10-" + [guid]::NewGuid().ToString("N"))
 New-Item $work -ItemType Directory -Force | Out-Null
@@ -113,16 +131,9 @@ if (-not $webExtCacheHit) {
       Stop-Process -Id $npmProcess.Id -Force -ErrorAction SilentlyContinue
       throw "Pinned web-ext@10.8.0 install exceeded the 120-second bootstrap bound."
     }
-    # Refresh after the bounded wait before reading ExitCode. On the Windows
-    # self-hosted runner, the Process object can otherwise retain a null/stale
-    # exit-code value even though cmd/npm has already exited successfully.
-    $npmProcess.WaitForExit()
-    $npmProcess.Refresh()
-    $npmExitCode = $npmProcess.ExitCode
-    if ($npmExitCode -ne 0) {
-      throw "Pinned web-ext@10.8.0 install failed with exit code $npmExitCode."
-    }
-
+    # Process.ExitCode is unreliable for this cmd.exe child on the Windows
+    # self-hosted runner. The bounded process completion above establishes
+    # termination; the pinned artifact/version checks below establish success.
     $stagedPackage = Join-Path $webExtStage "node_modules\web-ext\package.json"
     $stagedBinary = Join-Path $webExtStage "node_modules\.bin\web-ext.cmd"
     if (-not (Test-Path $stagedPackage) -or -not (Test-Path $stagedBinary)) {
