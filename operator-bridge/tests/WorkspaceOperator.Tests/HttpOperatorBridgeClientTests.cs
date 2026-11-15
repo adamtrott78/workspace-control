@@ -220,7 +220,7 @@ public sealed class HttpOperatorBridgeClientTests
             Configuration,
             startStatusPolling: false);
 
-        await Assert.ThrowsExceptionAsync<InvalidDataException>(
+        await ExpectAsync<InvalidDataException>(
             () => client.ClaimNextAsync(CancellationToken.None));
     }
 
@@ -291,11 +291,44 @@ public sealed class HttpOperatorBridgeClientTests
                 "Bearer",
                 "forbidden");
 
-        Assert.ThrowsException<ArgumentException>(() =>
+        Expect<ArgumentException>(() =>
             new HttpOperatorBridgeClient(
                 http,
                 Configuration,
                 startStatusPolling: false));
+    }
+
+    private static void Expect<TException>(Action action)
+        where TException : Exception
+    {
+        try
+        {
+            action();
+        }
+        catch (TException)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"Expected exception {typeof(TException).Name}.");
+    }
+
+    private static async Task ExpectAsync<TException>(
+        Func<Task> action)
+        where TException : Exception
+    {
+        try
+        {
+            await action();
+        }
+        catch (TException)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"Expected exception {typeof(TException).Name}.");
     }
 
     private static HttpResponseMessage Json(

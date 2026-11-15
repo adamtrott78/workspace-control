@@ -68,7 +68,7 @@ public sealed class RemoteOperatorBridgeConfigurationTests
     [DataRow("https://workspace-control.tailnet.invalid/#fragment")]
     public void UnsafeRemoteOriginsFailClosed(string url)
     {
-        Assert.ThrowsException<ArgumentException>(() =>
+        Expect<ArgumentException>(() =>
             RemoteOperatorBridgeConfiguration.Parse(
                 new[] { $"--operator-bridge-url={url}" },
                 "helper-default"));
@@ -77,7 +77,7 @@ public sealed class RemoteOperatorBridgeConfigurationTests
     [TestMethod]
     public void DuplicateRemoteUrlFailsClosed()
     {
-        Assert.ThrowsException<ArgumentException>(() =>
+        Expect<ArgumentException>(() =>
             RemoteOperatorBridgeConfiguration.Parse(
                 new[]
                 {
@@ -87,13 +87,29 @@ public sealed class RemoteOperatorBridgeConfigurationTests
                 "helper-default"));
     }
 
+    private static void Expect<TException>(Action action)
+        where TException : Exception
+    {
+        try
+        {
+            action();
+        }
+        catch (TException)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"Expected exception {typeof(TException).Name}.");
+    }
+
     [DataTestMethod]
     [DataRow("helper with spaces")]
     [DataRow("helper/with/slash")]
     [DataRow("")]
     public void UnsafeHelperIdFailsClosed(string helperId)
     {
-        Assert.ThrowsException<ArgumentException>(() =>
+        Expect<ArgumentException>(() =>
             RemoteOperatorBridgeConfiguration.Parse(
                 new[]
                 {
