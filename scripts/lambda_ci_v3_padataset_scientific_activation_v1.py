@@ -555,7 +555,8 @@ def _require_provisioner_active(systemd: Systemd) -> None:
         raise ScientificActivationError("shared v3 provisioner is not active/running")
 
 
-def _require_provisioner_socket() -> None:
+def _require_provisioner_socket()
+    _require_provisioner_path_traversable() -> None:
     st = PROVISIONER_SOCKET.lstat()
     if not stat.S_ISSOCK(st.st_mode):
         raise ScientificActivationError("v3 provisioner path is not a Unix socket")
@@ -566,6 +567,27 @@ def _require_provisioner_socket() -> None:
         raise ScientificActivationError("v3 provisioner socket group mismatch")
     if stat.S_IMODE(st.st_mode) != 0o660:
         raise ScientificActivationError("v3 provisioner socket mode mismatch")
+
+
+def _require_provisioner_path_traversable() -> None:
+    current = PROVISIONER_SOCKET.parent
+    required = []
+    while current != pathlib.Path("/"):
+        required.append(current)
+        current = current.parent
+    for path in reversed(required):
+        st = path.stat()
+        mode = stat.S_IMODE(st.st_mode)
+        if path == pathlib.Path("/run/workspace-ci"):
+            if st.st_uid != 0 or st.st_gid != 0 or mode != 0o711:
+                raise ScientificActivationError(
+                    "v3 provisioner parent /run/workspace-ci must be 0711 root:root"
+                )
+        elif path == pathlib.Path("/run/workspace-ci/v3"):
+            if st.st_uid != 0 or st.st_gid != 0 or mode != 0o711:
+                raise ScientificActivationError(
+                    "v3 provisioner parent /run/workspace-ci/v3 must be 0711 root:root"
+                )
 
 
 def _require_active_controller_socket_group(
@@ -970,6 +992,7 @@ def expand_inactive(
         provisioner_started_on_new_generation = True
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
+    _require_provisioner_path_traversable()
         _require_active_controller_socket_group(systemd, existing_class_ids)
 
         controller_after = _controller_snapshot(systemd, existing_class_ids)
@@ -1098,6 +1121,7 @@ def activate(
     existing_before = _controller_snapshot(systemd, existing_ids)
     _require_provisioner_active(systemd)
     _require_provisioner_socket()
+    _require_provisioner_path_traversable()
     _require_active_controller_socket_group(systemd, existing_ids)
 
     overlay = _load(DEPLOYMENT_OVERLAY)
@@ -1171,6 +1195,7 @@ def activate(
         _require_controller_snapshot_preserved(existing_before, existing_after)
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
+    _require_provisioner_path_traversable()
         _require_active_controller_socket_group(
             systemd, [*existing_ids, TARGET_CLASS]
         )
