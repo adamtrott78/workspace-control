@@ -5,6 +5,7 @@ namespace WorkspaceControl.OperatorBridge.Windows;
 
 public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
 {
+    private const int SwRestore = 9;
     private const int SwMinimize = 6;
     private nint _capturedWindow;
 
@@ -20,6 +21,40 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
         return true;
     }
 
+    public bool ForegroundPreparedWorkerWindow()
+    {
+        var window = _capturedWindow;
+        if (window == 0 || !IsWindow(window) || !IsFirefoxWindow(window))
+        {
+            window = FindSoleVisibleFirefoxWindow();
+            if (window == 0)
+            {
+                return false;
+            }
+
+            _capturedWindow = window;
+        }
+
+        if (IsIconic(window))
+        {
+            _ = ShowWindow(window, SwRestore);
+        }
+
+        _ = SetForegroundWindow(window);
+
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            if (GetForegroundWindow() == window)
+            {
+                return true;
+            }
+
+            Thread.Sleep(25);
+        }
+
+        return false;
+    }
+
     public bool MinimizeCapturedWorkerWindow()
     {
         var window = _capturedWindow;
@@ -33,6 +68,24 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
 
         _ = ShowWindow(window, SwMinimize);
         return IsIconic(window);
+    }
+
+    private static nint FindSoleVisibleFirefoxWindow()
+    {
+        var matches = new List<nint>();
+        _ = EnumWindows(
+            (window, _) =>
+            {
+                if (IsWindowVisible(window) && IsFirefoxWindow(window))
+                {
+                    matches.Add(window);
+                }
+
+                return true;
+            },
+            0);
+
+        return matches.Count == 1 ? matches[0] : 0;
     }
 
     private static bool IsFirefoxWindow(nint window)
@@ -76,6 +129,22 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
     private static extern uint GetWindowThreadProcessId(
         nint hWnd,
         out uint processId);
+
+    private delegate bool EnumWindowsProc(nint hWnd, nint lParam);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EnumWindows(
+        EnumWindowsProc lpEnumFunc,
+        nint lParam);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindowVisible(nint hWnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetForegroundWindow(nint hWnd);
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
