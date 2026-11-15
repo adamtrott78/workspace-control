@@ -509,7 +509,7 @@
     },
     {
       "id": "operator_bridge_server_composition_and_private_preflight",
-      "status": "BLOCKED",
+      "status": "SUSPENDED",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": "chatgpt",
       "selected_surface": "github+postgresql+private-tailnet",
@@ -540,7 +540,7 @@
           ]
         }
       ],
-      "resume_condition": "BLOCKED_BY_AUTHORITY: repository/server composition is validated, but live Linux process + Tailscale Serve activation requires an exact reviewed/default-branch authority route. Do not bypass with generic shell, manual sidecar, or widened helper."
+      "resume_condition": "SUSPENDED_BY_AUTHORITY: repository/server composition is validated, but live Linux process + Tailscale Serve activation requires an exact reviewed/default-branch authority route. Do not bypass with generic shell, manual sidecar, or widened helper."
     },
     {
       "id": "durable_worker_result_publication_and_intake",
