@@ -11,12 +11,16 @@ GPU0 = 'GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea'
 GPU1 = 'GPU-cfed3394-a935-63aa-9325-c4cae7b568b6'
 
 class PadatasetScientificDualLaneTests(unittest.TestCase):
-    def test_resource_allocator_and_project_caps_are_bounded_at_two(self):
+    def test_resource_allocator_reserves_control_slot_above_two_science_slots(self):
         host = load('architecture/lambda-ci-host-resource-policy.v1.json')
-        self.assertEqual(host['migration_mode']['host_max_active_runners'], 2)
+        self.assertEqual(host['migration_mode']['host_max_active_runners'], 3)
         self.assertEqual(host['project_limits']['padataset']['max_active_runners'], 2)
         self.assertEqual(host['project_limits']['workspace-control']['max_active_runners'], 1)
         self.assertEqual(host['project_limits']['research-engine']['max_active_runners'], 1)
+        self.assertEqual(
+            host['reservation_policy']['reserved_project_slots'],
+            {'workspace-control': 1},
+        )
 
     def test_scientific_lanes_have_disjoint_exact_gpu_claims(self):
         workload = load('architecture/lambda-ci-workload-policy.v1.json')
