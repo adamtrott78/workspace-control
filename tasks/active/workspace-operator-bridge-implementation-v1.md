@@ -24,17 +24,18 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 3a075ebd05f16e34c754dbcc1600aa8fa620b04f
+- Remote checkpoint: 931882bce5a34c597888e2eaa1a40650d5b31c58
 - Remote verified: true
 
 ## Next safe action
 
-EXECUTE THE NOW-SUPPORTED STAGE-10 HUMAN TRIALS ONE AT A TIME. The exact recovery/judgment/background-ack harness implementation head workspace-control@3a075ebd05f16e34c754dbcc1600aa8fa620b04f passed Workspace Control #2854, Semantic Execution #183, and Operator Bridge #442. Run and accept UT-05, UT-06, UT-07, UT-08, and UT-12 with the operator, preserving Ctrl+Space -> Ctrl+V -> Enter only where a worker packet is actually READY. Use only the explicit judgment/recovery surfaces for gated trials; do not search tabs or reconstruct state manually. Then rerun Bridge-OFF UT-11 and representative-work collision UT-09. Only after the remaining Stage-10 evidence passes and the semantic live-host authority route exists may exact-host Tailscale fake-worker preflight and Stage-12 real-account calibration proceed.
+FIX AND RE-ACCEPT UT-12 FROM VALIDATED IMPLEMENTATION BASE workspace-control@931882bce5a34c597888e2eaa1a40650d5b31c58. DO NOT REDO UT-05–UT-08: those human trials are accepted. UT-12 run #485/job 133000812535 emitted structured OBJECTIVE_PASS, but operator-visible acceptance failed because READY=0 Ctrl+Space minimizes WorkspaceWorkers Firefox only when Firefox is already foreground; if another app/window is foreground, it does not minimize. Current code re-captures only foreground Firefox at the UT-12 NoAction press and MinimizeCapturedWorkerWindow refuses unless the captured HWND is also GetForegroundWindow(). Make the smallest bounded correction: preserve/resolve the already trusted dedicated WorkspaceWorkers Firefox HWND before the no-work press and allow minimizing that trusted captured HWND while another app is foreground, without bringing Firefox forward; fail closed on stale/ambiguous/non-Firefox HWND and never minimize arbitrary Firefox. Validate the exact head, then rerun UT-12 with (1) Firefox foreground and (2) Firefox background after clicking another app on the second monitor; require minimize success in both cases and preserve the already-passing background durable-ack invariants: zero focus steal, zero clipboard write, zero browser service effect. Only after UT-12 passes, run Bridge-OFF UT-11 and representative-work collision UT-09.
 
 ## Remaining work
 
-- impl_10 trials: execute/accept UT-05–UT-08 and UT-12 on the validated harness.
-- impl_10 trials: execute Bridge-OFF UT-11 and representative-work collision UT-09; preserve no-response/no-wrong-window guarantees.
+- impl_10 UT-12: correct the focus-dependent READY=0 minimize path so the already trusted dedicated WorkspaceWorkers Firefox HWND can be minimized while another app is foreground; preserve fail-closed identity and no focus steal.
+- impl_10 UT-12 acceptance: rerun with Firefox foreground and background/other-app focus; require minimize success in both plus background durable ack with zero clipboard/browser/focus disruption.
+- impl_10 final binding coverage: execute Bridge-OFF UT-11 and representative-work collision UT-09; preserve no-response/no-wrong-window guarantees.
 - live transport gate: after Workspace Shell semantic authority exists, prove exact-host Tailscale fake-worker transport before real-account use.
 - impl_12: bounded real-account calibration with no DOM/content automation, no added browser permissions and no security workaround.
 - impl_09: authoritative target-machine UX-09 performance/resource benchmark after real-account calibration.
@@ -42,7 +43,7 @@ EXECUTE THE NOW-SUPPORTED STAGE-10 HUMAN TRIALS ONE AT A TIME. The exact recover
 
 ## Blockers / gates
 
-- Ctrl+Space passed UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, UT-03 interruption recovery, and UT-04 multiple SENT/UNCONFIRMED coexistence. Final binding retention still requires UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing.
+- Ctrl+Space has accepted UT-05, UT-06, UT-07, UT-08, UT-10, UT-02, UT-03 and UT-04 evidence. Final retention is blocked by UT-12 focus-independent READY=0 minimization: current run #485 minimizes only while Firefox is foreground. After that correction/acceptance, Bridge-OFF UT-11 and representative-work collision UT-09 remain required.
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
 - Production action/status transport is now implemented and validated in code, but the real Tailscale Serve -> localhost backend path has not yet been activated/preflighted on the Linux Workspace Control host and Windows WorkspaceWorkers client. INST-01 remains PARTIAL until that exact-host path carries a fake-worker action end-to-end.
 
