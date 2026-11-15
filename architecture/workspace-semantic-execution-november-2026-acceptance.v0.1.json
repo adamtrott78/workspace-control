@@ -192,7 +192,8 @@
         "Exact action/process/session generations are fail-closed and packet text is returned only at claim time.",
         "Default no-URL Windows mode intentionally retains NoWorkOperatorActionPort as a safe rollback/fail-closed baseline.",
         "PENDING for PASS: activate reviewed Tailscale Serve/private identity path on the real hosts and prove one fake-worker action/status round trip end-to-end.",
-        "Durable packet-source/materialization layer now proves Windows-bound packet text is reconstructed on claim from typed Postgres-backed state, not stored transcript/clipboard text."
+        "Durable packet-source/materialization layer now proves Windows-bound packet text is reconstructed on claim from typed Postgres-backed state, not stored transcript/clipboard text.",
+        "Production Postgres-backed Operator Bridge server composition is repository-validated; live host activation is explicitly authority-gated because semantic feature-branch task IDs are absent from Workspace Shell trusted authority root."
       ]
     },
     {
@@ -343,5 +344,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@6eb4744c5c01affc529257f29acb7c0bf6fff837"
+  "latest_validated_checkpoint": "workspace-control@e1a91804f6cb5b1cdcd6b24c5bd454dae5790e2e"
 }

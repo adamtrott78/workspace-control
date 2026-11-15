@@ -140,7 +140,7 @@ class GraphCodecTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(loads_work_graph(first), graph)
         payload = json.loads(first)
-        self.assertEqual(payload["schema_version"], 5)
+        self.assertEqual(payload["schema_version"], 6)
         self.assertEqual(
             [item["process_id"] for item in payload["processes"]],
             ["complete", "waiting"],
@@ -235,6 +235,17 @@ class GraphCodecTests(unittest.TestCase):
 
         self.assertEqual(decoded, graph)
         self.assertEqual(decoded.packet_sources, {})
+
+    def test_schema_v5_legacy_graph_remains_decodable_without_worker_results(self):
+        graph = rich_graph()
+        payload = encode_work_graph(graph)
+        payload["schema_version"] = 5
+        payload.pop("worker_results", None)
+
+        decoded = decode_work_graph(payload)
+
+        self.assertEqual(decoded, graph)
+        self.assertEqual(decoded.worker_results, {})
 
     def test_unknown_schema_version_fails_closed(self):
         payload = encode_work_graph(rich_graph())

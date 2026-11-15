@@ -40,6 +40,7 @@ from workspace_semantic_execution.application import (  # noqa: E402
     PacketCompilationInput,
     PersistentExecutorSessionBroker,
     RuntimeCoordinator,
+    WorkerResultIntakeService,
     openai_chat_instant_current_profile,
 )
 from workspace_semantic_execution.domain import (  # noqa: E402
@@ -52,6 +53,9 @@ from workspace_semantic_execution.domain import (  # noqa: E402
     OperatorHumanRequirement,
     OperatorPostLocalSuccess,
     ProcessState,
+    ValidationResult,
+    WorkerResultKind,
+    WorkerResultPublication,
 )
 from workspace_semantic_execution.operator_bridge_server import (  # noqa: E402
     OperatorBridgeServerConfig,
@@ -425,6 +429,137 @@ class PostgresAdapterIntegrationTests(unittest.TestCase):
             server.shutdown()
             server.server_close()
             thread.join(timeout=2)
+
+    def test_worker_result_intake_survives_postgres_adapter_reinstantiation(self):
+        state_key = f"result-{uuid.uuid4()}"
+        store1 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator1 = RuntimeCoordinator(
+            state_store=store1,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        coordinator1.initialize(
+            DomainKernel.create_graph(
+                [DomainKernel.create_process("result-process")]
+            )
+        )
+        profile = openai_chat_instant_current_profile()
+        registry = ExecutorRegistry((profile,))
+        PersistentExecutorSessionBroker(coordinator1).ensure_session(
+            profile=profile,
+            slot_id="result-slot",
+            session_id="result-session",
+        )
+        planned = OperatorDispatchPlanner(
+            runtime=coordinator1,
+            registry=registry,
+        ).plan_service_existing(
+            task_id="task:result",
+            action_id="action:result",
+            action_generation=0,
+            process_id="result-process",
+            process_generation=0,
+            worker_slot_id="result-slot",
+            session_generation=0,
+            executor_id=profile.executor_id,
+            packet_input=PacketCompilationInput(
+                process_id="result-process",
+                source_checkpoint="checkpoint:result",
+                objective="Return a durable result publication.",
+                constraints=("no consumer UI scraping",),
+                evidence_refs=("evidence:result-input",),
+                authority_refs=("scope:proposal-only",),
+                allowed_actions=("publish-worker-result",),
+                validator_contract="validator:result-integration",
+                next_safe_boundary="publish immutable result",
+            ),
+            priority_rank=1,
+            queue_sequence=1,
+            created_at="T0",
+        )
+        coordinator1.claim_next_operator_action(
+            helper_instance_id="integration-helper",
+            claim_id="result-claim",
+            claimed_at="T1",
+            expires_at="T2",
+        )
+        coordinator1.record_operator_action_local_prepared(
+            action_id="action:result",
+            generation=0,
+            worker_slot_id="result-slot",
+            session_generation=0,
+            observed_at="T1.5",
+        )
+
+        store2 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator2 = RuntimeCoordinator(
+            state_store=store2,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=10),
+        )
+
+        class Validator:
+            def validate(self, publication, packet_source):
+                self.last_packet_sha256 = packet_source.packet_sha256
+                return ValidationResult(
+                    validator_id="validator:result-integration",
+                    passed=True,
+                    evidence_ref="evidence:validated-result",
+                    observed_at="T4",
+                )
+
+        validator = Validator()
+        item = WorkerResultPublication(
+            publication_id="publication:result",
+            source_ref="github://worker-result@immutable-blob",
+            source_sha256="a" * 64,
+            action_id="action:result",
+            action_generation=0,
+            process_id="result-process",
+            process_generation=0,
+            executor_id=profile.executor_id,
+            worker_slot_id="result-slot",
+            session_generation=0,
+            packet_sha256=planned.packet.packet_sha256,
+            kind=WorkerResultKind.RESULT,
+            observed_at="T3",
+            result_payload_ref="github://result-payload@immutable-blob",
+            result_payload_sha256="b" * 64,
+            evidence_refs=("evidence:worker-result",),
+        )
+        outcome = WorkerResultIntakeService(
+            runtime=coordinator2,
+            validators={
+                "validator:result-integration": validator
+            },
+        ).ingest(item)
+
+        self.assertEqual(outcome.process_state, ProcessState.COMPLETED)
+        self.assertEqual(
+            validator.last_packet_sha256,
+            planned.packet.packet_sha256,
+        )
+
+        store3 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        restored = store3.load().graph
+        self.assertEqual(
+            restored.worker_results[item.publication_id],
+            item,
+        )
+        self.assertEqual(
+            restored.operator_actions["action:result"].status,
+            OperatorActionState.COMPLETED,
+        )
+        self.assertEqual(
+            restored.executor_sessions["result-slot"].state,
+            ExecutorSessionState.READY,
+        )
+        self.assertEqual(
+            restored.processes["result-process"].state,
+            ProcessState.COMPLETED,
+        )
 
     def test_external_event_is_immutable_and_visible_after_restart(self):
         ledger1 = PostgresEventLedger(POSTGRES_DSN)

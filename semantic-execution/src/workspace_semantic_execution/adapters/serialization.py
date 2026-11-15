@@ -1,7 +1,7 @@
 """Deterministic JSON codec for durable WorkGraph state.
 
 This codec is infrastructure-neutral and intentionally avoids pickle or
-runtime-specific object serialization. Schema v5 adds durable typed semantic packet sources while retaining v1-v4 decode compatibility.
+runtime-specific object serialization. Schema v6 adds durable worker-result publications while retaining v1-v5 decode compatibility.
 """
 from __future__ import annotations
 
@@ -28,14 +28,17 @@ from ..domain import (
     SemanticPacketSource,
     TransitionRecord,
     ValidationResult,
+    WorkerChildProposal,
+    WorkerResultKind,
+    WorkerResultPublication,
     WorkContract,
     WorkDisposition,
     WorkGraph,
 )
 
 
-SCHEMA_VERSION = 5
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5}
+SCHEMA_VERSION = 6
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6}
 
 
 class GraphCodecError(ValueError):
@@ -239,6 +242,50 @@ def _encode_packet_source(
     }
 
 
+def _encode_worker_result(
+    publication: WorkerResultPublication,
+) -> dict[str, Any]:
+    return {
+        "publication_id": publication.publication_id,
+        "source_ref": publication.source_ref,
+        "source_sha256": publication.source_sha256,
+        "action_id": publication.action_id,
+        "action_generation": publication.action_generation,
+        "process_id": publication.process_id,
+        "process_generation": publication.process_generation,
+        "executor_id": publication.executor_id,
+        "worker_slot_id": publication.worker_slot_id,
+        "session_generation": publication.session_generation,
+        "packet_sha256": publication.packet_sha256,
+        "kind": publication.kind.value,
+        "observed_at": publication.observed_at,
+        "result_payload_ref": publication.result_payload_ref,
+        "result_payload_sha256": publication.result_payload_sha256,
+        "evidence_refs": list(publication.evidence_refs),
+        "reason": publication.reason,
+        "wait_key": publication.wait_key,
+        "children": [
+            {
+                "process_id": child.process_id,
+                "objective": child.objective,
+                "dependencies": list(child.dependencies),
+                "mandatory_constraints": list(
+                    child.mandatory_constraints
+                ),
+                "provenance_refs": list(child.provenance_refs),
+                "authority_refs": list(child.authority_refs),
+                "validator_contracts": list(
+                    child.validator_contracts
+                ),
+                "output_schema_refs": list(
+                    child.output_schema_refs
+                ),
+            }
+            for child in publication.children
+        ],
+    }
+
+
 def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
     DomainKernel.validate(graph)
     processes: list[dict[str, Any]] = []
@@ -326,6 +373,13 @@ def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
             for source in sorted(
                 graph.packet_sources.values(),
                 key=lambda item: item.payload_ref,
+            )
+        ],
+        "worker_results": [
+            _encode_worker_result(publication)
+            for publication in sorted(
+                graph.worker_results.values(),
+                key=lambda item: item.publication_id,
             )
         ],
     }
@@ -640,11 +694,113 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
                 ),
             )
 
+    worker_results: dict[str, WorkerResultPublication] = {}
+    if schema_version >= 6:
+        raw_results = payload.get("worker_results", [])
+        if not isinstance(raw_results, list):
+            raise GraphCodecError("worker_results_must_be_list")
+        for raw in raw_results:
+            if not isinstance(raw, dict):
+                raise GraphCodecError("worker_result_must_be_object")
+            publication_id = raw.get("publication_id")
+            if (
+                not isinstance(publication_id, str)
+                or not publication_id
+            ):
+                raise GraphCodecError(
+                    "worker_result_publication_id_required"
+                )
+            if publication_id in worker_results:
+                raise GraphCodecError(
+                    f"duplicate_worker_result:{publication_id}"
+                )
+            children = tuple(
+                WorkerChildProposal(
+                    process_id=str(child.get("process_id", "")),
+                    objective=str(child.get("objective", "")),
+                    dependencies=_decode_string_tuple(
+                        child.get("dependencies"),
+                        "worker_child_dependencies",
+                    ),
+                    mandatory_constraints=_decode_string_tuple(
+                        child.get("mandatory_constraints"),
+                        "worker_child_mandatory_constraints",
+                    ),
+                    provenance_refs=_decode_string_tuple(
+                        child.get("provenance_refs"),
+                        "worker_child_provenance_refs",
+                    ),
+                    authority_refs=_decode_string_tuple(
+                        child.get("authority_refs"),
+                        "worker_child_authority_refs",
+                    ),
+                    validator_contracts=_decode_string_tuple(
+                        child.get("validator_contracts"),
+                        "worker_child_validator_contracts",
+                    ),
+                    output_schema_refs=_decode_string_tuple(
+                        child.get("output_schema_refs"),
+                        "worker_child_output_schema_refs",
+                    ),
+                )
+                for child in raw.get("children", [])
+            )
+            try:
+                worker_results[publication_id] = (
+                    WorkerResultPublication(
+                        publication_id=publication_id,
+                        source_ref=str(raw.get("source_ref", "")),
+                        source_sha256=str(
+                            raw.get("source_sha256", "")
+                        ),
+                        action_id=str(raw.get("action_id", "")),
+                        action_generation=int(
+                            raw.get("action_generation", 0)
+                        ),
+                        process_id=str(raw.get("process_id", "")),
+                        process_generation=int(
+                            raw.get("process_generation", 0)
+                        ),
+                        executor_id=str(
+                            raw.get("executor_id", "")
+                        ),
+                        worker_slot_id=str(
+                            raw.get("worker_slot_id", "")
+                        ),
+                        session_generation=int(
+                            raw.get("session_generation", 0)
+                        ),
+                        packet_sha256=str(
+                            raw.get("packet_sha256", "")
+                        ),
+                        kind=WorkerResultKind(str(raw["kind"])),
+                        observed_at=str(raw.get("observed_at", "")),
+                        result_payload_ref=raw.get(
+                            "result_payload_ref"
+                        ),
+                        result_payload_sha256=raw.get(
+                            "result_payload_sha256"
+                        ),
+                        evidence_refs=_decode_string_tuple(
+                            raw.get("evidence_refs"),
+                            "worker_result_evidence_refs",
+                        ),
+                        reason=raw.get("reason"),
+                        wait_key=raw.get("wait_key"),
+                        children=children,
+                    )
+                )
+            except (KeyError, TypeError, ValueError) as exc:
+                raise GraphCodecError(
+                    "invalid_worker_result"
+                ) from exc
+
     graph = WorkGraph(
         processes=processes,
         executor_sessions=executor_sessions,
         operator_actions=operator_actions,
         packet_sources=packet_sources,
+        worker_results=worker_results,
         event_seq=int(payload.get("event_seq", 0)),
         graph_history=_decode_value(payload.get("graph_history", [])),
     )

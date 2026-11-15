@@ -10,11 +10,16 @@ from ..domain import (
     ExecutorSession,
     OperatorAction,
     OperatorActionKernel,
+    OperatorActionState,
     PacketSourceKernel,
     ReasoningProcess,
     SemanticPacketSource,
     ValidationResult,
+    WorkContract,
     WorkDisposition,
+    WorkerResultKind,
+    WorkerResultKernel,
+    WorkerResultPublication,
     WorkGraph,
 )
 from ..ports import (
@@ -362,10 +367,54 @@ class RuntimeCoordinator:
         process_id: str,
         process_generation: int,
         packet_sha256: str,
+        worker_id: str,
+        lease_id: str,
     ) -> StateSnapshot:
         def transition(graph: WorkGraph) -> WorkGraph:
+            process = graph.processes.get(process_id)
+            if process is None:
+                raise RuntimeError(f"unknown_process:{process_id}")
+            if process.generation != process_generation:
+                raise RuntimeError(
+                    "stale_generation:"
+                    f"expected={process_generation}:"
+                    f"current={process.generation}"
+                )
+
+            next_graph = graph
+            if process.state in {
+                ProcessState.READY,
+                ProcessState.READY_TO_RESUME,
+            }:
+                next_graph = DomainKernel.claim(
+                    next_graph,
+                    process_id,
+                    worker_id=worker_id,
+                    lease_id=lease_id,
+                    expected_generation=process_generation,
+                )
+                next_graph = DomainKernel.start(
+                    next_graph,
+                    process_id,
+                    lease_id=lease_id,
+                    expected_generation=process_generation,
+                )
+            elif process.state == ProcessState.RUNNING:
+                if (
+                    process.worker_id != worker_id
+                    or process.lease_id != lease_id
+                ):
+                    raise RuntimeError(
+                        "operator_dispatch_process_owned_elsewhere"
+                    )
+            else:
+                raise RuntimeError(
+                    "operator_dispatch_process_not_dispatchable:"
+                    f"{process.state.value}"
+                )
+
             next_graph = PacketSourceKernel.register(
-                graph,
+                next_graph,
                 packet_source,
             )
             next_graph = DomainKernel.bind_executor_session(
@@ -383,6 +432,241 @@ class RuntimeCoordinator:
 
         return self._apply(
             "operator_dispatch.planned",
+            transition,
+        )
+
+    def accept_worker_result(
+        self,
+        *,
+        publication: WorkerResultPublication,
+        worker_id: str,
+        lease_id: str,
+    ) -> StateSnapshot:
+        def transition(graph: WorkGraph) -> WorkGraph:
+            existing = graph.worker_results.get(
+                publication.publication_id
+            )
+            if existing is not None:
+                if existing == publication:
+                    return graph
+                raise RuntimeError(
+                    "worker_result_publication_conflict"
+                )
+
+            action = graph.operator_actions.get(
+                publication.action_id
+            )
+            if action is None:
+                raise RuntimeError("worker_result_action_unknown")
+            if (
+                action.generation
+                != publication.action_generation
+                or action.reasoning_process_id
+                != publication.process_id
+                or action.process_generation
+                != publication.process_generation
+                or action.executor_id
+                != publication.executor_id
+                or action.worker_slot_id
+                != publication.worker_slot_id
+                or action.session_generation
+                != publication.session_generation
+                or action.payload_sha256
+                != publication.packet_sha256
+            ):
+                raise RuntimeError(
+                    "worker_result_action_binding_mismatch"
+                )
+            if action.status != OperatorActionState.AWAITING_DURABLE_ACK:
+                raise RuntimeError(
+                    "worker_result_action_not_awaiting_ack:"
+                    f"{action.status.value}"
+                )
+
+            if action.payload_ref is None:
+                raise RuntimeError(
+                    "worker_result_packet_source_missing"
+                )
+            source = graph.packet_sources.get(action.payload_ref)
+            if source is None:
+                raise RuntimeError(
+                    "worker_result_packet_source_missing"
+                )
+            if (
+                source.process_id != publication.process_id
+                or source.process_generation
+                != publication.process_generation
+                or source.executor_id != publication.executor_id
+                or source.packet_sha256
+                != publication.packet_sha256
+            ):
+                raise RuntimeError(
+                    "worker_result_packet_binding_mismatch"
+                )
+
+            process = graph.processes.get(publication.process_id)
+            if process is None:
+                raise RuntimeError("worker_result_process_unknown")
+            if (
+                process.generation
+                != publication.process_generation
+                or process.state != ProcessState.RUNNING
+                or process.worker_id != worker_id
+                or process.lease_id != lease_id
+            ):
+                raise RuntimeError(
+                    "worker_result_process_binding_mismatch"
+                )
+
+            session = graph.executor_sessions.get(
+                publication.worker_slot_id
+            )
+            if (
+                session is None
+                or session.session_generation
+                != publication.session_generation
+                or session.executor_id != publication.executor_id
+                or session.bound_process_id
+                != publication.process_id
+                or session.bound_process_generation
+                != publication.process_generation
+                or session.bound_packet_sha256
+                != publication.packet_sha256
+            ):
+                raise RuntimeError(
+                    "worker_result_session_binding_mismatch"
+                )
+
+            next_graph = WorkerResultKernel.register(
+                graph,
+                publication,
+            )
+
+            if publication.kind == WorkerResultKind.RESULT:
+                next_graph = DomainKernel.classify_work(
+                    next_graph,
+                    publication.process_id,
+                    disposition=WorkDisposition.EXECUTABLE,
+                    reason="durable_worker_result",
+                    lease_id=lease_id,
+                    expected_generation=publication.process_generation,
+                )
+                assert publication.result_payload_ref is not None
+                assert publication.result_payload_sha256 is not None
+                next_graph = DomainKernel.record_effect(
+                    next_graph,
+                    publication.process_id,
+                    receipt=EffectReceipt(
+                        action_id=publication.action_id,
+                        idempotency_key=(
+                            "worker-result:"
+                            f"{publication.publication_id}"
+                        ),
+                        target_ref=publication.result_payload_ref,
+                        effect_hash=publication.result_payload_sha256,
+                        executor_id=publication.executor_id,
+                        generation=publication.process_generation,
+                        observed_at=publication.observed_at,
+                    ),
+                    lease_id=lease_id,
+                    expected_generation=publication.process_generation,
+                )
+                next_graph = DomainKernel.propose_terminal(
+                    next_graph,
+                    publication.process_id,
+                    lease_id=lease_id,
+                    expected_generation=publication.process_generation,
+                )
+            elif publication.kind == WorkerResultKind.TOO_LARGE:
+                next_graph = DomainKernel.classify_work(
+                    next_graph,
+                    publication.process_id,
+                    disposition=WorkDisposition.TOO_LARGE,
+                    reason=publication.reason or "worker_too_large",
+                    lease_id=lease_id,
+                    expected_generation=publication.process_generation,
+                )
+                children = tuple(
+                    DomainKernel.create_process(
+                        child.process_id,
+                        dependencies=child.dependencies,
+                        work_contract=WorkContract(
+                            objective=child.objective,
+                            mandatory_constraints=(
+                                child.mandatory_constraints
+                            ),
+                            provenance_refs=child.provenance_refs,
+                            authority_refs=child.authority_refs,
+                            validator_contracts=(
+                                child.validator_contracts
+                            ),
+                            output_schema_refs=(
+                                child.output_schema_refs
+                            ),
+                        ),
+                    )
+                    for child in publication.children
+                )
+                next_graph = DomainKernel.decompose(
+                    next_graph,
+                    publication.process_id,
+                    children=children,
+                    lease_id=lease_id,
+                    expected_generation=publication.process_generation,
+                )
+            elif (
+                publication.kind
+                == WorkerResultKind.INTRINSICALLY_DIFFICULT
+            ):
+                next_graph = DomainKernel.classify_work(
+                    next_graph,
+                    publication.process_id,
+                    disposition=(
+                        WorkDisposition.INTRINSICALLY_DIFFICULT
+                    ),
+                    reason=(
+                        publication.reason
+                        or "worker_intrinsically_difficult"
+                    ),
+                    lease_id=lease_id,
+                    expected_generation=publication.process_generation,
+                )
+            elif publication.kind == WorkerResultKind.WAIT_EXTERNAL:
+                next_graph = DomainKernel.wait_external(
+                    next_graph,
+                    publication.process_id,
+                    wait_key=publication.wait_key or "",
+                    lease_id=lease_id,
+                    expected_generation=publication.process_generation,
+                )
+            else:
+                raise RuntimeError("worker_result_kind_unknown")
+
+            next_graph = DomainKernel.acknowledge_executor_session(
+                next_graph,
+                slot_id=publication.worker_slot_id,
+                expected_session_generation=(
+                    publication.session_generation
+                ),
+                process_id=publication.process_id,
+                process_generation=publication.process_generation,
+                ack_id=publication.publication_id,
+            )
+            next_graph = OperatorActionKernel.record_durable_ack(
+                next_graph,
+                action_id=publication.action_id,
+                generation=publication.action_generation,
+                ack_id=publication.publication_id,
+            )
+            return OperatorActionKernel.complete_acknowledged(
+                next_graph,
+                action_id=publication.action_id,
+                generation=publication.action_generation,
+                completed_at=publication.observed_at,
+            )
+
+        return self._apply(
+            "worker_result.accepted",
             transition,
         )
 

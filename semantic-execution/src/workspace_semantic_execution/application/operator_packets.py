@@ -27,6 +27,34 @@ from .router import ExecutorRegistry
 from .runtime import RuntimeCoordinator
 
 
+def operator_dispatch_worker_id(
+    *,
+    executor_id: str,
+    worker_slot_id: str,
+    session_generation: int,
+) -> str:
+    if (
+        not executor_id
+        or not worker_slot_id
+        or session_generation < 0
+    ):
+        raise ValueError("operator_dispatch_worker_identity_invalid")
+    return (
+        f"operator:{executor_id}:{worker_slot_id}:"
+        f"{session_generation}"
+    )
+
+
+def operator_dispatch_lease_id(
+    *,
+    action_id: str,
+    action_generation: int,
+) -> str:
+    if not action_id or action_generation < 0:
+        raise ValueError("operator_dispatch_lease_identity_invalid")
+    return f"operator-action:{action_id}:{action_generation}"
+
+
 class DurablePacketMaterializationError(RuntimeError):
     """Fail-closed durable packet reconstruction error."""
 
@@ -190,6 +218,15 @@ class OperatorDispatchPlanner:
             process_id=process_id,
             process_generation=process_generation,
             packet_sha256=packet.packet_sha256,
+            worker_id=operator_dispatch_worker_id(
+                executor_id=executor_id,
+                worker_slot_id=worker_slot_id,
+                session_generation=session_generation,
+            ),
+            lease_id=operator_dispatch_lease_id(
+                action_id=action_id,
+                action_generation=action_generation,
+            ),
         )
         persisted = snapshot.graph.operator_actions[action_id]
         if persisted != action:

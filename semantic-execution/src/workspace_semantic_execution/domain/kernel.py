@@ -26,6 +26,7 @@ from .models import (
 )
 from .operator_actions import OperatorActionKernel
 from .packet_sources import PacketSourceKernel
+from .worker_results import WorkerResultKernel
 
 
 class KernelError(RuntimeError):
@@ -1161,3 +1162,4 @@ class DomainKernel:
 
         OperatorActionKernel.validate_graph(graph)
         PacketSourceKernel.validate_graph(graph)
+        WorkerResultKernel.validate_graph(graph)

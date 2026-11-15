@@ -15,6 +15,7 @@ from .executors import (
 )
 from .kernel import DomainKernel, KernelError
 from .packet_sources import PacketSourceError, PacketSourceKernel
+from .worker_results import WorkerResultError, WorkerResultKernel
 from .operator_actions import OperatorActionError, OperatorActionKernel
 from .models import (
     ActionSpec,
@@ -39,6 +40,9 @@ from .models import (
     SemanticPacketSource,
     TransitionRecord,
     ValidationResult,
+    WorkerChildProposal,
+    WorkerResultKind,
+    WorkerResultPublication,
     WorkContract,
     WorkDisposition,
     WorkGraph,
@@ -84,6 +88,11 @@ __all__ = [
     "SessionMode",
     "TransitionRecord",
     "ValidationResult",
+    "WorkerChildProposal",
+    "WorkerResultError",
+    "WorkerResultKernel",
+    "WorkerResultKind",
+    "WorkerResultPublication",
     "WorkContract",
     "WorkDisposition",
     "WorkGraph",

@@ -79,6 +79,13 @@ class OperatorPostLocalSuccess(StrEnum):
     STOP = "STOP"
 
 
+class WorkerResultKind(StrEnum):
+    RESULT = "RESULT"
+    TOO_LARGE = "TOO_LARGE"
+    INTRINSICALLY_DIFFICULT = "INTRINSICALLY_DIFFICULT"
+    WAIT_EXTERNAL = "WAIT_EXTERNAL"
+
+
 class AuthorityOutcome(StrEnum):
     ALLOW = "ALLOW"
     DENY = "DENY"
@@ -139,6 +146,41 @@ class SemanticPacketSource:
     validator_contract: str = ""
     output_schema: str = "WORKSPACE_REASONING_RESULT_V1"
     next_safe_boundary: str = ""
+
+
+@dataclass(frozen=True)
+class WorkerChildProposal:
+    process_id: str
+    objective: str
+    dependencies: tuple[str, ...] = ()
+    mandatory_constraints: tuple[str, ...] = ()
+    provenance_refs: tuple[str, ...] = ()
+    authority_refs: tuple[str, ...] = ()
+    validator_contracts: tuple[str, ...] = ()
+    output_schema_refs: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class WorkerResultPublication:
+    publication_id: str
+    source_ref: str
+    source_sha256: str
+    action_id: str
+    action_generation: int
+    process_id: str
+    process_generation: int
+    executor_id: str
+    worker_slot_id: str
+    session_generation: int
+    packet_sha256: str
+    kind: WorkerResultKind
+    observed_at: str
+    result_payload_ref: str | None = None
+    result_payload_sha256: str | None = None
+    evidence_refs: tuple[str, ...] = ()
+    reason: str | None = None
+    wait_key: str | None = None
+    children: tuple[WorkerChildProposal, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -296,5 +338,6 @@ class WorkGraph:
     executor_sessions: dict[str, ExecutorSession] = field(default_factory=dict)
     operator_actions: dict[str, OperatorAction] = field(default_factory=dict)
     packet_sources: dict[str, SemanticPacketSource] = field(default_factory=dict)
+    worker_results: dict[str, WorkerResultPublication] = field(default_factory=dict)
     event_seq: int = 0
     graph_history: list[dict[str, Any]] = field(default_factory=list)

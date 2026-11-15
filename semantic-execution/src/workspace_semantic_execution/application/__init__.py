@@ -35,6 +35,12 @@ from .session_broker import (
     SessionBrokerError,
 )
 from .task_tree import ChildWorkSpec, TaskTreeCoordinator, TaskTreeStatus
+from .worker_results import (
+    WorkerResultIntakeError,
+    WorkerResultIntakeOutcome,
+    WorkerResultIntakeService,
+    WorkerResultValidator,
+)
 from .vertical_slice import (
     CoordinatedActionService,
     CoordinatedExecutionError,
@@ -67,6 +73,10 @@ __all__ = [
     "ChildWorkSpec",
     "TaskTreeCoordinator",
     "TaskTreeStatus",
+    "WorkerResultIntakeError",
+    "WorkerResultIntakeOutcome",
+    "WorkerResultIntakeService",
+    "WorkerResultValidator",
     "CoordinatedActionService",
     "CoordinatedExecutionError",
     "CoordinatedExecutionRequest",

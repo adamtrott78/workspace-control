@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 6eb4744c5c01affc529257f29acb7c0bf6fff837
+- Remote checkpoint: e1a91804f6cb5b1cdcd6b24c5bd454dae5790e2e
 - Remote verified: true
 
 ### research-engine
@@ -36,21 +36,22 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-VALIDATE OPERATOR_BRIDGE_SERVER_COMPOSITION_AND_PRIVATE_PREFLIGHT_V1. The server must load the existing Postgres state key (never silently initialize a new control graph), use DurableOperatorPacketMaterializer + initial ExecutorRegistry, bind only 127.0.0.1, accept the fixed Tailscale-User-Login proxy identity header, and take DSN/expected identity only from environment with secret fields excluded from repr/log output. Dedicated integration must prove a Postgres-backed planned action is visible in status and claim returns the exact reconstructed packet. After repository validation, stop before live host mutation unless a reviewed activation path exists.
+Implement DURABLE_WORKER_RESULT_PUBLICATION_AND_INTAKE_V1. Manual Instant dispatch must atomically claim/start the target ReasoningProcess using a deterministic operator worker/lease identity before packet/session/action publication. Add a strict WorkerResultPublication contract bound to immutable source bytes plus exact action_generation/process_generation/session_generation/packet_sha256. Result intake may propose RESULT, TOO_LARGE, INTRINSICALLY_DIFFICULT, or WAIT_EXTERNAL only; it cannot grant authority. On valid durable publication, atomically acknowledge the session + OperatorAction and apply the corresponding process transition. RESULT must become TERMINAL_CANDIDATE and complete only after an independent validator. Exact duplicate publications must be idempotent; stale/mismatched/unknown-field publications fail closed. Prove schema-v6 compatibility and PostgreSQL adapter-restart intake. Do not scrape ChatGPT or activate live Tailscale transport.
 
 ## Remaining work
 
-- Validate the production Postgres-backed Operator Bridge server composition and localhost claim path.
-- After exact server blob is validated, define reviewed activation authority for launching the backend process and Tailscale Serve without widening generic shell/root capability.
-- Run exact-host Linux/Windows Tailscale preflight with content-free identity/reachability evidence; do not log the user login or DSN.
-- Run one fake-worker action/status round trip through the real private transport and only then mark INST-01 PASS.
-- Finish remaining Operator Bridge Stage-10 trials and bounded Stage-12 real-account calibration.
+- Implement and validate durable worker-result publication/intake with exact action/process/session/packet generation fencing and no consumer-UI scraping.
+- Make manual Instant dispatch own the ReasoningProcess lease atomically with packet/session/action planning so another executor cannot race the same leaf.
+- Drive RESULT -> terminal candidate -> independent validator -> COMPLETED/repair-ready; TOO_LARGE -> recursive decomposition; INTRINSICALLY_DIFFICULT -> stronger-tier resume; WAIT_EXTERNAL -> event-driven wait.
+- Add strict worker-result JSON codec/schema and future immutable GitHub candidate/intake adapter; worker output must never mutate authoritative task state directly or grant authority.
+- After a reviewed default-branch activation route exists, run exact-host Tailscale fake-worker transport preflight and close INST-01.
+- Finish remaining Operator Bridge Stage-10 gates and Stage-12 real-account calibration.
 - Advance subscription Codex only after PR #627 lineage authority clears.
 - Run mixed-executor Research Engine research-iterate and remaining November reliability/soak acceptance.
 
 ## Blockers / gates
 
-- None.
+- LIVE OPERATOR TRANSPORT AUTHORITY: production server/client code is validated, but Workspace Shell trusted authority does not contain the semantic-execution backend/umbrella task IDs. Live backend-process and Tailscale Serve activation must wait for an exact reviewed/default-branch authority route; generic shell/sidecar bypass is forbidden.
 
 ## Fresh-chat initialization
 
