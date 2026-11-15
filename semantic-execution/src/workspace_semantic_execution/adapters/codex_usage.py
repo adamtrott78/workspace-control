@@ -478,7 +478,17 @@ class CodexAppServerStdioSession:
         method: str,
         params: Mapping[str, Any] | None = None,
     ) -> Mapping[str, Any]:
-        if method not in self._allowed_methods:
+        allowed_methods = getattr(
+            self,
+            "_allowed_methods",
+            frozenset(
+                {
+                    "account/rateLimits/read",
+                    "account/usage/read",
+                }
+            ),
+        )
+        if method not in allowed_methods:
             raise CodexUsageError(
                 f"method_not_authorized:{method}"
             )
