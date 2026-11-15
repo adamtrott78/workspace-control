@@ -122,6 +122,51 @@ def _target_route_envelope(
     return {key: copy.deepcopy(cls[key]) for key in keys}
 
 
+def _isolation_only_runner_identity_specialization(
+    data: dict[str, Any],
+    *,
+    project_id: str,
+    class_id: str,
+    current: dict[str, Any],
+    target: dict[str, Any],
+) -> bool:
+    catalog_class = data["catalog"]["projects"][project_id]["runner_classes"][class_id]
+    configured = catalog_class.get("runner_identity")
+    if not isinstance(configured, dict):
+        return False
+    if set(configured) != {"unix_user", "unix_group"}:
+        return False
+
+    expected_identity = {
+        "user": configured["unix_user"],
+        "group": configured["unix_group"],
+    }
+    if target.get("project_runner_identity") != expected_identity:
+        return False
+
+    current_identity = current.get("project_runner_identity")
+    if not isinstance(current_identity, dict):
+        return False
+    if current_identity.get("group") != expected_identity["group"]:
+        return False
+    if current_identity.get("user") == expected_identity["user"]:
+        return False
+
+    target_common = target.get("systemd_common")
+    current_common = current.get("systemd_common")
+    if not isinstance(target_common, dict) or not isinstance(current_common, dict):
+        return False
+    if target_common.get("User") != expected_identity["user"]:
+        return False
+    if target_common.get("Group") != expected_identity["group"]:
+        return False
+
+    normalized = copy.deepcopy(target)
+    normalized["project_runner_identity"] = copy.deepcopy(current_identity)
+    normalized["systemd_common"]["User"] = current_common.get("User")
+    return normalized == current
+
+
 def verify_migration(root: pathlib.Path = ROOT) -> dict[str, Any]:
     data = compiler.load_inputs(root)
     compiled = compiler.compile_from_inputs(copy.deepcopy(data))
@@ -141,10 +186,20 @@ def verify_migration(root: pathlib.Path = ROOT) -> dict[str, Any]:
             compiled,
             class_id=target_class,
         )
-        _require(
-            current == target,
-            f"{project_id}/{route_id}: target runner class changes root launch semantics",
-        )
+        if current == target:
+            root_launch_semantics = "EXACT_EQUIVALENT"
+        else:
+            _require(
+                _isolation_only_runner_identity_specialization(
+                    data,
+                    project_id=project_id,
+                    class_id=target_class,
+                    current=current,
+                    target=target,
+                ),
+                f"{project_id}/{route_id}: target runner class changes root launch semantics",
+            )
+            root_launch_semantics = "ISOLATION_ONLY_UID_SPECIALIZATION"
 
         current_contract = current["execution_contract"]
         target_contract = target["execution_contract"]
@@ -180,7 +235,7 @@ def verify_migration(root: pathlib.Path = ROOT) -> dict[str, Any]:
             "execution_contract_id": current["execution_contract_id"],
             "gpu_count": current_contract["gpu_count"],
             "payload_network_class": current_contract["payload_network_class"],
-            "root_launch_semantics": "EXACT_EQUIVALENT",
+            "root_launch_semantics": root_launch_semantics,
         })
 
     _require(len(rows) == 25, "expected 25 route equivalence proofs")
@@ -189,6 +244,10 @@ def verify_migration(root: pathlib.Path = ROOT) -> dict[str, Any]:
         "route_count": len(rows),
         "exact_equivalence_count": sum(
             row["root_launch_semantics"] == "EXACT_EQUIVALENT"
+            for row in rows
+        ),
+        "isolation_uid_specialization_count": sum(
+            row["root_launch_semantics"] == "ISOLATION_ONLY_UID_SPECIALIZATION"
             for row in rows
         ),
         "rows": sorted(rows, key=lambda x: (x["project_id"], x["route_id"])),
@@ -200,6 +259,10 @@ def main() -> int:
     print("MIGRATION_EQUIVALENCE=PASS")
     print(f"ROUTES={result['route_count']}")
     print(f"EXACT_EQUIVALENCE={result['exact_equivalence_count']}")
+    print(
+        "ISOLATION_UID_SPECIALIZATION="
+        f"{result['isolation_uid_specialization_count']}"
+    )
     return 0
 
 
