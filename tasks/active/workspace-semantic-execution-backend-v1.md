@@ -59,7 +59,7 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/workspace-semantic-execution-backend-v1.json
 
-Start by recovering exact GitHub state; trust the capsule/checklist plus verified repository/runtime evidence over chat prose.
-Read architecture/workspace-semantic-execution-november-2026-executor-handoff-checklist.md before choosing work.
-Do not redo items listed under DO NOT REDO.
-Follow the capsule's next_safe_action and continue autonomously until a real authority/policy/user-only gate.
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
