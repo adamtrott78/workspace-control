@@ -102,6 +102,24 @@
                       ]
                     }
                   }
+                },
+                "runner_identity": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "unix_user",
+                    "unix_group"
+                  ],
+                  "properties": {
+                    "unix_user": {
+                      "type": "string",
+                      "pattern": "^[a-z_][a-z0-9_-]{0,31}$"
+                    },
+                    "unix_group": {
+                      "type": "string",
+                      "pattern": "^[a-z_][a-z0-9_-]{0,31}$"
+                    }
+                  }
                 }
               }
             }
