@@ -492,6 +492,36 @@ If a command is supplied for human execution:
 Do not enable `set -e` or `set -euo pipefail` directly in a long-lived SSH
 login shell for a large assistant-supplied operation.
 
+## Final-response delivery for human-terminal actions
+
+When the executor reaches a genuine `HUMAN_TERMINAL` boundary and asks the
+operator to run a command, the **same final assistant response that requests the
+action MUST contain the complete, ready-to-paste command block**.
+
+This is a delivery invariant, not a style preference.
+
+Rules:
+
+- do not say `run the block above`, `use the command from earlier`, or require
+  the operator to recover executable text from a progress update, prior message,
+  tool transcript, comment, log, or handoff;
+- if the command was already shown during an intermediate progress update, repeat
+  the complete block in the final response that requests execution;
+- when multiple root/local steps are required for one bounded objective, prefer
+  one consolidated block unless separation is itself a safety boundary;
+- include the expected operation-specific PASS/FAILED marker or other exact
+  evidence the operator should return;
+- never omit the executable block merely because its construction or validation
+  was described earlier in the same turn;
+- if a safe complete block cannot be produced, state the exact blocker instead
+  of asking the operator to reconstruct or improvise commands.
+
+The operator should be able to act correctly by reading only the final response
+that contains the request.
+
+This rule applies equally after long tool sequences, root-authority gates,
+recovery paths, and executor handoffs.
+
 ## Execution evidence
 
 Claims about execution MUST be grounded in observable evidence.
@@ -883,6 +913,10 @@ Representative tests should include:
 - interactive-shell safety regression: a failing command inside a user-pasted
   SSH block returns a visible nonzero child status without terminating the
   parent interactive shell.
+- human-terminal final-delivery regression: when execution requires a pasted
+  command, the final response that asks for execution contains the complete
+  command block and expected return evidence without referring the operator to
+  earlier progress text;
 
 Failures should be classified as routing, content, implementation, evidence, or
 executor-portability defects.
