@@ -535,6 +535,69 @@ func TestRestAttestedAssignedDemandProvisionsWithoutBrokerIDs(t *testing.T) {
 	}
 }
 
+func TestRestDemandRefreshesCompletedRootRecordBeforeCountingOutstandingCapacity(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	policy := testPolicy()
+	root := newFakeRoot(&events)
+
+	oldJob := restDiscoveredJob(9001, 1901)
+	oldRecord, err := newJobRecord(policy, oldJob, "PREPARING", time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldRecord.SchedulerState = "COMPLETED"
+	oldRecord.LastRootStatus = "PREPARING"
+	root.statusByRequest[oldRecord.RequestID] = "COMPLETED"
+	if err := ledger.Put(oldRecord); err != nil {
+		t.Fatal(err)
+	}
+
+	freshJob := restDiscoveredJob(9002, 1902)
+	verifier := &fakeVerifier{
+		discoverySafe: true,
+		discovered:    []verifiedJob{freshJob},
+	}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		root,
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	completed, ok, err := ledger.Get(oldJob.GitHubJobID)
+	if err != nil || !ok {
+		t.Fatalf("old REST record missing: ok=%v err=%v", ok, err)
+	}
+	if completed.State != "COMPLETED" || completed.LastRootStatus != "COMPLETED" {
+		t.Fatalf("old root-completed record was not refreshed before demand: %#v", completed)
+	}
+
+	fresh, ok, err := ledger.Get(freshJob.GitHubJobID)
+	if err != nil || !ok {
+		t.Fatalf("fresh REST demand was not admitted in same scale cycle: ok=%v err=%v", ok, err)
+	}
+	if fresh.State != "PREPARING" || fresh.LastRootStatus != "PREPARING" {
+		t.Fatalf("fresh REST demand did not launch after capacity refresh: %#v", fresh)
+	}
+	if fresh.AuthoritySource != "REST_ACTIVE_JOB_SET" {
+		t.Fatalf("fresh REST authority source drifted: %#v", fresh)
+	}
+	if len(events) != 3 ||
+		!strings.HasPrefix(events[0], "reserve:") ||
+		!strings.HasPrefix(events[1], "jit:") ||
+		!strings.HasPrefix(events[2], "launch:") {
+		t.Fatalf("fresh REST demand did not execute RESERVE -> JIT -> LAUNCH: %#v", events)
+	}
+}
+
 func TestRestStillQueuedJobRevivesTerminalLocalRecordWithFreshProvisionIdentity(t *testing.T) {
 	events := []string{}
 	ledger := newMemoryLedger()

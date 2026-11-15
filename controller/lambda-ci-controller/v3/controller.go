@@ -569,6 +569,30 @@ func (s *v3Scaler) processAvailable(
 	return nil
 }
 
+func (s *v3Scaler) refreshRootStateBeforeDemand(
+	ctx context.Context,
+	records []jobRecord,
+) error {
+	for i := range records {
+		record := records[i]
+		current, err := s.currentPolicyRecord(record)
+		if err != nil {
+			return err
+		}
+		if !current {
+			continue
+		}
+		if err := s.recoverOne(ctx, &record); err != nil {
+			return fmt.Errorf(
+				"refresh root state before REST demand runner_request_id=%d: %w",
+				record.RunnerRequestID,
+				err,
+			)
+		}
+	}
+	return nil
+}
+
 func (s *v3Scaler) processRESTDemand(
 	ctx context.Context,
 	stats *scaleset.RunnerScaleSetStatistic,
@@ -581,6 +605,13 @@ func (s *v3Scaler) processRESTDemand(
 	records, err := s.ledger.List()
 	if err != nil {
 		return fmt.Errorf("list controller ledger for REST demand: %w", err)
+	}
+	if err := s.refreshRootStateBeforeDemand(ctx, records); err != nil {
+		return err
+	}
+	records, err = s.ledger.List()
+	if err != nil {
+		return fmt.Errorf("reload controller ledger after root refresh: %w", err)
 	}
 	outstanding := s.outstandingAcquired(records)
 	if outstanding >= desired {
