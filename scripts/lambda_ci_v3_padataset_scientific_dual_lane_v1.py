@@ -2,7 +2,7 @@
 """Drained two-phase activation for PADataset scientific lane B.
 
 Phase A expands the already-live scientific generation from 10 to 11 classes,
-raises only the host and PADataset project concurrency ceilings from 1 to 2,
+raises the host ceiling from 1 to 3 while raising only PADataset project concurrency from 1 to 2 and reserving one host slot for Workspace Control,
 and installs lane B inactive/disabled. Phase B separately activates lane B
 after a fresh GitHub/scale-set/runtime preflight. Both phases require exact,
 root-owned one-shot operator authority and fail closed on nonterminal work.
