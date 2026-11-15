@@ -1,0 +1,228 @@
+name: Lambda CI Workspace Control Codex Bootstrap
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  codex-bootstrap:
+    name: "${{ format('wc-admission-v1|workload=codex-bootstrap|pr={0}|request={1}', github.event.issue.number, github.event.comment.body) }}"
+    if: >-
+      github.event.issue.pull_request &&
+      github.actor == 'adamtrott78' &&
+      github.event.comment.author_association == 'OWNER' &&
+      startsWith(github.event.comment.body, '/workspace-codex-bootstrap ')
+    runs-on: lambda-workspace-control-control-small
+    timeout-minutes: 10
+
+    steps:
+      - name: Verify exact same-repository PR head
+        id: gate
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          expected_sha="$(printf '%s\n' "$COMMENT_BODY" | awk '{print $2}')"
+          [[ "$expected_sha" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "Invalid /workspace-codex-bootstrap SHA" >&2
+            exit 20
+          }
+          pr_json="$(
+            curl -fsSL \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/$REPOSITORY/pulls/$PR_NUMBER"
+          )"
+          readarray -t values < <(
+            python3 -c 'import json,sys; p=json.load(sys.stdin); print(p["head"]["sha"]); print(p["head"]["repo"]["full_name"]); print(p["state"])' <<<"$pr_json"
+          )
+          [[ "${values[0]}" == "$expected_sha" ]] || {
+            echo "Requested SHA does not match current PR head" >&2
+            exit 21
+          }
+          [[ "${values[1]}" == "$REPOSITORY" ]] || {
+            echo "Fork/foreign PR head rejected" >&2
+            exit 22
+          }
+          [[ "${values[2]}" == "open" ]] || {
+            echo "PR is not open" >&2
+            exit 23
+          }
+          echo "expected_sha=$expected_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Prove bounded workspace-control runner isolation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(id -un)" == "ci-workspace-control" ]]
+          [[ -n "${RUNNER_NAME:-}" ]]
+          [[ "$RUNNER_NAME" == lambda-workspace-control-control-small-* ]]
+          [[ -n "${RUNNER_TEMP:-}" ]]
+          [[ -n "${XDG_CACHE_HOME:-}" ]]
+          [[ "$XDG_CACHE_HOME" == /srv/workspace-ci/workspace-control/staging-cache/* ]]
+
+          for forbidden in \
+            /home/atrott \
+            /srv/workspace-ci/research-engine \
+            /srv/workspace-ci/padataset \
+            /var/lib/workspace-ci/provisioner \
+            /var/lib/workspace-ci/reconciler \
+            /var/lib/workspace-ci/controller \
+            /run/workspace-ci
+          do
+            [[ ! -r "$forbidden" ]] || {
+              echo "Forbidden path readable: $forbidden" >&2
+              exit 30
+            }
+          done
+
+          for socket in /var/run/docker.sock /run/docker.sock; do
+            if [[ -e "$socket" ]]; then
+              [[ ! -r "$socket" && ! -w "$socket" ]] || {
+                echo "Docker socket accessible: $socket" >&2
+                exit 31
+              }
+            fi
+          done
+
+          if command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi -L >/dev/null 2>&1; then
+            echo "Codex bootstrap runner unexpectedly has NVIDIA access" >&2
+            exit 32
+          fi
+
+      - name: Checkout exact candidate SHA
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ steps.gate.outputs.expected_sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          clean: true
+
+      - name: Install checksum-pinned Codex CLI in Workspace Control home
+        id: install
+        env:
+          CODEX_VERSION: "0.155.1"
+          CODEX_ARCHIVE_SHA256: "a0ef8b2debc3bf747e07b1a039354de31300ac0dcc2276498ba281470b5d9115"
+          CODEX_ARCHIVE_URL: "https://github.com/openai/codex/releases/download/rust-v0.155.1/codex-x86_64-unknown-linux-musl.tar.gz"
+          PROJECT_HOME: "/srv/workspace-ci/workspace-control/home"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY
+
+          runtime_root="$PROJECT_HOME/.local/share/workspace-reasoning-economy/codex"
+          install_dir="$runtime_root/$CODEX_VERSION"
+          bin_dir="$PROJECT_HOME/.local/bin"
+          codex_home="$PROJECT_HOME/.codex-reasoning-economy"
+          archive="$RUNNER_TEMP/codex-$CODEX_VERSION.tar.gz"
+
+          install -d -m 0700 "$runtime_root" "$install_dir" "$bin_dir" "$codex_home"
+
+          if [[ ! -x "$install_dir/codex" ]]; then
+            curl -fsSL --retry 3 -o "$archive" "$CODEX_ARCHIVE_URL"
+            printf '%s  %s\n' "$CODEX_ARCHIVE_SHA256" "$archive" | sha256sum -c -
+            extract_dir="$(mktemp -d "$RUNNER_TEMP/codex-extract.XXXXXX")"
+            tar -C "$extract_dir" -xzf "$archive"
+            source_binary="$extract_dir/codex-x86_64-unknown-linux-musl"
+            [[ -f "$source_binary" ]]
+            install -m 0755 "$source_binary" "$install_dir/codex"
+          fi
+
+          ln -sfn "$install_dir/codex" "$bin_dir/codex"
+          actual_version="$("$install_dir/codex" --version)"
+          [[ "$actual_version" == *"$CODEX_VERSION"* ]] || {
+            echo "Unexpected Codex version: $actual_version" >&2
+            exit 40
+          }
+
+          cat > "$codex_home/config.toml" <<'CFG'
+          forced_login_method = "chatgpt"
+          cli_auth_credentials_store = "file"
+          CFG
+          chmod 0600 "$codex_home/config.toml"
+
+          echo "CODEX_BIN=$install_dir/codex" >> "$GITHUB_ENV"
+          echo "CODEX_HOME=$codex_home" >> "$GITHUB_ENV"
+          echo "CODEX_VERSION=$CODEX_VERSION" >> "$GITHUB_ENV"
+          echo "codex_bin=$install_dir/codex" >> "$GITHUB_OUTPUT"
+          echo "codex_home=$codex_home" >> "$GITHUB_OUTPUT"
+
+      - name: Ensure ChatGPT login
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY
+          export CODEX_HOME
+
+          if "$CODEX_BIN" login status 2>&1 | grep -Fq "Logged in using ChatGPT"; then
+            echo "Codex ChatGPT login already present."
+          else
+            echo "No ChatGPT login found. Starting one-time device authorization."
+            echo "Complete the device authorization shown below; no token or auth file should be copied."
+            "$CODEX_BIN" login --device-auth
+          fi
+
+          status="$("$CODEX_BIN" login status 2>&1)"
+          printf '%s\n' "$status" | grep -Fq "Logged in using ChatGPT"
+          [[ ! -v OPENAI_API_KEY ]]
+          [[ -f "$CODEX_HOME/auth.json" ]]
+          chmod 0600 "$CODEX_HOME/auth.json"
+
+      - name: Write redacted bootstrap receipt
+        env:
+          EXPECTED_SHA: ${{ steps.gate.outputs.expected_sha }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+          PROJECT_HOME: "/srv/workspace-ci/workspace-control/home"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY
+          actual_sha="$(git rev-parse HEAD)"
+          [[ "$actual_sha" == "$EXPECTED_SHA" ]]
+          receipt="$RUNNER_TEMP/workspace-control-codex-bootstrap-receipt.json"
+          export RECEIPT_PATH="$receipt" ACTUAL_SHA="$actual_sha"
+          python3 - <<'PY'
+          import json, os, pathlib
+          payload = {
+              "schema_version": 1,
+              "mode": "WORKSPACE_CONTROL_CODEX_BOOTSTRAP_V1",
+              "decision": "PASS",
+              "expected_sha": os.environ["EXPECTED_SHA"],
+              "actual_sha": os.environ["ACTUAL_SHA"],
+              "pr_number": int(os.environ["PR_NUMBER"]),
+              "actor": os.environ["ACTOR"],
+              "runner_name": os.environ.get("RUNNER_NAME"),
+              "runner_user": os.environ.get("USER"),
+              "runner_class": "workspace-control-control-small-v1",
+              "project_home": os.environ["PROJECT_HOME"],
+              "codex_home": os.environ["CODEX_HOME"],
+              "codex_version": os.environ["CODEX_VERSION"],
+              "auth_mode": "chatgpt",
+              "api_key_present": False,
+              "model_inference_performed": False,
+              "gpu_visible": False,
+              "credential_material_in_receipt": False,
+          }
+          pathlib.Path(os.environ["RECEIPT_PATH"]).write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload redacted bootstrap receipt
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: workspace-control-codex-bootstrap-receipt
+          path: ${{ runner.temp }}/workspace-control-codex-bootstrap-receipt.json
