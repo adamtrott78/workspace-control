@@ -5,8 +5,8 @@
   "authority": "workspace-control-root",
   "source_checkpoint": "workspace-control@f48f46618b560d91950fae1927048e14e29a59ab",
   "migration_mode": {
-    "host_max_active_runners": 2,
-    "reason": "bounded post-migration dual-runner expansion; exclusive resource claims remain authoritative and atomic"
+    "host_max_active_runners": 3,
+    "reason": "bounded three-runner expansion: two PADataset scientific lanes plus one reserved Workspace Control orchestration slot"
   },
   "project_limits": {
     "workspace-control": {
@@ -40,9 +40,12 @@
     "state": "RESERVED",
     "ttl_seconds": 60,
     "renewal_allowed": false,
-    "allocation_order": "first successful atomic RESERVE; no persistent wait queue in migration v1",
+    "allocation_order": "first successful atomic RESERVE subject to project caps, exclusive resources, and reserved-project slot protection",
     "busy_semantics": "BUSY is capacity-local and creates no JIT registration",
-    "starvation_note": "host_max_active_runners=2 permits bounded concurrency while atomic exclusive GPU claims prevent device overlap; fairness remains first-successful RESERVE"
+    "starvation_note": "host_max_active_runners=3; padataset may consume at most two slots; when workspace-control has no active runner, one host slot remains reserved for workspace-control",
+    "reserved_project_slots": {
+      "workspace-control": 1
+    }
   },
   "release_policy": {
     "normal": "release after runner terminal and containment cleanup proof",
@@ -56,7 +59,8 @@
     "dual-GPU reservation is all-or-nothing",
     "CPU-only class has an empty GPU claim set",
     "catalog/resource-policy generation is bound into runner-instance receipts",
-    "host concurrency is capped at two; only padataset is raised to two project-active runners in this candidate",
-    "raising concurrency never weakens exclusive GPU claims or permits two active records to reserve the same GPU resource"
+    "raising concurrency never weakens exclusive GPU claims or permits two active records to reserve the same GPU resource",
+    "host concurrency is capped at three; padataset remains capped at two and workspace-control retains one reserved admission slot",
+    "when workspace-control has zero active runners, non-workspace-control admissions cannot consume the final reserved host slot"
   ]
 }
