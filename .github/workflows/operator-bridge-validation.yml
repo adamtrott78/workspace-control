@@ -438,22 +438,43 @@ jobs:
       STAGE10_SCHEDULER_HOTKEY: Ctrl+Space
 
     steps:
-      - name: Checkout exact Stage 10 usability head
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Materialize exact Stage 10 usability head without action bootstrap
+        shell: powershell
+        run: |
+          $ErrorActionPreference = "Stop"
+          $repo = "${{ github.workspace }}"
+          $expectedHead = "${{ github.event.pull_request.head.sha }}"
+          $origin = "https://github.com/${{ github.repository }}.git"
+          New-Item $repo -ItemType Directory -Force | Out-Null
+          Push-Location $repo
+          try {
+            if (-not (Test-Path ".git")) {
+              git init
+              if ($LASTEXITCODE -ne 0) { throw "Stage 10 git init failed." }
+            }
+            $remotes = @(git remote)
+            if ($remotes -contains "origin") {
+              git remote set-url origin $origin
+            } else {
+              git remote add origin $origin
+            }
+            if ($LASTEXITCODE -ne 0) { throw "Stage 10 origin binding failed." }
+            git fetch --force --no-tags --prune --depth=1 origin $expectedHead
+            if ($LASTEXITCODE -ne 0) { throw "Stage 10 exact-SHA fetch failed." }
+            git checkout --detach --force $expectedHead
+            if ($LASTEXITCODE -ne 0) { throw "Stage 10 exact-SHA checkout failed." }
+            git clean -ffdx
+            if ($LASTEXITCODE -ne 0) { throw "Stage 10 workspace clean failed." }
+            $head = (git rev-parse HEAD).Trim()
+            if ($head -ne $expectedHead) {
+              throw "Stage 10 runner checkout is not bound to the exact requested source SHA."
+            }
+          }
+          finally {
+            Pop-Location
+          }
 
-      - name: Set up .NET 10 LTS
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Set up Node 24 for temporary Firefox usability adapter
-        uses: actions/setup-node@v6
-        with:
-          node-version: '24.x'
-
-      - name: Validate interactive Stage 10 runner
+      - name: Validate persistent interactive Stage 10 runner
         shell: powershell
         run: |
           $ErrorActionPreference = "Stop"
@@ -465,11 +486,28 @@ jobs:
           if (-not [Environment]::UserInteractive) {
             throw "Stage 10 usability runner must be launched interactively in the Windows user session."
           }
+          $dotnetVersion = (dotnet --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $dotnetVersion -notmatch '^10\.') {
+            throw "Stage 10 runner requires preinstalled .NET SDK 10.x; found '$dotnetVersion'."
+          }
+          $nodeVersion = (node --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or $nodeVersion -notmatch '^v24\.') {
+            throw "Stage 10 runner requires preinstalled Node 24.x; found '$nodeVersion'."
+          }
+          $npmVersion = (npm.cmd --version).Trim()
+          if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($npmVersion)) {
+            throw "Stage 10 runner requires preinstalled npm."
+          }
+          $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
+          if (-not (Test-Path $firefox)) {
+            throw "Stage 10 runner requires Firefox at $firefox."
+          }
           foreach ($name in @("firefox", "WorkspaceOperator")) {
             if (Get-Process -Name $name -ErrorAction SilentlyContinue) {
               throw "Stage 10 usability trial requires no pre-existing $name process."
             }
           }
+          Write-Host "STAGE10_RUNNER_PREREQS=PASS dotnet=$dotnetVersion node=$nodeVersion npm=$npmVersion"
 
       - name: Execute Stage 10 human-in-loop usability trial
         shell: powershell
