@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-backend-v1",
-  "current_stage": "economics_ledger",
+  "current_stage": "codex_subscription_executor",
   "acceptance_criteria": [
     "No OpenAI API-key billing, pay-as-you-go fallback, purchased credits, paid reset consumption, or automatic billing path is authorized.",
     "Codex execution is authorized only when backed by the user's included ChatGPT subscription allowance.",
@@ -45,7 +45,7 @@
       "base_sha": "991f0c76497670f27482459463ebc6933d1aa95f",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45",
+        "checkpoint_sha": "fc5bdb47f2ba31c1c64c06eca4c1612397d2ce26",
         "verified": true
       },
       "local": null,
@@ -61,7 +61,9 @@
         "semantic-execution/src/workspace_semantic_execution/adapters/__init__.py",
         "tests/test_workspace_reasoning_economy*.py",
         "benchmarks/workspace-semantic-execution/economics/**",
-        ".github/workflows/reasoning-economy-validation.yml"
+        ".github/workflows/reasoning-economy-validation.yml",
+        "semantic-execution/src/workspace_semantic_execution/adapters/codex_subscription.py",
+        "semantic-execution/src/workspace_semantic_execution/economics/codex_trace.py"
       ]
     },
     {
@@ -114,7 +116,7 @@
     },
     {
       "id": "economics_ledger",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-reasoning-economy",
       "selected_executor": null,
       "selected_surface": null,
@@ -128,12 +130,24 @@
         "waste classification",
         "durable experiment rows"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Execution economics and conservative allowance deltas",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control@fc5bdb47f2ba31c1c64c06eca4c1612397d2ce26",
+            "Workspace Control Validation #2762 SUCCESS.",
+            "WAITING_EXTERNAL, POLLING, IDLE and deterministic classes enforce zero model invocations/tokens.",
+            "Reset boundaries, non-monotonic counters, missing metrics and multiple weekly buckets fail closed to UNKNOWN.",
+            "Verified-progress-per-allowance refuses zero-delta infinite-efficiency claims."
+          ]
+        }
+      ],
       "resume_condition": "Every bounded work item can produce a stable economics record without requiring API billing data."
     },
     {
       "id": "codex_subscription_executor",
-      "status": "PLANNED",
+      "status": "IN_PROGRESS",
       "execution_owner": "workspace-reasoning-economy",
       "selected_executor": null,
       "selected_surface": null,
@@ -210,14 +224,24 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "workspace-control@8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45",
+      "id": "economics-ledger-validated",
+      "kind": "implementation_checkpoint",
+      "identity": "workspace-control@fc5bdb47f2ba31c1c64c06eca4c1612397d2ce26",
       "required_for_resume": true,
       "evidence": [
-        "usage_telemetry_contract_and_collector VALIDATED.",
-        "First unfinished stage is economics_ledger.",
-        "No live account authentication has been attempted yet."
+        "Workspace Control Validation #2762 SUCCESS.",
+        "Reasoning Economy execution ledger and invariant tests validated."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "workspace-control@fc5bdb47f2ba31c1c64c06eca4c1612397d2ce26",
+      "required_for_resume": true,
+      "evidence": [
+        "usage telemetry and economics ledger VALIDATED.",
+        "First unfinished stage is codex_subscription_executor.",
+        "No live Codex subscription invocation has occurred."
       ]
     }
   ],
@@ -242,14 +266,13 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement execution economics ledger and waste classification.",
-    "Implement subscription-only Codex executor with JSONL trace ingestion.",
+    "Implement subscription-only Codex executor with ChatGPT-auth guard and JSONL trace ingestion.",
     "Calibrate account/usage/read and rate-limit deltas against controlled ChatGPT/Codex/Instant actions.",
     "Run Research Engine routing/decomposition experiments.",
     "Implement weekly burn governor and recursive policy promotion."
   ],
-  "next_safe_action": "Implement ExecutionEconomics, UsageDelta, allowance-window delta matching, token/tool/retry/validator metrics, and waste classifications under semantic-execution/src/workspace_semantic_execution/economics/. Preserve UNKNOWN for missing/reset/ambiguous telemetry. Add deterministic tests for weekly-window deltas, reset boundaries, null token totals, zero-token WAITING_EXTERNAL/IDLE/POLLING policy, and verified-progress-per-allowance calculations. Do not attempt live Codex authentication until the ledger is validated.",
+  "next_safe_action": "Implement a Codex subscription auth inspector using read-only account/read, fail closed unless account.type=chatgpt, and a codex exec --json trace parser that captures thread id, turn success/failure, input/cached/output/reasoning-output tokens, command/MCP/web/collab/file-change counts, and errors. Then implement a subscription-only executor wrapper that strips OPENAI_API_KEY, refuses unknown/API-key auth, snapshots account usage before/after, and returns structured execution economics. Unit-test all behavior with fixture processes before any live login/invocation.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-15 ACTIVATED: Reasoning Economy is a dedicated child track of semantic execution. Immediate objective is to remove manual Usage-page transcription by consuming official Codex app-server read-only account telemetry. account/rateLimits/read exposes rate-limit windows; account/usage/read exposes account token-activity summary/daily buckets and optional thread usage in the current public Codex protocol. Whether these values perfectly track the December shared ChatGPT/Codex allowance is intentionally UNKNOWN until controlled calibration. No API billing is authorized.\n\n2026-11-15 USAGE TELEMETRY VALIDATED: Official Codex app-server read-only account telemetry is implemented and passed Workspace Control Validation #2756 at 8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45. The collector reads account/rateLimits/read plus account/usage/read, strips OPENAI_API_KEY, excludes identity/upsell/reset-credit data, classifies windows by duration, and preserves unknown/null metrics. Next stage is the economics ledger; shared ChatGPT/Codex allowance equivalence remains an empirical calibration question.\n"
+  "notes": "2026-11-15 ACTIVATED: Reasoning Economy is a dedicated child track of semantic execution. Immediate objective is to remove manual Usage-page transcription by consuming official Codex app-server read-only account telemetry. account/rateLimits/read exposes rate-limit windows; account/usage/read exposes account token-activity summary/daily buckets and optional thread usage in the current public Codex protocol. Whether these values perfectly track the December shared ChatGPT/Codex allowance is intentionally UNKNOWN until controlled calibration. No API billing is authorized.\n\n2026-11-15 USAGE TELEMETRY VALIDATED: Official Codex app-server read-only account telemetry is implemented and passed Workspace Control Validation #2756 at 8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45. The collector reads account/rateLimits/read plus account/usage/read, strips OPENAI_API_KEY, excludes identity/upsell/reset-credit data, classifies windows by duration, and preserves unknown/null metrics. Next stage is the economics ledger; shared ChatGPT/Codex allowance equivalence remains an empirical calibration question.\n\n2026-11-15 ECONOMICS LEDGER VALIDATED: workspace-control@fc5bdb47f2ba31c1c64c06eca4c1612397d2ce26 passed Workspace Control Validation #2762. The ledger preserves unknown/reset/ambiguous allowance states, forbids model tokens in waits/polling/idle/deterministic work, and computes verified-progress-per-weekly-allowance only when a unique comparable bucket exists. Next stage is subscription-only Codex execution with account/read ChatGPT-auth enforcement and JSONL trace ingestion.\n"
 }
