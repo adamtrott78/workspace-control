@@ -113,6 +113,32 @@ internal static class UsabilityHarness
             var browser = new IpcBrowserPort(hub);
             SeedBrowser(browser, trialId);
 
+            var workerWindowSafety = new WorkerWindowSafetyController(
+                new Win32WorkerWindowSafetyPort());
+            if (trialId == "UT-12")
+            {
+                // UT-12 starts from a synthetically pre-existing
+                // SENT/UNCONFIRMED worker. Reproduce the production
+                // prerequisite before exposing READY=0: the managed worker
+                // target was prepared, brought to the OS foreground, and its
+                // exact Firefox HWND was captured while that identity was
+                // trusted. The later no-work press must not rediscover,
+                // recapture, or foreground any Firefox window.
+                RequireApplied(
+                    browser.FocusTargetAsync(
+                            new BrowserTarget("slot-1", 0),
+                            CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult(),
+                    "prime UT-12 trusted worker target");
+                if (!workerWindowSafety.ForegroundPreparedWorkerWindow() ||
+                    !workerWindowSafety.RecordPreparedWorkerWindow())
+                {
+                    throw new InvalidOperationException(
+                        "UT12_TRUSTED_WORKER_WINDOW_CAPTURE_FAILED");
+                }
+            }
+
             using var context = new UsabilityApplicationContext(
                 trialId,
                 resultPath,
@@ -122,7 +148,8 @@ internal static class UsabilityHarness
                 bridgeState,
                 browser,
                 diagnostics,
-                schedulerHotkey);
+                schedulerHotkey,
+                workerWindowSafety);
 
             if (trialId != "UT-11" &&
                 (!context.HotkeyRegistered || !context.BridgeEnabled))
@@ -740,7 +767,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
         BridgeState bridgeState,
         IpcBrowserPort browser,
         CaptureDiagnostics diagnostics,
-        SchedulerHotkeyBinding schedulerHotkey)
+        SchedulerHotkeyBinding schedulerHotkey,
+        WorkerWindowSafetyController workerWindowSafety)
     {
         _trialId = trialId;
         _resultPath = resultPath;
@@ -763,8 +791,7 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             _recovery,
             _clipboard,
             _browser);
-        _workerWindowSafety = new WorkerWindowSafetyController(
-            new Win32WorkerWindowSafetyPort());
+        _workerWindowSafety = workerWindowSafety;
 
         SynchronizationContext.SetSynchronizationContext(
             new WindowsFormsSynchronizationContext());
@@ -958,16 +985,6 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             {
                 NoActionPresses++;
                 NoWorkMinimizeAttempts++;
-
-                if (_trialId == "UT-12")
-                {
-                    // UT-12 begins from a synthetically pre-existing
-                    // SENT/UNCONFIRMED worker. Mirror the production
-                    // prerequisite that would have been established by the
-                    // prior LocalPrepared dispatch: capture only the Firefox
-                    // window that is already foreground at the READY=0 press.
-                    _workerWindowSafety.RecordPreparedWorkerWindow();
-                }
 
                 var minimized = _workerWindowSafety.MinimizeAfterNoAction();
                 if (minimized)
