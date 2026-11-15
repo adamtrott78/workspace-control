@@ -8,6 +8,8 @@ from ..domain import (
     EffectReceipt,
     ProcessState,
     ExecutorSession,
+    OperatorAction,
+    OperatorActionKernel,
     ReasoningProcess,
     ValidationResult,
     WorkDisposition,
@@ -347,6 +349,139 @@ class RuntimeCoordinator:
 
     def retire_executor_session(self, *, slot_id: str, expected_session_generation: int, reason: str) -> StateSnapshot:
         return self._apply("session.retired", lambda graph: DomainKernel.retire_executor_session(graph, slot_id=slot_id, expected_session_generation=expected_session_generation, reason=reason))
+
+    def enqueue_operator_action(self, action: OperatorAction) -> StateSnapshot:
+        return self._apply(
+            "operator_action.enqueued",
+            lambda graph: OperatorActionKernel.enqueue(graph, action),
+        )
+
+    def claim_next_operator_action(
+        self,
+        *,
+        helper_instance_id: str,
+        claim_id: str,
+        claimed_at: str,
+        expires_at: str,
+    ) -> StateSnapshot:
+        return self._apply(
+            "operator_action.claimed",
+            lambda graph: OperatorActionKernel.claim_next(
+                graph,
+                helper_instance_id=helper_instance_id,
+                claim_id=claim_id,
+                claimed_at=claimed_at,
+                expires_at=expires_at,
+            ),
+        )
+
+    def record_operator_action_local_prepared(
+        self,
+        *,
+        action_id: str,
+        generation: int,
+        worker_slot_id: str | None,
+        session_generation: int | None,
+        observed_at: str,
+    ) -> StateSnapshot:
+        return self._apply(
+            "operator_action.local_prepared",
+            lambda graph: OperatorActionKernel.record_local_prepared(
+                graph,
+                action_id=action_id,
+                generation=generation,
+                worker_slot_id=worker_slot_id,
+                session_generation=session_generation,
+                observed_at=observed_at,
+            ),
+        )
+
+    def record_operator_action_local_failure(
+        self,
+        *,
+        action_id: str,
+        generation: int,
+        failure_code: str,
+        failure_message: str,
+    ) -> StateSnapshot:
+        return self._apply(
+            "operator_action.local_failure",
+            lambda graph: OperatorActionKernel.record_local_failure(
+                graph,
+                action_id=action_id,
+                generation=generation,
+                failure_code=failure_code,
+                failure_message=failure_message,
+            ),
+        )
+
+    def record_operator_action_blocked(
+        self,
+        *,
+        action_id: str,
+        generation: int,
+        failure_code: str,
+        failure_message: str,
+    ) -> StateSnapshot:
+        return self._apply(
+            "operator_action.blocked",
+            lambda graph: OperatorActionKernel.record_blocked(
+                graph,
+                action_id=action_id,
+                generation=generation,
+                failure_code=failure_code,
+                failure_message=failure_message,
+            ),
+        )
+
+    def record_operator_action_durable_ack(
+        self,
+        *,
+        action_id: str,
+        generation: int,
+        ack_id: str,
+    ) -> StateSnapshot:
+        return self._apply(
+            "operator_action.acknowledged",
+            lambda graph: OperatorActionKernel.record_durable_ack(
+                graph,
+                action_id=action_id,
+                generation=generation,
+                ack_id=ack_id,
+            ),
+        )
+
+    def complete_acknowledged_operator_action(
+        self,
+        *,
+        action_id: str,
+        generation: int,
+        completed_at: str,
+    ) -> StateSnapshot:
+        return self._apply(
+            "operator_action.completed",
+            lambda graph: OperatorActionKernel.complete_acknowledged(
+                graph,
+                action_id=action_id,
+                generation=generation,
+                completed_at=completed_at,
+            ),
+        )
+
+    def expire_operator_action_claim(
+        self,
+        *,
+        action_id: str,
+        generation: int,
+    ) -> StateSnapshot:
+        return self._apply(
+            "operator_action.claim_expired",
+            lambda graph: OperatorActionKernel.expire_claim(
+                graph,
+                action_id=action_id,
+                generation=generation,
+            ),
+        )
 
     def record_effect(
         self,

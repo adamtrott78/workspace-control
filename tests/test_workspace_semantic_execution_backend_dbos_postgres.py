@@ -29,6 +29,7 @@ from workspace_semantic_execution.adapters import (  # noqa: E402
     RecordingTelemetry,
 )
 from workspace_semantic_execution.application import (  # noqa: E402
+    OperatorActionService,
     PersistentExecutorSessionBroker,
     RuntimeCoordinator,
     openai_chat_instant_current_profile,
@@ -36,6 +37,12 @@ from workspace_semantic_execution.application import (  # noqa: E402
 from workspace_semantic_execution.domain import (  # noqa: E402
     DomainKernel,
     ExecutorSessionState,
+    OperatorAckMode,
+    OperatorAction,
+    OperatorActionState,
+    OperatorActionType,
+    OperatorHumanRequirement,
+    OperatorPostLocalSuccess,
     ProcessState,
 )
 from workspace_semantic_execution.ports import (  # noqa: E402
@@ -150,6 +157,80 @@ class PostgresAdapterIntegrationTests(unittest.TestCase):
         )
         self.assertEqual(fenced.session_generation, 1)
         self.assertIsNone(fenced.bound_process_id)
+
+    def test_operator_action_queue_survives_adapter_reinstantiation(self):
+        state_key = f"operator-action-{uuid.uuid4()}"
+        store1 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator1 = RuntimeCoordinator(
+            state_store=store1,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        coordinator1.initialize(
+            DomainKernel.create_graph([DomainKernel.create_process("R")])
+        )
+        broker = PersistentExecutorSessionBroker(coordinator1)
+        profile = openai_chat_instant_current_profile()
+        broker.ensure_session(
+            profile=profile,
+            slot_id="instant-slot",
+            session_id="session-a",
+        )
+        broker.bind(
+            profile=profile,
+            slot_id="instant-slot",
+            expected_session_generation=0,
+            process_id="R",
+            process_generation=0,
+            packet_sha256="a" * 64,
+        )
+        service1 = OperatorActionService(runtime=coordinator1)
+        service1.enqueue(
+            OperatorAction(
+                action_id="action-1",
+                generation=0,
+                action_type=OperatorActionType.SERVICE_EXISTING,
+                status=OperatorActionState.QUEUED,
+                priority_rank=10,
+                queue_sequence=1,
+                created_at="T0",
+                task_id="task",
+                reasoning_process_id="R",
+                process_generation=0,
+                worker_slot_id="instant-slot",
+                session_generation=0,
+                executor_id=profile.executor_id,
+                payload_ref="semantic-packet://R/0",
+                payload_sha256="a" * 64,
+                human_requirement=OperatorHumanRequirement.PASTE_AND_SUBMIT,
+                ack_mode=OperatorAckMode.DURABLE_EVENT,
+                post_local_success=OperatorPostLocalSuccess.AWAIT_DURABLE_ACK,
+            )
+        )
+
+        store2 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator2 = RuntimeCoordinator(
+            state_store=store2,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=10),
+        )
+        restored = coordinator2.snapshot().graph.operator_actions["action-1"]
+        self.assertEqual(restored.status, OperatorActionState.QUEUED)
+        self.assertEqual(restored.worker_slot_id, "instant-slot")
+        self.assertEqual(restored.payload_sha256, "a" * 64)
+
+        claimed = coordinator2.claim_next_operator_action(
+            helper_instance_id="windows-helper",
+            claim_id="claim-1",
+            claimed_at="T1",
+            expires_at="T2",
+        )
+        self.assertEqual(
+            claimed.graph.operator_actions["action-1"].status,
+            OperatorActionState.CLAIMED_LOCAL,
+        )
 
     def test_external_event_is_immutable_and_visible_after_restart(self):
         ledger1 = PostgresEventLedger(POSTGRES_DSN)

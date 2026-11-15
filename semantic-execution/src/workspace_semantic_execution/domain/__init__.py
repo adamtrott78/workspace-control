@@ -14,6 +14,7 @@ from .executors import (
     SessionMode,
 )
 from .kernel import DomainKernel, KernelError
+from .operator_actions import OperatorActionError, OperatorActionKernel
 from .models import (
     ActionSpec,
     AuthorityDecision,
@@ -22,6 +23,13 @@ from .models import (
     EffectReceipt,
     ExecutorSession,
     ExecutorSessionState,
+    OperatorAckMode,
+    OperatorAction,
+    OperatorActionClaim,
+    OperatorActionState,
+    OperatorActionType,
+    OperatorHumanRequirement,
+    OperatorPostLocalSuccess,
     ProcessState,
     ReasoningProcess,
     TransitionRecord,
@@ -49,6 +57,15 @@ __all__ = [
     "InvocationMode",
     "KernelError",
     "MemoryResetPolicy",
+    "OperatorAckMode",
+    "OperatorAction",
+    "OperatorActionClaim",
+    "OperatorActionError",
+    "OperatorActionKernel",
+    "OperatorActionState",
+    "OperatorActionType",
+    "OperatorHumanRequirement",
+    "OperatorPostLocalSuccess",
     "PrivacyClass",
     "ProcessState",
     "ReasoningProcess",

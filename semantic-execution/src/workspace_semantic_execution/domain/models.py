@@ -36,6 +36,49 @@ class ExecutorSessionState(StrEnum):
     RETIRED = "RETIRED"
 
 
+class OperatorActionState(StrEnum):
+    QUEUED = "QUEUED"
+    CLAIMED_LOCAL = "CLAIMED_LOCAL"
+    LOCAL_PREPARED = "LOCAL_PREPARED"
+    AWAITING_DURABLE_ACK = "AWAITING_DURABLE_ACK"
+    ACKNOWLEDGED = "ACKNOWLEDGED"
+    COMPLETED = "COMPLETED"
+    FAILED_LOCAL = "FAILED_LOCAL"
+    CLAIM_EXPIRED = "CLAIM_EXPIRED"
+    BLOCKED = "BLOCKED"
+    STALE = "STALE"
+    SUPERSEDED = "SUPERSEDED"
+
+
+class OperatorActionType(StrEnum):
+    SERVICE_EXISTING = "SERVICE_EXISTING"
+    CREATE_AND_SERVICE = "CREATE_AND_SERVICE"
+    RESTORE_AND_SERVICE = "RESTORE_AND_SERVICE"
+    DISCARD_SESSION = "DISCARD_SESSION"
+    RETIRE_SESSION = "RETIRE_SESSION"
+    OPEN_JUDGMENT_GATE = "OPEN_JUDGMENT_GATE"
+    OPEN_RECOVERY = "OPEN_RECOVERY"
+
+
+class OperatorHumanRequirement(StrEnum):
+    NONE = "NONE"
+    PASTE_AND_SUBMIT = "PASTE_AND_SUBMIT"
+    SUBSTANTIVE_DECISION = "SUBSTANTIVE_DECISION"
+    RECOVERY_INTERACTION = "RECOVERY_INTERACTION"
+
+
+class OperatorAckMode(StrEnum):
+    NONE = "NONE"
+    DURABLE_EVENT = "DURABLE_EVENT"
+    DURABLE_STATE_PREDICATE = "DURABLE_STATE_PREDICATE"
+
+
+class OperatorPostLocalSuccess(StrEnum):
+    AWAIT_DURABLE_ACK = "AWAIT_DURABLE_ACK"
+    COMPLETE_AND_REQUERY = "COMPLETE_AND_REQUERY"
+    STOP = "STOP"
+
+
 class AuthorityOutcome(StrEnum):
     ALLOW = "ALLOW"
     DENY = "DENY"
@@ -141,6 +184,48 @@ class ExecutorSession:
     retirement_reason: str | None = None
 
 
+@dataclass(frozen=True)
+class OperatorActionClaim:
+    claim_id: str
+    helper_instance_id: str
+    claimed_at: str
+    expires_at: str
+
+
+@dataclass
+class OperatorAction:
+    """Durable control-plane action; packet text is deliberately absent."""
+
+    action_id: str
+    generation: int
+    action_type: OperatorActionType
+    status: OperatorActionState
+    priority_rank: int
+    queue_sequence: int
+    created_at: str
+    task_id: str
+    reasoning_process_id: str | None
+    process_generation: int | None
+    worker_slot_id: str | None
+    session_generation: int | None
+    executor_id: str | None
+    payload_ref: str | None
+    payload_sha256: str | None
+    human_requirement: OperatorHumanRequirement
+    ack_mode: OperatorAckMode
+    post_local_success: OperatorPostLocalSuccess
+    not_before: str | None = None
+    stale_after: str | None = None
+    supersedes_action_id: str | None = None
+    superseded_by_action_id: str | None = None
+    claim: OperatorActionClaim | None = None
+    local_prepared_at: str | None = None
+    durable_ack_id: str | None = None
+    failure_code: str | None = None
+    failure_message: str | None = None
+    completed_at: str | None = None
+
+
 @dataclass
 class ReasoningProcess:
     process_id: str
@@ -166,5 +251,6 @@ class ReasoningProcess:
 class WorkGraph:
     processes: dict[str, ReasoningProcess]
     executor_sessions: dict[str, ExecutorSession] = field(default_factory=dict)
+    operator_actions: dict[str, OperatorAction] = field(default_factory=dict)
     event_seq: int = 0
     graph_history: list[dict[str, Any]] = field(default_factory=list)

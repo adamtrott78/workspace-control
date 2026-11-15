@@ -24,6 +24,7 @@ from .models import (
     WorkDisposition,
     WorkGraph,
 )
+from .operator_actions import OperatorActionKernel
 
 
 class KernelError(RuntimeError):
@@ -665,6 +666,11 @@ class DomainKernel:
         if session.state == ExecutorSessionState.RETIRED:
             raise KernelError("session_already_retired")
         old_generation = session.session_generation
+        OperatorActionKernel.stale_for_session_generation(
+            next_graph,
+            slot_id=slot_id,
+            session_generation=old_generation,
+        )
         session.session_generation += 1
         session.session_id = None
         session.state = ExecutorSessionState.NEEDS_REPLACEMENT
@@ -701,6 +707,11 @@ class DomainKernel:
         next_graph = cls._copy(graph)
         session = cls._session(next_graph, slot_id)
         cls._guard_session_generation(session, expected_session_generation)
+        OperatorActionKernel.stale_for_session_generation(
+            next_graph,
+            slot_id=slot_id,
+            session_generation=session.session_generation,
+        )
         session.session_id = None
         session.state = ExecutorSessionState.RETIRED
         session.retirement_reason = reason
@@ -874,6 +885,11 @@ class DomainKernel:
 
         previous_state = process.state
         previous_generation = process.generation
+        OperatorActionKernel.stale_for_process_generation(
+            next_graph,
+            process_id=process_id,
+            process_generation=previous_generation,
+        )
         process.generation += 1
         cls._fence_sessions_for_process(
             next_graph,
@@ -1132,3 +1148,5 @@ class DomainKernel:
             ack_values = (session.last_ack_id, session.last_ack_process_id, session.last_ack_process_generation)
             if any(value is None for value in ack_values) and any(value is not None for value in ack_values):
                 raise KernelError("partial_session_ack")
+
+        OperatorActionKernel.validate_graph(graph)

@@ -6,6 +6,13 @@ from .default_profiles import (
     openai_chat_instant_current_profile,
     unprovisioned_institutional_llm_profile,
 )
+from .operator_actions import (
+    ClaimedOperatorAction,
+    OperatorActionService,
+    OperatorActionServiceError,
+    OperatorPacketMaterializer,
+    OperatorWorkloadStatus,
+)
 from .packet_compiler import (
     CompiledPacket,
     DecisionRecord,
@@ -35,6 +42,11 @@ __all__ = [
     "DecisionRecord",
     "ExecutorRegistry",
     "FindingRecord",
+    "ClaimedOperatorAction",
+    "OperatorActionService",
+    "OperatorActionServiceError",
+    "OperatorPacketMaterializer",
+    "OperatorWorkloadStatus",
     "PacketCompilationInput",
     "QuestionRecord",
     "SemanticPacketCompiler",
