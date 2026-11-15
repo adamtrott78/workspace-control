@@ -119,7 +119,10 @@ class DomainKernel:
     def _validate_work_contract(contract: WorkContract) -> None:
         if not isinstance(contract, WorkContract):
             raise KernelError("invalid_work_contract")
-        if not contract.objective.strip():
+        if (
+            not isinstance(contract.objective, str)
+            or not contract.objective.strip()
+        ):
             raise KernelError("work_objective_required")
         for field_name in (
             "mandatory_constraints",
@@ -531,6 +534,11 @@ class DomainKernel:
         cls._guard_lease(process, lease_id)
         if process.state != ProcessState.RUNNING:
             raise KernelError(f"effect_invalid_state:{process.state}")
+        if (
+            process.work_contract is not None
+            and process.disposition != WorkDisposition.EXECUTABLE
+        ):
+            raise KernelError("contracted_effect_requires_executable")
         if receipt.generation != process.generation:
             raise KernelError("receipt_generation_mismatch")
         if not all(
