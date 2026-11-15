@@ -310,8 +310,19 @@ class CodexAppServerStdioSession:
         *,
         timeout_sec: float = 5.0,
         environment: Mapping[str, str] | None = None,
+        allowed_methods: frozenset[str] | None = None,
     ) -> None:
         self._timeout_sec = timeout_sec
+        self._allowed_methods = (
+            allowed_methods
+            if allowed_methods is not None
+            else frozenset(
+                {
+                    "account/rateLimits/read",
+                    "account/usage/read",
+                }
+            )
+        )
         self._next_id = 1
         self._closed = False
         self._line_queue: queue.Queue[str | BaseException | None] = (
@@ -467,10 +478,7 @@ class CodexAppServerStdioSession:
         method: str,
         params: Mapping[str, Any] | None = None,
     ) -> Mapping[str, Any]:
-        if method not in {
-            "account/rateLimits/read",
-            "account/usage/read",
-        }:
+        if method not in self._allowed_methods:
             raise CodexUsageError(
                 f"method_not_authorized:{method}"
             )
