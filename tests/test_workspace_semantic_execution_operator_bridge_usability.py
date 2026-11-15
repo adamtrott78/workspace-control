@@ -110,6 +110,14 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
             workflow,
         )
         self.assertIn("operator-bridge-stage10-usability-", workflow)
+        stage10 = workflow.split("  stage10-usability:", 1)[1].split(
+            "\n  target-performance:", 1
+        )[0]
+        self.assertNotIn("actions/checkout@", stage10)
+        self.assertNotIn("actions/setup-dotnet@", stage10)
+        self.assertNotIn("actions/setup-node@", stage10)
+        self.assertIn("git fetch --force --no-tags --prune --depth=1", stage10)
+        self.assertIn("STAGE10_RUNNER_PREREQS=PASS", stage10)
 
     def test_stage10_ut03_interruption_trial_is_explicit_and_bounded(self):
         harness = (
@@ -189,6 +197,10 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("Ut05JudgmentClipboardWrites == 0", harness)
         self.assertIn("Ut05JudgmentBrowserEffects == 0", harness)
         self.assertIn("ut05_exact_gate_observed", harness)
+        self.assertIn("ForegroundWindowOwner", harness)
+        self.assertIn("GetForegroundWindow", harness)
+        self.assertIn("MessageBox.Show(owner", harness)
+        self.assertNotIn("SetForegroundWindow", harness)
         self.assertIn('case "UT-12":', harness)
         self.assertIn('"ut12-pending-01"', harness)
         self.assertIn("ApplyUt12BackgroundAckIfReady", harness)
@@ -203,6 +215,11 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn('"UT-12"', script)
         self.assertIn('$TrialId -eq "UT-05"', script)
         self.assertIn('$TrialId -eq "UT-12"', script)
+        self.assertIn("STAGE10_BUILD_CACHE=", script)
+        self.assertIn("STAGE10_WEB_EXT_CACHE=", script)
+        self.assertIn("web-ext-10.8.0", script)
+        self.assertIn("WaitForExit(120000)", script)
+        self.assertIn("--prefer-offline", script)
         self.assertIn("stage10-ut05", workflow)
         self.assertIn("stage10-ut12", workflow)
         self.assertNotIn("SendKeys", harness)
