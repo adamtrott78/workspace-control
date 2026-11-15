@@ -24,6 +24,8 @@ from .models import (
     ReasoningProcess,
     TransitionRecord,
     ValidationResult,
+    WorkContract,
+    WorkDisposition,
     WorkGraph,
 )
 
@@ -50,5 +52,7 @@ __all__ = [
     "SessionMode",
     "TransitionRecord",
     "ValidationResult",
+    "WorkContract",
+    "WorkDisposition",
     "WorkGraph",
 ]
