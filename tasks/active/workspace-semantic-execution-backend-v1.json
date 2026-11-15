@@ -717,11 +717,12 @@
       "validation": [
         {
           "check": "Workspace Shell trusted-authority presence after scheduler validation",
-          "result": "BLOCKED",
+          "result": "NOT_RUN",
           "evidence": [
+            "Live host validation was not run because trusted Workspace Shell authority is absent.",
             "workspace_shell_inspect(runtime_inventory) for workspace-semantic-execution-backend-v1 returned TASK_NOT_FOUND: durable task capsule not found in trusted authority root.",
             "workspace_shell_inspect(runtime_inventory) for workspace-semantic-execution-migration-v1 returned the same TASK_NOT_FOUND.",
-            "No live backend/Tailscale mutation was attempted."
+            "No live backend process, Tailscale Serve route, browser/account interaction, root-policy mutation, manual sidecar, or generic-shell bypass was attempted."
           ]
         }
       ],
