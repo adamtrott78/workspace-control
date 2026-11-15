@@ -568,6 +568,53 @@ def _require_provisioner_socket() -> None:
         raise ScientificActivationError("v3 provisioner socket mode mismatch")
 
 
+def _require_active_controller_socket_group(
+    systemd: Systemd,
+    class_ids: list[str],
+) -> None:
+    expected_gid = grp.getgrnam(PROVISIONER_SOCKET_GROUP).gr_gid
+    for class_id in sorted(class_ids):
+        unit = f"workspace-ci-v3-controller@{class_id}.service"
+        state = systemd.show(unit)
+        if state.get("ActiveState") != "active" or state.get("SubState") != "running":
+            continue
+        try:
+            pid = int(state.get("MainPID", "0"))
+        except (TypeError, ValueError) as exc:
+            raise ScientificActivationError(
+                f"active controller MainPID invalid: {class_id}"
+            ) from exc
+        if pid <= 0:
+            raise ScientificActivationError(
+                f"active controller MainPID missing: {class_id}"
+            )
+        status_path = pathlib.Path(f"/proc/{pid}/status")
+        try:
+            status_lines = status_path.read_text().splitlines()
+        except OSError as exc:
+            raise ScientificActivationError(
+                f"active controller proc status unreadable: {class_id}"
+            ) from exc
+        groups_line = next(
+            (line for line in status_lines if line.startswith("Groups:")),
+            None,
+        )
+        if groups_line is None:
+            raise ScientificActivationError(
+                f"active controller supplementary groups unavailable: {class_id}"
+            )
+        try:
+            gids = {int(value) for value in groups_line.split(":", 1)[1].split()}
+        except ValueError as exc:
+            raise ScientificActivationError(
+                f"active controller supplementary groups malformed: {class_id}"
+            ) from exc
+        if expected_gid not in gids:
+            raise ScientificActivationError(
+                f"active controller cannot reach provisioner socket group: {class_id}"
+            )
+
+
 def _load_authority(
     path: pathlib.Path,
     *,
@@ -1122,6 +1169,7 @@ def activate(
         _require_controller_snapshot_preserved(existing_before, existing_after)
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
+        _require_active_controller_socket_group(systemd, existing_class_ids)
         reconciler.verify_installed(BASE_MANIFEST)
 
         tx["phase"] = "COMMITTED_ACTIVE"
