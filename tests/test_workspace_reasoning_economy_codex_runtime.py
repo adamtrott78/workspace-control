@@ -15,7 +15,7 @@ def _workflow() -> str:
 def test_codex_bootstrap_targets_only_workspace_control_control_small() -> None:
     text = _workflow()
 
-    runs_on = re.findall(r"(?m)^\\s*runs-on:\\s*(\\S+)\\s*$", text)
+    runs_on = re.findall(r"(?m)^\s*runs-on:\s*(\S+)\s*$", text)
     assert runs_on == ["lambda-workspace-control-control-small"]
     assert "workspace-control-control-small-v1" in text
 
@@ -91,7 +91,7 @@ def test_codex_bootstrap_forces_chatgpt_auth_and_strips_api_key() -> None:
     text = _workflow()
 
     assert text.count("unset OPENAI_API_KEY") >= 3
-    assert not re.search(r"(?m)^\\s*(?:export\\s+)?OPENAI_API_KEY=", text)
+    assert not re.search(r"(?m)^\s*(?:export\s+)?OPENAI_API_KEY=", text)
 
     assert 'forced_login_method = "chatgpt"' in text
     assert 'cli_auth_credentials_store = "file"' in text
