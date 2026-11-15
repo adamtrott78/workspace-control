@@ -16,6 +16,7 @@ from .packet_compiler import (
 )
 from .router import ExecutorRegistry, route_executor
 from .runtime import RuntimeCoordinator
+from .task_tree import ChildWorkSpec, TaskTreeCoordinator, TaskTreeStatus
 from .vertical_slice import (
     CoordinatedActionService,
     CoordinatedExecutionError,
@@ -33,6 +34,9 @@ __all__ = [
     "QuestionRecord",
     "SemanticPacketCompiler",
     "RuntimeCoordinator",
+    "ChildWorkSpec",
+    "TaskTreeCoordinator",
+    "TaskTreeStatus",
     "CoordinatedActionService",
     "CoordinatedExecutionError",
     "CoordinatedExecutionRequest",
