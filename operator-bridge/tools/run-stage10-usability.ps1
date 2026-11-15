@@ -29,9 +29,8 @@ if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($buildTree)) {
 $sha256 = [System.Security.Cryptography.SHA256]::Create()
 try {
   $buildFingerprintBytes = [System.Text.Encoding]::UTF8.GetBytes($buildTree)
-  $buildFingerprint = ([Convert]::ToHexString(
-    $sha256.ComputeHash($buildFingerprintBytes)
-  )).ToLowerInvariant()
+  $buildFingerprintHash = $sha256.ComputeHash($buildFingerprintBytes)
+  $buildFingerprint = ([System.BitConverter]::ToString($buildFingerprintHash)).Replace("-", "").ToLowerInvariant()
 }
 finally {
   $sha256.Dispose()
