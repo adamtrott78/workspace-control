@@ -87,23 +87,37 @@ class UsageDelta:
     account_lifetime_token_delta: int | None
     allowance_windows: tuple[AllowanceWindowDelta, ...]
 
-    def known_weekly_delta_points(self) -> int | None:
-        weekly = [
+    def known_allowance_delta_points(
+        self,
+        *,
+        window_class: RateLimitWindowClass,
+        limit_id: str | None = None,
+    ) -> int | None:
+        matches = [
             item
             for item in self.allowance_windows
-            if item.window_class == RateLimitWindowClass.WEEKLY
+            if item.window_class == window_class
+            and (limit_id is None or item.limit_id == limit_id)
         ]
-        comparable = [
-            item.delta_used_percent
-            for item in weekly
-            if item.comparison_state == "COMPARABLE"
-            and item.delta_used_percent is not None
-        ]
-        if not weekly:
+        if len(matches) != 1:
             return None
-        if len(comparable) != len(weekly):
+        item = matches[0]
+        if (
+            item.comparison_state != "COMPARABLE"
+            or item.delta_used_percent is None
+        ):
             return None
-        return sum(comparable)
+        return item.delta_used_percent
+
+    def known_weekly_delta_points(
+        self,
+        *,
+        limit_id: str | None = None,
+    ) -> int | None:
+        return self.known_allowance_delta_points(
+            window_class=RateLimitWindowClass.WEEKLY,
+            limit_id=limit_id,
+        )
 
 
 @dataclass(frozen=True)
@@ -131,6 +145,8 @@ class ExecutionEconomics:
 
     def verified_progress_per_weekly_allowance_point(
         self,
+        *,
+        limit_id: str | None = None,
     ) -> float | None:
         if self.validator_passed is not True:
             return 0.0 if self.validator_passed is False else None
@@ -139,7 +155,9 @@ class ExecutionEconomics:
             if self.validator_score is not None
             else 1.0
         )
-        delta = self.usage_delta.known_weekly_delta_points()
+        delta = self.usage_delta.known_weekly_delta_points(
+            limit_id=limit_id,
+        )
         # A zero observed percent-point delta is below meter resolution or
         # genuinely unmetered; neither justifies claiming infinite efficiency.
         if delta is None or delta <= 0:
