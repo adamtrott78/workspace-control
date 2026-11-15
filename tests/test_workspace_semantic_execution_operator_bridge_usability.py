@@ -194,6 +194,14 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         workflow = (
             ROOT / ".github" / "workflows" / "operator-bridge-validation.yml"
         ).read_text(encoding="utf-8")
+        window_safety = (
+            ROOT
+            / "operator-bridge"
+            / "src"
+            / "WorkspaceOperator"
+            / "Windows"
+            / "Win32WorkerWindowSafetyPort.cs"
+        ).read_text(encoding="utf-8")
 
         self.assertIn('case "UT-05":', harness)
         self.assertIn('"ut05-judgment-01"', harness)
@@ -223,9 +231,31 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("Ut12NoWorkBrowserEffects == 0", harness)
         self.assertIn("Ut12BackgroundAckClipboardWrites == 0", harness)
         self.assertIn("Ut12BackgroundAckBrowserEffects == 0", harness)
-        self.assertIn('if (_trialId == "UT-12")', harness)
-        self.assertIn("_workerWindowSafety.RecordPreparedWorkerWindow();", harness)
+        self.assertIn('if (trialId == "UT-12")', harness)
+        self.assertIn("prime UT-12 trusted worker target", harness)
+        self.assertIn("UT12_TRUSTED_WORKER_WINDOW_CAPTURE_FAILED", harness)
         self.assertIn("synthetically pre-existing", harness)
+        no_action = harness.split(
+            "else if (result.Outcome == DispatchOutcome.NoAction)",
+            1,
+        )[1].split(
+            "else if (result.Outcome == DispatchOutcome.Busy)",
+            1,
+        )[0]
+        self.assertNotIn("RecordPreparedWorkerWindow", no_action)
+        self.assertNotIn("ForegroundPreparedWorkerWindow", no_action)
+
+        minimize = window_safety.split(
+            "public bool MinimizeCapturedWorkerWindow()",
+            1,
+        )[1].split(
+            "private static nint FindSoleVisibleFirefoxWindow()",
+            1,
+        )[0]
+        self.assertNotIn("GetForegroundWindow()", minimize)
+        self.assertIn("!IsWindow(window)", minimize)
+        self.assertIn("!IsFirefoxWindow(window)", minimize)
+        self.assertIn("ShowWindow(window, SwMinimize)", minimize)
         self.assertIn("bridge_browser_focus_commands", harness)
         self.assertIn('"UT-05"', script)
         self.assertIn('"UT-12"', script)
