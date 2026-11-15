@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: c24fda155bb5735aab5b34e7a4b3e68e46c0adbc
+- Remote checkpoint: 34028182aaf1dc56d40cc607f8561c2337e16bf8
 - Remote verified: true
 
 ### PADataset
@@ -70,10 +70,15 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-START THE FIRST REAL BACKEND VERTICAL SLICE. Use Research Engine / research-iterate as the proving workload and the v0.2 adversarial architecture, engineering-fitness contract, and assumption register as governing provisional design. Implement the pure domain kernel and dangerous-state-machine model first; add DurableRuntimePort/StateStorePort/ExecutorPort/AuthorityEvaluatorPort/SemanticProjectionPort/TelemetryPort; spike DBOS+PostgreSQL behind those ports; deterministically compile worker packets from typed state; register ChatGPT GPT-6 Instant as one executor profile and a generic machine LLM profile suitable for a future H100/Harmony service; begin with read-only/low-consequence effects and exact postcondition validation. Keep hot runtime state out of Git and keep the control plane GPU-blind. The current GitRunner/controller remains untouched except as an adapter/dependency; schedule a separate modernization review only after the new vertical slice and Architecture Review v0.3 produce real evidence.
+EXECUTE NOVEMBER INTEGRATED V0 CRITICAL PATH. Backend: continue workspace-semantic-execution-backend-v1 at RECURSIVE_TASK_TREE_CONTRACT_AND_FANIN_V1, preserving inherited constraints/provenance/authority/validator obligations and proving multi-level decomposition/fan-in plus TOO_LARGE vs INTRINSICALLY_DIFFICULT. Parallel lanes remain active rather than serialized: Codex runtime must advance only through the PR #627 owning promotion authority, and Operator Bridge production transport must advance only through workspace-operator-bridge-implementation-v1. Use architecture/workspace-semantic-execution-november-2026-acceptance.v0.1.json as the Definition of Done and do not admit work that cannot map to a November requirement or demonstrated blocker.
 
 ## Remaining work
 
+- NOVEMBER INTEGRATED V0 CRITICAL PATH: finish recursive task-tree/decomposition + fan-in first, with inherited constraints/provenance/authority/validator obligations and explicit TOO_LARGE vs INTRINSICALLY_DIFFICULT semantics.
+- NOVEMBER INTEGRATED V0 PARALLEL CODEX LANE: resolve the PR #627 promotion-lineage gate through its owning authority, then complete Workspace Control ChatGPT-Plus Codex runtime/auth, subscription executor, usage calibration, and weekly burn governor.
+- NOVEMBER INTEGRATED V0 PARALLEL INSTANT LANE: replace NoWorkOperatorActionPort/empty workload status with an authorized production backend transport, finish remaining Stage-10 trials, then Stage-12 real-account calibration.
+- NOVEMBER INTEGRATED V0 RED LINE: complete the first full Research Engine research-iterate path with recursive decomposition/routing/validation/synthesis by 2026-11-23; if missed, stop secondary feature/architecture work until the gate is reached.
+- NOVEMBER INTEGRATED V0 FINAL GATE: by 2026-11-30 run the complete acceptance matrix, integrated fault/resource/soak evidence and explicit PROMOTE_V0/HOLD/REVISE review.
 - FIRST REAL VERTICAL SLICE: use Research Engine / research-iterate as the proving workflow. Implement one end-to-end path from strategic ReasoningProcess -> tactical decomposition -> executor routing -> deterministic packet compilation -> worker result -> CandidateAction -> ActionSpec -> read-only/low-consequence effect -> EffectReceipt -> postcondition validation -> repair/synthesis/resume.
 - PACKET COMPILER: build executor-specific packets deterministically from typed durable state, DecisionRecords, constraints, evidence refs, authority refs and validator contracts. Do not require a separate LLM merely to author routine worker prompts.
 - EXECUTOR-AGNOSTIC REGISTRY: support explicit lifecycle/session/resource semantics including HUMAN_ASSISTED_PERSISTENT_CHAT, MACHINE_STATELESS, MACHINE_SESSION_SCOPED, PERSISTENT_SERVICE, BATCH_QUEUED, DETERMINISTIC, FRONTIER_REASONING and HUMAN_JUDGMENT. Current ChatGPT GPT-6 Instant is one profile; future department-H100/Harmony/local/HPC models slot in behind ExecutorPort.
