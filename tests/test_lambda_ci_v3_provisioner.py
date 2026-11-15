@@ -205,6 +205,33 @@ class V3ProvisionerTests(unittest.TestCase):
         self.assertEqual(busy["status"], "BUSY")
         self.assertIsNone(self.store.read(self.request_id(107)))
 
+    def test_two_science_lanes_leave_reserved_workspace_control_slot(self):
+        science0 = "padataset-scientific-single-gpu-v1"
+        science1 = "padataset-scientific-single-gpu-2-v1"
+        research = "research-cpu-public-v1"
+        control = "workspace-control-control-small-v1"
+
+        self.assertEqual(self.reserve(science0, 201)["status"], "RESERVED")
+        self.assertEqual(self.reserve(science1, 202)["status"], "RESERVED")
+        blocked = self.reserve(research, 203)
+        self.assertEqual(blocked["status"], "BUSY")
+        self.assertIsNone(self.store.read(self.request_id(203)))
+        self.assertEqual(self.reserve(control, 204)["status"], "RESERVED")
+
+    def test_control_first_then_two_science_lanes_fill_three_host_slots(self):
+        self.assertEqual(
+            self.reserve("workspace-control-control-small-v1", 205)["status"],
+            "RESERVED",
+        )
+        self.assertEqual(
+            self.reserve("padataset-scientific-single-gpu-v1", 206)["status"],
+            "RESERVED",
+        )
+        self.assertEqual(
+            self.reserve("padataset-scientific-single-gpu-2-v1", 207)["status"],
+            "RESERVED",
+        )
+
     def test_reservation_expires_and_fresh_request_can_allocate(self):
         first, second = self.class_ids[:2]
         response = self.reserve(first, 107)
