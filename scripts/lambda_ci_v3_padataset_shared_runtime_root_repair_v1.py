@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Narrow post-cutover repair for shared PADataset runtime-root traversal.
+"""Narrow post-cutover repair for shared PADataset runtime-root access.
 
-Only the three shared parent directories used by both scientific runner UIDs are
-changed. They remain owned by ci-padataset:ci-padataset and become 0710:
-owner rwx, shared project group execute-only, no world access. Per-request
-children remain 0700 and are still UID-isolated.
+The two scientific runner UIDs share the ci-padataset primary group. The GitHub
+Actions listener requires read+traverse on the shared jobs parent, while cache
+and log parents require traverse only. Per-request children remain 0700 and
+UID-isolated.
 """
 from __future__ import annotations
 
@@ -15,10 +15,20 @@ import pathlib
 import pwd
 import stat
 
+JOBS = pathlib.Path("/srv/workspace-ci/padataset/jobs")
+STAGING_CACHE = pathlib.Path("/srv/workspace-ci/padataset/staging-cache")
+LOGS = pathlib.Path("/srv/workspace-ci/padataset/logs")
+
 ROOT_MODES = {
-    pathlib.Path("/srv/workspace-ci/padataset/jobs"): 0o750,
-    pathlib.Path("/srv/workspace-ci/padataset/staging-cache"): 0o710,
-    pathlib.Path("/srv/workspace-ci/padataset/logs"): 0o710,
+    JOBS: 0o750,
+    STAGING_CACHE: 0o710,
+    LOGS: 0o710,
+}
+
+ACCEPTED_PRE_MODES = {
+    JOBS: frozenset({0o700, 0o710, 0o750}),
+    STAGING_CACHE: frozenset({0o700, 0o710}),
+    LOGS: frozenset({0o700, 0o710}),
 }
 
 
@@ -26,19 +36,26 @@ class RepairError(RuntimeError):
     pass
 
 
-def verify() -> None:
+def _identity() -> tuple[pwd.struct_passwd, grp.struct_group]:
     owner = pwd.getpwnam("ci-padataset")
     group = grp.getgrnam("ci-padataset")
     lane_b = pwd.getpwnam("ci-padataset-2")
     if lane_b.pw_gid != group.gr_gid:
         raise RepairError("lane-B primary group mismatch")
+    return owner, group
+
+
+def verify() -> None:
+    owner, group = _identity()
+
     for path, expected_mode in ROOT_MODES.items():
         st = path.stat()
         if st.st_uid != owner.pw_uid or st.st_gid != group.gr_gid:
             raise RepairError(f"ownership mismatch: {path}")
-        if stat.S_IMODE(st.st_mode) != expected_mode:
+        actual_mode = stat.S_IMODE(st.st_mode)
+        if actual_mode != expected_mode:
             raise RepairError(
-                f"mode mismatch {stat.S_IMODE(st.st_mode):04o} != "
+                f"mode mismatch {actual_mode:04o} != "
                 f"{expected_mode:04o}: {path}"
             )
 
@@ -46,24 +63,28 @@ def verify() -> None:
 def repair() -> None:
     if os.geteuid() != 0:
         raise RepairError("repair requires root")
-    owner = pwd.getpwnam("ci-padataset")
-    group = grp.getgrnam("ci-padataset")
-    lane_b = pwd.getpwnam("ci-padataset-2")
-    if lane_b.pw_gid != group.gr_gid:
-        raise RepairError("lane-B primary group mismatch")
+
+    owner, group = _identity()
 
     for path, expected_mode in ROOT_MODES.items():
         if not path.is_dir():
             raise RepairError(f"required shared root missing: {path}")
+
         st = path.stat()
         if st.st_uid != owner.pw_uid or st.st_gid != group.gr_gid:
             raise RepairError(f"unexpected pre-repair ownership: {path}")
-        mode = stat.S_IMODE(st.st_mode)
-        if mode not in {0o700, 0o710}:
-            raise RepairError(f"unexpected pre-repair mode {mode:04o}: {path}")
+
+        actual_mode = stat.S_IMODE(st.st_mode)
+        accepted = ACCEPTED_PRE_MODES[path]
+        if actual_mode not in accepted:
+            accepted_text = ",".join(f"{mode:04o}" for mode in sorted(accepted))
+            raise RepairError(
+                f"unexpected pre-repair mode {actual_mode:04o}; "
+                f"accepted={accepted_text}: {path}"
+            )
 
     for path, expected_mode in ROOT_MODES.items():
-        os.chmod(path, 0o710)
+        os.chmod(path, expected_mode)
 
     verify()
 
@@ -84,7 +105,7 @@ def main() -> int:
     print("LOGS_MODE=0710")
     print("OWNER=ci-padataset")
     print("GROUP=ci-padataset")
-    print("LANE_B_GROUP_TRAVERSE=PASS")
+    print("LANE_B_JOBS_READ_TRAVERSE=PASS")
     return 0
 
 

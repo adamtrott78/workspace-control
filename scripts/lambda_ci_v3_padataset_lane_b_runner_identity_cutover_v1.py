@@ -210,7 +210,10 @@ def _repair_shared_project_roots() -> None:
                 f"shared PADataset runtime root ownership mismatch: {path}"
             )
         mode = st.st_mode & 0o777
-        if mode not in {0o700, expected_mode}:
+        accepted_modes = {0o700, expected_mode}
+        if path.name == "jobs":
+            accepted_modes.add(0o710)
+        if mode not in accepted_modes:
             raise RunnerIdentityCutoverError(
                 f"unexpected shared PADataset runtime root mode {mode:04o}: {path}"
             )
