@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7
+- Remote checkpoint: 0afd7837f15ccc573d9dba8ce0422aa5a2d0b061
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,16 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement PRODUCTION_SCHEDULER_CANDIDATE_TRANSPORT_V1. Compose a scheduler application service around durable PostgreSQL state and ExecutorDispatchCoordinator: select only claimable READY/READY_TO_RESUME work, route by typed ExecutionRequirement/ExecutorProfile properties, emit deterministic effects or persistent-Instant OperatorActions, and stop/release on WAITING_EXTERNAL/WAITING_DEPENDENCIES without model polling. Replace the underspecified github-candidate target with an explicit candidate-only repository/ref/path contract; ingestion must read exact immutable commit bytes, bind commit SHA + content SHA, and invoke WorkerResultIntakeService idempotently. Prove restart/duplicate/stale/session-replacement behavior in repository CI. Do not activate live Tailscale Serve, real ChatGPT account interaction, or any new root route until Workspace Shell trusted authority is present.
+Advance INTEGRATED_RELIABILITY_AND_LIVE_PROVING_PREPARATION without bypassing the suspended live-host authority gate. Add scheduler-level stale-generation/restart/duplicate-candidate/session-replacement fault coverage and a bounded no-GPU soak over durable PostgreSQL state. Prepare the exact live research-iterate proving fixture and rollback/provenance checklist. Separately re-check the Codex PR #627 lineage and Operator Bridge remaining Stage-10 gates under their owning tasks; do not mutate live semantic host/Tailscale state while Workspace Shell returns TASK_NOT_FOUND.
 
 ## Remaining work
 
-- Implement a production scheduler service over RuntimeCoordinator + ExecutorDispatchCoordinator so ready work is routed from durable typed state instead of test-only direct method calls; external/dependency waits must remain event-driven and consume no reasoning quanta.
-- Freeze the GitHub candidate namespace contract with explicit repository/ref/path identity. Candidate writers may create proposal evidence only and must not mutate task capsules, authority policy, runtime control state, or authoritative branches.
-- Implement exact candidate-source ingestion that binds immutable 40-char commit SHA + exact bytes before WorkerResultIntakeService and is idempotent across scheduler restart.
-- Prove scheduler + candidate intake across PostgreSQL adapter recreation, stale candidate delivery, duplicate delivery, and persistent Instant session replacement.
-- Re-check Workspace Shell trusted authority for the semantic live-host task only after repository production scheduler/candidate transport is validated; do not activate Tailscale/browser/account transport while TASK_NOT_FOUND persists.
-- Finish remaining Operator Bridge Stage-10 trials and Stage-12 real-account calibration after the reviewed live route is authorized.
-- Advance subscription Codex only after PR #627 lineage authority clears.
-- Run live Research Engine proving workflow, mixed-executor fault injection, allowance/economics comparison, soak/resource tests, and PROD-03 readiness review.
+- Run scheduler-level fault/soak campaign covering stale dispatch generation, duplicate immutable candidate delivery, scheduler restart, external wait no-poll behavior, and session replacement composition.
+- Prepare exact live proving fixture and rollback/provenance checklist without activating any host route.
+- Resume live Operator Bridge backend + Tailscale fake-worker proof only when Workspace Shell trusted authority contains the semantic task.
+- Finish remaining Operator Bridge Stage-10 trials and bounded Stage-12 real-account calibration under its owning task.
+- Resume Workspace Control subscription Codex child if/when PR #627 lineage authority clears.
+- Run live mixed Research Engine proving workflow, allowance/economics comparison, soak/resource acceptance and final PROD-03 review.
 
 ## Blockers / gates
 

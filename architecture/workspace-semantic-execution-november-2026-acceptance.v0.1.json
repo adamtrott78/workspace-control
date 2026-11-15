@@ -76,16 +76,18 @@
         "Existing runtime/fault tests cover stale generations, executor loss, duplicate events, crash boundaries and waits.",
         "Recursive dependency-wait recovery preserves generation-fenced WorkContract and waits until both validated leaves complete.",
         "Semantic #152 proves manual Instant dispatch atomically owns the process lease and stale recovered worker-result publications cannot mutate current generations; exact duplicate publication is idempotent.",
-        "Semantic #160 forces process/session recovery after Instant local-prepared: old generation action becomes STALE, late old candidate is rejected pre-mutation, replacement generation completes from durable state."
+        "Semantic #160 forces process/session recovery after Instant local-prepared: old generation action becomes STALE, late old candidate is rejected pre-mutation, replacement generation completes from durable state.",
+        "Semantic #163 adds durable generation-bound scheduler specs, duplicate-plan rejection, PostgreSQL scheduler restart, duplicate candidate idempotency and pre-mutation observation mismatch rejection."
       ]
     },
     {
       "id": "ORCH-05",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "WAITING_EXTERNAL consumes zero model reasoning and resumes from durable events rather than LLM polling.",
       "evidence": [
         "RuntimeCoordinator event-ledger wait/wake semantics exist and are tested.",
-        "Semantic #152 proves a durable worker WAIT_EXTERNAL result releases the process lease and enters the event wait without a reasoning poll."
+        "Semantic #152 proves a durable worker WAIT_EXTERNAL result releases the process lease and enters the event wait without a reasoning poll.",
+        "Semantic #163 ProductionSchedulerTests prove WAITING_EXTERNAL is never selected for dispatch; repeated scheduler cycles leave its wait key/reasoning_quanta unchanged and perform no scheduler state mutation. Candidate/dependency wakeups are event-driven."
       ]
     },
     {
@@ -105,7 +107,8 @@
       "evidence": [
         "Executor profile/router model exists; integrated Instant/Codex adapters remain.",
         "Coordinated slice selected a deterministic repository executor through generic ExecutionRequirement/ExecutorRegistry routing rather than a Research-Engine-specific scheduler branch.",
-        "Semantic #158 proves the same generic ExecutorDispatchCoordinator selects persistent Instant or deterministic exact-source execution from typed requirements; no model-name scheduler branch is used."
+        "Semantic #158 proves the same generic ExecutorDispatchCoordinator selects persistent Instant or deterministic exact-source execution from typed requirements; no model-name scheduler branch is used.",
+        "ProductionSchedulerService now consumes durable ExecutionRequirement and delegates to generic ExecutorDispatchCoordinator; it contains no model-name branch."
       ]
     },
     {
@@ -201,7 +204,8 @@
         "Durable packet-source/materialization layer now proves Windows-bound packet text is reconstructed on claim from typed Postgres-backed state, not stored transcript/clipboard text.",
         "Production Postgres-backed Operator Bridge server composition is repository-validated; live host activation is explicitly authority-gated because semantic feature-branch task IDs are absent from Workspace Shell trusted authority root.",
         "Backend return path is now durable: worker-authored typed results are ingested from authoritative durable state rather than consumer-UI output, and exact process/action/session/packet identity is fenced.",
-        "Repository-side Instant execution is now complete end-to-end: production action transport plus immutable candidate return/intake/validation is proven through PostgreSQL restart. Remaining PARTIAL item is exact-host private-tailnet activation."
+        "Repository-side Instant execution is now complete end-to-end: production action transport plus immutable candidate return/intake/validation is proven through PostgreSQL restart. Remaining PARTIAL item is exact-host private-tailnet activation.",
+        "Production scheduler/action/candidate transport is repository-complete and restart-safe at 0afd7837…; remaining PARTIAL item is exact-host private-tailnet activation, still blocked by Workspace Shell TASK_NOT_FOUND."
       ]
     },
     {
@@ -248,7 +252,8 @@
       "evidence": [
         "Production fault tests already cover several dangerous boundaries; database/session/full vertical-slice injection remains.",
         "Semantic Execution #100 passes stale-generation race fencing after routing/packet compilation in addition to existing crash/event/validator fault coverage.",
-        "Semantic #160 adds an end-to-end persistent-chat continuity-loss fault after local-prepared, stale result rejection, explicit replacement, and successful resumed completion."
+        "Semantic #160 adds an end-to-end persistent-chat continuity-loss fault after local-prepared, stale result rejection, explicit replacement, and successful resumed completion.",
+        "Semantic #163 validates scheduler restart, duplicate candidate delivery, exact observation mismatch rejection and wait no-poll behavior through the production scheduler."
       ]
     },
     {
@@ -256,7 +261,8 @@
       "status": "PARTIAL",
       "requirement": "Control plane is GPU-blind and meets CPU/RAM/task budgets under the first real workflow.",
       "evidence": [
-        "Semantic #158/#160 control-plane probes remained GPU blind; recovery head max RSS was 18.5546875 MiB at ~1 observed CPU core. Live-host/soak budget proof remains."
+        "Semantic #158/#160 control-plane probes remained GPU blind; recovery head max RSS was 18.5546875 MiB at ~1 observed CPU core. Live-host/soak budget proof remains.",
+        "Semantic #163 production scheduler resource probe remained GPU blind at max RSS 18.51171875 MiB and ~1 CPU core; live-host/soak evidence remains."
       ]
     },
     {
@@ -310,7 +316,8 @@
         "Existing task/provenance/root-policy contracts provide the baseline; integrated promotion proof remains.",
         "Production transport code preserves ownership boundaries: backend loopback-only HTTP, outbound-only Windows client, no app bearer credential, no authority endpoint, and explicit opt-in activation.",
         "Candidate target/revision/source bytes, process/action/session generations, packet hash, and independent validator are mechanically bound end-to-end at d3f6e283….",
-        "Mixed-executor routing and recovery provenance is exact at workspace-control@a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7; stale session/action generations cannot be reused."
+        "Mixed-executor routing and recovery provenance is exact at workspace-control@a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7; stale session/action generations cannot be reused.",
+        "Production scheduler provenance is generation-bound and candidate evidence binds exact repository/ref/path/commit/content at workspace-control@0afd7837f15ccc573d9dba8ce0422aa5a2d0b061; live route provenance remains authority-gated."
       ]
     },
     {
@@ -365,5 +372,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7"
+  "latest_validated_checkpoint": "workspace-control@0afd7837f15ccc573d9dba8ce0422aa5a2d0b061"
 }
