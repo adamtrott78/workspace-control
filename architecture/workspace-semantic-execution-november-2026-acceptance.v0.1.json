@@ -106,9 +106,14 @@
     },
     {
       "id": "ORCH-08",
-      "status": "PENDING",
+      "status": "PASS",
       "requirement": "Persistent session broker safely reuses/rotates sessions and resumes from durable state after session loss.",
-      "evidence": []
+      "evidence": [
+        "ExecutorSession is durable control state with independent slot/session generation and no authority fields.",
+        "Semantic Execution #132 proves healthy persistent reuse, explicit loss/context replacement, stale session-generation rejection, automatic process-recovery fencing and deterministic packet reconstruction into replacement sessions.",
+        "Stateless machine executors allocate no session.",
+        "PostgreSQL integration proves bound session state survives adapter recreation and is fenced durably on process recovery."
+      ]
     },
     {
       "id": "SAFE-01",
@@ -254,7 +259,9 @@
       "id": "E2E-03",
       "status": "PENDING",
       "requirement": "The real workflow survives at least one worker/session/process loss without manual task-state reconstruction.",
-      "evidence": []
+      "evidence": [
+        "Session-loss/process-recovery primitives now resume from durable typed state without transcript reconstruction; real integrated research-iterate fault injection remains required."
+      ]
     },
     {
       "id": "E2E-04",
@@ -328,5 +335,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@f104361f3d27bf1a4548acf6f643eb454e847c9a"
+  "latest_validated_checkpoint": "workspace-control@6979165961cc848ca8b37acd58f7c91e7a48df65"
 }
