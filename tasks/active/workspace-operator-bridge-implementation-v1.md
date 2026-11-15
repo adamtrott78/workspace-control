@@ -33,19 +33,24 @@ EXECUTE THE NOW-SUPPORTED STAGE-10 HUMAN TRIALS ONE AT A TIME. The exact recover
 
 ## Remaining work
 
-- impl_10 harness: add supported TrialId/scenario/result-contract coverage for UT-05 and UT-12 first.
-- impl_10 harness: add UT-06, UT-07 and UT-08 recovery scenarios without widening browser/native-host authority.
 - impl_10 trials: execute/accept UT-05–UT-08 and UT-12 on the validated harness.
+
 - impl_10 trials: execute Bridge-OFF UT-11 and representative-work collision UT-09; preserve no-response/no-wrong-window guarantees.
+
 - live transport gate: after Workspace Shell semantic authority exists, prove exact-host Tailscale fake-worker transport before real-account use.
+
 - impl_12: bounded real-account calibration with no DOM/content automation, no added browser permissions and no security workaround.
+
 - impl_09: authoritative target-machine UX-09 performance/resource benchmark after real-account calibration.
+
 - impl_13: explicit PROMOTE_V0/HOLD/REVISE production-readiness review.
 
 ## Blockers / gates
 
 - Ctrl+Space passed UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, UT-03 interruption recovery, and UT-04 multiple SENT/UNCONFIRMED coexistence. Final binding retention still requires UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing.
+
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
+
 - Production action/status transport is now implemented and validated in code, but the real Tailscale Serve -> localhost backend path has not yet been activated/preflighted on the Linux Workspace Control host and Windows WorkspaceWorkers client. INST-01 remains PARTIAL until that exact-host path carries a fake-worker action end-to-end.
 
 ## Fresh-chat initialization

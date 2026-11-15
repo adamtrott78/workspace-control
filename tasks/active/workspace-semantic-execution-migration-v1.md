@@ -74,23 +74,34 @@ CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED CHECKPOINT workspace-control@3a07
 
 ## Remaining work
 
-- OPERATOR IMMEDIATE: add Stage-10 harness support for UT-05 and UT-12 first, then UT-06–UT-08; validate exact head before human trials.
 - OPERATOR TRIALS: run UT-05–UT-08, UT-12, Bridge-OFF UT-11, and representative-work UT-09; preserve Ctrl+Space -> Ctrl+V -> Enter, no tab search, minimize-on-empty, and stale-submit protection.
+
 - REASONING ECONOMY: continue claim-bearing P0-P3 runset readiness using exact fixture/oracle/run provenance; incomplete/superseded screening is never promotion evidence and unknown allowance remains UNKNOWN.
+
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
+
 - LIVE INSTANT: after Workspace Shell authority exists, activate reviewed localhost backend + private Tailscale route and prove one exact-host fake-worker action/status/result round trip before real-account use.
+
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
+
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
+
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
+
 - PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
 
 ## Blockers / gates
 
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is now validated.
+
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
+
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
+
 - Claim-bearing benchmark conclusions still require evaluator-only runtime isolation and replicated scoring; this blocks strong capability-equivalence claims, not deterministic orchestrator/backend implementation.
+
 - Remaining Operator Bridge Stage-10 UX trials gate real-account/production promotion, but they do not block implementation of the deterministic task-tree, decomposition, routing, packet-compiler, session-broker, event/wait, and validator backend.
+
 - GitRunner/controller modernization is intentionally deferred and authority-separated. This task may define comparison criteria and adapter boundaries, but may not rewrite/replace or widen GitRunner execution authority until a separate reviewed task is opened after semantic-execution Architecture Review v0.3.
 
 ## Fresh-chat initialization
