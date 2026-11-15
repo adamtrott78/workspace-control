@@ -80,10 +80,12 @@
     },
     {
       "id": "ORCH-06",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Worker packets are deterministically compiled from typed durable state; routine packet construction requires no LLM.",
       "evidence": [
-        "SemanticPacketCompiler exists with canonical hashing; real vertical-slice use remains."
+        "SemanticPacketCompiler canonical hashing was previously validated in isolation.",
+        "Coordinated Research Engine read-only slice at workspace-control@34028182aaf1dc56d40cc607f8561c2337e16bf8 used the deterministic packet compiler inside the actual router -> authority -> effect -> validator flow.",
+        "Semantic Execution #100 explicitly passed deterministic packet-hash reproducibility in CoordinatedResearchEngineReadOnlySliceTests."
       ]
     },
     {
@@ -91,7 +93,8 @@
       "status": "PARTIAL",
       "requirement": "Executor registry is model/surface agnostic and supports deterministic, persistent-chat, machine, batch, Codex, frontier, and human profiles.",
       "evidence": [
-        "Executor profile/router model exists; integrated Instant/Codex adapters remain."
+        "Executor profile/router model exists; integrated Instant/Codex adapters remain.",
+        "Coordinated slice selected a deterministic repository executor through generic ExecutionRequirement/ExecutorRegistry routing rather than a Research-Engine-specific scheduler branch."
       ]
     },
     {
@@ -102,10 +105,12 @@
     },
     {
       "id": "SAFE-01",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Model output may create CandidateAction but cannot mint or widen execution authority; only authority-owned policy may produce executable ActionSpec.",
       "evidence": [
-        "DomainKernel.compile_action_spec and fail-closed authority tests exist."
+        "DomainKernel.compile_action_spec requires exact AuthorityDecision=ALLOW bound to action/process/generation/target.",
+        "Coordinated Research Engine slice proved UNKNOWN authority produces no state transition and no repository effect.",
+        "Injected generation change after routing/packet planning was fenced before effect execution."
       ]
     },
     {
@@ -113,7 +118,8 @@
       "status": "PARTIAL",
       "requirement": "Every real effect is idempotent, receipt-bound, independently postcondition-validated, and repairable without duplicate effects.",
       "evidence": [
-        "EffectReceipt, independent validation, duplicate-effect and crash-after-effect tests exist."
+        "EffectReceipt, independent validation, duplicate-effect and crash-after-effect tests exist.",
+        "Coordinated slice records EffectReceipt before terminal proposal, independently rereads the exact source, completes only on validator PASS, returns repair-ready on changed bytes, and preserves a single effect for exact duplicate receipt."
       ]
     },
     {
@@ -211,7 +217,8 @@
       "status": "PARTIAL",
       "requirement": "Crash/fault campaign covers durable/effect boundaries, duplicate/delayed/out-of-order events, DB disconnect, stale generations, validator timeout, and executor/session loss.",
       "evidence": [
-        "Production fault tests already cover several dangerous boundaries; database/session/full vertical-slice injection remains."
+        "Production fault tests already cover several dangerous boundaries; database/session/full vertical-slice injection remains.",
+        "Semantic Execution #100 passes stale-generation race fencing after routing/packet compilation in addition to existing crash/event/validator fault coverage."
       ]
     },
     {
@@ -224,7 +231,10 @@
       "id": "E2E-01",
       "status": "PENDING",
       "requirement": "A real Research Engine / research-iterate workflow completes decomposition -> routing -> executor -> validated result -> authorized low-consequence effect -> synthesis.",
-      "evidence": []
+      "evidence": [
+        "PRECURSOR PASS: exact Research Engine objective now traverses generic routing -> deterministic packet -> authority -> RuntimeCoordinator -> exact read effect -> independent postcondition validation -> COMPLETED.",
+        "Still PENDING: full research-iterate E2E-01 additionally requires recursive decomposition, fan-in, and synthesis."
+      ]
     },
     {
       "id": "E2E-02",
@@ -308,5 +318,7 @@
     }
   ],
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
-  "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0."
+  "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
+  "last_updated": "2026-11-15",
+  "latest_validated_checkpoint": "workspace-control@34028182aaf1dc56d40cc607f8561c2337e16bf8"
 }
