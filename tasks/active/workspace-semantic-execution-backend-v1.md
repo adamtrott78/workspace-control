@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: d3f6e2837d36a59c0244b85db7de8679ad4dba1e
+- Remote checkpoint: a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,18 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement MIXED_EXECUTOR_RESEARCH_ITERATE_VERTICAL_SLICE_V1. Add a generic dispatch coordinator over route_executor: HUMAN_ASSISTED persistent Chat profiles must plan an OperatorAction/candidate contract through OperatorDispatchPlanner; DETERMINISTIC profiles must execute only through CoordinatedActionService with exact AuthorityDecision=ALLOW and independent postcondition validation; unsupported invocation modes fail closed. Then prove a research-iterate root over frozen research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4 recursively decomposes into at least one deterministic exact-source child and one persistent-Instant child, waits for both validated completions, resumes root synthesis through Instant, and completes only after independent validation. No model-name scheduler branches, no live Tailscale activation, no Codex dependency, no research-engine mutation.
+Implement PRODUCTION_SCHEDULER_CANDIDATE_TRANSPORT_V1. Compose a scheduler application service around durable PostgreSQL state and ExecutorDispatchCoordinator: select only claimable READY/READY_TO_RESUME work, route by typed ExecutionRequirement/ExecutorProfile properties, emit deterministic effects or persistent-Instant OperatorActions, and stop/release on WAITING_EXTERNAL/WAITING_DEPENDENCIES without model polling. Replace the underspecified github-candidate target with an explicit candidate-only repository/ref/path contract; ingestion must read exact immutable commit bytes, bind commit SHA + content SHA, and invoke WorkerResultIntakeService idempotently. Prove restart/duplicate/stale/session-replacement behavior in repository CI. Do not activate live Tailscale Serve, real ChatGPT account interaction, or any new root route until Workspace Shell trusted authority is present.
 
 ## Remaining work
 
-- Implement a generic ExecutorDispatchCoordinator that routes the same ReasoningProcess to deterministic authorized execution or persistent Instant operator dispatch based only on typed ExecutionRequirement/ExecutorProfile properties.
-- Build a Research Engine research-iterate vertical slice over the frozen exact source/canary: root Instant decomposition, deterministic exact-source child, Instant reasoning child, validated fan-in, and Instant synthesis.
-- Prove every completed leaf/result is independently validated and that routing uses requirement/capability/scarcity rather than model-name branches.
-- Inject one Instant session/process loss into the mixed workflow and recover from durable state for E2E-03.
-- After a reviewed default-branch activation route exists, run exact-host Tailscale fake-worker transport preflight and close INST-01.
-- Finish remaining Operator Bridge Stage-10 trials and Stage-12 real-account calibration.
+- Implement a production scheduler service over RuntimeCoordinator + ExecutorDispatchCoordinator so ready work is routed from durable typed state instead of test-only direct method calls; external/dependency waits must remain event-driven and consume no reasoning quanta.
+- Freeze the GitHub candidate namespace contract with explicit repository/ref/path identity. Candidate writers may create proposal evidence only and must not mutate task capsules, authority policy, runtime control state, or authoritative branches.
+- Implement exact candidate-source ingestion that binds immutable 40-char commit SHA + exact bytes before WorkerResultIntakeService and is idempotent across scheduler restart.
+- Prove scheduler + candidate intake across PostgreSQL adapter recreation, stale candidate delivery, duplicate delivery, and persistent Instant session replacement.
+- Re-check Workspace Shell trusted authority for the semantic live-host task only after repository production scheduler/candidate transport is validated; do not activate Tailscale/browser/account transport while TASK_NOT_FOUND persists.
+- Finish remaining Operator Bridge Stage-10 trials and Stage-12 real-account calibration after the reviewed live route is authorized.
 - Advance subscription Codex only after PR #627 lineage authority clears.
-- Run November integrated reliability/soak/economics acceptance and explicit PROD-03 readiness review.
+- Run live Research Engine proving workflow, mixed-executor fault injection, allowance/economics comparison, soak/resource tests, and PROD-03 readiness review.
 
 ## Blockers / gates
 

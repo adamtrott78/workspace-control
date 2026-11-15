@@ -75,7 +75,8 @@
       "evidence": [
         "Existing runtime/fault tests cover stale generations, executor loss, duplicate events, crash boundaries and waits.",
         "Recursive dependency-wait recovery preserves generation-fenced WorkContract and waits until both validated leaves complete.",
-        "Semantic #152 proves manual Instant dispatch atomically owns the process lease and stale recovered worker-result publications cannot mutate current generations; exact duplicate publication is idempotent."
+        "Semantic #152 proves manual Instant dispatch atomically owns the process lease and stale recovered worker-result publications cannot mutate current generations; exact duplicate publication is idempotent.",
+        "Semantic #160 forces process/session recovery after Instant local-prepared: old generation action becomes STALE, late old candidate is rejected pre-mutation, replacement generation completes from durable state."
       ]
     },
     {
@@ -103,7 +104,8 @@
       "requirement": "Executor registry is model/surface agnostic and supports deterministic, persistent-chat, machine, batch, Codex, frontier, and human profiles.",
       "evidence": [
         "Executor profile/router model exists; integrated Instant/Codex adapters remain.",
-        "Coordinated slice selected a deterministic repository executor through generic ExecutionRequirement/ExecutorRegistry routing rather than a Research-Engine-specific scheduler branch."
+        "Coordinated slice selected a deterministic repository executor through generic ExecutionRequirement/ExecutorRegistry routing rather than a Research-Engine-specific scheduler branch.",
+        "Semantic #158 proves the same generic ExecutorDispatchCoordinator selects persistent Instant or deterministic exact-source execution from typed requirements; no model-name scheduler branch is used."
       ]
     },
     {
@@ -114,7 +116,8 @@
         "ExecutorSession is durable control state with independent slot/session generation and no authority fields.",
         "Semantic Execution #132 proves healthy persistent reuse, explicit loss/context replacement, stale session-generation rejection, automatic process-recovery fencing and deterministic packet reconstruction into replacement sessions.",
         "Stateless machine executors allocate no session.",
-        "PostgreSQL integration proves bound session state survives adapter recreation and is fenced durably on process recovery."
+        "PostgreSQL integration proves bound session state survives adapter recreation and is fenced durably on process recovery.",
+        "Semantic #160 end-to-end replacement test proves stale pre-loss action fencing plus deterministic packet reconstruction into session_generation=1 and normal completion."
       ]
     },
     {
@@ -244,14 +247,17 @@
       "requirement": "Crash/fault campaign covers durable/effect boundaries, duplicate/delayed/out-of-order events, DB disconnect, stale generations, validator timeout, and executor/session loss.",
       "evidence": [
         "Production fault tests already cover several dangerous boundaries; database/session/full vertical-slice injection remains.",
-        "Semantic Execution #100 passes stale-generation race fencing after routing/packet compilation in addition to existing crash/event/validator fault coverage."
+        "Semantic Execution #100 passes stale-generation race fencing after routing/packet compilation in addition to existing crash/event/validator fault coverage.",
+        "Semantic #160 adds an end-to-end persistent-chat continuity-loss fault after local-prepared, stale result rejection, explicit replacement, and successful resumed completion."
       ]
     },
     {
       "id": "REL-02",
-      "status": "PENDING",
+      "status": "PARTIAL",
       "requirement": "Control plane is GPU-blind and meets CPU/RAM/task budgets under the first real workflow.",
-      "evidence": []
+      "evidence": [
+        "Semantic #158/#160 control-plane probes remained GPU blind; recovery head max RSS was 18.5546875 MiB at ~1 observed CPU core. Live-host/soak budget proof remains."
+      ]
     },
     {
       "id": "E2E-01",
@@ -261,7 +267,8 @@
         "PRECURSOR PASS: exact Research Engine objective now traverses generic routing -> deterministic packet -> authority -> RuntimeCoordinator -> exact read effect -> independent postcondition validation -> COMPLETED.",
         "Still PENDING: full research-iterate E2E-01 additionally requires recursive decomposition, fan-in, and synthesis.",
         "Recursive decomposition/fan-in semantics required by the full research-iterate path are now production-validated at f104361f…, but the real mixed-executor research-iterate synthesis remains pending.",
-        "PRECURSOR PASS: full persistent-Instant leaf transport and durable result cycle is now production-validated; mixed Research Engine fan-out/fan-in remains pending."
+        "PRECURSOR PASS: full persistent-Instant leaf transport and durable result cycle is now production-validated; mixed Research Engine fan-out/fan-in remains pending.",
+        "STRONG PRECURSOR PASS: Semantic #158 runs a complete mixed research-iterate production-component tree over exact frozen Research Engine provenance: Instant decomposition -> deterministic exact-source validated effect -> Instant analysis -> fan-in -> Instant synthesis -> COMPLETED. Live account/host proving run remains required for PASS."
       ]
     },
     {
@@ -269,7 +276,8 @@
       "status": "PENDING",
       "requirement": "The proving workflow uses mixed executor classes based on routing decisions, including deterministic execution plus Instant and/or Codex.",
       "evidence": [
-        "Instant is now a validated production executor path; the next stage composes it with the already-validated deterministic exact-source executor in one research-iterate tree."
+        "Instant is now a validated production executor path; the next stage composes it with the already-validated deterministic exact-source executor in one research-iterate tree.",
+        "STRONG PRECURSOR PASS: Semantic #158 routing trace selected persistent Instant, deterministic exact-source, Instant, Instant from typed requirements/scarcity only. Live proving workflow remains required for PASS."
       ]
     },
     {
@@ -278,7 +286,8 @@
       "requirement": "The real workflow survives at least one worker/session/process loss without manual task-state reconstruction.",
       "evidence": [
         "Session-loss/process-recovery primitives now resume from durable typed state without transcript reconstruction; real integrated research-iterate fault injection remains required.",
-        "Semantic #152 proves a late worker publication after process recovery is rejected fail-closed and the exact result-intake state survives PostgreSQL adapter recreation."
+        "Semantic #152 proves a late worker publication after process recovery is rejected fail-closed and the exact result-intake state survives PostgreSQL adapter recreation.",
+        "Semantic #160 proves persistent Instant session/process continuity loss after local-prepared is recovered from durable state with stale candidate rejection and replacement session completion; inject the same loss into the live proving workflow for PASS."
       ]
     },
     {
@@ -300,7 +309,8 @@
       "evidence": [
         "Existing task/provenance/root-policy contracts provide the baseline; integrated promotion proof remains.",
         "Production transport code preserves ownership boundaries: backend loopback-only HTTP, outbound-only Windows client, no app bearer credential, no authority endpoint, and explicit opt-in activation.",
-        "Candidate target/revision/source bytes, process/action/session generations, packet hash, and independent validator are mechanically bound end-to-end at d3f6e283…."
+        "Candidate target/revision/source bytes, process/action/session generations, packet hash, and independent validator are mechanically bound end-to-end at d3f6e283….",
+        "Mixed-executor routing and recovery provenance is exact at workspace-control@a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7; stale session/action generations cannot be reused."
       ]
     },
     {
@@ -355,5 +365,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@d3f6e2837d36a59c0244b85db7de8679ad4dba1e"
+  "latest_validated_checkpoint": "workspace-control@a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7"
 }
