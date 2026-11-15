@@ -1,7 +1,8 @@
 """Deterministic JSON codec for durable WorkGraph state.
 
 This codec is infrastructure-neutral and intentionally avoids pickle or
-runtime-specific object serialization.
+runtime-specific object serialization. Schema v2 adds durable work-contract
+and reasoning-disposition metadata while retaining v1 decode compatibility.
 """
 from __future__ import annotations
 
@@ -15,11 +16,14 @@ from ..domain import (
     ReasoningProcess,
     TransitionRecord,
     ValidationResult,
+    WorkContract,
+    WorkDisposition,
     WorkGraph,
 )
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+SUPPORTED_SCHEMA_VERSIONS = {1, 2}
 
 
 class GraphCodecError(ValueError):
@@ -59,6 +63,64 @@ def _decode_value(value: Any) -> Any:
             for key, item in value.items()
         }
     raise GraphCodecError("invalid_durable_value")
+
+
+def _encode_work_contract(
+    contract: WorkContract | None,
+) -> dict[str, Any] | None:
+    if contract is None:
+        return None
+    return {
+        "objective": contract.objective,
+        "mandatory_constraints": list(contract.mandatory_constraints),
+        "provenance_refs": list(contract.provenance_refs),
+        "authority_refs": list(contract.authority_refs),
+        "validator_contracts": list(contract.validator_contracts),
+        "output_schema_refs": list(contract.output_schema_refs),
+    }
+
+
+def _decode_string_tuple(raw: object, field_name: str) -> tuple[str, ...]:
+    if raw is None:
+        return ()
+    if not isinstance(raw, list):
+        raise GraphCodecError(f"{field_name}_must_be_list")
+    if any(not isinstance(value, str) for value in raw):
+        raise GraphCodecError(f"{field_name}_must_contain_strings")
+    return tuple(raw)
+
+
+def _decode_work_contract(raw: object) -> WorkContract | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict):
+        raise GraphCodecError("work_contract_must_be_object")
+    objective = raw.get("objective")
+    if not isinstance(objective, str):
+        raise GraphCodecError("work_contract_objective_must_be_string")
+    return WorkContract(
+        objective=objective,
+        mandatory_constraints=_decode_string_tuple(
+            raw.get("mandatory_constraints"),
+            "mandatory_constraints",
+        ),
+        provenance_refs=_decode_string_tuple(
+            raw.get("provenance_refs"),
+            "provenance_refs",
+        ),
+        authority_refs=_decode_string_tuple(
+            raw.get("authority_refs"),
+            "authority_refs",
+        ),
+        validator_contracts=_decode_string_tuple(
+            raw.get("validator_contracts"),
+            "validator_contracts",
+        ),
+        output_schema_refs=_decode_string_tuple(
+            raw.get("output_schema_refs"),
+            "output_schema_refs",
+        ),
+    )
 
 
 def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
@@ -117,6 +179,11 @@ def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
                     for record in process.history
                 ],
                 "parent_process_id": process.parent_process_id,
+                "work_contract": _encode_work_contract(
+                    process.work_contract
+                ),
+                "disposition": process.disposition.value,
+                "disposition_reason": process.disposition_reason,
             }
         )
     return {
@@ -130,7 +197,8 @@ def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
 def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
     if not isinstance(payload, dict):
         raise GraphCodecError("graph_payload_must_be_object")
-    if payload.get("schema_version") != SCHEMA_VERSION:
+    schema_version = payload.get("schema_version")
+    if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise GraphCodecError("unsupported_graph_schema_version")
     raw_processes = payload.get("processes")
     if not isinstance(raw_processes, list):
@@ -197,6 +265,34 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
         except (KeyError, ValueError) as exc:
             raise GraphCodecError("invalid_process_state") from exc
 
+        if schema_version == 1:
+            work_contract = None
+            disposition = WorkDisposition.UNCLASSIFIED
+            disposition_reason = None
+        else:
+            work_contract = _decode_work_contract(raw.get("work_contract"))
+            try:
+                disposition = WorkDisposition(
+                    str(
+                        raw.get(
+                            "disposition",
+                            WorkDisposition.UNCLASSIFIED.value,
+                        )
+                    )
+                )
+            except ValueError as exc:
+                raise GraphCodecError(
+                    "invalid_work_disposition"
+                ) from exc
+            disposition_reason = raw.get("disposition_reason")
+            if disposition_reason is not None and not isinstance(
+                disposition_reason,
+                str,
+            ):
+                raise GraphCodecError(
+                    "disposition_reason_must_be_string_or_null"
+                )
+
         process = ReasoningProcess(
             process_id=process_id,
             state=state,
@@ -212,6 +308,9 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
             repair_required=bool(raw.get("repair_required", False)),
             history=history,
             parent_process_id=raw.get("parent_process_id"),
+            work_contract=work_contract,
+            disposition=disposition,
+            disposition_reason=disposition_reason,
         )
         processes[process_id] = process
 
