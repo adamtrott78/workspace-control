@@ -482,32 +482,30 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             "FAILED",
         )
 
-    def test_host_max_two_allows_two_disjoint_classes_then_blocks_third(self):
+    def test_host_max_three_allows_three_disjoint_classes_then_blocks_fourth(self):
         root = self.root()
         a = "workspace-control-control-small-v1"
         b = "research-cpu-public-v1"
         c = "padataset-cpu-public-v1"
+        d = "padataset-scientific-single-gpu-v1"
+        for class_id, request_id in (
+            (a, "req-host-a"),
+            (b, "req-host-b"),
+            (c, "req-host-c"),
+        ):
+            self.assertEqual(
+                root.reserve(
+                    peer_user=self.peer(class_id),
+                    request_id=request_id,
+                    runner_name=self.runner_name(class_id, request_id),
+                )["status"],
+                "RESERVED",
+            )
         self.assertEqual(
             root.reserve(
-                peer_user=self.peer(a),
-                request_id="req-host-a",
-                runner_name=self.runner_name(a, "a"),
-            )["status"],
-            "RESERVED",
-        )
-        self.assertEqual(
-            root.reserve(
-                peer_user=self.peer(b),
-                request_id="req-host-b",
-                runner_name=self.runner_name(b, "b"),
-            )["status"],
-            "RESERVED",
-        )
-        self.assertEqual(
-            root.reserve(
-                peer_user=self.peer(c),
-                request_id="req-host-c",
-                runner_name=self.runner_name(c, "c"),
+                peer_user=self.peer(d),
+                request_id="req-host-d",
+                runner_name=self.runner_name(d, "d"),
             )["status"],
             "BUSY",
         )
