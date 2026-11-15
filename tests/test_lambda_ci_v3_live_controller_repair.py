@@ -50,6 +50,16 @@ class LiveControllerRepairTests(unittest.TestCase):
             HELPER[post:commit],
         )
 
+    def test_controller_build_uses_cwd_not_go_dash_c(self):
+        self.assertIn(
+            'cwd=str(repo/"controller/lambda-ci-controller")',
+            HELPER,
+        )
+        self.assertNotIn(
+            'str(go),"-C",str(repo/"controller/lambda-ci-controller")',
+            HELPER,
+        )
+
     def test_repair_receipt_is_reconciler_compatible(self):
         for marker in (
             '"mode":MODE',

@@ -185,9 +185,10 @@ def build_candidate(repo: Path, go_bin: str) -> bytes:
         output=Path(raw)/"lambda-ci-controller-v3"
         p=subprocess.run(
             [
-                str(go),"-C",str(repo/"controller/lambda-ci-controller"),
+                str(go),
                 "build","-mod=readonly","-trimpath","-o",str(output),"./v3",
             ],
+            cwd=str(repo/"controller/lambda-ci-controller"),
             text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False,
         )
         if p.returncode:
