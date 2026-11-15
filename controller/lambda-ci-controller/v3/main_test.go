@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"net"
 	"net/http"
+	"path/filepath"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -89,6 +91,59 @@ func newRESTVerifierTestServer(
 		logger:     slog.New(slog.DiscardHandler),
 	}
 	return server, verifier
+}
+
+func TestUnixCapacityProbeSucceedsOnReachableProvisioner(t *testing.T) {
+	socketPath := filepath.Join(t.TempDir(), "provisioner.sock")
+	listener, err := net.Listen("unix", socketPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+
+	done := make(chan error, 1)
+	go func() {
+		conn, err := listener.Accept()
+		if err != nil {
+			done <- err
+			return
+		}
+		defer conn.Close()
+
+		var request map[string]any
+		if err := json.NewDecoder(conn).Decode(&request); err != nil {
+			done <- err
+			return
+		}
+		requestID, _ := request["request_id"].(string)
+		done <- json.NewEncoder(conn).Encode(map[string]any{
+			"schema_version": 3,
+			"operation":      "STATUS_RESULT",
+			"request_id":     requestID,
+			"status":         "MISSING",
+		})
+	}()
+
+	client := &unixCapacityClient{
+		socketPath: socketPath,
+		logger:     slog.New(slog.DiscardHandler),
+	}
+	if err := client.Probe(context.Background()); err != nil {
+		t.Fatalf("Probe() error: %v", err)
+	}
+	if err := <-done; err != nil {
+		t.Fatalf("server error: %v", err)
+	}
+}
+
+func TestUnixCapacityProbeFailsWhenSocketPathUnreachable(t *testing.T) {
+	client := &unixCapacityClient{
+		socketPath: filepath.Join(t.TempDir(), "missing.sock"),
+		logger:     slog.New(slog.DiscardHandler),
+	}
+	if err := client.Probe(context.Background()); err == nil {
+		t.Fatal("Probe() unexpectedly succeeded")
+	}
 }
 
 func TestDiscoverTrustedDemandUsesRESTJobIdentity(t *testing.T) {

@@ -56,6 +56,58 @@ class PADatasetScientificActivationTests(unittest.TestCase):
         value["routes"].pop(activation.TARGET_ROUTE)
         return value
 
+    def test_active_controller_socket_group_gate_accepts_runtime_gid(self):
+        class FakeSystemd:
+            def show(self, unit):
+                return {
+                    "ActiveState": "active",
+                    "SubState": "running",
+                    "MainPID": "4321",
+                }
+
+        fake_group = type("G", (), {"gr_gid": 4242})()
+        with mock.patch.object(
+            activation.grp,
+            "getgrnam",
+            return_value=fake_group,
+        ), mock.patch.object(
+            activation.pathlib.Path,
+            "read_text",
+            return_value="Name:\tcontroller\nGroups:\t1000 4242 5000\n",
+        ):
+            activation._require_active_controller_socket_group(
+                FakeSystemd(),
+                ["padataset-scientific-single-gpu-v1"],
+            )
+
+    def test_active_controller_socket_group_gate_rejects_missing_runtime_gid(self):
+        class FakeSystemd:
+            def show(self, unit):
+                return {
+                    "ActiveState": "active",
+                    "SubState": "running",
+                    "MainPID": "4321",
+                }
+
+        fake_group = type("G", (), {"gr_gid": 4242})()
+        with mock.patch.object(
+            activation.grp,
+            "getgrnam",
+            return_value=fake_group,
+        ), mock.patch.object(
+            activation.pathlib.Path,
+            "read_text",
+            return_value="Name:\tcontroller\nGroups:\t1000 5000\n",
+        ):
+            with self.assertRaisesRegex(
+                activation.ScientificActivationError,
+                "cannot reach provisioner socket group",
+            ):
+                activation._require_active_controller_socket_group(
+                    FakeSystemd(),
+                    ["padataset-scientific-single-gpu-v1"],
+                )
+
     def test_candidate_generation_is_exact_plus_one_and_preserves_old_envelopes(self):
         current = self.predecessor_root()
         for policy in current["runner_classes"].values():

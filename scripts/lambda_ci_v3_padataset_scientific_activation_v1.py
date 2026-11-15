@@ -568,6 +568,74 @@ def _require_provisioner_socket() -> None:
         raise ScientificActivationError("v3 provisioner socket mode mismatch")
 
 
+def _require_provisioner_path_traversable() -> None:
+    current = PROVISIONER_SOCKET.parent
+    required = []
+    while current != pathlib.Path("/"):
+        required.append(current)
+        current = current.parent
+    for path in reversed(required):
+        st = path.stat()
+        mode = stat.S_IMODE(st.st_mode)
+        if path == pathlib.Path("/run/workspace-ci"):
+            if st.st_uid != 0 or st.st_gid != 0 or mode != 0o711:
+                raise ScientificActivationError(
+                    "v3 provisioner parent /run/workspace-ci must be 0711 root:root"
+                )
+        elif path == pathlib.Path("/run/workspace-ci/v3"):
+            if st.st_uid != 0 or st.st_gid != 0 or mode != 0o711:
+                raise ScientificActivationError(
+                    "v3 provisioner parent /run/workspace-ci/v3 must be 0711 root:root"
+                )
+
+
+def _require_active_controller_socket_group(
+    systemd: Systemd,
+    class_ids: list[str],
+) -> None:
+    expected_gid = grp.getgrnam(PROVISIONER_SOCKET_GROUP).gr_gid
+    for class_id in sorted(class_ids):
+        unit = f"workspace-ci-v3-controller@{class_id}.service"
+        state = systemd.show(unit)
+        if state.get("ActiveState") != "active" or state.get("SubState") != "running":
+            continue
+        try:
+            pid = int(state.get("MainPID", "0"))
+        except (TypeError, ValueError) as exc:
+            raise ScientificActivationError(
+                f"active controller MainPID invalid: {class_id}"
+            ) from exc
+        if pid <= 0:
+            raise ScientificActivationError(
+                f"active controller MainPID missing: {class_id}"
+            )
+        status_path = pathlib.Path(f"/proc/{pid}/status")
+        try:
+            status_lines = status_path.read_text().splitlines()
+        except OSError as exc:
+            raise ScientificActivationError(
+                f"active controller proc status unreadable: {class_id}"
+            ) from exc
+        groups_line = next(
+            (line for line in status_lines if line.startswith("Groups:")),
+            None,
+        )
+        if groups_line is None:
+            raise ScientificActivationError(
+                f"active controller supplementary groups unavailable: {class_id}"
+            )
+        try:
+            gids = {int(value) for value in groups_line.split(":", 1)[1].split()}
+        except ValueError as exc:
+            raise ScientificActivationError(
+                f"active controller supplementary groups malformed: {class_id}"
+            ) from exc
+        if expected_gid not in gids:
+            raise ScientificActivationError(
+                f"active controller cannot reach provisioner socket group: {class_id}"
+            )
+
+
 def _load_authority(
     path: pathlib.Path,
     *,
@@ -923,6 +991,8 @@ def expand_inactive(
         provisioner_started_on_new_generation = True
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
+        _require_provisioner_path_traversable()
+        _require_active_controller_socket_group(systemd, existing_class_ids)
 
         controller_after = _controller_snapshot(systemd, existing_class_ids)
         _require_controller_snapshot_preserved(controller_before, controller_after)
@@ -1050,6 +1120,8 @@ def activate(
     existing_before = _controller_snapshot(systemd, existing_ids)
     _require_provisioner_active(systemd)
     _require_provisioner_socket()
+    _require_provisioner_path_traversable()
+    _require_active_controller_socket_group(systemd, existing_ids)
 
     overlay = _load(DEPLOYMENT_OVERLAY)
     target_state = overlay.get("classes", {}).get(TARGET_CLASS)
@@ -1122,6 +1194,10 @@ def activate(
         _require_controller_snapshot_preserved(existing_before, existing_after)
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
+        _require_provisioner_path_traversable()
+        _require_active_controller_socket_group(
+            systemd, [*existing_ids, TARGET_CLASS]
+        )
         reconciler.verify_installed(BASE_MANIFEST)
 
         tx["phase"] = "COMMITTED_ACTIVE"

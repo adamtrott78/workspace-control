@@ -803,6 +803,21 @@ func (c *unixCapacityClient) doOnce(
 	return response, nil
 }
 
+func (c *unixCapacityClient) Probe(ctx context.Context) error {
+	response, err := c.doOnce(ctx, map[string]any{
+		"schema_version": 3,
+		"operation":      "STATUS",
+		"request_id":     "ffffffff-ffff-4fff-8fff-ffffffffffff",
+	}, "STATUS_RESULT")
+	if err != nil {
+		return err
+	}
+	if response.Status != "MISSING" {
+		return fmt.Errorf("unexpected provisioner probe status %q", response.Status)
+	}
+	return nil
+}
+
 func (c *unixCapacityClient) Reserve(
 	ctx context.Context,
 	requestID string,
@@ -952,6 +967,14 @@ func runController(ctx context.Context, cfg runtimeConfig, logger *slog.Logger) 
 		socketPath: cfg.ProvisionerSock,
 		logger:     logger.WithGroup("root"),
 	}
+	probeCtx, cancelProbe := context.WithTimeout(ctx, 5*time.Second)
+	if err := root.Probe(probeCtx); err != nil {
+		cancelProbe()
+		return fmt.Errorf("v3 provisioner startup probe failed: %w", err)
+	}
+	cancelProbe()
+	logger.Info("Verified v3 provisioner socket connectivity")
+
 	scaler := &v3Scaler{
 		policy:     policy,
 		verifier:   verifier,

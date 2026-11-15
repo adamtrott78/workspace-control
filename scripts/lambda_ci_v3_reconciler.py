@@ -1030,6 +1030,7 @@ def render_tmpfiles(
     classes = compiled["root_projection"]["runner_classes"]
     lines = [
         "# Generated Lambda CI v3 disjoint runtime/state layout.\n",
+        "d /run/workspace-ci 0711 root root -\n",
         "d /run/workspace-ci/v3 0711 root root -\n",
         "d /run/workspace-ci/v3/provisioner 0700 root root -\n",
         "d /run/workspace-ci/v3/provisioner/jit 0700 root root -\n",

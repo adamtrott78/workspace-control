@@ -1156,9 +1156,14 @@ def serve(
                         "transport_status": "ERROR",
                         "error": f"{type(exc).__name__}: {exc}"[:2048],
                     }
-                conn.sendall(
-                    (json.dumps(response, sort_keys=True) + "\n").encode("utf-8")
-                )
+                try:
+                    conn.sendall(
+                        (json.dumps(response, sort_keys=True) + "\n").encode("utf-8")
+                    )
+                except (BrokenPipeError, ConnectionResetError):
+                    # A malformed or disconnected local client must not be able
+                    # to terminate the shared root provisioner.
+                    continue
     finally:
         server.close()
         try:
