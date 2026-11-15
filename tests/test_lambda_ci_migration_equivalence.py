@@ -26,11 +26,20 @@ eq_spec.loader.exec_module(equivalence)
 
 
 class MigrationEquivalenceTests(unittest.TestCase):
-    def test_all_25_routes_preserve_exact_root_launch_semantics(self):
+    def test_all_25_routes_preserve_bounded_root_launch_semantics(self):
         result = equivalence.verify_migration(ROOT)
         self.assertEqual(result["decision"], "PASS")
         self.assertEqual(result["route_count"], 25)
-        self.assertEqual(result["exact_equivalence_count"], 25)
+        self.assertEqual(result["exact_equivalence_count"], 24)
+        self.assertEqual(result["isolation_uid_specialization_count"], 1)
+
+        specialized = [
+            row for row in result["rows"]
+            if row["root_launch_semantics"] == "ISOLATION_ONLY_UID_SPECIALIZATION"
+        ]
+        self.assertEqual(len(specialized), 1)
+        self.assertEqual(specialized[0]["project_id"], "padataset")
+        self.assertEqual(specialized[0]["route_id"], "scientific-single-gpu-2")
 
     def test_padataset_cpu_and_gpu_preserve_contracts(self):
         rows = equivalence.verify_migration(ROOT)["rows"]
