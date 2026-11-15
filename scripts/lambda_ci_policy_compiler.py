@@ -523,7 +523,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
             if configured_runner_identity is None:
                 runner_identity = {
                     "user": manifest["derived_identity"]["runner_user"],
-                    "group": runner_identity["group"],
+                    "group": manifest["derived_identity"]["runner_group"],
                 }
             else:
                 _require(
