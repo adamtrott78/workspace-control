@@ -6,7 +6,7 @@
   "goal": "Add a bounded, CPU-only Codex runtime/bootstrap capability to the existing Workspace Control control-small runner class so Reasoning Economy can use the user's included ChatGPT Plus Codex allowance without API billing, GPU access, credential copying, or bypassing the v3 root allocator.",
   "execution_topology": "remote_only",
   "workflow": null,
-  "parent_execution_owner": null,
+  "parent_execution_owner": "workspace-reasoning-economy-v1",
   "current_stage": "trusted_bootstrap_workflow",
   "acceptance_criteria": [
     "Preserve the live PR #627 capacity generation exactly: host max 3, PADataset max 2, Workspace Control max 1, reserved workspace-control slots 1.",
@@ -40,7 +40,7 @@
       "base_sha": "acd420758eb0124646988ee8776939572c88a82d",
       "remote": {
         "branch": "workspace-reasoning-economy-codex-runtime-v1",
-        "checkpoint_sha": "acd420758eb0124646988ee8776939572c88a82d",
+        "checkpoint_sha": "164c039b73a1433370802d962eaf949a688eb0a5",
         "verified": true
       },
       "local": null,
@@ -67,14 +67,24 @@
         "OpenAI Codex rust-v0.155.1 release digest"
       ],
       "outputs": [
-        "inert trusted bootstrap workflow candidate",
-        "pinned runtime installer",
-        "device-auth flow",
-        "zero-inference account telemetry verification",
-        "redacted bootstrap receipt"
+        "inert trusted bootstrap workflow candidate at .github/workflows/lambda-ci-workspace-control-codex-bootstrap.yml",
+        "checksum-pinned Codex 0.155.1 installer using official OpenAI musl release artifact",
+        "isolated CODEX_HOME under /srv/workspace-ci/workspace-control/home",
+        "ChatGPT-only device-auth flow with OPENAI_API_KEY unset",
+        "redacted bootstrap receipt with model_inference_performed=false"
       ],
-      "validation": [],
-      "resume_condition": "Workflow is repository-validated and cannot run without an explicit trusted route."
+      "validation": [
+        {
+          "check": "Implementation presence / exact remote reread",
+          "result": "PASS",
+          "evidence": [
+            "workspace-control branch workspace-reasoning-economy-codex-runtime-v1 exact head 164c039b73a1433370802d962eaf949a688eb0a5 exists remotely.",
+            "Commit 164c039b73a1433370802d962eaf949a688eb0a5 adds .github/workflows/lambda-ci-workspace-control-codex-bootstrap.yml.",
+            "No tests/test_workspace_reasoning_economy_codex_runtime.py exists at this breakpoint and no workflow run is attached to this child-branch head; repository validation is therefore NOT yet proven."
+          ]
+        }
+      ],
+      "resume_condition": "Static contract tests exist and the inert bootstrap workflow candidate passes repository validation without becoming live/executable from default-branch trust."
     },
     {
       "id": "trusted_workflow_promotion",
@@ -141,13 +151,27 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "workspace-control@acd420758eb0124646988ee8776939572c88a82d",
+      "id": "bootstrap-workflow-implemented-unvalidated",
+      "kind": "implementation_checkpoint",
+      "identity": "workspace-control@164c039b73a1433370802d962eaf949a688eb0a5",
       "required_for_resume": true,
       "evidence": [
-        "First unfinished stage is trusted_bootstrap_workflow.",
-        "No Codex runtime or credentials have been installed for ci-workspace-control."
+        "Inert Codex bootstrap workflow candidate is implemented on workspace-reasoning-economy-codex-runtime-v1.",
+        "Workflow pins Codex 0.155.1 and SHA-256 a0ef8b2debc3bf747e07b1a039354de31300ac0dcc2276498ba281470b5d9115.",
+        "Workflow targets only lambda-workspace-control-control-small, rejects GPU/Docker/sibling-project access, unsets OPENAI_API_KEY, forces ChatGPT auth, and emits a redacted no-inference receipt.",
+        "Static contract tests and repository validation are still missing; no live route/default-branch trust exists."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "workspace-control@164c039b73a1433370802d962eaf949a688eb0a5",
+      "required_for_resume": true,
+      "evidence": [
+        "First unfinished stage remains trusted_bootstrap_workflow.",
+        "The workflow implementation exists but is NOT yet validated or live.",
+        "PR #627 remains open at acd420758eb0124646988ee8776939572c88a82d and is the required live reservation base.",
+        "Parent Reasoning Economy PR #590 is independently green at fa29ea7894c64d32795141661ceaa31e84a6a9ac: Workspace Control #2787, Semantic Execution #85, Operator Bridge #379 all SUCCESS."
       ]
     }
   ],
@@ -165,15 +189,18 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement and repository-validate the inert pinned Codex bootstrap workflow.",
-    "Promote the inert workflow to main and bind its exact blob.",
-    "Add and validate the bootstrap route on the existing control-small class while preserving PR #627 capacity invariants.",
-    "Activate the additive route through the reviewed v3 root-policy mechanism.",
-    "Run bootstrap; if needed perform one device-code ChatGPT authorization.",
-    "Prove Plus auth and programmatic account/rate-limit/usage reads with zero model inference."
+    "Add tests/test_workspace_reasoning_economy_codex_runtime.py with static contract tests for exact runner class, no GPU/Docker/sibling access, OPENAI_API_KEY stripping, ChatGPT-only auth, pinned Codex version/digest, no model inference, redacted receipt, and absence of capacity/root-authority widening.",
+    "Repository-validate the inert bootstrap workflow candidate on the stacked branch; do not treat implementation presence as validation.",
+    "Open/validate the Codex runtime PR stacked on PR #627 head padataset-dual-science-control-reserve-v1@acd420758eb0124646988ee8776939572c88a82d without modifying PR #627.",
+    "Promote the validated inert workflow to default branch and bind its exact blob before adding any trusted route.",
+    "Add and validate an additive /workspace-codex-bootstrap route on workspace-control-control-small-v1 while preserving host=3, PADataset=2, Workspace Control=1, reserved=1.",
+    "Activate only through reviewed v3 root-policy/provisioner authority; no manual runner or sidecar bypass.",
+    "Run zero-inference bootstrap; if login is absent, user performs one device-code ChatGPT authorization.",
+    "Prove account.type=chatgpt, planType=plus, and programmatic rate-limit/usage reads without leaking credential/account identity material.",
+    "Return to parent workspace-reasoning-economy-v1 codex_subscription_executor stage after runtime/auth preflight succeeds."
   ],
-  "next_safe_action": "Implement the inert lambda-ci-workspace-control-codex-bootstrap.yml workflow on this stacked branch. Reuse the exact same-repository PR-head and control-small isolation gates from the accepted control-validation workflow; pin Codex 0.155.1 and its official SHA-256; write runtime/CODEX_HOME only under the Workspace Control project home; force ChatGPT auth; perform no model inference; emit only a redacted receipt. Add static tests proving no API key, GPU, sibling-project, or capacity widening behavior. Do not add the live root route until this workflow is validated and promoted to an exact default-branch blob.",
+  "next_safe_action": "DO NOT implement another bootstrap workflow: it already exists at exact head 164c039b73a1433370802d962eaf949a688eb0a5. First add tests/test_workspace_reasoning_economy_codex_runtime.py that statically prove the workflow preserves the frozen safety/resource contract (control-small only; no PADataset/GPU/Docker/sibling access; OPENAI_API_KEY unset; ChatGPT-only auth; Codex 0.155.1 + exact release digest; persistent paths only under Workspace Control home; zero model inference; redacted receipt; no capacity/root-policy widening). Then run repository validation on the exact candidate. If green, open/continue a stacked PR whose base is PR #627 head branch padataset-dual-science-control-reserve-v1 at acd420758eb0124646988ee8776939572c88a82d. Do not add or activate the live root route until the inert workflow is validated and promoted to an exact default-branch blob.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-15 ACTIVATED: Separate infrastructure child stacked on live PR #627 head so Reasoning Economy Codex setup cannot regress the reserved 2×science + 1×control generation. The existing reserved-runner preflight proved the control-small host has no Codex CLI. Research Engine already has a separate proven ChatGPT-plan Codex deployment, but its credentials are intentionally not reused across project boundaries."
+  "notes": "2026-11-15 ACTIVATED: Separate infrastructure child stacked on live PR #627 head so Reasoning Economy Codex setup cannot regress the reserved 2×science + 1×control generation. The existing reserved-runner preflight proved the control-small host has no Codex CLI. Research Engine already has a separate proven ChatGPT-plan Codex deployment, but its credentials are intentionally not reused across project boundaries.\n\n2026-11-15 HANDOFF RECONCILIATION: The child capsule had fallen behind the branch. Exact child head is workspace-control@164c039b73a1433370802d962eaf949a688eb0a5 on workspace-reasoning-economy-codex-runtime-v1. That head IMPLEMENTS the inert lambda-ci-workspace-control-codex-bootstrap.yml workflow; do not rebuild it. It has no child-branch workflow runs and tests/test_workspace_reasoning_economy_codex_runtime.py is absent, so it is not yet repository-validated. PR #627 remains open at acd420758eb0124646988ee8776939572c88a82d and remains the required reserved-capacity base. Parent Reasoning Economy PR #590 is green at fa29ea7894c64d32795141661ceaa31e84a6a9ac (Workspace Control #2787, Semantic Execution #85, Operator Bridge #379 SUCCESS). Next work is static contract tests + exact candidate validation only; no live route/activation yet.\n"
 }
