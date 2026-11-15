@@ -5,6 +5,8 @@ from .executor_dispatch import (
     ExecutorDispatchError,
     ExecutorDispatchRequest,
     ExecutorDispatchResult,
+    ExecutorSelectionPolicy,
+    ExecutorSelectionPolicyDecision,
     OperatorDispatchParameters,
 )
 from .default_profiles import (
@@ -68,6 +70,8 @@ __all__ = [
     "ExecutorDispatchError",
     "ExecutorDispatchRequest",
     "ExecutorDispatchResult",
+    "ExecutorSelectionPolicy",
+    "ExecutorSelectionPolicyDecision",
     "OperatorDispatchParameters",
     "DecisionRecord",
     "ExecutorRegistry",

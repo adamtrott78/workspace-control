@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping
+from typing import Mapping, Protocol
 
 from ..domain import (
     CandidateAction,
@@ -10,6 +10,7 @@ from ..domain import (
     ExecutorProfile,
     InvocationMode,
     RoutingDecision,
+    WorkDisposition,
 )
 from ..ports import (
     AuthorityEvaluatorPort,
@@ -31,6 +32,24 @@ from .vertical_slice import (
     CoordinatedExecutionResult,
     PostconditionValidator,
 )
+
+
+@dataclass(frozen=True)
+class ExecutorSelectionPolicyDecision:
+    selected_executor_id: str | None
+    outcome: str
+    rationale: str
+
+
+class ExecutorSelectionPolicy(Protocol):
+    def select(
+        self,
+        *,
+        requirement_id: str,
+        eligible_profiles: tuple[ExecutorProfile, ...],
+        base_routing: RoutingDecision,
+        disposition: WorkDisposition,
+    ) -> ExecutorSelectionPolicyDecision: ...
 
 
 class ExecutorDispatchError(RuntimeError):
@@ -74,6 +93,7 @@ class ExecutorDispatchResult:
     dispatch_mode: str
     coordinated_result: CoordinatedExecutionResult | None = None
     operator_dispatch: PlannedOperatorDispatch | None = None
+    selection_policy: ExecutorSelectionPolicyDecision | None = None
 
 
 class ExecutorDispatchCoordinator:
@@ -88,10 +108,12 @@ class ExecutorDispatchCoordinator:
         authority_evaluator: AuthorityEvaluatorPort,
         executor_ports: Mapping[str, ExecutorPort],
         validators: Mapping[str, PostconditionValidator],
+        selection_policy: ExecutorSelectionPolicy | None = None,
     ) -> None:
         self._runtime = runtime
         self._registry = registry
         self._packet_compiler = packet_compiler
+        self._selection_policy = selection_policy
         self._operator = OperatorDispatchPlanner(
             runtime=runtime,
             registry=registry,
@@ -119,16 +141,66 @@ class ExecutorDispatchCoordinator:
                 "dispatch_process_identity_invalid"
             )
 
-        routing = route_executor(
+        base_routing = route_executor(
             self._registry,
             requirement_id=request.requirement_id,
             requirement=request.requirement,
         )
         if (
-            routing.outcome != "SELECTED"
-            or routing.selected_executor_id is None
+            base_routing.outcome != "SELECTED"
+            or base_routing.selected_executor_id is None
         ):
             raise ExecutorDispatchError("no_eligible_executor")
+
+        routing = base_routing
+        policy_decision = None
+        if self._selection_policy is not None:
+            graph = self._runtime.snapshot().graph
+            process = graph.processes.get(request.process_id)
+            if process is None:
+                raise ExecutorDispatchError(
+                    "selection_policy_process_unknown"
+                )
+            if process.generation != request.expected_generation:
+                raise ExecutorDispatchError(
+                    "selection_policy_stale_process_generation"
+                )
+            eligible_profiles = tuple(
+                self._registry.get(executor_id)
+                for executor_id
+                in base_routing.eligible_executor_ids
+            )
+            policy_decision = self._selection_policy.select(
+                requirement_id=request.requirement_id,
+                eligible_profiles=eligible_profiles,
+                base_routing=base_routing,
+                disposition=process.disposition,
+            )
+            selected = policy_decision.selected_executor_id
+            if selected is None:
+                raise ExecutorDispatchError(
+                    "selection_policy_denied:"
+                    f"{policy_decision.outcome}"
+                )
+            if selected not in base_routing.eligible_executor_ids:
+                raise ExecutorDispatchError(
+                    "selection_policy_selected_ineligible_executor"
+                )
+            routing = RoutingDecision(
+                requirement_id=base_routing.requirement_id,
+                selected_executor_id=selected,
+                eligible_executor_ids=(
+                    base_routing.eligible_executor_ids
+                ),
+                exclusions=base_routing.exclusions,
+                outcome="SELECTED",
+                rationale=(
+                    base_routing.rationale
+                    + " Selection policy: "
+                    + policy_decision.rationale
+                ),
+            )
+
         executor = self._registry.get(
             routing.selected_executor_id
         )
@@ -164,6 +236,7 @@ class ExecutorDispatchCoordinator:
                 executor=executor,
                 dispatch_mode="OPERATOR_ACTION",
                 operator_dispatch=planned,
+                selection_policy=policy_decision,
             )
 
         if executor.invocation_mode == InvocationMode.DETERMINISTIC:
@@ -199,6 +272,7 @@ class ExecutorDispatchCoordinator:
                 executor=executor,
                 dispatch_mode="DETERMINISTIC_EFFECT",
                 coordinated_result=result,
+                selection_policy=policy_decision,
             )
 
         raise ExecutorDispatchError(
