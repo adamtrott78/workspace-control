@@ -71,7 +71,7 @@ TRUSTED_CACHE_MANAGER_PATH = pathlib.Path(
 )
 TRUSTED_CACHE_MANAGER_BLOB = "a97cb0be0e8f1f53504b33aed7c31a5aa6cb7807"
 CPU_EXECUTION_PROFILES = frozenset({"control-small", "cpu-test"})
-SINGLE_GPU_EXECUTION_PROFILES = frozenset({"gpu-small", "gpu-scientific-single"})
+SINGLE_GPU_EXECUTION_PROFILES = frozenset({"gpu-small", "gpu-scientific-single", "gpu-scientific-single-2"})
 GPU_EXECUTION_PROFILES = SINGLE_GPU_EXECUTION_PROFILES | frozenset({"gpu-heavy"})
 
 def run(argv: list[str], *, check: bool = True):
