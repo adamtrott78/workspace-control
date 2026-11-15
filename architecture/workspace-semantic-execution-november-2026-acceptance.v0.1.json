@@ -197,7 +197,8 @@
         "PENDING for PASS: activate reviewed Tailscale Serve/private identity path on the real hosts and prove one fake-worker action/status round trip end-to-end.",
         "Durable packet-source/materialization layer now proves Windows-bound packet text is reconstructed on claim from typed Postgres-backed state, not stored transcript/clipboard text.",
         "Production Postgres-backed Operator Bridge server composition is repository-validated; live host activation is explicitly authority-gated because semantic feature-branch task IDs are absent from Workspace Shell trusted authority root.",
-        "Backend return path is now durable: worker-authored typed results are ingested from authoritative durable state rather than consumer-UI output, and exact process/action/session/packet identity is fenced."
+        "Backend return path is now durable: worker-authored typed results are ingested from authoritative durable state rather than consumer-UI output, and exact process/action/session/packet identity is fenced.",
+        "Repository-side Instant execution is now complete end-to-end: production action transport plus immutable candidate return/intake/validation is proven through PostgreSQL restart. Remaining PARTIAL item is exact-host private-tailnet activation."
       ]
     },
     {
@@ -205,7 +206,8 @@
       "status": "PARTIAL",
       "requirement": "Normal Instant service requires only Ctrl+Space -> Ctrl+V -> Enter with no tab search, packet editing, or manual state relay.",
       "evidence": [
-        "UT-10/UT-02/UT-03/UT-04 evidence validates the accepted motor loop against fake workers."
+        "UT-10/UT-02/UT-03/UT-04 evidence validates the accepted motor loop against fake workers.",
+        "Semantic #155 proves the backend packet already includes the exact candidate result target/schema, eliminating manual result relay/state interpretation after the Ctrl+Space -> paste -> Enter motor loop."
       ]
     },
     {
@@ -258,14 +260,17 @@
       "evidence": [
         "PRECURSOR PASS: exact Research Engine objective now traverses generic routing -> deterministic packet -> authority -> RuntimeCoordinator -> exact read effect -> independent postcondition validation -> COMPLETED.",
         "Still PENDING: full research-iterate E2E-01 additionally requires recursive decomposition, fan-in, and synthesis.",
-        "Recursive decomposition/fan-in semantics required by the full research-iterate path are now production-validated at f104361f…, but the real mixed-executor research-iterate synthesis remains pending."
+        "Recursive decomposition/fan-in semantics required by the full research-iterate path are now production-validated at f104361f…, but the real mixed-executor research-iterate synthesis remains pending.",
+        "PRECURSOR PASS: full persistent-Instant leaf transport and durable result cycle is now production-validated; mixed Research Engine fan-out/fan-in remains pending."
       ]
     },
     {
       "id": "E2E-02",
       "status": "PENDING",
       "requirement": "The proving workflow uses mixed executor classes based on routing decisions, including deterministic execution plus Instant and/or Codex.",
-      "evidence": []
+      "evidence": [
+        "Instant is now a validated production executor path; the next stage composes it with the already-validated deterministic exact-source executor in one research-iterate tree."
+      ]
     },
     {
       "id": "E2E-03",
@@ -294,7 +299,8 @@
       "requirement": "Exact SHA/blob/route provenance, authority boundaries, and rollback paths are mechanically checked with no unresolved violations.",
       "evidence": [
         "Existing task/provenance/root-policy contracts provide the baseline; integrated promotion proof remains.",
-        "Production transport code preserves ownership boundaries: backend loopback-only HTTP, outbound-only Windows client, no app bearer credential, no authority endpoint, and explicit opt-in activation."
+        "Production transport code preserves ownership boundaries: backend loopback-only HTTP, outbound-only Windows client, no app bearer credential, no authority endpoint, and explicit opt-in activation.",
+        "Candidate target/revision/source bytes, process/action/session generations, packet hash, and independent validator are mechanically bound end-to-end at d3f6e283…."
       ]
     },
     {
@@ -349,5 +355,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@e9a1f976370ce5b91a2c0785ab4413d68667cc8e"
+  "latest_validated_checkpoint": "workspace-control@d3f6e2837d36a59c0244b85db7de8679ad4dba1e"
 }

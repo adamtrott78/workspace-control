@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: e9a1f976370ce5b91a2c0785ab4413d68667cc8e
+- Remote checkpoint: d3f6e2837d36a59c0244b85db7de8679ad4dba1e
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,18 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement INSTANT_CANDIDATE_PUBLICATION_CONTRACT_AND_E2E_V1. Extend deterministic packet compilation with a typed publication contract supplied by the dispatch planner: exact publication_id/action_id/action_generation/process_generation/worker_slot_id/session_generation, worker-result schema ref, and a candidate-only target ref. Do not embed packet_sha256 inside the canonical payload (the worker must copy the packet_sha256 header into its publication) to avoid self-reference. The target must be proposal-only and must explicitly forbid task-capsule/authority mutation. Add an exact-source candidate adapter that parses immutable bytes with source_ref/source_sha256 and invokes WorkerResultIntakeService. Prove the complete fake-worker loop through the production HTTP claim/local-prepared boundary and PostgreSQL restart. Do not activate live Tailscale transport or real ChatGPT account yet.
+Implement MIXED_EXECUTOR_RESEARCH_ITERATE_VERTICAL_SLICE_V1. Add a generic dispatch coordinator over route_executor: HUMAN_ASSISTED persistent Chat profiles must plan an OperatorAction/candidate contract through OperatorDispatchPlanner; DETERMINISTIC profiles must execute only through CoordinatedActionService with exact AuthorityDecision=ALLOW and independent postcondition validation; unsupported invocation modes fail closed. Then prove a research-iterate root over frozen research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4 recursively decomposes into at least one deterministic exact-source child and one persistent-Instant child, waits for both validated completions, resumes root synthesis through Instant, and completes only after independent validation. No model-name scheduler branches, no live Tailscale activation, no Codex dependency, no research-engine mutation.
 
 ## Remaining work
 
-- Embed a typed non-authoritative result-publication contract in Instant packets, including exact action/process/session generations and schema/candidate target while avoiding self-referential packet hashing.
-- Implement a candidate-source adapter that binds immutable result bytes/source SHA and feeds WorkerResultIntakeService; candidate publication must not mutate authoritative task state or authority fields.
-- Prove one full fake-worker Instant loop: atomic dispatch -> production HTTP claim -> local prepared -> immutable candidate result -> exact-source parse -> durable intake -> independent validation -> process/action/session completion.
-- Repeat the full loop across PostgreSQL adapter recreation and stale candidate/recovery faults.
+- Implement a generic ExecutorDispatchCoordinator that routes the same ReasoningProcess to deterministic authorized execution or persistent Instant operator dispatch based only on typed ExecutionRequirement/ExecutorProfile properties.
+- Build a Research Engine research-iterate vertical slice over the frozen exact source/canary: root Instant decomposition, deterministic exact-source child, Instant reasoning child, validated fan-in, and Instant synthesis.
+- Prove every completed leaf/result is independently validated and that routing uses requirement/capability/scarcity rather than model-name branches.
+- Inject one Instant session/process loss into the mixed workflow and recover from durable state for E2E-03.
 - After a reviewed default-branch activation route exists, run exact-host Tailscale fake-worker transport preflight and close INST-01.
 - Finish remaining Operator Bridge Stage-10 trials and Stage-12 real-account calibration.
 - Advance subscription Codex only after PR #627 lineage authority clears.
-- Run mixed-executor Research Engine research-iterate and remaining November reliability/soak acceptance.
+- Run November integrated reliability/soak/economics acceptance and explicit PROD-03 readiness review.
 
 ## Blockers / gates
 
