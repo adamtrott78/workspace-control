@@ -243,15 +243,29 @@ def deterministic_spec() -> SchedulerDispatchSpec:
     )
 
 
-def instant_spec() -> SchedulerDispatchSpec:
+def instant_spec(
+    *,
+    dispatch_id: str = "02-instant",
+    process_generation: int = 0,
+    session_generation: int = 0,
+    action_id: str = "action:instant-production",
+    candidate_path: str = CANDIDATE_PATH,
+    queue_sequence: int = 1,
+) -> SchedulerDispatchSpec:
     return SchedulerDispatchSpec(
-        dispatch_id="02-instant",
+        dispatch_id=dispatch_id,
         process_id=INSTANT_ID,
-        process_generation=0,
-        requirement_id="requirement:instant-ready",
+        process_generation=process_generation,
+        requirement_id=(
+            "requirement:instant-ready:"
+            f"g{process_generation}"
+        ),
         requirement=instant_requirement(),
         packet=SchedulerPacketSpec(
-            source_checkpoint="scheduler@instant-ready",
+            source_checkpoint=(
+                "scheduler@instant-ready:"
+                f"g{process_generation}"
+            ),
             objective="Return one immutable candidate result.",
             constraints=(
                 "candidate-only publication",
@@ -266,16 +280,16 @@ def instant_spec() -> SchedulerDispatchSpec:
         ),
         operator=SchedulerOperatorSpec(
             task_id="scheduler-production-test",
-            action_id="action:instant-production",
+            action_id=action_id,
             action_generation=0,
             worker_slot_id=SLOT_ID,
-            session_generation=0,
+            session_generation=session_generation,
             priority_rank=10,
-            queue_sequence=1,
-            created_at="T0",
+            queue_sequence=queue_sequence,
+            created_at=f"T{queue_sequence}",
             candidate_repository=CANDIDATE_REPO,
             candidate_ref=CANDIDATE_REF,
-            candidate_path=CANDIDATE_PATH,
+            candidate_path=candidate_path,
         ),
     )
 
@@ -315,11 +329,13 @@ def build_scheduler(runtime):
     )
 
 
-def worker_candidate_bytes(runtime) -> bytes:
+def worker_candidate_bytes(
+    runtime,
+    *,
+    action_id: str = "action:instant-production",
+) -> bytes:
     graph = runtime.snapshot().graph
-    action = graph.operator_actions[
-        "action:instant-production"
-    ]
+    action = graph.operator_actions[action_id]
     source = graph.packet_sources[action.payload_ref]
     contract = source.result_publication
     assert contract is not None
@@ -329,10 +345,10 @@ def worker_candidate_bytes(runtime) -> bytes:
             "action_id": action.action_id,
             "action_generation": action.generation,
             "process_id": INSTANT_ID,
-            "process_generation": 0,
+            "process_generation": action.process_generation,
             "executor_id": INSTANT.executor_id,
             "worker_slot_id": SLOT_ID,
-            "session_generation": 0,
+            "session_generation": action.session_generation,
             "packet_sha256": action.payload_sha256,
             "kind": "RESULT",
             "observed_at": "T-result",
@@ -472,6 +488,237 @@ class ProductionSchedulerTests(unittest.TestCase):
         self.assertEqual(
             len(runtime.snapshot().graph.worker_results),
             1,
+        )
+
+    def test_recovery_requires_new_generation_plan_and_replacement_session(self):
+        runtime = build_runtime()
+        scheduler = build_scheduler(runtime)
+        first_spec = instant_spec()
+        scheduler.register(first_spec)
+
+        first_tick = scheduler.run_once()
+        self.assertEqual(first_tick.outcome, "DISPATCHED")
+        runtime.claim_next_operator_action(
+            helper_instance_id="windows-helper",
+            claim_id="claim:g0",
+            claimed_at="T1",
+            expires_at="T2",
+        )
+        runtime.record_operator_action_local_prepared(
+            action_id="action:instant-production",
+            generation=0,
+            worker_slot_id=SLOT_ID,
+            session_generation=0,
+            observed_at="T1.5",
+        )
+        old_bytes = worker_candidate_bytes(runtime)
+        old_observation = GitHubCandidateObservation(
+            repository=CANDIDATE_REPO,
+            ref=CANDIDATE_REF,
+            path=CANDIDATE_PATH,
+            commit_sha="c" * 40,
+            content=old_bytes,
+        )
+
+        runtime.recover(
+            INSTANT_ID,
+            expected_generation=0,
+            reason="scheduler_worker_session_lost",
+        )
+        graph = runtime.snapshot().graph
+        self.assertEqual(
+            graph.processes[INSTANT_ID].generation,
+            1,
+        )
+        self.assertEqual(
+            graph.processes[INSTANT_ID].state,
+            ProcessState.READY_TO_RESUME,
+        )
+        self.assertEqual(
+            graph.operator_actions[
+                "action:instant-production"
+            ].status,
+            OperatorActionState.STALE,
+        )
+        self.assertEqual(
+            graph.executor_sessions[SLOT_ID].state.value,
+            "NEEDS_REPLACEMENT",
+        )
+
+        version_before_tick = runtime.snapshot().version
+        stale_tick = scheduler.run_once()
+        self.assertEqual(stale_tick.outcome, "UNPLANNED_READY")
+        self.assertIn(
+            INSTANT_ID,
+            stale_tick.unplanned_ready_processes,
+        )
+        self.assertEqual(
+            runtime.snapshot().version,
+            version_before_tick,
+            "old generation scheduler plan must not redispatch",
+        )
+
+        late_service = GitHubCandidateEventService(
+            runtime=runtime,
+            intake=WorkerResultIntakeService(
+                runtime=runtime,
+                validators={
+                    VALIDATOR_ID: PassingWorkerValidator()
+                },
+            ),
+            reader=StaticCandidateReader(old_observation),
+        )
+        version_before_late = runtime.snapshot().version
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "worker_result_action_not_awaiting_ack|"
+            "worker_result_process_binding_mismatch",
+        ):
+            late_service.ingest(
+                dispatch_id=first_spec.dispatch_id,
+                commit_sha="c" * 40,
+            )
+        self.assertEqual(
+            runtime.snapshot().version,
+            version_before_late,
+        )
+
+        PersistentExecutorSessionBroker(runtime).replace(
+            slot_id=SLOT_ID,
+            expected_session_generation=1,
+            session_id="chat-production-scheduler-replacement",
+        )
+        replacement_path = (
+            "worker-results/candidates/"
+            "instant-production-g1.json"
+        )
+        replacement_spec = instant_spec(
+            dispatch_id="03-instant-g1",
+            process_generation=1,
+            session_generation=1,
+            action_id="action:instant-production:g1",
+            candidate_path=replacement_path,
+            queue_sequence=2,
+        )
+        scheduler.register(replacement_spec)
+        replacement_tick = scheduler.run_once()
+        self.assertEqual(
+            replacement_tick.outcome,
+            "DISPATCHED",
+        )
+        self.assertEqual(
+            replacement_tick.dispatch_id,
+            replacement_spec.dispatch_id,
+        )
+        runtime.claim_next_operator_action(
+            helper_instance_id="windows-helper",
+            claim_id="claim:g1",
+            claimed_at="T3",
+            expires_at="T4",
+        )
+        runtime.record_operator_action_local_prepared(
+            action_id="action:instant-production:g1",
+            generation=0,
+            worker_slot_id=SLOT_ID,
+            session_generation=1,
+            observed_at="T3.5",
+        )
+        replacement_bytes = worker_candidate_bytes(
+            runtime,
+            action_id="action:instant-production:g1",
+        )
+        replacement_observation = GitHubCandidateObservation(
+            repository=CANDIDATE_REPO,
+            ref=CANDIDATE_REF,
+            path=replacement_path,
+            commit_sha="d" * 40,
+            content=replacement_bytes,
+        )
+        validator = PassingWorkerValidator()
+        outcome = GitHubCandidateEventService(
+            runtime=runtime,
+            intake=WorkerResultIntakeService(
+                runtime=runtime,
+                validators={VALIDATOR_ID: validator},
+            ),
+            reader=StaticCandidateReader(
+                replacement_observation
+            ),
+        ).ingest(
+            dispatch_id=replacement_spec.dispatch_id,
+            commit_sha="d" * 40,
+        )
+        self.assertEqual(
+            outcome.process_state,
+            ProcessState.COMPLETED,
+        )
+        final = runtime.snapshot().graph
+        self.assertEqual(
+            final.operator_actions[
+                "action:instant-production"
+            ].status,
+            OperatorActionState.STALE,
+        )
+        self.assertEqual(
+            final.operator_actions[
+                "action:instant-production:g1"
+            ].status,
+            OperatorActionState.COMPLETED,
+        )
+        self.assertEqual(
+            final.executor_sessions[SLOT_ID].state.value,
+            "READY",
+        )
+        self.assertEqual(
+            final.executor_sessions[SLOT_ID].session_generation,
+            1,
+        )
+
+    def test_wait_only_scheduler_soak_is_non_mutating_and_zero_reasoning(self):
+        graph = DomainKernel.create_graph(
+            [DomainKernel.create_process("wait-soak")]
+        )
+        graph = DomainKernel.claim(
+            graph,
+            "wait-soak",
+            worker_id="wait-soak-worker",
+            lease_id="wait-soak-lease",
+            expected_generation=0,
+        )
+        graph = DomainKernel.start(
+            graph,
+            "wait-soak",
+            lease_id="wait-soak-lease",
+            expected_generation=0,
+        )
+        graph = DomainKernel.wait_external(
+            graph,
+            "wait-soak",
+            wait_key="external:soak",
+            lease_id="wait-soak-lease",
+            expected_generation=0,
+        )
+        runtime = RuntimeCoordinator(
+            state_store=InMemoryStateStore(),
+            event_ledger=InMemoryEventLedger(),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        runtime.initialize(graph)
+        scheduler = build_scheduler(runtime)
+        before = runtime.snapshot()
+        for _ in range(1000):
+            tick = scheduler.run_once()
+            self.assertEqual(tick.outcome, "NO_WORK")
+        after = runtime.snapshot()
+        self.assertEqual(after.version, before.version)
+        self.assertEqual(
+            after.graph.processes["wait-soak"].reasoning_quanta,
+            0,
+        )
+        self.assertEqual(
+            after.graph.processes["wait-soak"].wait_key,
+            "external:soak",
         )
 
     def test_candidate_observation_mismatch_is_pre_mutation_failure(self):
