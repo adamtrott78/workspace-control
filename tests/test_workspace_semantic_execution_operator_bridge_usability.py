@@ -99,7 +99,6 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("stage10-ut10", workflow)
         self.assertIn("stage10-ut12", workflow)
         self.assertIn("STAGE10_SCHEDULER_HOTKEY: Ctrl+Space", workflow)
-        self.assertIn("needs: validation", workflow)
         self.assertIn(
             "runs-on: [self-hosted, windows, x64, workspace-operator-target]",
             workflow,
@@ -122,6 +121,9 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("RUNNER_TOOL_CACHE", stage10)
         self.assertIn("GITHUB_PATH", stage10)
         self.assertIn('".dotnet\\dotnet.exe"', stage10)
+        self.assertIn("STAGE10_PRIOR_EXACT_HEAD_VALIDATION=PASS", stage10)
+        self.assertIn("actions/runs/$($candidate.id)/jobs", stage10)
+        self.assertNotIn("    needs: validation\n", stage10)
 
     def test_stage10_ut03_interruption_trial_is_explicit_and_bounded(self):
         harness = (
@@ -223,9 +225,10 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertIn("STAGE10_WEB_EXT_CACHE=", script)
         self.assertIn("web-ext-10.8.0", script)
         self.assertIn("WaitForExit(120000)", script)
-        self.assertIn("$npmProcess.WaitForExit()", script)
-        self.assertIn("$npmProcess.Refresh()", script)
-        self.assertIn("$npmExitCode = $npmProcess.ExitCode", script)
+        self.assertNotIn("$npmExitCode = $npmProcess.ExitCode", script)
+        self.assertIn("$stagedMetadata.version -ne \"10.8.0\"", script)
+        self.assertIn("build_fingerprint=", script)
+        self.assertIn("ls-tree -r HEAD", script)
         self.assertIn("--prefer-offline", script)
         self.assertIn("stage10-ut05", workflow)
         self.assertIn("stage10-ut12", workflow)
