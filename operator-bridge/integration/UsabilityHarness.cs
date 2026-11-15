@@ -958,6 +958,17 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             {
                 NoActionPresses++;
                 NoWorkMinimizeAttempts++;
+
+                if (_trialId == "UT-12")
+                {
+                    // UT-12 begins from a synthetically pre-existing
+                    // SENT/UNCONFIRMED worker. Mirror the production
+                    // prerequisite that would have been established by the
+                    // prior LocalPrepared dispatch: capture only the Firefox
+                    // window that is already foreground at the READY=0 press.
+                    _workerWindowSafety.RecordPreparedWorkerWindow();
+                }
+
                 var minimized = _workerWindowSafety.MinimizeAfterNoAction();
                 if (minimized)
                 {
