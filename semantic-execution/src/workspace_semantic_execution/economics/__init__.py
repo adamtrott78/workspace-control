@@ -5,6 +5,16 @@ from .codex_trace import (
     CodexTraceError,
     parse_codex_exec_jsonl,
 )
+from .calibration import (
+    CalibrationInvariantError,
+    CalibrationObservation,
+    CalibrationSurface,
+    MeterCalibrationReport,
+    SharedMeterState,
+    SurfaceCalibrationSummary,
+    SurfaceMeterState,
+    calibrate_shared_weekly_meter,
+)
 from .experiments import (
     FrozenResearchFixture,
     PolicyExperimentError,
@@ -48,6 +58,14 @@ from .ledger import (
 )
 
 __all__ = [
+    "CalibrationInvariantError",
+    "CalibrationObservation",
+    "CalibrationSurface",
+    "MeterCalibrationReport",
+    "SharedMeterState",
+    "SurfaceCalibrationSummary",
+    "SurfaceMeterState",
+    "calibrate_shared_weekly_meter",
     "FrozenResearchFixture",
     "PolicyExperimentError",
     "PolicyExperimentSummary",
