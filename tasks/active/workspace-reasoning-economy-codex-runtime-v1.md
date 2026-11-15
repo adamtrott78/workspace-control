@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: workspace-reasoning-economy-codex-runtime-v1
 - Title: Workspace Reasoning Economy Codex Runtime v1
-- Status: IN_PROGRESS
+- Status: NEEDS_USER_DECISION
 - Capsule schema: v2
 
 ## Goal
@@ -24,19 +24,16 @@ Add a bounded, CPU-only Codex runtime/bootstrap capability to the existing Works
 
 - Intent: mutate
 - Remote branch: workspace-reasoning-economy-codex-runtime-v1
-- Remote checkpoint: 164c039b73a1433370802d962eaf949a688eb0a5
+- Remote checkpoint: 07198a81430a8ec20360b9060043ed238c59cb59
 - Remote verified: true
 
 ## Next safe action
 
-DO NOT implement another bootstrap workflow: it already exists at exact head 164c039b73a1433370802d962eaf949a688eb0a5. First add tests/test_workspace_reasoning_economy_codex_runtime.py that statically prove the workflow preserves the frozen safety/resource contract (control-small only; no PADataset/GPU/Docker/sibling access; OPENAI_API_KEY unset; ChatGPT-only auth; Codex 0.155.1 + exact release digest; persistent paths only under Workspace Control home; zero model inference; redacted receipt; no capacity/root-policy widening). Then run repository validation on the exact candidate. If green, open/continue a stacked PR whose base is PR #627 head branch padataset-dual-science-control-reserve-v1 at acd420758eb0124646988ee8776939572c88a82d. Do not add or activate the live root route until the inert workflow is validated and promoted to an exact default-branch blob.
+DO NOT modify, merge, retarget, or regress PR #627. The inert bootstrap workflow and six static safety/resource contract tests are repository-validated at exact child head 07198a81430a8ec20360b9060043ed238c59cb59 by Workspace Control Validation #2788, and authoritative stacked PR #630 targets PR #627 base acd420758eb0124646988ee8776939572c88a82d. Trusted-workflow promotion is now authority-gated on the PR #627 reserved-capacity lineage reaching default branch (or an explicit owning-task authorization for another provenance-preserving promotion path). Once that gate is satisfied, promote the inert workflow to default branch, bind its exact blob, and only then add the bounded /workspace-codex-bootstrap route.
 
 ## Remaining work
 
-- Add tests/test_workspace_reasoning_economy_codex_runtime.py with static contract tests for exact runner class, no GPU/Docker/sibling access, OPENAI_API_KEY stripping, ChatGPT-only auth, pinned Codex version/digest, no model inference, redacted receipt, and absence of capacity/root-authority widening.
-- Repository-validate the inert bootstrap workflow candidate on the stacked branch; do not treat implementation presence as validation.
-- Open/validate the Codex runtime PR stacked on PR #627 head padataset-dual-science-control-reserve-v1@acd420758eb0124646988ee8776939572c88a82d without modifying PR #627.
-- Promote the validated inert workflow to default branch and bind its exact blob before adding any trusted route.
+- Promote the validated inert workflow to default branch and bind its exact blob after the PR #627 lineage gate is satisfied.
 - Add and validate an additive /workspace-codex-bootstrap route on workspace-control-control-small-v1 while preserving host=3, PADataset=2, Workspace Control=1, reserved=1.
 - Activate only through reviewed v3 root-policy/provisioner authority; no manual runner or sidecar bypass.
 - Run zero-inference bootstrap; if login is absent, user performs one device-code ChatGPT authorization.
@@ -45,7 +42,7 @@ DO NOT implement another bootstrap workflow: it already exists at exact head 164
 
 ## Blockers / gates
 
-- None.
+- Trusted-workflow promotion is authority-gated on PR #627 lineage: authoritative stacked PR #630 targets padataset-dual-science-control-reserve-v1@acd420758eb0124646988ee8776939572c88a82d, while this child is explicitly prohibited from modifying, merging, retargeting, or regressing PR #627. The smallest next action is for the owner of PR #627 promotion authority to land/advance that reserved-capacity base to default branch, or explicitly authorize another provenance-preserving promotion path.
 
 ## Fresh-chat initialization
 
