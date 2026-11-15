@@ -210,17 +210,22 @@ class CoordinatedActionService:
         # Claim/start are deliberately after all effect-free planning. If the
         # durable generation changed meanwhile, RuntimeCoordinator/DomainKernel
         # fails closed before the executor can be invoked.
-        self._runtime.claim(
-            request.process_id,
-            worker_id=request.worker_id,
-            lease_id=request.lease_id,
-            expected_generation=request.expected_generation,
-        )
-        self._runtime.start(
-            request.process_id,
-            lease_id=request.lease_id,
-            expected_generation=request.expected_generation,
-        )
+        try:
+            self._runtime.claim(
+                request.process_id,
+                worker_id=request.worker_id,
+                lease_id=request.lease_id,
+                expected_generation=request.expected_generation,
+            )
+            self._runtime.start(
+                request.process_id,
+                lease_id=request.lease_id,
+                expected_generation=request.expected_generation,
+            )
+        except RuntimeError as exc:
+            raise CoordinatedExecutionError(
+                f"runtime_claim_start_failed:{exc}"
+            ) from exc
 
         receipt = executor_port.execute(
             action,
