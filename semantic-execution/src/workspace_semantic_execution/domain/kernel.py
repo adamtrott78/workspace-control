@@ -18,6 +18,8 @@ from .models import (
     ReasoningProcess,
     TransitionRecord,
     ValidationResult,
+    WorkContract,
+    WorkDisposition,
     WorkGraph,
 )
 
@@ -48,11 +50,13 @@ class DomainKernel:
     Failed transitions leave the caller's graph untouched.
     """
 
-    @staticmethod
+    @classmethod
     def create_process(
+        cls,
         process_id: str,
         *,
         dependencies: Iterable[str] = (),
+        work_contract: WorkContract | None = None,
     ) -> ReasoningProcess:
         if not process_id:
             raise KernelError("process_id_required")
@@ -61,7 +65,13 @@ class DomainKernel:
             raise KernelError("dependency_id_required")
         if process_id in deps:
             raise KernelError("self_dependency")
-        return ReasoningProcess(process_id=process_id, dependencies=deps)
+        if work_contract is not None:
+            cls._validate_work_contract(work_contract)
+        return ReasoningProcess(
+            process_id=process_id,
+            dependencies=deps,
+            work_contract=deepcopy(work_contract),
+        )
 
     @classmethod
     def create_graph(
@@ -104,6 +114,84 @@ class DomainKernel:
     def _guard_lease(process: ReasoningProcess, lease_id: str) -> None:
         if not lease_id or process.lease_id != lease_id:
             raise KernelError("lease_mismatch")
+
+    @staticmethod
+    def _validate_work_contract(contract: WorkContract) -> None:
+        if not isinstance(contract, WorkContract):
+            raise KernelError("invalid_work_contract")
+        if not contract.objective.strip():
+            raise KernelError("work_objective_required")
+        for field_name in (
+            "mandatory_constraints",
+            "provenance_refs",
+            "authority_refs",
+            "validator_contracts",
+            "output_schema_refs",
+        ):
+            values = getattr(contract, field_name)
+            if any(not isinstance(value, str) or not value.strip() for value in values):
+                raise KernelError(f"work_contract_empty_value:{field_name}")
+            if len(set(values)) != len(values):
+                raise KernelError(f"work_contract_duplicate_value:{field_name}")
+
+    @staticmethod
+    def _merge_contract_values(
+        inherited: tuple[str, ...],
+        local: tuple[str, ...],
+    ) -> tuple[str, ...]:
+        return tuple(dict.fromkeys((*inherited, *local)))
+
+    @classmethod
+    def _merge_work_contract(
+        cls,
+        inherited: WorkContract,
+        local: WorkContract,
+    ) -> WorkContract:
+        cls._validate_work_contract(inherited)
+        cls._validate_work_contract(local)
+        merged = WorkContract(
+            objective=local.objective,
+            mandatory_constraints=cls._merge_contract_values(
+                inherited.mandatory_constraints,
+                local.mandatory_constraints,
+            ),
+            provenance_refs=cls._merge_contract_values(
+                inherited.provenance_refs,
+                local.provenance_refs,
+            ),
+            authority_refs=cls._merge_contract_values(
+                inherited.authority_refs,
+                local.authority_refs,
+            ),
+            validator_contracts=cls._merge_contract_values(
+                inherited.validator_contracts,
+                local.validator_contracts,
+            ),
+            output_schema_refs=cls._merge_contract_values(
+                inherited.output_schema_refs,
+                local.output_schema_refs,
+            ),
+        )
+        cls._validate_work_contract(merged)
+        return merged
+
+    @staticmethod
+    def _contract_contains(
+        inherited: WorkContract,
+        child: WorkContract,
+    ) -> bool:
+        for field_name in (
+            "mandatory_constraints",
+            "provenance_refs",
+            "authority_refs",
+            "validator_contracts",
+            "output_schema_refs",
+        ):
+            if not set(getattr(inherited, field_name)).issubset(
+                set(getattr(child, field_name))
+            ):
+                return False
+        return True
 
     @classmethod
     def _dependencies_satisfied(
@@ -268,6 +356,48 @@ class DomainKernel:
         return next_graph
 
     @classmethod
+    def classify_work(
+        cls,
+        graph: WorkGraph,
+        process_id: str,
+        *,
+        disposition: WorkDisposition,
+        reason: str,
+        lease_id: str,
+        expected_generation: int,
+    ) -> WorkGraph:
+        next_graph = cls._copy(graph)
+        process = cls._process(next_graph, process_id)
+        cls._guard_generation(process, expected_generation)
+        cls._guard_lease(process, lease_id)
+        if process.state != ProcessState.RUNNING:
+            raise KernelError(f"classify_invalid_state:{process.state}")
+        if disposition == WorkDisposition.UNCLASSIFIED:
+            raise KernelError("classification_required")
+        if not reason:
+            raise KernelError("classification_reason_required")
+
+        process.disposition = disposition
+        process.disposition_reason = reason
+        if disposition == WorkDisposition.INTRINSICALLY_DIFFICULT:
+            # Classification itself cannot escalate authority. It only releases
+            # the current lease so routing can select a stronger eligible
+            # executor under the existing policy/authority boundary.
+            process.state = ProcessState.READY_TO_RESUME
+            process.worker_id = None
+            process.lease_id = None
+
+        cls._event(
+            next_graph,
+            process,
+            "CLASSIFY_WORK",
+            disposition=disposition.value,
+            reason=reason,
+        )
+        cls.validate(next_graph)
+        return next_graph
+
+    @classmethod
     def decompose(
         cls,
         graph: WorkGraph,
@@ -283,6 +413,13 @@ class DomainKernel:
         cls._guard_lease(parent, lease_id)
         if parent.state != ProcessState.RUNNING:
             raise KernelError(f"decompose_invalid_state:{parent.state}")
+        if parent.disposition == WorkDisposition.INTRINSICALLY_DIFFICULT:
+            raise KernelError("intrinsically_difficult_requires_escalation")
+        if (
+            parent.work_contract is not None
+            and parent.disposition != WorkDisposition.TOO_LARGE
+        ):
+            raise KernelError("contracted_decomposition_requires_too_large")
 
         child_values = [deepcopy(child) for child in children]
         if not child_values:
@@ -302,11 +439,22 @@ class DomainKernel:
                 raise KernelError("new_child_generation_must_be_zero")
             if child.worker_id is not None or child.lease_id is not None:
                 raise KernelError("new_child_cannot_have_lease")
+            if parent.work_contract is not None:
+                if child.work_contract is None:
+                    raise KernelError("contracted_child_requires_work_contract")
+                child.work_contract = cls._merge_work_contract(
+                    parent.work_contract,
+                    child.work_contract,
+                )
+            elif child.work_contract is not None:
+                cls._validate_work_contract(child.work_contract)
             child.parent_process_id = process_id
             next_graph.processes[child.process_id] = child
             child_ids.append(child.process_id)
 
-        parent.children = tuple(child_ids)
+        parent.children = tuple(
+            dict.fromkeys((*parent.children, *child_ids))
+        )
         parent.state = ProcessState.WAITING_DEPENDENCIES
         parent.worker_id = None
         parent.lease_id = None
@@ -341,6 +489,11 @@ class DomainKernel:
                 for child_id in process.children
             ):
                 process.state = ProcessState.READY_TO_RESUME
+                # Fan-in creates a fresh reasoning boundary. The resumed
+                # synthesis must be classified again rather than inheriting a
+                # stale TOO_LARGE decision from before decomposition.
+                process.disposition = WorkDisposition.UNCLASSIFIED
+                process.disposition_reason = None
                 cls._event(
                     next_graph,
                     process,
@@ -646,6 +799,15 @@ class DomainKernel:
                 raise KernelError(f"unknown_state:{process.state}")
             if process.generation < 0:
                 raise KernelError("invalid_generation")
+            if process.disposition not in set(WorkDisposition):
+                raise KernelError(f"unknown_work_disposition:{process.disposition}")
+            if (
+                process.disposition == WorkDisposition.UNCLASSIFIED
+                and process.disposition_reason is not None
+            ):
+                raise KernelError("unclassified_work_has_reason")
+            if process.work_contract is not None:
+                cls._validate_work_contract(process.work_contract)
 
             if (process.worker_id is None) != (process.lease_id is None):
                 raise KernelError("partial_lease_binding")
@@ -704,3 +866,26 @@ class DomainKernel:
             if process.state in TERMINAL_STATES:
                 if process.worker_id is not None or process.lease_id is not None:
                     raise KernelError("terminal_state_has_lease")
+
+            if (
+                process.disposition == WorkDisposition.INTRINSICALLY_DIFFICULT
+                and process.worker_id is not None
+            ):
+                raise KernelError("intrinsically_difficult_cannot_hold_lease")
+
+        for process_id, process in graph.processes.items():
+            if process.parent_process_id is None:
+                continue
+            parent = graph.processes.get(process.parent_process_id)
+            if parent is None:
+                raise KernelError("unknown_parent_process")
+            if process_id not in parent.children:
+                raise KernelError("parent_child_link_mismatch")
+            if parent.work_contract is not None:
+                if process.work_contract is None:
+                    raise KernelError("contracted_child_missing_work_contract")
+                if not cls._contract_contains(
+                    parent.work_contract,
+                    process.work_contract,
+                ):
+                    raise KernelError("inherited_work_contract_dropped")
