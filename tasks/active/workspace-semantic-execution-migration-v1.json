@@ -2353,7 +2353,6 @@
     "GitRunner/controller modernization is intentionally deferred and authority-separated. This task may define comparison criteria and adapter boundaries, but may not rewrite/replace or widen GitRunner execution authority until a separate reviewed task is opened after semantic-execution Architecture Review v0.3."
   ],
   "remaining_work": [
-    "OPERATOR IMMEDIATE: add Stage-10 harness support for UT-05 and UT-12 first, then UT-06–UT-08; validate exact head before human trials.",
     "OPERATOR TRIALS: run UT-05–UT-08, UT-12, Bridge-OFF UT-11, and representative-work UT-09; preserve Ctrl+Space -> Ctrl+V -> Enter, no tab search, minimize-on-empty, and stale-submit protection.",
     "REASONING ECONOMY: continue claim-bearing P0-P3 runset readiness using exact fixture/oracle/run provenance; incomplete/superseded screening is never promotion evidence and unknown allowance remains UNKNOWN.",
     "CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.",

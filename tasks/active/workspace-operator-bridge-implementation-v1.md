@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 41d320100a0c2ee3890c900ed5295a94b08213af
+- Remote checkpoint: 3a075ebd05f16e34c754dbcc1600aa8fa620b04f
 - Remote verified: true
 
 ## Next safe action
 
-IMPLEMENT THE MISSING STAGE-10 TRIAL HARNESS BEFORE ASKING THE OPERATOR TO RUN UNSUPPORTED TRIALS. Current operator-bridge/tools/run-stage10-usability.ps1 ValidateSet supports only UT-11, UT-01, UT-02, UT-03, UT-04 and UT-10. Add bounded deterministic fake-worker support and structured objective evidence for UT-05 judgment-gate behavior and UT-12 no-work/background-ack behavior first; then UT-06, UT-07 and UT-08 recovery scenarios. Preserve the frozen security boundary and Ctrl+Space motor loop. Validate exact head after each coherent slice. Then run UT-05–UT-08, UT-12, Bridge-OFF UT-11 and representative-work UT-09. Only after those pass and the semantic live-host authority route exists may exact-host Tailscale fake-worker preflight and Stage-12 real-account calibration proceed.
+EXECUTE THE NOW-SUPPORTED STAGE-10 HUMAN TRIALS ONE AT A TIME. The exact recovery/judgment/background-ack harness implementation head workspace-control@3a075ebd05f16e34c754dbcc1600aa8fa620b04f passed Workspace Control #2854, Semantic Execution #183, and Operator Bridge #442. Run and accept UT-05, UT-06, UT-07, UT-08, and UT-12 with the operator, preserving Ctrl+Space -> Ctrl+V -> Enter only where a worker packet is actually READY. Use only the explicit judgment/recovery surfaces for gated trials; do not search tabs or reconstruct state manually. Then rerun Bridge-OFF UT-11 and representative-work collision UT-09. Only after the remaining Stage-10 evidence passes and the semantic live-host authority route exists may exact-host Tailscale fake-worker preflight and Stage-12 real-account calibration proceed.
 
 ## Remaining work
 
@@ -47,7 +47,6 @@ IMPLEMENT THE MISSING STAGE-10 TRIAL HARNESS BEFORE ASKING THE OPERATOR TO RUN U
 - Ctrl+Space passed UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, UT-03 interruption recovery, and UT-04 multiple SENT/UNCONFIRMED coexistence. Final binding retention still requires UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing.
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
 - Production action/status transport is now implemented and validated in code, but the real Tailscale Serve -> localhost backend path has not yet been activated/preflighted on the Linux Workspace Control host and Windows WorkspaceWorkers client. INST-01 remains PARTIAL until that exact-host path carries a fake-worker action end-to-end.
-- Stage-10 HARNESS GAP: operator-bridge/tools/run-stage10-usability.ps1 currently accepts only UT-11, UT-01, UT-02, UT-03, UT-04 and UT-10. UT-05/UT-06/UT-07/UT-08/UT-12 cannot be validly executed until bounded harness/scenario/result support is implemented and repository-validated.
 
 ## Fresh-chat initialization
 
