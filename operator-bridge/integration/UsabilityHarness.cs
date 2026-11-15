@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using System.Runtime.InteropServices;
+using System.Drawing;
 using System.Text.Json;
 using WorkspaceControl.OperatorBridge.Application;
 using WorkspaceControl.OperatorBridge.Ipc;
@@ -863,6 +863,8 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
     private async void HotkeyPressed(object? sender, EventArgs e)
     {
         HotkeyPresses++;
+        Console.WriteLine(
+            $"STAGE10_HOTKEY_RECEIVED trial={_trialId} count={HotkeyPresses}");
         var clipboardWritesBeforeDispatch = _clipboard.WriteCount;
         var browserEffectsBeforeDispatch = _browser.EffectCount;
 
@@ -1687,6 +1689,8 @@ internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
         JudgmentOpenCount++;
         ExactGateObserved = true;
         LastJudgmentActionId = action.ActionId;
+        Console.WriteLine(
+            $"STAGE10_JUDGMENT_OPENING action_id={action.ActionId}");
 
         var decision = ShowOperatorDialog(
             $"UT-05 judgment gate\n\nAction: {action.ActionId}\n\n" +
@@ -1696,6 +1700,8 @@ internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Question,
             MessageBoxDefaultButton.Button1);
+        Console.WriteLine(
+            $"STAGE10_JUDGMENT_DECISION result={decision}");
 
         if (decision != DialogResult.Yes)
         {
@@ -1795,31 +1801,39 @@ internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
         MessageBoxIcon icon,
         MessageBoxDefaultButton defaultButton = MessageBoxDefaultButton.Button1)
     {
-        var owner = ForegroundWindowOwner.Capture();
-        return owner is null
-            ? MessageBox.Show(text, caption, buttons, icon, defaultButton)
-            : MessageBox.Show(owner, text, caption, buttons, icon, defaultButton);
+        using var owner = new TopMostOperatorDialogOwner();
+        owner.Show();
+        owner.Activate();
+        try
+        {
+            return MessageBox.Show(
+                owner,
+                text,
+                caption,
+                buttons,
+                icon,
+                defaultButton);
+        }
+        finally
+        {
+            owner.Close();
+        }
     }
 
-    private sealed class ForegroundWindowOwner : IWin32Window
+    private sealed class TopMostOperatorDialogOwner : Form
     {
-        private ForegroundWindowOwner(IntPtr handle)
+        public TopMostOperatorDialogOwner()
         {
-            Handle = handle;
+            TopMost = true;
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.Manual;
+            FormBorderStyle = FormBorderStyle.None;
+            Size = new Size(1, 1);
+            Location = new Point(-32000, -32000);
+            Opacity = 0;
         }
 
-        public IntPtr Handle { get; }
-
-        public static ForegroundWindowOwner? Capture()
-        {
-            var handle = GetForegroundWindow();
-            return handle == IntPtr.Zero
-                ? null
-                : new ForegroundWindowOwner(handle);
-        }
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetForegroundWindow();
+        protected override bool ShowWithoutActivation => false;
     }
 
     private string RecoveryInstruction() =>
