@@ -118,6 +118,10 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertNotIn("actions/setup-node@", stage10)
         self.assertIn("git fetch --force --no-tags --prune --depth=1", stage10)
         self.assertIn("STAGE10_RUNNER_PREREQS=PASS", stage10)
+        self.assertIn("STAGE10_RUNNER_TOOLCHAIN_BOUND=PASS", stage10)
+        self.assertIn("RUNNER_TOOL_CACHE", stage10)
+        self.assertIn("GITHUB_PATH", stage10)
+        self.assertIn('".dotnet\\dotnet.exe"', stage10)
 
     def test_stage10_ut03_interruption_trial_is_explicit_and_bounded(self):
         harness = (
