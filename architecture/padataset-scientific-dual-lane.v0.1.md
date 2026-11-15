@@ -16,11 +16,14 @@ Permit at most two concurrent PADataset scientific experiments while preserving 
 
 ## Concurrency policy
 
-- Host active-runner ceiling: 2.
+- Host active-runner ceiling: 3.
 - PADataset project ceiling: 2.
+- Workspace Control project ceiling: 1, with one reserved host slot whenever Workspace Control has no active runner.
 - Workspace Control and Research Engine project ceilings remain 1.
 - Each scientific class has `max_runners=1`.
+- The Workspace Control control-small class remains CPU-only and cannot consume either scientific GPU.
 - GPU claims remain atomic and exclusive; lane A and lane B claim disjoint GPU UUIDs.
+- Non-Workspace-Control admissions cannot consume the final reserved host slot while Workspace Control is idle.
 
 ## Activation safety
 
