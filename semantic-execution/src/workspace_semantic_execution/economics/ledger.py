@@ -43,6 +43,7 @@ ZERO_MODEL_TOKEN_CLASSES = {
 class ExecutionTokenUsage:
     input_tokens: int | None = None
     cached_input_tokens: int | None = None
+    cache_write_input_tokens: int | None = None
     output_tokens: int | None = None
     reasoning_output_tokens: int | None = None
     total_tokens: int | None = None
@@ -64,6 +65,7 @@ class ExecutionTokenUsage:
             for value in (
                 self.input_tokens,
                 self.cached_input_tokens,
+                self.cache_write_input_tokens,
                 self.output_tokens,
                 self.reasoning_output_tokens,
                 self.total_tokens,
@@ -372,6 +374,7 @@ def build_execution_economics(
     for name, value in (
         ("input_tokens", token_usage.input_tokens),
         ("cached_input_tokens", token_usage.cached_input_tokens),
+        ("cache_write_input_tokens", token_usage.cache_write_input_tokens),
         ("output_tokens", token_usage.output_tokens),
         ("reasoning_output_tokens", token_usage.reasoning_output_tokens),
         ("total_tokens", token_usage.total_tokens),
