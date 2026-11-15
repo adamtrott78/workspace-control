@@ -1,5 +1,12 @@
 """Application services for Workspace Semantic Execution."""
 
+from .executor_dispatch import (
+    ExecutorDispatchCoordinator,
+    ExecutorDispatchError,
+    ExecutorDispatchRequest,
+    ExecutorDispatchResult,
+    OperatorDispatchParameters,
+)
 from .default_profiles import (
     initial_executor_profiles,
     machine_llm_profile,
@@ -51,6 +58,11 @@ from .vertical_slice import (
 
 __all__ = [
     "CompiledPacket",
+    "ExecutorDispatchCoordinator",
+    "ExecutorDispatchError",
+    "ExecutorDispatchRequest",
+    "ExecutorDispatchResult",
+    "OperatorDispatchParameters",
     "DecisionRecord",
     "ExecutorRegistry",
     "FindingRecord",

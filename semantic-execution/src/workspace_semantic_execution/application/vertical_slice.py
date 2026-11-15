@@ -20,6 +20,7 @@ from ..domain import (
     ProcessState,
     RoutingDecision,
     ValidationResult,
+    WorkDisposition,
 )
 from ..ports import AuthorityEvaluatorPort, ExecutorPort, StateSnapshot
 from .packet_compiler import (
@@ -226,6 +227,32 @@ class CoordinatedActionService:
             raise CoordinatedExecutionError(
                 f"runtime_claim_start_failed:{exc}"
             ) from exc
+
+        process = self._runtime.snapshot().graph.processes[
+            request.process_id
+        ]
+        if process.work_contract is not None:
+            if process.disposition == WorkDisposition.UNCLASSIFIED:
+                try:
+                    self._runtime.classify_work(
+                        request.process_id,
+                        disposition=WorkDisposition.EXECUTABLE,
+                        reason=(
+                            "selected executor satisfies the concrete "
+                            "authority-bound bounded action"
+                        ),
+                        lease_id=request.lease_id,
+                        expected_generation=request.expected_generation,
+                    )
+                except RuntimeError as exc:
+                    raise CoordinatedExecutionError(
+                        f"runtime_classify_failed:{exc}"
+                    ) from exc
+            elif process.disposition != WorkDisposition.EXECUTABLE:
+                raise CoordinatedExecutionError(
+                    "contracted_process_not_executable:"
+                    f"{process.disposition.value}"
+                )
 
         receipt = executor_port.execute(
             action,
