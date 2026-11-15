@@ -970,6 +970,7 @@ def expand_inactive(
         provisioner_started_on_new_generation = True
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
+        _require_active_controller_socket_group(systemd, existing_class_ids)
 
         controller_after = _controller_snapshot(systemd, existing_class_ids)
         _require_controller_snapshot_preserved(controller_before, controller_after)
@@ -1097,6 +1098,7 @@ def activate(
     existing_before = _controller_snapshot(systemd, existing_ids)
     _require_provisioner_active(systemd)
     _require_provisioner_socket()
+    _require_active_controller_socket_group(systemd, existing_ids)
 
     overlay = _load(DEPLOYMENT_OVERLAY)
     target_state = overlay.get("classes", {}).get(TARGET_CLASS)
@@ -1169,7 +1171,9 @@ def activate(
         _require_controller_snapshot_preserved(existing_before, existing_after)
         _require_provisioner_active(systemd)
         _require_provisioner_socket()
-        _require_active_controller_socket_group(systemd, existing_class_ids)
+        _require_active_controller_socket_group(
+            systemd, [*existing_ids, TARGET_CLASS]
+        )
         reconciler.verify_installed(BASE_MANIFEST)
 
         tx["phase"] = "COMMITTED_ACTIVE"
