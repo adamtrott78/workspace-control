@@ -7,7 +7,7 @@
   "execution_topology": "remote_only",
   "workflow": null,
   "parent_execution_owner": "workspace-semantic-execution-migration-v1",
-  "current_stage": "operator_action_store_and_transport_contract",
+  "current_stage": "durable_operator_packet_materialization",
   "acceptance_criteria": [
     "The production domain kernel has no dependency on DBOS, PostgreSQL, GitHub, browser/UI, model-provider SDKs, GPU libraries, or other infrastructure adapters.",
     "Production kernel behavior satisfies the validated parent executable reference contract at workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723.",
@@ -51,7 +51,7 @@
       "base_sha": "6b27e9c057c6ea33fdf532112711a11e10ff3723",
       "remote": {
         "branch": "workspace-semantic-execution-migration-v1",
-        "checkpoint_sha": "6979165961cc848ca8b37acd58f7c91e7a48df65",
+        "checkpoint_sha": "b5695e8c42c546d549742279a54e5668874fdacc",
         "verified": true
       },
       "local": null,
@@ -439,7 +439,7 @@
     },
     {
       "id": "operator_action_store_and_transport_contract",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-semantic-execution-backend",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -457,8 +457,42 @@
         "transport-neutral backend service contract matching action_id + worker_slot_id + session_generation",
         "reviewed production transport selection without helper credential storage or unauthenticated listener"
       ],
+      "validation": [
+        {
+          "check": "Durable OperatorAction lifecycle and production transport contract",
+          "result": "PASS",
+          "evidence": [
+            "Durable OperatorAction queue/lifecycle, exact action/process/session-generation fencing, Ready/SentUnconfirmed projection and packet-text-not-at-rest semantics are validated.",
+            "Backend localhost-only Operator Bridge HTTP adapter uses a fixed endpoint allowlist, bounded request bodies, no request logging, no authority endpoint, and proxy-provided identity-header authentication.",
+            "Windows HttpOperatorBridgeClient is outbound-only, HTTPS-only, sends no Authorization/GitHub/OpenAI/Tailscale identity credential, replays the exact durable action generation privately, and preserves the no-work baseline when no remote URL is configured.",
+            "Exact head b5695e8c42c546d549742279a54e5668874fdacc passed Workspace Control Validation #2827 / run 43737570048 / job 132883443102 SUCCESS.",
+            "Semantic Execution Validation #143 / run 43737570042 / job 132883442854 SUCCESS, including HTTP contract and DBOS/PostgreSQL durability tests.",
+            "Operator Bridge Validation #416 / run 43737570090 / job 132883443144 SUCCESS, including frozen security/protocol checks, production build/tests, Firefox recovery integration, packaging smoke, CI performance smoke, and helper idle sample."
+          ]
+        }
+      ],
+      "resume_condition": "SATISFIED: durable action/status transport exists on both sides with generation fencing and frozen security boundaries; live Tailscale Serve activation remains a separate deployment/preflight gate."
+    },
+    {
+      "id": "durable_operator_packet_materialization",
+      "status": "IN_PROGRESS",
+      "execution_owner": "workspace-semantic-execution-backend",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github",
+      "inputs": [
+        "validated SemanticPacketCompiler",
+        "validated persistent ExecutorSession broker",
+        "validated durable OperatorAction lifecycle",
+        "validated localhost-only Operator Bridge HTTP transport"
+      ],
+      "outputs": [
+        "durable typed SemanticPacketSource records with no packet text at rest",
+        "atomic session-bind + packet-source + OperatorAction planning",
+        "production DurableOperatorPacketMaterializer",
+        "PostgreSQL restart/materialization proof"
+      ],
       "validation": [],
-      "resume_condition": "Workspace Control durably owns OperatorAction lifecycle and exposes a bounded transport contract that the independently owned Windows helper can consume without Git polling, browser authority, embedded GitHub credentials, or unauthenticated inbound helper listeners."
+      "resume_condition": "A persistent-chat work item can atomically bind its current session generation, persist typed packet inputs/hash and queue an OperatorAction; after state-store restart the exact packet is reconstructed and hash-verified without stored packet text or transcript dependence."
     }
   ],
   "checkpoints": [
@@ -611,6 +645,18 @@
         "Persistent session state survives Postgres adapter recreation; process recovery advances session generation and fences stale acknowledgments.",
         "Session state contains no authority and stateless executors allocate no session."
       ]
+    },
+    {
+      "id": "operator-action-production-transport-code-validated",
+      "kind": "transport_checkpoint",
+      "identity": "workspace-control@b5695e8c42c546d549742279a54e5668874fdacc",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Control #2827 SUCCESS.",
+        "Semantic Execution #143 SUCCESS.",
+        "Operator Bridge #416 SUCCESS.",
+        "Code-level NoWork/empty-status production transport blocker is removed when an explicit reviewed HTTPS remote URL is configured; default no-URL mode remains fail-safe no-work."
+      ]
     }
   ],
   "artifacts": [
@@ -673,6 +719,18 @@
       "evidence": [
         "Workspace Control #2819 and Semantic Execution #132 on 6979165961cc848ca8b37acd58f7c91e7a48df65."
       ]
+    },
+    {
+      "path": "semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py",
+      "state": "VALIDATED_LOCALHOST_HTTP_TRANSPORT",
+      "role": "Loopback-only authenticated Operator Bridge backend HTTP adapter",
+      "origin": "workspace-semantic-execution-backend-v1",
+      "persistence": "git",
+      "regeneration": "maintained under backend task authority",
+      "review_requirement": "Must remain localhost-only behind reviewed private reverse proxy; no authority endpoint or request-content logging.",
+      "evidence": [
+        "Workspace Control #2827 and Semantic Execution #143 on b5695e8c42c546d549742279a54e5668874fdacc."
+      ]
     }
   ],
   "validation": [
@@ -725,19 +783,29 @@
         "Exact head 6979165961cc848ca8b37acd58f7c91e7a48df65 passed repository, semantic-specific and PostgreSQL persistence tests.",
         "Persistent session reuse/rotation/replacement and stale-generation fencing are durable and independent of transcript correctness."
       ]
+    },
+    {
+      "check": "November INST-01 code-level transport implementation",
+      "result": "PASS",
+      "evidence": [
+        "Backend durable action/status API and Windows outbound HTTP client are implemented and cross-contract-tested.",
+        "Live host activation remains intentionally unproven and is tracked separately in November INST-01."
+      ]
     }
   ],
   "blockers": [],
   "remaining_work": [
-    "Implement durable OperatorAction lifecycle/store + workload-status projection bound to current process/session generations.",
-    "Freeze a bounded production OperatorBridge transport contract consistent with UX-12: helper-originated authenticated outbound connection, no embedded GitHub credential, no unauthenticated inbound helper listener, no page/content access.",
-    "Hand the transport contract to workspace-operator-bridge-implementation-v1 and implement its production IOperatorActionPort adapter only under that task authority.",
-    "Finish remaining Stage-10 Operator Bridge trials and then bounded Stage-12 real-account calibration.",
-    "Integrate subscription Codex after its runtime/auth child clears the PR #627 lineage gate.",
-    "Run the first mixed-executor Research Engine research-iterate slice and close remaining November REL/E2E gates."
+    "Implement and validate durable typed SemanticPacketSource records plus production packet materialization with packet text absent from durable state.",
+    "Atomically compose current session binding, typed packet source and queued OperatorAction in one state-store CAS boundary.",
+    "Prove exact retry idempotency, stale process/session fencing, deterministic materialization and PostgreSQL restart reconstruction.",
+    "After packet materialization passes, add a production backend server composition/entrypoint and run localhost transport preflight before any Tailscale Serve activation.",
+    "Activate the reviewed outbound-only Tailscale Serve path only after exact-host preflight; then run one fake-worker production transport action before any real ChatGPT account.",
+    "Finish remaining Operator Bridge Stage-10 trials and then bounded Stage-12 real-account calibration.",
+    "Integrate subscription Codex only after its PR #627 lineage gate clears.",
+    "Run the mixed-executor Research Engine research-iterate proving workflow and close remaining November REL/E2E gates."
   ],
-  "next_safe_action": "Implement OPERATOR_ACTION_STORE_AND_TRANSPORT_CONTRACT_V1. Add durable OperatorAction records/lifecycle to semantic-execution control state, with deterministic queue priority/sequence, exact action/process/slot/session-generation identity, atomic claim, revalidation before local preparation, local failure/block/completion receipts, durable-ack transition, and Ready/SentUnconfirmed status projection. Bind action validity to current ExecutorSession and process generations; stale actions must fail closed. Freeze an outbound authenticated production transport contract for the Windows helper without Git polling, embedded GitHub credentials, helper inbound listeners, or authority creation. Do not mutate operator-bridge/** from the backend task.",
+  "next_safe_action": "Implement DURABLE_OPERATOR_PACKET_MATERIALIZATION_V1 under semantic-execution/** and dedicated backend tests. Persist typed packet compilation inputs and expected hash, never packet text. Add an atomic planner that binds the exact current ExecutorSession generation, registers the packet source, and enqueues the OperatorAction in one CAS transition. Add a DurableOperatorPacketMaterializer that reconstructs PacketCompilationInput from durable state, resolves the exact ExecutorProfile, recompiles, and fails closed unless process generation/executor/payload ref/hash all match. Prove exact retry idempotency, stale recovery fencing, serialization compatibility and PostgreSQL adapter-restart reconstruction. Do not activate live Tailscale transport yet.",
   "last_executor": "chatgpt",
   "last_surface": "github",
-  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n\n2026-11-13 GENERATION-BOUND EFFECT CHAIN CORRECTION: While defining ExecutorPort, the implementation review found that ActionSpec bound process_id but not process_generation, which could allow a previously authorized action to survive recovery into a newer generation. Corrected CandidateAction, AuthorityDecision and ActionSpec to bind exact process_generation; compilation now fails closed on process/generation/action/target mismatch and EffectReceipt generation completes the fence. workspace-control@e927fbc8117ddb7caed114b2136eb5408ce1fe29 passed Workspace Control Validation #2697 including full unit/integration regression. Runtime-port implementation resumes only from this corrected boundary.\n\n2026-11-13 RUNTIME PORTS / IN-MEMORY SLICE VALIDATED: workspace-control@752351d064f815e600dcdf19f2ba154f7234211f passed Workspace Control Validation #2702. StateStorePort CAS, DurableRuntimePort event publication/reconciliation, RuntimeCoordinator, fake clock/telemetry, deterministic semantic projection, static fail-closed authority and deterministic fake executor are implemented and tested. Fault coverage includes stale writer, event-before-wait, restart while waiting, duplicate event, generation recovery and stale executor completion. The design remains database/runtime independent. Next stage is a provisional DBOS+PostgreSQL adapter spike behind the validated ports.\n\n2026-11-13 DBOS+POSTGRES FIRST SUBSTRATE SPIKE VALIDATED: exact head workspace-control@8e8caf543cff000275bd2cf543f57f89ad9ff3e5 passed Workspace Control #2722 and Semantic Execution #7. The spike pins DBOS Python 3.5.0 + psycopg 3.3.9 and separates DurableRuntimePort (bounded idempotent work) from EventLedgerPort (external wake evidence). PostgreSQL provides deterministic JSONB current-state CAS plus immutable wake-event evidence. DBOS work IDs are idempotent and stored workflow inputs are verified to reject conflicting reuse. A hard-kill subprocess probe exited via os._exit while a workflow was RUNNING and a fresh process recovered/completed that exact workflow from PostgreSQL. Semantic external waits deliberately do not use DBOS.recv. DBOS+PostgreSQL is therefore the provisional first substrate, still behind ports and still reversible until Architecture Review v0.3.\n\n2026-11-13 REAL CANARY VALIDATED: The first production read-only effect adapter and exact Research Engine shadow canary are validated. The upstream Research Engine orchestration file at 1031861c03b2af8cff5cf72939bbbc83a95e65a4 has Git blob 0d051fa50960708e0e773f6871c7e924c5796394; the frozen canary copy has the same blob identity. The production executor generated a receipt from those real bytes, the independent validator reread and validated the same source, and the production kernel projected the real workflow dependency shape. Workspace Control #2748 passed full unit/controller/integration validation. No Research Engine write occurred. Next active stage is explicit fault/resource acceptance plus Architecture Review v0.3.\n\n2026-11-15 ARCHITECTURE REVIEW V0.3: Current head fa29ea7894c64d32795141661ceaa31e84a6a9ac passed Workspace Control #2787 and Semantic Execution #85. The explicit backend suite ran 67 tests plus 7 DBOS/PostgreSQL integration tests, including stale-generation fencing, crash-after-effect, duplicate/out-of-order events, validator timeout, semantic-wait restart, CAS durability and abrupt-process DBOS recovery. Resource probe was GPU-blind with max RSS 18.0 MiB and ~0.99992 observed CPU cores under a 1000-iteration bounded probe. v0.3 retains DBOS 3.5.0 + PostgreSQL 17 provisionally behind ports, does not trigger Restate/Temporal/graph DB, and advances to RESEARCH_ENGINE_COORDINATED_READ_ONLY_VERTICAL_SLICE_V1 with no write-authority widening.\n\n2026-11-15 COORDINATED READ-ONLY SLICE VALIDATED: workspace-control@34028182aaf1dc56d40cc607f8561c2337e16bf8 passed Workspace Control #2800 and Semantic Execution #100. Semantic #100 explicitly ran 74 backend tests including seven coordinated Research Engine tests: exact read completion only after validator PASS, deterministic packet hashing, unknown-authority no-effect, no-eligible-executor no-effect, injected generation race fenced before effect, changed-source validation returning repair-ready, and exact duplicate receipt remaining single-effect. DBOS/PostgreSQL stayed 7/7 PASS and the resource probe remained GPU-blind at max RSS 17.94921875 MiB. The backend now advances to recursive task-tree contract/fan-in semantics; Research Engine remains read-only and write authority is still forbidden.\n\n2026-11-15 RECURSIVE TASK TREE VALIDATED: workspace-control@f104361f3d27bf1a4548acf6f643eb454e847c9a passed Workspace Control #2817 and Semantic Execution #129. The semantic-specific suite ran 81 tests PASS plus 7 DBOS/PostgreSQL integration tests. WorkContract obligations are durably serialized (schema v2 with v1 decode compatibility), recursively inherited and fail closed if dropped. TOO_LARGE permits decomposition; INTRINSICALLY_DIFFICULT releases the weak lease for stronger-executor reclaim but cannot decompose and cannot perform contracted effects until explicit EXECUTABLE reclassification. Two-level fan-out/fan-in, independent leaf completion and recovery while waiting on children all pass. Backend advances to PERSISTENT_EXECUTOR_SESSION_BROKER_V1.\n\n2026-11-15 PERSISTENT SESSION BROKER VALIDATED: workspace-control@6979165961cc848ca8b37acd58f7c91e7a48df65 passed Workspace Control #2819 and Semantic Execution #132. The dedicated semantic suite ran 87 tests PASS and DBOS/PostgreSQL integration ran 8 tests PASS, including durable session-slot survival across Postgres adapter recreation. Session generation is independent from process generation; process recovery automatically fences a bound session, loss/context retirement advances session generation, stale acknowledgments fail closed, replacement resumes from deterministically reconstructed packet state, stateless executors allocate no session, and ExecutorSession has no authority field. Backend advances to durable OperatorAction store + production transport contract for INST-01.\n"
+  "notes": "2026-11-13 CHILD ACTIVATION: Created from validated parent checkpoint workspace-control@6b27e9c057c6ea33fdf532112711a11e10ff3723 after the operator explicitly instructed implementation to begin. This child owns backend implementation only. The parent architecture/benchmark task remains the source of design evidence; Research Engine remains read-only for the first canary; GitRunner modernization is deferred; Operator Bridge remains independently owned. First principle: hand-build the Workspace-specific brain/domain semantics, reuse mature durability/runtime infrastructure behind ports.\n\n2026-11-13 KERNEL SLICE VALIDATED: Production pure-domain kernel at workspace-control@546a3f64b115baf6b07227416e2b844c5c6d3a58 passed Workspace Control Validation #2676 including unit regression and full integration. The backend now has typed ProcessState/ReasoningProcess/CandidateAction/AuthorityDecision/ActionSpec/EffectReceipt/ValidationResult records plus copy-on-transition semantics for claim/start/wait/wake/decompose/effect/validate/recover. Next active stage is deterministic packet compilation plus executor/resource/session registry; no infrastructure adapter or GPU dependency is present yet.\n\n2026-11-13 PACKET/ROUTER SLICE VALIDATED: workspace-control@713f70533eee1dfe7f5274c17ca7d2091204c40c passed Workspace Control Validation #2691. SemanticPacketCompiler deterministically renders typed durable state into WORKSPACE_REASONING_PACKET_V1, answering the clipboard-prompt ownership question without a second LLM prompt-writer. Executor routing is model-name agnostic and separates invocation mode, session mode, service lifecycle, and memory reset policy. The institutional LLM placeholder remains UNKNOWN/ineligible until measured deployment facts exist. During this slice a recovery flaw was found and corrected: generation recovery may fence ownership but cannot satisfy WAITING_EXTERNAL or WAITING_DEPENDENCIES; only actual wake conditions create readiness. Next stage is ports + deterministic in-memory runtime/state adapters.\n\n2026-11-13 GENERATION-BOUND EFFECT CHAIN CORRECTION: While defining ExecutorPort, the implementation review found that ActionSpec bound process_id but not process_generation, which could allow a previously authorized action to survive recovery into a newer generation. Corrected CandidateAction, AuthorityDecision and ActionSpec to bind exact process_generation; compilation now fails closed on process/generation/action/target mismatch and EffectReceipt generation completes the fence. workspace-control@e927fbc8117ddb7caed114b2136eb5408ce1fe29 passed Workspace Control Validation #2697 including full unit/integration regression. Runtime-port implementation resumes only from this corrected boundary.\n\n2026-11-13 RUNTIME PORTS / IN-MEMORY SLICE VALIDATED: workspace-control@752351d064f815e600dcdf19f2ba154f7234211f passed Workspace Control Validation #2702. StateStorePort CAS, DurableRuntimePort event publication/reconciliation, RuntimeCoordinator, fake clock/telemetry, deterministic semantic projection, static fail-closed authority and deterministic fake executor are implemented and tested. Fault coverage includes stale writer, event-before-wait, restart while waiting, duplicate event, generation recovery and stale executor completion. The design remains database/runtime independent. Next stage is a provisional DBOS+PostgreSQL adapter spike behind the validated ports.\n\n2026-11-13 DBOS+POSTGRES FIRST SUBSTRATE SPIKE VALIDATED: exact head workspace-control@8e8caf543cff000275bd2cf543f57f89ad9ff3e5 passed Workspace Control #2722 and Semantic Execution #7. The spike pins DBOS Python 3.5.0 + psycopg 3.3.9 and separates DurableRuntimePort (bounded idempotent work) from EventLedgerPort (external wake evidence). PostgreSQL provides deterministic JSONB current-state CAS plus immutable wake-event evidence. DBOS work IDs are idempotent and stored workflow inputs are verified to reject conflicting reuse. A hard-kill subprocess probe exited via os._exit while a workflow was RUNNING and a fresh process recovered/completed that exact workflow from PostgreSQL. Semantic external waits deliberately do not use DBOS.recv. DBOS+PostgreSQL is therefore the provisional first substrate, still behind ports and still reversible until Architecture Review v0.3.\n\n2026-11-13 REAL CANARY VALIDATED: The first production read-only effect adapter and exact Research Engine shadow canary are validated. The upstream Research Engine orchestration file at 1031861c03b2af8cff5cf72939bbbc83a95e65a4 has Git blob 0d051fa50960708e0e773f6871c7e924c5796394; the frozen canary copy has the same blob identity. The production executor generated a receipt from those real bytes, the independent validator reread and validated the same source, and the production kernel projected the real workflow dependency shape. Workspace Control #2748 passed full unit/controller/integration validation. No Research Engine write occurred. Next active stage is explicit fault/resource acceptance plus Architecture Review v0.3.\n\n2026-11-15 ARCHITECTURE REVIEW V0.3: Current head fa29ea7894c64d32795141661ceaa31e84a6a9ac passed Workspace Control #2787 and Semantic Execution #85. The explicit backend suite ran 67 tests plus 7 DBOS/PostgreSQL integration tests, including stale-generation fencing, crash-after-effect, duplicate/out-of-order events, validator timeout, semantic-wait restart, CAS durability and abrupt-process DBOS recovery. Resource probe was GPU-blind with max RSS 18.0 MiB and ~0.99992 observed CPU cores under a 1000-iteration bounded probe. v0.3 retains DBOS 3.5.0 + PostgreSQL 17 provisionally behind ports, does not trigger Restate/Temporal/graph DB, and advances to RESEARCH_ENGINE_COORDINATED_READ_ONLY_VERTICAL_SLICE_V1 with no write-authority widening.\n\n2026-11-15 COORDINATED READ-ONLY SLICE VALIDATED: workspace-control@34028182aaf1dc56d40cc607f8561c2337e16bf8 passed Workspace Control #2800 and Semantic Execution #100. Semantic #100 explicitly ran 74 backend tests including seven coordinated Research Engine tests: exact read completion only after validator PASS, deterministic packet hashing, unknown-authority no-effect, no-eligible-executor no-effect, injected generation race fenced before effect, changed-source validation returning repair-ready, and exact duplicate receipt remaining single-effect. DBOS/PostgreSQL stayed 7/7 PASS and the resource probe remained GPU-blind at max RSS 17.94921875 MiB. The backend now advances to recursive task-tree contract/fan-in semantics; Research Engine remains read-only and write authority is still forbidden.\n\n2026-11-15 RECURSIVE TASK TREE VALIDATED: workspace-control@f104361f3d27bf1a4548acf6f643eb454e847c9a passed Workspace Control #2817 and Semantic Execution #129. The semantic-specific suite ran 81 tests PASS plus 7 DBOS/PostgreSQL integration tests. WorkContract obligations are durably serialized (schema v2 with v1 decode compatibility), recursively inherited and fail closed if dropped. TOO_LARGE permits decomposition; INTRINSICALLY_DIFFICULT releases the weak lease for stronger-executor reclaim but cannot decompose and cannot perform contracted effects until explicit EXECUTABLE reclassification. Two-level fan-out/fan-in, independent leaf completion and recovery while waiting on children all pass. Backend advances to PERSISTENT_EXECUTOR_SESSION_BROKER_V1.\n\n2026-11-15 PERSISTENT SESSION BROKER VALIDATED: workspace-control@6979165961cc848ca8b37acd58f7c91e7a48df65 passed Workspace Control #2819 and Semantic Execution #132. The dedicated semantic suite ran 87 tests PASS and DBOS/PostgreSQL integration ran 8 tests PASS, including durable session-slot survival across Postgres adapter recreation. Session generation is independent from process generation; process recovery automatically fences a bound session, loss/context retirement advances session generation, stale acknowledgments fail closed, replacement resumes from deterministically reconstructed packet state, stateless executors allocate no session, and ExecutorSession has no authority field. Backend advances to durable OperatorAction store + production transport contract for INST-01.\n\n2026-11-15 PRODUCTION OPERATOR TRANSPORT CODE VALIDATED: workspace-control@b5695e8c42c546d549742279a54e5668874fdacc passed Workspace Control #2827, Semantic Execution #143, and Operator Bridge #416. The backend HTTP adapter is loopback-only, identity-header gated, fixed-route and content-log-free; the Windows helper is outbound HTTPS-only, carries no app bearer/GitHub/OpenAI/Tailscale identity credential, and uses exact action-generation replay while preserving the frozen ActionIdentity surface. No remote URL means the original NoWorkOperatorActionPort remains the fail-safe default. Live Tailscale Serve/host activation is NOT yet claimed. Backend advances to DURABLE_OPERATOR_PACKET_MATERIALIZATION_V1.\n"
 }

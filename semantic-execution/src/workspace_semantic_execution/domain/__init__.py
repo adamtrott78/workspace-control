@@ -14,6 +14,7 @@ from .executors import (
     SessionMode,
 )
 from .kernel import DomainKernel, KernelError
+from .packet_sources import PacketSourceError, PacketSourceKernel
 from .operator_actions import OperatorActionError, OperatorActionKernel
 from .models import (
     ActionSpec,
@@ -32,6 +33,10 @@ from .models import (
     OperatorPostLocalSuccess,
     ProcessState,
     ReasoningProcess,
+    SemanticPacketDecision,
+    SemanticPacketFinding,
+    SemanticPacketQuestion,
+    SemanticPacketSource,
     TransitionRecord,
     ValidationResult,
     WorkContract,
@@ -68,7 +73,13 @@ __all__ = [
     "OperatorPostLocalSuccess",
     "PrivacyClass",
     "ProcessState",
+    "PacketSourceError",
+    "PacketSourceKernel",
     "ReasoningProcess",
+    "SemanticPacketDecision",
+    "SemanticPacketFinding",
+    "SemanticPacketQuestion",
+    "SemanticPacketSource",
     "RoutingDecision",
     "SessionMode",
     "TransitionRecord",

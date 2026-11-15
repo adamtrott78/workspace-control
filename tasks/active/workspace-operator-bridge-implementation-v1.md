@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: f952a4b0dfea079469ad9d15f32efa51e9ca053b
+- Remote checkpoint: b5695e8c42c546d549742279a54e5668874fdacc
 - Remote verified: true
 
 ## Next safe action
 
-Continue Stage 10 by implementing/executing UT-05 judgment-gate handling, UT-06/UT-07/UT-08 recovery trials, UT-12 no-work/background acknowledgment, the full Bridge-OFF UT-11 Ctrl+Space release check, and UT-09 60-minute representative-work collision testing. In parallel, define a separately authorized production OperatorBridge action/status transport to replace NoWorkOperatorActionPort/empty workload status before Stage 12 real-account calibration. Do not use a real ChatGPT account until Stage 10 and the Stage-12 predecessor gates are satisfied.
+Continue remaining Stage-10 usability gates (UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing) while the backend completes durable packet-source materialization and server composition. Then run a separately reviewed exact-host Tailscale transport preflight using a fake worker before Stage-12 real-account calibration. Do not enable a real ChatGPT account or widen browser permissions before those predecessor gates pass.
 
 ## Remaining work
 
@@ -42,8 +42,8 @@ Continue Stage 10 by implementing/executing UT-05 judgment-gate handling, UT-06/
 ## Blockers / gates
 
 - Ctrl+Space passed UT-10 motor rhythm, UT-02 mixed-batch/minimize-on-empty, UT-03 interruption recovery, and UT-04 multiple SENT/UNCONFIRMED coexistence. Final binding retention still requires UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and UT-09 representative-work collision testing.
-- The production helper still uses NoWorkOperatorActionPort and an empty workload-status provider. An explicitly authorized production OperatorBridge action/status transport is required before real-account Stage 12 can service actual scheduler work.
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
+- Production action/status transport is now implemented and validated in code, but the real Tailscale Serve -> localhost backend path has not yet been activated/preflighted on the Linux Workspace Control host and Windows WorkspaceWorkers client. INST-01 remains PARTIAL until that exact-host path carries a fake-worker action end-to-end.
 
 ## Fresh-chat initialization
 

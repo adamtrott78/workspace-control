@@ -25,6 +25,7 @@ from .models import (
     WorkGraph,
 )
 from .operator_actions import OperatorActionKernel
+from .packet_sources import PacketSourceKernel
 
 
 class KernelError(RuntimeError):
@@ -613,14 +614,23 @@ class DomainKernel:
         next_graph = cls._copy(graph)
         session = cls._session(next_graph, slot_id)
         cls._guard_session_generation(session, expected_session_generation)
-        if session.state != ExecutorSessionState.READY:
-            raise KernelError(f"session_not_ready:{session.state}")
-        if session.session_id is None:
-            raise KernelError("session_id_required")
         process = cls._process(next_graph, process_id)
         cls._guard_generation(process, process_generation)
         if len(packet_sha256) != 64 or any(ch not in "0123456789abcdef" for ch in packet_sha256):
             raise KernelError("packet_sha256_required")
+        if session.state == ExecutorSessionState.BOUND:
+            if (
+                session.bound_process_id == process_id
+                and session.bound_process_generation == process_generation
+                and session.bound_packet_sha256 == packet_sha256
+            ):
+                cls.validate(next_graph)
+                return next_graph
+            raise KernelError(f"session_not_ready:{session.state}")
+        if session.state != ExecutorSessionState.READY:
+            raise KernelError(f"session_not_ready:{session.state}")
+        if session.session_id is None:
+            raise KernelError("session_id_required")
         session.state = ExecutorSessionState.BOUND
         session.bound_process_id = process_id
         session.bound_process_generation = process_generation
@@ -1150,3 +1160,4 @@ class DomainKernel:
                 raise KernelError("partial_session_ack")
 
         OperatorActionKernel.validate_graph(graph)
+        PacketSourceKernel.validate_graph(graph)

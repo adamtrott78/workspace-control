@@ -184,9 +184,15 @@
     },
     {
       "id": "INST-01",
-      "status": "PENDING",
+      "status": "PARTIAL",
       "requirement": "Production semantic scheduler action/status transport replaces NoWorkOperatorActionPort and the empty workload-status provider.",
-      "evidence": []
+      "evidence": [
+        "Durable OperatorAction lifecycle and Ready/SentUnconfirmed projection are validated in semantic control state.",
+        "Loopback-only backend HTTP contract and outbound HTTPS Windows IOperatorActionPort/status client are implemented and validated.",
+        "Exact action/process/session generations are fail-closed and packet text is returned only at claim time.",
+        "Default no-URL Windows mode intentionally retains NoWorkOperatorActionPort as a safe rollback/fail-closed baseline.",
+        "PENDING for PASS: activate reviewed Tailscale Serve/private identity path on the real hosts and prove one fake-worker action/status round trip end-to-end."
+      ]
     },
     {
       "id": "INST-02",
@@ -280,7 +286,8 @@
       "status": "PARTIAL",
       "requirement": "Exact SHA/blob/route provenance, authority boundaries, and rollback paths are mechanically checked with no unresolved violations.",
       "evidence": [
-        "Existing task/provenance/root-policy contracts provide the baseline; integrated promotion proof remains."
+        "Existing task/provenance/root-policy contracts provide the baseline; integrated promotion proof remains.",
+        "Production transport code preserves ownership boundaries: backend loopback-only HTTP, outbound-only Windows client, no app bearer credential, no authority endpoint, and explicit opt-in activation."
       ]
     },
     {
@@ -335,5 +342,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@6979165961cc848ca8b37acd58f7c91e7a48df65"
+  "latest_validated_checkpoint": "workspace-control@b5695e8c42c546d549742279a54e5668874fdacc"
 }

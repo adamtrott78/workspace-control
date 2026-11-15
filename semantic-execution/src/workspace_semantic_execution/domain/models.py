@@ -99,6 +99,49 @@ class WorkContract:
 
 
 @dataclass(frozen=True)
+class SemanticPacketFinding:
+    finding_id: str
+    text: str
+    evidence_refs: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class SemanticPacketDecision:
+    decision_id: str
+    decision: str
+    rationale: str
+    evidence_refs: tuple[str, ...] = ()
+    alternatives: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class SemanticPacketQuestion:
+    question_id: str
+    text: str
+
+
+@dataclass(frozen=True)
+class SemanticPacketSource:
+    payload_ref: str
+    process_id: str
+    process_generation: int
+    executor_id: str
+    packet_sha256: str
+    source_checkpoint: str
+    objective: str
+    findings: tuple[SemanticPacketFinding, ...] = ()
+    decisions: tuple[SemanticPacketDecision, ...] = ()
+    unresolved_questions: tuple[SemanticPacketQuestion, ...] = ()
+    constraints: tuple[str, ...] = ()
+    evidence_refs: tuple[str, ...] = ()
+    authority_refs: tuple[str, ...] = ()
+    allowed_actions: tuple[str, ...] = ()
+    validator_contract: str = ""
+    output_schema: str = "WORKSPACE_REASONING_RESULT_V1"
+    next_safe_boundary: str = ""
+
+
+@dataclass(frozen=True)
 class TransitionRecord:
     seq: int
     event: str
@@ -252,5 +295,6 @@ class WorkGraph:
     processes: dict[str, ReasoningProcess]
     executor_sessions: dict[str, ExecutorSession] = field(default_factory=dict)
     operator_actions: dict[str, OperatorAction] = field(default_factory=dict)
+    packet_sources: dict[str, SemanticPacketSource] = field(default_factory=dict)
     event_seq: int = 0
     graph_history: list[dict[str, Any]] = field(default_factory=list)

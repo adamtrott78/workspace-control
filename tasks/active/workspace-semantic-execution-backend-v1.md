@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 6979165961cc848ca8b37acd58f7c91e7a48df65
+- Remote checkpoint: b5695e8c42c546d549742279a54e5668874fdacc
 - Remote verified: true
 
 ### research-engine
@@ -36,16 +36,18 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement OPERATOR_ACTION_STORE_AND_TRANSPORT_CONTRACT_V1. Add durable OperatorAction records/lifecycle to semantic-execution control state, with deterministic queue priority/sequence, exact action/process/slot/session-generation identity, atomic claim, revalidation before local preparation, local failure/block/completion receipts, durable-ack transition, and Ready/SentUnconfirmed status projection. Bind action validity to current ExecutorSession and process generations; stale actions must fail closed. Freeze an outbound authenticated production transport contract for the Windows helper without Git polling, embedded GitHub credentials, helper inbound listeners, or authority creation. Do not mutate operator-bridge/** from the backend task.
+Implement DURABLE_OPERATOR_PACKET_MATERIALIZATION_V1 under semantic-execution/** and dedicated backend tests. Persist typed packet compilation inputs and expected hash, never packet text. Add an atomic planner that binds the exact current ExecutorSession generation, registers the packet source, and enqueues the OperatorAction in one CAS transition. Add a DurableOperatorPacketMaterializer that reconstructs PacketCompilationInput from durable state, resolves the exact ExecutorProfile, recompiles, and fails closed unless process generation/executor/payload ref/hash all match. Prove exact retry idempotency, stale recovery fencing, serialization compatibility and PostgreSQL adapter-restart reconstruction. Do not activate live Tailscale transport yet.
 
 ## Remaining work
 
-- Implement durable OperatorAction lifecycle/store + workload-status projection bound to current process/session generations.
-- Freeze a bounded production OperatorBridge transport contract consistent with UX-12: helper-originated authenticated outbound connection, no embedded GitHub credential, no unauthenticated inbound helper listener, no page/content access.
-- Hand the transport contract to workspace-operator-bridge-implementation-v1 and implement its production IOperatorActionPort adapter only under that task authority.
-- Finish remaining Stage-10 Operator Bridge trials and then bounded Stage-12 real-account calibration.
-- Integrate subscription Codex after its runtime/auth child clears the PR #627 lineage gate.
-- Run the first mixed-executor Research Engine research-iterate slice and close remaining November REL/E2E gates.
+- Implement and validate durable typed SemanticPacketSource records plus production packet materialization with packet text absent from durable state.
+- Atomically compose current session binding, typed packet source and queued OperatorAction in one state-store CAS boundary.
+- Prove exact retry idempotency, stale process/session fencing, deterministic materialization and PostgreSQL restart reconstruction.
+- After packet materialization passes, add a production backend server composition/entrypoint and run localhost transport preflight before any Tailscale Serve activation.
+- Activate the reviewed outbound-only Tailscale Serve path only after exact-host preflight; then run one fake-worker production transport action before any real ChatGPT account.
+- Finish remaining Operator Bridge Stage-10 trials and then bounded Stage-12 real-account calibration.
+- Integrate subscription Codex only after its PR #627 lineage gate clears.
+- Run the mixed-executor Research Engine research-iterate proving workflow and close remaining November REL/E2E gates.
 
 ## Blockers / gates
 

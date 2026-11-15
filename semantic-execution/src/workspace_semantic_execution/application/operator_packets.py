@@ -1,0 +1,294 @@
+"""Deterministic packet-source persistence and OperatorAction planning."""
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from ..domain import (
+    OperatorAckMode,
+    OperatorAction,
+    OperatorActionState,
+    OperatorActionType,
+    OperatorHumanRequirement,
+    OperatorPostLocalSuccess,
+    SemanticPacketDecision,
+    SemanticPacketFinding,
+    SemanticPacketQuestion,
+    SemanticPacketSource,
+)
+from .packet_compiler import (
+    CompiledPacket,
+    DecisionRecord,
+    FindingRecord,
+    PacketCompilationInput,
+    QuestionRecord,
+    SemanticPacketCompiler,
+)
+from .router import ExecutorRegistry
+from .runtime import RuntimeCoordinator
+
+
+class DurablePacketMaterializationError(RuntimeError):
+    """Fail-closed durable packet reconstruction error."""
+
+
+@dataclass(frozen=True)
+class PlannedOperatorDispatch:
+    action: OperatorAction
+    packet: CompiledPacket
+    packet_source: SemanticPacketSource
+
+
+class DurableOperatorPacketMaterializer:
+    """Rebuild packet text from durable typed source state at claim time."""
+
+    def __init__(
+        self,
+        *,
+        runtime: RuntimeCoordinator,
+        registry: ExecutorRegistry,
+        compiler: SemanticPacketCompiler | None = None,
+    ) -> None:
+        self._runtime = runtime
+        self._registry = registry
+        self._compiler = compiler or SemanticPacketCompiler()
+
+    def materialize(self, action: OperatorAction) -> CompiledPacket:
+        if action.payload_ref is None or action.payload_sha256 is None:
+            raise DurablePacketMaterializationError(
+                "operator_action_payload_binding_required"
+            )
+
+        graph = self._runtime.snapshot().graph
+        source = graph.packet_sources.get(action.payload_ref)
+        if source is None:
+            raise DurablePacketMaterializationError(
+                "packet_source_not_found"
+            )
+
+        expected = (
+            action.reasoning_process_id,
+            action.process_generation,
+            action.executor_id,
+            action.payload_sha256,
+        )
+        observed = (
+            source.process_id,
+            source.process_generation,
+            source.executor_id,
+            source.packet_sha256,
+        )
+        if expected != observed:
+            raise DurablePacketMaterializationError(
+                "packet_source_action_binding_mismatch"
+            )
+
+        process = graph.processes.get(source.process_id)
+        if (
+            process is None
+            or process.generation != source.process_generation
+        ):
+            raise DurablePacketMaterializationError(
+                "packet_source_stale_process_generation"
+            )
+
+        try:
+            executor = self._registry.get(source.executor_id)
+        except KeyError as exc:
+            raise DurablePacketMaterializationError(
+                "packet_source_executor_unknown"
+            ) from exc
+
+        packet = self._compiler.compile(
+            _compilation_input(source),
+            executor=executor,
+        )
+        if packet.packet_sha256 != source.packet_sha256:
+            raise DurablePacketMaterializationError(
+                "packet_source_hash_mismatch"
+            )
+        return packet
+
+
+class OperatorDispatchPlanner:
+    """Atomically bind a persistent session, packet source, and queued action."""
+
+    def __init__(
+        self,
+        *,
+        runtime: RuntimeCoordinator,
+        registry: ExecutorRegistry,
+        compiler: SemanticPacketCompiler | None = None,
+    ) -> None:
+        self._runtime = runtime
+        self._registry = registry
+        self._compiler = compiler or SemanticPacketCompiler()
+
+    def plan_service_existing(
+        self,
+        *,
+        task_id: str,
+        action_id: str,
+        action_generation: int,
+        process_id: str,
+        process_generation: int,
+        worker_slot_id: str,
+        session_generation: int,
+        executor_id: str,
+        packet_input: PacketCompilationInput,
+        priority_rank: int,
+        queue_sequence: int,
+        created_at: str,
+    ) -> PlannedOperatorDispatch:
+        if packet_input.process_id != process_id:
+            raise ValueError("packet_process_mismatch")
+        if action_generation < 0:
+            raise ValueError("action_generation_invalid")
+        if priority_rank < 0 or queue_sequence < 0:
+            raise ValueError("queue_order_invalid")
+
+        executor = self._registry.get(executor_id)
+        packet = self._compiler.compile(
+            packet_input,
+            executor=executor,
+        )
+        payload_ref = (
+            f"semantic-packet://{process_id}/"
+            f"{process_generation}/{packet.packet_sha256}"
+        )
+        source = _packet_source(
+            payload_ref=payload_ref,
+            process_generation=process_generation,
+            packet=packet,
+            packet_input=packet_input,
+        )
+        action = OperatorAction(
+            action_id=action_id,
+            generation=action_generation,
+            action_type=OperatorActionType.SERVICE_EXISTING,
+            status=OperatorActionState.QUEUED,
+            priority_rank=priority_rank,
+            queue_sequence=queue_sequence,
+            created_at=created_at,
+            task_id=task_id,
+            reasoning_process_id=process_id,
+            process_generation=process_generation,
+            worker_slot_id=worker_slot_id,
+            session_generation=session_generation,
+            executor_id=executor_id,
+            payload_ref=payload_ref,
+            payload_sha256=packet.packet_sha256,
+            human_requirement=OperatorHumanRequirement.PASTE_AND_SUBMIT,
+            ack_mode=OperatorAckMode.DURABLE_EVENT,
+            post_local_success=OperatorPostLocalSuccess.AWAIT_DURABLE_ACK,
+        )
+
+        snapshot = self._runtime.plan_operator_dispatch(
+            packet_source=source,
+            action=action,
+            slot_id=worker_slot_id,
+            expected_session_generation=session_generation,
+            process_id=process_id,
+            process_generation=process_generation,
+            packet_sha256=packet.packet_sha256,
+        )
+        persisted = snapshot.graph.operator_actions[action_id]
+        if persisted != action:
+            raise RuntimeError("persisted_operator_action_mismatch")
+
+        return PlannedOperatorDispatch(
+            action=persisted,
+            packet=packet,
+            packet_source=snapshot.graph.packet_sources[payload_ref],
+        )
+
+
+def _packet_source(
+    *,
+    payload_ref: str,
+    process_generation: int,
+    packet: CompiledPacket,
+    packet_input: PacketCompilationInput,
+) -> SemanticPacketSource:
+    return SemanticPacketSource(
+        payload_ref=payload_ref,
+        process_id=packet_input.process_id,
+        process_generation=process_generation,
+        executor_id=packet.executor_id,
+        packet_sha256=packet.packet_sha256,
+        source_checkpoint=packet_input.source_checkpoint,
+        objective=packet_input.objective,
+        findings=tuple(
+            SemanticPacketFinding(
+                finding_id=item.finding_id,
+                text=item.text,
+                evidence_refs=item.evidence_refs,
+            )
+            for item in packet_input.findings
+        ),
+        decisions=tuple(
+            SemanticPacketDecision(
+                decision_id=item.decision_id,
+                decision=item.decision,
+                rationale=item.rationale,
+                evidence_refs=item.evidence_refs,
+                alternatives=item.alternatives,
+            )
+            for item in packet_input.decisions
+        ),
+        unresolved_questions=tuple(
+            SemanticPacketQuestion(
+                question_id=item.question_id,
+                text=item.text,
+            )
+            for item in packet_input.unresolved_questions
+        ),
+        constraints=packet_input.constraints,
+        evidence_refs=packet_input.evidence_refs,
+        authority_refs=packet_input.authority_refs,
+        allowed_actions=packet_input.allowed_actions,
+        validator_contract=packet_input.validator_contract,
+        output_schema=packet_input.output_schema,
+        next_safe_boundary=packet_input.next_safe_boundary,
+    )
+
+
+def _compilation_input(
+    source: SemanticPacketSource,
+) -> PacketCompilationInput:
+    return PacketCompilationInput(
+        process_id=source.process_id,
+        source_checkpoint=source.source_checkpoint,
+        objective=source.objective,
+        findings=tuple(
+            FindingRecord(
+                finding_id=item.finding_id,
+                text=item.text,
+                evidence_refs=item.evidence_refs,
+            )
+            for item in source.findings
+        ),
+        decisions=tuple(
+            DecisionRecord(
+                decision_id=item.decision_id,
+                decision=item.decision,
+                rationale=item.rationale,
+                evidence_refs=item.evidence_refs,
+                alternatives=item.alternatives,
+            )
+            for item in source.decisions
+        ),
+        unresolved_questions=tuple(
+            QuestionRecord(
+                question_id=item.question_id,
+                text=item.text,
+            )
+            for item in source.unresolved_questions
+        ),
+        constraints=source.constraints,
+        evidence_refs=source.evidence_refs,
+        authority_refs=source.authority_refs,
+        allowed_actions=source.allowed_actions,
+        validator_contract=source.validator_contract,
+        output_schema=source.output_schema,
+        next_safe_boundary=source.next_safe_boundary,
+    )

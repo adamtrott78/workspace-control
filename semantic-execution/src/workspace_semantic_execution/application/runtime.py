@@ -10,7 +10,9 @@ from ..domain import (
     ExecutorSession,
     OperatorAction,
     OperatorActionKernel,
+    PacketSourceKernel,
     ReasoningProcess,
+    SemanticPacketSource,
     ValidationResult,
     WorkDisposition,
     WorkGraph,
@@ -349,6 +351,40 @@ class RuntimeCoordinator:
 
     def retire_executor_session(self, *, slot_id: str, expected_session_generation: int, reason: str) -> StateSnapshot:
         return self._apply("session.retired", lambda graph: DomainKernel.retire_executor_session(graph, slot_id=slot_id, expected_session_generation=expected_session_generation, reason=reason))
+
+    def plan_operator_dispatch(
+        self,
+        *,
+        packet_source: SemanticPacketSource,
+        action: OperatorAction,
+        slot_id: str,
+        expected_session_generation: int,
+        process_id: str,
+        process_generation: int,
+        packet_sha256: str,
+    ) -> StateSnapshot:
+        def transition(graph: WorkGraph) -> WorkGraph:
+            next_graph = PacketSourceKernel.register(
+                graph,
+                packet_source,
+            )
+            next_graph = DomainKernel.bind_executor_session(
+                next_graph,
+                slot_id=slot_id,
+                expected_session_generation=expected_session_generation,
+                process_id=process_id,
+                process_generation=process_generation,
+                packet_sha256=packet_sha256,
+            )
+            return OperatorActionKernel.enqueue(
+                next_graph,
+                action,
+            )
+
+        return self._apply(
+            "operator_dispatch.planned",
+            transition,
+        )
 
     def enqueue_operator_action(self, action: OperatorAction) -> StateSnapshot:
         return self._apply(

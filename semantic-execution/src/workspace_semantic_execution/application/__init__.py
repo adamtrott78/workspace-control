@@ -6,6 +6,12 @@ from .default_profiles import (
     openai_chat_instant_current_profile,
     unprovisioned_institutional_llm_profile,
 )
+from .operator_packets import (
+    DurableOperatorPacketMaterializer,
+    DurablePacketMaterializationError,
+    OperatorDispatchPlanner,
+    PlannedOperatorDispatch,
+)
 from .operator_actions import (
     ClaimedOperatorAction,
     OperatorActionService,
@@ -44,6 +50,10 @@ __all__ = [
     "FindingRecord",
     "ClaimedOperatorAction",
     "OperatorActionService",
+    "DurableOperatorPacketMaterializer",
+    "DurablePacketMaterializationError",
+    "OperatorDispatchPlanner",
+    "PlannedOperatorDispatch",
     "OperatorActionServiceError",
     "OperatorPacketMaterializer",
     "OperatorWorkloadStatus",

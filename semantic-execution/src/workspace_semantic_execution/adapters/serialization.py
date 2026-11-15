@@ -1,7 +1,7 @@
 """Deterministic JSON codec for durable WorkGraph state.
 
 This codec is infrastructure-neutral and intentionally avoids pickle or
-runtime-specific object serialization. Schema v4 adds durable OperatorAction lifecycle state while retaining v1-v3 decode compatibility.
+runtime-specific object serialization. Schema v5 adds durable typed semantic packet sources while retaining v1-v4 decode compatibility.
 """
 from __future__ import annotations
 
@@ -22,6 +22,10 @@ from ..domain import (
     OperatorPostLocalSuccess,
     ProcessState,
     ReasoningProcess,
+    SemanticPacketDecision,
+    SemanticPacketFinding,
+    SemanticPacketQuestion,
+    SemanticPacketSource,
     TransitionRecord,
     ValidationResult,
     WorkContract,
@@ -30,8 +34,8 @@ from ..domain import (
 )
 
 
-SCHEMA_VERSION = 4
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4}
+SCHEMA_VERSION = 5
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5}
 
 
 class GraphCodecError(ValueError):
@@ -189,6 +193,52 @@ def _encode_operator_action(action: OperatorAction) -> dict[str, Any]:
     }
 
 
+def _encode_packet_source(
+    source: SemanticPacketSource,
+) -> dict[str, Any]:
+    return {
+        "payload_ref": source.payload_ref,
+        "process_id": source.process_id,
+        "process_generation": source.process_generation,
+        "executor_id": source.executor_id,
+        "packet_sha256": source.packet_sha256,
+        "source_checkpoint": source.source_checkpoint,
+        "objective": source.objective,
+        "findings": [
+            {
+                "finding_id": item.finding_id,
+                "text": item.text,
+                "evidence_refs": list(item.evidence_refs),
+            }
+            for item in source.findings
+        ],
+        "decisions": [
+            {
+                "decision_id": item.decision_id,
+                "decision": item.decision,
+                "rationale": item.rationale,
+                "evidence_refs": list(item.evidence_refs),
+                "alternatives": list(item.alternatives),
+            }
+            for item in source.decisions
+        ],
+        "unresolved_questions": [
+            {
+                "question_id": item.question_id,
+                "text": item.text,
+            }
+            for item in source.unresolved_questions
+        ],
+        "constraints": list(source.constraints),
+        "evidence_refs": list(source.evidence_refs),
+        "authority_refs": list(source.authority_refs),
+        "allowed_actions": list(source.allowed_actions),
+        "validator_contract": source.validator_contract,
+        "output_schema": source.output_schema,
+        "next_safe_boundary": source.next_safe_boundary,
+    }
+
+
 def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
     DomainKernel.validate(graph)
     processes: list[dict[str, Any]] = []
@@ -269,6 +319,13 @@ def encode_work_graph(graph: WorkGraph) -> dict[str, Any]:
             for action in sorted(
                 graph.operator_actions.values(),
                 key=lambda item: item.action_id,
+            )
+        ],
+        "packet_sources": [
+            _encode_packet_source(source)
+            for source in sorted(
+                graph.packet_sources.values(),
+                key=lambda item: item.payload_ref,
             )
         ],
     }
@@ -494,10 +551,100 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
             except (KeyError, ValueError) as exc:
                 raise GraphCodecError("invalid_operator_action") from exc
 
+    packet_sources: dict[str, SemanticPacketSource] = {}
+    if schema_version >= 5:
+        raw_sources = payload.get("packet_sources", [])
+        if not isinstance(raw_sources, list):
+            raise GraphCodecError("packet_sources_must_be_list")
+        for raw in raw_sources:
+            if not isinstance(raw, dict):
+                raise GraphCodecError("packet_source_must_be_object")
+            payload_ref = raw.get("payload_ref")
+            if not isinstance(payload_ref, str) or not payload_ref:
+                raise GraphCodecError("packet_source_payload_ref_required")
+            if payload_ref in packet_sources:
+                raise GraphCodecError(
+                    f"duplicate_packet_source:{payload_ref}"
+                )
+            findings = tuple(
+                SemanticPacketFinding(
+                    finding_id=str(item.get("finding_id", "")),
+                    text=str(item.get("text", "")),
+                    evidence_refs=_decode_string_tuple(
+                        item.get("evidence_refs"),
+                        "packet_finding_evidence_refs",
+                    ),
+                )
+                for item in raw.get("findings", [])
+            )
+            decisions = tuple(
+                SemanticPacketDecision(
+                    decision_id=str(item.get("decision_id", "")),
+                    decision=str(item.get("decision", "")),
+                    rationale=str(item.get("rationale", "")),
+                    evidence_refs=_decode_string_tuple(
+                        item.get("evidence_refs"),
+                        "packet_decision_evidence_refs",
+                    ),
+                    alternatives=_decode_string_tuple(
+                        item.get("alternatives"),
+                        "packet_decision_alternatives",
+                    ),
+                )
+                for item in raw.get("decisions", [])
+            )
+            questions = tuple(
+                SemanticPacketQuestion(
+                    question_id=str(item.get("question_id", "")),
+                    text=str(item.get("text", "")),
+                )
+                for item in raw.get("unresolved_questions", [])
+            )
+            packet_sources[payload_ref] = SemanticPacketSource(
+                payload_ref=payload_ref,
+                process_id=str(raw.get("process_id", "")),
+                process_generation=int(
+                    raw.get("process_generation", 0)
+                ),
+                executor_id=str(raw.get("executor_id", "")),
+                packet_sha256=str(raw.get("packet_sha256", "")),
+                source_checkpoint=str(
+                    raw.get("source_checkpoint", "")
+                ),
+                objective=str(raw.get("objective", "")),
+                findings=findings,
+                decisions=decisions,
+                unresolved_questions=questions,
+                constraints=_decode_string_tuple(
+                    raw.get("constraints"),
+                    "packet_constraints",
+                ),
+                evidence_refs=_decode_string_tuple(
+                    raw.get("evidence_refs"),
+                    "packet_evidence_refs",
+                ),
+                authority_refs=_decode_string_tuple(
+                    raw.get("authority_refs"),
+                    "packet_authority_refs",
+                ),
+                allowed_actions=_decode_string_tuple(
+                    raw.get("allowed_actions"),
+                    "packet_allowed_actions",
+                ),
+                validator_contract=str(
+                    raw.get("validator_contract", "")
+                ),
+                output_schema=str(raw.get("output_schema", "")),
+                next_safe_boundary=str(
+                    raw.get("next_safe_boundary", "")
+                ),
+            )
+
     graph = WorkGraph(
         processes=processes,
         executor_sessions=executor_sessions,
         operator_actions=operator_actions,
+        packet_sources=packet_sources,
         event_seq=int(payload.get("event_seq", 0)),
         graph_history=_decode_value(payload.get("graph_history", [])),
     )

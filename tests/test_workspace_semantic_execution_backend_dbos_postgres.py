@@ -29,7 +29,11 @@ from workspace_semantic_execution.adapters import (  # noqa: E402
     RecordingTelemetry,
 )
 from workspace_semantic_execution.application import (  # noqa: E402
+    DurableOperatorPacketMaterializer,
+    ExecutorRegistry,
     OperatorActionService,
+    OperatorDispatchPlanner,
+    PacketCompilationInput,
     PersistentExecutorSessionBroker,
     RuntimeCoordinator,
     openai_chat_instant_current_profile,
@@ -231,6 +235,78 @@ class PostgresAdapterIntegrationTests(unittest.TestCase):
             claimed.graph.operator_actions["action-1"].status,
             OperatorActionState.CLAIMED_LOCAL,
         )
+
+    def test_packet_source_and_operator_dispatch_survive_adapter_reinstantiation(self):
+        state_key = f"packet-{uuid.uuid4()}"
+        store1 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator1 = RuntimeCoordinator(
+            state_store=store1,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        coordinator1.initialize(
+            DomainKernel.create_graph(
+                [DomainKernel.create_process("packet-process")]
+            )
+        )
+        profile = openai_chat_instant_current_profile()
+        registry = ExecutorRegistry((profile,))
+        broker = PersistentExecutorSessionBroker(coordinator1)
+        broker.ensure_session(
+            profile=profile,
+            slot_id="packet-slot",
+            session_id="packet-session",
+        )
+        planned = OperatorDispatchPlanner(
+            runtime=coordinator1,
+            registry=registry,
+        ).plan_service_existing(
+            task_id="task:packet",
+            action_id="action:packet",
+            action_generation=0,
+            process_id="packet-process",
+            process_generation=0,
+            worker_slot_id="packet-slot",
+            session_generation=0,
+            executor_id=profile.executor_id,
+            packet_input=PacketCompilationInput(
+                process_id="packet-process",
+                source_checkpoint="checkpoint:packet",
+                objective="Resume from durable typed packet state.",
+                constraints=("no packet text at rest",),
+                evidence_refs=("evidence:packet",),
+                authority_refs=("scope:proposal-only",),
+                allowed_actions=("report-result",),
+                validator_contract="validator:packet",
+                next_safe_boundary="return typed result",
+            ),
+            priority_rank=10,
+            queue_sequence=1,
+            created_at="T0",
+        )
+
+        store2 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator2 = RuntimeCoordinator(
+            state_store=store2,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=10),
+        )
+        restored = coordinator2.snapshot().graph
+        action = restored.operator_actions["action:packet"]
+        source = restored.packet_sources[action.payload_ref]
+
+        self.assertEqual(source, planned.packet_source)
+        self.assertEqual(
+            source.packet_sha256,
+            planned.packet.packet_sha256,
+        )
+        materialized = DurableOperatorPacketMaterializer(
+            runtime=coordinator2,
+            registry=registry,
+        ).materialize(action)
+        self.assertEqual(materialized, planned.packet)
 
     def test_external_event_is_immutable_and_visible_after_restart(self):
         ledger1 = PostgresEventLedger(POSTGRES_DSN)
