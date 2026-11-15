@@ -1177,6 +1177,18 @@ internal sealed class UsabilityApplicationContext : ApplicationContext
             return DateTimeOffset.UtcNow - _started >= _duration;
         }
 
+        if (_trialId is "UT-06" or "UT-07" or "UT-08" &&
+            _operatorSurface.RecoveryReadyCount == 0)
+        {
+            // Recovery trials can temporarily make every currently seeded
+            // action terminal before the operator completes the recovery
+            // boundary and the post-recovery service action is queued.
+            // Never let the completion grace timer tear down a live modal
+            // recovery/manual-auth prompt.
+            _allCompletedAt = null;
+            return false;
+        }
+
         var allCompleted = _world.Actions.Actions.Count > 0 &&
             _world.Actions.Actions.All(IsTerminalForTrial);
         if (!allCompleted)
