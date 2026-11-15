@@ -48,18 +48,24 @@
     },
     {
       "id": "ORCH-02",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Recursive TOO_LARGE decomposition creates child work while preserving inherited constraints, provenance, validator contracts, authority refs, and dependency edges.",
       "evidence": [
-        "DomainKernel.decompose and dependency-wait mechanics exist; recursive integrated path remains."
+        "Production WorkContract persists objective plus mandatory constraints, provenance refs, authority refs, validator contracts and output-schema refs.",
+        "Semantic Execution #129 proves two-level TOO_LARGE decomposition and deterministic inheritance/merge of all non-droppable parent obligations.",
+        "Direct tampering that drops inherited obligations fails global DomainKernel validation.",
+        "Independent leaves complete and fan-in resumes only after every child is COMPLETED from passing validation."
       ]
     },
     {
       "id": "ORCH-03",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "TOO_LARGE/decomposable and INTRINSICALLY_DIFFICULT/escalation-required work are distinct durable outcomes.",
       "evidence": [
-        "Benchmark taxonomy and routing design distinguish them; production coordinated path remains."
+        "WorkDisposition is durable and distinguishes UNCLASSIFIED, EXECUTABLE, TOO_LARGE and INTRINSICALLY_DIFFICULT.",
+        "TOO_LARGE permits recursive decomposition; INTRINSICALLY_DIFFICULT releases the current lease and forbids decomposition.",
+        "A stronger executor may reclaim intrinsically difficult work but contracted effects remain impossible until explicit EXECUTABLE reclassification.",
+        "Semantic Execution #129 explicitly validates the distinction."
       ]
     },
     {
@@ -67,7 +73,8 @@
       "status": "PARTIAL",
       "requirement": "CAS/generation fencing, leases, stale-worker rejection, retry/idempotency and multi-worker recovery work under the production kernel.",
       "evidence": [
-        "Existing runtime/fault tests cover stale generations, executor loss, duplicate events, crash boundaries and waits."
+        "Existing runtime/fault tests cover stale generations, executor loss, duplicate events, crash boundaries and waits.",
+        "Recursive dependency-wait recovery preserves generation-fenced WorkContract and waits until both validated leaves complete."
       ]
     },
     {
@@ -233,7 +240,8 @@
       "requirement": "A real Research Engine / research-iterate workflow completes decomposition -> routing -> executor -> validated result -> authorized low-consequence effect -> synthesis.",
       "evidence": [
         "PRECURSOR PASS: exact Research Engine objective now traverses generic routing -> deterministic packet -> authority -> RuntimeCoordinator -> exact read effect -> independent postcondition validation -> COMPLETED.",
-        "Still PENDING: full research-iterate E2E-01 additionally requires recursive decomposition, fan-in, and synthesis."
+        "Still PENDING: full research-iterate E2E-01 additionally requires recursive decomposition, fan-in, and synthesis.",
+        "Recursive decomposition/fan-in semantics required by the full research-iterate path are now production-validated at f104361f…, but the real mixed-executor research-iterate synthesis remains pending."
       ]
     },
     {
@@ -320,5 +328,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@34028182aaf1dc56d40cc607f8561c2337e16bf8"
+  "latest_validated_checkpoint": "workspace-control@f104361f3d27bf1a4548acf6f643eb454e847c9a"
 }

@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 34028182aaf1dc56d40cc607f8561c2337e16bf8
+- Remote checkpoint: f104361f3d27bf1a4548acf6f643eb454e847c9a
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,17 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement RECURSIVE_TASK_TREE_CONTRACT_AND_FANIN_V1 under semantic-execution/** and tests/test_workspace_semantic_execution_backend*.py. Add typed durable process/work contract metadata sufficient to preserve objective, mandatory constraints, provenance/evidence refs, authority refs, validator contract and output schema across recursive decomposition. Define durable disposition semantics that distinguish TOO_LARGE (decompose again) from INTRINSICALLY_DIFFICULT (escalation required). Reuse DomainKernel/RuntimeCoordinator dependency waits and generation fencing; prove two-level decomposition, independent leaf completion, fan-in only after all children validate, recovery during dependency wait, and fail-closed attempts to drop inherited obligations. Do not add Research Engine writes or executor authority.
+Implement PERSISTENT_EXECUTOR_SESSION_BROKER_V1 under semantic-execution/** and tests/test_workspace_semantic_execution_backend*.py. Add a durable ExecutorSession/session-slot model separate from chat transcript correctness, with session_id, slot_id, executor_id, generation, lifecycle state, bound process/generation, context/rotation metadata and last durable acknowledgment. Reuse ExecutorProfile session/lifecycle/reset-policy semantics. Prove: healthy persistent sessions are reusable; stale session generations cannot publish current work; session loss/auth loss/context-threshold retirement advances generation and makes old acknowledgments stale; replacement sessions resume from deterministic packet/state rather than transcript; machine-stateless executors do not allocate persistent sessions; and no session state grants execution authority. Do not mutate operator-bridge/** from this backend task.
 
 ## Remaining work
 
-- Implement and validate recursive task-tree/decomposition contract semantics with inherited constraints, provenance refs, authority refs and validator obligations.
-- Add durable TOO_LARGE -> DECOMPOSE and INTRINSICALLY_DIFFICULT -> ESCALATION_REQUIRED classification without conflating the two.
-- Prove multi-level fan-out/fan-in, generation fencing, recovery and independent leaf completion under the production RuntimeCoordinator.
-- Implement production session-broker semantics and recovery tests after the recursive task tree is durable.
-- Bind backend action/status transport to the independently owned Operator Bridge through its authorized child task.
-- Integrate subscription Codex only after its runtime/auth child clears the PR #627 lineage gate.
-- Run the first mixed-executor Research Engine research-iterate slice and real-workflow resource/fault measurements.
-- Propose a separately authorized low-consequence write-capable slice only after read-only decomposition/mixed-executor evidence passes.
+- Implement and validate persistent ExecutorSession/session-slot semantics with generation fencing, explicit reuse/rotate/replace policy, loss recovery and stateless resume from durable typed state.
+- Define the backend OperatorAction/status contract produced from eligible persistent-chat work without mutating the independently owned Operator Bridge implementation.
+- Bind backend action/status transport to Operator Bridge only through workspace-operator-bridge-implementation-v1 authority.
+- Integrate subscription Codex after its runtime/auth child clears the PR #627 lineage gate.
+- Run the first mixed-executor Research Engine research-iterate slice using recursive decomposition plus deterministic/Instant/Codex routing.
+- Run real-workflow fault/resource measurements and close remaining November ORCH/REL/E2E acceptance gates.
+- Propose a separately authorized low-consequence write-capable slice only after read-only mixed-executor evidence passes.
 
 ## Blockers / gates
 
