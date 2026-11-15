@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "workspace-reasoning-economy-codex-runtime-v1",
   "title": "Workspace Reasoning Economy Codex Runtime v1",
-  "status": "IN_PROGRESS",
+  "status": "NEEDS_USER_DECISION",
   "goal": "Add a bounded, CPU-only Codex runtime/bootstrap capability to the existing Workspace Control control-small runner class so Reasoning Economy can use the user's included ChatGPT Plus Codex allowance without API billing, GPU access, credential copying, or bypassing the v3 root allocator.",
   "execution_topology": "remote_only",
   "workflow": null,
@@ -57,7 +57,7 @@
   "stages": [
     {
       "id": "trusted_bootstrap_workflow",
-      "status": "COMPLETED",
+      "status": "VALIDATED",
       "execution_owner": "workspace-reasoning-economy-codex-runtime-v1",
       "selected_executor": "chatgpt",
       "selected_surface": "github",
@@ -218,12 +218,7 @@
     }
   ],
   "blockers": [
-    {
-      "id": "trusted-workflow-promotion-lineage-gate",
-      "state": "BLOCKED_BY_AUTHORITY",
-      "detail": "PR #630 is intentionally stacked on PR #627 at acd420758eb0124646988ee8776939572c88a82d. Promoting the child to default branch while preserving that required lineage now depends on the owning PR #627 promotion state. This child is explicitly prohibited from modifying, merging, or regressing PR #627 and must not abandon the stacked lineage by retargeting the authoritative PR.",
-      "smallest_next_action": "The owner of PR #627 promotion authority must land/advance the reserved-capacity base to default branch or explicitly authorize a different provenance-preserving promotion path. Then promote the validated inert workflow and bind its exact default-branch blob."
-    }
+    "Trusted-workflow promotion is authority-gated on PR #627 lineage: authoritative stacked PR #630 targets padataset-dual-science-control-reserve-v1@acd420758eb0124646988ee8776939572c88a82d, while this child is explicitly prohibited from modifying, merging, retargeting, or regressing PR #627. The smallest next action is for the owner of PR #627 promotion authority to land/advance that reserved-capacity base to default branch, or explicitly authorize another provenance-preserving promotion path."
   ],
   "remaining_work": [
     "Promote the validated inert workflow to default branch and bind its exact blob after the PR #627 lineage gate is satisfied.",
