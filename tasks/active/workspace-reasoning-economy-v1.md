@@ -24,7 +24,7 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 8f9d8c1012cc1f8a28ec6beb8c9b1c5e69166d45
+- Remote checkpoint: fc5bdb47f2ba31c1c64c06eca4c1612397d2ce26
 - Remote verified: true
 
 ### research-engine
@@ -36,12 +36,11 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 ## Next safe action
 
-Implement ExecutionEconomics, UsageDelta, allowance-window delta matching, token/tool/retry/validator metrics, and waste classifications under semantic-execution/src/workspace_semantic_execution/economics/. Preserve UNKNOWN for missing/reset/ambiguous telemetry. Add deterministic tests for weekly-window deltas, reset boundaries, null token totals, zero-token WAITING_EXTERNAL/IDLE/POLLING policy, and verified-progress-per-allowance calculations. Do not attempt live Codex authentication until the ledger is validated.
+Implement a Codex subscription auth inspector using read-only account/read, fail closed unless account.type=chatgpt, and a codex exec --json trace parser that captures thread id, turn success/failure, input/cached/output/reasoning-output tokens, command/MCP/web/collab/file-change counts, and errors. Then implement a subscription-only executor wrapper that strips OPENAI_API_KEY, refuses unknown/API-key auth, snapshots account usage before/after, and returns structured execution economics. Unit-test all behavior with fixture processes before any live login/invocation.
 
 ## Remaining work
 
-- Implement execution economics ledger and waste classification.
-- Implement subscription-only Codex executor with JSONL trace ingestion.
+- Implement subscription-only Codex executor with ChatGPT-auth guard and JSONL trace ingestion.
 - Calibrate account/usage/read and rate-limit deltas against controlled ChatGPT/Codex/Instant actions.
 - Run Research Engine routing/decomposition experiments.
 - Implement weekly burn governor and recursive policy promotion.
