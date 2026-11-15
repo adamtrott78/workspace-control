@@ -67,7 +67,7 @@ def _optional_nonnegative_int(
 
 def _sum_optional(values: Iterable[int | None]) -> int | None:
     materialized = tuple(values)
-    if any(value is None for value in materialized):
+    if not materialized or any(value is None for value in materialized):
         return None
     return sum(int(value) for value in materialized if value is not None)
 
@@ -190,9 +190,16 @@ def parse_codex_exec_jsonl(text: str) -> CodexExecTraceSummary:
 
         unknown_events += 1
 
-    total_input = sum(input_tokens)
-    total_cached = sum(cached_input_tokens)
-    total_output = sum(output_tokens)
+    if turns_completed:
+        total_input: int | None = sum(input_tokens)
+        total_cached: int | None = sum(cached_input_tokens)
+        total_output: int | None = sum(output_tokens)
+        total_tokens: int | None = total_input + total_output
+    else:
+        total_input = None
+        total_cached = None
+        total_output = None
+        total_tokens = None
     total_cache_write = _sum_optional(cache_write_input_tokens)
     total_reasoning = _sum_optional(reasoning_output_tokens)
 
@@ -207,7 +214,7 @@ def parse_codex_exec_jsonl(text: str) -> CodexExecTraceSummary:
             cache_write_input_tokens=total_cache_write,
             output_tokens=total_output,
             reasoning_output_tokens=total_reasoning,
-            total_tokens=total_input + total_output,
+            total_tokens=total_tokens,
         ),
         command_executions=counts["command_execution"],
         mcp_tool_calls=counts["mcp_tool_call"],
