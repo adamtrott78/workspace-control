@@ -191,7 +191,8 @@
         "Loopback-only backend HTTP contract and outbound HTTPS Windows IOperatorActionPort/status client are implemented and validated.",
         "Exact action/process/session generations are fail-closed and packet text is returned only at claim time.",
         "Default no-URL Windows mode intentionally retains NoWorkOperatorActionPort as a safe rollback/fail-closed baseline.",
-        "PENDING for PASS: activate reviewed Tailscale Serve/private identity path on the real hosts and prove one fake-worker action/status round trip end-to-end."
+        "PENDING for PASS: activate reviewed Tailscale Serve/private identity path on the real hosts and prove one fake-worker action/status round trip end-to-end.",
+        "Durable packet-source/materialization layer now proves Windows-bound packet text is reconstructed on claim from typed Postgres-backed state, not stored transcript/clipboard text."
       ]
     },
     {
@@ -342,5 +343,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@b5695e8c42c546d549742279a54e5668874fdacc"
+  "latest_validated_checkpoint": "workspace-control@6eb4744c5c01affc529257f29acb7c0bf6fff837"
 }

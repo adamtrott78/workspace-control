@@ -24,7 +24,7 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: b5695e8c42c546d549742279a54e5668874fdacc
+- Remote checkpoint: 6eb4744c5c01affc529257f29acb7c0bf6fff837
 - Remote verified: true
 
 ### research-engine
@@ -36,18 +36,17 @@ Implement the first production-grade modular-monolith backend for Workspace Sema
 
 ## Next safe action
 
-Implement DURABLE_OPERATOR_PACKET_MATERIALIZATION_V1 under semantic-execution/** and dedicated backend tests. Persist typed packet compilation inputs and expected hash, never packet text. Add an atomic planner that binds the exact current ExecutorSession generation, registers the packet source, and enqueues the OperatorAction in one CAS transition. Add a DurableOperatorPacketMaterializer that reconstructs PacketCompilationInput from durable state, resolves the exact ExecutorProfile, recompiles, and fails closed unless process generation/executor/payload ref/hash all match. Prove exact retry idempotency, stale recovery fencing, serialization compatibility and PostgreSQL adapter-restart reconstruction. Do not activate live Tailscale transport yet.
+VALIDATE OPERATOR_BRIDGE_SERVER_COMPOSITION_AND_PRIVATE_PREFLIGHT_V1. The server must load the existing Postgres state key (never silently initialize a new control graph), use DurableOperatorPacketMaterializer + initial ExecutorRegistry, bind only 127.0.0.1, accept the fixed Tailscale-User-Login proxy identity header, and take DSN/expected identity only from environment with secret fields excluded from repr/log output. Dedicated integration must prove a Postgres-backed planned action is visible in status and claim returns the exact reconstructed packet. After repository validation, stop before live host mutation unless a reviewed activation path exists.
 
 ## Remaining work
 
-- Implement and validate durable typed SemanticPacketSource records plus production packet materialization with packet text absent from durable state.
-- Atomically compose current session binding, typed packet source and queued OperatorAction in one state-store CAS boundary.
-- Prove exact retry idempotency, stale process/session fencing, deterministic materialization and PostgreSQL restart reconstruction.
-- After packet materialization passes, add a production backend server composition/entrypoint and run localhost transport preflight before any Tailscale Serve activation.
-- Activate the reviewed outbound-only Tailscale Serve path only after exact-host preflight; then run one fake-worker production transport action before any real ChatGPT account.
-- Finish remaining Operator Bridge Stage-10 trials and then bounded Stage-12 real-account calibration.
-- Integrate subscription Codex only after its PR #627 lineage gate clears.
-- Run the mixed-executor Research Engine research-iterate proving workflow and close remaining November REL/E2E gates.
+- Validate the production Postgres-backed Operator Bridge server composition and localhost claim path.
+- After exact server blob is validated, define reviewed activation authority for launching the backend process and Tailscale Serve without widening generic shell/root capability.
+- Run exact-host Linux/Windows Tailscale preflight with content-free identity/reachability evidence; do not log the user login or DSN.
+- Run one fake-worker action/status round trip through the real private transport and only then mark INST-01 PASS.
+- Finish remaining Operator Bridge Stage-10 trials and bounded Stage-12 real-account calibration.
+- Advance subscription Codex only after PR #627 lineage authority clears.
+- Run mixed-executor Research Engine research-iterate and remaining November reliability/soak acceptance.
 
 ## Blockers / gates
 

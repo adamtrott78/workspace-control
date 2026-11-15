@@ -7,13 +7,17 @@ installs pinned DBOS/PostgreSQL dependencies and supplies a disposable database.
 from __future__ import annotations
 
 import ast
+import json
 import os
+import socket
 from pathlib import Path
 import subprocess
 import sys
 import textwrap
 import time
+from threading import Thread
 import unittest
+from urllib.request import Request, urlopen
 import uuid
 
 
@@ -48,6 +52,10 @@ from workspace_semantic_execution.domain import (  # noqa: E402
     OperatorHumanRequirement,
     OperatorPostLocalSuccess,
     ProcessState,
+)
+from workspace_semantic_execution.operator_bridge_server import (  # noqa: E402
+    OperatorBridgeServerConfig,
+    build_operator_bridge_server,
 )
 from workspace_semantic_execution.ports import (  # noqa: E402
     DurableWorkConflict,
@@ -307,6 +315,116 @@ class PostgresAdapterIntegrationTests(unittest.TestCase):
             registry=registry,
         ).materialize(action)
         self.assertEqual(materialized, planned.packet)
+
+    def test_production_operator_bridge_server_claims_postgres_backed_packet(self):
+        state_key = f"server-{uuid.uuid4()}"
+        store = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        coordinator = RuntimeCoordinator(
+            state_store=store,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        coordinator.initialize(
+            DomainKernel.create_graph(
+                [DomainKernel.create_process("server-process")]
+            )
+        )
+        profile = openai_chat_instant_current_profile()
+        registry = ExecutorRegistry((profile,))
+        broker = PersistentExecutorSessionBroker(coordinator)
+        broker.ensure_session(
+            profile=profile,
+            slot_id="server-slot",
+            session_id="server-session",
+        )
+        planned = OperatorDispatchPlanner(
+            runtime=coordinator,
+            registry=registry,
+        ).plan_service_existing(
+            task_id="task:server",
+            action_id="action:server",
+            action_generation=0,
+            process_id="server-process",
+            process_generation=0,
+            worker_slot_id="server-slot",
+            session_generation=0,
+            executor_id=profile.executor_id,
+            packet_input=PacketCompilationInput(
+                process_id="server-process",
+                source_checkpoint="checkpoint:server",
+                objective="Serve one exact durable packet.",
+                constraints=("localhost backend only",),
+                evidence_refs=("evidence:server",),
+                authority_refs=("scope:proposal-only",),
+                allowed_actions=("report-result",),
+                validator_contract="validator:server",
+                next_safe_boundary="return typed result",
+            ),
+            priority_rank=1,
+            queue_sequence=1,
+            created_at="T0",
+        )
+
+        with socket.socket() as probe:
+            probe.bind(("127.0.0.1", 0))
+            port = int(probe.getsockname()[1])
+        self.assertGreaterEqual(port, 1024)
+
+        identity = "operator@example.invalid"
+        server = build_operator_bridge_server(
+            OperatorBridgeServerConfig(
+                postgres_dsn=POSTGRES_DSN,
+                expected_tailscale_login=identity,
+                state_key=state_key,
+                port=port,
+            )
+        )
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            status_request = Request(
+                f"http://127.0.0.1:{port}/operator-bridge/v1/status",
+                headers={"Tailscale-User-Login": identity},
+                method="GET",
+            )
+            with urlopen(status_request, timeout=2) as response:
+                status = json.loads(response.read().decode("utf-8"))
+            self.assertEqual(status["readyManualCycles"], 1)
+            self.assertEqual(status["sentUnconfirmed"], 0)
+
+            body = json.dumps(
+                {
+                    "helperInstanceId": "integration-helper",
+                    "claimId": "integration-claim",
+                    "claimedAt": "T1",
+                    "expiresAt": "T2",
+                }
+            ).encode("utf-8")
+            claim_request = Request(
+                f"http://127.0.0.1:{port}/operator-bridge/v1/actions/claim",
+                data=body,
+                headers={
+                    "Content-Type": "application/json",
+                    "Tailscale-User-Login": identity,
+                },
+                method="POST",
+            )
+            with urlopen(claim_request, timeout=2) as response:
+                claimed = json.loads(response.read().decode("utf-8"))
+            self.assertEqual(claimed["actionId"], "action:server")
+            self.assertEqual(
+                claimed["payloadSha256"],
+                planned.packet.packet_sha256,
+            )
+            self.assertEqual(
+                claimed["packetText"],
+                planned.packet.text,
+            )
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
 
     def test_external_event_is_immutable_and_visible_after_restart(self):
         ledger1 = PostgresEventLedger(POSTGRES_DSN)
