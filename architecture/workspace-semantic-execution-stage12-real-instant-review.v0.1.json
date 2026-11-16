@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-review-v0.1",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Bounded real ChatGPT Instant calibration using the already-validated private Operator Bridge route, managed Firefox bindings, durable session generations, and immutable GitHub worker-result candidates. This artifact does not authorize real-account interaction.",
   "prerequisites": {
@@ -147,5 +147,20 @@
     "model_reasoning_is_not_authority": true,
     "fake_worker_authority_does_not_transfer": true
   },
-  "postcondition": "Repository validation of this review candidate may establish readiness for an operator authority decision only. It cannot itself start Firefox, authenticate ChatGPT, dispatch a real model action, or mutate the live private route."
+  "postcondition": "This exact Stage-12 review candidate is repository-validated but remains non-authoritative. The operator must explicitly approve the validated candidate before any real ChatGPT account, model action, Firefox launch for Stage 12, or live private-route mutation.",
+  "validation": {
+    "validated_head": "646d6b09e029823f27f7764d5085da2b7d4af7b8",
+    "workspace_control_validation": {
+      "run_number": 2975,
+      "result": "SUCCESS"
+    },
+    "semantic_execution_validation": {
+      "run_number": 275,
+      "result": "SUCCESS"
+    },
+    "operator_bridge_validation": {
+      "run_number": 548,
+      "result": "SUCCESS"
+    }
+  }
 }

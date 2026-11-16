@@ -70,13 +70,13 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-D3 PRIVATE-ROUTE LIVE FAKE-WORKER ACCEPTANCE IS COMPLETE. Attempt 02 returned full PASS through the reviewed private route and exact restoration of the preexisting Jupyter Serve configuration. Next safe action is D4 only: design/review a bounded Stage-12 real ChatGPT Instant calibration using the existing Operator Bridge + persistent-session broker. Do not infer real-account authority from fake-worker authority. Stage 12 must preserve manual normal ChatGPT authentication, no credential automation, no DOM/page-content scraping, no browser-permission widening, one bounded real Instant action, persistent-session reuse proof, stale-session fencing, replacement/recovery, and exact result ownership validation.
+D4 STAGE-12 REAL-INSTANT CALIBRATION CANDIDATE IS VALIDATED, NOT AUTHORIZED. Exact review head 646d6b09e029823f27f7764d5085da2b7d4af7b8 passed Workspace #2975, Semantic #275 and Operator #548. Executable source is pinned to b282ccdebae222d70454db46fc287fdc4809cd6a with real-Instant harness blob 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d, Linux private-route transaction blob 28248b17bc775ad938c221c240a3c7f3e204e82b and Windows launcher blob d9d474ca6870585c9e4767f551086e17b4525fbc. Candidate-result branch worker-result-candidates-v1 is isolated at initialization commit 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. Smallest next action: explicit operator approval of this exact validated Stage-12 candidate. Do not infer authority from D3 or repository validation.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: D3 exact-host fake-worker transport is ACCEPTED. Build and review D4 Stage-12 bounded real-account calibration using normal manual ChatGPT auth and the existing persistent-session/Operator Bridge path; prove one bounded real Instant action, persistent-session reuse, stale-session fencing, replacement/recovery and exact result ownership before enabling broader live Instant dispatch.
+- LIVE INSTANT: D3 is ACCEPTED. D4 bounded real-Instant calibration candidate 646d6b09… is 3/3 green but not authority. Obtain explicit operator approval; then execute only the exact pinned Stage-12 Linux/Windows transactions to prove Q1 real Instant, Q2 same-chat continuity reuse, stale-generation fencing, generation-1 replacement/recovery, immutable candidate ownership, and exact Tailscale rollback.
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
@@ -85,9 +85,10 @@ D3 PRIVATE-ROUTE LIVE FAKE-WORKER ACCEPTANCE IS COMPLETE. Attempt 02 returned fu
 ## Blockers / gates
 
 - Workspace Shell semantic/evaluator activation is COMPLETE.
-- Private Operator Bridge route D3 is COMPLETE: Attempt 02 passed exact-host fake-worker transport and exact restoration of / -> 127.0.0.1:8888.
-- Attempt-02 fake-worker authority is consumed as accepted evidence and grants no real-account/model/browser authority.
-- Current hard gate is D4 Stage-12 real-account calibration review/authority. No real ChatGPT account interaction may begin until the exact Stage-12 action, session/browser boundaries, and rollback/recovery expectations are reviewed and explicitly authorized.
+- D3 private-route fake-worker acceptance is COMPLETE and durably recorded at c5ea51a015661c657497140e6c490446c7b48dbf; its authority is consumed.
+- D4 Stage-12 bounded real-Instant candidate 646d6b09e029823f27f7764d5085da2b7d4af7b8 is 3/3 green (Workspace #2975 / Semantic #275 / Operator #548) but remains VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY.
+- Fresh explicit operator approval is required before the temporary Firefox profile, normal manual ChatGPT login, real Instant model action, or Stage-12 private-route transaction may begin.
+- Stage-12 preserves manual auth/manual Instant selection/manual Ctrl+Space -> Ctrl+V -> Enter, exact Firefox permissions nativeMessaging/tabs/sessions, no DOM/page-content scraping, no automatic typing/submission, no credential automation, no API-key fallback, no public exposure, no production Postgres mutation and no GPU use.
 - Reasoning Economy scored runs remain blocked until Stage-12 live executor calibration plus comparable weekly allowance telemetry are accepted.
 
 ## Fresh-chat initialization
