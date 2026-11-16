@@ -213,20 +213,20 @@
           "check": "Canonical backbone bank progress",
           "result": "IN_PROGRESS",
           "evidence": [
-            "6/10 unique canonical backbones are COMPLETE and frozen in PR #26 canonical manifest: PA1-PA2, PA1-PA3, PA1-PA4, PA1-PA8, PA2-PA4, PA4-PA8.",
-            "PA1-PA3 run 43900286950/job 133414700376 SUCCESS; best epoch 26; best val macro-F1 0.999925851719; known-test macro-F1 0.9998517364899926; target_test_consumed=false.",
-            "PA2-PA3 run 43921420197/job 133489412741 is IN_PROGRESS on GPU1.",
-            "PA2-PA8 run 43926895324/job 133508635811 is IN_PROGRESS on GPU0."
+            "8/10 unique canonical backbones are COMPLETE and frozen in PADataset PR #26 canonical manifest.",
+            "PA2-PA3 run 43921420197/job 133489412741 SUCCESS; best epoch 3; best val macro-F1 0.9253955249097198; known-test macro-F1 0.9195729464289638; target_test_consumed=false.",
+            "PA2-PA8 run 43926895324/job 133508635811 SUCCESS; best epoch 2; best val macro-F1 0.9433003897151243; known-test macro-F1 0.9448806320168245; target_test_consumed=false.",
+            "Final two live jobs: PA3-PA4 run 43943016274/job 133565212672 and PA3-PA8 run 43943022113/job 133565235633."
           ]
         },
         {
           "check": "Directional evaluator candidate",
           "result": "CANDIDATE_READY",
           "evidence": [
-            "PADataset draft PR #26 exact head 29e333ce4d036548ab6e6045ad7bea0ac234a4aa is stacked on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
-            "PR #26 freezes directional evaluator policy, per-cell request manifests, GitHub artifact ID/digest transport binding, ZIP/checkpoint/config provenance rehydration, canonical matrix validation, and target-quarantine checks.",
-            "Actual branch data check PASS: 10 canonical backbones, 20 directed cells, 6 complete, 4 remaining, 12 frozen requests, zero invariant errors.",
-            "Authoritative Workspace Shell pytest remains blocked by stale live CHECKPOINTED task authority; no guard bypassed."
+            "PADataset draft PR #26 exact head 0a4a6d194320ba72bd5b874806aba54d45a6f4f7 is stacked on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
+            "PR #26 currently freezes 8 completed canonical backbones and 16 immutable directed evaluator request manifests.",
+            "Artifact ID/digest/workflow-run binding, ZIP/checkpoint/config rehydration, target-quarantine contracts, and canonical matrix validation remain fail-closed.",
+            "No workflow authority changes; authoritative Workspace Shell candidate pytest remains gated by stale live CHECKPOINTED authority."
           ]
         }
       ],
@@ -442,12 +442,11 @@
     {
       "id": "trackA-directional-evaluator-candidate",
       "kind": "git_commit",
-      "identity": "29e333ce4d036548ab6e6045ad7bea0ac234a4aa",
+      "identity": "0a4a6d194320ba72bd5b874806aba54d45a6f4f7",
       "required_for_resume": true,
       "evidence": [
         "PADataset PR #26 OPEN/DRAFT/UNMERGED; base exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
-        "Contains canonical matrix, frozen evaluator policy, 12 per-direction requests for the 6 completed backbones, artifact transport binding, provenance-safe rehydration, request/matrix validators, and contract tests.",
-        "Actual branch data check: 10 canonical backbones, 20 directed cells, 6 complete, 4 remaining, 12 frozen requests, zero invariant errors.",
+        "Canonical state: 8/10 complete, 2 live, 16 frozen directed evaluator requests.",
         "No workflow authority changes; no merge authority."
       ]
     }
@@ -479,10 +478,10 @@
       "check": "Track-A canonical matrix progress",
       "result": "IN_PROGRESS",
       "evidence": [
-        "6/10 unique canonical backbones frozen; 4 remain.",
-        "GPU0 PA2-PA8 run 43926895324/job 133508635811 IN_PROGRESS.",
-        "GPU1 PA2-PA3 run 43921420197/job 133489412741 IN_PROGRESS.",
-        "Target quarantine preserved on all frozen completed backbones."
+        "8/10 unique canonical backbones frozen; final two are live.",
+        "GPU0 PA3-PA4 run 43943016274/job 133565212672 queued/in progress.",
+        "GPU1 PA3-PA8 run 43943022113/job 133565235633 queued/in progress.",
+        "Target quarantine preserved on all eight frozen completed backbones."
       ]
     }
   ],
@@ -492,16 +491,15 @@
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
-    "Finish the remaining unique Track-A canonical backbone bank without reverse duplicates: current PA2-PA3 and PA2-PA8, then PA3-PA4 and PA3-PA8. Freeze exact artifact/checkpoint/config provenance after each SUCCESS.",
-    "Generate the remaining frozen per-direction evaluator request manifests as each canonical backbone completes; final bank is 10 backbones / 20 directed cells.",
-    "Refresh live Workspace Shell authority from this IN_PROGRESS continuation without rebinding live execution SHA 5401045341090a26a42ce3a497c379f8223a3b54 or PADataset authority befe383fd67c8bca8d8ce370344b33c7e13cd52f; then validate PR #26 contract tests through authorized candidate execution.",
-    "After PR #26 validation, add/review the bounded artifact-download + l2o directional evaluator operation in the authority-owned scientific workflow; do not execute an unreviewed candidate workflow.",
-    "Run the frozen Track-A 20-cell directional DQNGuard matrix with surrogate-only calibration and known-only threshold selection; target labels are final-evaluation-only.",
-    "Then resume Track-B Architecture B and the STFT diagnostic under their existing gates.",
+    "Finish final Track-A canonical backbones PA3-PA4 and PA3-PA8 on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f. Freeze exact artifact/checkpoint/config provenance on SUCCESS; never train reverse directions.",
+    "Create the final four immutable directional evaluator request manifests, yielding 10 backbones / 20 directed cells.",
+    "Refresh live Workspace Shell authority from this IN_PROGRESS continuation without rebinding workspace-control execution 5401045341090a26a42ce3a497c379f8223a3b54, PADataset authority befe383fd67c8bca8d8ce370344b33c7e13cd52f, or recorded dependency generation 4469009659182c8c2f4d12d727e556f2a2995fc9.",
+    "Validate PR #26 through authorized candidate execution; then add/review bounded artifact-download + directional evaluator workflow authority.",
+    "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "Keep both scientific GPU lanes saturated only with the remaining unique Track-A canonical backbones bound to PADataset PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f. Current live jobs: GPU0 PA2-PA8 run 43926895324/job 133508635811 and GPU1 PA2-PA3 run 43921420197/job 133489412741. On each SUCCESS, freeze exact workflow/artifact/checkpoint/config evidence into PADataset PR #26 and create the two frozen directional evaluator request manifests; never train the reverse direction. In parallel, preserve the existing Workspace Shell blocker: authoritative candidate pytest remains fail-closed until the live MTH602 authority snapshot is refreshed from this IN_PROGRESS capsule while keeping workspace-control execution at 5401045341090a26a42ce3a497c379f8223a3b54, PADataset authority at befe383fd67c8bca8d8ce370344b33c7e13cd52f, and recorded dependency generation at 4469009659182c8c2f4d12d727e556f2a2995fc9.",
+  "next_safe_action": "Monitor only the final two unique Track-A backbones: GPU0 PA3-PA4 run 43943016274/job 133565212672 and GPU1 PA3-PA8 run 43943022113/job 133565235633, both bound to PADataset PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f. On each SUCCESS, freeze exact workflow/artifact/checkpoint/config evidence into PR #26 and create its two frozen directional evaluator requests. Do not launch any more backbone trainings after these two. Then refresh Workspace Shell authority under the preserved live SHAs and validate PR #26 before any bounded evaluator workflow authority is added or executed.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
-  "notes": "Track A is now the active execution stage. Reverse-pair equivalence reduces the 20 directed evaluator cells to 10 unique backbone trainings. Six canonical backbones are frozen with exact provenance; PA2-PA3 and PA2-PA8 are live. Draft PR #26 exact head 29e333ce4d036548ab6e6045ad7bea0ac234a4aa, stacked on exact runtime PR #24 head d1fd5b6d..., contains the provenance-safe directional evaluator/request/artifact contracts plus canonical matrix validation..., contains the provenance-safe directional evaluator/request/artifact contracts. No workflow authority or merge authority is inferred. Track B and STFT remain preserved but are not consuming the current GPUs."
+  "notes": "Track A active. 8/10 canonical backbones are frozen; PA3-PA4 and PA3-PA8 are the final live trainings. PR #26 exact head 0a4a6d194320ba72bd5b874806aba54d45a6f4f7 contains the provenance-safe evaluator contracts and 16 frozen directed requests. No workflow authority or merge authority is inferred."
 }
