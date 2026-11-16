@@ -734,35 +734,31 @@ if not isinstance(value, str) or not value:
 print(value)
 PY
 )"
-  sudo python3 - "$SEMANTIC_RECEIPT_ROOT" "$SEMANTIC_ACCEPTANCE_STARTED" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
+  sudo python3 - "$SEMANTIC_RECEIPT_ROOT" "$MCP_TASK_SEMANTIC" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
 import json
+import re
 import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-started = float(sys.argv[2])
+mcp_payload = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
 expected = sys.argv[3]
-matches = []
-for path in root.glob("*.json"):
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        continue
-    if payload.get("task_id") != "workspace-semantic-execution-migration-v1":
-        continue
-    if float(payload.get("started_at") or 0) + 1 < started:
-        continue
-    if payload.get("expected_git_sha") != expected:
-        continue
-    if payload.get("argv_profile") != "git-read":
-        continue
-    matches.append((float(payload.get("started_at") or 0), path, payload))
-
-if not matches:
-    raise SystemExit("no semantic acceptance receipt found after live MCP call")
-
-_, path, receipt = max(matches, key=lambda item: item[0])
+structured = ((mcp_payload.get("result") or {}).get("structuredContent") or {})
+launcher_result = structured.get("result") or {}
+receipt_id = launcher_result.get("receipt_id")
+if not isinstance(receipt_id, str) or re.fullmatch(
+    r"job-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+    receipt_id,
+) is None:
+    raise SystemExit("semantic MCP response did not contain an exact job receipt_id")
+path = root / f"{receipt_id}.json"
+if not path.is_file():
+    raise SystemExit(f"semantic MCP receipt file missing: {path.name}")
+receipt = json.loads(path.read_text(encoding="utf-8"))
 checks = {
+    "receipt_id": receipt.get("receipt_id") == receipt_id,
+    "task_id": receipt.get("task_id") == "workspace-semantic-execution-migration-v1",
+    "argv_profile": receipt.get("argv_profile") == "git-read",
     "authorization_decision": receipt.get("authorization_decision") in (None, "ALLOW"),
     "exit_code": receipt.get("exit_code") == 0,
     "privileged": receipt.get("privileged") is False,
@@ -784,31 +780,30 @@ print("LOCAL_SEMANTIC_TASK_AUTHORITY=PASS")
 print("SEMANTIC_ACCEPTANCE_RECEIPT=" + path.name)
 PY
 
-  sudo python3 - "$SEMANTIC_RECEIPT_ROOT" "$EVALUATOR_DENIAL_STARTED" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
+  sudo python3 - "$SEMANTIC_RECEIPT_ROOT" "$MCP_EVALUATOR_DENIAL" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
 import json
+import re
 import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-started = float(sys.argv[2])
+mcp_payload = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
 expected = sys.argv[3]
-matches = []
-for path in root.glob("*.json"):
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        continue
-    if payload.get("task_id") != "workspace-semantic-execution-migration-v1":
-        continue
-    if float(payload.get("started_at") or 0) + 1 < started:
-        continue
-    if payload.get("argv_profile") != "evaluator-denial-probe":
-        continue
-    matches.append((float(payload.get("started_at") or 0), path, payload))
-if not matches:
-    raise SystemExit("no evaluator worker-denial receipt found after live MCP call")
-_, path, receipt = max(matches, key=lambda item: item[0])
+structured = ((mcp_payload.get("result") or {}).get("structuredContent") or {})
+launcher_result = structured.get("result") or {}
+receipt_id = launcher_result.get("receipt_id")
+if not isinstance(receipt_id, str) or re.fullmatch(
+    r"job-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+    receipt_id,
+) is None:
+    raise SystemExit("evaluator MCP response did not contain an exact job receipt_id")
+path = root / f"{receipt_id}.json"
+if not path.is_file():
+    raise SystemExit(f"evaluator MCP receipt file missing: {path.name}")
+receipt = json.loads(path.read_text(encoding="utf-8"))
 checks = {
+    "receipt_id": receipt.get("receipt_id") == receipt_id,
+    "task_id": receipt.get("task_id") == "workspace-semantic-execution-migration-v1",
     "authorization_decision": receipt.get("authorization_decision") == "ALLOW",
     "exit_code": receipt.get("exit_code") == 0,
     "privileged": receipt.get("privileged") is False,

@@ -275,9 +275,22 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             upgrade,
         )
         self.assertIn(
-            'if payload.get("argv_profile") != "git-read":',
+            '"$SEMANTIC_RECEIPT_ROOT" "$MCP_TASK_SEMANTIC" "$EXPECTED_SEMANTIC_EXEC_SHA"',
             upgrade,
         )
+        self.assertIn(
+            '"$SEMANTIC_RECEIPT_ROOT" "$MCP_EVALUATOR_DENIAL" "$EXPECTED_SEMANTIC_EXEC_SHA"',
+            upgrade,
+        )
+        self.assertIn(
+            'receipt_id = launcher_result.get("receipt_id")',
+            upgrade,
+        )
+        self.assertIn(
+            '"argv_profile": receipt.get("argv_profile") == "git-read"',
+            upgrade,
+        )
+        self.assertNotIn('root.glob("*.json")', upgrade)
 
     def test_candidate_pytest_is_sandbox_copy_only(self):
         resolved = job_launcher.resolve_profile(
