@@ -16,40 +16,42 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 ## Goal
 
-Extend the live Workspace Shell v1 lineage with a first-class PADataset target that supports exact-SHA/task-bound Git provenance, bounded read-only evidence inspection, and sandboxed network-denied research execution without exposing a generic shell or making the historical PADataset checkout writable.
+Extend the live Workspace Shell v1 lineage with first-class PADataset access and a permanent candidate-evidence path that can validate exact candidate SHAs without promoting them to durable task authority, while preserving credential isolation, private-repository support, rollback, and exact-SHA authoritative execution.
 
 ## Repositories
 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 1a9a24fc1bc6e5cda2984e296151a378138600c8
+- Remote branch: workspace-shell-candidate-evidence-current-v1
+- Remote checkpoint: 54ac65cbcd4211554710b8f8f4231c6c9554e3cc
 - Remote verified: true
 
 ### PADataset
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 17e1147614f27702e43565089d618182ff71c5af
+- Remote checkpoint: befe383fd67c8bca8d8ce370344b33c7e13cd52f
 - Remote verified: true
 
 ## Next safe action
 
-Rerun the validated rollback-capable multirepo upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. The upgrader must verify/reuse the existing PADataset evidence mount safely, refresh /etc/workspace-shell/authority separately, and report LOCAL_TASK_AUTHORITY=PASS. Then re-test both durable task IDs through ChatGPT Workspace Shell before any Stage 00 read.
+Workspace Shell live activation is accepted. Validate this new authority-state commit, sync the umbrella task, then derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository evidence. Do not invent a route or widen authority. If the reviewed route exists and is account/browser/model/GPU-free, execute the fake-worker transport and require an exact action/status/result roundtrip before proceeding toward Stage 12.
 
 ## Remaining work
 
-- Deploy the validated multirepo upgrade using the final authority-state head, workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af.
-- Verify live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1.
-- Run positive and negative PADataset Workspace Shell acceptance at exact SHA 17e1147614f27702e43565089d618182ff71c5af.
-- Begin MTH602 Stage 00 provenance recovery from the clean execution snapshot plus the untouched read-only historical evidence checkout.
-- Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
+- Validate this live-acceptance authority-state commit.
+- Sync the umbrella workspace-semantic-execution-migration-v1 task to the accepted live Workspace Shell runtime and evaluator-isolation checkpoint; validate Workspace/Semantic/Operator exact head.
+- Derive the exact reviewed private route/profile/task authority for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable source/docs.
+- Run the fake-worker transport only if the reviewed route and authority are explicitly present and it remains account-free, browser-free, model-free, and GPU-free; require exact action/status/result roundtrip.
+- Continue toward Stage 12 / real account calibration only after the fake-worker transport acceptance.
 
 ## Blockers / gates
 
-- Live trusted task authority is still stale: workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND. This remains the sole execution gate before PADataset Stage 00.
-- The validated host upgrade must be rerun from the new authority-state head with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8. The existing evidence mount may now be reused only if the upgrader verifies its identity and read-only hardening.
+- Workspace Shell multirepo live activation is accepted and independently verified at runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc with evaluator isolation PASS.
+- The next gate is no longer Workspace Shell activation. Before any fake-worker execution, derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository authority; do not invent a route.
+- Claim-bearing Reasoning Economy execution remains separately gated on reviewed live executor authority, evaluator isolation, and calibrated allowance telemetry.
+- GitRunner/controller modernization remains deferred and authority-separated.
 
 ## Fresh-chat initialization
 

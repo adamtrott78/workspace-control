@@ -43,6 +43,18 @@
       "write_scratch": true,
       "network": "deny",
       "max_timeout_ms": 90000
+    },
+    "candidate-pytest": {
+      "executable": "/usr/bin/python3",
+      "write_scratch": true,
+      "network": "deny",
+      "max_timeout_ms": 90000
+    },
+    "evaluator-denial-probe": {
+      "executable": "/usr/bin/python3",
+      "write_scratch": false,
+      "network": "deny",
+      "max_timeout_ms": 30000
     }
   }
 }

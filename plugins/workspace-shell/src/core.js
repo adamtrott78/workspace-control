@@ -186,8 +186,8 @@ export function assertTarget(value) {
 export function assertTargetProfile(target, profile) {
   assertTarget(target);
   const allowed = target === "workspace-control"
-    ? new Set(["git-read", "pytest-bounded", "validation-bounded", "file-list", "file-read", "file-hash"])
-    : new Set(["git-read", "file-list", "file-read", "file-hash", "research-bounded"]);
+    ? new Set(["git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash", "evaluator-denial-probe"])
+    : new Set(["git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"]);
   if (!allowed.has(profile)) {
     fail("TARGET_PROFILE_DENIED", `profile ${profile} is not authorized for target ${target}`);
   }
@@ -318,6 +318,12 @@ function validateFileHash(argv) {
   for (const item of argv) assertRelativePath(item, "file path");
 }
 
+function validateEvaluatorDenialProbe(argv) {
+  if (JSON.stringify(argv) !== JSON.stringify(["sealed-store-v1"])) {
+    fail("PROFILE_ARGV_DENIED", "evaluator-denial-probe accepts only sealed-store-v1");
+  }
+}
+
 function validateResearch(argv) {
   if (argv.length < 1) fail("PROFILE_ARGV_DENIED", "research-bounded requires a Python script");
   const script = assertRelativePath(argv[0], "research script");
@@ -368,6 +374,24 @@ export function resolveProfile(profile, argv) {
           PYTHONDONTWRITEBYTECODE: "1",
         },
       };
+    case "candidate-pytest":
+      validatePytest(argv);
+      return {
+        executable: "/usr/bin/python3",
+        argv: ["-m", "pytest", ...argv],
+        writeScratch: true,
+        env: {
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1",
+          PYTHONDONTWRITEBYTECODE: "1",
+          PYTHONPATH: "/workspace",
+          LD_LIBRARY_PATH: [
+            "/usr/lib/x86_64-linux-gnu/blas",
+            "/usr/lib/x86_64-linux-gnu/lapack",
+            "/usr/lib/x86_64-linux-gnu",
+            "/lib/x86_64-linux-gnu",
+          ].join(":"),
+        },
+      };
     case "validation-bounded":
       validateWorkspaceControl(argv);
       return {
@@ -385,6 +409,17 @@ export function resolveProfile(profile, argv) {
     case "file-hash":
       validateFileHash(argv);
       return { executable: "/usr/bin/sha256sum", argv, writeScratch: false, env: {} };
+    case "evaluator-denial-probe":
+      validateEvaluatorDenialProbe(argv);
+      return {
+        executable: "/usr/bin/python3",
+        argv,
+        writeScratch: false,
+        env: {
+          PYTHONDONTWRITEBYTECODE: "1",
+          PYTHONNOUSERSITE: "1",
+        },
+      };
     case "research-bounded":
       validateResearch(argv);
       return {
@@ -492,7 +527,55 @@ export function authorizeTaskExecution({
   if (expectedSha !== boundSha) {
     fail("TASK_SHA_MISMATCH", "expected_sha differs from durable task checkpoint");
   }
-  return { capsule, capsulePath, repository };
+  return {
+    capsule,
+    capsulePath,
+    repository,
+    taskCheckpointSha: boundSha,
+  };
+}
+
+export function authorizeCandidateEvidence({
+  authorityRoot,
+  taskId,
+  target,
+  candidateSha,
+  authorityOwnerUid = 0,
+}) {
+  assertTaskId(taskId);
+  assertTarget(target);
+  assertSha(candidateSha, "candidate_sha");
+  const { capsule, path: capsulePath } = loadTaskCapsule(
+    authorityRoot,
+    taskId,
+    { ownerUid: authorityOwnerUid },
+  );
+  if (capsule.status !== "IN_PROGRESS") {
+    fail(
+      "TASK_STATE_DENIED",
+      `task status ${capsule.status} does not permit candidate evidence execution`,
+    );
+  }
+  const repository = (capsule.repositories ?? []).find(
+    (entry) => entry?.name === target,
+  );
+  if (!repository) {
+    fail("TASK_TARGET_DENIED", "target repository is absent from durable task scope");
+  }
+  const boundSha =
+    repository.remote?.checkpoint_sha ??
+    repository.local?.head_sha ??
+    null;
+  if (!boundSha || !/^[0-9a-f]{40}$/.test(boundSha)) {
+    fail("TASK_PROVENANCE_MISSING", "task repository has no exact checkpoint SHA binding");
+  }
+  return {
+    capsule,
+    capsulePath,
+    repository,
+    taskCheckpointSha: boundSha,
+    candidateSha,
+  };
 }
 
 export function buildFrontendRequest({
