@@ -223,10 +223,10 @@
           "check": "Directional evaluator candidate",
           "result": "CANDIDATE_READY",
           "evidence": [
-            "PADataset draft PR #26 exact head 0a4a6d194320ba72bd5b874806aba54d45a6f4f7 is stacked on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
-            "PR #26 currently freezes 8 completed canonical backbones and 16 immutable directed evaluator request manifests.",
-            "Artifact ID/digest/workflow-run binding, ZIP/checkpoint/config rehydration, target-quarantine contracts, and canonical matrix validation remain fail-closed.",
-            "No workflow authority changes; authoritative Workspace Shell candidate pytest remains gated by stale live CHECKPOINTED authority."
+            "PADataset draft PR #26 exact head d2a0bca789a134d138e8c065973ef3b25644a7c4 is stacked on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
+            "Evaluator candidate includes frozen request/policy contracts, artifact transport/rehydration guards, provenance-bound result records, strict 20-cell aggregation, repaired matrix reporting, and documented future bounded workflow operation semantics.",
+            "Known-only diagnostic from PA2-PA8 and PA2-PA3 shows errors are dominated by PA4→PA1 confusion (661 and 1017 respectively), strengthening the separate PA1↔PA4 STFT diagnostic rationale without changing Track-A training.",
+            "No .github/workflows files are modified; authoritative Workspace Shell candidate pytest remains gated by stale live CHECKPOINTED authority."
           ]
         }
       ],
@@ -442,12 +442,14 @@
     {
       "id": "trackA-directional-evaluator-candidate",
       "kind": "git_commit",
-      "identity": "0a4a6d194320ba72bd5b874806aba54d45a6f4f7",
+      "identity": "d2a0bca789a134d138e8c065973ef3b25644a7c4",
       "required_for_resume": true,
       "evidence": [
         "PADataset PR #26 OPEN/DRAFT/UNMERGED; base exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
-        "Canonical state: 8/10 complete, 2 live, 16 frozen directed evaluator requests.",
-        "No workflow authority changes; no merge authority."
+        "Canonical state currently frozen at 8/10 completed backbones and 16 directional request manifests; final PA3-PA4 and PA3-PA8 backbones are live.",
+        "PR #26 additionally contains provenance-bound cell result records, strict 20-cell aggregation, 5x5 matrix reporting with optional explicit baseline comparison, and a documented bounded evaluator-operation design.",
+        "Changed workflow-authority files: none.",
+        "No merge authority."
       ]
     }
   ],
@@ -501,5 +503,5 @@
   "next_safe_action": "Monitor only the final two unique Track-A backbones: GPU0 PA3-PA4 run 43943016274/job 133565212672 and GPU1 PA3-PA8 run 43943022113/job 133565235633, both bound to PADataset PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f. On each SUCCESS, freeze exact workflow/artifact/checkpoint/config evidence into PR #26 and create its two frozen directional evaluator requests. Do not launch any more backbone trainings after these two. Then refresh Workspace Shell authority under the preserved live SHAs and validate PR #26 before any bounded evaluator workflow authority is added or executed.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
-  "notes": "Track A active. 8/10 canonical backbones are frozen; PA3-PA4 and PA3-PA8 are the final live trainings. PR #26 exact head 0a4a6d194320ba72bd5b874806aba54d45a6f4f7 contains the provenance-safe evaluator contracts and 16 frozen directed requests. No workflow authority or merge authority is inferred."
+  "notes": "Track A active. 8/10 canonical backbones are frozen; PA3-PA4 and PA3-PA8 are the final live trainings. PR #26 exact head d2a0bca789a134d138e8c065973ef3b25644a7c4 now covers request/policy/artifact/result/aggregation/report contracts and a bounded evaluator-operation design, with zero workflow-authority file changes. Known-only diagnostics show the weaker PA2/* backbones fail primarily at the recurring PA4→PA1 boundary. No workflow authority or merge authority is inferred."
 }
