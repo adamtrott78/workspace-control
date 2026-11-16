@@ -318,6 +318,12 @@ function validateFileHash(argv) {
   for (const item of argv) assertRelativePath(item, "file path");
 }
 
+function validateEvaluatorDenialProbe(argv) {
+  if (JSON.stringify(argv) !== JSON.stringify(["sealed-store-v1"])) {
+    fail("PROFILE_ARGV_DENIED", "evaluator-denial-probe accepts only sealed-store-v1");
+  }
+}
+
 function validateResearch(argv) {
   if (argv.length < 1) fail("PROFILE_ARGV_DENIED", "research-bounded requires a Python script");
   const script = assertRelativePath(argv[0], "research script");
@@ -403,6 +409,17 @@ export function resolveProfile(profile, argv) {
     case "file-hash":
       validateFileHash(argv);
       return { executable: "/usr/bin/sha256sum", argv, writeScratch: false, env: {} };
+    case "evaluator-denial-probe":
+      validateEvaluatorDenialProbe(argv);
+      return {
+        executable: "/usr/bin/python3",
+        argv,
+        writeScratch: false,
+        env: {
+          PYTHONDONTWRITEBYTECODE: "1",
+          PYTHONNOUSERSITE: "1",
+        },
+      };
     case "research-bounded":
       validateResearch(argv);
       return {

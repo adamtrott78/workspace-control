@@ -74,11 +74,41 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         server_profiles = set(re.findall(r'"([^"]+)"', server_match.group(1)))
         manifest_profiles = set(self.manifest.get("profiles", {}))
 
+        resolver_match = re.search(
+            r'export function resolveProfile\(profile, argv\) \{(.*?)\n\}',
+            core,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(resolver_match)
+        resolver_profiles = set(
+            re.findall(r'case "([^"]+)":', resolver_match.group(1))
+        )
+
+        root_expected_match = re.search(
+            r'expected = \{(.*?)\n\s*\}',
+            launcher,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(root_expected_match)
+        root_profiles = set(
+            re.findall(r'"([^"]+)": \(', root_expected_match.group(1))
+        )
+
         self.assertEqual(frontend, root)
         self.assertEqual(server_profiles, manifest_profiles)
+        self.assertEqual(resolver_profiles, server_profiles)
+        self.assertEqual(root_profiles, server_profiles)
         self.assertEqual(set().union(*frontend.values()), server_profiles)
         self.assertIn("evaluator-denial-probe", frontend["workspace-control"])
         self.assertNotIn("evaluator-denial-probe", frontend["PADataset"])
+        self.assertIn(
+            'case "evaluator-denial-probe":\n      validateEvaluatorDenialProbe(argv);',
+            core,
+        )
+        self.assertIn(
+            'JSON.stringify(["sealed-store-v1"])',
+            core,
+        )
 
     def test_evidence_profiles_are_read_only_and_bounded(self):
         listing = job_launcher.resolve_profile(
