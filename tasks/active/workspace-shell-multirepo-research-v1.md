@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: af3baf3bdc29bff6ae7114059fdfe4709dc13100
+- Remote checkpoint: 381677ac0ae5c17ee0610d286a6f847ad3d392b8
 - Remote verified: true
 
 ### PADataset
@@ -36,21 +36,21 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-DO NOT RETRY ROOT ACTIVATION YET. Recover the exact stderr for failed transient unit workspace-shell-job-c02602c3-80a8-42.service (receipt job-c02602c3-80a8-4233-affe-943194db9cc0, failure time 2026-11-16T14:46:59Z) with a read-only local journal query. Connected Workspace Shell cannot access arbitrary transient job journals by design. Once the stderr is known, patch only the demonstrated hostile-worker evaluator-denial runtime defect, add exact regression coverage, validate the new runtime, update JSON+Markdown atomically, and only then refreeze/retry activation. Preserve PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f and semantic capsule/execution 8019248f6952743d61e90d5abac754356952c18b / 7c20097c5f177f23c16a765b95ce94d7161f0d29.
+After this JSON+Markdown control-cycle state passes exact-head validation, retry the transactional root activation using the exact authority-state commit, Workspace Shell runtime 381677ac0ae5c17ee0610d286a6f847ad3d392b8 (#2922 SUCCESS), PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 8019248f6952743d61e90d5abac754356952c18b, and semantic execution binding 7c20097c5f177f23c16a765b95ce94d7161f0d29. Require SEMANTIC_DURABLE_TASK_BINDING=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure. Do not widen any other profile, generic shell/interpreter, root/sudo, helper/issuer, network, evaluator path, PADataset, or GPU authority. After PASS, independently verify semantic HEAD 7c20097c… and proceed to the frozen fake-worker private-route harness.
 
 ## Remaining work
 
-- Read the journal for exact transient unit workspace-shell-job-c02602c3-80a8-42.service around 2026-11-16T14:46:59Z to recover the 144-byte stderr from the failed evaluator-denial process.
-- Patch only the defect demonstrated by that stderr, add a regression that exercises the exact failure mode, validate the new runtime candidate, then refreeze the activation tuple.
-- Only after a fresh activation produces LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS may the integrated semantic program continue to the fake-worker private-route harness.
+- Retry the rollback-capable root activation from the exact authority-state commit produced by this control cycle using Workspace Shell runtime 381677ac0ae5c17ee0610d286a6f847ad3d392b8, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.
+- Require SEMANTIC_DURABLE_TASK_BINDING=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS; rollback remains mandatory on any failure.
+- After activation PASS, independently verify live Workspace Shell runtime 381677ac… and semantic execution 7c20097c…, then run the frozen fake-worker private-route harness.
 
 ## Blockers / gates
 
-- LATEST LIVE ACTIVATION FAILED CLOSED AND ROLLED BACK after evaluator-denial authorization succeeded. The exact receipt job-c02602c3-80a8-4233-affe-943194db9cc0 shows exit_code=1, stdout_bytes_seen=0, stderr_bytes_seen=144, stderr_sha256=8f8a93cfc164206a98ab72ca9c2767ca6c343583261d4e6c838fa00258456113 for evaluator-denial-probe at semantic SHA 7c20097c5f177f23c16a765b95ce94d7161f0d29.
-- Target/profile admission and frontend resolver parity are now proven fixed: LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS and the receipt authorization_decision is ALLOW. The remaining defect is inside actual hostile-worker execution of the fixed denial probe or its exact filesystem observation.
-- Direct live rollback-state validation-bounded execution succeeds with /usr/bin/python3 in the hostile-worker sandbox, so generic Python/bubblewrap startup is not the current root cause.
-- Connected Workspace Shell cannot read the failed transient unit journal because transient job units are outside its fixed inspect allowlist, and the semantic task disappeared from live authority after rollback. Recover the exact transient-unit stderr locally before changing runtime code or retrying activation.
-- Existing helper, issuer, generic shell/interpreter, network, evaluator-path, PADataset, and GPU authority boundaries remain unchanged.
+- Repaired runtime 381677ac0ae5c17ee0610d286a6f847ad3d392b8 is repository-validated but not live. The previous activation remains rolled back.
+- The prior evaluator-denial worker failure is isolated to the materialized-task source path: the exact probe/isolation succeeds against /srv, while the materializer had root-only 0700 candidate parents/final root that the worker must traverse before bubblewrap can bind. The new runtime repairs only this traversal/readability boundary and keeps all candidate paths non-writable by the worker.
+- Live activation remains an operator/root gate. Success still requires semantic task receipt PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and full transactional upgrade PASS with rollback on any failure.
+- Existing helper, issuer, generic shell/interpreter, network, evaluator-path, PADataset, GPU, and privileged authority boundaries remain unchanged.
+- After activation succeeds, independently verify live semantic task exact HEAD 7c20097c5f177f23c16a765b95ce94d7161f0d29 before the frozen fake-worker private-route harness.
 
 ## Fresh-chat initialization
 
