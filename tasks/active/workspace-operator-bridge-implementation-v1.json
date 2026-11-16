@@ -491,7 +491,7 @@
     },
     {
       "id": "impl_10_usability_trial_execution",
-      "status": "COMPLETE",
+      "status": "VALIDATED",
       "execution_owner": "operator+chatgpt",
       "selected_executor": "gpt-5.6-sol",
       "selected_surface": "chat+github+local",
