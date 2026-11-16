@@ -7,7 +7,7 @@ Before=workspace-shell-job-launcher.service
 [Service]
 Type=simple
 User=root
-Group=root
+Group=workspace-shell-exec
 ExecStart=/usr/bin/python3 /opt/workspace-shell/runtime/plugins/workspace-shell/root/candidate_materializer.py --config /etc/workspace-shell/candidate-materializer.json
 Restart=on-failure
 RestartSec=2s

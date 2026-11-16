@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: 5401045341090a26a42ce3a497c379f8223a3b54
+- Remote checkpoint: 54ac65cbcd4211554710b8f8f4231c6c9554e3cc
 - Remote verified: true
 
 ### PADataset
@@ -36,19 +36,22 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-From a fresh conversation with Workspace Shell plugin v1.0.1 schema loaded, run candidate-pytest on PADataset PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52 under task mth602-final-multisurrogate-dqnguard-v1; verify evidence-only receipt plus unchanged durable authority, then resume the MTH602 task.
+Workspace Shell live activation is accepted. Validate this new authority-state commit, sync the umbrella task, then derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository evidence. Do not invent a route or widen authority. If the reviewed route exists and is account/browser/model/GPU-free, execute the fake-worker transport and require an exact action/status/result roundtrip before proceeding toward Stage 12.
 
 ## Remaining work
 
-- In a fresh conversation, confirm workspace_shell_exec exposes candidate-pytest.
-- Run candidate-pytest against PADataset Architecture-B PR #23 exact SHA 4f27d00cce9ab15120d924963a5ecf049d032c52 while durable PADataset authority remains befe383fd67c8bca8d8ce370344b33c7e13cd52f.
-- Verify the candidate receipt binds durable task checkpoint + candidate SHA/tree and does not mutate authoritative task state.
-- Verify ordinary task-bound execution still rejects the same off-checkpoint SHA.
-- Then hand execution back to mth602-final-multisurrogate-dqnguard-v1.
+- Validate this live-acceptance authority-state commit.
+- Sync the umbrella workspace-semantic-execution-migration-v1 task to the accepted live Workspace Shell runtime and evaluator-isolation checkpoint; validate Workspace/Semantic/Operator exact head.
+- Derive the exact reviewed private route/profile/task authority for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable source/docs.
+- Run the fake-worker transport only if the reviewed route and authority are explicitly present and it remains account-free, browser-free, model-free, and GPU-free; require exact action/status/result roundtrip.
+- Continue toward Stage 12 / real account calibration only after the fake-worker transport acceptance.
 
 ## Blockers / gates
 
-- Positive candidate-pytest acceptance must be run from a fresh conversation/tool schema; this already-open conversation still exposes the old profile enum.
+- Workspace Shell multirepo live activation is accepted and independently verified at runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc with evaluator isolation PASS.
+- The next gate is no longer Workspace Shell activation. Before any fake-worker execution, derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository authority; do not invent a route.
+- Claim-bearing Reasoning Economy execution remains separately gated on reviewed live executor authority, evaluator isolation, and calibrated allowance telemetry.
+- GitRunner/controller modernization remains deferred and authority-separated.
 
 ## Fresh-chat initialization
 

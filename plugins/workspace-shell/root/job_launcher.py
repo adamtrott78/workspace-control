@@ -153,6 +153,14 @@ def validate_file_hash(argv):
         safe_relative(item, "file path")
 
 
+def validate_evaluator_denial_probe(argv):
+    if argv != ["sealed-store-v1"]:
+        fail(
+            "PROFILE_ARGV_DENIED",
+            "evaluator-denial-probe accepts only sealed-store-v1",
+        )
+
+
 def validate_research(argv):
     if not argv:
         fail("PROFILE_ARGV_DENIED", "research-bounded requires a Python script")
@@ -174,7 +182,7 @@ def validate_research(argv):
 
 def assert_target_profile(target, profile):
     allowed = {
-        "workspace-control": {"git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash"},
+        "workspace-control": {"git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash", "evaluator-denial-probe"},
         "PADataset": {"git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"},
     }
     if target not in allowed or profile not in allowed[target]:
@@ -196,6 +204,7 @@ def resolve_profile(manifest, profile, argv):
         "file-read": ("/usr/bin/head", False),
         "file-hash": ("/usr/bin/sha256sum", False),
         "research-bounded": ("/usr/bin/python3", True),
+        "evaluator-denial-probe": ("/usr/bin/python3", False),
     }
     if profile not in expected:
         fail("PROFILE_NOT_AUTHORIZED", "profile absent from frozen launcher grammar")
@@ -253,6 +262,37 @@ def resolve_profile(manifest, profile, argv):
         validate_file_hash(argv)
         resolved = argv
         env = {}
+    elif profile == "evaluator-denial-probe":
+        validate_evaluator_denial_probe(argv)
+        probe = """from pathlib import Path
+import json
+import sys
+
+root = Path("/var/lib/workspace-shell/evaluator-sealed")
+sentinel = root / "worker-denial-probe"
+
+def denied(operation):
+    try:
+        operation()
+    except (FileNotFoundError, NotADirectoryError, PermissionError):
+        return True
+    return False
+
+list_denied = denied(lambda: tuple(root.iterdir()))
+read_denied = denied(lambda: sentinel.read_bytes())
+ok = list_denied and read_denied
+print(json.dumps({
+    "list_denied": list_denied,
+    "read_denied": read_denied,
+    "ok": ok,
+}, sort_keys=True))
+raise SystemExit(0 if ok else 73)
+"""
+        resolved = ["-I", "-S", "-c", probe]
+        env = {
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONNOUSERSITE": "1",
+        }
     else:
         validate_research(argv)
         resolved = ["-B", *argv]
@@ -391,6 +431,42 @@ def candidate_materializer_rpc(cfg, target, candidate_sha):
     if result.get("candidate_sha") != candidate_sha:
         fail("CANDIDATE_MATERIALIZER_SHA_MISMATCH", "materializer returned wrong SHA")
     return candidate, result
+
+
+def resolve_task_source_root(cfg, target, expected_sha, task_checkpoint_sha, worker_uid):
+    """Resolve the exact task-bound source without weakening task authority.
+
+    The installed static source remains the fast path. If another authorized
+    task binds the same repository at a different exact SHA, reuse the trusted
+    materializer to fetch only that already-authorized SHA. The launcher never
+    chooses or widens the task checkpoint.
+    """
+    if expected_sha != task_checkpoint_sha:
+        fail(
+            "TASK_SOURCE_SHA_MISMATCH",
+            "task execution expected_sha must equal the authorized task checkpoint",
+        )
+    source_root = cfg.get("source_roots", {}).get(target)
+    if not isinstance(source_root, str):
+        fail("SOURCE_ROOT_UNTRUSTED", "target source root is not pinned by launcher config")
+    source_root = verify_source_tree(source_root, worker_uid)
+    installed_sha = hardened_git(source_root, ["rev-parse", "HEAD"])
+    if installed_sha == expected_sha:
+        return source_root, None
+
+    source_root, materialized = candidate_materializer_rpc(
+        cfg,
+        target,
+        expected_sha,
+    )
+    source_root = verify_source_tree(source_root, worker_uid)
+    observed_sha = hardened_git(source_root, ["rev-parse", "HEAD"])
+    if observed_sha != expected_sha:
+        fail(
+            "TASK_MATERIALIZED_SHA_MISMATCH",
+            "materialized task source differs from the authorized task checkpoint",
+        )
+    return source_root, materialized
 
 
 def verify_evidence_mount(evidence_root, worker_uid):
@@ -726,6 +802,9 @@ def run_request(cfg, manifest, request, cancel_check=None):
     worker_gid = int(cfg["worker_gid"])
     candidate_transport = None
     candidate_repository = None
+    task_source_materialized = False
+    materialized_transport = None
+    materialized_repository = None
     if source_mode == "candidate":
         if profile != "candidate-pytest":
             fail("CANDIDATE_PROFILE_REQUIRED", "candidate source mode is restricted to candidate-pytest")
@@ -737,13 +816,22 @@ def run_request(cfg, manifest, request, cancel_check=None):
         source_root = verify_source_tree(source_root, worker_uid)
         candidate_transport = materialized.get("transport")
         candidate_repository = materialized.get("repository")
+        materialized_transport = candidate_transport
+        materialized_repository = candidate_repository
     else:
         if profile == "candidate-pytest":
             fail("CANDIDATE_SOURCE_REQUIRED", "candidate-pytest requires candidate source mode")
-        source_root = cfg.get("source_roots", {}).get(request["target"])
-        if not isinstance(source_root, str):
-            fail("SOURCE_ROOT_UNTRUSTED", "target source root is not pinned by launcher config")
-        source_root = verify_source_tree(source_root, worker_uid)
+        source_root, materialized = resolve_task_source_root(
+            cfg,
+            request["target"],
+            expected_sha,
+            task_checkpoint_sha,
+            worker_uid,
+        )
+        if materialized is not None:
+            task_source_materialized = True
+            materialized_transport = materialized.get("transport")
+            materialized_repository = materialized.get("repository")
 
     evidence_root = None
     configured_evidence = cfg.get("evidence_roots", {}).get(request["target"])
@@ -818,6 +906,9 @@ def run_request(cfg, manifest, request, cancel_check=None):
         "task_checkpoint_sha": task_checkpoint_sha,
         "candidate_repository": candidate_repository,
         "candidate_transport": candidate_transport,
+        "task_source_materialized": task_source_materialized,
+        "materialized_repository": materialized_repository,
+        "materialized_transport": materialized_transport,
         "argv_profile": profile,
         "argv_hash": sha256_hex(json.dumps(request.get("argv"), separators=(",", ":"), ensure_ascii=False)),
         "redacted_argv": redact_argv(profile, request.get("argv")),

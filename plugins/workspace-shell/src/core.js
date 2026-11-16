@@ -186,7 +186,7 @@ export function assertTarget(value) {
 export function assertTargetProfile(target, profile) {
   assertTarget(target);
   const allowed = target === "workspace-control"
-    ? new Set(["git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash"])
+    ? new Set(["git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash", "evaluator-denial-probe"])
     : new Set(["git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"]);
   if (!allowed.has(profile)) {
     fail("TARGET_PROFILE_DENIED", `profile ${profile} is not authorized for target ${target}`);
@@ -318,6 +318,12 @@ function validateFileHash(argv) {
   for (const item of argv) assertRelativePath(item, "file path");
 }
 
+function validateEvaluatorDenialProbe(argv) {
+  if (JSON.stringify(argv) !== JSON.stringify(["sealed-store-v1"])) {
+    fail("PROFILE_ARGV_DENIED", "evaluator-denial-probe accepts only sealed-store-v1");
+  }
+}
+
 function validateResearch(argv) {
   if (argv.length < 1) fail("PROFILE_ARGV_DENIED", "research-bounded requires a Python script");
   const script = assertRelativePath(argv[0], "research script");
@@ -403,6 +409,17 @@ export function resolveProfile(profile, argv) {
     case "file-hash":
       validateFileHash(argv);
       return { executable: "/usr/bin/sha256sum", argv, writeScratch: false, env: {} };
+    case "evaluator-denial-probe":
+      validateEvaluatorDenialProbe(argv);
+      return {
+        executable: "/usr/bin/python3",
+        argv,
+        writeScratch: false,
+        env: {
+          PYTHONDONTWRITEBYTECODE: "1",
+          PYTHONNOUSERSITE: "1",
+        },
+      };
     case "research-bounded":
       validateResearch(argv);
       return {
