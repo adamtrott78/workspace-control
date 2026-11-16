@@ -70,13 +70,13 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-ATTEMPT 01 FAILED CLOSED BEFORE LIVE MUTATION on PREEXISTING_SERVE_CONFIG:TCP. Do not rerun transaction 81166627… and do not remove existing Serve state. Validate and run the read-only diagnostic benchmarks/workspace-semantic-execution/private_route_existing_serve_inspect_v1.sh to identify the exact existing TCP/Web/Funnel mapping. Then revise only the coexistence/conflict policy under a new reviewed candidate; preserve all existing unrelated Serve configuration.
+PRIVATE ROUTE V2 COEXISTENCE CANDIDATE IS VALIDATED, NOT AUTHORIZED. Exact head 429362c93314fa2e17809ea78b04c69d8c9c4e83 passed Workspace #2965, Semantic #265 and Operator #538. The v2 transaction at commit 2a6f65de5681f000a4b69913979db21953ab36a6 / blob beef1ade487e117e519b4cec1e9e4d43a36ead57 preserves the existing HTTPS 443 root handler / -> http://127.0.0.1:8888, temporarily mounts only /operator-bridge/v1 -> http://127.0.0.1:8765/operator-bridge/v1, and rolls back only that path while requiring exact restoration of the preexisting config. Smallest next action: explicit operator approval of this exact new candidate. Do not reuse attempt-01 authority.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: attempt 01 failed closed before mutation because gokhan-lambda-vector already has Tailscale Serve TCP state. Run the exact read-only Serve/Funnel inspection, preserve the existing mapping, revise/revalidate coexistence logic, then obtain fresh narrow authority and rerun fake-worker acceptance.
+- LIVE INSTANT: attempt 01 failed closed safely; read-only evidence identified the existing Jupyter root Serve mapping. Coexistence-safe v2 candidate 429362c9… is 3/3 green and uses only /operator-bridge/v1 while preserving / -> 8888. Obtain fresh explicit operator approval of v2, execute exact transaction 2a6f65de…/blob beef1ade…, and require fake-worker PASS plus exact Serve restoration before Stage 12.
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
@@ -85,10 +85,11 @@ ATTEMPT 01 FAILED CLOSED BEFORE LIVE MUTATION on PREEXISTING_SERVE_CONFIG:TCP. D
 ## Blockers / gates
 
 - Workspace Shell semantic/evaluator activation remains COMPLETE.
-- Private-route activation attempt 01 materialized the exact authorized transaction and passed host/peer/login binding, then failed closed at PREEXISTING_SERVE_CONFIG:TCP before PostgreSQL start, Serve mutation, or fake-worker execution.
-- An existing Tailscale Serve TCP configuration is present on gokhan-lambda-vector and must be identified and preserved before any revised activation.
-- Authority for transaction 81166627… is consumed for attempt 01 evidence review. Do not rerun or widen it.
-- Stage 12 remains blocked until a newly reviewed coexistence-safe route passes the full account-free fake-worker transaction and rollback.
+- Attempt 01 is closed as FAILED_CLOSED_PREEXISTING_SERVE_CONFIG; its authority is consumed and transaction 81166627… must not be rerun.
+- Read-only diagnostic proved the existing private Serve configuration is HTTPS 443 with root / -> http://127.0.0.1:8888 and Funnel disabled.
+- Coexistence-safe v2 host review at 429362c93314fa2e17809ea78b04c69d8c9c4e83 is 3/3 green (Workspace #2965 / Semantic #265 / Operator #538) but remains REVIEW_CANDIDATE_NOT_AUTHORITY.
+- Fresh explicit operator approval is required because the exact live mutation/rollback mechanism changed from global-empty Serve assumptions to a path-specific coexistence transaction.
+- Stage 12 remains blocked until v2 receives explicit authority and the exact-host fake-worker transaction returns full PASS plus exact preexisting-config restoration.
 
 ## Fresh-chat initialization
 
