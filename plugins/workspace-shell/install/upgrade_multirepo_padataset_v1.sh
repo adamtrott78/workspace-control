@@ -187,6 +187,7 @@ for p in \
   /srv/workspace-shell/PADataset \
   /opt/workspace-shell/runtime/plugins/workspace-shell \
   /etc/workspace-shell/profiles.v1.json \
+  /etc/workspace-shell/frontend.json \
   /etc/workspace-shell/candidate-materializer.json \
   /etc/workspace-shell/job-launcher.json \
   /etc/workspace-shell/broker-verifier.json \
@@ -224,6 +225,7 @@ rollback() {
   restore /srv/workspace-shell/PADataset
   restore /opt/workspace-shell/runtime/plugins/workspace-shell
   restore /etc/workspace-shell/profiles.v1.json
+  restore /etc/workspace-shell/frontend.json
   restore /etc/workspace-shell/candidate-materializer.json
   restore /etc/workspace-shell/job-launcher.json
   restore /etc/workspace-shell/broker-verifier.json
@@ -319,6 +321,20 @@ sudo chmod 0700 /var/lib/workspace-shell/candidates /etc/workspace-shell/candida
 sudo python3 - <<'PY'
 import json
 from pathlib import Path
+
+frontend = Path("/etc/workspace-shell/frontend.json")
+fdata = json.loads(frontend.read_text())
+units = fdata.setdefault("allowed_units", [])
+candidate_unit = "workspace-shell-candidate-materializer.service"
+if candidate_unit not in units:
+    units.append(candidate_unit)
+fst = frontend.stat()
+ftmp = frontend.with_suffix(frontend.suffix + ".tmp")
+ftmp.write_text(json.dumps(fdata, indent=2) + "\n")
+ftmp.chmod(fst.st_mode & 0o777)
+import os
+os.chown(ftmp, fst.st_uid, fst.st_gid)
+ftmp.replace(frontend)
 
 launcher = Path("/etc/workspace-shell/job-launcher.json")
 data = json.loads(launcher.read_text())
