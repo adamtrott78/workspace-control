@@ -501,10 +501,30 @@
         "Authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e installed with reviewed byte-identical upgrade script.",
         "Post-refresh Workspace Shell task-bound probe receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 PASS at PADataset authority befe383fd67c8bca8d8ce370344b33c7e13cd52f."
       ]
+    },
+    {
+      "check": "PR #26 off-checkpoint candidate validation",
+      "result": "PASS",
+      "evidence": [
+        "PR #26 candidate SHA 15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766.",
+        "Workspace Shell candidate-pytest receipt job-ef08c200-1c9d-4fc3-a10d-4c9d0a1084a4: 35 passed in 0.32s.",
+        "Receipt binds source_mode=candidate, durable PADataset checkpoint befe383fd67c8bca8d8ce370344b33c7e13cd52f, candidate SHA 15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766, candidate tree a384451c831db92834ab3e14e480de806acf5bf4.",
+        "Ordinary pytest-bounded with the off-checkpoint candidate SHA fails closed with TASK_SHA_MISMATCH."
+      ]
+    },
+    {
+      "check": "GPU2 evaluator workflow authority candidate",
+      "result": "PASS_CANDIDATE_NOT_ACTIVE",
+      "evidence": [
+        "PADataset draft PR #27 head 613387d22299bbb11481aa38b745be2f2fc29617 adds a GPU2-only bounded L2O directional evaluator workflow.",
+        "Workspace Shell candidate-pytest receipt job-e81ee184-0f61-40c8-a3e6-42a71bd87ade: 3 passed.",
+        "PR #27 diff is exactly one workflow, one static contract test, and one Workspace Shell evidence mountpoint marker.",
+        "No merge authority has been granted; workflow is not active on main."
+      ]
     }
   ],
   "blockers": [
-    "This conversation still exposes the old cached Workspace Shell execution schema and cannot issue candidate-pytest. A fresh chat with Workspace Shell loaded is required for off-checkpoint PR #26 validation.",
+    "GPU2 evaluator execution is prepared and validated in PADataset draft PR #27 but remains inactive until an explicitly authorized merge/activation places the workflow on the default branch.",
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
@@ -515,8 +535,8 @@
     "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "Open a fresh ChatGPT chat with Workspace Shell selected so the refreshed plugin schema exposes candidate-pytest. Continue task mth602-final-multisurrogate-dqnguard-v1 from workspace-control PR #640. First validate PADataset PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 (or fetch its newer exact head if the branch advanced) with the complete PR #26 contract test set through candidate-pytest while durable PADataset authority remains befe383fd67c8bca8d8ce370344b33c7e13cd52f. Verify the candidate receipt binds durable checkpoint plus candidate SHA/tree and confirm ordinary task-bound execution still rejects the off-checkpoint candidate. Do not activate evaluator workflow authority until candidate validation passes. Meanwhile PA3-PA4 run 43943016274/job 133565212672 remains the sole live backbone; do not launch another backbone.",
+  "next_safe_action": "Await explicit merge/activation authority for PADataset draft PR #27. If granted, merge only PR #27, verify the default-branch workflow SHA, then launch one frozen PR #26 directional request on GPU2 and inspect its complete artifact/receipt before scheduling further cells. Continue monitoring PA3-PA4 run 43943016274/job 133565212672; on SUCCESS freeze backbone #10 and its final two evaluator requests. Do not merge PR #26 or any backbone PR without separate explicit authority.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
-  "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred. Workspace Shell stale-authority gate was cleared successfully on 2026-11-16 via authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e; post-refresh receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 proves task-bound execution at pinned PADataset authority. Remaining schema blocker is chat-local only."
+  "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred. Workspace Shell stale-authority gate was cleared successfully on 2026-11-16 via authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e; post-refresh receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 proves task-bound execution at pinned PADataset authority. Remaining schema blocker is chat-local only. Workspace Shell Refresh Tools exposed candidate-pytest. PR #26 contract suite passed authoritatively (35 tests), and separate GPU2 evaluator workflow candidate PR #27 passed its authority-surface tests (3 tests). The next blocker is explicit activation/merge authority for PR #27."
 }
