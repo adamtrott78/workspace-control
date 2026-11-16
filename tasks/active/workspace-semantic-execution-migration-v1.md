@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29. CURRENT CRITICAL PATH: retry the owned Workspace Shell transactional activation using authority 6a1be26bbfc84246f19ed7858d60d04fd90766e2 and runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc (#2942 SUCCESS; authority #2943 SUCCESS), PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. Require LOCAL_CANDIDATE_MATERIALIZER_READY=PASS before semantic acceptance, then full semantic/evaluator receipt and isolation PASS plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
+WORKSPACE SHELL ACTIVATION IS COMPLETE. Live runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29 are independently verified; evaluator isolation acceptance is PASS. Derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository evidence. Do not invent or widen authority. If an explicit reviewed route exists and remains account-free, browser-free, model-free, and GPU-free, execute it and require an exact action/status/result roundtrip before moving toward Stage 12 / real account calibration.
 
 ## Remaining work
 
@@ -84,11 +84,11 @@ SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b9
 
 ## Blockers / gates
 
-- Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review.
-- Workspace Shell root activation remains rollback-safe but not live. The ninth retry failed before semantic Git execution because the candidate materializer service was unavailable.
-- Owning Workspace Shell authority 6a1be26bbfc84246f19ed7858d60d04fd90766e2 freezes runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc. The transactional upgrade now writes worker_gid=41011 into candidate-materializer.json and proves the materializer Unix socket responds with INVALID_SHA before any semantic MCP acceptance call. Runtime #2942 and authority #2943 are SUCCESS.
-- Strong evaluator/capability claims remain blocked until fresh root activation proves materializer readiness, semantic receipt, evaluator worker-denial receipt, evaluator isolation, and full transactional upgrade on the exact host.
-- GitRunner/controller modernization remains deferred and authority-separated. Reasoning Economy claim-bearing execution remains gated on live executor authority, evaluator isolation, and calibrated allowance telemetry.
+- Workspace Shell multirepo live activation is ACCEPTED and independently verified at runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc. Evaluator isolation acceptance is PASS.
+- The semantic execution remains frozen at 7c20097c5f177f23c16a765b95ce94d7161f0d29 and has been independently re-executed through live Workspace Shell with exit 0 and clean source.
+- The next immediate gate is to derive, from durable repository authority, the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py. Do not invent a route, helper, profile, or execution authority.
+- Claim-bearing Reasoning Economy execution remains separately gated on reviewed live executor authority, evaluator isolation, and calibrated allowance telemetry.
+- GitRunner/controller modernization remains deferred and authority-separated.
 
 ## Fresh-chat initialization
 
