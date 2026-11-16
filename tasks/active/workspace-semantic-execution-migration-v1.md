@@ -70,13 +70,13 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-PRIVATE ROUTE V2 ATTEMPT 02 IS EXPLICITLY AUTHORIZED. Execute only transaction 2a6f65de5681f000a4b69913979db21953ab36a6 / blob beef1ade487e117e519b4cec1e9e4d43a36ead57 on gokhan-lambda-vector. It must preserve existing HTTPS 443 root / -> http://127.0.0.1:8888, temporarily add only /operator-bridge/v1 -> http://127.0.0.1:8765/operator-bridge/v1, run the fake-worker harness, remove only that path, and prove exact restoration. On any mismatch/failure stop and diagnose; Stage 12 remains blocked until complete PASS.
+D3 PRIVATE-ROUTE LIVE FAKE-WORKER ACCEPTANCE IS COMPLETE. Attempt 02 returned full PASS through the reviewed private route and exact restoration of the preexisting Jupyter Serve configuration. Next safe action is D4 only: design/review a bounded Stage-12 real ChatGPT Instant calibration using the existing Operator Bridge + persistent-session broker. Do not infer real-account authority from fake-worker authority. Stage 12 must preserve manual normal ChatGPT authentication, no credential automation, no DOM/page-content scraping, no browser-permission widening, one bounded real Instant action, persistent-session reuse proof, stale-session fencing, replacement/recovery, and exact result ownership validation.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: coexistence-safe v2 is explicitly authorized for Attempt 02. Execute exact transaction 2a6f65de…/blob beef1ade… on gokhan-lambda-vector; require complete fake-worker PASS and exact restoration of the existing / -> 8888 Serve configuration before Stage 12.
+- LIVE INSTANT: D3 exact-host fake-worker transport is ACCEPTED. Build and review D4 Stage-12 bounded real-account calibration using normal manual ChatGPT auth and the existing persistent-session/Operator Bridge path; prove one bounded real Instant action, persistent-session reuse, stale-session fencing, replacement/recovery and exact result ownership before enabling broader live Instant dispatch.
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
@@ -84,11 +84,11 @@ PRIVATE ROUTE V2 ATTEMPT 02 IS EXPLICITLY AUTHORIZED. Execute only transaction 2
 
 ## Blockers / gates
 
-- Workspace Shell semantic/evaluator activation remains COMPLETE.
-- Attempt 01 remains closed as failed-safe evidence and must not be rerun.
-- Coexistence-safe v2 is now explicitly authorized for one exact fake-worker attempt on gokhan-lambda-vector.
-- The only remaining gate before Stage 12 is complete live Attempt-02 evidence including fake-worker PASS and exact restoration of the preexisting Jupyter Serve mapping.
-- No authority exists for global Serve off/reset, Funnel, public exposure, production Postgres mutation, real ChatGPT account use, model/browser/GPU use, helper widening, or Workspace Shell network widening.
+- Workspace Shell semantic/evaluator activation is COMPLETE.
+- Private Operator Bridge route D3 is COMPLETE: Attempt 02 passed exact-host fake-worker transport and exact restoration of / -> 127.0.0.1:8888.
+- Attempt-02 fake-worker authority is consumed as accepted evidence and grants no real-account/model/browser authority.
+- Current hard gate is D4 Stage-12 real-account calibration review/authority. No real ChatGPT account interaction may begin until the exact Stage-12 action, session/browser boundaries, and rollback/recovery expectations are reviewed and explicitly authorized.
+- Reasoning Economy scored runs remain blocked until Stage-12 live executor calibration plus comparable weekly allowance telemetry are accepted.
 
 ## Fresh-chat initialization
 
