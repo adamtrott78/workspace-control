@@ -18,6 +18,22 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Extend the live Workspace Shell v1 lineage with first-class PADataset access and a permanent candidate-evidence path that can validate exact candidate SHAs without promoting them to durable task authority, while preserving credential isolation, private-repository support, rollback, and exact-SHA authoritative execution.
 
+## Repositories
+
+### workspace-control
+
+- Intent: mutate
+- Remote branch: workspace-shell-candidate-evidence-current-v1
+- Remote checkpoint: 79e8940589d0ac448d40fd2a1560a4e59e817c73
+- Remote verified: true
+
+### PADataset
+
+- Intent: read
+- Remote branch: mth602-final-multisurrogate-dqnguard-v1
+- Remote checkpoint: befe383fd67c8bca8d8ce370344b33c7e13cd52f
+- Remote verified: true
+
 ## Next safe action
 
 After this control-cycle state validates, retry the transactional root activation using the exact authority-state commit produced here and runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 (#2934 SUCCESS), with the frozen PADataset/semantic tuple. The semantic git-read request now obeys its unchanged 30000 ms ceiling. Require LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure.
@@ -35,3 +51,17 @@ After this control-cycle state validates, retry the transactional root activatio
 - Runtime 79e89405… corrects the caller to 30000 ms and does not change the frozen policy ceiling or any execution authority.
 - Live activation remains an operator/root gate. Full success still requires semantic receipt PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
 - After activation succeeds, independently verify live runtime and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29 before the frozen fake-worker route.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-shell-multirepo-research-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
