@@ -110,6 +110,9 @@
   - [x] Owning live-acceptance authority `05c7be116320ea8640b38870d622cf2b0023292e` passed Workspace #2945.
   - [x] Umbrella live-acceptance head `92325102e5730199a7735f09b17b8730a50d3185` passed Workspace #2946 / Semantic #241 / Operator #519.
 - [ ] **D2 — Establish explicit reviewed deployment authority for the localhost Operator Bridge backend + authenticated private Tailscale Serve route.**
+  - [x] Non-authoritative activation proposal frozen at `a350fe07b25b4a67dc0ca714bb70633041c5b9e5`; Workspace #2950 / Semantic #245 / Operator #523 PASS.
+  - [x] Proposed exact backend binding: `127.0.0.1:8765`, state key `control`, base path `/operator-bridge/v1`, private Tailscale Serve HTTPS only.
+  - [ ] Authority review must bind exactly four unresolved host values: private base URL, expected Tailscale login, Postgres DSN, and authorized activation mechanism.
   - [x] Transport design is already selected and validated: outbound-only HTTPS over authenticated tailnet; backend listens only on localhost; Tailscale Serve injects authenticated identity; no helper credential store; no public endpoint/Funnel.
   - [x] Production server composition and Windows HTTPS client are already repository-validated.
   - [ ] Missing: host-specific reviewed activation route binding exact localhost port, expected Tailscale identity configuration, Postgres runtime source, rollback, and fake-worker-only acceptance scope.
