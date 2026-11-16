@@ -537,6 +537,7 @@ else:
     mdata = {}
 mdata["socket_path"] = "/run/workspace-shell-control/candidate-materializer.sock"
 mdata["candidate_store_root"] = "/var/lib/workspace-shell/candidates"
+mdata["worker_gid"] = 41011
 sources = mdata.setdefault("sources", {})
 sources.setdefault("workspace-control", {
     "repository": "adamtrott78/workspace-control",
@@ -580,6 +581,45 @@ sudo systemctl start workspace-shell-tunnel.service
 for svc in "${SERVICES[@]}"; do
   sudo systemctl is-active --quiet "$svc" || fail "$svc is not active after upgrade"
 done
+
+CANDIDATE_READY=0
+for attempt in $(seq 1 20); do
+  if sudo python3 - <<'PY'
+import json
+import socket
+from pathlib import Path
+
+cfg = json.loads(Path("/etc/workspace-shell/candidate-materializer.json").read_text())
+if cfg.get("worker_gid") != 41011:
+    raise SystemExit(1)
+sock_path = cfg.get("socket_path")
+if sock_path != "/run/workspace-shell-control/candidate-materializer.sock":
+    raise SystemExit(1)
+client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+client.settimeout(1.0)
+try:
+    client.connect(sock_path)
+    payload = {
+        "schema": "workspace-shell-candidate-materialize.v1",
+        "target": "workspace-control",
+        "candidate_sha": "invalid",
+    }
+    client.sendall((json.dumps(payload, separators=(",", ":")) + "\n").encode())
+    raw = client.recv(4096)
+finally:
+    client.close()
+response = json.loads(raw.decode())
+if response.get("ok") is not False or response.get("code") != "INVALID_SHA":
+    raise SystemExit(1)
+PY
+  then
+    CANDIDATE_READY=1
+    break
+  fi
+  sleep 1
+done
+[[ "$CANDIDATE_READY" == "1" ]] || fail "candidate materializer did not become responsive after bounded startup wait"
+echo "LOCAL_CANDIDATE_MATERIALIZER_READY=PASS"
 
 MCP_INIT="$(mktemp /tmp/workspace-shell-upgrade-init.XXXXXX.json)"
 MCP_TOOLS="$(mktemp /tmp/workspace-shell-upgrade-tools.XXXXXX.json)"
