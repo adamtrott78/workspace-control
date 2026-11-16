@@ -8,6 +8,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 LINUX = ROOT / "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v1.sh"
 WINDOWS = ROOT / "operator-bridge/tools/run-stage12-real-instant.ps1"
+REVIEW = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-review.v0.1.json"
 
 
 class Stage12TransportStaticTests(unittest.TestCase):
@@ -77,6 +78,71 @@ class Stage12TransportStaticTests(unittest.TestCase):
         )
         self.assertIn("--operator-bridge-url=$OperatorBridgeUrl", text)
         self.assertIn("--scheduler-hotkey=$SchedulerHotkey", text)
+
+    def test_review_candidate_is_exact_and_not_authority(self) -> None:
+        import json
+        review = json.loads(REVIEW.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(
+            review["authority_gate"]["live_real_account_authorized"]
+        )
+        self.assertTrue(
+            review["authority_gate"]["explicit_operator_approval_required"]
+        )
+        bindings = review["exact_candidate_bindings"]
+        self.assertEqual(
+            bindings["source_head"],
+            "b282ccdebae222d70454db46fc287fdc4809cd6a",
+        )
+        self.assertEqual(
+            bindings["real_instant_harness"]["blob_sha"],
+            "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d",
+        )
+        self.assertEqual(
+            bindings["linux_private_route_transaction"]["blob_sha"],
+            "28248b17bc775ad938c221c240a3c7f3e204e82b",
+        )
+        self.assertEqual(
+            bindings["windows_operator_launcher"]["blob_sha"],
+            "d9d474ca6870585c9e4767f551086e17b4525fbc",
+        )
+        self.assertEqual(
+            bindings["candidate_result_branch"]["initialization_commit"],
+            "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+        )
+        self.assertFalse(
+            bindings["candidate_result_branch"]["source_or_authority_branch"]
+        )
+
+    def test_review_preserves_real_account_and_browser_safety_boundaries(self) -> None:
+        import json
+        review = json.loads(REVIEW.read_text(encoding="utf-8"))
+        human = review["human_interaction_boundary"]
+        self.assertEqual(
+            human["normal_chatgpt_authentication"],
+            "MANUAL_ONLY",
+        )
+        self.assertEqual(
+            human["worker_service_sequence"],
+            "Ctrl+Space -> Ctrl+V -> Enter",
+        )
+        self.assertFalse(human["credential_automation"])
+        self.assertFalse(human["automatic_typing"])
+        self.assertFalse(human["automatic_submission"])
+        browser = review["browser_boundary"]
+        self.assertEqual(
+            browser["allowed_extension_permissions"],
+            ["nativeMessaging", "tabs", "sessions"],
+        )
+        self.assertFalse(browser["content_scripts"])
+        self.assertFalse(browser["host_permissions"])
+        self.assertFalse(browser["dom_or_page_content_scraping"])
+        host = review["host_runtime_boundary"]
+        self.assertEqual(host["backend_bind"], "127.0.0.1:8765")
+        self.assertFalse(host["tailscale_funnel"])
+        self.assertFalse(host["public_listener"])
+        self.assertFalse(host["production_postgres_mutation"])
+        self.assertFalse(host["gpu_required"])
 
 
 if __name__ == "__main__":
