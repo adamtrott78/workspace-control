@@ -117,7 +117,7 @@
   - [x] Production server composition and Windows HTTPS client are already repository-validated.
   - [x] Host-specific transaction candidate `8116662727003e9fe0904fa88ff7836608aeac00` / blob `765c846e7b6c1297f4a0a8871c2fdd34b453b5c2` freezes exact localhost port, runtime-only identity, isolated Postgres source, rollback, and fake-worker-only scope.\n  - [x] Tailnet `tailca6171.ts.net`, Linux `gokhan-lambda-vector`, Windows `desktop-ub9p70p`, MagicDNS ON, HTTPS certificates ON.
   - [ ] Do **not** bypass with generic shell, manual sidecar, arbitrary Tailscale commands, network-enabled Workspace Shell profile, or helper/root-policy widening. Current helper registry is empty and frozen Workspace Shell profiles deny network.
-- [ ] **D3 — Prove one exact-host fake-worker action/status/result round trip through the reviewed private route before touching a real ChatGPT account.**
+- [ ] **D3 — Prove one exact-host fake-worker action/status/result round trip through the reviewed private route before touching a real ChatGPT account.**\n  - [x] Attempt 01 materialized exact authorized transaction `81166627…` and passed host/peer/login binding, then failed closed on `PREEXISTING_SERVE_CONFIG:TCP` before PostgreSQL, Serve mutation, or fake-worker execution. Existing Serve state preserved.\n  - [ ] Read-only inspect the existing Serve/Funnel mapping and produce a new coexistence-safe reviewed candidate; do not remove existing unrelated configuration.
   - [x] Account-free/model-free/browser-free/GPU-free harness is frozen at `7c20097c…` and repository-green (#2904/#226/#504).
   - [ ] Run through the real reviewed private route and require: status ready -> exact claim -> revalidate -> local-prepared -> immutable fake candidate -> independent validator -> process COMPLETED -> action COMPLETED -> session READY -> final ready=0/sent=0.
 - [ ] **D4 — Then run bounded Stage-12 real-account calibration with no widened browser permissions, DOM/content automation, credential workaround, or synthetic account interaction.**
@@ -136,7 +136,7 @@
 ## Current gates / non-negotiable boundaries
 
 - **Workspace Shell semantic/evaluator activation:** COMPLETE and independently verified. Do not redo the activation sequence unless a real regression appears.
-- **Private Operator Bridge route:** EXPLICITLY AUTHORIZED FOR FAKE-WORKER-ONLY EXACT TRANSACTION `81166627…` on `gokhan-lambda-vector`. Remaining gate is live PASS + rollback evidence; Stage 12 stays blocked until that evidence exists.
+- **Private Operator Bridge route:** ATTEMPT 01 FAILED CLOSED before mutation on existing Serve TCP state. Exact transaction `81166627…` must not be rerun. Current gate is read-only inspection and a newly reviewed coexistence-safe activation candidate.
 - **Codex:** suspended until PR #627/#630 lineage is trusted/promoted; subscription-only, no API billing, no credits/API-key fallback.
 - **Operator real account:** Stage-10 is complete; no Stage-12 until exact-host fake-worker transport passes through the reviewed private route.
 - **Reasoning Economy claim-bearing runs:** evaluator isolation gate is now satisfied live; launches still require reviewed live executor transport plus calibrated comparable weekly allowance telemetry. Do not manually grind the frozen 54-run matrix.
@@ -176,4 +176,4 @@
 - [x] Materializer readiness, semantic exact-SHA execution, exact receipt binding, evaluator worker denial, sealed-store isolation, and transactional promotion all passed on the real host.
 - [x] Post-activation independent receipts confirm the promoted runtime and frozen semantic execution remain exact and clean.
 - [x] Private-route authority audit completed at `ab6b82df2e5886663f32b289a68939eed6be86f4`; Workspace #2947 / Semantic #242 / Operator #520 all PASS.
-- [ ] Next executable live milestone is the now-authorized exact transaction `81166627…` on `gokhan-lambda-vector`, followed by account-free exact-host fake-worker PASS and rollback proof.
+- [ ] Next executable host step is the non-mutating `private_route_existing_serve_inspect_v1.sh` diagnostic. Preserve the existing mapping, then review a coexistence-safe transaction before any second live attempt.
