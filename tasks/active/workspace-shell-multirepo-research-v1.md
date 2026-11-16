@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: f23a7a4855a7c23f99a5cadb4143b732c7c153ad
+- Remote checkpoint: 296d2591b83d86da898940ccc6f6cc5cbcc45374
 - Remote verified: true
 
 ### PADataset
@@ -36,16 +36,15 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-Run the validated transactional Workspace Shell upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad and PADataset execution SHA befe383fd67c8bca8d8ce370344b33c7e13cd52f. Require five-service health, LOCAL_MCP_DISCOVERY including candidate-pytest, and a live off-checkpoint candidate-pytest receipt before updating the existing Workspace Shell plugin through Plugin Creator.
+Apply the transactional Workspace Shell upgrade from the exact authority-state head produced by this checkpoint, using execution candidate 296d2591b83d86da898940ccc6f6cc5cbcc45374 and PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f. Then prove candidate-pytest live, refresh the existing Workspace Shell plugin through Plugin Creator, and resume STFT from the persistent checkout without rebuilding completed cache files.
 
 ## Remaining work
 
-- Deploy the validated host upgrade from the authority-state checkpoint produced after execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad, explicitly binding PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.
-- Verify all five Workspace Shell services are active and still boot-disabled, with the job launcher/worker network isolation unchanged.
-- Run candidate-pytest against a PADataset candidate SHA that deliberately differs from the durable task checkpoint and verify the receipt binds task_checkpoint_sha + candidate SHA/tree.
-- Run a negative candidate test proving ordinary task-bound execution still rejects a mismatched SHA.
-- Update the existing private Workspace Shell plugin in place through Plugin Creator and refresh tool discovery.
-- Return to PADataset Architecture-B validation using candidate-pytest rather than promoting candidate SHAs into task authority.
+- Deploy the validated host upgrade from the authority-state checkpoint produced after execution candidate 296d2591b83d86da898940ccc6f6cc5cbcc45374, explicitly binding PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.
+- Verify five-service live health and candidate-pytest discovery.
+- Run an off-checkpoint candidate-pytest receipt to prove candidate SHA execution without mutating durable task authority.
+- Refresh the existing private Workspace Shell plugin in place through Plugin Creator.
+- Resume the STFT ablation from persistent checkout head 6fa2ef479d4a05de339154bfaed7a57648339c1b; completed cache files must be skipped, not rebuilt.
 
 ## Blockers / gates
 
