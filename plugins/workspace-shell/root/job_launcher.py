@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import select
+import shlex
 import shutil
 import signal
 import socket
@@ -173,8 +174,8 @@ def validate_research(argv):
 
 def assert_target_profile(target, profile):
     allowed = {
-        "workspace-control": {"git-read", "pytest-bounded", "validation-bounded", "file-list", "file-read", "file-hash"},
-        "PADataset": {"git-read", "file-list", "file-read", "file-hash", "research-bounded"},
+        "workspace-control": {"git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash"},
+        "PADataset": {"git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"},
     }
     if target not in allowed or profile not in allowed[target]:
         fail("TARGET_PROFILE_DENIED", f"profile {profile} is not authorized for target {target}")
@@ -189,6 +190,7 @@ def resolve_profile(manifest, profile, argv):
     expected = {
         "git-read": ("/usr/bin/git", False),
         "pytest-bounded": ("/usr/bin/python3", True),
+        "candidate-pytest": ("/usr/bin/python3", True),
         "validation-bounded": ("/usr/bin/python3", True),
         "file-list": ("/usr/bin/find", False),
         "file-read": ("/usr/bin/head", False),
@@ -218,7 +220,7 @@ def resolve_profile(manifest, profile, argv):
             "GIT_OPTIONAL_LOCKS": "0",
             "GIT_TERMINAL_PROMPT": "0",
         }
-    elif profile == "pytest-bounded":
+    elif profile in ("pytest-bounded", "candidate-pytest"):
         validate_pytest(argv)
         resolved = ["-m", "pytest", *argv]
         env = {
@@ -316,6 +318,142 @@ def verify_source_tree(source_root, worker_uid):
             if st.st_uid == worker_uid and st.st_mode & 0o200:
                 fail("SOURCE_WRITABLE_BY_WORKER", f"worker owns writable source entry: {p}")
     return source_root
+
+
+def _candidate_git_env(source):
+    env = {
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_OPTIONAL_LOCKS": "0",
+        "GIT_TERMINAL_PROMPT": "0",
+    }
+    transport = source.get("transport")
+    if transport == "public_https":
+        url = source.get("url")
+        if not isinstance(url, str) or not url.startswith("https://github.com/") or "@" in url.split("://", 1)[1]:
+            fail("CANDIDATE_SOURCE_CONFIG_INVALID", "public_https source URL must be credential-free GitHub HTTPS")
+    elif transport == "ssh_deploy_key":
+        url = source.get("url")
+        key_path = source.get("key_path")
+        known_hosts = source.get("known_hosts_path")
+        if not isinstance(url, str) or not url.startswith("git@github.com:"):
+            fail("CANDIDATE_SOURCE_CONFIG_INVALID", "ssh_deploy_key source URL must be GitHub SSH")
+        for field, value in (("key_path", key_path), ("known_hosts_path", known_hosts)):
+            if not isinstance(value, str) or not value.startswith("/etc/workspace-shell/candidate-sources/"):
+                fail("CANDIDATE_SOURCE_CONFIG_INVALID", f"{field} must live under candidate-sources policy root")
+            p = Path(value)
+            if not p.is_file() or p.is_symlink():
+                fail("CANDIDATE_SOURCE_CREDENTIAL_INVALID", f"{field} missing or symlinked")
+            st = os.lstat(p)
+            if st.st_uid != 0 or st.st_mode & 0o022:
+                fail("CANDIDATE_SOURCE_CREDENTIAL_INVALID", f"{field} ownership/mode invalid")
+        env["GIT_SSH_COMMAND"] = " ".join([
+            "/usr/bin/ssh",
+            "-i", shlex.quote(str(key_path)),
+            "-o", "IdentitiesOnly=yes",
+            "-o", "BatchMode=yes",
+            "-o", "StrictHostKeyChecking=yes",
+            "-o", "UserKnownHostsFile=" + shlex.quote(str(known_hosts)),
+        ])
+    else:
+        fail("CANDIDATE_SOURCE_CONFIG_INVALID", "unsupported candidate transport")
+    return env
+
+
+def _run_candidate_git(args, *, cwd=None, env=None, timeout=30):
+    proc = subprocess.run(
+        ["/usr/bin/git", *args],
+        cwd=cwd,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
+        timeout=timeout,
+        close_fds=True,
+        text=True,
+    )
+    if proc.returncode != 0:
+        message = proc.stderr.strip() or proc.stdout.strip() or "candidate git operation failed"
+        fail("CANDIDATE_SOURCE_FETCH_FAILED", message[:1000])
+    return proc.stdout.strip()
+
+
+def materialize_candidate_source(cfg, target, expected_sha, worker_uid):
+    sources = cfg.get("candidate_sources", {})
+    source = sources.get(target)
+    if not isinstance(source, dict):
+        fail("CANDIDATE_SOURCE_UNCONFIGURED", "target has no root-owned candidate source configuration")
+    repository = source.get("repository")
+    expected_repository = {
+        "workspace-control": "adamtrott78/workspace-control",
+        "PADataset": "adamtrott78/PADataset",
+    }.get(target)
+    if repository != expected_repository:
+        fail("CANDIDATE_SOURCE_CONFIG_INVALID", "candidate repository identity mismatch")
+
+    store = require_secure_directory(cfg.get("candidate_store_root"), owner_uid=0)
+    target_root = store / target
+    target_root.mkdir(mode=0o700, exist_ok=True)
+    st = os.lstat(target_root)
+    if st.st_uid != 0 or st.st_mode & 0o022:
+        fail("CANDIDATE_STORE_INVALID", "candidate target store ownership/mode invalid")
+
+    final = target_root / expected_sha
+    if final.exists():
+        root = verify_source_tree(final, worker_uid)
+        observed = hardened_git(root, ["rev-parse", "HEAD"])
+        dirty = hardened_git(root, ["status", "--porcelain=v1", "--untracked-files=normal"])
+        if observed != expected_sha or dirty:
+            fail("CANDIDATE_STORE_CORRUPT", "cached candidate does not match exact clean SHA")
+        return root, source.get("transport"), repository
+
+    temp = target_root / f".tmp-{expected_sha}-{uuid.uuid4().hex}"
+    temp.mkdir(mode=0o700)
+    env = _candidate_git_env(source)
+    try:
+        _run_candidate_git(["init", "--quiet", str(temp)], env=env, timeout=10)
+        _run_candidate_git(
+            ["-C", str(temp), "remote", "add", "origin", source["url"]],
+            env=env,
+            timeout=10,
+        )
+        _run_candidate_git(
+            ["-C", str(temp), "fetch", "--quiet", "--depth=1", "--no-tags", "origin", expected_sha],
+            env=env,
+            timeout=30,
+        )
+        _run_candidate_git(
+            ["-C", str(temp), "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", "FETCH_HEAD"],
+            env=env,
+            timeout=20,
+        )
+        observed = hardened_git(temp, ["rev-parse", "HEAD"])
+        dirty = hardened_git(temp, ["status", "--porcelain=v1", "--untracked-files=normal"])
+        if observed != expected_sha or dirty:
+            fail("CANDIDATE_SOURCE_MISMATCH", "materialized candidate is not the requested clean SHA")
+        for root, dirs, files in os.walk(temp, topdown=False, followlinks=False):
+            for name in files + dirs:
+                p = Path(root) / name
+                try:
+                    mode = os.lstat(p).st_mode
+                    os.chmod(p, mode & ~0o022, follow_symlinks=False)
+                except (FileNotFoundError, NotImplementedError):
+                    pass
+        os.chmod(temp, os.lstat(temp).st_mode & ~0o022)
+        try:
+            temp.rename(final)
+        except FileExistsError:
+            shutil.rmtree(temp, ignore_errors=True)
+        root = verify_source_tree(final, worker_uid)
+        if hardened_git(root, ["rev-parse", "HEAD"]) != expected_sha:
+            fail("CANDIDATE_STORE_CORRUPT", "final candidate cache SHA mismatch")
+        return root, source.get("transport"), repository
+    except Exception:
+        shutil.rmtree(temp, ignore_errors=True)
+        raise
 
 
 def verify_evidence_mount(evidence_root, worker_uid):
@@ -601,7 +739,7 @@ def decode_output(data):
 
 def redact_argv(profile, argv):
     values = list(argv or [])
-    if profile != "pytest-bounded":
+    if profile not in ("pytest-bounded", "candidate-pytest"):
         return values
     redacted = []
     i = 0
@@ -636,12 +774,33 @@ def run_request(cfg, manifest, request, cancel_check=None):
     if not 1000 <= timeout_ms <= resolved["max_timeout_ms"]:
         fail("TIMEOUT_DENIED", "timeout exceeds profile ceiling")
 
-    source_root = cfg.get("source_roots", {}).get(request["target"])
-    if not isinstance(source_root, str):
-        fail("SOURCE_ROOT_UNTRUSTED", "target source root is not pinned by launcher config")
+    source_mode = request.get("source_mode", "task")
+    if source_mode not in ("task", "candidate"):
+        fail("SOURCE_MODE_DENIED", "source_mode must be task or candidate")
+    task_checkpoint_sha = request.get("task_checkpoint_sha")
+    if not isinstance(task_checkpoint_sha, str) or len(task_checkpoint_sha) != 40 or any(c not in "0123456789abcdef" for c in task_checkpoint_sha):
+        fail("TASK_CHECKPOINT_SHA_INVALID", "task_checkpoint_sha must be an exact lowercase Git SHA")
+
     worker_uid = int(cfg["worker_uid"])
     worker_gid = int(cfg["worker_gid"])
-    source_root = verify_source_tree(source_root, worker_uid)
+    candidate_transport = None
+    candidate_repository = None
+    if source_mode == "candidate":
+        if profile != "candidate-pytest":
+            fail("CANDIDATE_PROFILE_REQUIRED", "candidate source mode is restricted to candidate-pytest")
+        source_root, candidate_transport, candidate_repository = materialize_candidate_source(
+            cfg,
+            request["target"],
+            expected_sha,
+            worker_uid,
+        )
+    else:
+        if profile == "candidate-pytest":
+            fail("CANDIDATE_SOURCE_REQUIRED", "candidate-pytest requires candidate source mode")
+        source_root = cfg.get("source_roots", {}).get(request["target"])
+        if not isinstance(source_root, str):
+            fail("SOURCE_ROOT_UNTRUSTED", "target source root is not pinned by launcher config")
+        source_root = verify_source_tree(source_root, worker_uid)
 
     evidence_root = None
     configured_evidence = cfg.get("evidence_roots", {}).get(request["target"])
@@ -712,6 +871,10 @@ def run_request(cfg, manifest, request, cancel_check=None):
         "expected_git_sha": expected_sha,
         "observed_git_sha": observed_sha,
         "observed_git_tree": observed_tree,
+        "source_mode": source_mode,
+        "task_checkpoint_sha": task_checkpoint_sha,
+        "candidate_repository": candidate_repository,
+        "candidate_transport": candidate_transport,
         "argv_profile": profile,
         "argv_hash": sha256_hex(json.dumps(request.get("argv"), separators=(",", ":"), ensure_ascii=False)),
         "redacted_argv": redact_argv(profile, request.get("argv")),
