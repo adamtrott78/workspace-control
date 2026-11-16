@@ -1,5 +1,0 @@
-<Solution>
-  <Project Path="src/SharedContracts/SharedContracts.csproj" />
-  <Project Path="simulator/WorkspaceOperator.Simulator.csproj" />
-  <Project Path="tests/Simulator.Tests/Simulator.Tests.csproj" />
-</Solution>

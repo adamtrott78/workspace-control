@@ -1,8 +1,0 @@
-# Local control-plane runtime state
-.venv/
-__pycache__/
-*.pyc
-
-# Future local scratch/state
-.local/
-tmp/

@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://workspace-control.local/schemas/task_capsule.schema.json",
-  "title": "Workspace Control Task Capsule",
-  "oneOf": [
-    {"$ref": "task_capsule.v1.schema.json"},
-    {"$ref": "task_capsule.v2.schema.json"}
-  ]
-}
