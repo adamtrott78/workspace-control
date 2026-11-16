@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-WORKSPACE SHELL ACTIVATION IS COMPLETE. Live runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29 are independently verified; evaluator isolation acceptance is PASS. Derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository evidence. Do not invent or widen authority. If an explicit reviewed route exists and remains account-free, browser-free, model-free, and GPU-free, execute it and require an exact action/status/result roundtrip before moving toward Stage 12 / real account calibration.
+REAL AUTHORITY GATE: Workspace Shell activation is complete, but no reviewed private Operator Bridge/Tailscale Serve deployment route currently exists. The smallest next action is an explicit authority-owned review/activation of the already-selected localhost-only backend + authenticated Tailscale Serve transport, binding the exact host, localhost serve port, expected Tailscale identity, PostgreSQL runtime source, rollback, and fake-worker-only acceptance scope. Do not infer those host-specific values or create authority from this task. After that reviewed route exists, run benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py through it and require the full exact action/status/result roundtrip before Stage 12.
 
 ## Remaining work
 
@@ -84,11 +84,11 @@ WORKSPACE SHELL ACTIVATION IS COMPLETE. Live runtime 54ac65cbcd4211554710b8f8f42
 
 ## Blockers / gates
 
-- Workspace Shell multirepo live activation is ACCEPTED and independently verified at runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc. Evaluator isolation acceptance is PASS.
-- The semantic execution remains frozen at 7c20097c5f177f23c16a765b95ce94d7161f0d29 and has been independently re-executed through live Workspace Shell with exit 0 and clean source.
-- The next immediate gate is to derive, from durable repository authority, the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py. Do not invent a route, helper, profile, or execution authority.
-- Claim-bearing Reasoning Economy execution remains separately gated on reviewed live executor authority, evaluator isolation, and calibrated allowance telemetry.
-- GitRunner/controller modernization remains deferred and authority-separated.
+- Workspace Shell multirepo live activation and evaluator isolation are COMPLETE and independently verified.
+- Exact-host fake-worker transport is now blocked only on a genuine authority/deployment gate: no reviewed private backend/Tailscale Serve activation route exists in the current trusted helper registry or default-branch authority.
+- Do not use generic shell, manual sidecar, caller-chosen Tailscale Serve configuration, root-policy widening, or network-enabled Workspace Shell execution as a bypass.
+- Once an explicit reviewed private-route activation is authority-owned, run the validated account-free fake-worker harness and require exact status -> claim -> revalidate -> local-prepared -> immutable candidate -> independent validation -> process/action/session completion -> empty final status.
+- Real-account Stage 12 remains blocked until that exact-host fake-worker transport proof passes.
 
 ## Fresh-chat initialization
 
