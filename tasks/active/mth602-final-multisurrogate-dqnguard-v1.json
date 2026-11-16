@@ -6,7 +6,7 @@
   "goal": "Complete the MTH602/DQNGuard follow-on program with two scientifically separated tracks: (A) repair the published Target–Surrogate control by retraining competent leave-two-out backbones, and (B) develop single-backbone multi-surrogate OSR using a competent target-withheld four-known backbone. In parallel, finish the STFT/time-frequency representation diagnostic for the PA1↔PA4 boundary. Preserve true-target quarantine, known-only selection/threshold semantics, exact provenance, and keep OSR-method changes separate from backbone/representation changes.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "trackB_archB_validation_plus_stft_resume",
+  "current_stage": "trackb_archb_cross_surrogate",
   "acceptance_criteria": [
     "Track A remains a control repair: original leave-two-out target/surrogate taxonomy and original DQNGuard evaluator are preserved while backbones are retrained to genuine convergence under known-only selection.",
     "Track B compares Architecture A (pooled DQN), Architecture B (surrogate-specific DQNs with cross-surrogate selection), and Architecture C (hybrid pooled DQN + deterministic guard) on the same competent target-withheld four-known backbone/evidence partitions.",
@@ -185,7 +185,7 @@
       "resume_condition": null
     },
     {
-      "id": "trackA_l2o_control_repair",
+      "id": "tracka_l2o_control_repair",
       "status": "PLANNED",
       "execution_owner": "chatgpt",
       "selected_executor": "lambda-scientific-after-protocol-freeze",
@@ -201,7 +201,7 @@
       "resume_condition": "Freeze PA1-aware known-only backbone/HPO protocol first."
     },
     {
-      "id": "trackB_archB_cross_surrogate",
+      "id": "trackb_archb_cross_surrogate",
       "status": "IN_PROGRESS",
       "execution_owner": "chatgpt",
       "selected_executor": "workspace-shell-candidate-pytest+bounded-evaluator",
