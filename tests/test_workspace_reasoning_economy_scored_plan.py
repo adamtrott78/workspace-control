@@ -18,6 +18,11 @@ RUNSET = json.loads(
         encoding="utf-8"
     )
 )
+ISOLATION = json.loads(
+    (BASE / "evaluator_isolation_v1.json").read_text(
+        encoding="utf-8"
+    )
+)
 
 
 class ScoredReplicatePlanTests(unittest.TestCase):
@@ -58,6 +63,19 @@ class ScoredReplicatePlanTests(unittest.TestCase):
         self.assertEqual(
             PLAN["launch_gate"]["calibrated_allowance_relationship"],
             "UNKNOWN",
+        )
+        self.assertEqual(
+            PLAN["launch_gate"]["evaluator_isolation"],
+            ISOLATION["status"],
+        )
+        self.assertNotEqual(
+            PLAN["launch_gate"]["evaluator_isolation"],
+            PLAN["evaluator_isolation_contract"]["required_live_status"],
+        )
+        self.assertTrue(
+            PLAN["evaluator_isolation_contract"][
+                "required_for_claim_bearing_launch"
+            ]
         )
         self.assertEqual(PLAN["summary"]["run_files_materialized"], 0)
         self.assertEqual(PLAN["summary"]["model_invocations_authorized"], 0)
@@ -109,6 +127,9 @@ class ScoredReplicatePlanTests(unittest.TestCase):
         self.assertNotIn("oracle_path", serialized)
         self.assertNotIn("expected_hypothesis", serialized)
         self.assertNotIn("interpretation_hint", serialized)
+        self.assertNotIn("seed_hex", serialized)
+        self.assertNotIn("seal_nonce_hex", serialized)
+        self.assertNotIn(".sealed.json", serialized)
 
 
 if __name__ == "__main__":

@@ -22,8 +22,10 @@
     "reasons": [
       "Live Instant/operator transport remains suspended until exact reviewed Workspace Shell semantic authority exists.",
       "Codex subscription executor remains suspended on PR #627/#630 lineage.",
-      "Shared ChatGPT/Codex allowance mapping is not calibrated; zero or absent meter movement remains UNKNOWN rather than free."
-    ]
+      "Shared ChatGPT/Codex allowance mapping is not calibrated; zero or absent meter movement remains UNKNOWN rather than free.",
+      "Evaluator sealed storage primitive exists, but live hostile-worker read denial and evaluator readback/commitment verification are not yet accepted; claim-bearing runs remain launch-blocked."
+    ],
+    "evaluator_isolation": "SEALED_STORE_PRIMITIVE_IMPLEMENTED_LIVE_WORKER_DENIAL_PENDING"
   },
   "comparison_questions": [
     {
@@ -641,6 +643,13 @@
     "This plan creates no execution authority and launches no model work.",
     "A planned run becomes evidence only after an exact run-state file is materialized, executed under the frozen public protocol, objectively validated, and admitted by the runset readiness gate.",
     "Protocol-screening runs remain non-claim-bearing and are never counted as scored replicates.",
-    "Policy promotion additionally requires calibrated comparable weekly-allowance deltas and matched holdout quality-floor PASS."
-  ]
+    "Policy promotion additionally requires calibrated comparable weekly-allowance deltas and matched holdout quality-floor PASS.",
+    "Claim-bearing launch additionally requires live evaluator isolation: hostile worker cannot list/read evaluator-only state and evaluator control can read back the sealed record and reproduce the pre-run public commitment."
+  ],
+  "evaluator_isolation_contract": {
+    "path": "benchmarks/workspace-semantic-execution/evaluator_isolation_v1.json",
+    "required_for_claim_bearing_launch": true,
+    "required_live_status": "LIVE_WORKER_DENIAL_AND_EVALUATOR_READBACK_ACCEPTED",
+    "current_status": "SEALED_STORE_PRIMITIVE_IMPLEMENTED_LIVE_WORKER_DENIAL_PENDING"
+  }
 }
