@@ -88,19 +88,34 @@ GitHub zero-work observation at checkpoint time:
 
 The failed old v3 operator block must **not** be rerun unchanged.
 
+## Refresh-v3 second pre-mutation failure and corrected candidate
+
+The first binding repair passed candidate validation but the fresh operator attempt exposed one additional copy/lineage typo **before any mutation**:
+
+- refresh-v2 actually writes receipt mode `V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2`
+- refresh-v3 incorrectly required its predecessor mode to equal `V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3`
+- runtime failure: `ERROR: lane-B workflow refresh v2 predecessor binding invalid`
+- the later `rm ... __pycache__ Permission denied` messages were temporary-checkout cleanup only.
+
+Corrected child candidate:
+- branch: `mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2`
+- base: `5a7134056fef65b44e25bf06ac66f975f1903bff`
+- exact head: `fc6c1cbac894d9350d11bae4859cbbb27b2da175`
+- code delta from base: one predecessor-mode line changed V3 -> V2
+- regression added for exact V2 predecessor mode
+- candidate-pytest receipt: `job-4cf75745-3a81-407b-bfa0-1b9319b54bca`
+- result: **34 passed**
+
+No root/control-plane mutation occurred in either failed v3 attempt.
+
 ## Immediate next action
 
-1. Run a **new** refresh-v3 root/operator transaction bound to candidate `5a7134056fef65b44e25bf06ac66f975f1903bff`.
+1. Run a **new** refresh-v3 root/operator transaction bound to candidate `fc6c1cbac894d9350d11bae4859cbbb27b2da175`.
 2. Recompute a fresh zero-work preflight immediately before execution.
-3. Require live predecessor policy SHA `70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d`.
-4. Advance only lane-B workflow trust:
-   - old blob: `8da00f39284745cf6c9032620d63574052cd6d61`
-   - new blob: `85e8deef5240e2d6d7db34318e6b2c35947a83f3`
-   - PADataset main: `dbf167b23e6a1777a31ad5c4bccde44d26d0aad6`
-5. After refresh-v3 PASS, inspect the active receipt and live policy before any science.
-6. Then rerun **exactly one** frozen PA1->PA2 evaluator cell from PR #26 head `99ba123e1455566e16d86d6faf67fef3be8ab0b9`.
-7. Inspect artifact transport, rehydration, `result_record.json`, `target_labels_used_for_tuning=false`, GPU UUID, scientific receipt, and final OSR metrics before scheduling anything else.
-8. If that acceptance cell passes, schedule the remaining Track-A matrix without retraining any backbone.
+3. Require predecessor receipt mode `V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2` and live predecessor policy SHA `70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d`.
+4. Advance only lane-B workflow trust from `8da00f39284745cf6c9032620d63574052cd6d61` to `85e8deef5240e2d6d7db34318e6b2c35947a83f3` at PADataset main `dbf167b23e6a1777a31ad5c4bccde44d26d0aad6`.
+5. Verify active v3 receipt and live lane-B policy after the transaction.
+6. Only after PASS, run exactly one frozen PA1->PA2 evaluator acceptance cell at PR #26 head `99ba123e1455566e16d86d6faf67fef3be8ab0b9`.
 
 ## Other lanes
 
