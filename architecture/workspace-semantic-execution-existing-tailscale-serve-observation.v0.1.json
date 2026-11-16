@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-existing-tailscale-serve-observation-v0.1",
+  "status": "OPERATOR_READ_ONLY_EVIDENCE",
+  "source": {
+    "diagnostic_head": "911c3245ba7607edeaa41405f595f835b68dc9c8",
+    "diagnostic_script": "benchmarks/workspace-semantic-execution/private_route_existing_serve_inspect_v1.sh",
+    "diagnostic_blob_sha": "d17c72202412d9871fc7bc449193595863bad9e1",
+    "result": "PRIVATE_ROUTE_EXISTING_TAILSCALE_CONFIG_READONLY=PASS"
+  },
+  "observed_relevant_config": {
+    "tcp_443_https": true,
+    "hostname": "gokhan-lambda-vector.tailca6171.ts.net:443",
+    "handlers": {
+      "/": {
+        "Proxy": "http://127.0.0.1:8888"
+      }
+    },
+    "allow_funnel": {},
+    "services": {}
+  },
+  "conclusion": "HTTPS 443 is already privately serving the existing localhost:8888 root application. Funnel exposure is disabled. A coexistence-safe candidate must preserve this root handler and add/remove only a non-root /operator-bridge/v1 handler."
+}
