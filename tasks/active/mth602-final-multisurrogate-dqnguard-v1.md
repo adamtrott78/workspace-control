@@ -5,62 +5,38 @@ Authoritative capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 
 ## Track-A live state
 
-- Status: IN_PROGRESS
-- Canonical backbone bank: **8/10 COMPLETE**
-- Final two live trainings:
+- Canonical backbone bank: **9/10 COMPLETE**
+- Sole remaining training:
   - GPU0: PA3-PA4 — run 43943016274 / job 133565212672
-  - GPU1: PA3-PA8 — run 43943022113 / job 133565235633
-- Both are bound to PADataset PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f.
-- After these two, no additional backbone training is permitted; reverse directions are evaluator-only reuse.
+- GPU1 is intentionally idle; there is no additional unique backbone to launch.
+- All training remains bound to PADataset PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f.
+- Reverse-direction backbone retraining is forbidden.
 
-## Newly frozen results
+## Newly frozen PA3-PA8 result
 
-PA2-PA8:
-- SUCCESS run 43926895324 / job 133508635811
-- best epoch 2
-- best known-val macro-F1 0.9433003897151243
-- known-test macro-F1 0.9448806320168245
+- SUCCESS run 43943022113 / job 133565235633
+- artifact 14267872094
+- artifact digest sha256:eb608ed9ccd6c17a8447a27778227435bbc389e48696178cec98933dcc440aa7
+- best epoch 1
+- best known-val macro-F1 0.8966316187092961
+- known-test macro-F1 0.8952296085145685
+- early stop epoch 11
 - target_test_consumed=false
-- artifact 14258984518
-- target quarantine preserved
-
-PA2-PA3:
-- SUCCESS run 43921420197 / job 133489412741
-- best epoch 3
-- best known-val macro-F1 0.9253955249097198
-- known-test macro-F1 0.9195729464289638
-- target_test_consumed=false
-- artifact 14259500161
 - target quarantine preserved
 
 ## Evaluator candidate
 
-- PADataset PR #26 exact head: d2a0bca789a134d138e8c065973ef3b25644a7c4
+- PADataset PR #26 exact head: 5520601b999c10202457760368f7e13d7bc8a439
 - Base: PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f
-- Current frozen evaluator state: 8 canonical backbones / 16 directed request manifests
-- Post-evaluation pipeline is also staged: provenance-bound result records, strict 20-cell aggregation, 5×5 matrix reporting, optional explicit-baseline deltas, and a bounded evaluator-operation design document.
+- Frozen state: 9 canonical backbones / 18 directed evaluator request manifests
+- Includes provenance-safe artifact transport/rehydration, frozen evaluator policy, provenance-bound result records, strict 20-cell aggregation, matrix reporting, and bounded evaluator-operation design
 - No workflow-authority file changes
 - No merge authority
 
-## Known-only diagnostic
-
-The two weaker completed PA2/* backbones are not broad collapses; their errors are dominated by the recurring PA4→PA1 boundary:
-- PA2-PA8 backbone: PA4→PA1 = 661.
-- PA2-PA3 backbone: PA4→PA1 = 1017.
-
-This strengthens the already separate STFT diagnostic rationale without changing Track-A training or using target evidence.
-
-## Workspace Shell gate
-
-Authoritative candidate pytest remains fail-closed because the live Workspace Shell authority snapshot still sees the older CHECKPOINTED task state.
-
-Preserve:
-- workspace-control live execution: 5401045341090a26a42ce3a497c379f8223a3b54
-- PADataset authority: befe383fd67c8bca8d8ce370344b33c7e13cd52f
-- recorded dependency generation: 4469009659182c8c2f4d12d727e556f2a2995fc9
-
 ## Next safe action
 
-Wait for the two final canonical backbone runs above. On each SUCCESS, freeze exact artifact/checkpoint/config provenance into PR #26 and create its two directional evaluator requests. Then stop backbone training, refresh Workspace Shell authority without rebinding the preserved SHAs, validate PR #26, and only then authorize/run the frozen 20-cell directional evaluator matrix.
+Monitor only PA3-PA4. On SUCCESS, freeze its exact workflow/artifact/checkpoint/config provenance into PR #26 and create the final two directional evaluator requests. That completes the 10-backbone / 20-cell Track-A bank.
+
+Then stop backbone training, refresh the Workspace Shell authority snapshot while preserving the pinned live SHAs, validate PR #26 through authorized candidate execution, and only then separately review/activate the bounded directional evaluator workflow operation.
 
 No merges without explicit authority.
