@@ -6,7 +6,7 @@
   "goal": "Extend the live Workspace Shell v1 lineage with first-class PADataset access and a permanent candidate-evidence path that can validate exact candidate SHAs without promoting them to durable task authority, while preserving credential isolation, private-repository support, rollback, and exact-SHA authoritative execution.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-shell-mcp-v1",
-  "current_stage": "live_candidate_acceptance",
+  "current_stage": "stage00_handoff",
   "acceptance_criteria": [
     "PADataset is an explicit Workspace Shell target authorized only by an IN_PROGRESS durable task capsule with an exact repository checkpoint SHA.",
     "Read-only PADataset evidence inspection supports bounded recursive file listing, bounded byte reads, SHA-256 hashing, and existing hardened Git inspection without arbitrary shell execution.",
