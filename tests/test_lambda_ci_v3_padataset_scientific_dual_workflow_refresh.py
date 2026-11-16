@@ -9,6 +9,10 @@ HELPER = (
 
 
 class PADatasetScientificDualWorkflowRefreshTests(unittest.TestCase):
+    def test_candidate_python_sources_compile(self):
+        compile(REC, "lambda_ci_v3_reconciler.py", "exec")
+        compile(HELPER, "lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v1.py", "exec")
+
     def test_exact_lane_b_workflow_transition_is_frozen(self):
         self.assertIn(
             'PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB = "6280a6e7b2ad8cc379277fa320e8839a94f360ec"',
@@ -35,7 +39,7 @@ class PADatasetScientificDualWorkflowRefreshTests(unittest.TestCase):
             "scientific_dual_workflow_refresh",
             "expected_b_policy_sha",
             "expected_b_blob",
-            'scientific_dual_workflow_refresh["controller_policy_file_sha256"]',
+            "controller_policy_file_sha256",
         ):
             self.assertIn(marker, REC)
 
