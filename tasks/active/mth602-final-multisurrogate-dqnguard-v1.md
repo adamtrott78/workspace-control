@@ -29,7 +29,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 ## Exact candidate stack
 
 - Runtime-only w4 training candidate: PADataset PR #24 @ d1fd5b6d414e7b88675485f576732a424504455f.
-- Directional evaluator/artifact candidate: PADataset PR #26 @ ac6c4f19e4e5f605665c8ea6101b9b7566eab6ec, stacked on exact PR #24 head.
+- Directional evaluator/artifact candidate: PADataset PR #26 @ 29e333ce4d036548ab6e6045ad7bea0ac234a4aa, stacked on exact PR #24 head.
 - PR #26 contains:
   - canonical 10-backbone / 20-directed-cell matrix,
   - frozen Track-A evaluator policy,
@@ -37,6 +37,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
   - GitHub artifact ID/digest/workflow-run binding,
   - ZIP/checkpoint/config provenance-safe rehydration,
   - directional reuse and target-quarantine contracts/tests.
+- Actual PR #26 branch-data validation: 10 canonical backbones, 20 directed cells, 6 complete, 4 remaining, 12 frozen requests, zero invariant errors.
 - No workflow authority changes and no merge authority are implied.
 
 ## Latest completed backbone
