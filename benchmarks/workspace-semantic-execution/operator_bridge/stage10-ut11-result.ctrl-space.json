@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "stage": "impl_10_usability_trial_execution",
+  "trial_id": "UT-11",
+  "binding": "Ctrl+Space",
+  "result": "PASS",
+  "evidence_class": "OPERATOR_OBSERVATION_PLUS_EXACT_HEAD_VALIDATION",
+  "validated_source": {
+    "source_sha": "b84f69cf11a598d8353ef0aa1ddcb1b014026446",
+    "workspace_validation": "#2886 SUCCESS",
+    "semantic_validation": "#215 SUCCESS",
+    "operator_bridge_validation": "#493 SUCCESS"
+  },
+  "operator_observation": {
+    "bridge_state": "OFF",
+    "ctrl_space_repeated_with_firefox_focused": true,
+    "ctrl_space_repeated_with_firefox_unfocused": true,
+    "bridge_reaction_observed": false,
+    "unexpected_firefox_focus_or_minimize_observed": false,
+    "unexpected_clipboard_effect_reported": false
+  },
+  "canceled_harness_attempt": {
+    "workflow_run_id": 43780397604,
+    "workflow_run_number": 494,
+    "job_id": 133016035152,
+    "reached_ready_marker": "STAGE10_USABILITY_READY=UT-11",
+    "completed_structured_result": false,
+    "conclusion": "failure_after_operator_canceled_runner",
+    "acceptance_use": "NOT_TREATED_AS_OBJECTIVE_PASS"
+  },
+  "interpretation": "Bridge-OFF shortcut-release behavior is accepted from the direct operator observation required by UT-11 plus the exact-head validated bridge contract. No additional timer run is required."
+}

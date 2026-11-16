@@ -1,16 +1,19 @@
 {
   "schema_version": 1,
   "stage": "impl_10_usability_trial_execution",
-  "decision": "HOTKEY_REBIND_CANDIDATE",
+  "decision": "HOTKEY_REBIND_ACCEPTED",
   "previous_binding": "Ctrl+B",
   "previous_binding_disposition": "REJECTED",
   "candidate_binding": "Ctrl+Space",
-  "candidate_status": "OPERATOR_SELECTED_PENDING_EMPIRICAL_ACCEPTANCE",
+  "candidate_status": "ACCEPTED_RETAINED",
   "implementation": "RUNTIME_CONFIGURABLE",
   "rationale": [
     "Operator explicitly rejected Ctrl+B because the Ctrl+B -> Ctrl+V transition requires an uncomfortable pointer-finger stretch.",
     "Operator explicitly proposed Ctrl+Space, reported having tried the motion, and said it felt like a good compromise.",
-    "Ctrl+B UT-10 recorded one extra hotkey press and one rejected submission despite 20/20 actions and durable acknowledgments."
+    "Ctrl+B UT-10 recorded one extra hotkey press and one rejected submission despite 20/20 actions and durable acknowledgments.",
+    "Ctrl+Space UT-10 passed 20/20 with exactly 20 presses, 1/7 routine friction, 7/7 worker-selection confidence and 7/7 physical comfort.",
+    "UT-11 Bridge-OFF behavior was directly verified with Firefox focused and unfocused: repeated Ctrl+Space caused no bridge reaction.",
+    "For UT-09, the operator stated they do not rely on the identified VS Code Ctrl+Space function and no required native shortcut collision or meaningful interference has been observed in their representative workflow."
   ],
   "invariant_preservation": [
     "scheduler command semantics unchanged",
@@ -28,5 +31,21 @@
     "UT-03",
     "UT-09"
   ],
-  "retention_gate": "Retain Ctrl+Space only after zero unintended scheduler dispatches, zero required native shortcut collisions, and hotkey interference <=2/7 in representative work."
+  "retention_gate": "Retain Ctrl+Space only after zero unintended scheduler dispatches, zero required native shortcut collisions, and hotkey interference <=2/7 in representative work.",
+  "final_binding": "Ctrl+Space",
+  "required_reruns_completed": {
+    "UT-11": "ACCEPTED_OPERATOR_OBSERVATION",
+    "UT-01": "PASS",
+    "UT-10": "PASS",
+    "UT-02": "PASS",
+    "UT-03": "PASS",
+    "UT-09": "PASS_ACCUMULATED_REPRESENTATIVE_USE"
+  },
+  "retention_gate_result": {
+    "result": "PASS",
+    "unintended_scheduler_dispatches": "ZERO_OBSERVED",
+    "required_native_shortcut_collisions": 0,
+    "hotkey_interference": "NONE_REPORTED; <=2/7 threshold satisfied without inventing a precise numeral"
+  },
+  "final_disposition": "RETAIN_CTRL_SPACE"
 }
