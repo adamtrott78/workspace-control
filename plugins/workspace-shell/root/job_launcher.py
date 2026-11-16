@@ -393,6 +393,42 @@ def candidate_materializer_rpc(cfg, target, candidate_sha):
     return candidate, result
 
 
+def resolve_task_source_root(cfg, target, expected_sha, task_checkpoint_sha, worker_uid):
+    """Resolve the exact task-bound source without weakening task authority.
+
+    The installed static source remains the fast path. If another authorized
+    task binds the same repository at a different exact SHA, reuse the trusted
+    materializer to fetch only that already-authorized SHA. The launcher never
+    chooses or widens the task checkpoint.
+    """
+    if expected_sha != task_checkpoint_sha:
+        fail(
+            "TASK_SOURCE_SHA_MISMATCH",
+            "task execution expected_sha must equal the authorized task checkpoint",
+        )
+    source_root = cfg.get("source_roots", {}).get(target)
+    if not isinstance(source_root, str):
+        fail("SOURCE_ROOT_UNTRUSTED", "target source root is not pinned by launcher config")
+    source_root = verify_source_tree(source_root, worker_uid)
+    installed_sha = hardened_git(source_root, ["rev-parse", "HEAD"])
+    if installed_sha == expected_sha:
+        return source_root, None
+
+    source_root, materialized = candidate_materializer_rpc(
+        cfg,
+        target,
+        expected_sha,
+    )
+    source_root = verify_source_tree(source_root, worker_uid)
+    observed_sha = hardened_git(source_root, ["rev-parse", "HEAD"])
+    if observed_sha != expected_sha:
+        fail(
+            "TASK_MATERIALIZED_SHA_MISMATCH",
+            "materialized task source differs from the authorized task checkpoint",
+        )
+    return source_root, materialized
+
+
 def verify_evidence_mount(evidence_root, worker_uid):
     root = Path(evidence_root).resolve()
     if not root.is_dir():
@@ -726,6 +762,9 @@ def run_request(cfg, manifest, request, cancel_check=None):
     worker_gid = int(cfg["worker_gid"])
     candidate_transport = None
     candidate_repository = None
+    task_source_materialized = False
+    materialized_transport = None
+    materialized_repository = None
     if source_mode == "candidate":
         if profile != "candidate-pytest":
             fail("CANDIDATE_PROFILE_REQUIRED", "candidate source mode is restricted to candidate-pytest")
@@ -737,13 +776,22 @@ def run_request(cfg, manifest, request, cancel_check=None):
         source_root = verify_source_tree(source_root, worker_uid)
         candidate_transport = materialized.get("transport")
         candidate_repository = materialized.get("repository")
+        materialized_transport = candidate_transport
+        materialized_repository = candidate_repository
     else:
         if profile == "candidate-pytest":
             fail("CANDIDATE_SOURCE_REQUIRED", "candidate-pytest requires candidate source mode")
-        source_root = cfg.get("source_roots", {}).get(request["target"])
-        if not isinstance(source_root, str):
-            fail("SOURCE_ROOT_UNTRUSTED", "target source root is not pinned by launcher config")
-        source_root = verify_source_tree(source_root, worker_uid)
+        source_root, materialized = resolve_task_source_root(
+            cfg,
+            request["target"],
+            expected_sha,
+            task_checkpoint_sha,
+            worker_uid,
+        )
+        if materialized is not None:
+            task_source_materialized = True
+            materialized_transport = materialized.get("transport")
+            materialized_repository = materialized.get("repository")
 
     evidence_root = None
     configured_evidence = cfg.get("evidence_roots", {}).get(request["target"])
@@ -818,6 +866,9 @@ def run_request(cfg, manifest, request, cancel_check=None):
         "task_checkpoint_sha": task_checkpoint_sha,
         "candidate_repository": candidate_repository,
         "candidate_transport": candidate_transport,
+        "task_source_materialized": task_source_materialized,
+        "materialized_repository": materialized_repository,
+        "materialized_transport": materialized_transport,
         "argv_profile": profile,
         "argv_hash": sha256_hex(json.dumps(request.get("argv"), separators=(",", ":"), ensure_ascii=False)),
         "redacted_argv": redact_argv(profile, request.get("argv")),

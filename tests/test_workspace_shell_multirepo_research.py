@@ -5,6 +5,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "workspace-shell"
@@ -242,6 +243,61 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertIn('data.setdefault("evidence_roots", {})', upgrade)
         self.assertIn("/srv/workspace-shell/PADataset-evidence", upgrade)
         self.assertIn("attempting rollback", upgrade)
+
+    def test_task_source_falls_back_to_exact_materialization_only_for_authorized_checkpoint(self):
+        cfg = {
+            "source_roots": {"workspace-control": "/srv/workspace-shell/workspace-control"},
+        }
+        materialized = {
+            "candidate_sha": "b" * 40,
+            "repository": "adamtrott78/workspace-control",
+            "transport": "public_https",
+        }
+        with (
+            mock.patch.object(job_launcher, "verify_source_tree", side_effect=lambda path, uid: Path(path)),
+            mock.patch.object(job_launcher, "hardened_git", side_effect=["a" * 40, "b" * 40]),
+            mock.patch.object(
+                job_launcher,
+                "candidate_materializer_rpc",
+                return_value=(Path("/var/lib/workspace-shell/candidates/workspace-control/" + "b" * 40), materialized),
+            ) as materialize,
+        ):
+            source, evidence = job_launcher.resolve_task_source_root(
+                cfg,
+                "workspace-control",
+                "b" * 40,
+                "b" * 40,
+                41011,
+            )
+        self.assertEqual(source.name, "b" * 40)
+        self.assertEqual(evidence, materialized)
+        materialize.assert_called_once_with(cfg, "workspace-control", "b" * 40)
+
+    def test_task_source_never_materializes_a_sha_different_from_task_checkpoint(self):
+        cfg = {
+            "source_roots": {"workspace-control": "/srv/workspace-shell/workspace-control"},
+        }
+        with self.assertRaisesRegex(Exception, "TASK_SOURCE_SHA_MISMATCH"):
+            job_launcher.resolve_task_source_root(
+                cfg,
+                "workspace-control",
+                "b" * 40,
+                "c" * 40,
+                41011,
+            )
+
+    def test_upgrade_can_enroll_exact_semantic_capsule_without_rebinding_execution(self):
+        upgrade = (PLUGIN / "install" / "upgrade_multirepo_padataset_v1.sh").read_text()
+        self.assertIn('EXPECTED_SEMANTIC_CAPSULE_SHA="${4:-}"', upgrade)
+        self.assertIn('EXPECTED_SEMANTIC_EXEC_SHA="${5:-}"', upgrade)
+        self.assertIn('SEMANTIC_TASK_ID="workspace-semantic-execution-migration-v1"', upgrade)
+        self.assertIn("SEMANTIC_DURABLE_TASK_BINDING=PASS", upgrade)
+        self.assertIn("semantic task execution binding", upgrade)
+        self.assertIn("LOCAL_SEMANTIC_TASK_AUTHORITY=PASS", upgrade)
+        self.assertIn('"profile":"git-read"', upgrade)
+        self.assertIn('"argv":["rev-parse","HEAD"]', upgrade)
+        self.assertIn("authority snapshot has unexpected changes after semantic enrollment", upgrade)
+        self.assertIn("SEMANTIC_EXECUTION_BINDING=", upgrade)
 
     def test_launcher_binds_evidence_inside_workspace_without_schema_change(self):
         source = (PLUGIN / "root" / "job_launcher.py").read_text()

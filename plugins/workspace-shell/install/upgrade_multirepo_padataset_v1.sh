@@ -19,6 +19,10 @@ git_retry() {
 EXPECTED_AUTHORITY_SHA="${1:-}"
 EXPECTED_EXEC_SHA="${2:-}"
 EXPECTED_PAD_EXEC_SHA="${3:-}"
+EXPECTED_SEMANTIC_CAPSULE_SHA="${4:-}"
+EXPECTED_SEMANTIC_EXEC_SHA="${5:-}"
+SEMANTIC_TASK_ID="workspace-semantic-execution-migration-v1"
+SEMANTIC_TASK_REL="tasks/active/${SEMANTIC_TASK_ID}.json"
 PAD_EVIDENCE_ROOT="${PADATASET_CHECKOUT:-$HOME/adamArchives/Adam/varMax/PADataset}"
 PAD_EXEC_REPO_URL="https://github.com/adamtrott78/PADataset.git"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
@@ -32,6 +36,14 @@ SERVICES=(workspace-shell-candidate-materializer.service "${BASE_SERVICES[@]}")
 [[ "$EXPECTED_AUTHORITY_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "usage: bash upgrade_multirepo_padataset_v1.sh <expected-authority-sha> <expected-workspace-control-exec-sha> <expected-padataset-execution-sha>"
 [[ "$EXPECTED_EXEC_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "expected workspace-control execution SHA must be full lowercase SHA"
 [[ "$EXPECTED_PAD_EXEC_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "expected PADataset execution SHA must be full lowercase SHA"
+if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" || -n "$EXPECTED_SEMANTIC_EXEC_SHA" ]]; then
+  [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" && -n "$EXPECTED_SEMANTIC_EXEC_SHA" ]] \
+    || fail "semantic authority enrollment requires both capsule SHA and execution SHA"
+  [[ "$EXPECTED_SEMANTIC_CAPSULE_SHA" =~ ^[0-9a-f]{40}$ ]] \
+    || fail "semantic capsule SHA must be full lowercase SHA"
+  [[ "$EXPECTED_SEMANTIC_EXEC_SHA" =~ ^[0-9a-f]{40}$ ]] \
+    || fail "semantic execution SHA must be full lowercase SHA"
+fi
 [[ -d "$ROOT/.git" || -f "$ROOT/.git" ]] || fail "upgrade script must run from a workspace-control Git checkout"
 [[ -d "$PAD_EVIDENCE_ROOT/.git" || -f "$PAD_EVIDENCE_ROOT/.git" ]] || fail "historical PADataset checkout not found at $PAD_EVIDENCE_ROOT"
 command -v mountpoint >/dev/null || fail "mountpoint is required"
@@ -142,8 +154,9 @@ fi
 
 WC_FETCH="$(mktemp -d /tmp/workspace-control-exec.XXXXXX)"
 PAD_FETCH="$(mktemp -d /tmp/padataset-exec.XXXXXX)"
+SEM_AUTH_FETCH="$(mktemp -d /tmp/workspace-control-semantic-authority.XXXXXX)"
 cleanup_tmp() {
-  rm -rf "$WC_FETCH" "$PAD_FETCH" >/dev/null 2>&1 || true
+  rm -rf "$WC_FETCH" "$PAD_FETCH" "$SEM_AUTH_FETCH" >/dev/null 2>&1 || true
 }
 trap cleanup_tmp EXIT
 
@@ -168,6 +181,44 @@ git_retry git -C "$PAD_FETCH" -c http.version=HTTP/1.1 fetch --quiet --depth=1 -
 git -C "$PAD_FETCH" -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD
 [[ "$(git -C "$PAD_FETCH" rev-parse HEAD)" == "$EXPECTED_PAD_EXEC_SHA" ]] || fail "clean PADataset execution checkout SHA mismatch"
 [[ -z "$(git -C "$PAD_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] || fail "clean PADataset execution checkout unexpectedly dirty"
+
+if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
+  echo "Materializing semantic task authority capsule at exact SHA $EXPECTED_SEMANTIC_CAPSULE_SHA"
+  rm -rf "$SEM_AUTH_FETCH"
+  mkdir -p "$SEM_AUTH_FETCH"
+  git -C "$SEM_AUTH_FETCH" init --quiet
+  git -C "$SEM_AUTH_FETCH" remote add origin "https://github.com/adamtrott78/workspace-control.git"
+  git_retry git -C "$SEM_AUTH_FETCH" -c http.version=HTTP/1.1 fetch --quiet --depth=1 --no-tags origin "$EXPECTED_SEMANTIC_CAPSULE_SHA" \
+    || fail "unable to fetch exact semantic authority capsule SHA after bounded retries"
+  git -C "$SEM_AUTH_FETCH" -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD
+  [[ "$(git -C "$SEM_AUTH_FETCH" rev-parse HEAD)" == "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]] \
+    || fail "semantic authority checkout SHA mismatch"
+  python3 - "$SEM_AUTH_FETCH/$SEMANTIC_TASK_REL" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+expected_exec = sys.argv[2]
+task = json.loads(path.read_text(encoding="utf-8"))
+if task.get("task_id") != "workspace-semantic-execution-migration-v1":
+    raise SystemExit("semantic task_id mismatch")
+if task.get("status") != "IN_PROGRESS":
+    raise SystemExit("semantic task must be IN_PROGRESS")
+repo = next(
+    (item for item in task.get("repositories", []) if item.get("name") == "workspace-control"),
+    None,
+)
+if not isinstance(repo, dict):
+    raise SystemExit("semantic task workspace-control repository binding missing")
+bound = (repo.get("remote") or {}).get("checkpoint_sha")
+if bound != expected_exec:
+    raise SystemExit(
+        f"semantic task execution binding {bound!r} != expected {expected_exec!r}"
+    )
+print("SEMANTIC_DURABLE_TASK_BINDING=PASS")
+PY
+fi
 
 mkdir -p "$PAD_FETCH/local_artifacts/evidence"
 git -C "$PAD_EVIDENCE_ROOT" status --short > "$PAD_FETCH/local_artifacts/evidence_source_status.txt"
@@ -280,6 +331,15 @@ sudo mkdir -p "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
 sudo cp -a --reflink=auto "$ROOT/." "$AUTH_NEXT/"
 sudo cp -a --reflink=auto "$WC_FETCH/." "$WC_NEXT/"
 sudo cp -a --reflink=auto "$PAD_FETCH/." "$PAD_NEXT/"
+if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
+  sudo install -o root -g root -m 0644 \
+    "$SEM_AUTH_FETCH/$SEMANTIC_TASK_REL" \
+    "$AUTH_NEXT/$SEMANTIC_TASK_REL"
+  SEMANTIC_CAPSULE_SHA256="$(sha256sum "$SEM_AUTH_FETCH/$SEMANTIC_TASK_REL" | awk '{print $1}')"
+  INSTALLED_SEMANTIC_CAPSULE_SHA256="$(sudo sha256sum "$AUTH_NEXT/$SEMANTIC_TASK_REL" | awk '{print $1}')"
+  [[ "$INSTALLED_SEMANTIC_CAPSULE_SHA256" == "$SEMANTIC_CAPSULE_SHA256" ]] \
+    || fail "semantic authority capsule content hash mismatch"
+fi
 sudo chown -R root:root "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
 # mktemp creates 0700 roots and cp -a preserves those source-directory modes.
 # These snapshots are immutable inputs for unprivileged Workspace Shell principals,
@@ -287,6 +347,11 @@ sudo chown -R root:root "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
 sudo chmod -R a+rX,go-w "$AUTH_NEXT" "$WC_NEXT" "$PAD_NEXT"
 
 [[ "$(sudo git -c safe.directory="$AUTH_NEXT" -C "$AUTH_NEXT" rev-parse HEAD)" == "$EXPECTED_AUTHORITY_SHA" ]] || fail "workspace-control authority snapshot SHA mismatch"
+if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
+  AUTH_STATUS="$(sudo git -c safe.directory="$AUTH_NEXT" -C "$AUTH_NEXT" status --porcelain=v1 --untracked-files=normal)"
+  [[ "$AUTH_STATUS" == "?? $SEMANTIC_TASK_REL" ]] \
+    || fail "authority snapshot has unexpected changes after semantic enrollment: $AUTH_STATUS"
+fi
 [[ "$(sudo git -c safe.directory="$WC_NEXT" -C "$WC_NEXT" rev-parse HEAD)" == "$EXPECTED_EXEC_SHA" ]] || fail "workspace-control execution snapshot SHA mismatch"
 [[ "$(sudo git -c safe.directory="$PAD_NEXT" -C "$PAD_NEXT" rev-parse HEAD)" == "$EXPECTED_PAD_EXEC_SHA" ]] || fail "PADataset execution snapshot SHA mismatch"
 [[ -z "$(sudo git -c safe.directory="$WC_NEXT" -C "$WC_NEXT" status --porcelain=v1 --untracked-files=normal)" ]] || fail "workspace-control execution snapshot is not clean"
@@ -427,7 +492,8 @@ MCP_INIT="$(mktemp /tmp/workspace-shell-upgrade-init.XXXXXX.json)"
 MCP_TOOLS="$(mktemp /tmp/workspace-shell-upgrade-tools.XXXXXX.json)"
 MCP_TASK_PRIMARY="$(mktemp /tmp/workspace-shell-upgrade-task-primary.XXXXXX.json)"
 MCP_TASK_DEPENDENT="$(mktemp /tmp/workspace-shell-upgrade-task-dependent.XXXXXX.json)"
-trap 'rc=$?; rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT"; rollback "$rc"' EXIT
+MCP_TASK_SEMANTIC="$(mktemp /tmp/workspace-shell-upgrade-task-semantic.XXXXXX.json)"
+trap 'rc=$?; rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC"; rollback "$rc"' EXIT
 
 MCP_READY=0
 for attempt in $(seq 1 20); do
@@ -500,7 +566,18 @@ sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
   --data-binary '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"workspace_shell_inspect","arguments":{"task_id":"mth602-final-multisurrogate-dqnguard-v1","target":"workspace-shell","operation":"runtime_inventory"}}}' \
   https://127.0.0.1:8797/mcp >"$MCP_TASK_DEPENDENT"
 
-python3 - "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" <<'PY'
+if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
+  sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 60 \
+    --cacert /etc/workspace-shell/tunnel/ca.crt \
+    --cert /etc/workspace-shell/tunnel/client.crt \
+    --key /etc/workspace-shell/tunnel/client.key \
+    -H 'content-type: application/json' \
+    -H 'accept: application/json, text/event-stream' \
+    --data-binary '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"workspace_shell_exec","arguments":{"task_id":"workspace-semantic-execution-migration-v1","target":"workspace-control","expected_sha":"'"$EXPECTED_SEMANTIC_EXEC_SHA"'","profile":"git-read","argv":["rev-parse","HEAD"],"cwd":".","timeout_ms":50000}}}' \
+    https://127.0.0.1:8797/mcp >"$MCP_TASK_SEMANTIC"
+fi
+
+python3 - "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
 import json
 import pathlib
 import sys
@@ -532,13 +609,28 @@ def accepted(path, label):
 
 accepted(sys.argv[1], "workspace-shell-multirepo-research-v1")
 accepted(sys.argv[2], "mth602-final-multisurrogate-dqnguard-v1")
+expected_semantic = sys.argv[4]
+if expected_semantic:
+    accepted(sys.argv[3], "workspace-semantic-execution-migration-v1")
+    payload = json.loads(pathlib.Path(sys.argv[3]).read_text())
+    serialized = json.dumps(payload, sort_keys=True)
+    if expected_semantic not in serialized:
+        raise SystemExit("semantic exact execution SHA missing from live MCP result")
+    if expected_semantic + "\\n" not in serialized:
+        raise SystemExit("semantic git-read did not report exact bound HEAD")
+    print("LOCAL_SEMANTIC_TASK_AUTHORITY=PASS")
 print("LOCAL_TASK_AUTHORITY=PASS")
 PY
 
-rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT"
+rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC"
 trap 'rollback "$?"' EXIT
 
 echo "WORKSPACE_CONTROL_AUTHORITY_SNAPSHOT=$(sudo git -c safe.directory="$AUTHORITY_ROOT" -C "$AUTHORITY_ROOT" rev-parse HEAD)"
+if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
+  echo "SEMANTIC_AUTHORITY_CAPSULE_SOURCE=$EXPECTED_SEMANTIC_CAPSULE_SHA"
+  echo "SEMANTIC_AUTHORITY_CAPSULE_SHA256=$SEMANTIC_CAPSULE_SHA256"
+  echo "SEMANTIC_EXECUTION_BINDING=$EXPECTED_SEMANTIC_EXEC_SHA"
+fi
 echo "WORKSPACE_CONTROL_SNAPSHOT=$(sudo git -c safe.directory=/srv/workspace-shell/workspace-control -C /srv/workspace-shell/workspace-control rev-parse HEAD)"
 echo "PADataset_EXECUTION_SNAPSHOT=$(sudo git -c safe.directory=/srv/workspace-shell/PADataset -C /srv/workspace-shell/PADataset rev-parse HEAD)"
 echo "PADataset_EVIDENCE_BRANCH=${EVIDENCE_BRANCH:-DETACHED}"
