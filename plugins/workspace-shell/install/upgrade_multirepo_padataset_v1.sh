@@ -231,6 +231,9 @@ rollback() {
   fi
 
   sudo systemctl daemon-reload || true
+  if [[ -e "$BACKUP/etc__systemd__system__workspace-shell-candidate-materializer.service" ]]; then
+    sudo systemctl start workspace-shell-candidate-materializer.service || true
+  fi
   sudo systemctl start "${BASE_SERVICES[@]}" || true
   cleanup_tmp
   exit "$rc"
