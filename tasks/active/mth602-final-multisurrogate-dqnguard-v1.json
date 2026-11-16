@@ -2,7 +2,7 @@
   "schema_version": 2,
   "task_id": "mth602-final-multisurrogate-dqnguard-v1",
   "title": "MTH 602 final project / PADataset multi-surrogate DQNGuard",
-  "status": "CHECKPOINTED",
+  "status": "IN_PROGRESS",
   "goal": "Complete the MTH602/DQNGuard follow-on program with two scientifically separated tracks: (A) repair the published Target–Surrogate control by retraining competent leave-two-out backbones, and (B) develop single-backbone multi-surrogate OSR using a competent target-withheld four-known backbone. In parallel, finish the STFT/time-frequency representation diagnostic for the PA1↔PA4 boundary. Preserve true-target quarantine, known-only selection/threshold semantics, exact provenance, and keep OSR-method changes separate from backbone/representation changes.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",

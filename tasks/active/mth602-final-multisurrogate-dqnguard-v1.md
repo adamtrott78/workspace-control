@@ -11,7 +11,7 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: mth602-final-multisurrogate-dqnguard-v1
 - Title: MTH 602 final project / PADataset multi-surrogate DQNGuard
-- Status: CHECKPOINTED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
