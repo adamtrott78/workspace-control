@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 866e2805def9d7bb1e5640715a72c72efc895480
+- Remote checkpoint: 9b02005a58a961ce83ef8790e2d59ec626802591
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED STAGE-10 CLOSEOUT BASE workspace-control@aa3c3e39d1a1ce00cc67fa2bcbee726b03623a22. OPERATOR BRIDGE STAGE 10 IS COMPLETE AND CTRL+SPACE IS RETAINED; do not redo UT-05–UT-12 or hotkey retention testing. PRIMARY CURRENTLY-EXECUTABLE LANE: Reasoning Economy claim-bearing P0–P3 runset readiness/holdout preparation only, preserving exact fixture/oracle/source/run provenance and UNKNOWN allowance when no controlled comparable meter delta exists. CODEX remains authority-gated on PR #627/#630 with no API billing or bypass. LIVE semantic/Instant + Operator Stage-12 transport remain suspended until exact Workspace Shell authority exists; once authorized, first prove one exact-host fake-worker action/status/result round trip before real-account use. Final proving still requires live mixed research-iterate + forced durable recovery, calibrated economics comparison, authoritative UX-09/resource/soak/provenance evidence, full acceptance reconciliation, and explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
+CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED REASONING-ECONOMY PLAN BASE workspace-control@9b02005a58a961ce83ef8790e2d59ec626802591. OPERATOR STAGE 10 IS COMPLETE. REASONING ECONOMY P0-P3 PROTOCOL SCREENING IS COMPLETE and the exact 54-run scored-replicate/holdout plan is frozen; do not manually launch or materialize it while live executor authority and comparable allowance telemetry are unavailable. CODEX remains gated on draft PR #627/#630. LIVE semantic/Instant remains gated on Workspace Shell TASK_NOT_FOUND. NEXT INDEPENDENT NO-ALLOWANCE LANE: close or precisely narrow the evaluator-only runtime-isolation blocker for hidden-ephemeral scoring; do not claim strong frontier equivalence until a control-owned sealed store is proven inaccessible to scored workers. Final proving still requires authorized live mixed research-iterate, forced recovery, calibrated economics comparison, UX-09/resource/soak/provenance evidence, acceptance reconciliation, and explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
 
 ## Remaining work
 
-- REASONING ECONOMY: continue claim-bearing P0-P3 runset readiness using exact fixture/oracle/run provenance; incomplete/superseded screening is never promotion evidence and unknown allowance remains UNKNOWN.
+- REASONING ECONOMY: protocol screening is COMPLETE and the exact 54-run claim-bearing scored-replicate/holdout plan is frozen; do not launch/materialize scored runs until live executor authority and calibrated comparable allowance telemetry exist.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
 - LIVE INSTANT: after Workspace Shell authority exists, activate reviewed localhost backend + private Tailscale route and prove one exact-host fake-worker action/status/result round trip before real-account use.
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
@@ -89,6 +89,7 @@ CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED STAGE-10 CLOSEOUT BASE workspace-
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
 - Claim-bearing benchmark conclusions still require evaluator-only runtime isolation and replicated scoring; this blocks strong capability-equivalence claims, not deterministic orchestrator/backend implementation.
 - GitRunner/controller modernization is intentionally deferred and authority-separated. This task may define comparison criteria and adapter boundaries, but may not rewrite/replace or widen GitRunner execution authority until a separate reviewed task is opened after semantic-execution Architecture Review v0.3.
+- Claim-bearing Reasoning Economy execution is now plan-ready but launch-gated: the 54-run plan is frozen with zero launches authorized until reviewed live Instant/operator transport exists and shared weekly allowance telemetry is calibrated. UNKNOWN meter cost must remain UNKNOWN.
 
 ## Fresh-chat initialization
 

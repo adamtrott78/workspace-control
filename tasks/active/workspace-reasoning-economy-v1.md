@@ -24,7 +24,7 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 41d320100a0c2ee3890c900ed5295a94b08213af
+- Remote checkpoint: 9b02005a58a961ce83ef8790e2d59ec626802591
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 ## Next safe action
 
-CONTINUE FROM validated Reasoning Economy base workspace-control@41d320100a0c2ee3890c900ed5295a94b08213af. Do not rebuild the weekly governor (65709645…), frozen Research Engine policy-trace adapter (fadadcc0…), shared-allowance calibration harness (59d69e0f…), claim-bearing runset readiness gate (31f138a8…), or dispatch-time allowance admission (41d32010…). Continue only exact claim-bearing P0-P3 screening/runset readiness and holdout preparation; superseded/refrozen-but-incomplete runs are NOT promotion evidence and allowance remains UNKNOWN without comparable calibrated meter deltas. Codex live runtime stays SUSPENDED until PR #627/#630 lineage authority clears. When it clears, run zero-inference bootstrap/auth, then controlled isolated Codex/Instant snapshots and feed only calibrated observations into the governor/holdout promotion protocol.
+SCREENING IS COMPLETE AND THE CLAIM-BEARING PLAN IS FROZEN. Validated screening-completion head 91dcc8520cc7e348c1f6bf2e16044b096d89c5bf passed Workspace #2890 / Semantic #219 / Operator #498; validated scored-plan head 9b02005a58a961ce83ef8790e2d59ec626802591 passed Workspace #2891 / Semantic #220 / Operator #499. The plan binds 18 required arm×phenotype cells × 3 replicates = 54 claim-bearing runs, but authorizes zero launches. DO NOT materialize or manually grind through those runs while live Instant/operator transport is authority-gated or allowance calibration is UNKNOWN. Codex remains suspended on PR #627/#630. When an authorized live executor and calibrated comparable weekly meter exist, admit/materialize scored runs through the existing governor/runset gate and preserve matched_work_item_id sets for holdout promotion.
 
 ## Remaining work
 
-- Complete claim-bearing P0-P3 screening/runset prerequisites with exact source checkpoint/run set/hard-gate manifest; incomplete or superseded screening cannot promote policy.
+- Execute the frozen 54-run claim-bearing scored-replicate plan only after live executor authority and a calibrated comparable allowance relationship exist; materialize run-state files lazily at admission time, not in advance.
 - Preserve UNKNOWN allowance for traces without controlled comparable meter deltas; never infer shared allowance from raw tokens.
 - When PR #627/#630 lineage clears, run reserved Workspace Control zero-inference Codex bootstrap and prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, no API billing/fallback.
 - Run isolated controlled Codex and Instant actions bracketed by official account/rate-limit/usage snapshots; determine which meter actually moves and keep unresolved mappings unknown.
@@ -50,6 +50,7 @@ CONTINUE FROM validated Reasoning Economy base workspace-control@41d320100a0c2ee
 ## Blockers / gates
 
 - LIVE CODEX LINEAGE AUTHORITY: PR #627 and stacked PR #630 remain open drafts at their validated SHAs. Live Codex runtime/auth is suspended until the reserved-capacity lineage reaches a trusted/default-branch promotion path; API billing and manual runner/sidecar bypass remain forbidden.
+- CLAIM-BEARING EXECUTION GATE: protocol screening is complete and the exact 54-run scored-replicate plan is frozen, but launch remains blocked because live Instant/operator transport lacks reviewed Workspace Shell authority and the shared ChatGPT/Codex weekly allowance relationship is still UNKNOWN. Do not spend 54 manual clean-chat runs or treat unknown meter cost as free.
 
 ## Fresh-chat initialization
 

@@ -78,13 +78,14 @@
 
 ### B. Reasoning Economy — parallel, repository-safe lane
 
-- [ ] **B1 — Continue claim-bearing P0–P3 screening/runset readiness only.**
-  - Preserve exact fixture/oracle/source/run identities.
-  - Superseded/refrozen-but-incomplete runs are NOT promotion evidence.
-  - No policy promotion until claim-bearing scored replicates + exact run set + hard-gate manifest exist.
-- [ ] **B2 — Preserve UNKNOWN allowance when no controlled comparable meter delta exists.**
-- [ ] **B3 — Do not rebuild governor / trace adapter / calibration harness / runset gate / dispatch admission.**
-- [ ] **B4 — When calibrated live traces exist, exercise matched holdout promotion and compare validated progress per scarce allowance against all-strong/frontier control.**
+- [x] **B1 — Freeze completed P0–P3 screening and claim-bearing runset preparation.**
+  - [x] Exact 20-run P0–P3/A–E screening completion manifest validated at `91dcc852…` (#2890/#219/#498).
+  - [x] Exact 54-run scored-replicate plan validated at `9b02005a…` (#2891/#220/#499): 18 required arm×phenotype cells ×3 replicates.
+  - [x] Superseded/refrozen-but-incomplete runs remain excluded from promotion evidence.
+  - [x] Plan authorizes zero launches; scored runs are materialized only after admission.
+- [x] **B2 — Preserve UNKNOWN allowance when no controlled comparable meter delta exists.** The frozen scored plan explicitly keeps the shared allowance relationship UNKNOWN and does not treat zero/absent movement as free.
+- [x] **B3 — Do not rebuild governor / trace adapter / calibration harness / runset gate / dispatch admission.** Existing components remain the admission/promotion path.
+- [ ] **B4 — When calibrated live traces exist, execute admitted scored replicates, exercise matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.**
 
 ### C. Codex subscription executor — authority-gated lane
 
@@ -117,7 +118,7 @@
 
 - **Live semantic host:** suspended until Workspace Shell has exact reviewed authority for this task.
 - **Codex:** suspended until PR #627/#630 lineage is trusted/promoted; subscription-only, no API billing.
-- **Operator real account:** no Stage-12 until remaining Stage-10 harness/trials and exact-host fake-worker transport are complete.
+- **Operator real account:** Stage-10 is complete; no Stage-12 until exact-host fake-worker transport is proven through reviewed live authority.
 - **Frontier-equivalence claims:** remain blocked without evaluator-only isolation and claim-bearing replicated scoring.
 - **GitRunner modernization:** deferred; do not rewrite/widen GitRunner authority from this task.
 - **PADataset GPUs:** do not touch for this program; Workspace Control remains CPU-only control lane.
@@ -129,7 +130,9 @@
 - `fadadcc0…`: Workspace #2846 / Semantic #172 PASS — frozen policy-trace adapter; later descendants fully validate the ancestry.
 - `59d69e0f…`: Workspace #2847 / Semantic #174 PASS — shared allowance calibration harness; later descendants fully validate the ancestry.
 - `31f138a8…`: Workspace #2848 / Semantic #176 / Operator #436 PASS — claim-bearing runset gate.
-- `41d320100a0c2ee3890c900ed5295a94b08213af`: Workspace #2849 / Semantic #178 / Operator #437 PASS — allowance admission integrated at dispatch; current validated cross-task base.
+- `41d320100a0c2ee3890c900ed5295a94b08213af`: Workspace #2849 / Semantic #178 / Operator #437 PASS — allowance admission integrated at dispatch.
+- `91dcc852…`: Workspace #2890 / Semantic #219 / Operator #498 PASS — exact 20-run P0-P3/A-E protocol-screening completion manifest.
+- `9b02005a…`: Workspace #2891 / Semantic #220 / Operator #499 PASS — exact 54-run claim-bearing scored-replicate/holdout plan frozen; zero launches authorized.
 
 ## Handoff behavior for the next executor
 
