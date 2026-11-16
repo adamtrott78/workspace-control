@@ -123,3 +123,21 @@ tmux new -s mth602-matrix 'watch -n 3 "gh run list -R adamtrott78/PADataset -w l
 ```
 
 Detach with `Ctrl-B D`; reattach with `tmux attach -t mth602-matrix`.
+
+
+## GPU0 evaluator scale-out candidate
+
+GPU0 support is now engineered and candidate-validated, but **not live yet**.
+
+- PADataset draft PR #32
+- exact head: `e77c82d90b36d6223877909adf2d5d0a490c3beb`
+- lane A remains `ci-padataset` / `lambda-padataset-scientific-single-gpu` / GPU0 `GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea`
+- candidate-pytest receipt: `job-7cead1f2-3c5e-4a7d-b870-672c09c52086`
+- result: **14 passed**
+- PR remains OPEN/DRAFT/UNMERGED; no merge authority has been inferred.
+
+The candidate ports the already-accepted GPU2 bounded `l2o_directional_eval` path to GPU0 without changing frozen request, provenance, target-quarantine, surrogate-calibration, or known-only-threshold semantics.
+
+Current authority gate: explicit permission is required to merge PR #32. After merge, a new default-branch workflow blob/main SHA must be bound into a chained lane-A trusted-workflow refresh and activated under fresh root/operator authority before any `/lambda-scientific ... l2o_directional_eval:...` request can be admitted on GPU0.
+
+Do not cancel GPU2 queued cells until GPU0 trust is live. At this checkpoint run 77 is SUCCESS, run 78 is IN_PROGRESS, and runs 79-95 are still queued.
