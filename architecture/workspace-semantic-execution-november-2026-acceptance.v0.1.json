@@ -221,7 +221,10 @@
         "Backend return path is now durable: worker-authored typed results are ingested from authoritative durable state rather than consumer-UI output, and exact process/action/session/packet identity is fenced.",
         "Repository-side Instant execution is now complete end-to-end: production action transport plus immutable candidate return/intake/validation is proven through PostgreSQL restart. Remaining PARTIAL item is exact-host private-tailnet activation.",
         "Production scheduler/action/candidate transport is repository-complete and restart-safe at 0afd7837…; remaining PARTIAL item is exact-host private-tailnet activation, still blocked by Workspace Shell TASK_NOT_FOUND.",
-        "Workspace Shell semantic authority enrollment first activation rolled back safely on a false-negative MCP stdout assertion. Receipt-based semantic enrollment repair ccdde5c9… passed Workspace #2896 and owning authority-state ee586acf… passed #2898; live root retry remains required before exact-host transport proof."
+        "Workspace Shell semantic authority enrollment first activation rolled back safely on a false-negative MCP stdout assertion. Receipt-based semantic enrollment repair ccdde5c9… passed Workspace #2896 and owning authority-state ee586acf… passed #2898; live root retry remains required before exact-host transport proof.",
+        "workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29 passed Workspace #2904 / Semantic #226 / Operator #504 and adds a standalone account-free exact-host fake-worker transport harness over the production Postgres-backed Operator Bridge stack.",
+        "The harness requires exact status/claim/revalidate/local-prepared/candidate-intake/independent-validation/final-status behavior and verifies durable process COMPLETED, action COMPLETED and session READY.",
+        "Private-route mode does not set Tailscale-User-Login client-side and cannot configure Tailscale, so PASS requires the reviewed private reverse proxy to inject authenticated identity. Live exact-host execution is still required before INST-01 can PASS."
       ]
     },
     {
@@ -345,7 +348,9 @@
         "Candidate target/revision/source bytes, process/action/session generations, packet hash, and independent validator are mechanically bound end-to-end at d3f6e283….",
         "Mixed-executor routing and recovery provenance is exact at workspace-control@a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7; stale session/action generations cannot be reused.",
         "Production scheduler provenance is generation-bound and candidate evidence binds exact repository/ref/path/commit/content at workspace-control@0afd7837f15ccc573d9dba8ce0422aa5a2d0b061; live route provenance remains authority-gated.",
-        "workspace-control@41d32010… is 3/3 green (#2849/#178/#437) and integrates scarcity admission without allowing the governor to widen executor capability/privacy/session eligibility."
+        "workspace-control@41d32010… is 3/3 green (#2849/#178/#437) and integrates scarcity admission without allowing the governor to widen executor capability/privacy/session eligibility.",
+        "Workspace Shell bundled activation runtime 6d47e3ec… passed #2902 and transactionally prepares semantic authority plus evaluator sealed-store control-readback/hostile-worker-denial acceptance without adding generic shell/helper authority.",
+        "Semantic execution head 7c20097c… is 3/3 green (#2904/#226/#504) and provides an account-free exact-host private-route harness binding packet SHA, action/process/session generations, immutable candidate revision and independent validator outcome."
       ]
     },
     {
@@ -399,6 +404,6 @@
   ],
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
-  "last_updated": "2026-11-15",
-  "latest_validated_checkpoint": "workspace-control@41d320100a0c2ee3890c900ed5295a94b08213af"
+  "last_updated": "2026-11-16",
+  "latest_validated_checkpoint": "workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29"
 }
