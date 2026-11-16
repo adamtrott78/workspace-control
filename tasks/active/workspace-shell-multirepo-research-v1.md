@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: df24022f897643282b4ce16aa727fa2dd646f859
+- Remote checkpoint: 54ac65cbcd4211554710b8f8f4231c6c9554e3cc
 - Remote verified: true
 
 ### PADataset
@@ -36,21 +36,21 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-After this control-cycle state validates, retry the transactional root activation using the exact authority-state commit produced here and runtime df24022f897643282b4ce16aa727fa2dd646f859 (#2939 SUCCESS), with PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. The exact-source materializer now binds source contents to the hostile worker group without world-readable repo contents and rematerializes stale root-private caches. Require LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure.
+After this control-cycle state validates, retry the transactional root activation using the exact authority-state commit produced here and runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc (#2942 SUCCESS), with the unchanged PADataset/semantic tuple. Require LOCAL_CANDIDATE_MATERIALIZER_READY=PASS before semantic MCP acceptance, then LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure.
 
 ## Remaining work
 
-- Retry transactional root activation from the exact authority-state commit produced by this control cycle using runtime df24022f897643282b4ce16aa727fa2dd646f859 and the unchanged PADataset/semantic tuple.
-- Require semantic/evaluator receipt and isolation PASS plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS; rollback on any failure.
-- After PASS, independently verify live Workspace Shell runtime and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29, record evaluator-isolation acceptance, sync umbrella state, then derive and run the reviewed account-free fake-worker route.
+- Retry transactional root activation from the exact authority-state commit produced by this control cycle using runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc and the unchanged PADataset/semantic tuple.
+- Require LOCAL_CANDIDATE_MATERIALIZER_READY=PASS before semantic MCP acceptance, then all semantic/evaluator receipt and isolation markers plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
+- After PASS, independently verify live Workspace Shell runtime and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29, record evaluator-isolation acceptance, sync umbrella state, and continue to the reviewed fake-worker route.
 
 ## Blockers / gates
 
-- Runtime df24022f897643282b4ce16aa727fa2dd646f859 is repository-validated but not live. The eighth activation remains rolled back.
-- The eighth retry passed authorization and all SHA/source-mode checks but sandboxed git-read exited 128. Exact stderr content was not recovered.
-- Repository source inspection demonstrated that root materialization under UMask=0077 previously left nested Git metadata potentially root-private to the hostile worker. Runtime df24022f… repairs worker readability at the materialization substrate while keeping repo contents non-world-readable.
-- Live activation remains an operator/root gate. Full success still requires LOCAL_SEMANTIC_TASK_RECEIPT=PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
-- After activation succeeds, independently verify live runtime and frozen semantic execution before any fake-worker transport execution.
+- Runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc is repository-validated but not live. The ninth activation remains rolled back.
+- The ninth retry failed because the upgrade path omitted worker_gid from candidate-materializer.json, causing the newly hardened materializer to fail closed and leave its socket unavailable.
+- Runtime 54ac65cb… fixes the upgrade-time config omission and adds an explicit materializer responsiveness gate before semantic MCP execution.
+- Live activation remains an operator/root gate. Full success still requires materializer readiness, semantic receipt PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
+- After activation succeeds, independently verify live runtime and frozen semantic execution before fake-worker transport execution.
 
 ## Fresh-chat initialization
 
