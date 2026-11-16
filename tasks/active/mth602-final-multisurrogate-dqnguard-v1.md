@@ -107,3 +107,19 @@ Requirements:
 - STFT remains separate and is still gated on repaired PA1 provenance preflight.
 - Preserve the first 120 completed STFT overlay records.
 - Do not merge PR #31, PR #26, PR #23, PR #21, or unrelated workspace-control branches without separate explicit authority.
+
+## Remaining Track-A matrix queue
+
+All other **19** frozen directional cells were submitted exactly once on PR #31 head `b141020bf7b171571879abdf18a836132e80d1d5` through the trusted GPU2 workflow.
+
+Workflow run numbers are **77-95**, with GitHub run IDs from `43976846146` through `43976937980` (exact per-cell run/job binding is authoritative in the JSON capsule).
+
+Do **not** enqueue duplicates. Current lane A was deliberately left unchanged because its trusted workflow does not authorize `l2o_directional_eval`.
+
+A safe operator-side tmux queue view is:
+
+```bash
+tmux new -s mth602-matrix 'watch -n 3 "gh run list -R adamtrott78/PADataset -w lambda-ci-scientific-2.yml -L 25"'
+```
+
+Detach with `Ctrl-B D`; reattach with `tmux attach -t mth602-matrix`.
