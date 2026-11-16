@@ -231,7 +231,7 @@
           ]
         }
       ],
-      "resume_condition": "Repair the refresh-v3 helper binding bug, activate corrected trusted GPU2 workflow blob, then rerun exactly one frozen PA1->PA2 evaluator acceptance cell before scheduling the remaining matrix."
+      "resume_condition": "Execute validated refresh-v3 candidate 5a7134056fef65b44e25bf06ac66f975f1903bff under fresh root/operator authority, verify lane-B trust advanced to workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3, then rerun exactly one frozen PA1->PA2 evaluator acceptance cell before scheduling the remaining matrix."
     },
     {
       "id": "trackb_archb_cross_surrogate",
@@ -671,22 +671,33 @@
         "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2=PASS; transaction refresh-69d6b04f-e5d7-47c1-9ae7-8015be78d354.",
         "Active receipt sha256 67875d5c10c337584400ff41f0c5e46ee2ad0ecb7d1b057c8d3058225634a8ab."
       ]
+    },
+    {
+      "check": "Lane-B workflow refresh v3 binding repair candidate",
+      "result": "PASS_CANDIDATE_READY_FOR_OPERATOR",
+      "evidence": [
+        "New branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 is rooted at exact failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d.",
+        "Exact candidate head 5a7134056fef65b44e25bf06ac66f975f1903bff changes only scripts/lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py (2 lines replaced) and tests/test_lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py (exact binding regression).",
+        "Correct bindings are PRIOR_REFRESH_ACTIVE -> PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT and REFRESH_ACTIVE -> PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT.",
+        "Workspace Shell candidate-pytest receipt job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b: 33 passed.",
+        "GitHub verification at checkpoint time: PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6, workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3, and zero requested/queued/in_progress/waiting/pending PADataset Actions runs.",
+        "No root/control-plane mutation has been performed by this candidate validation."
+      ]
     }
   ],
   "blockers": [
-    "Refresh-v3 helper exact-head 9ea2444d54d97c0e2a740c660589e6675e1c207d has reversed receipt constants: PRIOR_REFRESH_ACTIVE incorrectly points to V3 and REFRESH_ACTIVE incorrectly points to V2. Operator preflight failed with FileNotFoundError before mutation. Fix the two bindings on a new candidate head, add a regression assertion for exact predecessor/output paths, rerun full v1+v2+v3 control tests through candidate-pytest, then issue a new v3 root block.",
+    "Refresh-v3 code repair is validated at workspace-control candidate 5a7134056fef65b44e25bf06ac66f975f1903bff (candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b: 33 passed), but activation still requires a new root/operator transaction with a fresh zero-work preflight. The failed old v3 operator block must not be rerun unchanged.",
     "STFT resume remains gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
-    "Fix refresh-v3 helper receipt bindings only: PRIOR_REFRESH_ACTIVE must be V2_ACTIVE_RECEIPT; REFRESH_ACTIVE must be V3_ACTIVE_RECEIPT. Validate the new exact candidate through candidate-pytest, including a regression that would catch the reversed constants.",
-    "Execute corrected chained refresh-v3 under root/operator authority with a fresh zero-work preflight. Live predecessor is refresh-v2 policy SHA 70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d; corrected trusted workflow target is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 / blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3.",
+    "Execute corrected chained refresh-v3 candidate 5a7134056fef65b44e25bf06ac66f975f1903bff under root/operator authority with a fresh zero-work preflight. Live predecessor remains refresh-v2 policy SHA 70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d; corrected trusted workflow target is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 / blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3.",
     "After refresh-v3 PASS, rerun exactly one frozen PR #26 PA1->PA2 evaluator cell at head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 through /lambda-scientific-2. Inspect artifact transport, rehydration, result_record.json, target_labels_used_for_tuning=false, GPU UUID, and scientific receipt before scheduling more.",
     "If the acceptance cell PASSes, schedule the remaining Track-A 20-cell matrix across available GPU lanes without retraining backbones.",
     "Then resume Track-B Architecture B and the separate STFT representation diagnostic.",
     "Do not merge PR #26, PR #23, PR #21, or unrelated workspace-control branches without separate explicit authority."
   ],
-  "next_safe_action": "Create a new workspace-control candidate from refresh-v3 head 9ea2444d54d97c0e2a740c660589e6675e1c207d that changes only scripts/lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py so PRIOR_REFRESH_ACTIVE points to PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT and REFRESH_ACTIVE points to PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT. Add a test that asserts those exact bindings, rerun the full dual-lane + refresh-v1 + refresh-v2 + refresh-v3 suite via candidate-pytest, and only then prepare a new root v3 block. Do not rerun the failed old block unchanged.",
+  "next_safe_action": "Run a NEW refresh-v3 root/operator transaction bound to workspace-control candidate 5a7134056fef65b44e25bf06ac66f975f1903bff. Recompute a fresh zero-work preflight immediately before execution, require live refresh-v2 predecessor policy SHA 70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d, PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6, old workflow blob 8da00f39284745cf6c9032620d63574052cd6d61, and new workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Do not reuse the failed old v3 block unchanged. After PASS, inspect the active receipt/policy and only then run one frozen PA1->PA2 acceptance cell.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
-  "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer."
+  "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet."
 }
