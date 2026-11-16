@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: faf72bfda6a6ce762dd9adde39499af205e6fc69
+- Remote checkpoint: f23a7a4855a7c23f99a5cadb4143b732c7c153ad
 - Remote verified: true
 
 ### PADataset
@@ -36,11 +36,11 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-Run the validated transactional Workspace Shell upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 and PADataset execution SHA befe383fd67c8bca8d8ce370344b33c7e13cd52f. Require five-service health, LOCAL_MCP_DISCOVERY including candidate-pytest, and a live off-checkpoint candidate-pytest receipt before updating the existing Workspace Shell plugin through Plugin Creator.
+Run the validated transactional Workspace Shell upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad and PADataset execution SHA befe383fd67c8bca8d8ce370344b33c7e13cd52f. Require five-service health, LOCAL_MCP_DISCOVERY including candidate-pytest, and a live off-checkpoint candidate-pytest receipt before updating the existing Workspace Shell plugin through Plugin Creator.
 
 ## Remaining work
 
-- Deploy the validated host upgrade from the authority-state checkpoint produced after execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69, explicitly binding PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.
+- Deploy the validated host upgrade from the authority-state checkpoint produced after execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad, explicitly binding PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.
 - Verify all five Workspace Shell services are active and still boot-disabled, with the job launcher/worker network isolation unchanged.
 - Run candidate-pytest against a PADataset candidate SHA that deliberately differs from the durable task checkpoint and verify the receipt binds task_checkpoint_sha + candidate SHA/tree.
 - Run a negative candidate test proving ordinary task-bound execution still rejects a mismatched SHA.

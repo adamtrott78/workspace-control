@@ -38,7 +38,7 @@
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
         "branch": "workspace-shell-candidate-evidence-current-v1",
-        "checkpoint_sha": "faf72bfda6a6ce762dd9adde39499af205e6fc69",
+        "checkpoint_sha": "f23a7a4855a7c23f99a5cadb4143b732c7c153ad",
         "verified": true
       },
       "local": null,
@@ -111,10 +111,10 @@
           "check": "Exact-head current-lineage Workspace Shell candidate-evidence validation",
           "result": "PASS",
           "evidence": [
-            "Execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 is the reconciled current-lineage candidate preserving the newer PADataset research runtime and MTH602 authority state.",
-            "Lambda Workspace Control Validation run 43783063540 completed SUCCESS on the exact reconciled head after the final checkpoint-status compatibility correction.",
-            "The immediately preceding reconciled candidate passed the full repository validation workflow as well; candidate evidence changes were validated on the current controller-containing lineage rather than the older non-applicable wrapper lineage.",
-            "Candidate transport regression covers public credential-free HTTPS, private SSH deploy-key mode, exact repository/URL binding, candidate-pytest sandboxing, and upgrade Bash syntax."
+            "Final execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad preserves the current MTH602/Workspace Shell authority lineage and adds transactional frontend service-allowlist preservation.",
+            "Lambda Workspace Control Validation run 43783505917 completed SUCCESS on the exact final execution candidate.",
+            "The candidate-evidence regression suite covers authority separation, candidate-pytest scientific runtime paths, public/private source transport, exact repository URL binding, frontend allowlist backup/rollback, and upgrade Bash syntax.",
+            "No durable MTH602 scientific checkpoint was changed by the runtime candidate."
           ]
         }
       ],
@@ -187,11 +187,12 @@
     {
       "id": "workspace-shell-candidate-evidence-runtime-v1",
       "kind": "git_commit",
-      "identity": "faf72bfda6a6ce762dd9adde39499af205e6fc69",
+      "identity": "f23a7a4855a7c23f99a5cadb4143b732c7c153ad",
       "required_for_resume": true,
       "evidence": [
-        "Validated permanent candidate-evidence execution candidate on the current MTH602/Workspace Shell authority lineage.",
-        "Preserves PADataset durable checkpoint befe383fd67c8bca8d8ce370344b33c7e13cd52f while separating candidate validation from authoritative task execution."
+        "Final validated permanent candidate-evidence execution candidate on the current MTH602/Workspace Shell authority lineage.",
+        "Preserves PADataset durable checkpoint befe383fd67c8bca8d8ce370344b33c7e13cd52f while separating candidate validation from authoritative task execution.",
+        "Includes transactional live frontend allowlist preservation for the fifth materializer service."
       ]
     }
   ],
@@ -270,16 +271,16 @@
       "check": "Repository implementation tests",
       "result": "PASS",
       "evidence": [
-        "Exact current-lineage execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 passed Lambda Workspace Control Validation run 43783063540 with workflow conclusion SUCCESS.",
-        "The candidate-evidence regression suite includes candidate authority separation, profile grammar, public/private source transport, scientific runtime paths, transactional upgrade markers, and Bash syntax."
+        "Exact final execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad passed Lambda Workspace Control Validation run 43783505917 with workflow conclusion SUCCESS.",
+        "The regression suite covers candidate authority separation, profile grammar, scientific runtime paths, public/private source transport, frontend service allowlist preservation, transactional upgrade markers, and Bash syntax."
       ]
     },
     {
       "check": "Workspace Control integration validation",
       "result": "PASS",
       "evidence": [
-        "Exact same-repository PR-head admission and bounded workspace-control runner isolation passed on the current controller-containing lineage.",
-        "No MTH602 task-state regression is present in the execution candidate; it was rebased by transplant onto PR #633 state rather than deploying the stale PR #595 authority snapshot."
+        "Exact same-repository PR-head admission and bounded workspace-control runner isolation passed for f23a7a4855a7c23f99a5cadb4143b732c7c153ad.",
+        "The runtime candidate is reconciled onto the current controller-containing and MTH602 authority lineage; no stale task snapshot is introduced."
       ]
     },
     {
@@ -336,15 +337,15 @@
     "The existing Workspace Shell ChatGPT plugin must be refreshed through Plugin Creator after backend live acceptance so the model-visible schema discovers candidate-pytest."
   ],
   "remaining_work": [
-    "Deploy the validated host upgrade from the authority-state checkpoint produced after execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69, explicitly binding PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
+    "Deploy the validated host upgrade from the authority-state checkpoint produced after execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad, explicitly binding PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
     "Verify all five Workspace Shell services are active and still boot-disabled, with the job launcher/worker network isolation unchanged.",
     "Run candidate-pytest against a PADataset candidate SHA that deliberately differs from the durable task checkpoint and verify the receipt binds task_checkpoint_sha + candidate SHA/tree.",
     "Run a negative candidate test proving ordinary task-bound execution still rejects a mismatched SHA.",
     "Update the existing private Workspace Shell plugin in place through Plugin Creator and refresh tool discovery.",
     "Return to PADataset Architecture-B validation using candidate-pytest rather than promoting candidate SHAs into task authority."
   ],
-  "next_safe_action": "Run the validated transactional Workspace Shell upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 and PADataset execution SHA befe383fd67c8bca8d8ce370344b33c7e13cd52f. Require five-service health, LOCAL_MCP_DISCOVERY including candidate-pytest, and a live off-checkpoint candidate-pytest receipt before updating the existing Workspace Shell plugin through Plugin Creator.",
+  "next_safe_action": "Run the validated transactional Workspace Shell upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad and PADataset execution SHA befe383fd67c8bca8d8ce370344b33c7e13cd52f. Require five-service health, LOCAL_MCP_DISCOVERY including candidate-pytest, and a live off-checkpoint candidate-pytest receipt before updating the existing Workspace Shell plugin through Plugin Creator.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell",
-  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385.\n\n2026-11-16 permanent candidate-evidence correction: repeated TASK_SHA_MISMATCH failures were traced to a policy/transport conflation. Candidate validation is now modeled as evidence-only execution on an exact task-scoped repository SHA, while authoritative execution and privileged helpers retain exact durable task-SHA binding. The hostile worker and job launcher remain network-dead. A separate fifth materializer service supports public HTTPS and private read-only SSH deploy keys without exposing credentials through MCP or receipts. Execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 passed current-lineage Lambda validation run 43783063540 SUCCESS."
+  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385.\n\n2026-11-16 permanent candidate-evidence correction: repeated TASK_SHA_MISMATCH failures were traced to a policy/transport conflation. Candidate validation is now modeled as evidence-only execution on an exact task-scoped repository SHA, while authoritative execution and privileged helpers retain exact durable task-SHA binding. The hostile worker and job launcher remain network-dead. A separate fifth materializer service supports public HTTPS and private read-only SSH deploy keys without exposing credentials through MCP or receipts. Execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 passed current-lineage Lambda validation run 43783063540 SUCCESS.\n\n2026-11-16 final live-upgrade hardening: execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad adds transactional backup/restore of /etc/workspace-shell/frontend.json and updates its inspectable-unit allowlist for workspace-shell-candidate-materializer.service while preserving owner/group/mode. Exact-head Lambda validation run 43783505917 completed SUCCESS."
 }
