@@ -5,15 +5,15 @@
   "authority": "workspace-control-root",
   "source_checkpoint": "workspace-control@f48f46618b560d91950fae1927048e14e29a59ab",
   "migration_mode": {
-    "host_max_active_runners": 1,
-    "reason": "make the current accidental global serialization explicit during protocol migration; performance expansion is a later task"
+    "host_max_active_runners": 2,
+    "reason": "bounded post-migration dual-runner expansion; exclusive resource claims remain authoritative and atomic"
   },
   "project_limits": {
     "workspace-control": {
       "max_active_runners": 1
     },
     "padataset": {
-      "max_active_runners": 1
+      "max_active_runners": 2
     },
     "research-engine": {
       "max_active_runners": 1
@@ -42,7 +42,7 @@
     "renewal_allowed": false,
     "allocation_order": "first successful atomic RESERVE; no persistent wait queue in migration v1",
     "busy_semantics": "BUSY is capacity-local and creates no JIT registration",
-    "starvation_note": "migration host_max_active_runners=1 makes resource contention explicit but not throughput-optimal; fairness/concurrency expansion is a separately benchmarked post-migration policy"
+    "starvation_note": "host_max_active_runners=2 permits bounded concurrency while atomic exclusive GPU claims prevent device overlap; fairness remains first-successful RESERVE"
   },
   "release_policy": {
     "normal": "release after runner terminal and containment cleanup proof",
@@ -56,6 +56,7 @@
     "dual-GPU reservation is all-or-nothing",
     "CPU-only class has an empty GPU claim set",
     "catalog/resource-policy generation is bound into runner-instance receipts",
-    "raising host/project concurrency is not part of protocol migration"
+    "host concurrency is capped at two; only padataset is raised to two project-active runners in this candidate",
+    "raising concurrency never weakens exclusive GPU claims or permits two active records to reserve the same GPU resource"
   ]
 }

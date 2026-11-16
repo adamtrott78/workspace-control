@@ -124,7 +124,7 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
         }
         self.assertEqual(
             set(PAD["routes"]),
-            {*expected_active_blobs, "scientific-single-gpu"},
+            {*expected_active_blobs, "scientific-single-gpu", "scientific-single-gpu-2"},
         )
         for route_id, sha in expected_active_blobs.items():
             route = PAD["routes"][route_id]
@@ -162,6 +162,29 @@ class LambdaCIMultiRepoContractTests(unittest.TestCase):
             scientific["bindings"],
             {"model_id": None, "runtime_id": "padataset-dnns-v1"},
         )
+        scientific_2 = PAD["routes"]["scientific-single-gpu-2"]
+        self.assertEqual(scientific_2["activation_state"], "ACTIVE")
+        self.assertEqual(
+            scientific_2["execution_contract_id"],
+            "scientific-single-gpu-2-v1",
+        )
+        self.assertEqual(
+            scientific_2["trusted_workflow"]["path"],
+            ".github/workflows/lambda-ci-scientific-2.yml",
+        )
+        self.assertEqual(
+            scientific_2["trusted_workflow"]["blob_sha"],
+            "6b710d36a7bcd59bfba7224ab4a068411398edfd",
+        )
+        self.assertEqual(
+            scientific_2["trigger"]["command"],
+            "/lambda-scientific-2",
+        )
+        self.assertEqual(
+            scientific_2["bindings"],
+            {"model_id": None, "runtime_id": "padataset-dnns-v1"},
+        )
+
         runtime = PAD["bindings"]["runtimes"]["padataset-dnns-v1"]
         self.assertEqual(runtime["promotion_method"], "python-venv-copy-rewrite-v1")
         self.assertEqual(runtime["base_python_path"], "/usr/bin/python3.12")
