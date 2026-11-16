@@ -36,21 +36,22 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-After this control-cycle state validates, retry the transactional root activation using the exact authority-state commit produced here and runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc (#2942 SUCCESS), with the unchanged PADataset/semantic tuple. Require LOCAL_CANDIDATE_MATERIALIZER_READY=PASS before semantic MCP acceptance, then LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure.
+Workspace Shell live activation is accepted. Validate this new authority-state commit, sync the umbrella task, then derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository evidence. Do not invent a route or widen authority. If the reviewed route exists and is account/browser/model/GPU-free, execute the fake-worker transport and require an exact action/status/result roundtrip before proceeding toward Stage 12.
 
 ## Remaining work
 
-- Retry transactional root activation from the exact authority-state commit produced by this control cycle using runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc and the unchanged PADataset/semantic tuple.
-- Require LOCAL_CANDIDATE_MATERIALIZER_READY=PASS before semantic MCP acceptance, then all semantic/evaluator receipt and isolation markers plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
-- After PASS, independently verify live Workspace Shell runtime and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29, record evaluator-isolation acceptance, sync umbrella state, and continue to the reviewed fake-worker route.
+- Validate this live-acceptance authority-state commit.
+- Sync the umbrella workspace-semantic-execution-migration-v1 task to the accepted live Workspace Shell runtime and evaluator-isolation checkpoint; validate Workspace/Semantic/Operator exact head.
+- Derive the exact reviewed private route/profile/task authority for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable source/docs.
+- Run the fake-worker transport only if the reviewed route and authority are explicitly present and it remains account-free, browser-free, model-free, and GPU-free; require exact action/status/result roundtrip.
+- Continue toward Stage 12 / real account calibration only after the fake-worker transport acceptance.
 
 ## Blockers / gates
 
-- Runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc is repository-validated but not live. The ninth activation remains rolled back.
-- The ninth retry failed because the upgrade path omitted worker_gid from candidate-materializer.json, causing the newly hardened materializer to fail closed and leave its socket unavailable.
-- Runtime 54ac65cb… fixes the upgrade-time config omission and adds an explicit materializer responsiveness gate before semantic MCP execution.
-- Live activation remains an operator/root gate. Full success still requires materializer readiness, semantic receipt PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
-- After activation succeeds, independently verify live runtime and frozen semantic execution before fake-worker transport execution.
+- Workspace Shell multirepo live activation is accepted and independently verified at runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc with evaluator isolation PASS.
+- The next gate is no longer Workspace Shell activation. Before any fake-worker execution, derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository authority; do not invent a route.
+- Claim-bearing Reasoning Economy execution remains separately gated on reviewed live executor authority, evaluator isolation, and calibrated allowance telemetry.
+- GitRunner/controller modernization remains deferred and authority-separated.
 
 ## Fresh-chat initialization
 
