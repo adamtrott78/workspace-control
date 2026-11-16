@@ -524,18 +524,22 @@
     },
     {
       "check": "GPU2 evaluator workflow activation",
-      "result": "ACTIVE_ACCEPTANCE_RUNNING",
+      "result": "BLOCKED_CONTROL_PLANE_TRUST",
       "evidence": [
-        "Explicit user authority: MERGE AND ACTIVATE for PADataset PR #27 only.",
-        "PR #27 head 613387d22299bbb11481aa38b745be2f2fc29617 was marked ready and squash-merged successfully.",
-        "Default branch head after merge: 7782be95f409dc7bccf2729915e4014c0178428c.",
-        "Active workflow blob .github/workflows/lambda-ci-l2o-directional-eval-2.yml: ba825a98f0aa49bbdc78f5ed37faaf33c1982b4a.",
-        "First frozen acceptance request: PA1-PA2 target PA1 surrogate PA2 from PR #26 exact head 15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766.",
-        "GitHub Actions run 43963122999 / job 133635479325 created and queued on GPU2 lane."
+        "Explicit user authority MERGE AND ACTIVATE applied to PADataset PR #27 only.",
+        "PR #27 exact head 613387d22299bbb11481aa38b745be2f2fc29617 marked ready and squash-merged successfully.",
+        "PADataset main after merge: 7782be95f409dc7bccf2729915e4014c0178428c.",
+        "Merged evaluator workflow blob: ba825a98f0aa49bbdc78f5ed37faaf33c1982b4a.",
+        "Frozen PA1->PA2 acceptance trigger created run 43963122999 / job 133635479325; run remains queued.",
+        "Existing authorized lane-B smoke trigger created run 43963420422 / job 133636487691; run also remains queued.",
+        "Workspace Shell unit inspection proves workspace-ci-v3-provisioner.service active/running.",
+        "Live lane-B design binds exactly .github/workflows/lambda-ci-scientific-2.yml blob 6280a6e7b2ad8cc379277fa320e8839a94f360ec.",
+        "Current reviewed Workspace Shell helper registry contains no PADataset/lane-B workflow refresh helper; no privileged authority was invented or widened."
       ]
     }
   ],
   "blockers": [
+    "GPU2 evaluator activation is blocked by the live lane-B controller trusted-workflow binding. Lane B is pinned to .github/workflows/lambda-ci-scientific-2.yml blob 6280a6e7b2ad8cc379277fa320e8839a94f360ec; merged evaluator workflow .github/workflows/lambda-ci-l2o-directional-eval-2.yml blob ba825a98f0aa49bbdc78f5ed37faaf33c1982b4a is not in the trusted-workflow set. No reviewed lane-B workflow-refresh helper exists in the current helper registry. Evaluator run 43963122999 and trusted GPU2 smoke run 43963420422 remain queued while shared provisioner is active.",
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
@@ -546,7 +550,7 @@
     "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "Monitor GPU2 evaluator acceptance run 43963122999/job 133635479325 to terminal state. On SUCCESS, inspect exact artifact metadata, scientific execution receipt, result_record.json metrics, artifact transport binding, rehydration record, target-label tuning=false, and GPU UUID. Do not schedule additional directional cells until this acceptance result is verified. Continue monitoring PA3-PA4 backbone run 43943016274/job 133565212672 independently.",
+  "next_safe_action": "A new reviewed lane-B trusted-workflow refresh path is required before GPU2 can execute the merged evaluator workflow. Prepare/validate a candidate that either (preferred) extends the existing trusted .github/workflows/lambda-ci-scientific-2.yml with the bounded l2o_directional_eval operation and provides a lane-B workflow-blob refresh mechanism, or explicitly adds the new evaluator workflow to lane-B trusted_workflows. Do not mutate live controller trust without separate exact root/operator authority. Existing queued runs 43963122999 and 43963420422 should be treated as blocked, not successful activation. Continue monitoring PA3-PA4 run 43943016274 independently.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
   "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred. Workspace Shell stale-authority gate was cleared successfully on 2026-11-16 via authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e; post-refresh receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 proves task-bound execution at pinned PADataset authority. Remaining schema blocker is chat-local only. Workspace Shell Refresh Tools exposed candidate-pytest. PR #26 contract suite passed authoritatively (35 tests), and separate GPU2 evaluator workflow candidate PR #27 passed its authority-surface tests (3 tests). The next blocker is explicit activation/merge authority for PR #27."
