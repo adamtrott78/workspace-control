@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29. CURRENT CRITICAL PATH: retry the owned Workspace Shell transactional activation using authority fbfbdb7706e96cb0d27dc00ed2433b4f280bc807 and runtime df24022f897643282b4ce16aa727fa2dd646f859 (#2939 SUCCESS; authority #2940 SUCCESS), PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. The exact materialized source is now worker-group readable/traversable without world-readable repo contents, and stale root-private caches are rematerialized. Require full semantic/evaluator receipt and isolation PASS plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS before fake-worker execution.
+SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29. CURRENT CRITICAL PATH: retry the owned Workspace Shell transactional activation using authority 6a1be26bbfc84246f19ed7858d60d04fd90766e2 and runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc (#2942 SUCCESS; authority #2943 SUCCESS), PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. Require LOCAL_CANDIDATE_MATERIALIZER_READY=PASS before semantic acceptance, then full semantic/evaluator receipt and isolation PASS plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
 
 ## Remaining work
 
@@ -85,10 +85,9 @@ SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b9
 ## Blockers / gates
 
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review.
-- Workspace Shell root activation remains rollback-safe but not live. The eighth retry passed authorization and every exact SHA/source-mode invariant, but sandboxed semantic git-read exited 128.
-- Exact stderr text was not recovered. Source inspection nevertheless established a structural worker-readability defect sufficient to explain the failure: candidate materialization ran root/Group=root under UMask=0077, so nested Git metadata could remain inaccessible to the hostile worker.
-- Owning Workspace Shell authority state fbfbdb7706e96cb0d27dc00ed2433b4f280bc807 freezes runtime df24022f897643282b4ce16aa727fa2dd646f859. The materializer remains root, but uses primary group workspace-shell-exec, verifies worker_gid, grants only worker-group read/traverse, denies group write and all world access, and rematerializes stale root-private caches. Runtime #2939 and authority #2940 are SUCCESS.
-- Strong evaluator/capability claims remain blocked until fresh root activation proves semantic receipt, evaluator worker-denial receipt, evaluator isolation, and full transactional upgrade on the exact host.
+- Workspace Shell root activation remains rollback-safe but not live. The ninth retry failed before semantic Git execution because the candidate materializer service was unavailable.
+- Owning Workspace Shell authority 6a1be26bbfc84246f19ed7858d60d04fd90766e2 freezes runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc. The transactional upgrade now writes worker_gid=41011 into candidate-materializer.json and proves the materializer Unix socket responds with INVALID_SHA before any semantic MCP acceptance call. Runtime #2942 and authority #2943 are SUCCESS.
+- Strong evaluator/capability claims remain blocked until fresh root activation proves materializer readiness, semantic receipt, evaluator worker-denial receipt, evaluator isolation, and full transactional upgrade on the exact host.
 - GitRunner/controller modernization remains deferred and authority-separated. Reasoning Economy claim-bearing execution remains gated on live executor authority, evaluator isolation, and calibrated allowance telemetry.
 
 ## Fresh-chat initialization
