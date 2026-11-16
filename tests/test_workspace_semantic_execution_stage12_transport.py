@@ -82,7 +82,7 @@ class Stage12TransportStaticTests(unittest.TestCase):
     def test_review_candidate_is_exact_and_not_authority(self) -> None:
         import json
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
-        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertEqual(review["status"], "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY")
         self.assertFalse(
             review["authority_gate"]["live_real_account_authorized"]
         )
