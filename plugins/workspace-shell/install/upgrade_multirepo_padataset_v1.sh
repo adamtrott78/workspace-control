@@ -744,8 +744,7 @@ root = Path(sys.argv[1])
 mcp_payload = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
 expected = sys.argv[3]
 structured = ((mcp_payload.get("result") or {}).get("structuredContent") or {})
-launcher_result = structured.get("result") or {}
-receipt_id = launcher_result.get("receipt_id")
+receipt_id = structured.get("receipt_id")
 if not isinstance(receipt_id, str) or re.fullmatch(
     r"job-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
     receipt_id,
@@ -790,8 +789,7 @@ root = Path(sys.argv[1])
 mcp_payload = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
 expected = sys.argv[3]
 structured = ((mcp_payload.get("result") or {}).get("structuredContent") or {})
-launcher_result = structured.get("result") or {}
-receipt_id = launcher_result.get("receipt_id")
+receipt_id = structured.get("receipt_id")
 if not isinstance(receipt_id, str) or re.fullmatch(
     r"job-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
     receipt_id,

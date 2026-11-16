@@ -282,8 +282,21 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             '"$SEMANTIC_RECEIPT_ROOT" "$MCP_EVALUATOR_DENIAL" "$EXPECTED_SEMANTIC_EXEC_SHA"',
             upgrade,
         )
+        server = (PLUGIN / "server.js").read_text()
         self.assertIn(
-            'receipt_id = launcher_result.get("receipt_id")',
+            "receipt_id: z.string().regex(/^job-",
+            server,
+        )
+        self.assertIn(
+            "return okResult({ receipt_id: response.receipt_id, result: response }",
+            server,
+        )
+        self.assertIn(
+            'receipt_id = structured.get("receipt_id")',
+            upgrade,
+        )
+        self.assertNotIn(
+            'launcher_result = structured.get("result")',
             upgrade,
         )
         self.assertIn(

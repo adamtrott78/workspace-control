@@ -335,7 +335,10 @@ function createShellServer() {
         cwd: z.string().min(1).max(512),
         timeout_ms: z.number().int().min(1000).max(90000),
       },
-      outputSchema: { ok: z.boolean() },
+      outputSchema: {
+        ok: z.boolean(),
+        receipt_id: z.string().regex(/^job-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/).optional(),
+      },
       _meta: {},
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false, idempotentHint: false },
     },
@@ -372,7 +375,7 @@ function createShellServer() {
           cwd: args.cwd,
           timeout_ms: args.timeout_ms,
         }, { timeoutMs: Math.min(95000, args.timeout_ms + 5000), maxResponseBytes: 1024 * 1024, signal: extra.signal });
-        return okResult({ result: response }, "Bounded Workspace Shell execution completed.");
+        return okResult({ receipt_id: response.receipt_id, result: response }, "Bounded Workspace Shell execution completed.");
       } catch (error) {
         return toolError(error);
       }
