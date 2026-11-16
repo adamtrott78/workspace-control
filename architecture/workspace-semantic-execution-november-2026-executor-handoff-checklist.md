@@ -6,7 +6,9 @@
 **Validated workflows on that base:** Workspace Control #2849 PASS; Semantic Execution #178 PASS; Operator Bridge #437 PASS.  
 **Deadline:** 2026-11-30.  
 **Definition of done:** every mandatory requirement in `architecture/workspace-semantic-execution-november-2026-acceptance.v0.1.json` is PASS and the integrated review records explicit `PROMOTE_V0`.  
-**Current acceptance matrix before this handoff commit:** 8 PASS / 13 PARTIAL / 1 BLOCKED / 10 PENDING.
+**Acceptance matrix baseline before recent live-host promotion:** 8 PASS / 13 PARTIAL / 1 BLOCKED / 10 PENDING. The matrix still requires a formal reconciliation pass after current live-host evidence; do not treat this old count as current.
+**Current live semantic-host status:** Workspace Shell multirepo activation ACCEPTED at runtime `54ac65cbcd4211554710b8f8f4231c6c9554e3cc`; semantic execution `7c20097c5f177f23c16a765b95ce94d7161f0d29` independently verified; evaluator isolation ACCEPTED. Owning acceptance authority `05c7be116320ea8640b38870d622cf2b0023292e` passed Workspace #2945. Umbrella live-acceptance head `92325102e5730199a7735f09b17b8730a50d3185` passed Workspace #2946 / Semantic #241 / Operator #519.
+**Current next hard gate:** reviewed localhost Operator Bridge backend + authenticated private Tailscale Serve deployment authority. Gate checkpoint `ab6b82df2e5886663f32b289a68939eed6be86f4` passed Workspace #2947 / Semantic #242 / Operator #520.
 **Current validated Stage-10 implementation checkpoint for this handoff:** `866e2805def9d7bb1e5640715a72c72efc895480` — Workspace #2885 PASS; Semantic #214 PASS; Operator Bridge #491 PASS; off-foreground UT-12 acceptance run #492 completed on the same exact head.
 **Stage-10 human status:** COMPLETE. UT-05, UT-06, UT-07, UT-08, UT-12, UT-11 and UT-09 ACCEPTED; final hotkey disposition is **RETAIN Ctrl+Space**.
 
@@ -99,13 +101,23 @@
 - [ ] **C5 — Prove `account.type=chatgpt`, `planType=plus`, `OPENAI_API_KEY` absent, no API fallback, programmatic usage/rate-limit reads, zero model inference during bootstrap.
 - [ ] **C6 — Run controlled isolated Codex/Instant calibration actions bracketed by official snapshots; only then feed real allowance observations into the governor.**
 
-### D. Live semantic/Instant host — authority-gated lane
+### D. Live semantic/Instant host — activation complete; private-route authority is the current gate
 
-- [ ] **D1 — Repair and pass the Workspace Shell evaluator-denial activation gate.** Latest transactional root activation reached semantic binding/materialization + evaluator control readback + MCP readiness/discovery, then failed `TARGET_PROFILE_DENIED` for `workspace-control` + `evaluator-denial-probe` and rolled back. Exact root cause is now pinned: `plugins/workspace-shell/src/core.js::assertTargetProfile()` omits `evaluator-denial-probe` from the `workspace-control` frontend allowlist, while `server.js`, `profiles.v1.json`, and `root/job_launcher.py` already include it. Owning repair handoff is `workspace-shell@299557f7…`. Patch only that frontend parity defect + regression coverage before retry.
-- [ ] **D2 — When exact reviewed/default-branch authority exists:** launch validated localhost backend and reviewed private Tailscale Serve route.
-- [ ] **D3 — Prove one exact-host fake-worker action/status/result round trip before touching a real ChatGPT account.**
-  - [x] Account-free/GPU-free production-stack harness is frozen at `7c20097c…` and 3/3 green (#2904/#226/#504); live reviewed-private-route execution remains required.
-- [ ] **D4 — Then run bounded Stage-12 real-account calibration with no widened browser permissions, DOM/content automation, or security workaround.**
+- [x] **D1 — Promote Workspace Shell semantic/evaluator runtime live and prove hostile-worker isolation.**
+  - [x] Transactional activation completed with `LOCAL_CANDIDATE_MATERIALIZER_READY=PASS`, `LOCAL_SEMANTIC_TASK_RECEIPT=PASS`, `LOCAL_SEMANTIC_TASK_AUTHORITY=PASS`, `LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS`, `LOCAL_EVALUATOR_ISOLATION=PASS`, `EVALUATOR_ISOLATION_ACCEPTANCE=PASS`, and `WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS`.
+  - [x] Live Workspace Shell runtime independently verified at `54ac65cbcd4211554710b8f8f4231c6c9554e3cc`; live semantic execution independently verified at frozen `7c20097c5f177f23c16a765b95ce94d7161f0d29`, exit 0, clean source.
+  - [x] Activation semantic receipt: `job-d479bb9c-2ab2-4b01-b082-0921a173f0ac`; evaluator denial receipt: `job-0841ffee-e93e-4316-81a4-0a01a7d7bbfb`.
+  - [x] Owning live-acceptance authority `05c7be116320ea8640b38870d622cf2b0023292e` passed Workspace #2945.
+  - [x] Umbrella live-acceptance head `92325102e5730199a7735f09b17b8730a50d3185` passed Workspace #2946 / Semantic #241 / Operator #519.
+- [ ] **D2 — Establish explicit reviewed deployment authority for the localhost Operator Bridge backend + authenticated private Tailscale Serve route.**
+  - [x] Transport design is already selected and validated: outbound-only HTTPS over authenticated tailnet; backend listens only on localhost; Tailscale Serve injects authenticated identity; no helper credential store; no public endpoint/Funnel.
+  - [x] Production server composition and Windows HTTPS client are already repository-validated.
+  - [ ] Missing: host-specific reviewed activation route binding exact localhost port, expected Tailscale identity configuration, Postgres runtime source, rollback, and fake-worker-only acceptance scope.
+  - [ ] Do **not** bypass with generic shell, manual sidecar, arbitrary Tailscale commands, network-enabled Workspace Shell profile, or helper/root-policy widening. Current helper registry is empty and frozen Workspace Shell profiles deny network.
+- [ ] **D3 — Prove one exact-host fake-worker action/status/result round trip through the reviewed private route before touching a real ChatGPT account.**
+  - [x] Account-free/model-free/browser-free/GPU-free harness is frozen at `7c20097c…` and repository-green (#2904/#226/#504).
+  - [ ] Run through the real reviewed private route and require: status ready -> exact claim -> revalidate -> local-prepared -> immutable fake candidate -> independent validator -> process COMPLETED -> action COMPLETED -> session READY -> final ready=0/sent=0.
+- [ ] **D4 — Then run bounded Stage-12 real-account calibration with no widened browser permissions, DOM/content automation, credential workaround, or synthetic account interaction.**
 
 ### E. Integrated live proving + final November acceptance
 
@@ -120,12 +132,14 @@
 
 ## Current gates / non-negotiable boundaries
 
-- **Live semantic host:** suspended after rollback-safe Workspace Shell activation failure at evaluator worker-denial authorization. Semantic binding itself progressed; the current blocker is the `workspace-control` + `evaluator-denial-probe` `TARGET_PROFILE_DENIED` source/live mismatch tracked in `workspace-shell@299557f7…`.
-- **Codex:** suspended until PR #627/#630 lineage is trusted/promoted; subscription-only, no API billing.
-- **Operator real account:** Stage-10 is complete; no Stage-12 until exact-host fake-worker transport is proven through reviewed live authority.
-- **Frontier-equivalence claims:** remain blocked without evaluator-only isolation and claim-bearing replicated scoring.
+- **Workspace Shell semantic/evaluator activation:** COMPLETE and independently verified. Do not redo the activation sequence unless a real regression appears.
+- **Private Operator Bridge route:** CURRENT HARD GATE. No reviewed host-specific localhost backend + Tailscale Serve activation route exists yet. Do not infer deployment authority from the now-live semantic Workspace Shell route.
+- **Codex:** suspended until PR #627/#630 lineage is trusted/promoted; subscription-only, no API billing, no credits/API-key fallback.
+- **Operator real account:** Stage-10 is complete; no Stage-12 until exact-host fake-worker transport passes through the reviewed private route.
+- **Reasoning Economy claim-bearing runs:** evaluator isolation gate is now satisfied live; launches still require reviewed live executor transport plus calibrated comparable weekly allowance telemetry. Do not manually grind the frozen 54-run matrix.
+- **Frontier-equivalence / routing-promotion claims:** remain blocked until claim-bearing replicated scoring + matched holdout + calibrated allowance evidence exist.
 - **GitRunner modernization:** deferred; do not rewrite/widen GitRunner authority from this task.
-- **PADataset GPUs:** do not touch for this program; Workspace Control remains CPU-only control lane.
+- **PADataset GPUs:** do not touch for this program; Workspace Control remains CPU-only control lane and the historical dirty PADataset checkout remains preserved.
 
 ## Exact validated evidence worth preserving
 
@@ -151,3 +165,12 @@
 - If blocked, state the exact gate and smallest authorized next action.
 
 - `299557f7…`: owning Workspace Shell handoff records the rollback-safe evaluator-denial `TARGET_PROFILE_DENIED` failure and pins the exact defect to `src/core.js::assertTargetProfile`; no activation success is claimed.
+
+
+## 2026-11-16 live-host promotion closeout
+
+- [x] Nine distinct rollback-safe activation defects were repaired without widening authority; the tenth activation passed end to end.
+- [x] Materializer readiness, semantic exact-SHA execution, exact receipt binding, evaluator worker denial, sealed-store isolation, and transactional promotion all passed on the real host.
+- [x] Post-activation independent receipts confirm the promoted runtime and frozen semantic execution remain exact and clean.
+- [x] Private-route authority audit completed at `ab6b82df2e5886663f32b289a68939eed6be86f4`; Workspace #2947 / Semantic #242 / Operator #520 all PASS.
+- [ ] Next executable live milestone is **not another Workspace Shell repair**. It is reviewed private Operator Bridge/Tailscale deployment authority, followed by the account-free exact-host fake-worker round trip.
