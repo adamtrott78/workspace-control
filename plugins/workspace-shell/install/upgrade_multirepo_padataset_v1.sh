@@ -30,6 +30,8 @@ STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP="/var/lib/workspace-shell/upgrades/padataset-multirepo-v1-${STAMP}"
 AUTHORITY_ROOT="/etc/workspace-shell/authority"
 EVIDENCE_MOUNT="/srv/workspace-shell/PADataset-evidence"
+EVALUATOR_SEALED_ROOT="/var/lib/workspace-shell/evaluator-sealed"
+EVALUATOR_DENIAL_SENTINEL="$EVALUATOR_SEALED_ROOT/worker-denial-probe"
 BASE_SERVICES=(workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service)
 SERVICES=(workspace-shell-candidate-materializer.service "${BASE_SERVICES[@]}")
 
@@ -155,8 +157,9 @@ fi
 WC_FETCH="$(mktemp -d /tmp/workspace-control-exec.XXXXXX)"
 PAD_FETCH="$(mktemp -d /tmp/padataset-exec.XXXXXX)"
 SEM_AUTH_FETCH="$(mktemp -d /tmp/workspace-control-semantic-authority.XXXXXX)"
+SEM_EXEC_FETCH="$(mktemp -d /tmp/workspace-control-semantic-exec.XXXXXX)"
 cleanup_tmp() {
-  rm -rf "$WC_FETCH" "$PAD_FETCH" "$SEM_AUTH_FETCH" >/dev/null 2>&1 || true
+  rm -rf "$WC_FETCH" "$PAD_FETCH" "$SEM_AUTH_FETCH" "$SEM_EXEC_FETCH" >/dev/null 2>&1 || true
 }
 trap cleanup_tmp EXIT
 
@@ -218,6 +221,19 @@ if bound != expected_exec:
     )
 print("SEMANTIC_DURABLE_TASK_BINDING=PASS")
 PY
+
+  echo "Materializing semantic execution source at exact SHA $EXPECTED_SEMANTIC_EXEC_SHA"
+  rm -rf "$SEM_EXEC_FETCH"
+  mkdir -p "$SEM_EXEC_FETCH"
+  git -C "$SEM_EXEC_FETCH" init --quiet
+  git -C "$SEM_EXEC_FETCH" remote add origin "https://github.com/adamtrott78/workspace-control.git"
+  git_retry git -C "$SEM_EXEC_FETCH" -c http.version=HTTP/1.1 fetch --quiet --depth=1 --no-tags origin "$EXPECTED_SEMANTIC_EXEC_SHA" \
+    || fail "unable to fetch exact semantic execution SHA after bounded retries"
+  git -C "$SEM_EXEC_FETCH" -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD
+  [[ "$(git -C "$SEM_EXEC_FETCH" rev-parse HEAD)" == "$EXPECTED_SEMANTIC_EXEC_SHA" ]] \
+    || fail "semantic execution checkout SHA mismatch"
+  [[ -z "$(git -C "$SEM_EXEC_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] \
+    || fail "semantic execution checkout unexpectedly dirty"
 fi
 
 mkdir -p "$PAD_FETCH/local_artifacts/evidence"
@@ -272,6 +288,7 @@ for p in \
 done
 
 EVIDENCE_MOUNT_CREATED=0
+EVALUATOR_SEALED_ROOT_CREATED=0
 rollback() {
   rc="$1"
   if [[ $rc -eq 0 ]]; then return; fi
@@ -280,6 +297,11 @@ rollback() {
 
   if [[ "$EVIDENCE_MOUNT_CREATED" == "1" ]] && sudo mountpoint -q "$EVIDENCE_MOUNT"; then
     sudo umount "$EVIDENCE_MOUNT" >/dev/null 2>&1 || true
+  fi
+
+  sudo rm -f "$EVALUATOR_DENIAL_SENTINEL" >/dev/null 2>&1 || true
+  if [[ "$EVALUATOR_SEALED_ROOT_CREATED" == "1" ]]; then
+    sudo rm -rf "$EVALUATOR_SEALED_ROOT" >/dev/null 2>&1 || true
   fi
 
   restore() {
@@ -371,6 +393,76 @@ if [[ "$EVIDENCE_MOUNT_PREEXISTING" == "0" ]]; then
   sudo mount -o remount,bind,ro,nosuid,nodev,noexec "$EVIDENCE_MOUNT"
 fi
 MOUNT_OPTIONS="$(verify_existing_evidence_mount)"
+
+if sudo test -e "$EVALUATOR_SEALED_ROOT"; then
+  sudo python3 - "$EVALUATOR_SEALED_ROOT" <<'PY'
+import os
+import stat
+import sys
+
+path = sys.argv[1]
+st = os.lstat(path)
+if stat.S_ISLNK(st.st_mode) or not stat.S_ISDIR(st.st_mode):
+    raise SystemExit("evaluator sealed root must be a real directory")
+if st.st_uid != 0 or st.st_gid != 0:
+    raise SystemExit("evaluator sealed root must be root:root")
+if stat.S_IMODE(st.st_mode) != 0o700:
+    raise SystemExit("evaluator sealed root mode must be 0700")
+PY
+else
+  sudo install -d -o root -g root -m 0700 "$EVALUATOR_SEALED_ROOT"
+  EVALUATOR_SEALED_ROOT_CREATED=1
+fi
+echo "EVALUATOR_SEALED_ROOT=PASS"
+
+if [[ -n "$EXPECTED_SEMANTIC_EXEC_SHA" ]]; then
+  sudo env PYTHONPATH="$SEM_EXEC_FETCH/semantic-execution/src" python3 - "$SEM_EXEC_FETCH" "$EVALUATOR_SEALED_ROOT" <<'PY'
+import importlib.util
+from pathlib import Path
+import sys
+
+source = Path(sys.argv[1])
+sealed_root = Path(sys.argv[2])
+
+from workspace_semantic_execution.evaluator import (
+    FilesystemEvaluatorSealedStore,
+    stage_ephemeral_bundle,
+)
+
+generator_path = source / "benchmarks/workspace-semantic-execution/resumable_reasoning_ephemeral_fixture_v1.py"
+spec = importlib.util.spec_from_file_location("ws_ephemeral_fixture", generator_path)
+module = importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+spec.loader.exec_module(module)
+
+seed = "a1" * 32
+nonce = "b2" * 32
+bundle = module.generate_bundle(seed_hex=seed, seal_nonce_hex=nonce)
+store = FilesystemEvaluatorSealedStore(sealed_root, owner_uid=0)
+staged = stage_ephemeral_bundle(
+    store=store,
+    bundle=bundle,
+    seed_hex=seed,
+    seal_nonce_hex=nonce,
+)
+restored = store.load(staged.record.fixture_id)
+if not module.verify_bundle(
+    public_fixture=staged.worker_material["public_fixture"],
+    evaluator_oracle=restored.evaluator_oracle,
+    public_seal=staged.worker_material["public_seal"],
+    seal_nonce_hex=restored.seal_nonce_hex,
+):
+    raise SystemExit("evaluator sealed-store commitment verification failed")
+record = sealed_root / f"{staged.record.fixture_id}.sealed.json"
+record.unlink()
+print("LOCAL_EVALUATOR_CONTROL_READBACK=PASS")
+PY
+fi
+
+printf '%s\n' 'workspace-shell-evaluator-worker-denial-probe-v1' \
+  | sudo tee "$EVALUATOR_DENIAL_SENTINEL" >/dev/null
+sudo chown root:root "$EVALUATOR_DENIAL_SENTINEL"
+sudo chmod 0600 "$EVALUATOR_DENIAL_SENTINEL"
 
 RUNTIME_PLUGIN="/opt/workspace-shell/runtime/plugins/workspace-shell"
 BACKUP_RUNTIME_PLUGIN="$BACKUP/opt__workspace-shell__runtime__plugins__workspace-shell"
@@ -493,7 +585,8 @@ MCP_TOOLS="$(mktemp /tmp/workspace-shell-upgrade-tools.XXXXXX.json)"
 MCP_TASK_PRIMARY="$(mktemp /tmp/workspace-shell-upgrade-task-primary.XXXXXX.json)"
 MCP_TASK_DEPENDENT="$(mktemp /tmp/workspace-shell-upgrade-task-dependent.XXXXXX.json)"
 MCP_TASK_SEMANTIC="$(mktemp /tmp/workspace-shell-upgrade-task-semantic.XXXXXX.json)"
-trap 'rc=$?; rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC"; rollback "$rc"' EXIT
+MCP_EVALUATOR_DENIAL="$(mktemp /tmp/workspace-shell-upgrade-evaluator-denial.XXXXXX.json)"
+trap 'rc=$?; rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC" "$MCP_EVALUATOR_DENIAL"; rollback "$rc"' EXIT
 
 MCP_READY=0
 for attempt in $(seq 1 20); do
@@ -542,7 +635,7 @@ profile=((schema.get("properties") or {}).get("profile") or {}).get("enum") or [
 for value in ("workspace-control","PADataset"):
     if value not in target:
         raise SystemExit(f"workspace_shell_exec target missing {value}")
-for value in ("file-list","file-read","file-hash","research-bounded","candidate-pytest"):
+for value in ("file-list","file-read","file-hash","research-bounded","candidate-pytest","evaluator-denial-probe"):
     if value not in profile:
         raise SystemExit(f"workspace_shell_exec profile missing {value}")
 print("LOCAL_MCP_DISCOVERY=PASS")
@@ -576,9 +669,19 @@ if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
     -H 'accept: application/json, text/event-stream' \
     --data-binary '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"workspace_shell_exec","arguments":{"task_id":"workspace-semantic-execution-migration-v1","target":"workspace-control","expected_sha":"'"$EXPECTED_SEMANTIC_EXEC_SHA"'","profile":"git-read","argv":["rev-parse","HEAD"],"cwd":".","timeout_ms":50000}}}' \
     https://127.0.0.1:8797/mcp >"$MCP_TASK_SEMANTIC"
+
+  EVALUATOR_DENIAL_STARTED="$(date +%s)"
+  sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 60 \
+    --cacert /etc/workspace-shell/tunnel/ca.crt \
+    --cert /etc/workspace-shell/tunnel/client.crt \
+    --key /etc/workspace-shell/tunnel/client.key \
+    -H 'content-type: application/json' \
+    -H 'accept: application/json, text/event-stream' \
+    --data-binary '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"workspace_shell_exec","arguments":{"task_id":"workspace-semantic-execution-migration-v1","target":"workspace-control","expected_sha":"'"$EXPECTED_SEMANTIC_EXEC_SHA"'","profile":"evaluator-denial-probe","argv":["sealed-store-v1"],"cwd":".","timeout_ms":30000}}}' \
+    https://127.0.0.1:8797/mcp >"$MCP_EVALUATOR_DENIAL"
 fi
 
-python3 - "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
+python3 - "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC" "$MCP_EVALUATOR_DENIAL" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
 import json
 import pathlib
 import sys
@@ -610,10 +713,12 @@ def accepted(path, label):
 
 accepted(sys.argv[1], "workspace-shell-multirepo-research-v1")
 accepted(sys.argv[2], "mth602-final-multisurrogate-dqnguard-v1")
-expected_semantic = sys.argv[4]
+expected_semantic = sys.argv[5]
 if expected_semantic:
     accepted(sys.argv[3], "workspace-semantic-execution-migration-v1")
+    accepted(sys.argv[4], "workspace-semantic-execution-evaluator-denial")
     print("LOCAL_SEMANTIC_TASK_MCP=PASS")
+    print("LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS")
 print("LOCAL_TASK_AUTHORITY=PASS")
 PY
 
@@ -675,9 +780,58 @@ print("LOCAL_SEMANTIC_TASK_RECEIPT=PASS")
 print("LOCAL_SEMANTIC_TASK_AUTHORITY=PASS")
 print("SEMANTIC_ACCEPTANCE_RECEIPT=" + path.name)
 PY
+
+  sudo python3 - "$SEMANTIC_RECEIPT_ROOT" "$EVALUATOR_DENIAL_STARTED" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+started = float(sys.argv[2])
+expected = sys.argv[3]
+matches = []
+for path in root.glob("*.json"):
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        continue
+    if payload.get("task_id") != "workspace-semantic-execution-migration-v1":
+        continue
+    if float(payload.get("started_at") or 0) + 1 < started:
+        continue
+    if payload.get("argv_profile") != "evaluator-denial-probe":
+        continue
+    matches.append((float(payload.get("started_at") or 0), path, payload))
+if not matches:
+    raise SystemExit("no evaluator worker-denial receipt found after live MCP call")
+_, path, receipt = max(matches, key=lambda item: item[0])
+checks = {
+    "authorization_decision": receipt.get("authorization_decision") == "ALLOW",
+    "exit_code": receipt.get("exit_code") == 0,
+    "privileged": receipt.get("privileged") is False,
+    "expected_git_sha": receipt.get("expected_git_sha") == expected,
+    "observed_git_sha": receipt.get("observed_git_sha") == expected,
+    "task_checkpoint_sha": receipt.get("task_checkpoint_sha") == expected,
+    "source_mode": receipt.get("source_mode") == "task",
+    "argv_profile": receipt.get("argv_profile") == "evaluator-denial-probe",
+    "redacted_argv": receipt.get("redacted_argv") == ["sealed-store-v1"],
+}
+failed = [name for name, ok in checks.items() if not ok]
+if failed:
+    raise SystemExit(
+        "evaluator worker-denial receipt failed checks "
+        + ",".join(failed)
+        + ": "
+        + json.dumps(receipt, sort_keys=True)
+    )
+print("LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS")
+print("LOCAL_EVALUATOR_ISOLATION=PASS")
+print("EVALUATOR_DENIAL_RECEIPT=" + path.name)
+PY
+  sudo rm -f "$EVALUATOR_DENIAL_SENTINEL"
 fi
 
-rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC"
+rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC" "$MCP_EVALUATOR_DENIAL"
 trap 'rollback "$?"' EXIT
 
 echo "WORKSPACE_CONTROL_AUTHORITY_SNAPSHOT=$(sudo git -c safe.directory="$AUTHORITY_ROOT" -C "$AUTHORITY_ROOT" rev-parse HEAD)"
@@ -691,6 +845,10 @@ echo "PADataset_EXECUTION_SNAPSHOT=$(sudo git -c safe.directory=/srv/workspace-s
 echo "PADataset_EVIDENCE_BRANCH=${EVIDENCE_BRANCH:-DETACHED}"
 echo "PADataset_EVIDENCE_HEAD=$EVIDENCE_SHA"
 echo "PADataset_EVIDENCE_MOUNT_OPTIONS=$MOUNT_OPTIONS"
+if [[ -n "$EXPECTED_SEMANTIC_EXEC_SHA" ]]; then
+  echo "EVALUATOR_SEALED_ROOT_PATH=$EVALUATOR_SEALED_ROOT"
+  echo "EVALUATOR_ISOLATION_ACCEPTANCE=PASS"
+fi
 echo "WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS"
 echo "Backup retained at: $BACKUP"
 trap - EXIT

@@ -25,6 +25,15 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             job_launcher.assert_target_profile("PADataset", "validation-bounded")
         with self.assertRaisesRegex(Exception, "TARGET_PROFILE_DENIED"):
             job_launcher.assert_target_profile("workspace-control", "research-bounded")
+        job_launcher.assert_target_profile(
+            "workspace-control",
+            "evaluator-denial-probe",
+        )
+        with self.assertRaisesRegex(Exception, "TARGET_PROFILE_DENIED"):
+            job_launcher.assert_target_profile(
+                "PADataset",
+                "evaluator-denial-probe",
+            )
         with self.assertRaisesRegex(Exception, "TARGET_PROFILE_DENIED"):
             job_launcher.assert_target_profile("unknown", "git-read")
 
@@ -59,6 +68,41 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
                 "file-read",
                 ["-c", "65537", "--", "results/example.csv"],
             )
+
+    def test_evaluator_denial_probe_is_fixed_and_does_not_mount_sealed_root(self):
+        resolved = job_launcher.resolve_profile(
+            self.manifest,
+            "evaluator-denial-probe",
+            ["sealed-store-v1"],
+        )
+        self.assertEqual(resolved["executable"], "/usr/bin/python3")
+        self.assertFalse(resolved["write_scratch"])
+        self.assertIn(
+            "/var/lib/workspace-shell/evaluator-sealed",
+            resolved["argv"][-1],
+        )
+        with self.assertRaisesRegex(Exception, "PROFILE_ARGV_DENIED"):
+            job_launcher.resolve_profile(
+                self.manifest,
+                "evaluator-denial-probe",
+                ["/tmp/caller-chosen-path"],
+            )
+        with tempfile.TemporaryDirectory() as td:
+            cmd = job_launcher.build_bwrap_command(
+                {"bwrap_path": "/bin/true"},
+                Path(td),
+                ".",
+                resolved,
+            )
+        bind_pairs = list(zip(cmd, cmd[1:]))
+        self.assertNotIn(
+            ("--ro-bind", "/var/lib/workspace-shell/evaluator-sealed"),
+            bind_pairs,
+        )
+        self.assertNotIn(
+            ("--bind", "/var/lib/workspace-shell/evaluator-sealed"),
+            bind_pairs,
+        )
 
     def test_candidate_materializer_public_transport_is_credential_free_and_private_mode_exists(self):
         env = candidate_materializer.git_env({
@@ -305,6 +349,16 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertIn('"argv":["rev-parse","HEAD"]', upgrade)
         self.assertIn("authority snapshot has unexpected changes after semantic enrollment", upgrade)
         self.assertIn("SEMANTIC_EXECUTION_BINDING=", upgrade)
+        self.assertIn('EVALUATOR_SEALED_ROOT="/var/lib/workspace-shell/evaluator-sealed"', upgrade)
+        self.assertIn("EVALUATOR_SEALED_ROOT=PASS", upgrade)
+        self.assertIn("LOCAL_EVALUATOR_CONTROL_READBACK=PASS", upgrade)
+        self.assertIn('"profile":"evaluator-denial-probe"', upgrade)
+        self.assertIn('"argv":["sealed-store-v1"]', upgrade)
+        self.assertIn("LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS", upgrade)
+        self.assertIn("LOCAL_EVALUATOR_ISOLATION=PASS", upgrade)
+        self.assertIn("EVALUATOR_ISOLATION_ACCEPTANCE=PASS", upgrade)
+        self.assertIn('receipt.get("argv_profile") == "evaluator-denial-probe"', upgrade)
+        self.assertIn('receipt.get("redacted_argv") == ["sealed-store-v1"]', upgrade)
 
     def test_launcher_binds_evidence_inside_workspace_without_schema_change(self):
         source = (PLUGIN / "root" / "job_launcher.py").read_text()

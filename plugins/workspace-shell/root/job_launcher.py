@@ -153,6 +153,14 @@ def validate_file_hash(argv):
         safe_relative(item, "file path")
 
 
+def validate_evaluator_denial_probe(argv):
+    if argv != ["sealed-store-v1"]:
+        fail(
+            "PROFILE_ARGV_DENIED",
+            "evaluator-denial-probe accepts only sealed-store-v1",
+        )
+
+
 def validate_research(argv):
     if not argv:
         fail("PROFILE_ARGV_DENIED", "research-bounded requires a Python script")
@@ -174,7 +182,7 @@ def validate_research(argv):
 
 def assert_target_profile(target, profile):
     allowed = {
-        "workspace-control": {"git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash"},
+        "workspace-control": {"git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash", "evaluator-denial-probe"},
         "PADataset": {"git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"},
     }
     if target not in allowed or profile not in allowed[target]:
@@ -196,6 +204,7 @@ def resolve_profile(manifest, profile, argv):
         "file-read": ("/usr/bin/head", False),
         "file-hash": ("/usr/bin/sha256sum", False),
         "research-bounded": ("/usr/bin/python3", True),
+        "evaluator-denial-probe": ("/usr/bin/python3", False),
     }
     if profile not in expected:
         fail("PROFILE_NOT_AUTHORIZED", "profile absent from frozen launcher grammar")
@@ -253,6 +262,37 @@ def resolve_profile(manifest, profile, argv):
         validate_file_hash(argv)
         resolved = argv
         env = {}
+    elif profile == "evaluator-denial-probe":
+        validate_evaluator_denial_probe(argv)
+        probe = """from pathlib import Path
+import json
+import sys
+
+root = Path("/var/lib/workspace-shell/evaluator-sealed")
+sentinel = root / "worker-denial-probe"
+
+def denied(operation):
+    try:
+        operation()
+    except (FileNotFoundError, NotADirectoryError, PermissionError):
+        return True
+    return False
+
+list_denied = denied(lambda: tuple(root.iterdir()))
+read_denied = denied(lambda: sentinel.read_bytes())
+ok = list_denied and read_denied
+print(json.dumps({
+    "list_denied": list_denied,
+    "read_denied": read_denied,
+    "ok": ok,
+}, sort_keys=True))
+raise SystemExit(0 if ok else 73)
+"""
+        resolved = ["-I", "-S", "-c", probe]
+        env = {
+            "PYTHONDONTWRITEBYTECODE": "1",
+            "PYTHONNOUSERSITE": "1",
+        }
     else:
         validate_research(argv)
         resolved = ["-B", *argv]
