@@ -6,7 +6,7 @@ namespace WorkspaceControl.OperatorBridge.Windows;
 public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
 {
     private const int SwRestore = 9;
-    private const int SwMinimize = 6;
+    private const int SwShowMinNoActive = 7;
     private nint _capturedWindow;
 
     public bool CaptureForegroundPreparedWorkerWindow()
@@ -65,7 +65,7 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
             return false;
         }
 
-        _ = ShowWindow(window, SwMinimize);
+        _ = ShowWindow(window, SwShowMinNoActive);
         return IsIconic(window);
     }
 
