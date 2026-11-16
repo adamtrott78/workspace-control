@@ -18,52 +18,20 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Extend the live Workspace Shell v1 lineage with first-class PADataset access and a permanent candidate-evidence path that can validate exact candidate SHAs without promoting them to durable task authority, while preserving credential isolation, private-repository support, rollback, and exact-SHA authoritative execution.
 
-## Repositories
-
-### workspace-control
-
-- Intent: mutate
-- Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: aad85eb8ffd4b7a3804905aade0de0fa04543582
-- Remote verified: true
-
-### PADataset
-
-- Intent: read
-- Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: befe383fd67c8bca8d8ce370344b33c7e13cd52f
-- Remote verified: true
-
 ## Next safe action
 
-After this JSON+Markdown control-cycle state passes exact-head validation, retry the transactional root activation using the exact authority-state commit, Workspace Shell runtime aad85eb8ffd4b7a3804905aade0de0fa04543582 (#2931 SUCCESS), PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 8019248f6952743d61e90d5abac754356952c18b, and semantic execution binding 7c20097c5f177f23c16a765b95ce94d7161f0d29. The output contract now preserves any safe opaque receipt ID so exact receipt validation can reveal job success or rejection evidence. Require SEMANTIC_DURABLE_TASK_BINDING=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure. Do not widen any other profile, generic shell/interpreter, root/sudo, helper/issuer, network, evaluator path, PADataset, or GPU authority. After PASS, independently verify semantic HEAD 7c20097c… and proceed to the frozen fake-worker private-route harness.
+After this control-cycle state validates, retry the transactional root activation using the exact authority-state commit produced here and runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 (#2934 SUCCESS), with the frozen PADataset/semantic tuple. The semantic git-read request now obeys its unchanged 30000 ms ceiling. Require LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure.
 
 ## Remaining work
 
-- Retry the rollback-capable root activation from the exact authority-state commit produced by this control cycle using Workspace Shell runtime aad85eb8ffd4b7a3804905aade0de0fa04543582, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.
-- If the semantic receipt is a rejection receipt, preserve and report its exact authorization_reason instead of changing runtime policy speculatively.
-- Require SEMANTIC_DURABLE_TASK_BINDING=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS; rollback remains mandatory on any failure.
-- After activation PASS, independently verify live Workspace Shell runtime aad85eb8… and semantic execution 7c20097c…, then run the frozen fake-worker private-route harness.
+- Retry transactional root activation from the new exact authority-state commit using runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.
+- Require all semantic/evaluator receipt and isolation markers plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS; rollback on any failure.
+- After PASS, independently verify live runtime and semantic execution, record evaluator-isolation acceptance, sync umbrella state, then derive and run the reviewed private fake-worker route.
 
 ## Blockers / gates
 
-- Repaired runtime aad85eb8ffd4b7a3804905aade0de0fa04543582 is repository-validated but not live. The sixth activation remains rolled back.
-- The sixth retry failed before semantic acceptance because MCP output validation rejected receipt_id. The exact returned identifier was hidden by the SDK validation error, so its job-vs-rejection semantics remain unknown.
-- Runtime aad85eb8… preserves any bounded opaque receipt identifier through MCP output validation, then exact receipt validation determines whether execution was ALLOW/success or a rejection. This is an evidence-preservation fix, not an authority widening.
-- Live activation remains an operator/root gate. Success still requires semantic task receipt PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and full transactional upgrade PASS with rollback on any failure.
-- Existing helper, issuer, generic shell/interpreter, network, evaluator-path, PADataset, GPU, and privileged authority boundaries remain unchanged.
-- After activation succeeds, independently verify live semantic task exact HEAD 7c20097c5f177f23c16a765b95ce94d7161f0d29 before the frozen fake-worker private-route harness.
-
-## Fresh-chat initialization
-
-@GitHub
-
-https://github.com/adamtrott78/workspace-control
-
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/workspace-shell-multirepo-research-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+- Runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 is repository-validated but not live. The seventh activation remains rolled back.
+- The seventh retry produced a definitive semantic rejection: TIMEOUT_DENIED because the caller requested 50000 ms for git-read while the frozen profile ceiling is 30000 ms.
+- Runtime 79e89405… corrects the caller to 30000 ms and does not change the frozen policy ceiling or any execution authority.
+- Live activation remains an operator/root gate. Full success still requires semantic receipt PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
+- After activation succeeds, independently verify live runtime and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29 before the frozen fake-worker route.
