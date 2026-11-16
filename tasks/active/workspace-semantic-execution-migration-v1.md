@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29. DO NOT ADD SEMANTIC FEATURES. CURRENT CRITICAL PATH IS THE OWNED WORKSPACE SHELL ACTIVATION RETRY frozen at authority state 650497d7b407130d91950833c6ab80a9fffaeaa7 with runtime aad85eb8ffd4b7a3804905aade0de0fa04543582 (#2931 SUCCESS; authority #2932 SUCCESS), PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. The sixth retry was masked by a job-only receipt-id output regex; the repaired runtime accepts only the established safe opaque receipt-ID grammar, then validates one exact root-owned receipt. If that receipt is a rejection, preserve/report its exact reason rather than changing policy speculatively. Only after full transactional activation PASS may this task independently verify live semantic HEAD 7c20097c…, record evaluator isolation, and run benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py through the reviewed private route. Stage 10 remains complete; Codex remains authority-gated on PR #627/#630.
+SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29. CURRENT CRITICAL PATH: retry the owned Workspace Shell transactional activation using authority 17a73471e812a0cf327224ab2c0beb2248200b6e and runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 (#2934 SUCCESS; authority #2936 SUCCESS), PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. The semantic git-read acceptance request now obeys its unchanged 30000 ms profile ceiling. Require full semantic/evaluator receipt and isolation PASS plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS before any fake-worker execution.
 
 ## Remaining work
 
@@ -85,12 +85,12 @@ SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b9
 ## Blockers / gates
 
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is validated.
-- Workspace Shell root activation remains rollback-safe but not live. The sixth retry reached MCP discovery, then workspace_shell_exec output validation rejected receipt_id before exact receipt inspection; the SDK error hid the returned identifier, so job-vs-rejection semantics remain unknown.
-- Owning Workspace Shell authority state 650497d7b407130d91950833c6ab80a9fffaeaa7 freezes runtime aad85eb8ffd4b7a3804905aade0de0fa04543582, which uses the existing bounded opaque receipt-ID grammar and preserves exact receipt evidence for subsequent task/profile/SHA/authorization/exit validation. Runtime #2931 and authority #2932 are SUCCESS.
+- Workspace Shell root activation remains rollback-safe but not live. The seventh retry exposed a definitive semantic rejection receipt: TIMEOUT_DENIED because activation requested 50000 ms for git-read while the frozen profile ceiling is 30000 ms.
+- Owning Workspace Shell authority state 17a73471e812a0cf327224ab2c0beb2248200b6e freezes runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73, which changes only the semantic acceptance timeout to 30000 ms and adds regression coverage against the frozen manifest ceiling. Runtime #2934 and authority #2936 are SUCCESS.
 - Hidden-ephemeral evaluator generation, commitment verification, strict sealed-store primitive, and bundled live acceptance remain repository-validated. Strong capability claims stay blocked until a fresh root activation proves semantic receipt, evaluator worker-denial receipt, and evaluator isolation on the exact host.
-- Claim-bearing benchmark conclusions still require live evaluator-isolation acceptance plus replicated scoring; repository evidence alone does not establish worker inaccessibility or capability equivalence.
-- GitRunner/controller modernization is intentionally deferred and authority-separated. This task may define comparison criteria and adapter boundaries, but may not rewrite/replace or widen GitRunner execution authority until a separate reviewed task is opened after semantic-execution Architecture Review v0.3.
-- Claim-bearing Reasoning Economy execution is plan-ready but launch-gated on reviewed live Instant/operator authority, live evaluator worker-denial/readback acceptance, and calibrated weekly allowance telemetry. UNKNOWN meter cost must remain UNKNOWN.
+- Claim-bearing benchmark conclusions still require live evaluator-isolation acceptance plus replicated scoring.
+- GitRunner/controller modernization remains deferred and authority-separated.
+- Claim-bearing Reasoning Economy execution remains gated on reviewed live executor authority, evaluator isolation, and calibrated allowance telemetry.
 
 ## Fresh-chat initialization
 
