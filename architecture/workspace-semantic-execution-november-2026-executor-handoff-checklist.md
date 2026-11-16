@@ -101,7 +101,7 @@
 
 ### D. Live semantic/Instant host — authority-gated lane
 
-- [ ] **D1 — Repair and pass the Workspace Shell evaluator-denial activation gate.** Latest transactional root activation reached semantic binding/materialization + evaluator control readback + MCP readiness/discovery, then failed `TARGET_PROFILE_DENIED` for `workspace-control` + `evaluator-denial-probe` and rolled back. Exact runtime source `6d47e3…` explicitly authorizes that pair; owning repair handoff is `workspace-shell@eed66da6…`. Do not retry activation until the source/live authorization discrepancy is reconciled.
+- [ ] **D1 — Repair and pass the Workspace Shell evaluator-denial activation gate.** Latest transactional root activation reached semantic binding/materialization + evaluator control readback + MCP readiness/discovery, then failed `TARGET_PROFILE_DENIED` for `workspace-control` + `evaluator-denial-probe` and rolled back. Exact root cause is now pinned: `plugins/workspace-shell/src/core.js::assertTargetProfile()` omits `evaluator-denial-probe` from the `workspace-control` frontend allowlist, while `server.js`, `profiles.v1.json`, and `root/job_launcher.py` already include it. Owning repair handoff is `workspace-shell@299557f7…`. Patch only that frontend parity defect + regression coverage before retry.
 - [ ] **D2 — When exact reviewed/default-branch authority exists:** launch validated localhost backend and reviewed private Tailscale Serve route.
 - [ ] **D3 — Prove one exact-host fake-worker action/status/result round trip before touching a real ChatGPT account.**
   - [x] Account-free/GPU-free production-stack harness is frozen at `7c20097c…` and 3/3 green (#2904/#226/#504); live reviewed-private-route execution remains required.
@@ -120,7 +120,7 @@
 
 ## Current gates / non-negotiable boundaries
 
-- **Live semantic host:** suspended after rollback-safe Workspace Shell activation failure at evaluator worker-denial authorization. Semantic binding itself progressed; the current blocker is the `workspace-control` + `evaluator-denial-probe` `TARGET_PROFILE_DENIED` source/live mismatch tracked in `workspace-shell@eed66da6…`.
+- **Live semantic host:** suspended after rollback-safe Workspace Shell activation failure at evaluator worker-denial authorization. Semantic binding itself progressed; the current blocker is the `workspace-control` + `evaluator-denial-probe` `TARGET_PROFILE_DENIED` source/live mismatch tracked in `workspace-shell@299557f7…`.
 - **Codex:** suspended until PR #627/#630 lineage is trusted/promoted; subscription-only, no API billing.
 - **Operator real account:** Stage-10 is complete; no Stage-12 until exact-host fake-worker transport is proven through reviewed live authority.
 - **Frontier-equivalence claims:** remain blocked without evaluator-only isolation and claim-bearing replicated scoring.
@@ -150,4 +150,4 @@
 - Do not return merely because CI is running if another independent safe action exists.
 - If blocked, state the exact gate and smallest authorized next action.
 
-- `eed66da6…`: owning Workspace Shell handoff records the latest rollback-safe evaluator-denial `TARGET_PROFILE_DENIED` failure and the source/live authorization discrepancy; no activation success is claimed.
+- `299557f7…`: owning Workspace Shell handoff records the rollback-safe evaluator-denial `TARGET_PROFILE_DENIED` failure and pins the exact defect to `src/core.js::assertTargetProfile`; no activation success is claimed.
