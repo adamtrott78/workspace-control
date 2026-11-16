@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 931882bce5a34c597888e2eaa1a40650d5b31c58
+- Remote checkpoint: 866e2805def9d7bb1e5640715a72c72efc895480
 - Remote verified: true
 
 ### PADataset
@@ -70,12 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED STAGE-10 BASE workspace-control@931882bce5a34c597888e2eaa1a40650d5b31c58. PRIMARY ACTIVE LANE: DO NOT REDO UT-05–UT-08; they are accepted. Fix UT-12 only: current READY=0 minimize succeeds when WorkspaceWorkers Firefox is foreground but fails when another app/window is foreground. Preserve the trusted dedicated worker HWND before the no-work press and allow minimizing only that trusted HWND without foregrounding it; fail closed on stale/ambiguous/non-Firefox identity. Validate exact head, rerun UT-12 with Firefox foreground and background, and require the already-passing delayed durable ack to remain zero-focus-steal/zero-clipboard/zero-browser-effect. Then run Bridge-OFF UT-11 and representative-work collision UT-09. PARALLEL REASONING-ECONOMY LANE: continue only new claim-bearing P0–P3 evidence/runset readiness and holdout preparation; do not rebuild existing governor/calibration/runset/dispatch components. CODEX remains authority-gated on PR #627/#630 with no API billing or bypass. LIVE semantic/Instant host remains suspended until exact Workspace Shell authority exists. Final proving still requires live mixed research-iterate + forced durable recovery, calibrated economics comparison, authoritative UX-09/resource/soak/provenance evidence, full acceptance reconciliation, and explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
+CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED STAGE-10 BASE workspace-control@866e2805def9d7bb1e5640715a72c72efc895480. PRIMARY ACTIVE LANE: UT-12 IS ACCEPTED; do not redo UT-05–UT-08 or UT-12. Run and accept Bridge-OFF UT-11 next, requiring zero servicing/clipboard/browser/window effects while the bridge is disabled; then run representative-work collision UT-09 before making the final Ctrl+Space retention decision. PARALLEL REASONING-ECONOMY LANE: continue only new claim-bearing P0–P3 evidence/runset readiness and holdout preparation; do not rebuild existing governor/calibration/runset/dispatch components. CODEX remains authority-gated on PR #627/#630 with no API billing or bypass. LIVE semantic/Instant host remains suspended until exact Workspace Shell authority exists. Final proving still requires live mixed research-iterate + forced durable recovery, calibrated economics comparison, authoritative UX-09/resource/soak/provenance evidence, full acceptance reconciliation, and explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
 
 ## Remaining work
 
-- OPERATOR UT-12: fix focus-independent READY=0 minimization of only the trusted dedicated WorkspaceWorkers Firefox HWND; rerun foreground + background/other-app focus and preserve zero focus-steal/clipboard/browser effects for the delayed durable ack.
-- OPERATOR FINAL: after UT-12 passes, run Bridge-OFF UT-11 and representative-work UT-09; preserve Ctrl+Space -> Ctrl+V -> Enter, no tab search, stale-submit protection, and trusted-window-only no-work behavior.
+- OPERATOR FINAL: UT-12 is accepted. Run Bridge-OFF UT-11, then representative-work collision UT-09; preserve Ctrl+Space -> Ctrl+V -> Enter, no tab search, stale-submit protection, pending-action refocus/blocking, and trusted-window-only READY=0 minimize.
 - REASONING ECONOMY: continue claim-bearing P0-P3 runset readiness using exact fixture/oracle/run provenance; incomplete/superseded screening is never promotion evidence and unknown allowance remains UNKNOWN.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
 - LIVE INSTANT: after Workspace Shell authority exists, activate reviewed localhost backend + private Tailscale route and prove one exact-host fake-worker action/status/result round trip before real-account use.
@@ -91,7 +90,7 @@ CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED STAGE-10 BASE workspace-control@9
 - Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
 - Claim-bearing benchmark conclusions still require evaluator-only runtime isolation and replicated scoring; this blocks strong capability-equivalence claims, not deterministic orchestrator/backend implementation.
 - GitRunner/controller modernization is intentionally deferred and authority-separated. This task may define comparison criteria and adapter boundaries, but may not rewrite/replace or widen GitRunner execution authority until a separate reviewed task is opened after semantic-execution Architecture Review v0.3.
-- Operator Bridge Stage-10 is narrowed to one active correctness blocker before final UT-11/UT-09 coverage: UT-12 no-work minimize is foreground-dependent. UT-05–UT-08 are accepted. Structured UT-12 #485 OBJECTIVE_PASS is insufficient because operator-visible off-foreground minimize failed.
+- Operator Bridge Stage-10 has accepted UT-05–UT-08 and UT-12. The remaining human coverage before the Ctrl+Space retention decision is Bridge-OFF UT-11 followed by representative-work collision UT-09.
 
 ## Fresh-chat initialization
 

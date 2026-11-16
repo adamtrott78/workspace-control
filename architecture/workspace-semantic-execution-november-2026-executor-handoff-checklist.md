@@ -7,8 +7,8 @@
 **Deadline:** 2026-11-30.  
 **Definition of done:** every mandatory requirement in `architecture/workspace-semantic-execution-november-2026-acceptance.v0.1.json` is PASS and the integrated review records explicit `PROMOTE_V0`.  
 **Current acceptance matrix before this handoff commit:** 8 PASS / 13 PARTIAL / 1 BLOCKED / 10 PENDING.
-**Current validated Stage-10 implementation checkpoint for this handoff:** `931882bce5a34c597888e2eaa1a40650d5b31c58` — Workspace #2880 PASS; Semantic #209 PASS; Operator Bridge #484 PASS; UT-12 retry #485 completed on the same exact head.
-**Stage-10 human status:** UT-05, UT-06, UT-07 and UT-08 ACCEPTED. UT-12 is **NOT accepted** despite structured `OBJECTIVE_PASS`; off-foreground READY=0 minimize fails when another app/window has focus.
+**Current validated Stage-10 implementation checkpoint for this handoff:** `866e2805def9d7bb1e5640715a72c72efc895480` — Workspace #2885 PASS; Semantic #214 PASS; Operator Bridge #491 PASS; off-foreground UT-12 acceptance run #492 completed on the same exact head.
+**Stage-10 human status:** UT-05, UT-06, UT-07, UT-08 and UT-12 ACCEPTED. Remaining human coverage is Bridge-OFF UT-11 followed by representative-work collision UT-09.
 
 ## Fresh-chat recovery protocol
 
@@ -61,15 +61,15 @@
   - UT-06 uses managed-tab-loss fencing + exact generation advance; UT-07 uses auth-domain fencing + manual-auth return with no credential automation; UT-08 rehydrates a persisted cold-restart recovery incident before dispatch.
 - [x] **A3 — Validate each coherent harness slice at exact head before asking the user to run it.**
   - Exact A2 validation: Workspace Control #2854 PASS; Semantic Execution #183 PASS; Operator Bridge #442 PASS.
-- [ ] **A4 — Complete remaining Stage-10 UT-12 acceptance; do not redo accepted recovery/judgment trials.**
+- [x] **A4 — Complete remaining Stage-10 UT-12 acceptance; do not redo accepted recovery/judgment trials.**
   - [x] UT-05 accepted: #466 / job 132983488035; judgment popup foregrounded correctly, explicit Yes returned cleanly to Ctrl+Space -> Ctrl+V -> Enter, zero judgment-phase clipboard/browser effects.
   - [x] UT-06 accepted: #467 / job 132984929448; lost-worker recovery reached ReadyToResume with exact generation advancement and no wrong-worker/wrong-packet effects.
   - [x] UT-07 accepted: #480 / job 132995991788; auth-refresh recovery survives deliberate hesitation and native Windows foreground handoff visibly pulled Firefox forward from Discord; native foreground 1/1.
   - [x] UT-08 accepted: #481 / job 132997332383; durable cold-restart incident rehydrated and resumed with native foreground 1/1 and no wrong-worker/wrong-packet effects.
-  - [ ] UT-12 **BLOCKED / NOT ACCEPTED**: #485 / job 133000812535 emitted structured `OBJECTIVE_PASS`, but `no_work_minimize_attempts=2` and `no_work_minimize_successes=1`. Operator reproduced that Ctrl+Space minimizes when Firefox is foreground but does not minimize after focus is moved to another app/window.
-  - Current exact root cause at `931882bc…`: UT-12 re-captures only the foreground Firefox HWND at the NoAction press, while native minimize refuses unless captured HWND == `GetForegroundWindow()`.
-  - Next bounded fix: preserve/resolve the already trusted dedicated WorkspaceWorkers HWND before READY=0 and allow minimizing only that captured HWND while another app is foreground; do **not** foreground Firefox, enumerate/minimize arbitrary Firefox, or widen native-host authority. Fail closed on stale/ambiguous/non-Firefox HWND.
-  - Re-run UT-12 in two operator-visible cases: Firefox foreground; Firefox background after clicking another app on the second monitor. Both must minimize, and delayed durable ack must remain zero focus-steal / zero clipboard / zero browser service effects.
+  - [x] UT-12 accepted after bounded trusted-HWND correction. Exact corrected head `866e2805def9d7bb1e5640715a72c72efc895480` passed Workspace #2885, Semantic #214 and Operator #491.
+  - [x] Foreground-visible case #489 / job 133007524996: structured `OBJECTIVE_PASS`, minimize 1/1, delayed ack=1, zero no-work/background-ack clipboard or browser effects; operator confirmed Firefox minimized.
+  - [x] Off-foreground case #492 / workflow 43778759491 / job 133010952603 on exact head `866e2805…`: structured `OBJECTIVE_PASS`, minimize 1/1, delayed ack=1, zero bridge clipboard/browser/focus effects, zero native foreground attempts, and zero wrong-worker/wrong-packet/rejected-state/dispatch failures.
+  - [x] Operator deliberately focused another app on the second monitor and confirmed WorkspaceWorkers Firefox minimized while out of focus. The fix uses the already trusted captured Firefox HWND with `SW_SHOWMINNOACTIVE`; no arbitrary Firefox enumeration/minimization or authority widening was introduced.
 - [ ] **A5 — Run/accept Bridge-OFF UT-11 and representative-work collision UT-09.**
 - [ ] Preserve accepted behavior: Ctrl+Space -> Ctrl+V -> Enter; no tab search; repeated scheduler presses refocus/block pending action; READY=0 extra press minimizes only WorkspaceWorkers Firefox.
 
