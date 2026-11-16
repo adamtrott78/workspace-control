@@ -566,10 +566,52 @@
         "Run 43963420422/job 133636487691 completed with conclusion cancelled.",
         "Post-cancellation sweep of all non-completed PADataset Actions runs found zero jobs with label lambda-padataset-scientific-single-gpu-2."
       ]
+    },
+    {
+      "check": "Final PA3-PA4 backbone",
+      "result": "PASS",
+      "evidence": [
+        "Run 43943016274 / job 133565212672 completed SUCCESS.",
+        "Artifact 14277201494 digest sha256:9e4b8ec93e19868cd46c8982503570e406d9b286cd2fa7e715f25e210d0d76b8.",
+        "Scientific receipt decision PASS; candidate d1fd5b6d414e7b88675485f576732a424504455f; GPU0 UUID exact.",
+        "best_model sha256 d9fd5db822458e47b04b4efd74b9725a758445a84240d469c2d8fc69ba6c7580; config sha256 cfb3294c3a176a2a03b0882928fade4dd18e5aad0e0641241aaed4887c2ae3bb.",
+        "best_epoch=24; best_val_macro_f1=1.0; test_known_macro_f1=1.0; target_test_consumed=false; target quarantine preserved."
+      ]
+    },
+    {
+      "check": "Final PR #26 10-of-10 matrix validation",
+      "result": "PASS",
+      "evidence": [
+        "PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9.",
+        "Canonical matrix completed_backbone_count=10 and remaining_backbone_count=0.",
+        "Final PA3->PA4 and PA4->PA3 frozen evaluator request manifests added, yielding 20 directed requests.",
+        "Workspace Shell candidate-pytest receipt job-3d9c726d-aa8a-4e79-8d69-718d5bca6e2b: 35 passed."
+      ]
+    },
+    {
+      "check": "Lane-B evaluator acceptance run",
+      "result": "CONTROL_PLANE_PASS_WORKFLOW_BUG",
+      "evidence": [
+        "Run 43967496290 / job 133650662301 was admitted to actual GPU2 runner lambda-padataset-scientific-single-gpu-2-c8e7aef948ec.",
+        "Runner proof, exact PR head verification, and exact candidate checkout all passed.",
+        "Validation failed before science execution because workflow line 236 contained malformed heredoc terminator PYY instead of PY.",
+        "No evaluator science ran and no result artifact was produced."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v2 candidate",
+      "result": "PASS_CANDIDATE_NOT_EXECUTED",
+      "evidence": [
+        "PADataset PR #29 one-line heredoc fix merged; main 9889a981e34de81e58f3263630f0cba54a8e9e06.",
+        "Corrected trusted GPU2 workflow blob 8da00f39284745cf6c9032620d63574052cd6d61.",
+        "Workflow candidate receipt job-d594dbe2-1409-479f-bbf0-aef7661b3bee: 6 passed.",
+        "Workspace-control chained refresh-v2 candidate ebff264b5ee5240ee87f8e5860dafecd7b13f005 preserves v1 receipt and advances only lane-B trusted workflow from 5f29137d... to 8da00f39....",
+        "Refresh-v2 candidate receipt job-3f93de6f-2b83-4ae7-a911-51d1d6505da4: 26 passed."
+      ]
     }
   ],
   "blockers": [
-    "Lane-B workflow refresh is ready for root/operator execution. GitHub zero-work gate is clean: runs 43963122999 and 43963420422 are completed/cancelled, and a full active-run sweep found zero jobs carrying runner label lambda-padataset-scientific-single-gpu-2. No reviewed privileged Workspace Shell helper exists for the validated one-shot refresh candidate, so the remaining action must be executed by the operator under sudo.",
+    "Corrected GPU2 trusted workflow is merged and validated, but live lane-B trust still points to prior blob 5f29137d9636ed170d3735d0f273220e7cf6f377. Chained refresh-v2 candidate ebff264b5ee5240ee87f8e5860dafecd7b13f005 is validated (26 passed) and must be executed under sudo because no reviewed privileged Workspace Shell helper exists.",
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
@@ -580,7 +622,7 @@
     "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "Operator executes the validated one-shot lane-B workflow refresh candidate at exact workspace-control SHA 9dd69558efcbcbdb53b2bfc71d04023900cf0c7c under sudo, after generating a fresh root-owned preflight and one-use operator authority receipt bound to old blob 6280a6e7b2ad8cc379277fa320e8839a94f360ec, new blob 5f29137d9636ed170d3735d0f273220e7cf6f377, PADataset main 4674d1b07d7d7bb7ee3cbe4ab8a709d536486c13, the immutable dual-lane activation receipt, and the live lane-B controller-policy hashes. Helper must fail closed if any GPU2 work reappears. On PASS, trigger one frozen PR #26 l2o_directional_eval cell via /lambda-scientific-2 and inspect its complete result before scheduling more.",
+  "next_safe_action": "Operator executes chained lane-B workflow refresh v2 candidate ebff264b5ee5240ee87f8e5860dafecd7b13f005 under sudo, with fresh zero-work GitHub preflight, binding predecessor v1 refresh receipt, old blob 5f29137d9636ed170d3735d0f273220e7cf6f377, corrected blob 8da00f39284745cf6c9032620d63574052cd6d61, and PADataset main 9889a981e34de81e58f3263630f0cba54a8e9e06. On PASS, trigger one frozen PR #26 request at head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 via /lambda-scientific-2 and inspect full result before scheduling remaining cells.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
   "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred. Workspace Shell stale-authority gate was cleared successfully on 2026-11-16 via authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e; post-refresh receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 proves task-bound execution at pinned PADataset authority. Remaining schema blocker is chat-local only. Workspace Shell Refresh Tools exposed candidate-pytest. PR #26 contract suite passed authoritatively (35 tests), and separate GPU2 evaluator workflow candidate PR #27 passed its authority-surface tests (3 tests). The next blocker is explicit activation/merge authority for PR #27."
