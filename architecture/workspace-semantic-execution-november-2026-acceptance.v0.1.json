@@ -202,7 +202,8 @@
       "evidence": [
         "Governor tests prove least-scarce executor selection only after validator-backed minimum sample count/quality floor; a cheaper executor below quality floor is rejected.",
         "Holdout promotion requires matched tasks, no candidate failures, no disallowed quality regression and strictly lower scarce allowance. Real Research Engine policy traces/holdout promotion remain pending.",
-        "Claim-bearing runset gate 31f138a8… blocks policy promotion until completed protocol screening, claim-bearing scored replicates, exact source/run-set identity and hard-gate manifest exist."
+        "Claim-bearing runset gate 31f138a8… blocks policy promotion until completed protocol screening, claim-bearing scored replicates, exact source/run-set identity and hard-gate manifest exist.",
+        "Evaluator sealed-store primitive 8470957f… is 3/3 green and scored-plan head 74958b5d… fail-closes all 54 claim-bearing runs until live evaluator worker-denial/readback acceptance; no unisolated run may enter promotion evidence."
       ]
     },
     {
@@ -219,16 +220,19 @@
         "Production Postgres-backed Operator Bridge server composition is repository-validated; live host activation is explicitly authority-gated because semantic feature-branch task IDs are absent from Workspace Shell trusted authority root.",
         "Backend return path is now durable: worker-authored typed results are ingested from authoritative durable state rather than consumer-UI output, and exact process/action/session/packet identity is fenced.",
         "Repository-side Instant execution is now complete end-to-end: production action transport plus immutable candidate return/intake/validation is proven through PostgreSQL restart. Remaining PARTIAL item is exact-host private-tailnet activation.",
-        "Production scheduler/action/candidate transport is repository-complete and restart-safe at 0afd7837…; remaining PARTIAL item is exact-host private-tailnet activation, still blocked by Workspace Shell TASK_NOT_FOUND."
+        "Production scheduler/action/candidate transport is repository-complete and restart-safe at 0afd7837…; remaining PARTIAL item is exact-host private-tailnet activation, still blocked by Workspace Shell TASK_NOT_FOUND.",
+        "Workspace Shell semantic authority enrollment first activation rolled back safely on a false-negative MCP stdout assertion. Receipt-based semantic enrollment repair ccdde5c9… passed Workspace #2896 and owning authority-state ee586acf… passed #2898; live root retry remains required before exact-host transport proof."
       ]
     },
     {
       "id": "INST-02",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Normal Instant service requires only Ctrl+Space -> Ctrl+V -> Enter with no tab search, packet editing, or manual state relay.",
       "evidence": [
-        "UT-10/UT-02/UT-03/UT-04 evidence validates the accepted motor loop against fake workers.",
-        "Semantic #155 proves the backend packet already includes the exact candidate result target/schema, eliminating manual result relay/state interpretation after the Ctrl+Space -> paste -> Enter motor loop."
+        "UT-10 Ctrl+Space trial completed 20/20 intended actions and 20/20 acknowledgments with exactly 20 hotkey presses, zero wrong-worker/wrong-packet/rejected-state/dispatch failures, friction 1/7, worker-selection confidence 7/7 and physical comfort 7/7.",
+        "UT-02/UT-03/UT-04 validated READY=0 minimize, repeated pending-action refocus/block behavior, multi-worker routing and no manual tab search.",
+        "Semantic #155 proves the backend packet includes the exact candidate result target/schema, eliminating manual result relay/state interpretation after Ctrl+Space -> Ctrl+V -> Enter.",
+        "Stage-10 final disposition RETAIN Ctrl+Space is validated; real-account Stage-12 remains a separate INST-06 gate."
       ]
     },
     {
@@ -244,15 +248,20 @@
       "status": "PASS",
       "requirement": "First extra Ctrl+Space at READY=0 minimizes only the dedicated WorkspaceWorkers Firefox window.",
       "evidence": [
-        "UT-02 minimize-on-empty accepted by operator and structured counters."
+        "UT-02 minimize-on-empty accepted by operator and structured counters.",
+        "UT-12 corrected off-foreground acceptance run #492 proved READY=0 minimizes the already trusted WorkspaceWorkers Firefox HWND even while another app is foreground, without focus steal or arbitrary Firefox enumeration."
       ]
     },
     {
       "id": "INST-05",
-      "status": "PENDING",
+      "status": "PASS",
       "requirement": "Remaining Stage-10 trials UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and representative-work UT-09 pass.",
       "evidence": [
-        "Current Stage-10 PowerShell runner supports UT-11/01/02/03/04/10 only; UT-05–08/UT-12 require harness implementation before trial execution."
+        "UT-05 judgment popup accepted on #466; UT-06 managed-tab-loss recovery accepted on #467; UT-07 auth-refresh foreground recovery accepted on #480; UT-08 cold restart recovery accepted on #481.",
+        "UT-12 focus-independent trusted-window minimize accepted at corrected head 866e2805… with #2885/#214/#491 green and off-foreground run #492 OBJECTIVE_PASS.",
+        "UT-11 Bridge-OFF accepted from direct operator observation on validated head b84f69cf…; canceled timer run #494 is not misrepresented as objective pass.",
+        "UT-09 representative-work collision gate passed from accumulated real use; identified VS Code Ctrl+Space behavior is not a required operator workflow function.",
+        "Final Stage-10 closeout retained Ctrl+Space; aa3c3e39… passed #2887/#216/#495 and schema-valid 5b169e66… passed #2889/#218/#497."
       ]
     },
     {

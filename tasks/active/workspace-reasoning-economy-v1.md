@@ -24,7 +24,7 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 9b02005a58a961ce83ef8790e2d59ec626802591
+- Remote checkpoint: 74958b5d0d325893fd39045d1e49b5320dca7fa3
 - Remote verified: true
 
 ### research-engine
@@ -36,11 +36,11 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 ## Next safe action
 
-SCREENING IS COMPLETE AND THE CLAIM-BEARING PLAN IS FROZEN. Validated screening-completion head 91dcc8520cc7e348c1f6bf2e16044b096d89c5bf passed Workspace #2890 / Semantic #219 / Operator #498; validated scored-plan head 9b02005a58a961ce83ef8790e2d59ec626802591 passed Workspace #2891 / Semantic #220 / Operator #499. The plan binds 18 required arm×phenotype cells × 3 replicates = 54 claim-bearing runs, but authorizes zero launches. DO NOT materialize or manually grind through those runs while live Instant/operator transport is authority-gated or allowance calibration is UNKNOWN. Codex remains suspended on PR #627/#630. When an authorized live executor and calibrated comparable weekly meter exist, admit/materialize scored runs through the existing governor/runset gate and preserve matched_work_item_id sets for holdout promotion.
+CLAIM-BEARING PREPARATION IS COMPLETE BUT LAUNCH REMAINS FAIL-CLOSED. Protocol screening is complete; the exact 54-run scored-replicate plan is frozen; evaluator sealed-store primitive head 8470957f880bcf871c21b762aeb70d25d9188ce9 passed Workspace #2897 / Semantic #223 / Operator #501; and plan head 74958b5d0d325893fd39045d1e49b5320dca7fa3 passed Workspace #2899 / Semantic #224 / Operator #502 and now explicitly requires live evaluator-isolation acceptance. DO NOT launch/materialize the 54 scored runs until all three gates are satisfied: (1) reviewed live Instant/operator authority, (2) live hostile-worker denial + evaluator readback/commitment acceptance for the sealed store, and (3) calibrated comparable weekly allowance telemetry. Codex remains suspended on PR #627/#630. UNKNOWN allowance remains UNKNOWN.
 
 ## Remaining work
 
-- Execute the frozen 54-run claim-bearing scored-replicate plan only after live executor authority and a calibrated comparable allowance relationship exist; materialize run-state files lazily at admission time, not in advance.
+- Execute the frozen 54-run claim-bearing scored-replicate plan only after live executor authority, live evaluator-isolation acceptance, and a calibrated comparable allowance relationship all exist; materialize run-state files lazily at admission time.
 - Preserve UNKNOWN allowance for traces without controlled comparable meter deltas; never infer shared allowance from raw tokens.
 - When PR #627/#630 lineage clears, run reserved Workspace Control zero-inference Codex bootstrap and prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, no API billing/fallback.
 - Run isolated controlled Codex and Instant actions bracketed by official account/rate-limit/usage snapshots; determine which meter actually moves and keep unresolved mappings unknown.
@@ -50,7 +50,7 @@ SCREENING IS COMPLETE AND THE CLAIM-BEARING PLAN IS FROZEN. Validated screening-
 ## Blockers / gates
 
 - LIVE CODEX LINEAGE AUTHORITY: PR #627 and stacked PR #630 remain open drafts at their validated SHAs. Live Codex runtime/auth is suspended until the reserved-capacity lineage reaches a trusted/default-branch promotion path; API billing and manual runner/sidecar bypass remain forbidden.
-- CLAIM-BEARING EXECUTION GATE: protocol screening is complete and the exact 54-run scored-replicate plan is frozen, but launch remains blocked because live Instant/operator transport lacks reviewed Workspace Shell authority and the shared ChatGPT/Codex weekly allowance relationship is still UNKNOWN. Do not spend 54 manual clean-chat runs or treat unknown meter cost as free.
+- CLAIM-BEARING EXECUTION GATE: protocol screening is complete and the exact 54-run scored plan is frozen, but launch remains blocked on three independent gates: reviewed live Instant/operator authority, live evaluator sealed-store worker-denial/readback acceptance, and calibrated shared ChatGPT/Codex weekly allowance telemetry. Do not spend 54 manual clean-chat runs or treat UNKNOWN meter cost as free.
 
 ## Fresh-chat initialization
 

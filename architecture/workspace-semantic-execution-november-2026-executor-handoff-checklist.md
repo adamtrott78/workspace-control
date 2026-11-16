@@ -86,6 +86,9 @@
 - [x] **B2 — Preserve UNKNOWN allowance when no controlled comparable meter delta exists.** The frozen scored plan explicitly keeps the shared allowance relationship UNKNOWN and does not treat zero/absent movement as free.
 - [x] **B3 — Do not rebuild governor / trace adapter / calibration harness / runset gate / dispatch admission.** Existing components remain the admission/promotion path.
 - [ ] **B4 — When calibrated live traces exist, execute admitted scored replicates, exercise matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.**
+  - [x] Evaluator sealed-store primitive validated at `8470957f…` (#2897/#223/#501).
+  - [x] Frozen 54-run plan now fail-closes on evaluator isolation at `74958b5d…` (#2899/#224/#502).
+  - [ ] Before any claim-bearing launch, prove live hostile-worker read denial plus evaluator readback/commitment verification; repository mode/ownership tests alone are not sufficient.
 
 ### C. Codex subscription executor — authority-gated lane
 

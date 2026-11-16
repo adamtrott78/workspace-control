@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 9b02005a58a961ce83ef8790e2d59ec626802591
+- Remote checkpoint: 74958b5d0d325893fd39045d1e49b5320dca7fa3
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED REASONING-ECONOMY PLAN BASE workspace-control@9b02005a58a961ce83ef8790e2d59ec626802591. OPERATOR STAGE 10 IS COMPLETE. REASONING ECONOMY P0-P3 PROTOCOL SCREENING IS COMPLETE and the exact 54-run scored-replicate/holdout plan is frozen; do not manually launch or materialize it while live executor authority and comparable allowance telemetry are unavailable. CODEX remains gated on draft PR #627/#630. LIVE semantic/Instant remains gated on Workspace Shell TASK_NOT_FOUND. NEXT INDEPENDENT NO-ALLOWANCE LANE: close or precisely narrow the evaluator-only runtime-isolation blocker for hidden-ephemeral scoring; do not claim strong frontier equivalence until a control-owned sealed store is proven inaccessible to scored workers. Final proving still requires authorized live mixed research-iterate, forced recovery, calibrated economics comparison, UX-09/resource/soak/provenance evidence, acceptance reconciliation, and explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
+CONTINUE NOVEMBER INTEGRATED V0 FROM workspace-control@74958b5d0d325893fd39045d1e49b5320dca7fa3. OPERATOR STAGE 10 IS COMPLETE; DO NOT RERUN UT-05–UT-12. REASONING ECONOMY SCREENING + 54-RUN PLAN + SEALED-STORE PRIMITIVE ARE REPOSITORY-VALIDATED, and claim-bearing launch is now mechanically gated on live evaluator isolation. WORKSPACE SHELL: the first semantic enrollment attempt safely rolled back; corrected receipt-based runtime candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe passed #2896 and owning authority-state ee586acf180e7fd85f3fe94a7553a52157b026cb passed #2898. Before the next root retry, rebind the semantic authority capsule to this latest validated semantic execution head so one activation carries current evaluator code. CODEX remains gated on PR #627/#630. After semantic authority activation, first prove exact-host semantic resolution, fake-worker transport, and live evaluator worker-denial/readback; then Stage-12 real-account calibration, controlled allowance calibration, admitted scored replicates/holdout, live research recovery, UX-09/resource/soak/provenance, and explicit PROMOTE_V0/HOLD/REVISE.
 
 ## Remaining work
 
-- REASONING ECONOMY: protocol screening is COMPLETE and the exact 54-run claim-bearing scored-replicate/holdout plan is frozen; do not launch/materialize scored runs until live executor authority and calibrated comparable allowance telemetry exist.
+- REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and sealed-store primitive + plan isolation gate are validated; do not launch/materialize scored runs until live executor authority, live evaluator isolation acceptance, and calibrated comparable allowance telemetry all exist.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
 - LIVE INSTANT: after Workspace Shell authority exists, activate reviewed localhost backend + private Tailscale route and prove one exact-host fake-worker action/status/result round trip before real-account use.
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
@@ -86,10 +86,10 @@ CONTINUE NOVEMBER INTEGRATED V0 FROM VALIDATED REASONING-ECONOMY PLAN BASE works
 
 - Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is now validated.
 - Workspace Shell still lacks a sufficiently general but narrow standing privileged-helper authority path for routine reviewed root operations; operator terminal relay must be reduced without widening to arbitrary sudo/bash.
-- Hidden-ephemeral evaluator generation and commitment verification are implemented, but the evaluator-only runtime store is not yet proven inaccessible to scored workers. Strong frontier-equivalence claims remain blocked until that storage boundary is validated.
-- Claim-bearing benchmark conclusions still require evaluator-only runtime isolation and replicated scoring; this blocks strong capability-equivalence claims, not deterministic orchestrator/backend implementation.
+- Hidden-ephemeral evaluator generation, commitment verification, and a strict control-owned filesystem sealed-store primitive are repository-validated. Strong frontier-equivalence claims remain blocked only on live proof that the scored worker cannot list/read the sealed store while evaluator control can read back the record and reproduce the commitment.
+- Claim-bearing benchmark conclusions still require live evaluator-isolation acceptance plus replicated scoring; the repository sealed-store primitive alone does not establish worker inaccessibility or capability equivalence.
 - GitRunner/controller modernization is intentionally deferred and authority-separated. This task may define comparison criteria and adapter boundaries, but may not rewrite/replace or widen GitRunner execution authority until a separate reviewed task is opened after semantic-execution Architecture Review v0.3.
-- Claim-bearing Reasoning Economy execution is now plan-ready but launch-gated: the 54-run plan is frozen with zero launches authorized until reviewed live Instant/operator transport exists and shared weekly allowance telemetry is calibrated. UNKNOWN meter cost must remain UNKNOWN.
+- Claim-bearing Reasoning Economy execution is plan-ready but launch-gated on reviewed live Instant/operator authority, live evaluator worker-denial/readback acceptance, and calibrated weekly allowance telemetry. UNKNOWN meter cost must remain UNKNOWN.
 
 ## Fresh-chat initialization
 
