@@ -79,6 +79,17 @@ class PADatasetScientificDualWorkflowRefreshV3Tests(unittest.TestCase):
         self.assertNotIn('run_systemctl("stop", PROVISIONER_UNIT)', HELPER)
         self.assertNotIn('run_systemctl("restart"', HELPER)
 
+    def test_helper_requires_exact_v2_receipt_mode_predecessor(self):
+        helper_lines = set(HELPER.splitlines())
+        self.assertIn(
+            '        != "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2"',
+            helper_lines,
+        )
+        self.assertNotIn(
+            '        != "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3"',
+            helper_lines,
+        )
+
     def test_helper_requires_zero_work_and_v2_policy_predecessor(self):
         for marker in (
             '"assigned_jobs": 0',
