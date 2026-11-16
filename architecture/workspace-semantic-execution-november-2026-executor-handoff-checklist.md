@@ -8,7 +8,7 @@
 **Definition of done:** every mandatory requirement in `architecture/workspace-semantic-execution-november-2026-acceptance.v0.1.json` is PASS and the integrated review records explicit `PROMOTE_V0`.  
 **Current acceptance matrix before this handoff commit:** 8 PASS / 13 PARTIAL / 1 BLOCKED / 10 PENDING.
 **Current validated Stage-10 implementation checkpoint for this handoff:** `866e2805def9d7bb1e5640715a72c72efc895480` — Workspace #2885 PASS; Semantic #214 PASS; Operator Bridge #491 PASS; off-foreground UT-12 acceptance run #492 completed on the same exact head.
-**Stage-10 human status:** UT-05, UT-06, UT-07, UT-08 and UT-12 ACCEPTED. Remaining human coverage is Bridge-OFF UT-11 followed by representative-work collision UT-09.
+**Stage-10 human status:** UT-05, UT-06, UT-07, UT-08, UT-12 and Bridge-OFF UT-11 ACCEPTED. Remaining hotkey coverage is representative-work collision UT-09 only.
 
 ## Fresh-chat recovery protocol
 
@@ -70,7 +70,9 @@
   - [x] Foreground-visible case #489 / job 133007524996: structured `OBJECTIVE_PASS`, minimize 1/1, delayed ack=1, zero no-work/background-ack clipboard or browser effects; operator confirmed Firefox minimized.
   - [x] Off-foreground case #492 / workflow 43778759491 / job 133010952603 on exact head `866e2805…`: structured `OBJECTIVE_PASS`, minimize 1/1, delayed ack=1, zero bridge clipboard/browser/focus effects, zero native foreground attempts, and zero wrong-worker/wrong-packet/rejected-state/dispatch failures.
   - [x] Operator deliberately focused another app on the second monitor and confirmed WorkspaceWorkers Firefox minimized while out of focus. The fix uses the already trusted captured Firefox HWND with `SW_SHOWMINNOACTIVE`; no arbitrary Firefox enumeration/minimization or authority widening was introduced.
-- [ ] **A5 — Run/accept Bridge-OFF UT-11 and representative-work collision UT-09.**
+- [ ] **A5 — Finish final Stage-10 hotkey coverage.**
+  - [x] Bridge-OFF UT-11 accepted from direct operator observation on validated head `b84f69cf…`: repeated Ctrl+Space produced no bridge reaction with Firefox focused or unfocused. Run #494 reached UT-11 ready state but was intentionally canceled; no completed OBJECTIVE_PASS is claimed from the canceled job.
+  - [ ] Resolve representative-work collision UT-09 for Ctrl+Space, then record the final hotkey retention decision.
 - [ ] Preserve accepted behavior: Ctrl+Space -> Ctrl+V -> Enter; no tab search; repeated scheduler presses refocus/block pending action; READY=0 extra press minimizes only WorkspaceWorkers Firefox.
 
 ### B. Reasoning Economy — parallel, repository-safe lane
