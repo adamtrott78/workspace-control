@@ -255,7 +255,19 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertNotIn("GetForegroundWindow()", minimize)
         self.assertIn("!IsWindow(window)", minimize)
         self.assertIn("!IsFirefoxWindow(window)", minimize)
-        self.assertIn("ShowWindow(window, SwMinimize)", minimize)
+        self.assertIn("SwShowMinNoActive = 7", window_safety)
+        self.assertNotIn("SwMinimize = 6", window_safety)
+        self.assertIn("ShowWindow(window, SwShowMinNoActive)", minimize)
+        setup = harness.split(
+            'if (trialId == "UT-12")',
+            1,
+        )[1].split(
+            "using var context = new UsabilityApplicationContext",
+            1,
+        )[0]
+        self.assertIn("RecordPreparedWorkerWindow()", setup)
+        self.assertNotIn("ForegroundPreparedWorkerWindow()", setup)
+        self.assertIn("STAGE10_UT12_TRUSTED_WORKER_WINDOW_CAPTURED", setup)
         self.assertIn("bridge_browser_focus_commands", harness)
         self.assertIn('"UT-05"', script)
         self.assertIn('"UT-12"', script)
