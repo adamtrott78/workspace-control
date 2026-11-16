@@ -36,25 +36,22 @@ Eliminate routine dependence on metered GitHub-hosted runners by moving workspac
 
 ## Next safe action
 
-Hold all scientific GPU execution. Capture one bounded read-only research-engine/gpu controller journal snapshot to classify the exact crash-loop error while implementing controller-reliability-hardening-v1 on branch controller-reliability-hardening-v1. No live restart/reset/reconcile/controller installation is authorized until the implementation batch passes full validation and the activation boundary is reviewed.
+Validate the final PR #599 head containing BF-1/BF-2 corrections plus durable task binding. If green, issue a new authority-sensitive review request superseding request 6798274468 / blocked disposition 6798416097. The bounded live transaction remains unchanged in scope, but the reviewer must verify exact integer lineage decoding and validate-before-delete semantics for reset-zero evidence before accepting.
 
 ## Remaining work
 
-- Complete controller reliability hardening v1 before resuming the local-reasoner GPU bakeoff.
-- Classify the exact current research-engine/gpu crash-loop error from a bounded read-only journal snapshot and freeze it as regression evidence.
-- Implement and validate admission ordering, recovery-state lifecycle, state-file ownership, stable restart certification, and restart-storm containment.
-- Run full workspace-control validation on the complete hardening batch.
-- Perform the owning workflow's final authority-sensitive activation review only once the implementation batch is stable; do not reintroduce iterative independent-review loops during ordinary implementation.
-- Dogfood merged review_automation on this exact state-only closure PR: create the authority-sensitive request through the default-branch issue_comment command, obtain a fresh independent disposition, and verify the automation posts an ACCEPTED consumption receipt without operator prompt-copy plumbing.
-- After dogfood acceptance, design the next steady-state/P2 tranche under a separate exact review gate; do not start the automatic reconcile-controller or widen live admission in this closure.
-- Then remove routine hosted-runner dependence only after private-repository steady-state CI is proven under reviewed boundaries.
-- Leave GitHub organization migration, capacity widening, maintenance-command widening, and workspace-shell-mcp-v1 paused until their own gates.
+- Validate the final corrected PR #599 head after this durable task binding.
+- Obtain fresh independent authority-sensitive review proving BF-1/BF-2 closure and accepting the bounded live transaction.
+- Execute the reviewed controller+manifest+historical recovery-state repair only after exact live preflight.
+- Prove workspace-control CPU stable running, stale quarantine retired by the fixed controller, recovery gate terminal, and sibling semantic state preserved.
+- Allow existing exact-head run #389 to proceed naturally and record its result.
 
 ## Blockers / gates
 
-- No live controller/runtime mutation is authorized by review_automation closure or dogfood.
-- The next stage must remain separately reviewed before any automatic reconcile-controller startup, P2 admission widening, hosted-runner dependency removal, maintenance widening, capacity widening, or organization migration.
-- The merged review automation must prove end-to-end request creation and disposition consumption on this state-only closure PR before routine reliance.
+- Fresh exact-head validation is required after this BF-1/BF-2 task-state binding.
+- Fresh authority-sensitive review is required on the final corrected PR #599 head before installing the controller or mutating historical workspace-control recovery state.
+- Live repair remains bound to exact historical quarantine receipt ab2334ab-384c-4432-ab84-f5b38ba4071d, old scale set 1 -> new scale set 3, reset generation 40d61b30-e8b9-5559-abfc-706fb3df6c67, and terminal probe run/job 41404080844/125142056183.
+- No scale-set reset/recreation, reconciliation, provisioner restart, sibling-controller mutation, workflow cancel/retrigger, admission/capacity widening, or research-engine mutation is authorized.
 
 ## Fresh-chat initialization
 
