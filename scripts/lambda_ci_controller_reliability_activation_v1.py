@@ -75,13 +75,14 @@ WORKSPACE_CPU = "workspace-ci-controller@workspace-control-cpu.service"
 MAINT_ROOT = "workspace-ci-maintenance.service"
 MAINT_CONTROLLER = "workspace-ci-maintenance-controller.service"
 
-HEALTHY_CONTROLLERS = [PAD_CPU, PAD_GPU, WORKSPACE_CPU]
+HEALTHY_CONTROLLERS = [PAD_CPU, PAD_GPU]
 ACTIVE_AFTER_INSTALL = list(HEALTHY_CONTROLLERS)
+BROKEN_LANES_HELD = [RESEARCH_GPU, WORKSPACE_CPU]
 EXPECTED_HEALTHY_BASELINES = {
     PAD_CPU: {"Result": "success", "NRestarts": "0"},
     PAD_GPU: {"Result": "success", "NRestarts": "0"},
-    WORKSPACE_CPU: {"Result": "success", "NRestarts": "14140"},
 }
+WORKSPACE_CPU_MIN_RESTARTS = 14710
 
 EXPECTED_QUARANTINE = {
     "schema_version": 1,
@@ -289,6 +290,29 @@ def require_old_gpu_loop() -> dict[str, str]:
         raise ActivationError("gpu NRestarts is invalid") from exc
     if restarts < 14276:
         raise ActivationError(f"gpu restart count regressed unexpectedly: {restarts}")
+    return snap
+
+
+def require_old_workspace_cpu_loop() -> dict[str, str]:
+    snap = service_snapshot(WORKSPACE_CPU)
+    if (
+        snap["LoadState"] != "loaded"
+        or snap["UnitFileState"] != "enabled"
+        or snap["Result"] != "exit-code"
+        or snap["Restart"] != "on-failure"
+        or snap["ActiveState"] not in {"activating", "active"}
+        or snap["SubState"] not in {"auto-restart", "running"}
+    ):
+        raise ActivationError(f"workspace-control cpu old crash-loop baseline drift: {snap}")
+    try:
+        restarts = int(snap["NRestarts"])
+    except ValueError as exc:
+        raise ActivationError("workspace-control cpu NRestarts is invalid") from exc
+    if restarts < WORKSPACE_CPU_MIN_RESTARTS:
+        raise ActivationError(
+            "workspace-control cpu restart count regressed unexpectedly: "
+            f"{restarts} < {WORKSPACE_CPU_MIN_RESTARTS}"
+        )
     return snap
 
 
@@ -541,6 +565,79 @@ def contain_gpu_fail_closed(*, fail_on_initial_error: bool = True) -> dict[str, 
     }
 
 
+def require_workspace_cpu_inactive() -> dict[str, str]:
+    snap = service_snapshot(WORKSPACE_CPU)
+    if (
+        snap["LoadState"] != "loaded"
+        or snap["UnitFileState"] != "enabled"
+        or snap["ActiveState"] != "inactive"
+        or snap["SubState"] != "dead"
+        or snap["MainPID"] != "0"
+    ):
+        raise ActivationError(
+            "workspace-control cpu is not fail-closed inactive: "
+            + json.dumps(snap, sort_keys=True)
+        )
+    return snap
+
+
+def contain_broken_lanes_fail_closed(
+    *,
+    fail_on_initial_error: bool = True,
+) -> dict[str, Any]:
+    services = (RESEARCH_GPU, WORKSPACE_CPU)
+    first_error: Exception | None = None
+    try:
+        # One first transaction action targets both broken old-controller lanes.
+        run(["systemctl", "stop", *services])
+    except Exception as exc:
+        first_error = exc
+
+    # Re-issue each stop even if the joint stop partially mutated state and
+    # returned an error/timeout. Neither broken lane may remain live.
+    for service in services:
+        run(["systemctl", "stop", service], check=False)
+
+    deadline = time.monotonic() + 15
+    proofs: dict[str, dict[str, str]] = {}
+    while time.monotonic() < deadline:
+        for service in services:
+            if service in proofs:
+                continue
+            snap = service_snapshot(service)
+            if (
+                snap["ActiveState"] == "inactive"
+                and snap["SubState"] == "dead"
+                and snap["MainPID"] == "0"
+            ):
+                proofs[service] = snap
+        if len(proofs) == len(services):
+            break
+        time.sleep(0.2)
+    if len(proofs) != len(services):
+        missing = sorted(set(services) - set(proofs))
+        raise ActivationError(
+            "broken-lane containment could not be proved after stop: "
+            + ",".join(missing)
+        )
+
+    for service in services:
+        run(["systemctl", "reset-failed", service], check=False)
+    proofs = {
+        RESEARCH_GPU: require_gpu_inactive(),
+        WORKSPACE_CPU: require_workspace_cpu_inactive(),
+    }
+    if first_error is not None and fail_on_initial_error:
+        raise ActivationError(
+            "initial dual-lane stop failed after containment was proved: "
+            + str(first_error)
+        ) from first_error
+    return {
+        "initial_stop_error": None if first_error is None else str(first_error),
+        "proofs": proofs,
+    }
+
+
 def _invalidated_gate_expected(previous_status: str) -> dict[str, Any]:
     expected = dict(EXPECTED_READY)
     expected["status"] = "RECOVERY_RETRY_INVALIDATED"
@@ -681,6 +778,7 @@ def preflight(repo: pathlib.Path) -> dict[str, Any]:
     installed = require_installed_baseline()
     research_cpu = require_inactive_research_cpu()
     gpu = require_old_gpu_loop()
+    workspace_cpu = require_old_workspace_cpu_loop()
     healthy: dict[str, dict[str, str]] = {}
     for service in HEALTHY_CONTROLLERS:
         snap = require_running(service)
@@ -701,6 +799,7 @@ def preflight(repo: pathlib.Path) -> dict[str, Any]:
         "installed": installed,
         "research_cpu": research_cpu,
         "gpu": gpu,
+        "workspace_cpu": workspace_cpu,
         "healthy_controllers": healthy,
         "maintenance": maintenance,
         "recovery": recovery,
@@ -764,7 +863,7 @@ def prepare_payload(
 def rollback_activation(
     backup: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    containment = contain_gpu_fail_closed(fail_on_initial_error=False)
+    containment = contain_broken_lanes_fail_closed(fail_on_initial_error=False)
 
     # Restore the exact frozen quarantine before retry invalidation because
     # invalidation is intentionally bound to that durable quarantine identity.
@@ -807,6 +906,7 @@ def rollback_activation(
 
     research_cpu = require_inactive_research_cpu()
     gpu = require_gpu_inactive()
+    workspace_cpu = require_workspace_cpu_inactive()
     require_no_active_execution()
     recovery = require_post_activation_recovery()
     return {
@@ -817,6 +917,7 @@ def rollback_activation(
         "controllers": controllers,
         "research_cpu": research_cpu,
         "gpu": gpu,
+        "workspace_cpu": workspace_cpu,
         "recovery": recovery,
     }
 
@@ -835,7 +936,7 @@ def activate(
     source_unit = bytes(prepared["controller_unit"])
     source_maintenance = bytes(prepared["maintenance_service"])
     try:
-        gpu_containment = contain_gpu_fail_closed()
+        broken_lane_containment = contain_broken_lanes_fail_closed()
 
         # Detect any authority/lifecycle drift that happened after the
         # authoritative preflight but before containment. Restore fail-closed
@@ -909,6 +1010,7 @@ def activate(
 
         research_cpu_after = require_inactive_research_cpu()
         gpu_after = require_gpu_inactive()
+        workspace_cpu_after = require_workspace_cpu_inactive()
         require_no_active_execution()
         recovery_after = require_post_activation_recovery()
 
@@ -921,7 +1023,7 @@ def activate(
 
         receipt = {
             "schema_version": 1,
-            "status": "CONTROLLER_RELIABILITY_ACTIVATED_GPU_HELD",
+            "status": "CONTROLLER_RELIABILITY_ACTIVATED_BROKEN_LANES_HELD",
             "source_head": expected_head,
             "payload_source_head": PAYLOAD_SOURCE_HEAD,
             "candidate_controller_sha256": candidate_sha,
@@ -930,13 +1032,14 @@ def activate(
             "installed_maintenance_service_sha256": sha256_path(MAINTENANCE_SERVICE),
             "preflight": before,
             "post_activation": {
-                "gpu_containment": gpu_containment,
+                "broken_lane_containment": broken_lane_containment,
                 "retry_gate": invalidated_gate,
                 "frozen_quarantine": frozen_quarantine,
                 "controllers": controllers,
                 "final_controller_state": final_controller_state,
                 "research_cpu": research_cpu_after,
                 "research_gpu": gpu_after,
+                "workspace_cpu": workspace_cpu_after,
                 "maintenance_root": maintenance_root,
                 "maintenance_final": maintenance_final,
                 "maintenance_controller": maintenance_controller,
@@ -947,6 +1050,7 @@ def activate(
             "retry_authority_restored": False,
             "scientific_execution_started": False,
             "research_engine_gpu_started": False,
+            "workspace_control_cpu_started": False,
         }
         write_receipt(receipt)
         rollback_armed = False
@@ -967,8 +1071,8 @@ def activate(
             ) from exc
         raise ActivationError(
             "activation failed; old files preserved/restored, healthy lanes "
-            "preserved/restored, research-engine gpu held stopped/quarantined, "
-            "retry authority invalidated; rollback="
+            "preserved/restored, research-engine gpu and workspace-control cpu "
+            "held stopped, gpu quarantine restored, retry authority invalidated; rollback="
             + json.dumps(rollback_receipt, sort_keys=True, default=str)
             + f"; original={type(exc).__name__}:{exc}"
         ) from exc
