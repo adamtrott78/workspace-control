@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "workspace-shell"
 sys.path.insert(0, str(PLUGIN / "root"))
 job_launcher = importlib.import_module("job_launcher")
+candidate_materializer = importlib.import_module("candidate_materializer")
 
 
 class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
@@ -17,7 +18,7 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.manifest = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
 
     def test_padataset_profile_matrix_is_fail_closed(self):
-        for profile in ("git-read", "file-list", "file-read", "file-hash", "research-bounded"):
+        for profile in ("git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"):
             job_launcher.assert_target_profile("PADataset", profile)
         with self.assertRaisesRegex(Exception, "TARGET_PROFILE_DENIED"):
             job_launcher.assert_target_profile("PADataset", "validation-bounded")
@@ -58,6 +59,34 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
                 ["-c", "65537", "--", "results/example.csv"],
             )
 
+    def test_candidate_materializer_public_transport_is_credential_free_and_private_mode_exists(self):
+        env = candidate_materializer.git_env({
+            "transport": "public_https",
+            "url": "https://github.com/adamtrott78/PADataset.git",
+        })
+        self.assertEqual(env["GIT_TERMINAL_PROMPT"], "0")
+        self.assertNotIn("GIT_SSH_COMMAND", env)
+        with self.assertRaisesRegex(Exception, "SOURCE_CONFIG_INVALID"):
+            candidate_materializer.git_env({
+                "transport": "public_https",
+                "url": "https://token@github.com/adamtrott78/PADataset.git",
+            })
+        source = (PLUGIN / "root" / "candidate_materializer.py").read_text()
+        self.assertIn('"ssh_deploy_key"', source)
+        self.assertIn("StrictHostKeyChecking=yes", source)
+        self.assertIn("deploy key must be root-private", source)
+
+    def test_candidate_pytest_is_sandbox_copy_only(self):
+        resolved = job_launcher.resolve_profile(
+            self.manifest,
+            "candidate-pytest",
+            ["-q", "tests/test_cross_surrogate_dqnguard.py"],
+        )
+        self.assertEqual(resolved["executable"], "/usr/bin/python3")
+        self.assertTrue(resolved["write_scratch"])
+        self.assertEqual(resolved["argv"][:3], ["-m", "pytest", "-q"])
+        self.assertEqual(self.manifest["profiles"]["candidate-pytest"]["network"], "deny")
+
     def test_research_profile_is_sandbox_copy_only(self):
         resolved = job_launcher.resolve_profile(
             self.manifest,
@@ -67,24 +96,17 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertEqual(resolved["executable"], "/usr/bin/python3")
         self.assertTrue(resolved["write_scratch"])
         self.assertEqual(resolved["argv"][:2], ["-B", "experiments/pa_eval_osr_one.py"])
-        self.assertEqual(self.manifest["profiles"]["research-bounded"]["network"], "deny")
 
         contract_test = job_launcher.resolve_profile(
             self.manifest,
             "research-bounded",
             ["tests/test_multisurrogate_dqnguard.py"],
         )
-        self.assertEqual(
-            contract_test["argv"],
-            ["-B", "tests/test_multisurrogate_dqnguard.py"],
-        )
+        self.assertEqual(contract_test["argv"], ["-B", "tests/test_multisurrogate_dqnguard.py"])
         self.assertEqual(contract_test["env"]["PYTHONPATH"], "/workspace")
         self.assertEqual(
             contract_test["env"]["LD_LIBRARY_PATH"],
-            "/usr/lib/x86_64-linux-gnu/blas:"
-            "/usr/lib/x86_64-linux-gnu/lapack:"
-            "/usr/lib/x86_64-linux-gnu:"
-            "/lib/x86_64-linux-gnu",
+            "/usr/lib/x86_64-linux-gnu/blas:/usr/lib/x86_64-linux-gnu/lapack:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu",
         )
         with self.assertRaisesRegex(Exception, "PROFILE_ARGV_DENIED"):
             job_launcher.resolve_profile(
@@ -92,6 +114,7 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
                 "research-bounded",
                 ["tests/test_other_research.py"],
             )
+        self.assertEqual(self.manifest["profiles"]["research-bounded"]["network"], "deny")
         with self.assertRaisesRegex(Exception, "PROFILE_ARGV_DENIED"):
             job_launcher.resolve_profile(
                 self.manifest,
@@ -158,6 +181,10 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertIn('padataset_evidence_root = "/srv/workspace-shell/PADataset-evidence"', render)
         self.assertIn('"PADataset": padataset_root', render)
         self.assertIn('"evidence_roots": {"PADataset": padataset_evidence_root}', render)
+        self.assertIn('"candidate_materializer_socket": control_root + "/candidate-materializer.sock"', render)
+        self.assertIn('"candidate_store_root": "/var/lib/workspace-shell/candidates"', render)
+        self.assertIn('"transport": "public_https"', render)
+        self.assertIn('"workspace-shell-candidate-materializer.service"', render)
 
         upgrade = (PLUGIN / "install" / "upgrade_multirepo_padataset_v1.sh").read_text()
         self.assertIn('AUTHORITY_ROOT="/etc/workspace-shell/authority"', upgrade)
@@ -171,7 +198,7 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertIn("workspace-shell-multirepo-research-v1", upgrade)
         self.assertIn("mth602-final-multisurrogate-dqnguard-v1", upgrade)
         self.assertIn("LOCAL_TASK_AUTHORITY=PASS", upgrade)
-        self.assertIn("17e1147614f27702e43565089d618182ff71c5af", upgrade)
+        self.assertIn('EXPECTED_PAD_EXEC_SHA="${3:-}"', upgrade)
         self.assertIn('PAD_EVIDENCE_ROOT="${PADATASET_CHECKOUT:-$HOME/adamArchives/Adam/varMax/PADataset}"', upgrade)
         self.assertIn('git clone --filter=blob:none --no-checkout "$PAD_EXEC_REPO_URL" "$PAD_FETCH"', upgrade)
         self.assertIn('mount --bind "$PAD_EVIDENCE_ROOT" "$EVIDENCE_MOUNT"', upgrade)
@@ -198,6 +225,10 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertIn('"method":"tools/list"', upgrade)
         self.assertIn('"PADataset"', upgrade)
         self.assertIn('"research-bounded"', upgrade)
+        self.assertIn('"candidate-pytest"', upgrade)
+        self.assertIn("workspace-shell-candidate-materializer.service", upgrade)
+        self.assertIn("candidate-materializer.sock", upgrade)
+        self.assertIn("/var/lib/workspace-shell/candidates", upgrade)
         self.assertIn('"historical_checkout_mutated": False', upgrade)
         self.assertIn('data.setdefault("evidence_roots", {})', upgrade)
         self.assertIn("/srv/workspace-shell/PADataset-evidence", upgrade)

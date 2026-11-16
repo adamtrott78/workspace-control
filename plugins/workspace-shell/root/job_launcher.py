@@ -174,8 +174,8 @@ def validate_research(argv):
 
 def assert_target_profile(target, profile):
     allowed = {
-        "workspace-control": {"git-read", "pytest-bounded", "validation-bounded", "file-list", "file-read", "file-hash"},
-        "PADataset": {"git-read", "file-list", "file-read", "file-hash", "research-bounded"},
+        "workspace-control": {"git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash"},
+        "PADataset": {"git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"},
     }
     if target not in allowed or profile not in allowed[target]:
         fail("TARGET_PROFILE_DENIED", f"profile {profile} is not authorized for target {target}")
@@ -190,6 +190,7 @@ def resolve_profile(manifest, profile, argv):
     expected = {
         "git-read": ("/usr/bin/git", False),
         "pytest-bounded": ("/usr/bin/python3", True),
+        "candidate-pytest": ("/usr/bin/python3", True),
         "validation-bounded": ("/usr/bin/python3", True),
         "file-list": ("/usr/bin/find", False),
         "file-read": ("/usr/bin/head", False),
@@ -219,7 +220,7 @@ def resolve_profile(manifest, profile, argv):
             "GIT_OPTIONAL_LOCKS": "0",
             "GIT_TERMINAL_PROMPT": "0",
         }
-    elif profile == "pytest-bounded":
+    elif profile in ("pytest-bounded", "candidate-pytest"):
         validate_pytest(argv)
         resolved = ["-m", "pytest", *argv]
         env = {
@@ -324,6 +325,62 @@ def verify_source_tree(source_root, worker_uid):
             if st.st_uid == worker_uid and st.st_mode & 0o200:
                 fail("SOURCE_WRITABLE_BY_WORKER", f"worker owns writable source entry: {p}")
     return source_root
+
+
+def candidate_materializer_rpc(cfg, target, candidate_sha):
+    socket_path = cfg.get("candidate_materializer_socket")
+    if not isinstance(socket_path, str) or not socket_path.startswith("/run/workspace-shell-control/"):
+        fail("CANDIDATE_MATERIALIZER_CONFIG_INVALID", "candidate materializer socket is not trusted")
+    request = {
+        "schema": "workspace-shell-candidate-materialize.v1",
+        "target": target,
+        "candidate_sha": candidate_sha,
+    }
+    body = (json.dumps(request, separators=(",", ":")) + "\n").encode("utf-8")
+    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    client.settimeout(55)
+    try:
+        client.connect(socket_path)
+        client.sendall(body)
+        client.shutdown(socket.SHUT_WR)
+        chunks = []
+        total = 0
+        while True:
+            chunk = client.recv(8192)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > RESPONSE_LIMIT:
+                fail("CANDIDATE_MATERIALIZER_RESPONSE_TOO_LARGE", "materializer response exceeded limit")
+            chunks.append(chunk)
+    except OSError as exc:
+        fail("CANDIDATE_MATERIALIZER_UNAVAILABLE", str(exc))
+    finally:
+        client.close()
+    try:
+        payload = json.loads(b"".join(chunks).decode("utf-8"))
+    except Exception as exc:
+        fail("CANDIDATE_MATERIALIZER_RESPONSE_INVALID", str(exc))
+    if payload.get("ok") is not True:
+        fail(
+            payload.get("code") or "CANDIDATE_MATERIALIZER_DENIED",
+            payload.get("message") or "candidate materialization failed",
+        )
+    result = payload.get("result")
+    if not isinstance(result, dict):
+        fail("CANDIDATE_MATERIALIZER_RESPONSE_INVALID", "missing materializer result")
+    path = result.get("path")
+    if not isinstance(path, str):
+        fail("CANDIDATE_MATERIALIZER_RESPONSE_INVALID", "candidate path missing")
+    store = Path(cfg.get("candidate_store_root", "")).resolve()
+    candidate = Path(path).resolve()
+    try:
+        candidate.relative_to(store)
+    except ValueError:
+        fail("CANDIDATE_MATERIALIZER_PATH_ESCAPE", "candidate path escaped configured store")
+    if result.get("candidate_sha") != candidate_sha:
+        fail("CANDIDATE_MATERIALIZER_SHA_MISMATCH", "materializer returned wrong SHA")
+    return candidate, result
 
 
 def verify_evidence_mount(evidence_root, worker_uid):
@@ -609,7 +666,7 @@ def decode_output(data):
 
 def redact_argv(profile, argv):
     values = list(argv or [])
-    if profile != "pytest-bounded":
+    if profile not in ("pytest-bounded", "candidate-pytest"):
         return values
     redacted = []
     i = 0
@@ -644,12 +701,39 @@ def run_request(cfg, manifest, request, cancel_check=None):
     if not 1000 <= timeout_ms <= resolved["max_timeout_ms"]:
         fail("TIMEOUT_DENIED", "timeout exceeds profile ceiling")
 
-    source_root = cfg.get("source_roots", {}).get(request["target"])
-    if not isinstance(source_root, str):
-        fail("SOURCE_ROOT_UNTRUSTED", "target source root is not pinned by launcher config")
+    source_mode = request.get("source_mode", "task")
+    if source_mode not in ("task", "candidate"):
+        fail("SOURCE_MODE_DENIED", "source_mode must be task or candidate")
+    task_checkpoint_sha = request.get("task_checkpoint_sha")
+    if source_mode == "task" and task_checkpoint_sha is None:
+        # Rolling-upgrade compatibility: an old frontend can only request the
+        # exact task-bound source, so expected_sha is the task checkpoint.
+        task_checkpoint_sha = expected_sha
+    if not isinstance(task_checkpoint_sha, str) or len(task_checkpoint_sha) != 40 or any(c not in "0123456789abcdef" for c in task_checkpoint_sha):
+        fail("TASK_CHECKPOINT_SHA_INVALID", "task_checkpoint_sha must be an exact lowercase Git SHA")
+
     worker_uid = int(cfg["worker_uid"])
     worker_gid = int(cfg["worker_gid"])
-    source_root = verify_source_tree(source_root, worker_uid)
+    candidate_transport = None
+    candidate_repository = None
+    if source_mode == "candidate":
+        if profile != "candidate-pytest":
+            fail("CANDIDATE_PROFILE_REQUIRED", "candidate source mode is restricted to candidate-pytest")
+        source_root, materialized = candidate_materializer_rpc(
+            cfg,
+            request["target"],
+            expected_sha,
+        )
+        source_root = verify_source_tree(source_root, worker_uid)
+        candidate_transport = materialized.get("transport")
+        candidate_repository = materialized.get("repository")
+    else:
+        if profile == "candidate-pytest":
+            fail("CANDIDATE_SOURCE_REQUIRED", "candidate-pytest requires candidate source mode")
+        source_root = cfg.get("source_roots", {}).get(request["target"])
+        if not isinstance(source_root, str):
+            fail("SOURCE_ROOT_UNTRUSTED", "target source root is not pinned by launcher config")
+        source_root = verify_source_tree(source_root, worker_uid)
 
     evidence_root = None
     configured_evidence = cfg.get("evidence_roots", {}).get(request["target"])
@@ -720,6 +804,10 @@ def run_request(cfg, manifest, request, cancel_check=None):
         "expected_git_sha": expected_sha,
         "observed_git_sha": observed_sha,
         "observed_git_tree": observed_tree,
+        "source_mode": source_mode,
+        "task_checkpoint_sha": task_checkpoint_sha,
+        "candidate_repository": candidate_repository,
+        "candidate_transport": candidate_transport,
         "argv_profile": profile,
         "argv_hash": sha256_hex(json.dumps(request.get("argv"), separators=(",", ":"), ensure_ascii=False)),
         "redacted_argv": redact_argv(profile, request.get("argv")),

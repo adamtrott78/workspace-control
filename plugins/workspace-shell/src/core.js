@@ -186,8 +186,8 @@ export function assertTarget(value) {
 export function assertTargetProfile(target, profile) {
   assertTarget(target);
   const allowed = target === "workspace-control"
-    ? new Set(["git-read", "pytest-bounded", "validation-bounded", "file-list", "file-read", "file-hash"])
-    : new Set(["git-read", "file-list", "file-read", "file-hash", "research-bounded"]);
+    ? new Set(["git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash"])
+    : new Set(["git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"]);
   if (!allowed.has(profile)) {
     fail("TARGET_PROFILE_DENIED", `profile ${profile} is not authorized for target ${target}`);
   }
@@ -358,6 +358,7 @@ export function resolveProfile(profile, argv) {
         },
       };
     case "pytest-bounded":
+    case "candidate-pytest":
       validatePytest(argv);
       return {
         executable: "/usr/bin/python3",
@@ -492,7 +493,55 @@ export function authorizeTaskExecution({
   if (expectedSha !== boundSha) {
     fail("TASK_SHA_MISMATCH", "expected_sha differs from durable task checkpoint");
   }
-  return { capsule, capsulePath, repository };
+  return {
+    capsule,
+    capsulePath,
+    repository,
+    taskCheckpointSha: boundSha,
+  };
+}
+
+export function authorizeCandidateEvidence({
+  authorityRoot,
+  taskId,
+  target,
+  candidateSha,
+  authorityOwnerUid = 0,
+}) {
+  assertTaskId(taskId);
+  assertTarget(target);
+  assertSha(candidateSha, "candidate_sha");
+  const { capsule, path: capsulePath } = loadTaskCapsule(
+    authorityRoot,
+    taskId,
+    { ownerUid: authorityOwnerUid },
+  );
+  if (capsule.status !== "IN_PROGRESS") {
+    fail(
+      "TASK_STATE_DENIED",
+      `task status ${capsule.status} does not permit candidate evidence execution`,
+    );
+  }
+  const repository = (capsule.repositories ?? []).find(
+    (entry) => entry?.name === target,
+  );
+  if (!repository) {
+    fail("TASK_TARGET_DENIED", "target repository is absent from durable task scope");
+  }
+  const boundSha =
+    repository.remote?.checkpoint_sha ??
+    repository.local?.head_sha ??
+    null;
+  if (!boundSha || !/^[0-9a-f]{40}$/.test(boundSha)) {
+    fail("TASK_PROVENANCE_MISSING", "task repository has no exact checkpoint SHA binding");
+  }
+  return {
+    capsule,
+    capsulePath,
+    repository,
+    taskCheckpointSha: boundSha,
+    candidateSha,
+  };
 }
 
 export function buildFrontendRequest({
