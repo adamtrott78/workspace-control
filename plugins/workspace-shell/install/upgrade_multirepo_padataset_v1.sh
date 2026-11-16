@@ -567,6 +567,7 @@ sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 5 \
   https://127.0.0.1:8797/mcp >"$MCP_TASK_DEPENDENT"
 
 if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
+  SEMANTIC_ACCEPTANCE_STARTED="$(date +%s)"
   sudo -u workspace-shell-tunnel /usr/bin/curl -fsS --max-time 60 \
     --cacert /etc/workspace-shell/tunnel/ca.crt \
     --cert /etc/workspace-shell/tunnel/client.crt \
@@ -612,15 +613,69 @@ accepted(sys.argv[2], "mth602-final-multisurrogate-dqnguard-v1")
 expected_semantic = sys.argv[4]
 if expected_semantic:
     accepted(sys.argv[3], "workspace-semantic-execution-migration-v1")
-    payload = json.loads(pathlib.Path(sys.argv[3]).read_text())
-    serialized = json.dumps(payload, sort_keys=True)
-    if expected_semantic not in serialized:
-        raise SystemExit("semantic exact execution SHA missing from live MCP result")
-    if expected_semantic + "\\n" not in serialized:
-        raise SystemExit("semantic git-read did not report exact bound HEAD")
-    print("LOCAL_SEMANTIC_TASK_AUTHORITY=PASS")
+    print("LOCAL_SEMANTIC_TASK_MCP=PASS")
 print("LOCAL_TASK_AUTHORITY=PASS")
 PY
+
+if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
+  SEMANTIC_RECEIPT_ROOT="$(sudo python3 - <<'PY'
+import json
+from pathlib import Path
+cfg = json.loads(Path("/etc/workspace-shell/frontend.json").read_text(encoding="utf-8"))
+value = cfg.get("receipt_root")
+if not isinstance(value, str) or not value:
+    raise SystemExit("frontend receipt_root missing")
+print(value)
+PY
+)"
+  sudo python3 - "$SEMANTIC_RECEIPT_ROOT" "$SEMANTIC_ACCEPTANCE_STARTED" "$EXPECTED_SEMANTIC_EXEC_SHA" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+started = float(sys.argv[2])
+expected = sys.argv[3]
+matches = []
+for path in root.glob("*.json"):
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        continue
+    if payload.get("task_id") != "workspace-semantic-execution-migration-v1":
+        continue
+    if float(payload.get("started_at") or 0) + 1 < started:
+        continue
+    if payload.get("expected_git_sha") != expected:
+        continue
+    matches.append((float(payload.get("started_at") or 0), path, payload))
+
+if not matches:
+    raise SystemExit("no semantic acceptance receipt found after live MCP call")
+
+_, path, receipt = max(matches, key=lambda item: item[0])
+checks = {
+    "authorization_decision": receipt.get("authorization_decision") in (None, "ALLOW"),
+    "exit_code": receipt.get("exit_code") == 0,
+    "privileged": receipt.get("privileged") is False,
+    "expected_git_sha": receipt.get("expected_git_sha") == expected,
+    "observed_git_sha": receipt.get("observed_git_sha") == expected,
+    "task_checkpoint_sha": receipt.get("task_checkpoint_sha") == expected,
+    "source_mode": receipt.get("source_mode") == "task",
+}
+failed = [name for name, ok in checks.items() if not ok]
+if failed:
+    raise SystemExit(
+        "semantic acceptance receipt failed checks "
+        + ",".join(failed)
+        + ": "
+        + json.dumps(receipt, sort_keys=True)
+    )
+print("LOCAL_SEMANTIC_TASK_RECEIPT=PASS")
+print("LOCAL_SEMANTIC_TASK_AUTHORITY=PASS")
+print("SEMANTIC_ACCEPTANCE_RECEIPT=" + path.name)
+PY
+fi
 
 rm -f "$MCP_INIT" "$MCP_TOOLS" "$MCP_TASK_PRIMARY" "$MCP_TASK_DEPENDENT" "$MCP_TASK_SEMANTIC"
 trap 'rollback "$?"' EXIT
