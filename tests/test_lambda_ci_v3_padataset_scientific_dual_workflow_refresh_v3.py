@@ -50,21 +50,22 @@ class PADatasetScientificDualWorkflowRefreshV3Tests(unittest.TestCase):
         self.assertNotIn("PRIOR_REFRESH_ACTIVE.unlink", HELPER)
 
     def test_helper_receipt_bindings_are_exact(self):
+        helper_lines = set(HELPER.splitlines())
         self.assertIn(
             "PRIOR_REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT",
-            HELPER,
+            helper_lines,
         )
         self.assertIn(
             "REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT",
-            HELPER,
+            helper_lines,
         )
         self.assertNotIn(
             "PRIOR_REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT",
-            HELPER,
+            helper_lines,
         )
         self.assertNotIn(
             "REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT",
-            HELPER,
+            helper_lines,
         )
 
     def test_helper_changes_only_lane_b_controller(self):
