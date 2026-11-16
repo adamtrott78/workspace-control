@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: 296d2591b83d86da898940ccc6f6cc5cbcc45374
+- Remote checkpoint: 5401045341090a26a42ce3a497c379f8223a3b54
 - Remote verified: true
 
 ### PADataset
@@ -36,15 +36,15 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-Apply the transactional Workspace Shell upgrade from the exact authority-state head produced by this checkpoint, using execution candidate 296d2591b83d86da898940ccc6f6cc5cbcc45374 and PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f. Then prove candidate-pytest live, refresh the existing Workspace Shell plugin through Plugin Creator, and resume STFT from the persistent checkout without rebuilding completed cache files.
+Apply the transactional Workspace Shell upgrade from the authority-state head produced by this checkpoint using execution candidate 5401045341090a26a42ce3a497c379f8223a3b54 and PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f; then live-test candidate-pytest, refresh the existing Workspace Shell plugin through Plugin Creator, and resume STFT from persistent checkout.
 
 ## Remaining work
 
-- Deploy the validated host upgrade from the authority-state checkpoint produced after execution candidate 296d2591b83d86da898940ccc6f6cc5cbcc45374, explicitly binding PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.
-- Verify five-service live health and candidate-pytest discovery.
-- Run an off-checkpoint candidate-pytest receipt to prove candidate SHA execution without mutating durable task authority.
-- Refresh the existing private Workspace Shell plugin in place through Plugin Creator.
-- Resume the STFT ablation from persistent checkout head 6fa2ef479d4a05de339154bfaed7a57648339c1b; completed cache files must be skipped, not rebuilt.
+- Deploy the validated host upgrade using authority-state head produced by this checkpoint, execution candidate 5401045341090a26a42ce3a497c379f8223a3b54, and PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.
+- Verify all five Workspace Shell services active and candidate-pytest visible.
+- Run an off-checkpoint candidate-pytest receipt and prove ordinary task-bound mismatch remains denied.
+- Refresh the existing Workspace Shell plugin in place through Plugin Creator.
+- Resume STFT from persistent exact-SHA checkout; completed cache files remain reusable.
 
 ## Blockers / gates
 
