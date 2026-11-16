@@ -35,8 +35,8 @@ Authoritative capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 
 ## Next safe action
 
-Monitor only PA3-PA4. On SUCCESS, freeze its exact workflow/artifact/checkpoint/config provenance into PR #26 and create the final two directional evaluator requests. That completes the 10-backbone / 20-cell Track-A bank.
+Open a fresh ChatGPT chat with Workspace Shell selected so the refreshed plugin schema exposes `candidate-pytest`. Continue this durable task from PR #640 and validate PADataset PR #26 exact current head through the authorized off-checkpoint candidate path while durable PADataset authority remains pinned at `befe383fd67c8bca8d8ce370344b33c7e13cd52f`.
 
-Then stop backbone training, refresh the Workspace Shell authority snapshot while preserving the pinned live SHAs, validate PR #26 through authorized candidate execution, and only then separately review/activate the bounded directional evaluator workflow operation.
+In parallel, monitor only PA3-PA4. On SUCCESS, freeze its exact workflow/artifact/checkpoint/config provenance into PR #26 and create the final two directional evaluator requests. Do not launch another backbone.
 
 No merges without explicit authority.
