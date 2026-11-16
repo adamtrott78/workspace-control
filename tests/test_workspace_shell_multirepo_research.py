@@ -86,6 +86,8 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertTrue(resolved["write_scratch"])
         self.assertEqual(resolved["argv"][:3], ["-m", "pytest", "-q"])
         self.assertEqual(self.manifest["profiles"]["candidate-pytest"]["network"], "deny")
+        self.assertEqual(resolved["env"]["PYTHONPATH"], "/workspace")
+        self.assertIn("/usr/lib/x86_64-linux-gnu/blas", resolved["env"]["LD_LIBRARY_PATH"])
 
     def test_research_profile_is_sandbox_copy_only(self):
         resolved = job_launcher.resolve_profile(
