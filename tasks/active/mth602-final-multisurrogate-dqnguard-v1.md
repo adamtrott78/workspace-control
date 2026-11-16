@@ -35,11 +35,20 @@ PA2-PA3:
 
 ## Evaluator candidate
 
-- PADataset PR #26 exact head: 0a4a6d194320ba72bd5b874806aba54d45a6f4f7
+- PADataset PR #26 exact head: d2a0bca789a134d138e8c065973ef3b25644a7c4
 - Base: PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f
 - Current frozen evaluator state: 8 canonical backbones / 16 directed request manifests
+- Post-evaluation pipeline is also staged: provenance-bound result records, strict 20-cell aggregation, 5×5 matrix reporting, optional explicit-baseline deltas, and a bounded evaluator-operation design document.
 - No workflow-authority file changes
 - No merge authority
+
+## Known-only diagnostic
+
+The two weaker completed PA2/* backbones are not broad collapses; their errors are dominated by the recurring PA4→PA1 boundary:
+- PA2-PA8 backbone: PA4→PA1 = 661.
+- PA2-PA3 backbone: PA4→PA1 = 1017.
+
+This strengthens the already separate STFT diagnostic rationale without changing Track-A training or using target evidence.
 
 ## Workspace Shell gate
 
