@@ -6,7 +6,7 @@
   "goal": "Extend the live Workspace Shell v1 lineage with first-class PADataset access and a permanent candidate-evidence path that can validate exact candidate SHAs without promoting them to durable task authority, while preserving credential isolation, private-repository support, rollback, and exact-SHA authoritative execution.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-shell-mcp-v1",
-  "current_stage": "live_upgrade",
+  "current_stage": "live_candidate_acceptance",
   "acceptance_criteria": [
     "PADataset is an explicit Workspace Shell target authorized only by an IN_PROGRESS durable task capsule with an exact repository checkpoint SHA.",
     "Read-only PADataset evidence inspection supports bounded recursive file listing, bounded byte reads, SHA-256 hashing, and existing hardened Git inspection without arbitrary shell execution.",
@@ -121,7 +121,7 @@
     },
     {
       "id": "live_upgrade",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "operator+chatgpt",
       "selected_executor": "operator",
       "selected_surface": "lambda+workspace-shell",
@@ -135,8 +135,19 @@
         "live candidate-evidence acceptance receipt",
         "refreshed existing ChatGPT Workspace Shell plugin release"
       ],
-      "validation": [],
-      "resume_condition": "Repository implementation is validated. Live upgrade must install the fifth candidate-materializer service, refresh independent trusted authority and execution snapshots without regressing MTH602 state, prove candidate-pytest on an exact non-checkpoint SHA, then refresh the existing Workspace Shell plugin through Plugin Creator."
+      "validation": [
+        {
+          "check": "Transactional live Workspace Shell upgrade",
+          "result": "PASS",
+          "evidence": [
+            "Operator upgrade completed with WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS and WORKSPACE_SHELL_UPGRADE=COMPLETE.",
+            "Live snapshots: authority b5a03299219257032debba105cf6e955bbe659ac; workspace-control execution 5401045341090a26a42ce3a497c379f8223a3b54; PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
+            "Live workspace-shell-candidate-materializer.service is loaded / active / running as root.",
+            "Original authoritative task-bound SHA mismatch behavior remains fail-closed."
+          ]
+        }
+      ],
+      "resume_condition": null
     },
     {
       "id": "stage00_handoff",
@@ -291,18 +302,6 @@
       ]
     },
     {
-      "check": "Live candidate-pytest/materializer acceptance",
-      "result": "NOT_RUN",
-      "evidence": []
-    },
-    {
-      "check": "Plugin Creator Workspace Shell release refresh",
-      "result": "NOT_RUN",
-      "evidence": [
-        "Existing private personal Workspace Shell plugin identified as plugin_asdk_app_6ae80eae88c081919d9d4fd0d43524ba; it must be updated in place only after the live MCP backend exposes candidate-pytest."
-      ]
-    },
-    {
       "check": "Live PADataset exact-SHA inspection",
       "result": "NOT_RUN",
       "evidence": []
@@ -329,21 +328,45 @@
         "workspace_shell_exec target enum contains workspace-control and PADataset.",
         "workspace_shell_exec profile enum contains git-read, pytest-bounded, validation-bounded, file-list, file-read, file-hash, research-bounded."
       ]
+    },
+    {
+      "check": "Live candidate materializer service",
+      "result": "PASS",
+      "evidence": [
+        "workspace-shell-candidate-materializer.service LoadState=loaded, ActiveState=active, SubState=running, User=root, Group=root.",
+        "Runtime inventory still reports HTTPS_MTLS_REQUIRED and root-owned launcher/broker sockets."
+      ]
+    },
+    {
+      "check": "Plugin Creator Workspace Shell release refresh",
+      "result": "PASS",
+      "evidence": [
+        "Existing private personal plugin plugin_asdk_app_6ae80eae88c081919d9d4fd0d43524ba refreshed in place.",
+        "Current release pluginrel_6afa5f53a31481919a951d996a362865, version 1.0.1.",
+        "No duplicate Workspace Shell plugin was created."
+      ]
+    },
+    {
+      "check": "Positive off-checkpoint candidate-pytest acceptance",
+      "result": "NOT_RUN",
+      "evidence": [
+        "This conversation still exposes the pre-refresh cached workspace_shell_exec enum and therefore cannot submit candidate-pytest client-side.",
+        "A fresh conversation/tool-schema load is required to prove the new positive path."
+      ]
     }
   ],
   "blockers": [
-    "The live Workspace Shell runtime does not yet include candidate-pytest or workspace-shell-candidate-materializer.service; the validated rollback-capable host upgrade must be applied.",
-    "The existing Workspace Shell ChatGPT plugin must be refreshed through Plugin Creator after backend live acceptance so the model-visible schema discovers candidate-pytest."
+    "Positive candidate-pytest acceptance must be run from a fresh conversation/tool schema; this already-open conversation still exposes the old profile enum."
   ],
   "remaining_work": [
-    "Deploy the validated host upgrade using authority-state head produced by this checkpoint, execution candidate 5401045341090a26a42ce3a497c379f8223a3b54, and PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
-    "Verify all five Workspace Shell services active and candidate-pytest visible.",
-    "Run an off-checkpoint candidate-pytest receipt and prove ordinary task-bound mismatch remains denied.",
-    "Refresh the existing Workspace Shell plugin in place through Plugin Creator.",
-    "Resume STFT from persistent exact-SHA checkout; completed cache files remain reusable."
+    "In a fresh conversation, confirm workspace_shell_exec exposes candidate-pytest.",
+    "Run candidate-pytest against PADataset Architecture-B PR #23 exact SHA 4f27d00cce9ab15120d924963a5ecf049d032c52 while durable PADataset authority remains befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
+    "Verify the candidate receipt binds durable task checkpoint + candidate SHA/tree and does not mutate authoritative task state.",
+    "Verify ordinary task-bound execution still rejects the same off-checkpoint SHA.",
+    "Then hand execution back to mth602-final-multisurrogate-dqnguard-v1."
   ],
-  "next_safe_action": "Apply the transactional Workspace Shell upgrade from the authority-state head produced by this checkpoint using execution candidate 5401045341090a26a42ce3a497c379f8223a3b54 and PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f; then live-test candidate-pytest, refresh the existing Workspace Shell plugin through Plugin Creator, and resume STFT from persistent checkout.",
-  "last_executor": "chatgpt",
-  "last_surface": "github+workspace-shell",
-  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385.\n\n2026-11-16 permanent candidate-evidence correction: repeated TASK_SHA_MISMATCH failures were traced to a policy/transport conflation. Candidate validation is now modeled as evidence-only execution on an exact task-scoped repository SHA, while authoritative execution and privileged helpers retain exact durable task-SHA binding. The hostile worker and job launcher remain network-dead. A separate fifth materializer service supports public HTTPS and private read-only SSH deploy keys without exposing credentials through MCP or receipts. Execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 passed current-lineage Lambda validation run 43783063540 SUCCESS.\n\n2026-11-16 final live-upgrade hardening: execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad adds transactional backup/restore of /etc/workspace-shell/frontend.json and updates its inspectable-unit allowlist for workspace-shell-candidate-materializer.service while preserving owner/group/mode. Exact-head Lambda validation run 43783505917 completed SUCCESS.\n\n2026-11-16 retryable materialization correction: first operator live-upgrade attempt failed before service mutation on gnutls_handshake while cloning PADataset. Candidate 296d2591b83d86da898940ccc6f6cc5cbcc45374 replaces that full clone with bounded exact-SHA shallow fetch retries over HTTP/1.1; exact-head validation run 43784660953 completed SUCCESS. Live inspection after the failed attempt confirmed the original four services remained active and unchanged.\n\n2026-11-16 shallow-authority correction: execution candidate 5401045341090a26a42ce3a497c379f8223a3b54 replaces local-clone execution materialization with independent exact-SHA remote fetch for workspace-control. Lambda validation run 43785491090 completed SUCCESS."
+  "next_safe_action": "From a fresh conversation with Workspace Shell plugin v1.0.1 schema loaded, run candidate-pytest on PADataset PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52 under task mth602-final-multisurrogate-dqnguard-v1; verify evidence-only receipt plus unchanged durable authority, then resume the MTH602 task.",
+  "last_executor": "chatgpt+operator",
+  "last_surface": "github+lambda+workspace-shell+plugin-creator",
+  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385.\n\n2026-11-16 permanent candidate-evidence correction: repeated TASK_SHA_MISMATCH failures were traced to a policy/transport conflation. Candidate validation is now modeled as evidence-only execution on an exact task-scoped repository SHA, while authoritative execution and privileged helpers retain exact durable task-SHA binding. The hostile worker and job launcher remain network-dead. A separate fifth materializer service supports public HTTPS and private read-only SSH deploy keys without exposing credentials through MCP or receipts. Execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 passed current-lineage Lambda validation run 43783063540 SUCCESS.\n\n2026-11-16 final live-upgrade hardening: execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad adds transactional backup/restore of /etc/workspace-shell/frontend.json and updates its inspectable-unit allowlist for workspace-shell-candidate-materializer.service while preserving owner/group/mode. Exact-head Lambda validation run 43783505917 completed SUCCESS.\n\n2026-11-16 retryable materialization correction: first operator live-upgrade attempt failed before service mutation on gnutls_handshake while cloning PADataset. Candidate 296d2591b83d86da898940ccc6f6cc5cbcc45374 replaces that full clone with bounded exact-SHA shallow fetch retries over HTTP/1.1; exact-head validation run 43784660953 completed SUCCESS. Live inspection after the failed attempt confirmed the original four services remained active and unchanged.\n\n2026-11-16 shallow-authority correction: execution candidate 5401045341090a26a42ce3a497c379f8223a3b54 replaces local-clone execution materialization with independent exact-SHA remote fetch for workspace-control. Lambda validation run 43785491090 completed SUCCESS.\n\n2026-11-16 live closure: transactional upgrade completed PASS. Fifth candidate-materializer service is live/active/running. Workspace Shell private plugin was refreshed in place to v1.0.1 (release pluginrel_6afa5f53a31481919a951d996a362865). Remaining acceptance is only a positive candidate-pytest from a fresh tool-schema load; the current chat remains client-side cached to the old enum."
 }

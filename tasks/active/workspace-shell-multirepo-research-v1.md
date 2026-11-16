@@ -36,20 +36,19 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-Apply the transactional Workspace Shell upgrade from the authority-state head produced by this checkpoint using execution candidate 5401045341090a26a42ce3a497c379f8223a3b54 and PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f; then live-test candidate-pytest, refresh the existing Workspace Shell plugin through Plugin Creator, and resume STFT from persistent checkout.
+From a fresh conversation with Workspace Shell plugin v1.0.1 schema loaded, run candidate-pytest on PADataset PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52 under task mth602-final-multisurrogate-dqnguard-v1; verify evidence-only receipt plus unchanged durable authority, then resume the MTH602 task.
 
 ## Remaining work
 
-- Deploy the validated host upgrade using authority-state head produced by this checkpoint, execution candidate 5401045341090a26a42ce3a497c379f8223a3b54, and PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.
-- Verify all five Workspace Shell services active and candidate-pytest visible.
-- Run an off-checkpoint candidate-pytest receipt and prove ordinary task-bound mismatch remains denied.
-- Refresh the existing Workspace Shell plugin in place through Plugin Creator.
-- Resume STFT from persistent exact-SHA checkout; completed cache files remain reusable.
+- In a fresh conversation, confirm workspace_shell_exec exposes candidate-pytest.
+- Run candidate-pytest against PADataset Architecture-B PR #23 exact SHA 4f27d00cce9ab15120d924963a5ecf049d032c52 while durable PADataset authority remains befe383fd67c8bca8d8ce370344b33c7e13cd52f.
+- Verify the candidate receipt binds durable task checkpoint + candidate SHA/tree and does not mutate authoritative task state.
+- Verify ordinary task-bound execution still rejects the same off-checkpoint SHA.
+- Then hand execution back to mth602-final-multisurrogate-dqnguard-v1.
 
 ## Blockers / gates
 
-- The live Workspace Shell runtime does not yet include candidate-pytest or workspace-shell-candidate-materializer.service; the validated rollback-capable host upgrade must be applied.
-- The existing Workspace Shell ChatGPT plugin must be refreshed through Plugin Creator after backend live acceptance so the model-visible schema discovers candidate-pytest.
+- Positive candidate-pytest acceptance must be run from a fresh conversation/tool schema; this already-open conversation still exposes the old profile enum.
 
 ## Fresh-chat initialization
 
