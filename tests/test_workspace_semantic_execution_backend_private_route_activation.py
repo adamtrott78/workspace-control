@@ -8,6 +8,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "benchmarks/workspace-semantic-execution/private_route_fake_worker_activation_v1.sh"
+REVIEW = ROOT / "architecture/workspace-semantic-execution-private-route-host-review.v0.1.json"
 
 
 class PrivateRouteActivationTests(unittest.TestCase):
@@ -48,6 +49,31 @@ class PrivateRouteActivationTests(unittest.TestCase):
         self.assertIn('--base-url "$BASE_URL"', text)
         self.assertIn('--serve-port "$BACKEND_PORT"', text)
         self.assertIn('PRIVATE_ROUTE_FAKE_WORKER_ACCEPTANCE=PASS', text)
+
+    def test_host_review_binds_route_without_persisting_private_values(self) -> None:
+        review = json.loads(REVIEW.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(review["authority_gate"]["live_activation_authorized"])
+        self.assertEqual(
+            review["host_bindings"]["reviewed_private_base_url"],
+            "https://gokhan-lambda-vector.tailca6171.ts.net",
+        )
+        login = review["host_bindings"]["expected_tailscale_login_value"]
+        self.assertEqual(login["persistence"], "RUNTIME_ONLY_NOT_COMMITTED_NOT_LOGGED")
+        dsn = review["host_bindings"]["postgres_dsn_value"]
+        self.assertEqual(dsn["persistence"], "RUNTIME_ONLY_NOT_COMMITTED_NOT_LOGGED")
+        self.assertFalse(dsn["host_tcp_listener"])
+        self.assertEqual(dsn["auth_host"], "reject")
+        self.assertFalse(dsn["production_database_touched"])
+        mechanism = review["host_bindings"]["exact_authorized_activation_mechanism"]
+        self.assertTrue(mechanism["requires_explicit_operator_approval_of_exact_candidate"])
+        self.assertEqual(
+            mechanism["candidate_commit"],
+            "8116662727003e9fe0904fa88ff7836608aeac00",
+        )
+        serialized = REVIEW.read_text(encoding="utf-8")
+        self.assertNotIn("adamtrott78@gmail.com", serialized)
+        self.assertNotIn("OPENAI_API_KEY", serialized)
 
 
 if __name__ == "__main__":
