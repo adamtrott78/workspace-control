@@ -358,6 +358,16 @@ export function resolveProfile(profile, argv) {
         },
       };
     case "pytest-bounded":
+      validatePytest(argv);
+      return {
+        executable: "/usr/bin/python3",
+        argv: ["-m", "pytest", ...argv],
+        writeScratch: true,
+        env: {
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1",
+          PYTHONDONTWRITEBYTECODE: "1",
+        },
+      };
     case "candidate-pytest":
       validatePytest(argv);
       return {
@@ -367,6 +377,13 @@ export function resolveProfile(profile, argv) {
         env: {
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: "1",
           PYTHONDONTWRITEBYTECODE: "1",
+          PYTHONPATH: "/workspace",
+          LD_LIBRARY_PATH: [
+            "/usr/lib/x86_64-linux-gnu/blas",
+            "/usr/lib/x86_64-linux-gnu/lapack",
+            "/usr/lib/x86_64-linux-gnu",
+            "/lib/x86_64-linux-gnu",
+          ].join(":"),
         },
       };
     case "validation-bounded":
