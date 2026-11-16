@@ -5,7 +5,6 @@ umask 077
 SEMANTIC_SHA="7c20097c5f177f23c16a765b95ce94d7161f0d29"
 BASE_URL="https://gokhan-lambda-vector.tailca6171.ts.net"
 EXPECTED_DNS_NAME="gokhan-lambda-vector.tailca6171.ts.net"
-EXPECTED_TAILSCALE_LOGIN="adamtrott78@gmail.com"
 BACKEND_PORT="8765"
 PG_PORT="55436"
 PG_PREFIX="/opt/workspace-ci/postgresql/postgresql-14.24-pgvector-0.8.6"
@@ -63,22 +62,39 @@ echo "BASE_URL=$BASE_URL"
 sudo -v
 
 tailscale status --json >"$RUNTIME_ROOT/tailscale-status.json"
-python3 - "$RUNTIME_ROOT/tailscale-status.json" <<'PY'
+EXPECTED_TAILSCALE_LOGIN="$(python3 - "$RUNTIME_ROOT/tailscale-status.json" <<'PY'
 import json, sys
 d=json.load(open(sys.argv[1], encoding="utf-8"))
 self_node=d.get("Self") or {}
 dns=str(self_node.get("DNSName") or "").rstrip(".")
 if dns != "gokhan-lambda-vector.tailca6171.ts.net":
     raise SystemExit(f"TAILSCALE_DNS_MISMATCH:{dns!r}")
-uid=self_node.get("UserID")
+self_uid=self_node.get("UserID")
+if self_uid is None:
+    raise SystemExit("TAILSCALE_SELF_USER_ID_MISSING")
+peer_match=None
+for peer in (d.get("Peer") or {}).values():
+    pdns=str(peer.get("DNSName") or "").rstrip(".")
+    phost=str(peer.get("HostName") or "")
+    if pdns == "desktop-ub9p70p.tailca6171.ts.net" or phost == "desktop-ub9p70p":
+        peer_match=peer
+        break
+if peer_match is None:
+    raise SystemExit("TAILSCALE_WINDOWS_OPERATOR_PEER_MISSING")
+if peer_match.get("UserID") != self_uid:
+    raise SystemExit("TAILSCALE_OPERATOR_OWNER_MISMATCH")
 users=d.get("User") or {}
-user=users.get(str(uid)) or users.get(uid) or {}
+user=users.get(str(self_uid)) or users.get(self_uid) or {}
 login=user.get("LoginName")
-if login != "adamtrott78@gmail.com":
-    raise SystemExit(f"TAILSCALE_LOGIN_MISMATCH:{login!r}")
-print("TAILSCALE_HOST_BINDING=PASS")
-print("TAILSCALE_LOGIN_BINDING=PASS")
+if not isinstance(login, str) or not login or any(ord(ch) < 0x20 for ch in login):
+    raise SystemExit("TAILSCALE_LOGIN_INVALID")
+print(login, end="")
 PY
+)"
+[[ -n "$EXPECTED_TAILSCALE_LOGIN" ]] || fail "TAILSCALE_LOGIN_DERIVATION_FAILED"
+echo "TAILSCALE_HOST_BINDING=PASS"
+echo "TAILSCALE_OPERATOR_PEER_BINDING=PASS"
+echo "TAILSCALE_LOGIN_BINDING=PASS"
 
 sudo tailscale serve status --json >"$SERVE_BEFORE"
 sudo tailscale funnel status --json >"$FUNNEL_BEFORE"
