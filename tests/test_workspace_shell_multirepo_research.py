@@ -1,5 +1,6 @@
 import importlib
 import json
+import os
 import re
 import stat
 from pathlib import Path
@@ -220,7 +221,20 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
                     return ""
                 return ""
 
-            with mock.patch.object(candidate_materializer, "run_git", side_effect=fake_git):
+            real_lstat = os.lstat
+
+            def root_owned_store_lstat(path):
+                observed = real_lstat(path)
+                if Path(path) == store:
+                    values = list(observed)
+                    values[4] = 0
+                    return os.stat_result(values)
+                return observed
+
+            with (
+                mock.patch.object(candidate_materializer, "run_git", side_effect=fake_git),
+                mock.patch.object(candidate_materializer.os, "lstat", side_effect=root_owned_store_lstat),
+            ):
                 result = candidate_materializer.materialize(cfg, "workspace-control", sha)
 
             target_root = store / "workspace-control"
@@ -233,7 +247,10 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
 
             # Cache hits must repair a stale root-only final checkout.
             final.chmod(0o700)
-            with mock.patch.object(candidate_materializer, "run_git", side_effect=fake_git):
+            with (
+                mock.patch.object(candidate_materializer, "run_git", side_effect=fake_git),
+                mock.patch.object(candidate_materializer.os, "lstat", side_effect=root_owned_store_lstat),
+            ):
                 cached = candidate_materializer.materialize(cfg, "workspace-control", sha)
             self.assertTrue(cached["cache_hit"])
             self.assertEqual(stat.S_IMODE(final.stat().st_mode), 0o755)
