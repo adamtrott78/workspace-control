@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: 79e8940589d0ac448d40fd2a1560a4e59e817c73
+- Remote checkpoint: df24022f897643282b4ce16aa727fa2dd646f859
 - Remote verified: true
 
 ### PADataset
@@ -36,21 +36,21 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-After this control-cycle state validates, retry the transactional root activation using the exact authority-state commit produced here and runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 (#2934 SUCCESS), with the frozen PADataset/semantic tuple. The semantic git-read request now obeys its unchanged 30000 ms ceiling. Require LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure.
+After this control-cycle state validates, retry the transactional root activation using the exact authority-state commit produced here and runtime df24022f897643282b4ce16aa727fa2dd646f859 (#2939 SUCCESS), with PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. The exact-source materializer now binds source contents to the hostile worker group without world-readable repo contents and rematerializes stale root-private caches. Require LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure.
 
 ## Remaining work
 
-- Retry transactional root activation from the new exact authority-state commit using runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.
-- Require all semantic/evaluator receipt and isolation markers plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS; rollback on any failure.
-- After PASS, independently verify live runtime and semantic execution, record evaluator-isolation acceptance, sync umbrella state, then derive and run the reviewed private fake-worker route.
+- Retry transactional root activation from the exact authority-state commit produced by this control cycle using runtime df24022f897643282b4ce16aa727fa2dd646f859 and the unchanged PADataset/semantic tuple.
+- Require semantic/evaluator receipt and isolation PASS plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS; rollback on any failure.
+- After PASS, independently verify live Workspace Shell runtime and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29, record evaluator-isolation acceptance, sync umbrella state, then derive and run the reviewed account-free fake-worker route.
 
 ## Blockers / gates
 
-- Runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 is repository-validated but not live. The seventh activation remains rolled back.
-- The seventh retry produced a definitive semantic rejection: TIMEOUT_DENIED because the caller requested 50000 ms for git-read while the frozen profile ceiling is 30000 ms.
-- Runtime 79e89405… corrects the caller to 30000 ms and does not change the frozen policy ceiling or any execution authority.
-- Live activation remains an operator/root gate. Full success still requires semantic receipt PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
-- After activation succeeds, independently verify live runtime and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29 before the frozen fake-worker route.
+- Runtime df24022f897643282b4ce16aa727fa2dd646f859 is repository-validated but not live. The eighth activation remains rolled back.
+- The eighth retry passed authorization and all SHA/source-mode checks but sandboxed git-read exited 128. Exact stderr content was not recovered.
+- Repository source inspection demonstrated that root materialization under UMask=0077 previously left nested Git metadata potentially root-private to the hostile worker. Runtime df24022f… repairs worker readability at the materialization substrate while keeping repo contents non-world-readable.
+- Live activation remains an operator/root gate. Full success still requires LOCAL_SEMANTIC_TASK_RECEIPT=PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.
+- After activation succeeds, independently verify live runtime and frozen semantic execution before any fake-worker transport execution.
 
 ## Fresh-chat initialization
 
