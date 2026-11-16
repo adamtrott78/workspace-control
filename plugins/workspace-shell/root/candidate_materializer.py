@@ -135,6 +135,12 @@ def materialize(cfg, target, sha):
     }.get(target)
     if source.get("repository") != expected_repo:
         fail("SOURCE_CONFIG_INVALID", "repository identity mismatch")
+    expected_urls = {
+        "public_https": f"https://github.com/{expected_repo}.git",
+        "ssh_deploy_key": f"git@github.com:{expected_repo}.git",
+    }
+    if source.get("url") != expected_urls.get(source.get("transport")):
+        fail("SOURCE_CONFIG_INVALID", "candidate source URL does not exactly match task-scoped repository")
 
     store = Path(cfg["candidate_store_root"]).resolve()
     st = os.lstat(store)
