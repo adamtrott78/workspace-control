@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: cd009257e08b2bd9f3ac241657895d3ba58c5979
+- Remote checkpoint: ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe
 - Remote verified: true
 
 ### PADataset
@@ -36,7 +36,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-APPLY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authority-state head produced by this checkpoint using workspace-control runtime candidate cd009257e08b2bd9f3ac241657895d3ba58c5979, PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 2cec87fbf5c054b632e5ddc7e057384e4228c48a, and semantic execution binding 9b02005a58a961ce83ef8790e2d59ec626802591. The upgrader must preserve rollback, import only the fixed semantic task capsule, prove its capsule binding, and run a live workspace_shell_exec git-read returning exactly 9b02005a58a961ce83ef8790e2d59ec626802591. Do not add trusted issuers/helpers or rebind the semantic task.
+RETRY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authority-state head produced by this checkpoint using workspace-control runtime candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe, PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 2cec87fbf5c054b632e5ddc7e057384e4228c48a, and semantic execution binding 9b02005a58a961ce83ef8790e2d59ec626802591. The prior activation safely rolled back because its local MCP parser incorrectly expected nested stdout that the declared MCP output schema does not guarantee. The corrected upgrader proves semantic execution using MCP success plus the root-owned execution receipt: exact task_id, expected/observed Git SHA, task checkpoint SHA, source_mode=task, exit 0 and privileged=false. Do not rebind the semantic task or widen helper/issuer trust.
 
 ## Remaining work
 
@@ -48,8 +48,8 @@ APPLY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authori
 
 ## Blockers / gates
 
-- The semantic-enrollment runtime candidate is repository-validated, but live host activation still requires the transactional root-owned Workspace Shell upgrader. Privileged helper registry and trusted issuer registry are intentionally empty, so ChatGPT cannot perform that sudo/root activation through Workspace Shell.
-- After host activation, live acceptance must prove workspace-semantic-execution-migration-v1 resolves and git-read observes exact bound workspace-control HEAD 9b02005a58a961ce83ef8790e2d59ec626802591; do not proceed on capsule-resolution alone.
+- Live semantic authority is not yet activated because the first enrollment attempt safely rolled back after a false-negative acceptance check. Corrected receipt-based acceptance candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe passed Workspace Control Validation #2896.
+- Host activation remains a genuine root/operator step because privileged helper and trusted issuer registries intentionally remain empty. After retry success, ChatGPT must independently confirm workspace-semantic-execution-migration-v1 resolves at exact bound SHA 9b02005a58a961ce83ef8790e2d59ec626802591.
 
 ## Fresh-chat initialization
 
