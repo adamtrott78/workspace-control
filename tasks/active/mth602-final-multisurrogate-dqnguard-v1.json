@@ -608,10 +608,33 @@
         "Workspace-control chained refresh-v2 candidate ebff264b5ee5240ee87f8e5860dafecd7b13f005 preserves v1 receipt and advances only lane-B trusted workflow from 5f29137d... to 8da00f39....",
         "Refresh-v2 candidate receipt job-3f93de6f-2b83-4ae7-a911-51d1d6505da4: 26 passed."
       ]
+    },
+    {
+      "check": "Second GPU2 evaluator acceptance run",
+      "result": "CONTROL_PLANE_PASS_SHELL_PARSE_BUG",
+      "evidence": [
+        "Run 43969575701 / job 133657867208 admitted successfully to GPU2 after refresh v2.",
+        "Verify exact PR head, prove bounded runner, checkout exact candidate, and validate bounded scientific request all passed.",
+        "Execution failed before evaluator science at Bash parse time: unexpected EOF while looking for matching ')' around nested process substitution/heredoc.",
+        "No evaluator result was produced; tiny artifact 14276199017 contains only pre-execution runtime evidence.",
+        "Root cause fixed in PADataset PR #30 by replacing nested heredoc with python3 -c argument extraction and adding bash -n regression coverage."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v3 candidate",
+      "result": "PASS_CANDIDATE_NOT_EXECUTED",
+      "evidence": [
+        "PADataset PR #30 merged to main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6.",
+        "Corrected GPU2 workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3.",
+        "Workflow candidate receipt job-1bf22e23-4965-499e-8482-c517e5c8c560: 7 passed, including bash -n over the actual execution block.",
+        "Workspace-control refresh-v3 candidate 9ea2444d54d97c0e2a740c660589e6675e1c207d chains over refresh-v2, preserves prior receipts, advances only lane-B workflow trust, and rolls back to v2 on failure.",
+        "Refresh-v3 candidate receipt job-bea40700-793d-4e55-b15d-5d0d812319fc: 32 passed.",
+        "Post-failure GitHub sweep found zero active GPU2-labeled jobs."
+      ]
     }
   ],
   "blockers": [
-    "Corrected GPU2 trusted workflow is merged and validated, but live lane-B trust still points to prior blob 5f29137d9636ed170d3735d0f273220e7cf6f377. Chained refresh-v2 candidate ebff264b5ee5240ee87f8e5860dafecd7b13f005 is validated (26 passed) and must be executed under sudo because no reviewed privileged Workspace Shell helper exists.",
+    "GPU2 evaluator workflow shell syntax has been corrected and validated, but live lane-B trust still points to workflow blob 8da00f39284745cf6c9032620d63574052cd6d61. Chained refresh-v3 candidate 9ea2444d54d97c0e2a740c660589e6675e1c207d is validated (32 passed) and requires root/operator execution because no reviewed privileged Workspace Shell helper exists.",
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
@@ -622,7 +645,7 @@
     "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "Operator executes chained lane-B workflow refresh v2 candidate ebff264b5ee5240ee87f8e5860dafecd7b13f005 under sudo, with fresh zero-work GitHub preflight, binding predecessor v1 refresh receipt, old blob 5f29137d9636ed170d3735d0f273220e7cf6f377, corrected blob 8da00f39284745cf6c9032620d63574052cd6d61, and PADataset main 9889a981e34de81e58f3263630f0cba54a8e9e06. On PASS, trigger one frozen PR #26 request at head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 via /lambda-scientific-2 and inspect full result before scheduling remaining cells.",
+  "next_safe_action": "Operator executes chained lane-B workflow refresh v3 candidate 9ea2444d54d97c0e2a740c660589e6675e1c207d under sudo, with fresh zero-work preflight binding predecessor refresh-v2 receipt, old blob 8da00f39284745cf6c9032620d63574052cd6d61, corrected blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3, and PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6. On PASS, re-run exactly one frozen PA1->PA2 evaluator cell at PR #26 head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 and inspect complete result before scheduling remaining cells.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
   "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred. Workspace Shell stale-authority gate was cleared successfully on 2026-11-16 via authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e; post-refresh receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 proves task-bound execution at pinned PADataset authority. Remaining schema blocker is chat-local only. Workspace Shell Refresh Tools exposed candidate-pytest. PR #26 contract suite passed authoritatively (35 tests), and separate GPU2 evaluator workflow candidate PR #27 passed its authority-surface tests (3 tests). The next blocker is explicit activation/merge authority for PR #27."
