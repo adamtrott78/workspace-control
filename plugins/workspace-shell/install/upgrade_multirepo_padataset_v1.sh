@@ -148,9 +148,13 @@ cleanup_tmp() {
 trap cleanup_tmp EXIT
 
 echo "Materializing clean workspace-control execution source at exact SHA $EXPECTED_EXEC_SHA"
-git clone --no-checkout "$ROOT" "$WC_FETCH"
-git -C "$WC_FETCH" checkout --detach "$EXPECTED_EXEC_SHA"
-git -C "$WC_FETCH" remote remove origin >/dev/null 2>&1 || true
+rm -rf "$WC_FETCH"
+mkdir -p "$WC_FETCH"
+git -C "$WC_FETCH" init --quiet
+git -C "$WC_FETCH" remote add origin "https://github.com/adamtrott78/workspace-control.git"
+git_retry git -C "$WC_FETCH" -c http.version=HTTP/1.1 fetch --quiet --depth=1 --no-tags origin "$EXPECTED_EXEC_SHA" \
+  || fail "unable to fetch exact workspace-control execution SHA after bounded retries"
+git -C "$WC_FETCH" -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD
 [[ "$(git -C "$WC_FETCH" rev-parse HEAD)" == "$EXPECTED_EXEC_SHA" ]] || fail "workspace-control execution checkout SHA mismatch"
 [[ -z "$(git -C "$WC_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] || fail "workspace-control execution checkout unexpectedly dirty"
 
