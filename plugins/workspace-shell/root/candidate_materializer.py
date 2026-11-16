@@ -117,12 +117,10 @@ def harden_tree(root):
                 if stat.S_ISSOCK(st.st_mode) or stat.S_ISFIFO(st.st_mode) or stat.S_ISCHR(st.st_mode) or stat.S_ISBLK(st.st_mode):
                     fail("SOURCE_SPECIAL_FILE_DENIED", f"special file in candidate: {p}")
                 os.chmod(p, st.st_mode & ~0o022, follow_symlinks=False)
-                os.chown(p, 0, 0, follow_symlinks=False)
             except (FileNotFoundError, NotImplementedError):
                 pass
     st = os.lstat(root)
     os.chmod(root, st.st_mode & ~0o022)
-    os.chown(root, 0, 0)
 
 
 def materialize(cfg, target, sha):
@@ -144,7 +142,6 @@ def materialize(cfg, target, sha):
         fail("STORE_INVALID", "candidate store ownership/mode invalid")
     target_root = store / target
     target_root.mkdir(mode=0o700, exist_ok=True)
-    os.chown(target_root, 0, 0)
     os.chmod(target_root, 0o700)
 
     final = target_root / sha
