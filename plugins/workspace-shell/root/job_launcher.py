@@ -350,6 +350,8 @@ def _candidate_git_env(source):
             st = os.lstat(p)
             if st.st_uid != 0 or st.st_mode & 0o022:
                 fail("CANDIDATE_SOURCE_CREDENTIAL_INVALID", f"{field} ownership/mode invalid")
+            if field == "key_path" and st.st_mode & 0o077:
+                fail("CANDIDATE_SOURCE_CREDENTIAL_INVALID", "deploy key must be root-private")
         env["GIT_SSH_COMMAND"] = " ".join([
             "/usr/bin/ssh",
             "-i", shlex.quote(str(key_path)),
@@ -778,6 +780,10 @@ def run_request(cfg, manifest, request, cancel_check=None):
     if source_mode not in ("task", "candidate"):
         fail("SOURCE_MODE_DENIED", "source_mode must be task or candidate")
     task_checkpoint_sha = request.get("task_checkpoint_sha")
+    if source_mode == "task" and task_checkpoint_sha is None:
+        # Rolling-upgrade compatibility: an old frontend can only request the
+        # exact task-bound source, so expected_sha is the task checkpoint.
+        task_checkpoint_sha = expected_sha
     if not isinstance(task_checkpoint_sha, str) or len(task_checkpoint_sha) != 40 or any(c not in "0123456789abcdef" for c in task_checkpoint_sha):
         fail("TASK_CHECKPOINT_SHA_INVALID", "task_checkpoint_sha must be an exact lowercase Git SHA")
 
