@@ -50,13 +50,15 @@ root = Path(sys.argv[1])
 expected_exec = sys.argv[2]
 expected_pad = sys.argv[3]
 
-def load(task_id):
+def load(task_id, allowed_statuses):
     path = root / "tasks" / "active" / f"{task_id}.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("task_id") != task_id:
         raise SystemExit(f"{task_id}: task_id mismatch")
-    if data.get("status") != "IN_PROGRESS":
-        raise SystemExit(f"{task_id}: status must be IN_PROGRESS")
+    if data.get("status") not in allowed_statuses:
+        raise SystemExit(
+            f"{task_id}: status {data.get('status')!r} not in {sorted(allowed_statuses)}"
+        )
     return data
 
 def checkpoint(task, repository):
@@ -67,8 +69,11 @@ def checkpoint(task, repository):
                 return value
     return None
 
-shell = load("workspace-shell-multirepo-research-v1")
-research = load("mth602-final-multisurrogate-dqnguard-v1")
+shell = load("workspace-shell-multirepo-research-v1", {"IN_PROGRESS"})
+research = load(
+    "mth602-final-multisurrogate-dqnguard-v1",
+    {"IN_PROGRESS", "CHECKPOINTED"},
+)
 if checkpoint(shell, "workspace-control") != expected_exec:
     raise SystemExit("workspace-shell task does not bind expected workspace-control execution SHA")
 if checkpoint(shell, "PADataset") != expected_pad:
