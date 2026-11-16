@@ -144,14 +144,19 @@ def materialize(cfg, target, sha):
 
     store = Path(cfg["candidate_store_root"]).resolve()
     st = os.lstat(store)
-    if not store.is_dir() or st.st_uid != 0 or st.st_mode & 0o022:
-        fail("STORE_INVALID", "candidate store ownership/mode invalid")
+    if (
+        not store.is_dir()
+        or st.st_uid != 0
+        or stat.S_IMODE(st.st_mode) != 0o711
+    ):
+        fail("STORE_INVALID", "candidate store must be root-owned mode 0711")
     target_root = store / target
-    target_root.mkdir(mode=0o700, exist_ok=True)
-    os.chmod(target_root, 0o700)
+    target_root.mkdir(mode=0o711, exist_ok=True)
+    os.chmod(target_root, 0o711)
 
     final = target_root / sha
     if final.exists():
+        os.chmod(final, 0o755)
         observed = run_git(["-C", str(final), "rev-parse", "HEAD"], env=git_env(source), timeout=5)
         dirty = run_git(["-C", str(final), "status", "--porcelain=v1", "--untracked-files=normal"], env=git_env(source), timeout=5)
         if observed != sha or dirty:
@@ -179,6 +184,7 @@ def materialize(cfg, target, sha):
         if observed != sha or dirty:
             fail("SOURCE_MISMATCH", "materialized source does not equal requested clean SHA")
         harden_tree(temp)
+        os.chmod(temp, 0o755)
         try:
             temp.rename(final)
         except FileExistsError:

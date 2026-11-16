@@ -495,7 +495,8 @@ sudo install -o root -g root -m 0644 \
   /etc/systemd/system/workspace-shell-candidate-materializer.service
 sudo mkdir -p /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
 sudo chown root:root /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
-sudo chmod 0700 /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
+sudo chmod 0711 /var/lib/workspace-shell/candidates
+sudo chmod 0700 /etc/workspace-shell/candidate-sources
 
 sudo python3 - <<'PY'
 import json
@@ -752,6 +753,8 @@ for path in root.glob("*.json"):
     if float(payload.get("started_at") or 0) + 1 < started:
         continue
     if payload.get("expected_git_sha") != expected:
+        continue
+    if payload.get("argv_profile") != "git-read":
         continue
     matches.append((float(payload.get("started_at") or 0), path, payload))
 

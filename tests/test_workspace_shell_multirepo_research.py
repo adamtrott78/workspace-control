@@ -1,6 +1,7 @@
 import importlib
 import json
 import re
+import stat
 from pathlib import Path
 import subprocess
 import sys
@@ -193,6 +194,73 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertIn('"ssh_deploy_key"', source)
         self.assertIn("StrictHostKeyChecking=yes", source)
         self.assertIn("deploy key must be root-private", source)
+
+
+    def test_materialized_task_source_is_worker_traversable_but_not_listable_by_parent(self):
+        source = {
+            "repository": "adamtrott78/workspace-control",
+            "transport": "public_https",
+            "url": "https://github.com/adamtrott78/workspace-control.git",
+        }
+        sha = "a" * 40
+        with tempfile.TemporaryDirectory() as td:
+            store = Path(td) / "candidates"
+            store.mkdir(mode=0o711)
+            cfg = {
+                "candidate_store_root": str(store),
+                "sources": {"workspace-control": source},
+            }
+
+            def fake_git(args, **_kwargs):
+                if "rev-parse" in args and "HEAD^{tree}" in args:
+                    return "b" * 40
+                if "rev-parse" in args:
+                    return sha
+                if "status" in args:
+                    return ""
+                return ""
+
+            with mock.patch.object(candidate_materializer, "run_git", side_effect=fake_git):
+                result = candidate_materializer.materialize(cfg, "workspace-control", sha)
+
+            target_root = store / "workspace-control"
+            final = Path(result["path"])
+            self.assertEqual(stat.S_IMODE(store.stat().st_mode), 0o711)
+            self.assertEqual(stat.S_IMODE(target_root.stat().st_mode), 0o711)
+            self.assertEqual(stat.S_IMODE(final.stat().st_mode), 0o755)
+            self.assertFalse(target_root.stat().st_mode & 0o022)
+            self.assertFalse(final.stat().st_mode & 0o022)
+
+            # Cache hits must repair a stale root-only final checkout.
+            final.chmod(0o700)
+            with mock.patch.object(candidate_materializer, "run_git", side_effect=fake_git):
+                cached = candidate_materializer.materialize(cfg, "workspace-control", sha)
+            self.assertTrue(cached["cache_hit"])
+            self.assertEqual(stat.S_IMODE(final.stat().st_mode), 0o755)
+
+    def test_candidate_store_install_modes_and_semantic_receipt_profile_filter(self):
+        tmpfiles = (PLUGIN / "install" / "tmpfiles.conf").read_text()
+        upgrade = (PLUGIN / "install" / "upgrade_multirepo_padataset_v1.sh").read_text()
+        self.assertIn(
+            "d /var/lib/workspace-shell/candidates 0711 root root - -",
+            tmpfiles,
+        )
+        self.assertIn(
+            "d /etc/workspace-shell/candidate-sources 0700 root root - -",
+            tmpfiles,
+        )
+        self.assertIn(
+            "sudo chmod 0711 /var/lib/workspace-shell/candidates",
+            upgrade,
+        )
+        self.assertIn(
+            "sudo chmod 0700 /etc/workspace-shell/candidate-sources",
+            upgrade,
+        )
+        self.assertIn(
+            'if payload.get("argv_profile") != "git-read":',
+            upgrade,
+        )
 
     def test_candidate_pytest_is_sandbox_copy_only(self):
         resolved = job_launcher.resolve_profile(
