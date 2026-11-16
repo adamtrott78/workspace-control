@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29. CURRENT CRITICAL PATH: retry the owned Workspace Shell transactional activation using authority 17a73471e812a0cf327224ab2c0beb2248200b6e and runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 (#2934 SUCCESS; authority #2936 SUCCESS), PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. The semantic git-read acceptance request now obeys its unchanged 30000 ms profile ceiling. Require full semantic/evaluator receipt and isolation PASS plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS before any fake-worker execution.
+SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29. CURRENT CRITICAL PATH: retry the owned Workspace Shell transactional activation using authority fbfbdb7706e96cb0d27dc00ed2433b4f280bc807 and runtime df24022f897643282b4ce16aa727fa2dd646f859 (#2939 SUCCESS; authority #2940 SUCCESS), PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29. The exact materialized source is now worker-group readable/traversable without world-readable repo contents, and stale root-private caches are rematerialized. Require full semantic/evaluator receipt and isolation PASS plus WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS before fake-worker execution.
 
 ## Remaining work
 
@@ -84,13 +84,12 @@ SEMANTIC EXECUTION REMAINS FROZEN AT workspace-control@7c20097c5f177f23c16a765b9
 
 ## Blockers / gates
 
-- Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review. The previously unseen workflow/domain extension proof is validated.
-- Workspace Shell root activation remains rollback-safe but not live. The seventh retry exposed a definitive semantic rejection receipt: TIMEOUT_DENIED because activation requested 50000 ms for git-read while the frozen profile ceiling is 30000 ms.
-- Owning Workspace Shell authority state 17a73471e812a0cf327224ab2c0beb2248200b6e freezes runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73, which changes only the semantic acceptance timeout to 30000 ms and adds regression coverage against the frozen manifest ceiling. Runtime #2934 and authority #2936 are SUCCESS.
-- Hidden-ephemeral evaluator generation, commitment verification, strict sealed-store primitive, and bundled live acceptance remain repository-validated. Strong capability claims stay blocked until a fresh root activation proves semantic receipt, evaluator worker-denial receipt, and evaluator isolation on the exact host.
-- Claim-bearing benchmark conclusions still require live evaluator-isolation acceptance plus replicated scoring.
-- GitRunner/controller modernization remains deferred and authority-separated.
-- Claim-bearing Reasoning Economy execution remains gated on reviewed live executor authority, evaluator isolation, and calibrated allowance telemetry.
+- Architecture freeze remains blocked pending the resumable-reasoning effectiveness benchmark and independent architecture review.
+- Workspace Shell root activation remains rollback-safe but not live. The eighth retry passed authorization and every exact SHA/source-mode invariant, but sandboxed semantic git-read exited 128.
+- Exact stderr text was not recovered. Source inspection nevertheless established a structural worker-readability defect sufficient to explain the failure: candidate materialization ran root/Group=root under UMask=0077, so nested Git metadata could remain inaccessible to the hostile worker.
+- Owning Workspace Shell authority state fbfbdb7706e96cb0d27dc00ed2433b4f280bc807 freezes runtime df24022f897643282b4ce16aa727fa2dd646f859. The materializer remains root, but uses primary group workspace-shell-exec, verifies worker_gid, grants only worker-group read/traverse, denies group write and all world access, and rematerializes stale root-private caches. Runtime #2939 and authority #2940 are SUCCESS.
+- Strong evaluator/capability claims remain blocked until fresh root activation proves semantic receipt, evaluator worker-denial receipt, evaluator isolation, and full transactional upgrade on the exact host.
+- GitRunner/controller modernization remains deferred and authority-separated. Reasoning Economy claim-bearing execution remains gated on live executor authority, evaluator isolation, and calibrated allowance telemetry.
 
 ## Fresh-chat initialization
 
