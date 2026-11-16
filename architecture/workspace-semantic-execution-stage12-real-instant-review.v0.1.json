@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-review-v0.1",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Bounded real ChatGPT Instant calibration using the already-validated private Operator Bridge route, managed Firefox bindings, durable session generations, and immutable GitHub worker-result candidates. This artifact does not authorize real-account interaction.",
+  "prerequisites": {
+    "d3_private_route_acceptance": {
+      "accepted_receipt": "architecture/workspace-semantic-execution-private-route-activation-attempt-02.v0.1.json",
+      "accepted_state_commit": "c5ea51a015661c657497140e6c490446c7b48dbf",
+      "result": "PASS"
+    },
+    "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
+    "private_base_url": "https://gokhan-lambda-vector.tailca6171.ts.net",
+    "existing_jupyter_root_proxy": "http://127.0.0.1:8888"
+  },
+  "exact_candidate_bindings": {
+    "source_head": "b282ccdebae222d70454db46fc287fdc4809cd6a",
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v1.sh",
+      "blob_sha": "28248b17bc775ad938c221c240a3c7f3e204e82b"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "initialization_commit": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "calibration_phases": [
+    {
+      "id": "Q1_REAL_INSTANT",
+      "session_generation": 0,
+      "requirement": "One bounded real Instant worker action publishes exactly one immutable candidate JSON through connected GitHub tooling."
+    },
+    {
+      "id": "Q2_PERSISTENT_REUSE",
+      "session_generation": 0,
+      "requirement": "Reuse the same managed conversation. A continuity evidence ref exists only in the preceding conversation turn, not the Q2 packet; exact validated publication proves useful persistent-chat continuity."
+    },
+    {
+      "id": "STALE_GENERATION_FENCE",
+      "session_generation": 0,
+      "requirement": "Recover the process before servicing a planned old-generation action; require OperatorAction STALE, session NEEDS_REPLACEMENT, and rejection of a late old-generation publication without durable mutation."
+    },
+    {
+      "id": "Q3_REPLACEMENT_RECOVERY",
+      "session_generation": 1,
+      "requirement": "Create/use replacement logical session generation 1, complete one bounded candidate publication, and end with all calibration processes COMPLETED and replacement session READY."
+    }
+  ],
+  "human_interaction_boundary": {
+    "normal_chatgpt_authentication": "MANUAL_ONLY",
+    "model_selection": "MANUAL_INSTANT_SELECTION",
+    "worker_service_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "final_windows_cleanup_confirmation": "MANUAL_ENTER",
+    "credential_automation": false,
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "result_relay_by_human": false
+  },
+  "browser_boundary": {
+    "profile": "TEMPORARY_ISOLATED_FIREFOX_PROFILE",
+    "managed_binding_identity": "worker_slot_id + session_generation",
+    "allowed_extension_permissions": [
+      "nativeMessaging",
+      "tabs",
+      "sessions"
+    ],
+    "content_scripts": false,
+    "host_permissions": false,
+    "dom_or_page_content_scraping": false,
+    "arbitrary_tab_adoption": false,
+    "title_routing": false,
+    "browser_permission_widening": false
+  },
+  "result_and_validation_boundary": {
+    "consumer_ui_is_authoritative": false,
+    "result_channel": "IMMUTABLE_GITHUB_CANDIDATE",
+    "candidate_commit_must_advance_branch_by_exactly_one_commit": true,
+    "candidate_commit_must_change_exactly_one_expected_path": true,
+    "result_contract_binds": [
+      "publication_id",
+      "action_id",
+      "action_generation",
+      "process_id",
+      "process_generation",
+      "executor_id",
+      "worker_slot_id",
+      "session_generation",
+      "packet_sha256"
+    ],
+    "independent_validator_required": true
+  },
+  "host_runtime_boundary": {
+    "backend_bind": "127.0.0.1:8765",
+    "tailscale_https_port": 443,
+    "temporary_path": "/operator-bridge/v1",
+    "temporary_proxy": "http://127.0.0.1:8765/operator-bridge/v1",
+    "preserve_existing_root_mapping": true,
+    "exact_preexisting_serve_state_restoration_required": true,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "production_postgres_mutation": false,
+    "temporary_isolated_postgres": true,
+    "gpu_required": false
+  },
+  "prohibited": [
+    "credential automation",
+    "ChatGPT DOM/page-content scraping",
+    "automatic typing or submission",
+    "browser permission widening",
+    "API-key or paid API fallback",
+    "Tailscale Funnel or public listener",
+    "global Tailscale Serve reset/off",
+    "production PostgreSQL mutation",
+    "GPU use",
+    "manual worker-result JSON relay",
+    "accepting stale old-generation results",
+    "treating chat transcript continuity as authority"
+  ],
+  "required_acceptance": [
+    "Q1 exact real-Instant candidate accepted and independently validated",
+    "Q2 same session generation reuses conversation continuity and exact candidate is validated",
+    "old session generation is deterministically fenced and late result cannot mutate current state",
+    "replacement generation 1 completes exact candidate publication and validation",
+    "all calibration processes COMPLETED",
+    "replacement executor session READY",
+    "no queued or awaiting OperatorAction remains",
+    "candidate branch commits touched only exact candidate paths",
+    "preexisting Jupyter Tailscale Serve state restored exactly",
+    "no credential automation, page scraping, automatic typing/submission, browser permission widening, API-key fallback, public exposure, production DB mutation, or GPU use"
+  ],
+  "authority_gate": {
+    "live_real_account_authorized": false,
+    "explicit_operator_approval_required": true,
+    "approval_must_bind_exact_candidate_source_head": "b282ccdebae222d70454db46fc287fdc4809cd6a",
+    "model_reasoning_is_not_authority": true,
+    "fake_worker_authority_does_not_transfer": true
+  },
+  "postcondition": "Repository validation of this review candidate may establish readiness for an operator authority decision only. It cannot itself start Firefox, authenticate ChatGPT, dispatch a real model action, or mutate the live private route."
+}
