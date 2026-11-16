@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: 5401045341090a26a42ce3a497c379f8223a3b54
+- Remote checkpoint: cd009257e08b2bd9f3ac241657895d3ba58c5979
 - Remote verified: true
 
 ### PADataset
@@ -36,7 +36,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-From a fresh conversation with Workspace Shell plugin v1.0.1 schema loaded, run candidate-pytest on PADataset PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52 under task mth602-final-multisurrogate-dqnguard-v1; verify evidence-only receipt plus unchanged durable authority, then resume the MTH602 task.
+APPLY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authority-state head produced by this checkpoint using workspace-control runtime candidate cd009257e08b2bd9f3ac241657895d3ba58c5979, PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 2cec87fbf5c054b632e5ddc7e057384e4228c48a, and semantic execution binding 9b02005a58a961ce83ef8790e2d59ec626802591. The upgrader must preserve rollback, import only the fixed semantic task capsule, prove its capsule binding, and run a live workspace_shell_exec git-read returning exactly 9b02005a58a961ce83ef8790e2d59ec626802591. Do not add trusted issuers/helpers or rebind the semantic task.
 
 ## Remaining work
 
@@ -48,7 +48,8 @@ From a fresh conversation with Workspace Shell plugin v1.0.1 schema loaded, run 
 
 ## Blockers / gates
 
-- Positive candidate-pytest acceptance must be run from a fresh conversation/tool schema; this already-open conversation still exposes the old profile enum.
+- The semantic-enrollment runtime candidate is repository-validated, but live host activation still requires the transactional root-owned Workspace Shell upgrader. Privileged helper registry and trusted issuer registry are intentionally empty, so ChatGPT cannot perform that sudo/root activation through Workspace Shell.
+- After host activation, live acceptance must prove workspace-semantic-execution-migration-v1 resolves and git-read observes exact bound workspace-control HEAD 9b02005a58a961ce83ef8790e2d59ec626802591; do not proceed on capsule-resolution alone.
 
 ## Fresh-chat initialization
 
