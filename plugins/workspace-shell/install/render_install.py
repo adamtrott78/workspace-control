@@ -17,6 +17,7 @@ REPO_ROOT = HERE.parents[2]
 AUTHORITY_ARTIFACT = REPO_ROOT / "architecture" / "workspace-shell-mcp-authority-v2.json"
 
 SERVICE_TEMPLATES = (
+    "workspace-shell-candidate-materializer.service.in",
     "workspace-shell-job-launcher.service.in",
     "workspace-shell-root-broker.service.in",
     "workspace-shell-mcp.service.in",
@@ -24,6 +25,7 @@ SERVICE_TEMPLATES = (
 )
 
 ALLOWED_UNITS = (
+    "workspace-shell-candidate-materializer.service",
     "workspace-shell-job-launcher.service",
     "workspace-shell-root-broker.service",
     "workspace-shell-mcp.service",
@@ -201,8 +203,20 @@ def render(args):
         "profile_manifest": "/etc/workspace-shell/profiles.v1.json",
         "source_roots": {"workspace-control": source_root, "PADataset": padataset_root},
         "evidence_roots": {"PADataset": padataset_evidence_root},
+        "candidate_materializer_socket": control_root + "/candidate-materializer.sock",
         "candidate_store_root": "/var/lib/workspace-shell/candidates",
-        "candidate_sources": {
+        "scratch_root": "/var/lib/workspace-shell/jobs",
+        "receipt_root": receipt_root,
+        "bwrap_path": "/usr/bin/bwrap",
+        "systemd_run_path": "/usr/bin/systemd-run",
+        "systemctl_path": "/usr/bin/systemctl",
+        "policy_version_sha": authority_sha,
+    }
+
+    candidate_materializer = {
+        "socket_path": control_root + "/candidate-materializer.sock",
+        "candidate_store_root": "/var/lib/workspace-shell/candidates",
+        "sources": {
             "workspace-control": {
                 "repository": "adamtrott78/workspace-control",
                 "transport": "public_https",
@@ -214,12 +228,6 @@ def render(args):
                 "url": "https://github.com/adamtrott78/PADataset.git",
             },
         },
-        "scratch_root": "/var/lib/workspace-shell/jobs",
-        "receipt_root": receipt_root,
-        "bwrap_path": "/usr/bin/bwrap",
-        "systemd_run_path": "/usr/bin/systemd-run",
-        "systemctl_path": "/usr/bin/systemctl",
-        "policy_version_sha": authority_sha,
     }
 
     verifier = {
@@ -257,6 +265,7 @@ def render(args):
     )
     for name, payload in (
         ("frontend.unsealed.json", frontend),
+        ("candidate-materializer.json", candidate_materializer),
         ("job-launcher.json", launcher),
         ("broker-verifier.json", verifier),
         ("root-broker.json", broker),
