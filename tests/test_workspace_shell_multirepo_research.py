@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT / "plugins" / "workspace-shell"
 sys.path.insert(0, str(PLUGIN / "root"))
 job_launcher = importlib.import_module("job_launcher")
+candidate_materializer = importlib.import_module("candidate_materializer")
 
 
 class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
@@ -57,6 +58,23 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
                 "file-read",
                 ["-c", "65537", "--", "results/example.csv"],
             )
+
+    def test_candidate_materializer_public_transport_is_credential_free_and_private_mode_exists(self):
+        env = candidate_materializer.git_env({
+            "transport": "public_https",
+            "url": "https://github.com/adamtrott78/PADataset.git",
+        })
+        self.assertEqual(env["GIT_TERMINAL_PROMPT"], "0")
+        self.assertNotIn("GIT_SSH_COMMAND", env)
+        with self.assertRaisesRegex(Exception, "SOURCE_CONFIG_INVALID"):
+            candidate_materializer.git_env({
+                "transport": "public_https",
+                "url": "https://token@github.com/adamtrott78/PADataset.git",
+            })
+        source = (PLUGIN / "root" / "candidate_materializer.py").read_text()
+        self.assertIn('"ssh_deploy_key"', source)
+        self.assertIn("StrictHostKeyChecking=yes", source)
+        self.assertIn("deploy key must be root-private", source)
 
     def test_candidate_pytest_is_sandbox_copy_only(self):
         resolved = job_launcher.resolve_profile(
