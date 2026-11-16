@@ -8,7 +8,9 @@
     "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
     "prior_authority_attempt": "architecture/workspace-semantic-execution-private-route-activation-attempt-01.v0.1.json",
     "existing_serve_observation": "architecture/workspace-semantic-execution-existing-tailscale-serve-observation.v0.1.json",
-    "activation_script_path": "benchmarks/workspace-semantic-execution/private_route_fake_worker_activation_v2.sh"
+    "activation_script_path": "benchmarks/workspace-semantic-execution/private_route_fake_worker_activation_v2.sh",
+    "activation_candidate_commit": "2a6f65de5681f000a4b69913979db21953ab36a6",
+    "activation_script_blob_sha": "beef1ade487e117e519b4cec1e9e4d43a36ead57"
   },
   "frozen_host_bindings": {
     "private_base_url": "https://gokhan-lambda-vector.tailca6171.ts.net",
@@ -44,5 +46,14 @@
     "live_activation_authorized": false,
     "explicit_operator_approval_of_new_exact_candidate_required": true,
     "model_reasoning_is_not_authority": true
+  },
+  "validation_gate": {
+    "repository_validation_required": true,
+    "required_workflows": [
+      "Workspace Control Validation",
+      "Semantic Execution Validation",
+      "Operator Bridge Validation"
+    ],
+    "operator_reapproval_required_after_validation": true
   }
 }
