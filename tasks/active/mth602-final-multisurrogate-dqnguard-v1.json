@@ -521,10 +521,21 @@
         "PR #27 diff is exactly one workflow, one static contract test, and one Workspace Shell evidence mountpoint marker.",
         "No merge authority has been granted; workflow is not active on main."
       ]
+    },
+    {
+      "check": "GPU2 evaluator workflow activation",
+      "result": "ACTIVE_ACCEPTANCE_RUNNING",
+      "evidence": [
+        "Explicit user authority: MERGE AND ACTIVATE for PADataset PR #27 only.",
+        "PR #27 head 613387d22299bbb11481aa38b745be2f2fc29617 was marked ready and squash-merged successfully.",
+        "Default branch head after merge: 7782be95f409dc7bccf2729915e4014c0178428c.",
+        "Active workflow blob .github/workflows/lambda-ci-l2o-directional-eval-2.yml: ba825a98f0aa49bbdc78f5ed37faaf33c1982b4a.",
+        "First frozen acceptance request: PA1-PA2 target PA1 surrogate PA2 from PR #26 exact head 15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766.",
+        "GitHub Actions run 43963122999 / job 133635479325 created and queued on GPU2 lane."
+      ]
     }
   ],
   "blockers": [
-    "GPU2 evaluator execution is prepared and validated in PADataset draft PR #27 but remains inactive until an explicitly authorized merge/activation places the workflow on the default branch.",
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
@@ -535,7 +546,7 @@
     "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "Await explicit merge/activation authority for PADataset draft PR #27. If granted, merge only PR #27, verify the default-branch workflow SHA, then launch one frozen PR #26 directional request on GPU2 and inspect its complete artifact/receipt before scheduling further cells. Continue monitoring PA3-PA4 run 43943016274/job 133565212672; on SUCCESS freeze backbone #10 and its final two evaluator requests. Do not merge PR #26 or any backbone PR without separate explicit authority.",
+  "next_safe_action": "Monitor GPU2 evaluator acceptance run 43963122999/job 133635479325 to terminal state. On SUCCESS, inspect exact artifact metadata, scientific execution receipt, result_record.json metrics, artifact transport binding, rehydration record, target-label tuning=false, and GPU UUID. Do not schedule additional directional cells until this acceptance result is verified. Continue monitoring PA3-PA4 backbone run 43943016274/job 133565212672 independently.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
   "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred. Workspace Shell stale-authority gate was cleared successfully on 2026-11-16 via authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e; post-refresh receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 proves task-bound execution at pinned PADataset authority. Remaining schema blocker is chat-local only. Workspace Shell Refresh Tools exposed candidate-pytest. PR #26 contract suite passed authoritatively (35 tests), and separate GPU2 evaluator workflow candidate PR #27 passed its authority-surface tests (3 tests). The next blocker is explicit activation/merge authority for PR #27."
