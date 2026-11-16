@@ -1,0 +1,85 @@
+{
+  "benchmark": "INSTANT_MULTI_LEAF_QUEUE_V1",
+  "base_main_sha": "d47a7922aa8d47d3a22b55c19ce4d6af7309a964",
+  "branch": "instant-multi-leaf-queue-v1-20261101",
+  "dependencies": {
+    "A": [],
+    "B": [
+      "A"
+    ],
+    "C": [],
+    "D": [
+      "C"
+    ],
+    "E": [
+      "B",
+      "D"
+    ]
+  },
+  "metadata": {
+    "A": {
+      "reasoning_class": "LOW",
+      "unresolved_architecture": false,
+      "authority_expansion": false,
+      "objective_validator": true,
+      "context_items": 3,
+      "files_touched": 2
+    },
+    "B": {
+      "reasoning_class": "MEDIUM",
+      "unresolved_architecture": false,
+      "authority_expansion": false,
+      "objective_validator": true,
+      "context_items": 4,
+      "files_touched": 2
+    },
+    "C": {
+      "reasoning_class": "LOW",
+      "unresolved_architecture": false,
+      "authority_expansion": false,
+      "objective_validator": true,
+      "context_items": 2,
+      "files_touched": 0
+    },
+    "D": {
+      "reasoning_class": "LOW",
+      "unresolved_architecture": false,
+      "authority_expansion": false,
+      "objective_validator": true,
+      "context_items": 14,
+      "files_touched": 6
+    },
+    "E": {
+      "reasoning_class": "HIGH",
+      "unresolved_architecture": false,
+      "authority_expansion": false,
+      "objective_validator": true,
+      "context_items": 4,
+      "files_touched": 2
+    }
+  },
+  "safety_boundary": {
+    "allowed_paths": [
+      "benchmarks/instant_capability/multi_leaf_queue_v1.json",
+      "scripts/instant_multi_leaf_retry.py",
+      "tests/test_instant_multi_leaf_retry.py"
+    ],
+    "draft_pr_only": true,
+    "no_main_mutation": true,
+    "no_workflow_dispatch": true,
+    "no_workspace_shell_exec": true,
+    "no_production_authority": true
+  },
+  "terminal_expected": {
+    "A": "COMPLETE",
+    "B": "COMPLETE",
+    "C": "COMPLETE",
+    "D": "DECOMPOSED",
+    "E": "ESCALATE_REASONING"
+  },
+  "classifier_precedence": [
+    "ESCALATE_REASONING if HIGH or unresolved_architecture or authority_expansion",
+    "DECOMPOSE_AGAIN if context_items>8 or files_touched>3 or !objective_validator",
+    "LEAF_EXECUTABLE otherwise"
+  ]
+}
