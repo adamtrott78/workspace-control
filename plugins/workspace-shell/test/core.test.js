@@ -117,6 +117,12 @@ test("profile grammars reject shell/interpreter/config escape shapes", () => {
 test("PADataset profiles expose bounded evidence and sandboxed research only", () => {
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "git-read"));
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "candidate-pytest"));
+  const candidatePytest = resolveProfile("candidate-pytest", ["-q", "tests/test_multisurrogate_dqnguard.py"]);
+  assert.equal(candidatePytest.env.PYTHONPATH, "/workspace");
+  assert.equal(
+    candidatePytest.env.LD_LIBRARY_PATH,
+    "/usr/lib/x86_64-linux-gnu/blas:/usr/lib/x86_64-linux-gnu/lapack:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu",
+  );
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-list"));
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-read"));
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-hash"));
