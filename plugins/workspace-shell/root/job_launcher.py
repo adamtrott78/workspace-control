@@ -227,6 +227,16 @@ def resolve_profile(manifest, profile, argv):
             "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
             "PYTHONDONTWRITEBYTECODE": "1",
         }
+        if profile == "candidate-pytest":
+            env.update({
+                "PYTHONPATH": "/workspace",
+                "LD_LIBRARY_PATH": (
+                    "/usr/lib/x86_64-linux-gnu/blas:"
+                    "/usr/lib/x86_64-linux-gnu/lapack:"
+                    "/usr/lib/x86_64-linux-gnu:"
+                    "/lib/x86_64-linux-gnu"
+                ),
+            })
     elif profile == "validation-bounded":
         validate_workspace_control(argv)
         resolved = ["scripts/workspace_control.py", *argv]
