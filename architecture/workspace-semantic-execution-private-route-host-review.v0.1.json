@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-private-route-host-review-v0.1",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "purpose": "Bind the exact Tailscale host route and a rollback-capable fake-worker-only activation mechanism while keeping private runtime identity and PostgreSQL DSN values off Git and out of logs.",
+  "reviewed_proposal": {
+    "path": "architecture/workspace-semantic-execution-private-route-activation.v0.1.json",
+    "proposal_commit": "a350fe07b25b4a67dc0ca714bb70633041c5b9e5"
+  },
+  "exact_source_bindings": {
+    "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
+    "live_workspace_shell_runtime_sha": "54ac65cbcd4211554710b8f8f4231c6c9554e3cc",
+    "activation_candidate_commit": "8116662727003e9fe0904fa88ff7836608aeac00",
+    "activation_script_path": "benchmarks/workspace-semantic-execution/private_route_fake_worker_activation_v1.sh",
+    "activation_script_blob_sha": "765c846e7b6c1297f4a0a8871c2fdd34b453b5c2"
+  },
+  "operator_confirmed_tailnet": {
+    "tailnet_dns_name": "tailca6171.ts.net",
+    "linux_machine_name": "gokhan-lambda-vector",
+    "windows_operator_machine_name": "desktop-ub9p70p",
+    "magic_dns_enabled": true,
+    "https_certificates_enabled": true
+  },
+  "host_bindings": {
+    "reviewed_private_base_url": "https://gokhan-lambda-vector.tailca6171.ts.net",
+    "expected_tailscale_login_value": {
+      "persistence": "RUNTIME_ONLY_NOT_COMMITTED_NOT_LOGGED",
+      "derivation": "Read Linux Self.UserID and LoginName from local tailscale status --json; require desktop-ub9p70p peer UserID equals Linux Self.UserID; pass the resulting LoginName only through the process environment to the backend/harness.",
+      "fail_closed_on_missing_or_owner_mismatch": true
+    },
+    "postgres_dsn_value": {
+      "persistence": "RUNTIME_ONLY_NOT_COMMITTED_NOT_LOGGED",
+      "source": "TEMPORARY_ISOLATED_LOCAL_POSTGRES",
+      "runtime_prefix": "/opt/workspace-ci/postgresql/postgresql-14.24-pgvector-0.8.6",
+      "runtime_version": "14.24",
+      "socket_root": "/tmp/workspace-semantic-execution-private-route-v1/socket",
+      "port": 55436,
+      "database": "semantic_execution",
+      "user": "atrott",
+      "exact_dsn_sha256": "5abb0ae70f23b9f334dcad6e5eb5994facdd2168bfcc21bab682e27440127e22",
+      "host_tcp_listener": false,
+      "auth_host": "reject",
+      "production_database_touched": false
+    },
+    "exact_authorized_activation_mechanism": {
+      "mechanism_type": "OPERATOR_EXECUTED_EXACT_GIT_SCRIPT",
+      "candidate_commit": "8116662727003e9fe0904fa88ff7836608aeac00",
+      "script_path": "benchmarks/workspace-semantic-execution/private_route_fake_worker_activation_v1.sh",
+      "script_blob_sha": "765c846e7b6c1297f4a0a8871c2fdd34b453b5c2",
+      "requires_explicit_operator_approval_of_exact_candidate": true
+    }
+  },
+  "activation_scope": {
+    "fake_worker_only": true,
+    "real_chatgpt_account": false,
+    "model_inference": false,
+    "browser_automation": false,
+    "gpu_required": false,
+    "backend_bind": "127.0.0.1:8765",
+    "tailscale_https_port": 443,
+    "tailscale_funnel": false,
+    "preexisting_serve_or_funnel_config_policy": "FAIL_CLOSED",
+    "serve_target": "http://127.0.0.1:8765"
+  },
+  "rollback": {
+    "automatic_on_exit_or_failure": true,
+    "remove_only_reviewed_https_443_mapping": true,
+    "command_shape": "tailscale serve --https=443 off",
+    "stop_ephemeral_postgres": true,
+    "remove_ephemeral_runtime_root": true,
+    "preserve_existing_serve_config_by_refusing_nonempty_preflight": true
+  },
+  "authority_gate": {
+    "live_activation_authorized": false,
+    "operator_approval_required": true,
+    "approval_must_bind_exact_candidate_commit": "8116662727003e9fe0904fa88ff7836608aeac00",
+    "model_reasoning_is_not_authority": true,
+    "workspace_shell_network_widening": false,
+    "helper_registry_widening": false,
+    "generic_shell_bypass": false
+  },
+  "promotion_rule": "After exact-head repository validation, the operator must explicitly approve activation candidate 8116662727003e9fe0904fa88ff7836608aeac00. Only then may the exact script be executed on gokhan-lambda-vector; require PRIVATE_ROUTE_FAKE_WORKER_ACCEPTANCE=PASS and rollback PASS before Stage 12."
+}
