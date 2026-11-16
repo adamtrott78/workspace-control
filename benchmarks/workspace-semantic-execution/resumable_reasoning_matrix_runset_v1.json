@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "runset_id": "workspace-resumable-reasoning-matrix-v1",
-  "status": "PROVENANCE_REFROZEN_P0_PRIMARY_SCREENING_IN_PROGRESS",
+  "status": "PROTOCOL_SCREENING_COMPLETE_SCORED_REPLICATES_PENDING",
   "benchmark_id": "workspace-resumable-reasoning-v1",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frozen_inputs": {
@@ -165,7 +165,61 @@
           "note": "A/B/C/E first E_restore_timeout results were durably published before control-chat interruption. D decomposer completed LEAF_EXECUTABLE and awaits leaf_worker. No replay is required."
         }
       },
-      "next_action": "Resume provenance-refrozen P0 primary screening from durable state: A/B same persistent chats; C fresh stateless quantum-1 chat; D fresh leaf_worker chat; E fresh lower-tier Instant chat. Service subsequent WAITING_EXTERNAL/role/terminal boundaries from control state."
+      "next_action": "Protocol screening is complete. Do not launch additional screening runs unless the public protocol changes. Prepare claim-bearing scored-replicate slots and matched holdout execution under the same frozen public-input checkpoint; keep promotion fail-closed until claim-bearing replicates and calibrated comparable allowance observations exist.",
+      "status": "COMPLETE",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "screening_completion_manifest": {
+        "status": "COMPLETE",
+        "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+        "protocol_frozen": true,
+        "hard_gates_passed": true,
+        "run_count": 20,
+        "completed_run_ids": [
+          "screening-v1-P0-A-002",
+          "screening-v1-P0-B-004",
+          "screening-v1-P0-C-002",
+          "screening-v1-P0-D-002",
+          "screening-v1-P0-E-002",
+          "screening-v1-P1-A-004",
+          "screening-v1-P1-B-004",
+          "screening-v1-P1-C-002",
+          "screening-v1-P1-D-002",
+          "screening-v1-P1-E-004",
+          "screening-v1-P2-A-002",
+          "screening-v1-P2-B-003",
+          "screening-v1-P2-C-002",
+          "screening-v1-P2-D-003",
+          "screening-v1-P2-E-002",
+          "screening-v1-P3-A-003",
+          "screening-v1-P3-B-003",
+          "screening-v1-P3-C-002",
+          "screening-v1-P3-D-002",
+          "screening-v1-P3-E-003"
+        ],
+        "run_state_paths": [
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/A_frontier_long_horizon/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-004.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/C_instant_stateless_resume/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/D_instant_decompose_critic/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/E_hybrid_escalation/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/A_frontier_long_horizon/screen-004.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/B_instant_persistent_chat/screen-004.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/C_instant_stateless_resume/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/D_instant_decompose_critic/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P1/E_hybrid_escalation/screen-004.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/A_frontier_long_horizon/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/B_instant_persistent_chat/screen-003.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/C_instant_stateless_resume/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/D_instant_decompose_critic/screen-003.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/E_hybrid_escalation/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/A_frontier_long_horizon/screen-003.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/B_instant_persistent_chat/screen-003.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/C_instant_stateless_resume/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/D_instant_decompose_critic/screen-002.json",
+          "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/E_hybrid_escalation/screen-003.json"
+        ],
+        "interpretation": "All 20 primary A-E protocol-screening slots across P0-P3 completed on the provenance-refrozen public-input checkpoint with final objective validator PASS. Screening remains non-claim-bearing and cannot support routing-policy promotion."
+      }
     },
     {
       "id": "scored_replicates",
@@ -231,7 +285,17 @@
             "P3_mixed_long_hard"
           ]
         }
-      ]
+      ],
+      "status": "READY_TO_START",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "completed_run_ids": [],
+      "readiness": {
+        "protocol_screening_complete": true,
+        "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+        "claim_bearing_runs_started": false,
+        "calibrated_allowance_available": false,
+        "promotion_ready": false
+      }
     }
   ],
   "worker_isolation": {

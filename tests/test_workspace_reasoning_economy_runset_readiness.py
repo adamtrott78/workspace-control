@@ -179,7 +179,7 @@ def traces():
 
 
 class RunsetReadinessTests(unittest.TestCase):
-    def test_current_refrozen_screening_runset_is_explicitly_not_promotion_ready(self):
+    def test_completed_screening_runset_is_still_not_promotion_ready_without_scored_replicates(self):
         audit = audit_policy_runset_readiness(
             matrix=MATRIX,
             runset=RUNSET,
@@ -191,7 +191,7 @@ class RunsetReadinessTests(unittest.TestCase):
             RunsetReadinessState.NOT_READY,
         )
         self.assertFalse(audit.promotion_ready)
-        self.assertIn(
+        self.assertNotIn(
             "PROTOCOL_SCREENING_NOT_COMPLETE",
             audit.reasons,
         )
@@ -206,6 +206,51 @@ class RunsetReadinessTests(unittest.TestCase):
         self.assertIn(
             "RUNSET_STATUS_NOT_TERMINAL",
             audit.reasons,
+        )
+
+    def test_screening_completion_manifest_binds_exact_completed_runs(self):
+        screening = next(
+            item
+            for item in RUNSET["execution_stages"]
+            if item["id"] == "protocol_screening"
+        )
+        manifest = screening["screening_completion_manifest"]
+
+        self.assertEqual(screening["status"], "COMPLETE")
+        self.assertEqual(manifest["status"], "COMPLETE")
+        self.assertTrue(manifest["protocol_frozen"])
+        self.assertTrue(manifest["hard_gates_passed"])
+        self.assertEqual(
+            manifest["source_checkpoint_sha"],
+            "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+        )
+        self.assertEqual(manifest["run_count"], 20)
+        self.assertEqual(
+            len(manifest["completed_run_ids"]),
+            len(set(manifest["completed_run_ids"])),
+        )
+        self.assertEqual(
+            len(manifest["run_state_paths"]),
+            manifest["run_count"],
+        )
+
+        observed_ids = set()
+        for relative_path in manifest["run_state_paths"]:
+            run = json.loads(
+                (ROOT / relative_path).read_text(encoding="utf-8")
+            )
+            observed_ids.add(run["run_id"])
+            self.assertEqual(run["status"], "COMPLETED")
+            self.assertEqual(
+                run["source_checkpoint_sha"],
+                manifest["source_checkpoint_sha"],
+            )
+            self.assertTrue(run["validator_results"])
+            self.assertTrue(run["validator_results"][-1]["passed"])
+
+        self.assertEqual(
+            observed_ids,
+            set(manifest["completed_run_ids"]),
         )
 
     def test_non_ready_runset_cannot_build_claim_bearing_report(self):
