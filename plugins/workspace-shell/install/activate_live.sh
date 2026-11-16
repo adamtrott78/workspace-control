@@ -37,6 +37,7 @@ SERVICES=(
   workspace-shell-mcp.service
   workspace-shell-root-broker.service
   workspace-shell-job-launcher.service
+  workspace-shell-candidate-materializer.service
 )
 
 require_cmd() {
@@ -282,6 +283,7 @@ esac
 )
 sudo python3 -m py_compile \
   /opt/workspace-shell/runtime/plugins/workspace-shell/root/job_launcher.py \
+  /opt/workspace-shell/runtime/plugins/workspace-shell/root/candidate_materializer.py \
   /opt/workspace-shell/runtime/plugins/workspace-shell/root/root_broker.py \
   /opt/workspace-shell/runtime/plugins/workspace-shell/root/runtime_common.py \
   /opt/workspace-shell/runtime/plugins/workspace-shell/install/render_tunnel_profile.py \
@@ -295,6 +297,7 @@ sudo install -o root -g root -m 0644 "$BUNDLE/profiles.v1.json" /etc/workspace-s
 sudo install -o root -g root -m 0644 "$BUNDLE/helper-registry.v2.json" /etc/workspace-shell/helpers/registry.json
 sudo install -o root -g root -m 0644 "$BUNDLE/trusted-issuers.empty.json" /etc/workspace-shell/approval/trusted-issuers.json
 sudo install -o root -g root -m 0644 "$BUNDLE/revocations.empty.json" /etc/workspace-shell/approval/revocations.json
+sudo install -o root -g root -m 0600 "$BUNDLE/candidate-materializer.json" /etc/workspace-shell/candidate-materializer.json
 sudo install -o root -g root -m 0644 "$BUNDLE/job-launcher.json" /etc/workspace-shell/job-launcher.json
 sudo install -o root -g root -m 0600 "$BUNDLE/root-broker.json" /etc/workspace-shell/root-broker.json
 sudo install -o root -g root -m 0644 "$BUNDLE/broker-verifier.json" /etc/workspace-shell/broker-verifier.json
@@ -412,7 +415,7 @@ sudo install -o root -g workspace-shell-mcp -m 0640 "$BUNDLE/frontend.json" /etc
 sudo install -o root -g root -m 0644 "$BUNDLE/install-manifest.json" /etc/workspace-shell/install-manifest.json
 
 echo "=== INSTALL SYSTEMD UNITS DISABLED-BY-DEFAULT ==="
-for svc in workspace-shell-job-launcher workspace-shell-root-broker workspace-shell-mcp workspace-shell-tunnel; do
+for svc in workspace-shell-candidate-materializer workspace-shell-job-launcher workspace-shell-root-broker workspace-shell-mcp workspace-shell-tunnel; do
   sudo install -o root -g root -m 0644 "$BUNDLE/${svc}.service" "/etc/systemd/system/${svc}.service"
 done
 sudo systemctl daemon-reload
@@ -423,13 +426,14 @@ done
 sudo tee /opt/workspace-shell/bin/workspace-shell-disable >/dev/null <<'DISABLE'
 #!/usr/bin/env bash
 set -euo pipefail
-systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
+systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service workspace-shell-candidate-materializer.service
 echo "WORKSPACE_SHELL_DISABLED=PASS"
 DISABLE
 sudo chmod 0755 /opt/workspace-shell/bin/workspace-shell-disable
 sudo chown root:root /opt/workspace-shell/bin/workspace-shell-disable
 
 echo "=== START LOCAL CONTROL PLANE ==="
+sudo systemctl start workspace-shell-candidate-materializer.service
 sudo systemctl start workspace-shell-job-launcher.service
 sudo systemctl start workspace-shell-root-broker.service
 sudo systemctl start workspace-shell-mcp.service
@@ -448,7 +452,7 @@ for _ in $(seq 1 100); do
 done
 if [ "$LOCAL_READY" != "1" ]; then
   echo "=== LOCAL CONTROL PLANE DIAGNOSTICS: BEGIN ===" >&2
-  for svc in workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service; do
+  for svc in workspace-shell-candidate-materializer.service workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service; do
     echo "--- ${svc}: state ---" >&2
     sudo systemctl show "$svc" --no-pager \
       --property=Id,LoadState,ActiveState,SubState,MainPID,ExecMainCode,ExecMainStatus,Result,User,Group,FragmentPath,NRestarts,MemoryCurrent,MemoryPeak \
