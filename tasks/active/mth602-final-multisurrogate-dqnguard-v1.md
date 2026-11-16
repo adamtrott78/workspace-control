@@ -12,58 +12,73 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 - ID: mth602-final-multisurrogate-dqnguard-v1
 - Title: MTH 602 final project / PADataset multi-surrogate DQNGuard
 - Status: IN_PROGRESS
+- Current stage: tracka_l2o_control_repair
 - Capsule schema: v2
 
-## Goal
+## Track-A live state
 
-Complete the MTH602/DQNGuard follow-on program with two scientifically separated tracks: (A) repair the published Target–Surrogate control by retraining competent leave-two-out backbones, and (B) develop single-backbone multi-surrogate OSR using a competent target-withheld four-known backbone. In parallel, finish the STFT/time-frequency representation diagnostic for the PA1↔PA4 boundary. Preserve true-target quarantine, known-only selection/threshold semantics, exact provenance, and keep OSR-method changes separate from backbone/representation changes.
+- Canonical reduction: 20 directed target/surrogate cells -> 10 unique unordered excluded-pair backbone trainings.
+- Completed and provenance-frozen: 6/10.
+- Completed: PA1-PA2, PA1-PA3, PA1-PA4, PA1-PA8, PA2-PA4, PA4-PA8.
+- GPU0 live: PA2-PA8, run 43926895324 / job 133508635811.
+- GPU1 live: PA2-PA3, run 43921420197 / job 133489412741.
+- Remaining after those two: PA3-PA4 and PA3-PA8.
+- Reverse-direction backbone retraining is forbidden; evaluator direction remains ordered.
+- Target labels remain forbidden for fitting, HPO, threshold selection, retry decisions, or method selection.
 
-## Repositories
+## Exact candidate stack
 
-### PADataset
+- Runtime-only w4 training candidate: PADataset PR #24 @ d1fd5b6d414e7b88675485f576732a424504455f.
+- Directional evaluator/artifact candidate: PADataset PR #26 @ ac6c4f19e4e5f605665c8ea6101b9b7566eab6ec, stacked on exact PR #24 head.
+- PR #26 contains:
+  - canonical 10-backbone / 20-directed-cell matrix,
+  - frozen Track-A evaluator policy,
+  - per-direction immutable request manifests for completed backbones,
+  - GitHub artifact ID/digest/workflow-run binding,
+  - ZIP/checkpoint/config provenance-safe rehydration,
+  - directional reuse and target-quarantine contracts/tests.
+- No workflow authority changes and no merge authority are implied.
 
-- Intent: mutate
-- Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: befe383fd67c8bca8d8ce370344b33c7e13cd52f
-- Remote verified: true
+## Latest completed backbone
 
-### workspace-control
+PA1-PA3 run 43900286950 / job 133414700376:
+- SUCCESS.
+- best epoch 26.
+- best known-validation macro-F1 0.999925851719.
+- known-test macro-F1 0.9998517364899926.
+- early stop epoch 36.
+- target_test_consumed=false.
+- target quarantine preserved.
+- validation showed large intermittent collapses despite smooth training loss; the known-only best-checkpoint rule correctly preserved epoch 26.
 
-- Intent: mutate
-- Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: 4469009659182c8c2f4d12d727e556f2a2995fc9
-- Remote verified: true
+## Workspace Shell gate
+
+Authoritative candidate pytest is still fail-closed because the live Workspace Shell authority snapshot sees the older CHECKPOINTED MTH602 capsule.
+
+Do not weaken or bypass that guard.
+
+Required authority preservation during refresh:
+- live workspace-control execution snapshot: 5401045341090a26a42ce3a497c379f8223a3b54
+- live PADataset authority: befe383fd67c8bca8d8ce370344b33c7e13cd52f
+- recorded MTH602 workspace-control dependency generation: 4469009659182c8c2f4d12d727e556f2a2995fc9
 
 ## Next safe action
 
-Operator refresh the live Workspace Shell authority snapshot from this IN_PROGRESS continuation while preserving the live Workspace Shell workspace-control execution snapshot at 5401045341090a26a42ce3a497c379f8223a3b54, preserving PADataset execution at befe383fd67c8bca8d8ce370344b33c7e13cd52f, and leaving the MTH602 recorded Workspace Control dependency generation at 4469009659182c8c2f4d12d727e556f2a2995fc9. Then use a newly loaded Workspace Shell schema that exposes candidate-pytest and run candidate-pytest on PADataset PR #23 exact SHA 4f27d00cce9ab15120d924963a5ecf049d032c52. If PASS, verify the receipt binds the durable PADataset checkpoint plus candidate SHA/tree and confirm ordinary task-bound execution still rejects the off-checkpoint SHA. Next exercise PR #21 fd15238... PA1 provenance preflight from the persistent checkout and resume STFT only on PASS, preserving the first 120 overlays. Then execute Architecture-B B0 softmax3 on the strong PA2 seed0 backbone.
+Keep both scientific GPU lanes saturated only with the remaining unique Track-A canonical backbones bound to exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.
 
-## Remaining work
+On each SUCCESS:
+1. freeze workflow run/job, artifact ID/digest, candidate SHA, best_model SHA, config SHA, metrics, early-stop epoch, and target-quarantine evidence into PR #26;
+2. create the two immutable directional evaluator request manifests;
+3. never train the reverse direction.
 
-- Fresh chat: confirm candidate-pytest exists, then run `pytest -q tests/test_cross_surrogate_dqnguard.py` at PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52 under task mth602-final-multisurrogate-dqnguard-v1 while durable authority stays befe383fd67c8bca8d8ce370344b33c7e13cd52f.
-- Verify candidate receipt binds durable checkpoint + candidate SHA/tree and ordinary task-bound execution still rejects the off-checkpoint SHA.
-- Materialize PR #21 exact head fd15238aa369118e61b21ab714900861dbb99d2c in persistent STFT checkout; run repaired PA1 provenance preflight; resume only on PASS and skip first 120 completed overlays.
-- After B unit validation, run B0 softmax3 on the strong PA2 seed0 four-known backbone; freeze winner from off-diagonal transfer before true PA2 evaluation.
-- Then B1 expanded5, then B2 with bands; keep A pooled and C hybrid as matched baselines.
-- Separately freeze PA1-aware known-only backbone/HPO and execute Track A corrected leave-two-out matrix.
-- No merges without explicit authority.
+After the 10-backbone bank is complete:
+- refresh Workspace Shell authority without rebinding the pinned live SHAs above;
+- validate PR #26 through authorized candidate execution;
+- only then add/review the bounded artifact-download + directional evaluator operation in the authority-owned scientific workflow;
+- run the frozen 20-cell Track-A matrix.
 
-## Blockers / gates
+Track B Architecture B and the STFT diagnostic remain preserved under their existing gates.
 
-- Live Workspace Shell authority snapshot still contains the prior CHECKPOINTED MTH602 capsule; root/operator authority refresh from this IN_PROGRESS continuation is required before Workspace Shell can execute the task.
-- Current conversation still exposes old cached Workspace Shell profile enum; fresh chat is required for candidate-pytest.
-- STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly.
+## No-merge rule
 
-## Fresh-chat initialization
-
-@GitHub
-
-https://github.com/adamtrott78/workspace-control
-
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
-
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Do not merge PADataset PRs #17, #21, #22, #23, #24, #25, #26 or workspace-control PRs #636, #637, #640 without explicit merge authority.
