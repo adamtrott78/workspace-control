@@ -36,7 +36,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-RETRY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authority-state head produced by this checkpoint using workspace-control runtime candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe, PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 2cec87fbf5c054b632e5ddc7e057384e4228c48a, and semantic execution binding 9b02005a58a961ce83ef8790e2d59ec626802591. The prior activation safely rolled back because its local MCP parser incorrectly expected nested stdout that the declared MCP output schema does not guarantee. The corrected upgrader proves semantic execution using MCP success plus the root-owned execution receipt: exact task_id, expected/observed Git SHA, task checkpoint SHA, source_mode=task, exit 0 and privileged=false. Do not rebind the semantic task or widen helper/issuer trust.
+RETRY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authority-state head produced by this checkpoint using workspace-control runtime candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe, PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 629cbb10cd3e7136a34faa2df575ca3b5d481b80, and semantic execution binding 74958b5d0d325893fd39045d1e49b5320dca7fa3. This intentionally supersedes the older semantic capsule/execution tuple 2cec87fb… / 9b02005a…. The current semantic state is 3/3 green (#2900/#225/#503) and includes the evaluator sealed-store primitive plus claim-bearing launch isolation gate. The corrected Workspace Shell runtime candidate is green at #2896. Require LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_SEMANTIC_TASK_AUTHORITY=PASS and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Do not rebind the semantic task, widen helper/issuer trust, or touch PADataset GPUs.
 
 ## Remaining work
 
@@ -48,8 +48,9 @@ RETRY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authori
 
 ## Blockers / gates
 
-- Live semantic authority is not yet activated because the first enrollment attempt safely rolled back after a false-negative acceptance check. Corrected receipt-based acceptance candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe passed Workspace Control Validation #2896.
-- Host activation remains a genuine root/operator step because privileged helper and trusted issuer registries intentionally remain empty. After retry success, ChatGPT must independently confirm workspace-semantic-execution-migration-v1 resolves at exact bound SHA 9b02005a58a961ce83ef8790e2d59ec626802591.
+- Live semantic authority is not yet activated because the first enrollment attempt safely rolled back on a false-negative acceptance parser. Corrected receipt-based runtime candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe passed Workspace Control #2896.
+- The semantic enrollment tuple has advanced to current validated semantic capsule 629cbb10cd3e7136a34faa2df575ca3b5d481b80 with exact execution binding 74958b5d0d325893fd39045d1e49b5320dca7fa3 (#2900/#225/#503). Host activation remains a root/operator step because helper/issuer trust remains intentionally empty.
+- After retry success, ChatGPT must independently verify the semantic task resolves at exact HEAD 74958b5d0d325893fd39045d1e49b5320dca7fa3 before any live transport/evaluator acceptance work.
 
 ## Fresh-chat initialization
 
