@@ -211,26 +211,27 @@
         },
         {
           "check": "Canonical backbone bank progress",
-          "result": "IN_PROGRESS",
+          "result": "PASS",
           "evidence": [
-            "9/10 unique canonical backbones are COMPLETE and frozen in PADataset PR #26.",
-            "PA3-PA8 run 43943022113/job 133565235633 SUCCESS; best epoch 1; best val macro-F1 0.8966316187092961; known-test macro-F1 0.8952296085145685; target_test_consumed=false.",
-            "Final and only remaining backbone: PA3-PA4 run 43943016274/job 133565212672 IN_PROGRESS on GPU0.",
-            "GPU1 is intentionally idle; no unique canonical backbone remains for that lane."
+            "10/10 unique canonical backbones are COMPLETE and frozen in PADataset PR #26.",
+            "Final PA3-PA4 run 43943016274/job 133565212672 SUCCESS; artifact 14277201494 digest sha256:9e4b8ec93e19868cd46c8982503570e406d9b286cd2fa7e715f25e210d0d76b8.",
+            "Final PA3-PA4 best epoch 24; best known-val macro-F1 1.0; known-test macro-F1 1.0; target_test_consumed=false; target quarantine preserved.",
+            "No additional backbone training remains."
           ]
         },
         {
           "check": "Directional evaluator candidate",
-          "result": "CANDIDATE_READY",
+          "result": "PASS_CANDIDATE_READY_FOR_ACCEPTANCE",
           "evidence": [
-            "PADataset draft PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 is stacked on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
-            "PR #26 currently freezes 9 completed canonical backbones and 18 immutable directed evaluator request manifests.",
-            "Post-evaluation result-record, strict 20-cell aggregation, matrix reporting, and bounded evaluator-operation design remain staged.",
-            "No .github/workflows files are modified; authoritative Workspace Shell candidate pytest remains gated by stale live CHECKPOINTED authority."
+            "PADataset draft PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 remains OPEN/UNMERGED.",
+            "PR #26 freezes all 10 canonical backbones and all 20 immutable directed evaluator requests.",
+            "Workspace Shell candidate-pytest receipt job-3d9c726d-aa8a-4e79-8d69-718d5bca6e2b: 35 passed.",
+            "Post-evaluation result-record, strict 20-cell aggregation, matrix reporting, artifact transport/rehydration, and bounded evaluator contracts remain staged.",
+            "Do not merge PR #26 without separate explicit authority."
           ]
         }
       ],
-      "resume_condition": "Continue unique canonical backbones until 10/10; then validate PR #26 through authorized candidate execution before running the frozen 20-cell evaluator matrix."
+      "resume_condition": "Repair the refresh-v3 helper binding bug, activate corrected trusted GPU2 workflow blob, then rerun exactly one frozen PA1->PA2 evaluator acceptance cell before scheduling the remaining matrix."
     },
     {
       "id": "trackb_archb_cross_surrogate",
@@ -309,7 +310,7 @@
     },
     {
       "id": "workspace_shell_candidate_dependency",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "workspace-shell-multirepo-research-v1",
       "selected_executor": "workspace-shell+plugin-creator",
       "selected_surface": "workspace-shell",
@@ -340,13 +341,15 @@
         },
         {
           "check": "Positive candidate-pytest",
-          "result": "NOT_RUN",
+          "result": "PASS",
           "evidence": [
-            "Requires fresh tool schema."
+            "Workspace Shell Refresh Tools exposed candidate-pytest.",
+            "PR #26 candidate validation passed repeatedly through off-checkpoint candidate execution; final 10/10 head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 passed 35 tests.",
+            "Ordinary task-bound execution still fails closed on off-checkpoint candidate SHA."
           ]
         }
       ],
-      "resume_condition": "Fresh chat exposes candidate-pytest; validate PADataset PR #26 exact head before any evaluator workflow activation."
+      "resume_condition": null
     }
   ],
   "checkpoints": [
@@ -452,12 +455,13 @@
     {
       "id": "trackA-directional-evaluator-candidate",
       "kind": "git_commit",
-      "identity": "5520601b999c10202457760368f7e13d7bc8a439",
+      "identity": "99ba123e1455566e16d86d6faf67fef3be8ab0b9",
       "required_for_resume": true,
       "evidence": [
         "PADataset PR #26 OPEN/DRAFT/UNMERGED; base exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
-        "Canonical state: 9/10 complete, 1 live, 18 frozen directed evaluator requests.",
-        "No workflow authority changes; no merge authority."
+        "Canonical state: 10/10 complete and 20/20 directed evaluator requests frozen.",
+        "Final candidate-pytest receipt job-3d9c726d-aa8a-4e79-8d69-718d5bca6e2b: 35 passed.",
+        "No merge authority."
       ]
     }
   ],
@@ -486,12 +490,11 @@
     },
     {
       "check": "Track-A canonical matrix progress",
-      "result": "IN_PROGRESS",
+      "result": "PASS",
       "evidence": [
-        "9/10 unique canonical backbones frozen; one remains.",
-        "GPU0 PA3-PA4 run 43943016274/job 133565212672 IN_PROGRESS.",
-        "GPU1 intentionally idle because no additional unique backbone remains.",
-        "Target quarantine preserved on all nine frozen completed backbones."
+        "10/10 unique canonical backbones frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9.",
+        "20/20 immutable directional evaluator requests exist.",
+        "Final PA3-PA4 backbone SUCCESS with target quarantine preserved."
       ]
     },
     {
@@ -506,10 +509,9 @@
       "check": "PR #26 off-checkpoint candidate validation",
       "result": "PASS",
       "evidence": [
-        "PR #26 candidate SHA 15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766.",
-        "Workspace Shell candidate-pytest receipt job-ef08c200-1c9d-4fc3-a10d-4c9d0a1084a4: 35 passed in 0.32s.",
-        "Receipt binds source_mode=candidate, durable PADataset checkpoint befe383fd67c8bca8d8ce370344b33c7e13cd52f, candidate SHA 15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766, candidate tree a384451c831db92834ab3e14e480de806acf5bf4.",
-        "Ordinary pytest-bounded with the off-checkpoint candidate SHA fails closed with TASK_SHA_MISMATCH."
+        "Final PR #26 head 99ba123e1455566e16d86d6faf67fef3be8ab0b9.",
+        "Workspace Shell candidate-pytest receipt job-3d9c726d-aa8a-4e79-8d69-718d5bca6e2b: 35 passed.",
+        "Earlier receipt job-ef08c200-1c9d-4fc3-a10d-4c9d0a1084a4 proved source_mode=candidate and durable PADataset checkpoint befe383fd67c8bca8d8ce370344b33c7e13cd52f; ordinary task-bound path rejected off-checkpoint SHA."
       ]
     },
     {
@@ -622,31 +624,69 @@
     },
     {
       "check": "Lane-B workflow refresh v3 candidate",
-      "result": "PASS_CANDIDATE_NOT_EXECUTED",
+      "result": "BUG_FOUND_PRE_MUTATION",
       "evidence": [
-        "PADataset PR #30 merged to main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6.",
-        "Corrected GPU2 workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3.",
-        "Workflow candidate receipt job-1bf22e23-4965-499e-8482-c517e5c8c560: 7 passed, including bash -n over the actual execution block.",
-        "Workspace-control refresh-v3 candidate 9ea2444d54d97c0e2a740c660589e6675e1c207d chains over refresh-v2, preserves prior receipts, advances only lane-B workflow trust, and rolls back to v2 on failure.",
-        "Refresh-v3 candidate receipt job-bea40700-793d-4e55-b15d-5d0d812319fc: 32 passed.",
-        "Post-failure GitHub sweep found zero active GPU2-labeled jobs."
+        "Workspace-control branch mth602-laneb-workflow-refresh-v3 exact head 9ea2444d54d97c0e2a740c660589e6675e1c207d previously passed candidate-pytest receipt job-bea40700-793d-4e55-b15d-5d0d812319fc: 32 passed.",
+        "Operator v3 command failed during preflight before any mutation: FileNotFoundError for /var/lib/workspace-ci/v3/padataset-scientific/dual-lane/workflow-refresh-v3/active.json.",
+        "Exact source bug: scripts/lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py line 27 sets PRIOR_REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT, while line 28 sets REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT.",
+        "Those two bindings are reversed. Correct mapping must be PRIOR_REFRESH_ACTIVE = ...V2_ACTIVE_RECEIPT and REFRESH_ACTIVE = ...V3_ACTIVE_RECEIPT.",
+        "Failure occurred before preflight/authority receipt creation and before root mutation; live state remains refresh-v2."
+      ]
+    },
+    {
+      "check": "GPU2 trusted workflow current code",
+      "result": "PASS_CODE_NOT_LIVE_TRUST",
+      "evidence": [
+        "PADataset PR #30 merged; PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6.",
+        "Corrected existing trusted GPU2 workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3.",
+        "Workflow candidate receipt job-1bf22e23-4965-499e-8482-c517e5c8c560: 7 passed, including bash -n on the actual execution block.",
+        "Live lane-B controller trust still points to refresh-v2 blob 8da00f39284745cf6c9032620d63574052cd6d61 until refresh-v3 succeeds."
+      ]
+    },
+    {
+      "check": "GPU2 evaluator acceptance attempts",
+      "result": "CONTROL_PLANE_PASS_WORKFLOW_FIXED_PENDING_V3",
+      "evidence": [
+        "Run 43967496290/job 133650662301 admitted to actual GPU2 runner; failed before science due PYY heredoc terminator; fixed by PR #29.",
+        "Run 43969575701/job 133657867208 admitted to actual GPU2 runner; exact PR head, bounded runner proof, checkout, and request validation passed; failed before science due unmatched ')' from nested heredoc/process substitution; fixed by PR #30.",
+        "No DQNGuard evaluator science has yet completed; do not infer scientific metrics from either failed acceptance run."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v1",
+      "result": "PASS_LIVE",
+      "evidence": [
+        "Operator refresh-v1 preflight PASS; scale_set_id=6.",
+        "Policy advanced 8c4a2d3dea415999128c78f9086ba2112542e2f334f37c12fc5c466cbdf56929 -> 669aa487f38ab6d3972c0dc970925554b4d05b2647eb842b11543d26d2a2767b.",
+        "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH=PASS; transaction refresh-e8be5357-316f-40f0-9302-56856e98325a.",
+        "Active receipt sha256 7b2c4af51cbcb8d42a5432920769d19d131df5dbb9601110d78c32fbf403502d."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v2",
+      "result": "PASS_LIVE",
+      "evidence": [
+        "Operator refresh-v2 preflight PASS; scale_set_id=6.",
+        "Policy advanced 669aa487f38ab6d3972c0dc970925554b4d05b2647eb842b11543d26d2a2767b -> 70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d.",
+        "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2=PASS; transaction refresh-69d6b04f-e5d7-47c1-9ae7-8015be78d354.",
+        "Active receipt sha256 67875d5c10c337584400ff41f0c5e46ee2ad0ecb7d1b057c8d3058225634a8ab."
       ]
     }
   ],
   "blockers": [
-    "GPU2 evaluator workflow shell syntax has been corrected and validated, but live lane-B trust still points to workflow blob 8da00f39284745cf6c9032620d63574052cd6d61. Chained refresh-v3 candidate 9ea2444d54d97c0e2a740c660589e6675e1c207d is validated (32 passed) and requires root/operator execution because no reviewed privileged Workspace Shell helper exists.",
-    "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
+    "Refresh-v3 helper exact-head 9ea2444d54d97c0e2a740c660589e6675e1c207d has reversed receipt constants: PRIOR_REFRESH_ACTIVE incorrectly points to V3 and REFRESH_ACTIVE incorrectly points to V2. Operator preflight failed with FileNotFoundError before mutation. Fix the two bindings on a new candidate head, add a regression assertion for exact predecessor/output paths, rerun full v1+v2+v3 control tests through candidate-pytest, then issue a new v3 root block.",
+    "STFT resume remains gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
-    "Finish the final Track-A canonical backbone PA3-PA4 on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f. Freeze exact artifact/checkpoint/config provenance on SUCCESS; do not launch any additional backbone training.",
-    "Create its two immutable directional evaluator request manifests, yielding 10 canonical backbones / 20 directed cells.",
-    "Refresh live Workspace Shell authority from this IN_PROGRESS continuation without rebinding workspace-control execution 5401045341090a26a42ce3a497c379f8223a3b54, PADataset authority befe383fd67c8bca8d8ce370344b33c7e13cd52f, or recorded dependency generation 4469009659182c8c2f4d12d727e556f2a2995fc9.",
-    "Validate PR #26 through authorized candidate execution; then separately review/activate the bounded artifact-download + directional evaluator workflow operation.",
-    "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
-    "No merges without explicit authority."
+    "Fix refresh-v3 helper receipt bindings only: PRIOR_REFRESH_ACTIVE must be V2_ACTIVE_RECEIPT; REFRESH_ACTIVE must be V3_ACTIVE_RECEIPT. Validate the new exact candidate through candidate-pytest, including a regression that would catch the reversed constants.",
+    "Execute corrected chained refresh-v3 under root/operator authority with a fresh zero-work preflight. Live predecessor is refresh-v2 policy SHA 70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d; corrected trusted workflow target is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 / blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3.",
+    "After refresh-v3 PASS, rerun exactly one frozen PR #26 PA1->PA2 evaluator cell at head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 through /lambda-scientific-2. Inspect artifact transport, rehydration, result_record.json, target_labels_used_for_tuning=false, GPU UUID, and scientific receipt before scheduling more.",
+    "If the acceptance cell PASSes, schedule the remaining Track-A 20-cell matrix across available GPU lanes without retraining backbones.",
+    "Then resume Track-B Architecture B and the separate STFT representation diagnostic.",
+    "Do not merge PR #26, PR #23, PR #21, or unrelated workspace-control branches without separate explicit authority."
   ],
-  "next_safe_action": "Operator executes chained lane-B workflow refresh v3 candidate 9ea2444d54d97c0e2a740c660589e6675e1c207d under sudo, with fresh zero-work preflight binding predecessor refresh-v2 receipt, old blob 8da00f39284745cf6c9032620d63574052cd6d61, corrected blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3, and PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6. On PASS, re-run exactly one frozen PA1->PA2 evaluator cell at PR #26 head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 and inspect complete result before scheduling remaining cells.",
+  "next_safe_action": "Create a new workspace-control candidate from refresh-v3 head 9ea2444d54d97c0e2a740c660589e6675e1c207d that changes only scripts/lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py so PRIOR_REFRESH_ACTIVE points to PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT and REFRESH_ACTIVE points to PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT. Add a test that asserts those exact bindings, rerun the full dual-lane + refresh-v1 + refresh-v2 + refresh-v3 suite via candidate-pytest, and only then prepare a new root v3 block. Do not rerun the failed old block unchanged.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
-  "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred. Workspace Shell stale-authority gate was cleared successfully on 2026-11-16 via authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e; post-refresh receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 proves task-bound execution at pinned PADataset authority. Remaining schema blocker is chat-local only. Workspace Shell Refresh Tools exposed candidate-pytest. PR #26 contract suite passed authoritatively (35 tests), and separate GPU2 evaluator workflow candidate PR #27 passed its authority-surface tests (3 tests). The next blocker is explicit activation/merge authority for PR #27."
+  "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer."
 }
