@@ -120,9 +120,10 @@ internal static class UsabilityHarness
                 // UT-12 starts from a synthetically pre-existing
                 // SENT/UNCONFIRMED worker. Reproduce the production
                 // prerequisite before exposing READY=0: the managed worker
-                // target was prepared, brought to the OS foreground, and its
-                // exact Firefox HWND was captured while that identity was
-                // trusted. The later no-work press must not rediscover,
+                // target was prepared while the dedicated Firefox launch was
+                // already foreground, and its exact Firefox HWND was captured
+                // while that identity was trusted. Setup never forces OS
+                // foreground. The later no-work press must not rediscover,
                 // recapture, or foreground any Firefox window.
                 RequireApplied(
                     browser.FocusTargetAsync(
@@ -131,12 +132,13 @@ internal static class UsabilityHarness
                         .GetAwaiter()
                         .GetResult(),
                     "prime UT-12 trusted worker target");
-                if (!workerWindowSafety.ForegroundPreparedWorkerWindow() ||
-                    !workerWindowSafety.RecordPreparedWorkerWindow())
+                if (!workerWindowSafety.RecordPreparedWorkerWindow())
                 {
                     throw new InvalidOperationException(
                         "UT12_TRUSTED_WORKER_WINDOW_CAPTURE_FAILED");
                 }
+                Console.WriteLine(
+                    "STAGE10_UT12_TRUSTED_WORKER_WINDOW_CAPTURED");
             }
 
             using var context = new UsabilityApplicationContext(
