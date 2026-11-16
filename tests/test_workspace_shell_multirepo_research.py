@@ -224,9 +224,9 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
 
             real_lstat = os.lstat
 
-            def root_owned_store_lstat(path):
-                observed = real_lstat(path)
-                if Path(path) == store:
+            def root_owned_store_lstat(path, *args, **kwargs):
+                observed = real_lstat(path, *args, **kwargs)
+                if not args and not kwargs and Path(path) == store:
                     values = list(observed)
                     values[4] = 0
                     return os.stat_result(values)
