@@ -74,9 +74,9 @@ PRIVATE ROUTE PROPOSAL IS VALIDATED, NOT AUTHORIZED. Use architecture/workspace-
 
 ## Remaining work
 
-- REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and sealed-store primitive + plan isolation gate are validated; do not launch/materialize scored runs until live executor authority, live evaluator isolation acceptance, and calibrated comparable allowance telemetry all exist.
+- REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: repository-side exact-host fake-worker acceptance harness is 3/3 green at 7c20097c…; after Workspace Shell semantic/evaluator root activation, activate only the reviewed localhost backend + private Tailscale route and run that harness through the real private route before real-account use.
+- LIVE INSTANT: Workspace Shell semantic/evaluator activation is COMPLETE and the repository-side exact-host fake-worker harness is 3/3 green at 7c20097c…; next obtain authority-owned review of architecture/workspace-semantic-execution-private-route-activation.v0.1.json, bind its four unresolved host values, activate exactly that private route, and run the fake-worker harness before any real-account use.
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
