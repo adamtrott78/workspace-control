@@ -1,0 +1,38 @@
+[Unit]
+Description=Workspace Shell exact candidate source materializer
+After=network-online.target local-fs.target
+Wants=network-online.target
+Before=workspace-shell-job-launcher.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/usr/bin/python3 /opt/workspace-shell/runtime/plugins/workspace-shell/root/candidate_materializer.py --config /etc/workspace-shell/candidate-materializer.json
+Restart=on-failure
+RestartSec=2s
+UMask=0077
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectProc=invisible
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadOnlyPaths=/etc/workspace-shell/candidate-materializer.json /etc/workspace-shell/candidate-sources /opt/workspace-shell
+ReadWritePaths=/run/workspace-shell-control /var/lib/workspace-shell/candidates
+InaccessiblePaths=/home /root /etc/workspace-shell/approval /etc/workspace-shell/frontend /etc/workspace-shell/tunnel /var/lib/workspace-shell/replay /var/lib/workspace-shell/helper-cache /var/lib/workspace-shell/jobs /var/lib/workspace-shell/receipts
+TasksMax=32
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

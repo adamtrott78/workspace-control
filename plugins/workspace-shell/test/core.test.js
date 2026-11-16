@@ -8,6 +8,7 @@ import { Readable } from "node:stream";
 import {
   RequestAdmissionLimiter,
   assertTargetProfile,
+  authorizeCandidateEvidence,
   authorizeTaskExecution,
   canonicalize,
   readBoundedJsonBody,
@@ -115,6 +116,7 @@ test("profile grammars reject shell/interpreter/config escape shapes", () => {
 
 test("PADataset profiles expose bounded evidence and sandboxed research only", () => {
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "git-read"));
+  assert.doesNotThrow(() => assertTargetProfile("PADataset", "candidate-pytest"));
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-list"));
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-read"));
   assert.doesNotThrow(() => assertTargetProfile("PADataset", "file-hash"));
@@ -164,6 +166,16 @@ test("task authority is read from the trusted authority root and target-bound", 
     authorityOwnerUid: typeof process.getuid === "function" ? process.getuid() : null,
   });
   assert.equal(result.repository.name, "workspace-control");
+
+  const candidate = authorizeCandidateEvidence({
+    authorityRoot: root,
+    taskId: "task-abc",
+    target: "workspace-control",
+    candidateSha: "b".repeat(40),
+    authorityOwnerUid: typeof process.getuid === "function" ? process.getuid() : null,
+  });
+  assert.equal(candidate.taskCheckpointSha, "a".repeat(40));
+  assert.equal(candidate.candidateSha, "b".repeat(40));
 
   chmodSync(taskPath, 0o664);
   assert.throws(

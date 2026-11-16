@@ -13,7 +13,8 @@ STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP="/var/lib/workspace-shell/upgrades/padataset-multirepo-v1-${STAMP}"
 AUTHORITY_ROOT="/etc/workspace-shell/authority"
 EVIDENCE_MOUNT="/srv/workspace-shell/PADataset-evidence"
-SERVICES=(workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service)
+BASE_SERVICES=(workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service)
+SERVICES=(workspace-shell-candidate-materializer.service "${BASE_SERVICES[@]}")
 
 [[ "$EXPECTED_AUTHORITY_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "usage: bash upgrade_multirepo_padataset_v1.sh <expected-authority-sha> <expected-workspace-control-exec-sha> [expected-padataset-execution-sha]"
 [[ "$EXPECTED_EXEC_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "expected workspace-control execution SHA must be full lowercase SHA"
@@ -181,8 +182,10 @@ for p in \
   /srv/workspace-shell/PADataset \
   /opt/workspace-shell/runtime/plugins/workspace-shell \
   /etc/workspace-shell/profiles.v1.json \
+  /etc/workspace-shell/candidate-materializer.json \
   /etc/workspace-shell/job-launcher.json \
-  /etc/workspace-shell/broker-verifier.json; do
+  /etc/workspace-shell/broker-verifier.json \
+  /etc/systemd/system/workspace-shell-candidate-materializer.service; do
   if sudo test -e "$p"; then
     name="$(echo "$p" | sed 's#^/##; s#/#__#g')"
     sudo cp -a --reflink=auto "$p" "$BACKUP/$name"
@@ -216,17 +219,29 @@ rollback() {
   restore /srv/workspace-shell/PADataset
   restore /opt/workspace-shell/runtime/plugins/workspace-shell
   restore /etc/workspace-shell/profiles.v1.json
+  restore /etc/workspace-shell/candidate-materializer.json
   restore /etc/workspace-shell/job-launcher.json
   restore /etc/workspace-shell/broker-verifier.json
+  restore /etc/systemd/system/workspace-shell-candidate-materializer.service
+  if [[ ! -e "$BACKUP/etc__workspace-shell__candidate-materializer.json" ]]; then
+    sudo rm -f /etc/workspace-shell/candidate-materializer.json
+  fi
+  if [[ ! -e "$BACKUP/etc__systemd__system__workspace-shell-candidate-materializer.service" ]]; then
+    sudo rm -f /etc/systemd/system/workspace-shell-candidate-materializer.service
+  fi
 
   sudo systemctl daemon-reload || true
-  sudo systemctl start workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service || true
+  if [[ -e "$BACKUP/etc__systemd__system__workspace-shell-candidate-materializer.service" ]]; then
+    sudo systemctl start workspace-shell-candidate-materializer.service || true
+  fi
+  sudo systemctl start "${BASE_SERVICES[@]}" || true
   cleanup_tmp
   exit "$rc"
 }
 trap 'rollback "$?"' EXIT
 
 sudo systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
+sudo systemctl stop workspace-shell-candidate-materializer.service >/dev/null 2>&1 || true
 
 AUTH_NEXT="$AUTHORITY_ROOT.next.$$"
 WC_NEXT="/srv/workspace-shell/workspace-control.next.$$"
@@ -289,6 +304,12 @@ sudo chmod -R go-w "$RUNTIME_PLUGIN"
 echo "RUNTIME_NODE_DEPENDENCIES=PASS"
 
 sudo install -o root -g root -m 0644 "$WC_FETCH/plugins/workspace-shell/config/profiles.v1.json" /etc/workspace-shell/profiles.v1.json
+sudo install -o root -g root -m 0644 \
+  "$WC_FETCH/plugins/workspace-shell/install/workspace-shell-candidate-materializer.service.in" \
+  /etc/systemd/system/workspace-shell-candidate-materializer.service
+sudo mkdir -p /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
+sudo chown root:root /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
+sudo chmod 0700 /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
 
 sudo python3 - <<'PY'
 import json
@@ -301,10 +322,41 @@ roots["workspace-control"] = "/srv/workspace-shell/workspace-control"
 roots["PADataset"] = "/srv/workspace-shell/PADataset"
 evidence = data.setdefault("evidence_roots", {})
 evidence["PADataset"] = "/srv/workspace-shell/PADataset-evidence"
+data["candidate_materializer_socket"] = "/run/workspace-shell-control/candidate-materializer.sock"
+data["candidate_store_root"] = "/var/lib/workspace-shell/candidates"
 tmp = launcher.with_suffix(launcher.suffix + ".tmp")
 tmp.write_text(json.dumps(data, indent=2) + "\n")
 tmp.chmod(0o600)
 tmp.replace(launcher)
+
+materializer = Path("/etc/workspace-shell/candidate-materializer.json")
+if materializer.exists():
+    mdata = json.loads(materializer.read_text())
+else:
+    mdata = {}
+mdata["socket_path"] = "/run/workspace-shell-control/candidate-materializer.sock"
+mdata["candidate_store_root"] = "/var/lib/workspace-shell/candidates"
+sources = mdata.setdefault("sources", {})
+sources.setdefault("workspace-control", {
+    "repository": "adamtrott78/workspace-control",
+    "transport": "public_https",
+    "url": "https://github.com/adamtrott78/workspace-control.git",
+})
+sources.setdefault("PADataset", {
+    "repository": "adamtrott78/PADataset",
+    "transport": "public_https",
+    "url": "https://github.com/adamtrott78/PADataset.git",
+})
+for target, repository in (
+    ("workspace-control", "adamtrott78/workspace-control"),
+    ("PADataset", "adamtrott78/PADataset"),
+):
+    if (sources.get(target) or {}).get("repository") != repository:
+        raise SystemExit(f"candidate source repository mismatch for {target}")
+mtmp = materializer.with_suffix(materializer.suffix + ".tmp")
+mtmp.write_text(json.dumps(mdata, indent=2) + "\n")
+mtmp.chmod(0o600)
+mtmp.replace(materializer)
 
 verifier = Path("/etc/workspace-shell/broker-verifier.json")
 vdata = json.loads(verifier.read_text())
@@ -318,6 +370,7 @@ vtmp.replace(verifier)
 PY
 
 sudo systemctl daemon-reload
+sudo systemctl start workspace-shell-candidate-materializer.service
 sudo systemctl start workspace-shell-job-launcher.service
 sudo systemctl start workspace-shell-root-broker.service
 sudo systemctl start workspace-shell-mcp.service
@@ -380,7 +433,7 @@ profile=((schema.get("properties") or {}).get("profile") or {}).get("enum") or [
 for value in ("workspace-control","PADataset"):
     if value not in target:
         raise SystemExit(f"workspace_shell_exec target missing {value}")
-for value in ("file-list","file-read","file-hash","research-bounded"):
+for value in ("file-list","file-read","file-hash","research-bounded","candidate-pytest"):
     if value not in profile:
         raise SystemExit(f"workspace_shell_exec profile missing {value}")
 print("LOCAL_MCP_DISCOVERY=PASS")
