@@ -16,40 +16,41 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 ## Goal
 
-Extend the live Workspace Shell v1 lineage with a first-class PADataset target that supports exact-SHA/task-bound Git provenance, bounded read-only evidence inspection, and sandboxed network-denied research execution without exposing a generic shell or making the historical PADataset checkout writable.
+Extend the live Workspace Shell v1 lineage with first-class PADataset access and a permanent candidate-evidence path that can validate exact candidate SHAs without promoting them to durable task authority, while preserving credential isolation, private-repository support, rollback, and exact-SHA authoritative execution.
 
 ## Repositories
 
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: workspace-shell-multirepo-research-v1
-- Remote checkpoint: 1a9a24fc1bc6e5cda2984e296151a378138600c8
+- Remote branch: workspace-shell-candidate-evidence-current-v1
+- Remote checkpoint: faf72bfda6a6ce762dd9adde39499af205e6fc69
 - Remote verified: true
 
 ### PADataset
 
 - Intent: read
 - Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: 17e1147614f27702e43565089d618182ff71c5af
+- Remote checkpoint: befe383fd67c8bca8d8ce370344b33c7e13cd52f
 - Remote verified: true
 
 ## Next safe action
 
-Rerun the validated rollback-capable multirepo upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. The upgrader must verify/reuse the existing PADataset evidence mount safely, refresh /etc/workspace-shell/authority separately, and report LOCAL_TASK_AUTHORITY=PASS. Then re-test both durable task IDs through ChatGPT Workspace Shell before any Stage 00 read.
+Run the validated transactional Workspace Shell upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 and PADataset execution SHA befe383fd67c8bca8d8ce370344b33c7e13cd52f. Require five-service health, LOCAL_MCP_DISCOVERY including candidate-pytest, and a live off-checkpoint candidate-pytest receipt before updating the existing Workspace Shell plugin through Plugin Creator.
 
 ## Remaining work
 
-- Deploy the validated multirepo upgrade using the final authority-state head, workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af.
-- Verify live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1.
-- Run positive and negative PADataset Workspace Shell acceptance at exact SHA 17e1147614f27702e43565089d618182ff71c5af.
-- Begin MTH602 Stage 00 provenance recovery from the clean execution snapshot plus the untouched read-only historical evidence checkout.
-- Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema.
+- Deploy the validated host upgrade from the authority-state checkpoint produced after execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69, explicitly binding PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f.
+- Verify all five Workspace Shell services are active and still boot-disabled, with the job launcher/worker network isolation unchanged.
+- Run candidate-pytest against a PADataset candidate SHA that deliberately differs from the durable task checkpoint and verify the receipt binds task_checkpoint_sha + candidate SHA/tree.
+- Run a negative candidate test proving ordinary task-bound execution still rejects a mismatched SHA.
+- Update the existing private Workspace Shell plugin in place through Plugin Creator and refresh tool discovery.
+- Return to PADataset Architecture-B validation using candidate-pytest rather than promoting candidate SHAs into task authority.
 
 ## Blockers / gates
 
-- Live trusted task authority is still stale: workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND. This remains the sole execution gate before PADataset Stage 00.
-- The validated host upgrade must be rerun from the new authority-state head with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8. The existing evidence mount may now be reused only if the upgrader verifies its identity and read-only hardening.
+- The live Workspace Shell runtime does not yet include candidate-pytest or workspace-shell-candidate-materializer.service; the validated rollback-capable host upgrade must be applied.
+- The existing Workspace Shell ChatGPT plugin must be refreshed through Plugin Creator after backend live acceptance so the model-visible schema discovers candidate-pytest.
 
 ## Fresh-chat initialization
 
