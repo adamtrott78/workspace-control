@@ -746,10 +746,10 @@ expected = sys.argv[3]
 structured = ((mcp_payload.get("result") or {}).get("structuredContent") or {})
 receipt_id = structured.get("receipt_id")
 if not isinstance(receipt_id, str) or re.fullmatch(
-    r"job-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+    r"[a-zA-Z0-9._-]{8,128}",
     receipt_id,
 ) is None:
-    raise SystemExit("semantic MCP response did not contain an exact job receipt_id")
+    raise SystemExit("semantic MCP response did not contain a valid opaque receipt_id")
 path = root / f"{receipt_id}.json"
 if not path.is_file():
     raise SystemExit(f"semantic MCP receipt file missing: {path.name}")
@@ -791,10 +791,10 @@ expected = sys.argv[3]
 structured = ((mcp_payload.get("result") or {}).get("structuredContent") or {})
 receipt_id = structured.get("receipt_id")
 if not isinstance(receipt_id, str) or re.fullmatch(
-    r"job-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+    r"[a-zA-Z0-9._-]{8,128}",
     receipt_id,
 ) is None:
-    raise SystemExit("evaluator MCP response did not contain an exact job receipt_id")
+    raise SystemExit("evaluator MCP response did not contain a valid opaque receipt_id")
 path = root / f"{receipt_id}.json"
 if not path.is_file():
     raise SystemExit(f"evaluator MCP receipt file missing: {path.name}")

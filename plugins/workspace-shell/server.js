@@ -337,7 +337,7 @@ function createShellServer() {
       },
       outputSchema: {
         ok: z.boolean(),
-        receipt_id: z.string().regex(/^job-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/).optional(),
+        receipt_id: z.string().regex(/^[a-zA-Z0-9._-]{8,128}$/).optional(),
       },
       _meta: {},
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false, idempotentHint: false },

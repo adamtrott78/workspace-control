@@ -284,7 +284,7 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         )
         server = (PLUGIN / "server.js").read_text()
         self.assertIn(
-            "receipt_id: z.string().regex(/^job-",
+            "receipt_id: z.string().regex(/^[a-zA-Z0-9._-]{8,128}$/)",
             server,
         )
         self.assertIn(
@@ -304,6 +304,14 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             upgrade,
         )
         self.assertNotIn('root.glob("*.json")', upgrade)
+        self.assertIn(
+            'r"[a-zA-Z0-9._-]{8,128}"',
+            upgrade,
+        )
+        self.assertIn(
+            '"authorization_decision": receipt.get("authorization_decision")',
+            upgrade,
+        )
 
     def test_candidate_pytest_is_sandbox_copy_only(self):
         resolved = job_launcher.resolve_profile(
