@@ -69,7 +69,7 @@ class PADatasetScientificDualWorkflowRefreshTests(unittest.TestCase):
     def test_helper_requires_one_shot_exact_operator_authority(self):
         for marker in (
             "REFRESH_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_V1",
-            '"authority" != "workspace-control-operator"',
+            'value["authority"] != "workspace-control-operator"',
             "AUTHORITY_MAX_SECONDS",
             "O_EXCL",
             "consume_authority(authority, authority_raw)",
