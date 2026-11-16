@@ -319,7 +319,7 @@ def main() -> int:
         raise DualWorkflowRefreshError("lane-B activation predecessor is not ACTIVE")
     if (
         prior_refresh.get("mode")
-        != "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3"
+        != "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2"
         or prior_refresh.get("phase") != "ACTIVE"
         or prior_refresh.get("workflow_blob_sha") != OLD_BLOB
         or prior_refresh.get("previous_workflow_blob_sha")
