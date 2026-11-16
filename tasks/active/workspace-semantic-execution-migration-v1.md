@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-REAL AUTHORITY GATE: Workspace Shell activation is complete, but no reviewed private Operator Bridge/Tailscale Serve deployment route currently exists. The smallest next action is an explicit authority-owned review/activation of the already-selected localhost-only backend + authenticated Tailscale Serve transport, binding the exact host, localhost serve port, expected Tailscale identity, PostgreSQL runtime source, rollback, and fake-worker-only acceptance scope. Do not infer those host-specific values or create authority from this task. After that reviewed route exists, run benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py through it and require the full exact action/status/result roundtrip before Stage 12.
+PRIVATE ROUTE PROPOSAL IS VALIDATED, NOT AUTHORIZED. Use architecture/workspace-semantic-execution-private-route-activation.v0.1.json at a350fe07b25b4a67dc0ca714bb70633041c5b9e5 as the exact review object. The smallest next action is authority-owned host review that binds reviewed_private_base_url, expected_tailscale_login_value, postgres_dsn_value, and exact_authorized_activation_mechanism while preserving localhost 127.0.0.1:8765, private Tailscale Serve only, no Funnel/public listener, runtime-only secret handling, rollback, and fake-worker-only scope. Once that explicit authority exists, activate exactly that route and run live_fake_worker_transport_v1.py; require full PASS before Stage 12.
 
 ## Remaining work
 
@@ -84,11 +84,11 @@ REAL AUTHORITY GATE: Workspace Shell activation is complete, but no reviewed pri
 
 ## Blockers / gates
 
-- Workspace Shell multirepo live activation and evaluator isolation are COMPLETE and independently verified.
-- Exact-host fake-worker transport is now blocked only on a genuine authority/deployment gate: no reviewed private backend/Tailscale Serve activation route exists in the current trusted helper registry or default-branch authority.
-- Do not use generic shell, manual sidecar, caller-chosen Tailscale Serve configuration, root-policy widening, or network-enabled Workspace Shell execution as a bypass.
-- Once an explicit reviewed private-route activation is authority-owned, run the validated account-free fake-worker harness and require exact status -> claim -> revalidate -> local-prepared -> immutable candidate -> independent validation -> process/action/session completion -> empty final status.
-- Real-account Stage 12 remains blocked until that exact-host fake-worker transport proof passes.
+- Workspace Shell semantic/evaluator activation is COMPLETE and independently verified.
+- Private Operator Bridge deployment is narrowed to four unresolved host bindings in architecture/workspace-semantic-execution-private-route-activation.v0.1.json: reviewed_private_base_url, expected_tailscale_login_value, postgres_dsn_value, and exact_authorized_activation_mechanism.
+- The validated proposal at a350fe07b25b4a67dc0ca714bb70633041c5b9e5 is PROPOSAL_NOT_AUTHORITY. It cannot itself authorize Tailscale Serve, a backend process, network access, or root/helper changes.
+- Do not bypass the remaining authority gate with generic shell, manual sidecar, arbitrary tailscale commands, Workspace Shell network/profile widening, or helper-registry widening.
+- After an authority-owned host review binds all four values and authorizes the exact activation mechanism, run the account-free exact-host fake-worker harness before any real ChatGPT account use.
 
 ## Fresh-chat initialization
 
