@@ -109,10 +109,10 @@
   - [x] Activation semantic receipt: `job-d479bb9c-2ab2-4b01-b082-0921a173f0ac`; evaluator denial receipt: `job-0841ffee-e93e-4316-81a4-0a01a7d7bbfb`.
   - [x] Owning live-acceptance authority `05c7be116320ea8640b38870d622cf2b0023292e` passed Workspace #2945.
   - [x] Umbrella live-acceptance head `92325102e5730199a7735f09b17b8730a50d3185` passed Workspace #2946 / Semantic #241 / Operator #519.
-- [ ] **D2 — Establish explicit reviewed deployment authority for the localhost Operator Bridge backend + authenticated private Tailscale Serve route.**
+- [x] **D2 — Establish explicit reviewed deployment authority for the localhost Operator Bridge backend + authenticated private Tailscale Serve route.**
   - [x] Non-authoritative activation proposal frozen at `a350fe07b25b4a67dc0ca714bb70633041c5b9e5`; Workspace #2950 / Semantic #245 / Operator #523 PASS.
   - [x] Proposed exact backend binding: `127.0.0.1:8765`, state key `control`, base path `/operator-bridge/v1`, private Tailscale Serve HTTPS only.
-  - [x] Host review candidate `0668650142eb37fbd77f70b2983a30df17a03dc5` binds the exact private URL plus runtime-only Tailscale identity derivation, isolated temporary PostgreSQL DSN construction, and exact activation mechanism; Workspace #2958 / Semantic #256 / Operator #531 PASS.\n  - [ ] Explicit operator approval of that exact validated candidate is still required before execution.
+  - [x] Host review candidate `0668650142eb37fbd77f70b2983a30df17a03dc5` binds the exact private URL plus runtime-only Tailscale identity derivation, isolated temporary PostgreSQL DSN construction, and exact activation mechanism; Workspace #2958 / Semantic #256 / Operator #531 PASS.\n  - [x] Operator explicitly approved exact host-review `0668650142eb37fbd77f70b2983a30df17a03dc5` and transaction `8116662727003e9fe0904fa88ff7836608aeac00`; narrow durable authority is recorded in `architecture/workspace-semantic-execution-private-route-activation-authority.v0.1.json`.
   - [x] Transport design is already selected and validated: outbound-only HTTPS over authenticated tailnet; backend listens only on localhost; Tailscale Serve injects authenticated identity; no helper credential store; no public endpoint/Funnel.
   - [x] Production server composition and Windows HTTPS client are already repository-validated.
   - [x] Host-specific transaction candidate `8116662727003e9fe0904fa88ff7836608aeac00` / blob `765c846e7b6c1297f4a0a8871c2fdd34b453b5c2` freezes exact localhost port, runtime-only identity, isolated Postgres source, rollback, and fake-worker-only scope.\n  - [x] Tailnet `tailca6171.ts.net`, Linux `gokhan-lambda-vector`, Windows `desktop-ub9p70p`, MagicDNS ON, HTTPS certificates ON.
@@ -136,7 +136,7 @@
 ## Current gates / non-negotiable boundaries
 
 - **Workspace Shell semantic/evaluator activation:** COMPLETE and independently verified. Do not redo the activation sequence unless a real regression appears.
-- **Private Operator Bridge route:** VALIDATED HOST-REVIEW CANDIDATE EXISTS, BUT IS NOT AUTHORITY. `06686501…` is 3/3 green and the exact transaction is pinned at `81166627…`; the remaining hard gate is explicit operator approval before any host mutation.
+- **Private Operator Bridge route:** EXPLICITLY AUTHORIZED FOR FAKE-WORKER-ONLY EXACT TRANSACTION `81166627…` on `gokhan-lambda-vector`. Remaining gate is live PASS + rollback evidence; Stage 12 stays blocked until that evidence exists.
 - **Codex:** suspended until PR #627/#630 lineage is trusted/promoted; subscription-only, no API billing, no credits/API-key fallback.
 - **Operator real account:** Stage-10 is complete; no Stage-12 until exact-host fake-worker transport passes through the reviewed private route.
 - **Reasoning Economy claim-bearing runs:** evaluator isolation gate is now satisfied live; launches still require reviewed live executor transport plus calibrated comparable weekly allowance telemetry. Do not manually grind the frozen 54-run matrix.
@@ -176,4 +176,4 @@
 - [x] Materializer readiness, semantic exact-SHA execution, exact receipt binding, evaluator worker denial, sealed-store isolation, and transactional promotion all passed on the real host.
 - [x] Post-activation independent receipts confirm the promoted runtime and frozen semantic execution remain exact and clean.
 - [x] Private-route authority audit completed at `ab6b82df2e5886663f32b289a68939eed6be86f4`; Workspace #2947 / Semantic #242 / Operator #520 all PASS.
-- [ ] Next executable live milestone is **not another Workspace Shell repair**. It is explicit operator approval of `06686501…` / activation transaction `81166627…`, followed immediately by the account-free exact-host fake-worker round trip and rollback proof.
+- [ ] Next executable live milestone is the now-authorized exact transaction `81166627…` on `gokhan-lambda-vector`, followed by account-free exact-host fake-worker PASS and rollback proof.

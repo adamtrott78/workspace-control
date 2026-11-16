@@ -70,13 +70,13 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-PRIVATE ROUTE HOST REVIEW CANDIDATE IS VALIDATED, NOT YET AUTHORIZED. Exact host-review head 0668650142eb37fbd77f70b2983a30df17a03dc5 passed Workspace #2958, Semantic #256 and Operator #531. It binds the private URL https://gokhan-lambda-vector.tailca6171.ts.net and exact activation script candidate 8116662727003e9fe0904fa88ff7836608aeac00 while keeping the Tailscale login and ephemeral PostgreSQL DSN runtime-only and unlogged. Smallest next action: operator explicitly approves that exact reviewed activation candidate. Only after that approval execute the exact transaction on gokhan-lambda-vector; require PRIVATE_ROUTE_FAKE_WORKER_ACCEPTANCE=PASS plus Serve rollback PASS before Stage 12.
+PRIVATE ROUTE ACTIVATION IS NOW EXPLICITLY AUTHORIZED FOR FAKE-WORKER-ONLY SCOPE. Operator approved exact validated host-review 0668650142eb37fbd77f70b2983a30df17a03dc5 and exact activation transaction 8116662727003e9fe0904fa88ff7836608aeac00 / blob 765c846e7b6c1297f4a0a8871c2fdd34b453b5c2. Execute only that transaction on gokhan-lambda-vector, capture exact output, and require PRIVATE_ROUTE_FAKE_WORKER_ACCEPTANCE=PASS plus TAILSCALE_SERVE_ROLLBACK=PASS. On any failure, stop and diagnose exact evidence; do not widen authority. Stage 12 remains blocked until full PASS.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: Workspace Shell semantic/evaluator activation is COMPLETE; the exact private-route host review candidate 06686501… is 3/3 green and binds https://gokhan-lambda-vector.tailca6171.ts.net plus activation script 81166627…. Next obtain explicit operator approval of that exact candidate, execute the fake-worker-only transaction, and require full acceptance + rollback before any real-account use.
+- LIVE INSTANT: exact private-route fake-worker activation is explicitly authorized at architecture/workspace-semantic-execution-private-route-activation-authority.v0.1.json. Execute only transaction 81166627… on gokhan-lambda-vector; require full fake-worker acceptance and rollback PASS before any real-account Stage-12 work.
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
@@ -85,11 +85,9 @@ PRIVATE ROUTE HOST REVIEW CANDIDATE IS VALIDATED, NOT YET AUTHORIZED. Exact host
 ## Blockers / gates
 
 - Workspace Shell semantic/evaluator activation is COMPLETE and independently verified.
-- Tailscale host prerequisites are confirmed for tailca6171.ts.net: gokhan-lambda-vector and desktop-ub9p70p are on the same tailnet; MagicDNS and HTTPS certificates are enabled.
-- Host-specific private-route review candidate 0668650142eb37fbd77f70b2983a30df17a03dc5 passed Workspace #2958 / Semantic #256 / Operator #531 but remains REVIEW_CANDIDATE_NOT_AUTHORITY.
-- Exact activation mechanism is benchmarks/workspace-semantic-execution/private_route_fake_worker_activation_v1.sh at candidate commit 8116662727003e9fe0904fa88ff7836608aeac00 / blob 765c846e7b6c1297f4a0a8871c2fdd34b453b5c2. It derives the Tailscale login at runtime, uses an isolated temporary local PostgreSQL instance, refuses pre-existing Serve/Funnel configuration, exposes only 127.0.0.1:8765 through private HTTPS, and rolls back the exact 443 mapping.
-- Live activation remains blocked solely on explicit operator approval of the exact validated candidate. Model reasoning, generic shell, helper-registry widening, Workspace Shell network widening, Funnel, public listeners, or manual sidecars do not create that authority.
-- After explicit approval, run the account-free exact-host fake-worker transaction and require full PASS plus rollback before any real ChatGPT account use.
+- Private-route host review is COMPLETE and explicit operator approval now authorizes only the exact fake-worker transaction 8116662727003e9fe0904fa88ff7836608aeac00 on gokhan-lambda-vector.
+- The remaining gate is live execution evidence, not design or authority: run the exact transaction and require complete fake-worker PASS plus Serve rollback PASS.
+- Any mismatch/failure remains fail-closed. No generic shell authority, helper-registry widening, Workspace Shell network widening, Funnel, public listener, production Postgres mutation, real account, model, browser, or GPU authority is granted.
 
 ## Fresh-chat initialization
 
