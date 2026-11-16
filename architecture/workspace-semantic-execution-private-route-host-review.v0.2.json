@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-private-route-host-review-v0.2",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "supersedes_review": "architecture/workspace-semantic-execution-private-route-host-review.v0.1.json",
+  "purpose": "Revise only the Tailscale Serve conflict policy after attempt 01 discovered an existing private HTTPS 443 root handler for localhost:8888.",
+  "exact_source_bindings": {
+    "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
+    "prior_authority_attempt": "architecture/workspace-semantic-execution-private-route-activation-attempt-01.v0.1.json",
+    "existing_serve_observation": "architecture/workspace-semantic-execution-existing-tailscale-serve-observation.v0.1.json",
+    "activation_script_path": "benchmarks/workspace-semantic-execution/private_route_fake_worker_activation_v2.sh"
+  },
+  "frozen_host_bindings": {
+    "private_base_url": "https://gokhan-lambda-vector.tailca6171.ts.net",
+    "tailnet": "tailca6171.ts.net",
+    "linux_host": "gokhan-lambda-vector",
+    "windows_operator_host": "desktop-ub9p70p",
+    "tailscale_identity": "RUNTIME_ONLY_NOT_COMMITTED_NOT_LOGGED",
+    "postgres_dsn": "TEMPORARY_ISOLATED_RUNTIME_ONLY"
+  },
+  "coexistence_contract": {
+    "https_port": 443,
+    "existing_root_path": "/",
+    "existing_root_proxy": "http://127.0.0.1:8888",
+    "temporary_operator_path": "/operator-bridge/v1",
+    "temporary_operator_proxy": "http://127.0.0.1:8765/operator-bridge/v1",
+    "mount_prefix_behavior": "TAILSCALE_SET_PATH_STRIPS_PREFIX_SO_TARGET_REPEATS_PREFIX",
+    "add_command_shape": "tailscale serve --bg --https=443 --set-path=/operator-bridge/v1 http://127.0.0.1:8765/operator-bridge/v1",
+    "rollback_command_shape": "tailscale serve --https=443 --set-path=/operator-bridge/v1 off",
+    "global_serve_reset": false,
+    "global_serve_off": false,
+    "exact_preexisting_config_restore_required": true,
+    "funnel": false
+  },
+  "activation_scope": {
+    "fake_worker_only": true,
+    "real_chatgpt_account": false,
+    "model_inference": false,
+    "browser_automation": false,
+    "gpu_required": false,
+    "production_postgres_mutation": false
+  },
+  "authority_gate": {
+    "live_activation_authorized": false,
+    "explicit_operator_approval_of_new_exact_candidate_required": true,
+    "model_reasoning_is_not_authority": true
+  }
+}
