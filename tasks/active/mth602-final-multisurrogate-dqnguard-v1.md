@@ -6,51 +6,55 @@ Authoritative capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 ## Track-A backbone state
 
 - Canonical backbone bank: **9/10 COMPLETE**
-- Sole remaining training:
-  - GPU0: PA3-PA4 — run 43943016274 / job 133565212672
-- GPU1 is idle pending evaluator workflow activation.
+- Sole remaining training: GPU0 PA3-PA4 — run 43943016274 / job 133565212672
+- GPU0 run remains IN_PROGRESS.
 - Reverse-direction backbone retraining remains forbidden.
 
-## Workspace Shell / PR #26 validation
+## PR #26 evaluator validation
 
-- Workspace Shell stale-authority gate: **CLEARED**
-- Refresh Tools exposed `candidate-pytest`.
-- PR #26 current validated candidate SHA: `15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766`
+- Workspace Shell `candidate-pytest` available after Refresh Tools.
+- PR #26 validated candidate SHA: `15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766`
 - candidate tree: `a384451c831db92834ab3e14e480de806acf5bf4`
-- candidate receipt: `job-ef08c200-1c9d-4fc3-a10d-4c9d0a1084a4`
-- result: **35 passed**
-- durable PADataset checkpoint bound in receipt: `befe383fd67c8bca8d8ce370344b33c7e13cd52f`
-- ordinary task-bound execution still rejects the off-checkpoint candidate with `TASK_SHA_MISMATCH`.
+- receipt: `job-ef08c200-1c9d-4fc3-a10d-4c9d0a1084a4`
+- **35 passed**
+- durable PADataset checkpoint in receipt: `befe383fd67c8bca8d8ce370344b33c7e13cd52f`
+- ordinary task-bound execution rejects the off-checkpoint candidate with `TASK_SHA_MISMATCH`.
 
-PR #26 required a tracked `local_artifacts/evidence/` mountpoint marker because clean Git materializations do not preserve empty directories. This preserves the read-only evidence bind; no Workspace Shell guard was weakened.
+## PR #27 merge / activation attempt
 
-## GPU2 directional evaluator workflow candidate
+Explicit authority was granted to merge and activate PR #27 only.
 
-- PADataset draft PR #27
-- branch: `mth602-l2o-evaluator-workflow-v1`
-- exact head: `613387d22299bbb11481aa38b745be2f2fc29617`
-- validation receipt: `job-e81ee184-0f61-40c8-a3e6-42a71bd87ade`
-- result: **3 passed**
-- diff:
-  - new GPU2-only bounded directional evaluator workflow
-  - static authority-surface contract test
-  - Workspace Shell evidence mountpoint marker
-- workflow accepts only frozen request manifests under `manifests/configs/l2o_directional_eval_v1/`
-- permissions are read-only: actions / contents / pull requests
-- no backbone-training operation exists in the new workflow
-- PR #27 is **draft, unmerged, inactive**
-- no merge authority has been granted
+- PR #27 head: `613387d22299bbb11481aa38b745be2f2fc29617`
+- merged successfully to PADataset main: `7782be95f409dc7bccf2729915e4014c0178428c`
+- evaluator workflow blob: `ba825a98f0aa49bbdc78f5ed37faaf33c1982b4a`
+- first frozen acceptance cell: PA1 -> PA2
+- evaluator run: `43963122999`
+- evaluator job: `133635479325`
+- status: **QUEUED**
+- trusted lane-B smoke run: `43963420422`
+- trusted lane-B smoke job: `133636487691`
+- status: **QUEUED**
+- shared provisioner: active/running
+
+## Live control-plane blocker
+
+Lane B remains bound to exactly one trusted workflow:
+
+- path: `.github/workflows/lambda-ci-scientific-2.yml`
+- blob: `6280a6e7b2ad8cc379277fa320e8839a94f360ec`
+
+The newly merged evaluator workflow is a different path/blob and therefore is not authorized by the live lane-B controller. The reviewed Workspace Shell helper registry contains no lane-B workflow-refresh helper.
+
+No controller trust was widened and no privileged authority was invented.
 
 ## Next safe action
 
-A genuine authority gate has been reached.
+A separate reviewed lane-B trusted-workflow refresh path is required.
 
-If explicit merge/activation authority is granted for **PR #27 only**:
-1. merge PR #27;
-2. verify the exact resulting default-branch workflow SHA;
-3. launch one already-frozen PR #26 directional request on GPU2;
-4. inspect the complete result artifact and scientific receipt before scheduling more cells.
+Preferred correction:
+1. extend the existing trusted `.github/workflows/lambda-ci-scientific-2.yml` with the bounded `l2o_directional_eval` operation;
+2. validate the exact candidate;
+3. refresh lane-B's trusted workflow blob through a reviewed, one-shot root/operator authority path;
+4. launch one frozen cell and verify its scientific receipt before scheduling further cells.
 
-Separately, continue monitoring PA3-PA4. On SUCCESS, freeze backbone #10 and create its final two directional evaluator requests.
-
-Do not merge PR #26 or any backbone PR without separate explicit authority.
+Do not mutate live lane-B controller trust without separate explicit authority.
