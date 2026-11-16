@@ -36,7 +36,7 @@ Complete the MTH602/DQNGuard follow-on program with two scientifically separated
 
 ## Next safe action
 
-Fresh chat: read this capsule plus PADataset PR #23, PR #21, and Workspace Control PR #636. First confirm refreshed Workspace Shell exposes candidate-pytest, then run candidate-pytest on PR #23 exact SHA 4f27d00cce9ab15120d924963a5ecf049d032c52 while durable PADataset authority remains befe383fd67c8bca8d8ce370344b33c7e13cd52f. If PASS, verify receipt/unchanged authority. Next exercise PR #21 fd15238... PA1 provenance preflight from the persistent checkout and resume STFT only on PASS, preserving the first 120 overlays. Then execute Architecture-B B0 softmax3 on the strong PA2 seed0 backbone.
+Operator refresh the live Workspace Shell authority snapshot from this IN_PROGRESS continuation while keeping workspace-control execution pinned to 4469009659182c8c2f4d12d727e556f2a2995fc9 and PADataset pinned to befe383fd67c8bca8d8ce370344b33c7e13cd52f. Then use a newly loaded Workspace Shell schema that exposes candidate-pytest and run candidate-pytest on PADataset PR #23 exact SHA 4f27d00cce9ab15120d924963a5ecf049d032c52. If PASS, verify receipt binds the durable checkpoint plus candidate SHA/tree and confirm ordinary task-bound execution still rejects the off-checkpoint SHA. Next exercise PR #21 fd15238... PA1 provenance preflight from the persistent checkout and resume STFT only on PASS, preserving the first 120 overlays. Then execute Architecture-B B0 softmax3 on the strong PA2 seed0 backbone.
 
 ## Remaining work
 
@@ -50,6 +50,7 @@ Fresh chat: read this capsule plus PADataset PR #23, PR #21, and Workspace Contr
 
 ## Blockers / gates
 
+- Live Workspace Shell authority snapshot still contains the prior CHECKPOINTED MTH602 capsule; root/operator authority refresh from this IN_PROGRESS continuation is required before Workspace Shell can execute the task.
 - Current conversation still exposes old cached Workspace Shell profile enum; fresh chat is required for candidate-pytest.
 - STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly.
 
