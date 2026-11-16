@@ -6,7 +6,7 @@
   "goal": "Complete the MTH602/DQNGuard follow-on program with two scientifically separated tracks: (A) repair the published Target–Surrogate control by retraining competent leave-two-out backbones, and (B) develop single-backbone multi-surrogate OSR using a competent target-withheld four-known backbone. In parallel, finish the STFT/time-frequency representation diagnostic for the PA1↔PA4 boundary. Preserve true-target quarantine, known-only selection/threshold semantics, exact provenance, and keep OSR-method changes separate from backbone/representation changes.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "trackb_archb_cross_surrogate",
+  "current_stage": "tracka_l2o_control_repair",
   "acceptance_criteria": [
     "Track A remains a control repair: original leave-two-out target/surrogate taxonomy and original DQNGuard evaluator are preserved while backbones are retrained to genuine convergence under known-only selection.",
     "Track B compares Architecture A (pooled DQN), Architecture B (surrogate-specific DQNs with cross-surrogate selection), and Architecture C (hybrid pooled DQN + deterministic guard) on the same competent target-withheld four-known backbone/evidence partitions.",
@@ -186,19 +186,50 @@
     },
     {
       "id": "tracka_l2o_control_repair",
-      "status": "PLANNED",
-      "execution_owner": "chatgpt",
-      "selected_executor": "lambda-scientific-after-protocol-freeze",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt+automation",
+      "selected_executor": "lambda-scientific-lane-a+lane-b",
       "selected_surface": "github+lambda",
       "inputs": [
-        "mth602-l2o-matrix-repair-v1@4aae5d293664b1f8fabf6e6d6b3f47bc009a3cc8"
+        "PADataset PR #24 runtime-only w4 exact head d1fd5b6d414e7b88675485f576732a424504455f",
+        "PADataset PR #26 directional evaluator/artifact contract stack on PR #24",
+        "canonical unordered excluded-pair reduction: 20 directed cells -> 10 unique backbone trainings"
       ],
       "outputs": [
-        "competent leave-two-out backbone bank",
-        "corrected 20-cell matrix"
+        "10 provenance-frozen canonical leave-two-out backbones",
+        "20 frozen directional DQNGuard evaluation requests",
+        "corrected 20-cell Track-A matrix with true-target quarantine"
       ],
-      "validation": [],
-      "resume_condition": "Freeze PA1-aware known-only backbone/HPO protocol first."
+      "validation": [
+        {
+          "check": "Reverse-pair backbone equivalence",
+          "result": "PASS",
+          "evidence": [
+            "PA1↔PA4 reverse training produced 176/176 exactly equal model_state_dict tensors for best and final checkpoints.",
+            "Therefore one backbone per unordered excluded pair is sufficient; evaluator direction remains ordered."
+          ]
+        },
+        {
+          "check": "Canonical backbone bank progress",
+          "result": "IN_PROGRESS",
+          "evidence": [
+            "6/10 unique canonical backbones are COMPLETE and frozen in PR #26 canonical manifest: PA1-PA2, PA1-PA3, PA1-PA4, PA1-PA8, PA2-PA4, PA4-PA8.",
+            "PA1-PA3 run 43900286950/job 133414700376 SUCCESS; best epoch 26; best val macro-F1 0.999925851719; known-test macro-F1 0.9998517364899926; target_test_consumed=false.",
+            "PA2-PA3 run 43921420197/job 133489412741 is IN_PROGRESS on GPU1.",
+            "PA2-PA8 run 43926895324/job 133508635811 is IN_PROGRESS on GPU0."
+          ]
+        },
+        {
+          "check": "Directional evaluator candidate",
+          "result": "CANDIDATE_READY",
+          "evidence": [
+            "PADataset draft PR #26 is stacked on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
+            "PR #26 freezes directional evaluator policy, per-cell request manifests for completed backbones, GitHub artifact ID/digest transport binding, ZIP/checkpoint/config provenance rehydration, and target-quarantine checks.",
+            "Authoritative Workspace Shell pytest remains blocked by stale live CHECKPOINTED task authority; no guard bypassed."
+          ]
+        }
+      ],
+      "resume_condition": "Continue unique canonical backbones until 10/10; then validate PR #26 through authorized candidate execution before running the frozen 20-cell evaluator matrix."
     },
     {
       "id": "trackb_archb_cross_surrogate",
@@ -396,6 +427,27 @@
       "evidence": [
         "First action candidate-pytest PR #23; then PR #21 PA1 preflight/resume; do not rebuild first 120 STFT records; Track A stays separate."
       ]
+    },
+    {
+      "id": "trackA-runtime-w4-candidate",
+      "kind": "git_commit",
+      "identity": "d1fd5b6d414e7b88675485f576732a424504455f",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset PR #24 OPEN/DRAFT/UNMERGED; runtime-only num_workers=4 acceleration with frozen batch/scientific semantics.",
+        "Current canonical training jobs are bound to this exact SHA."
+      ]
+    },
+    {
+      "id": "trackA-directional-evaluator-candidate",
+      "kind": "git_commit",
+      "identity": "ac6c4f19e4e5f605665c8ea6101b9b7566eab6ec",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset PR #26 OPEN/DRAFT/UNMERGED; base exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
+        "Contains canonical matrix, frozen evaluator policy, per-direction requests, artifact transport binding, provenance-safe rehydration, and contract tests.",
+        "No workflow authority changes; no merge authority."
+      ]
     }
   ],
   "artifacts": [],
@@ -420,6 +472,16 @@
       "evidence": [
         "PR #21 fd15238... passed CPU canary 43788103594; live repaired preflight/resume pending."
       ]
+    },
+    {
+      "check": "Track-A canonical matrix progress",
+      "result": "IN_PROGRESS",
+      "evidence": [
+        "6/10 unique canonical backbones frozen; 4 remain.",
+        "GPU0 PA2-PA8 run 43926895324/job 133508635811 IN_PROGRESS.",
+        "GPU1 PA2-PA3 run 43921420197/job 133489412741 IN_PROGRESS.",
+        "Target quarantine preserved on all frozen completed backbones."
+      ]
     }
   ],
   "blockers": [
@@ -428,16 +490,16 @@
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
-    "Fresh chat: confirm candidate-pytest exists, then run `pytest -q tests/test_cross_surrogate_dqnguard.py` at PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52 under task mth602-final-multisurrogate-dqnguard-v1 while durable authority stays befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
-    "Verify candidate receipt binds durable checkpoint + candidate SHA/tree and ordinary task-bound execution still rejects the off-checkpoint SHA.",
-    "Materialize PR #21 exact head fd15238aa369118e61b21ab714900861dbb99d2c in persistent STFT checkout; run repaired PA1 provenance preflight; resume only on PASS and skip first 120 completed overlays.",
-    "After B unit validation, run B0 softmax3 on the strong PA2 seed0 four-known backbone; freeze winner from off-diagonal transfer before true PA2 evaluation.",
-    "Then B1 expanded5, then B2 with bands; keep A pooled and C hybrid as matched baselines.",
-    "Separately freeze PA1-aware known-only backbone/HPO and execute Track A corrected leave-two-out matrix.",
+    "Finish the remaining unique Track-A canonical backbone bank without reverse duplicates: current PA2-PA3 and PA2-PA8, then PA3-PA4 and PA3-PA8. Freeze exact artifact/checkpoint/config provenance after each SUCCESS.",
+    "Generate the remaining frozen per-direction evaluator request manifests as each canonical backbone completes; final bank is 10 backbones / 20 directed cells.",
+    "Refresh live Workspace Shell authority from this IN_PROGRESS continuation without rebinding live execution SHA 5401045341090a26a42ce3a497c379f8223a3b54 or PADataset authority befe383fd67c8bca8d8ce370344b33c7e13cd52f; then validate PR #26 contract tests through authorized candidate execution.",
+    "After PR #26 validation, add/review the bounded artifact-download + l2o directional evaluator operation in the authority-owned scientific workflow; do not execute an unreviewed candidate workflow.",
+    "Run the frozen Track-A 20-cell directional DQNGuard matrix with surrogate-only calibration and known-only threshold selection; target labels are final-evaluation-only.",
+    "Then resume Track-B Architecture B and the STFT diagnostic under their existing gates.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "Operator refresh the live Workspace Shell authority snapshot from this IN_PROGRESS continuation while preserving the live Workspace Shell workspace-control execution snapshot at 5401045341090a26a42ce3a497c379f8223a3b54, preserving PADataset execution at befe383fd67c8bca8d8ce370344b33c7e13cd52f, and leaving the MTH602 recorded Workspace Control dependency generation at 4469009659182c8c2f4d12d727e556f2a2995fc9. Then use a newly loaded Workspace Shell schema that exposes candidate-pytest and run candidate-pytest on PADataset PR #23 exact SHA 4f27d00cce9ab15120d924963a5ecf049d032c52. If PASS, verify the receipt binds the durable PADataset checkpoint plus candidate SHA/tree and confirm ordinary task-bound execution still rejects the off-checkpoint SHA. Next exercise PR #21 fd15238... PA1 provenance preflight from the persistent checkout and resume STFT only on PASS, preserving the first 120 overlays. Then execute Architecture-B B0 softmax3 on the strong PA2 seed0 backbone.",
+  "next_safe_action": "Keep both scientific GPU lanes saturated only with the remaining unique Track-A canonical backbones bound to PADataset PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f. Current live jobs: GPU0 PA2-PA8 run 43926895324/job 133508635811 and GPU1 PA2-PA3 run 43921420197/job 133489412741. On each SUCCESS, freeze exact workflow/artifact/checkpoint/config evidence into PADataset PR #26 and create the two frozen directional evaluator request manifests; never train the reverse direction. In parallel, preserve the existing Workspace Shell blocker: authoritative candidate pytest remains fail-closed until the live MTH602 authority snapshot is refreshed from this IN_PROGRESS capsule while keeping workspace-control execution at 5401045341090a26a42ce3a497c379f8223a3b54, PADataset authority at befe383fd67c8bca8d8ce370344b33c7e13cd52f, and recorded dependency generation at 4469009659182c8c2f4d12d727e556f2a2995fc9.",
   "last_executor": "chatgpt",
-  "last_surface": "github+workspace-shell+plugin-creator+lambda",
-  "notes": "Primary fresh-chat recovery surface for the reframed MTH602/DQNGuard program. Track A repairs the published leave-two-out control; Track B develops single-backbone OSR. Architecture-B is primary next method: surrogate-specific DQNs selected only by off-diagonal transfer. PA1↔PA4 has a physically motivated time-frequency/recurrence distinction, so STFT is a diagnostic/ablation rather than a presumed fix. Workspace Shell permanent candidate-evidence repair is live and plugin v1.0.1 is installed, but this conversation still has the old cached tool enum. First 120 STFT overlay records are durable and must not be rebuilt."
+  "last_surface": "github+lambda+workspace-control",
+  "notes": "Track A is now the active execution stage. Reverse-pair equivalence reduces the 20 directed evaluator cells to 10 unique backbone trainings. Six canonical backbones are frozen with exact provenance; PA2-PA3 and PA2-PA8 are live. Draft PR #26, stacked on exact runtime PR #24 head d1fd5b6d..., contains the provenance-safe directional evaluator/request/artifact contracts. No workflow authority or merge authority is inferred. Track B and STFT remain preserved but are not consuming the current GPUs."
 }
