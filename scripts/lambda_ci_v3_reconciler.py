@@ -141,6 +141,19 @@ PADATASET_SCIENTIFIC_DUAL_TARGET_ROUTE = "padataset:scientific-single-gpu-2"
 PADATASET_SCIENTIFIC_DUAL_TARGET_SCALE_SET = "lambda-padataset-scientific-single-gpu-2"
 PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH = ".github/workflows/lambda-ci-scientific-2.yml"
 PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB = "6280a6e7b2ad8cc379277fa320e8839a94f360ec"
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_BLOB = (
+    "5f29137d9636ed170d3735d0f273220e7cf6f377"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_PAD_MAIN = (
+    "4674d1b07d7d7bb7ee3cbe4ab8a709d536486c13"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh"
+    / "active.json"
+)
 PADATASET_SCIENTIFIC_DUAL_GPU0 = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
 PADATASET_SCIENTIFIC_DUAL_GPU1 = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
 PADATASET_SCIENTIFIC_DUAL_OVERRIDE_DESTINATIONS = set(
@@ -609,6 +622,53 @@ def _padataset_scientific_dual_lane_override(
     return active
 
 
+def _padataset_scientific_dual_lane_workflow_refresh(
+    dual_active: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_ACTIVE_RECEIPT
+    ):
+        return None
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh",
+    )
+    dual_raw = PADATASET_SCIENTIFIC_DUAL_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH",
+        "phase": "ACTIVE",
+        "dual_active_receipt_sha256": _sha256(dual_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB,
+        "workflow_blob_sha": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_BLOB,
+        "padataset_main_sha": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            dual_active["target_controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh {key} invalid"
+            )
+    return refresh
+
+
 def _verify_padataset_scientific_effective_state(
     active: dict[str, Any],
     workflow_refresh: dict[str, Any] | None = None,
@@ -733,6 +793,7 @@ def _verify_padataset_scientific_dual_lane_effective_state(
     scientific_active: dict[str, Any],
     workflow_refresh: dict[str, Any] | None,
     dual_active: dict[str, Any],
+    dual_workflow_refresh: dict[str, Any] | None,
 ) -> None:
     root_policy = _json(V3_CONFIG_ROOT / "root-policy.json")
     if root_policy.get("root_policy_sha256") != dual_active["root_policy_sha256"]:
@@ -879,18 +940,25 @@ def _verify_padataset_scientific_dual_lane_effective_state(
         / "controllers"
         / f"{PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS}.json"
     )
-    if (
-        controller_b.get("controller_policy_sha256")
-        != dual_active["target_controller_policy_sha256"]
-    ):
+    expected_b_policy_sha = (
+        dual_workflow_refresh["controller_policy_sha256"]
+        if dual_workflow_refresh is not None
+        else dual_active["target_controller_policy_sha256"]
+    )
+    if controller_b.get("controller_policy_sha256") != expected_b_policy_sha:
         raise ReconcileError("PADataset lane B controller policy digest mismatch")
     workflows_b = controller_b.get("trusted_workflows")
+    expected_b_blob = (
+        dual_workflow_refresh["workflow_blob_sha"]
+        if dual_workflow_refresh is not None
+        else PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB
+    )
     if (
         not isinstance(workflows_b, list)
         or len(workflows_b) != 1
         or workflows_b[0].get("route_id") != "scientific-single-gpu-2"
         or workflows_b[0].get("path") != PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH
-        or workflows_b[0].get("blob_sha") != PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB
+        or workflows_b[0].get("blob_sha") != expected_b_blob
     ):
         raise ReconcileError("PADataset lane B workflow binding drift")
 
@@ -1395,6 +1463,11 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_override is not None
         else None
     )
+    scientific_dual_workflow_refresh = (
+        _padataset_scientific_dual_lane_workflow_refresh(scientific_dual_lane)
+        if scientific_dual_lane is not None
+        else None
+    )
     scientific_overrides = (
         scientific_override["managed_artifact_overrides"]
         if scientific_override is not None
@@ -1518,7 +1591,20 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             raise ReconcileError(
                 f"PADataset scientific dual-lane managed addition mode drift: {path}"
             )
-        if _sha256(path.read_bytes()) != binding["sha256"]:
+        expected_addition_sha = binding["sha256"]
+        if (
+            scientific_dual_workflow_refresh is not None
+            and destination
+            == str(
+                V3_CONFIG_ROOT
+                / "controllers"
+                / f"{PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS}.json"
+            )
+        ):
+            expected_addition_sha = scientific_dual_workflow_refresh[
+                "controller_policy_file_sha256"
+            ]
+        if _sha256(path.read_bytes()) != expected_addition_sha:
             raise ReconcileError(
                 f"PADataset scientific dual-lane managed addition digest drift: {path}"
             )
@@ -1647,6 +1733,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
                 scientific_override,
                 scientific_workflow_refresh,
                 scientific_dual_lane,
+                scientific_dual_workflow_refresh,
             )
         else:
             _verify_padataset_scientific_effective_state(
