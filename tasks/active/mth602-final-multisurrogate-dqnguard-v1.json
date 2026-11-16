@@ -813,6 +813,18 @@
         "Workspace Shell candidate-pytest receipt job-7cead1f2-3c5e-4a7d-b870-672c09c52086: 14 passed.",
         "PR #32 remains OPEN/DRAFT/UNMERGED; current default-branch lane-A workflow does not yet authorize l2o_directional_eval."
       ]
+    },
+    {
+      "check": "Track-A live result preview through run 81",
+      "result": "PASS_5_ADDITIONAL_CELLS",
+      "evidence": [
+        "Run 43976863664 / workflow #80 / artifact 14282908704 SUCCESS: target PA1 <- surrogate PA4, unknown_f1=0.2410990600144613, unknown_precision=0.8921232876712328, unknown_recall=0.1393840082934822, known_reject_rate=0.0373527014007263, unknown_auroc=0.4308515404134873.",
+        "Run #80 provenance remains frozen/leakage-safe: target_labels_used_for_tuning=false; surrogate_only_open_calibration=true; threshold_source=known_only; mix_true_open=false.",
+        "Run 43976868643 / workflow #81 / artifact 14282869869 SUCCESS: target PA4 <- surrogate PA1, unknown_f1=0.858483687015051, unknown_precision=0.9775601447732596, unknown_recall=0.7652666666666667, known_reject_rate=0.0390572889646483, unknown_auroc=0.9302384730354012.",
+        "Run #81 provenance remains frozen/leakage-safe: target_labels_used_for_tuning=false; surrogate_only_open_calibration=true; threshold_source=known_only; mix_true_open=false.",
+        "Compared with the paper matrix, PA1<-PA4 changed 0.71 -> 0.2410990600144613 while PA4<-PA1 changed 0.84 -> 0.858483687015051. Directional asymmetry therefore remains material under the repaired backbone protocol.",
+        "Across the first six comparable paper/new cells, paper mean unknown_f1=0.5583333333333333 and current frozen mean unknown_f1=0.6976080043854656; this is descriptive only and must not drive retries or method selection."
+      ]
     }
   ],
   "blockers": [
@@ -822,7 +834,7 @@
   "remaining_work": [
     "Obtain explicit merge authority for PADataset draft PR #32. After merge, bind the exact new PADataset main SHA and lane-A workflow blob, construct/validate a chained lane-A trusted-workflow refresh, and execute it only under fresh root/operator authority with lane A quiescent.",
     "Once GPU0 trust is live, redistribute only still-queued Track-A cells: cancel selected GPU2 queued runs first, then resubmit those exact cells once through /lambda-scientific on GPU0. Never duplicate an in-progress or completed cell.",
-    "Continue validating the GPU2 queue; at checkpoint time run 77 succeeded, run 78 was in progress, and runs 79-95 remained queued.",
+    "Continue validating the GPU2 queue; current checkpoint: runs 77-81 succeeded and runs 82-95 are queued. Do not duplicate or performance-select retries.",
     "After all 20 directional cells are terminal and provenance-valid, aggregate the frozen Track-A matrix.",
     "Then resume Track-B Architecture B and the separate STFT representation diagnostic."
   ],
