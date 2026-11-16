@@ -3,7 +3,6 @@ import argparse
 import json
 import os
 import select
-import shlex
 import shutil
 import signal
 import socket
@@ -320,142 +319,60 @@ def verify_source_tree(source_root, worker_uid):
     return source_root
 
 
-def _candidate_git_env(source):
-    env = {
-        "PATH": "/usr/bin:/bin",
-        "LANG": "C.UTF-8",
-        "LC_ALL": "C.UTF-8",
-        "GIT_CONFIG_NOSYSTEM": "1",
-        "GIT_CONFIG_GLOBAL": "/dev/null",
-        "GIT_OPTIONAL_LOCKS": "0",
-        "GIT_TERMINAL_PROMPT": "0",
+def candidate_materializer_rpc(cfg, target, candidate_sha):
+    socket_path = cfg.get("candidate_materializer_socket")
+    if not isinstance(socket_path, str) or not socket_path.startswith("/run/workspace-shell-control/"):
+        fail("CANDIDATE_MATERIALIZER_CONFIG_INVALID", "candidate materializer socket is not trusted")
+    request = {
+        "schema": "workspace-shell-candidate-materialize.v1",
+        "target": target,
+        "candidate_sha": candidate_sha,
     }
-    transport = source.get("transport")
-    if transport == "public_https":
-        url = source.get("url")
-        if not isinstance(url, str) or not url.startswith("https://github.com/") or "@" in url.split("://", 1)[1]:
-            fail("CANDIDATE_SOURCE_CONFIG_INVALID", "public_https source URL must be credential-free GitHub HTTPS")
-    elif transport == "ssh_deploy_key":
-        url = source.get("url")
-        key_path = source.get("key_path")
-        known_hosts = source.get("known_hosts_path")
-        if not isinstance(url, str) or not url.startswith("git@github.com:"):
-            fail("CANDIDATE_SOURCE_CONFIG_INVALID", "ssh_deploy_key source URL must be GitHub SSH")
-        for field, value in (("key_path", key_path), ("known_hosts_path", known_hosts)):
-            if not isinstance(value, str) or not value.startswith("/etc/workspace-shell/candidate-sources/"):
-                fail("CANDIDATE_SOURCE_CONFIG_INVALID", f"{field} must live under candidate-sources policy root")
-            p = Path(value)
-            if not p.is_file() or p.is_symlink():
-                fail("CANDIDATE_SOURCE_CREDENTIAL_INVALID", f"{field} missing or symlinked")
-            st = os.lstat(p)
-            if st.st_uid != 0 or st.st_mode & 0o022:
-                fail("CANDIDATE_SOURCE_CREDENTIAL_INVALID", f"{field} ownership/mode invalid")
-            if field == "key_path" and st.st_mode & 0o077:
-                fail("CANDIDATE_SOURCE_CREDENTIAL_INVALID", "deploy key must be root-private")
-        env["GIT_SSH_COMMAND"] = " ".join([
-            "/usr/bin/ssh",
-            "-i", shlex.quote(str(key_path)),
-            "-o", "IdentitiesOnly=yes",
-            "-o", "BatchMode=yes",
-            "-o", "StrictHostKeyChecking=yes",
-            "-o", "UserKnownHostsFile=" + shlex.quote(str(known_hosts)),
-        ])
-    else:
-        fail("CANDIDATE_SOURCE_CONFIG_INVALID", "unsupported candidate transport")
-    return env
-
-
-def _run_candidate_git(args, *, cwd=None, env=None, timeout=30):
-    proc = subprocess.run(
-        ["/usr/bin/git", *args],
-        cwd=cwd,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        env=env,
-        timeout=timeout,
-        close_fds=True,
-        text=True,
-    )
-    if proc.returncode != 0:
-        message = proc.stderr.strip() or proc.stdout.strip() or "candidate git operation failed"
-        fail("CANDIDATE_SOURCE_FETCH_FAILED", message[:1000])
-    return proc.stdout.strip()
-
-
-def materialize_candidate_source(cfg, target, expected_sha, worker_uid):
-    sources = cfg.get("candidate_sources", {})
-    source = sources.get(target)
-    if not isinstance(source, dict):
-        fail("CANDIDATE_SOURCE_UNCONFIGURED", "target has no root-owned candidate source configuration")
-    repository = source.get("repository")
-    expected_repository = {
-        "workspace-control": "adamtrott78/workspace-control",
-        "PADataset": "adamtrott78/PADataset",
-    }.get(target)
-    if repository != expected_repository:
-        fail("CANDIDATE_SOURCE_CONFIG_INVALID", "candidate repository identity mismatch")
-
-    store = require_secure_directory(cfg.get("candidate_store_root"), owner_uid=0)
-    target_root = store / target
-    target_root.mkdir(mode=0o700, exist_ok=True)
-    st = os.lstat(target_root)
-    if st.st_uid != 0 or st.st_mode & 0o022:
-        fail("CANDIDATE_STORE_INVALID", "candidate target store ownership/mode invalid")
-
-    final = target_root / expected_sha
-    if final.exists():
-        root = verify_source_tree(final, worker_uid)
-        observed = hardened_git(root, ["rev-parse", "HEAD"])
-        dirty = hardened_git(root, ["status", "--porcelain=v1", "--untracked-files=normal"])
-        if observed != expected_sha or dirty:
-            fail("CANDIDATE_STORE_CORRUPT", "cached candidate does not match exact clean SHA")
-        return root, source.get("transport"), repository
-
-    temp = target_root / f".tmp-{expected_sha}-{uuid.uuid4().hex}"
-    temp.mkdir(mode=0o700)
-    env = _candidate_git_env(source)
+    body = (json.dumps(request, separators=(",", ":")) + "\n").encode("utf-8")
+    client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    client.settimeout(55)
     try:
-        _run_candidate_git(["init", "--quiet", str(temp)], env=env, timeout=10)
-        _run_candidate_git(
-            ["-C", str(temp), "remote", "add", "origin", source["url"]],
-            env=env,
-            timeout=10,
+        client.connect(socket_path)
+        client.sendall(body)
+        client.shutdown(socket.SHUT_WR)
+        chunks = []
+        total = 0
+        while True:
+            chunk = client.recv(8192)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > RESPONSE_LIMIT:
+                fail("CANDIDATE_MATERIALIZER_RESPONSE_TOO_LARGE", "materializer response exceeded limit")
+            chunks.append(chunk)
+    except OSError as exc:
+        fail("CANDIDATE_MATERIALIZER_UNAVAILABLE", str(exc))
+    finally:
+        client.close()
+    try:
+        payload = json.loads(b"".join(chunks).decode("utf-8"))
+    except Exception as exc:
+        fail("CANDIDATE_MATERIALIZER_RESPONSE_INVALID", str(exc))
+    if payload.get("ok") is not True:
+        fail(
+            payload.get("code") or "CANDIDATE_MATERIALIZER_DENIED",
+            payload.get("message") or "candidate materialization failed",
         )
-        _run_candidate_git(
-            ["-C", str(temp), "fetch", "--quiet", "--depth=1", "--no-tags", "origin", expected_sha],
-            env=env,
-            timeout=30,
-        )
-        _run_candidate_git(
-            ["-C", str(temp), "-c", "advice.detachedHead=false", "checkout", "--quiet", "--detach", "FETCH_HEAD"],
-            env=env,
-            timeout=20,
-        )
-        observed = hardened_git(temp, ["rev-parse", "HEAD"])
-        dirty = hardened_git(temp, ["status", "--porcelain=v1", "--untracked-files=normal"])
-        if observed != expected_sha or dirty:
-            fail("CANDIDATE_SOURCE_MISMATCH", "materialized candidate is not the requested clean SHA")
-        for root, dirs, files in os.walk(temp, topdown=False, followlinks=False):
-            for name in files + dirs:
-                p = Path(root) / name
-                try:
-                    mode = os.lstat(p).st_mode
-                    os.chmod(p, mode & ~0o022, follow_symlinks=False)
-                except (FileNotFoundError, NotImplementedError):
-                    pass
-        os.chmod(temp, os.lstat(temp).st_mode & ~0o022)
-        try:
-            temp.rename(final)
-        except FileExistsError:
-            shutil.rmtree(temp, ignore_errors=True)
-        root = verify_source_tree(final, worker_uid)
-        if hardened_git(root, ["rev-parse", "HEAD"]) != expected_sha:
-            fail("CANDIDATE_STORE_CORRUPT", "final candidate cache SHA mismatch")
-        return root, source.get("transport"), repository
-    except Exception:
-        shutil.rmtree(temp, ignore_errors=True)
-        raise
+    result = payload.get("result")
+    if not isinstance(result, dict):
+        fail("CANDIDATE_MATERIALIZER_RESPONSE_INVALID", "missing materializer result")
+    path = result.get("path")
+    if not isinstance(path, str):
+        fail("CANDIDATE_MATERIALIZER_RESPONSE_INVALID", "candidate path missing")
+    store = Path(cfg.get("candidate_store_root", "")).resolve()
+    candidate = Path(path).resolve()
+    try:
+        candidate.relative_to(store)
+    except ValueError:
+        fail("CANDIDATE_MATERIALIZER_PATH_ESCAPE", "candidate path escaped configured store")
+    if result.get("candidate_sha") != candidate_sha:
+        fail("CANDIDATE_MATERIALIZER_SHA_MISMATCH", "materializer returned wrong SHA")
+    return candidate, result
 
 
 def verify_evidence_mount(evidence_root, worker_uid):
@@ -794,12 +711,14 @@ def run_request(cfg, manifest, request, cancel_check=None):
     if source_mode == "candidate":
         if profile != "candidate-pytest":
             fail("CANDIDATE_PROFILE_REQUIRED", "candidate source mode is restricted to candidate-pytest")
-        source_root, candidate_transport, candidate_repository = materialize_candidate_source(
+        source_root, materialized = candidate_materializer_rpc(
             cfg,
             request["target"],
             expected_sha,
-            worker_uid,
         )
+        source_root = verify_source_tree(source_root, worker_uid)
+        candidate_transport = materialized.get("transport")
+        candidate_repository = materialized.get("repository")
     else:
         if profile == "candidate-pytest":
             fail("CANDIDATE_SOURCE_REQUIRED", "candidate-pytest requires candidate source mode")
