@@ -201,6 +201,19 @@ def render(args):
         "profile_manifest": "/etc/workspace-shell/profiles.v1.json",
         "source_roots": {"workspace-control": source_root, "PADataset": padataset_root},
         "evidence_roots": {"PADataset": padataset_evidence_root},
+        "candidate_store_root": "/var/lib/workspace-shell/candidates",
+        "candidate_sources": {
+            "workspace-control": {
+                "repository": "adamtrott78/workspace-control",
+                "transport": "public_https",
+                "url": "https://github.com/adamtrott78/workspace-control.git",
+            },
+            "PADataset": {
+                "repository": "adamtrott78/PADataset",
+                "transport": "public_https",
+                "url": "https://github.com/adamtrott78/PADataset.git",
+            },
+        },
         "scratch_root": "/var/lib/workspace-shell/jobs",
         "receipt_root": receipt_root,
         "bwrap_path": "/usr/bin/bwrap",
