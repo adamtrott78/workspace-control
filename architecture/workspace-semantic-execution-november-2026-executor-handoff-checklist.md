@@ -104,6 +104,7 @@
 - [ ] **D1 — Do not activate while Workspace Shell semantic task authority is absent / TASK_NOT_FOUND.**
 - [ ] **D2 — When exact reviewed/default-branch authority exists:** launch validated localhost backend and reviewed private Tailscale Serve route.
 - [ ] **D3 — Prove one exact-host fake-worker action/status/result round trip before touching a real ChatGPT account.**
+  - [x] Account-free/GPU-free production-stack harness is frozen at `7c20097c…` and 3/3 green (#2904/#226/#504); live reviewed-private-route execution remains required.
 - [ ] **D4 — Then run bounded Stage-12 real-account calibration with no widened browser permissions, DOM/content automation, or security workaround.**
 
 ### E. Integrated live proving + final November acceptance
