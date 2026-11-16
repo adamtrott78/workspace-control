@@ -51,10 +51,10 @@
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "12146948df885bc27882248748944437fb36e61f",
+      "base_sha": "4469009659182c8c2f4d12d727e556f2a2995fc9",
       "remote": {
         "branch": "workspace-shell-candidate-evidence-current-v1",
-        "checkpoint_sha": "12146948df885bc27882248748944437fb36e61f",
+        "checkpoint_sha": "4469009659182c8c2f4d12d727e556f2a2995fc9",
         "verified": true
       },
       "local": null,
