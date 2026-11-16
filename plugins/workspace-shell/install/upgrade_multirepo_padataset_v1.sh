@@ -3,6 +3,19 @@ set -euo pipefail
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 
+git_retry() {
+  local attempt rc
+  for attempt in 1 2 3 4 5; do
+    if "$@"; then
+      return 0
+    fi
+    rc=$?
+    echo "Git operation failed (attempt $attempt/5, rc=$rc); retrying..." >&2
+    sleep $((attempt * 2))
+  done
+  return "$rc"
+}
+
 EXPECTED_AUTHORITY_SHA="${1:-}"
 EXPECTED_EXEC_SHA="${2:-}"
 EXPECTED_PAD_EXEC_SHA="${3:-}"
@@ -142,8 +155,13 @@ git -C "$WC_FETCH" remote remove origin >/dev/null 2>&1 || true
 [[ -z "$(git -C "$WC_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] || fail "workspace-control execution checkout unexpectedly dirty"
 
 echo "Materializing clean PADataset execution source at exact SHA $EXPECTED_PAD_EXEC_SHA"
-git clone --filter=blob:none --no-checkout "$PAD_EXEC_REPO_URL" "$PAD_FETCH"
-git -C "$PAD_FETCH" checkout --detach "$EXPECTED_PAD_EXEC_SHA"
+rm -rf "$PAD_FETCH"
+mkdir -p "$PAD_FETCH"
+git -C "$PAD_FETCH" init --quiet
+git -C "$PAD_FETCH" remote add origin "$PAD_EXEC_REPO_URL"
+git_retry git -C "$PAD_FETCH" -c http.version=HTTP/1.1 fetch --quiet --depth=1 --no-tags origin "$EXPECTED_PAD_EXEC_SHA" \
+  || fail "unable to fetch exact PADataset execution SHA after bounded retries"
+git -C "$PAD_FETCH" -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD
 [[ "$(git -C "$PAD_FETCH" rev-parse HEAD)" == "$EXPECTED_PAD_EXEC_SHA" ]] || fail "clean PADataset execution checkout SHA mismatch"
 [[ -z "$(git -C "$PAD_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] || fail "clean PADataset execution checkout unexpectedly dirty"
 
