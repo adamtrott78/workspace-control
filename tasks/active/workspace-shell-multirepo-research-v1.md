@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52
+- Remote checkpoint: d02bfd36ed06457698a3f1e120d9a84e2349cf5f
 - Remote verified: true
 
 ### PADataset
@@ -36,19 +36,19 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-After this JSON+Markdown control-cycle state passes exact-head validation, retry the transactional root activation using the exact authority-state commit, Workspace Shell runtime 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52 (#2925 SUCCESS), PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 8019248f6952743d61e90d5abac754356952c18b, and semantic execution binding 7c20097c5f177f23c16a765b95ce94d7161f0d29. Require SEMANTIC_DURABLE_TASK_BINDING=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure. Do not widen any other profile, generic shell/interpreter, root/sudo, helper/issuer, network, evaluator path, PADataset, or GPU authority. After PASS, independently verify semantic HEAD 7c20097c… and proceed to the frozen fake-worker private-route harness.
+After this JSON+Markdown control-cycle state passes exact-head validation, retry the transactional root activation using the exact authority-state commit, Workspace Shell runtime d02bfd36ed06457698a3f1e120d9a84e2349cf5f (#2928 SUCCESS), PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 8019248f6952743d61e90d5abac754356952c18b, and semantic execution binding 7c20097c5f177f23c16a765b95ce94d7161f0d29. Require SEMANTIC_DURABLE_TASK_BINDING=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Roll back on any failure. Do not widen any other profile, generic shell/interpreter, root/sudo, helper/issuer, network, evaluator path, PADataset, or GPU authority. After PASS, independently verify semantic HEAD 7c20097c… and proceed to the frozen fake-worker private-route harness.
 
 ## Remaining work
 
-- Retry the rollback-capable root activation from the exact authority-state commit produced by this control cycle using Workspace Shell runtime 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.
+- Retry the rollback-capable root activation from the exact authority-state commit produced by this control cycle using Workspace Shell runtime d02bfd36ed06457698a3f1e120d9a84e2349cf5f, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.
 - Require SEMANTIC_DURABLE_TASK_BINDING=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS, and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS; rollback remains mandatory on any failure.
-- After activation PASS, independently verify live Workspace Shell runtime 8e0a9bc3… and semantic execution 7c20097c…, then run the frozen fake-worker private-route harness.
+- After activation PASS, independently verify live Workspace Shell runtime d02bfd36… and semantic execution 7c20097c…, then run the frozen fake-worker private-route harness.
 
 ## Blockers / gates
 
-- Repaired runtime 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52 is repository-validated but not live. The previous activation remains rolled back.
-- Materialized task-source traversal is no longer the observed failure: the fourth retry passed both semantic/evaluator MCP calls and local task authority. The remaining observed defect was only acceptance-harness receipt discovery.
-- Runtime 8e0a9bc3… binds semantic and evaluator acceptance directly to the exact receipt_id returned by each corresponding MCP response, eliminating timestamp/profile directory-scan ambiguity without widening execution authority.
+- Repaired runtime d02bfd36ed06457698a3f1e120d9a84e2349cf5f is repository-validated but not live. The fifth activation remains rolled back.
+- The fifth retry passed semantic/evaluator MCP calls and local task authority. The only observed failure was that raw MCP structured output did not include a schema-declared receipt_id.
+- Runtime d02bfd36… explicitly exposes the already-generated opaque receipt_id in workspace_shell_exec structured output while preserving the launcher, exact receipt validation, and all execution authority boundaries.
 - Live activation remains an operator/root gate. Success still requires semantic task receipt PASS, evaluator worker-denial receipt PASS, evaluator isolation acceptance PASS, and full transactional upgrade PASS with rollback on any failure.
 - Existing helper, issuer, generic shell/interpreter, network, evaluator-path, PADataset, GPU, and privileged authority boundaries remain unchanged.
 - After activation succeeds, independently verify live semantic task exact HEAD 7c20097c5f177f23c16a765b95ce94d7161f0d29 before the frozen fake-worker private-route harness.
