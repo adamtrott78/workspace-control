@@ -3,40 +3,54 @@
 
 Authoritative capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 
-## Track-A live state
+## Track-A backbone state
 
 - Canonical backbone bank: **9/10 COMPLETE**
 - Sole remaining training:
   - GPU0: PA3-PA4 — run 43943016274 / job 133565212672
-- GPU1 is intentionally idle; there is no additional unique backbone to launch.
-- All training remains bound to PADataset PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f.
-- Reverse-direction backbone retraining is forbidden.
+- GPU1 is idle pending evaluator workflow activation.
+- Reverse-direction backbone retraining remains forbidden.
 
-## Newly frozen PA3-PA8 result
+## Workspace Shell / PR #26 validation
 
-- SUCCESS run 43943022113 / job 133565235633
-- artifact 14267872094
-- artifact digest sha256:eb608ed9ccd6c17a8447a27778227435bbc389e48696178cec98933dcc440aa7
-- best epoch 1
-- best known-val macro-F1 0.8966316187092961
-- known-test macro-F1 0.8952296085145685
-- early stop epoch 11
-- target_test_consumed=false
-- target quarantine preserved
+- Workspace Shell stale-authority gate: **CLEARED**
+- Refresh Tools exposed `candidate-pytest`.
+- PR #26 current validated candidate SHA: `15c92fcc7bffe56d6fb29ca5719e9a0f9dd8e766`
+- candidate tree: `a384451c831db92834ab3e14e480de806acf5bf4`
+- candidate receipt: `job-ef08c200-1c9d-4fc3-a10d-4c9d0a1084a4`
+- result: **35 passed**
+- durable PADataset checkpoint bound in receipt: `befe383fd67c8bca8d8ce370344b33c7e13cd52f`
+- ordinary task-bound execution still rejects the off-checkpoint candidate with `TASK_SHA_MISMATCH`.
 
-## Evaluator candidate
+PR #26 required a tracked `local_artifacts/evidence/` mountpoint marker because clean Git materializations do not preserve empty directories. This preserves the read-only evidence bind; no Workspace Shell guard was weakened.
 
-- PADataset PR #26 exact head: 5520601b999c10202457760368f7e13d7bc8a439
-- Base: PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f
-- Frozen state: 9 canonical backbones / 18 directed evaluator request manifests
-- Includes provenance-safe artifact transport/rehydration, frozen evaluator policy, provenance-bound result records, strict 20-cell aggregation, matrix reporting, and bounded evaluator-operation design
-- No workflow-authority file changes
-- No merge authority
+## GPU2 directional evaluator workflow candidate
+
+- PADataset draft PR #27
+- branch: `mth602-l2o-evaluator-workflow-v1`
+- exact head: `613387d22299bbb11481aa38b745be2f2fc29617`
+- validation receipt: `job-e81ee184-0f61-40c8-a3e6-42a71bd87ade`
+- result: **3 passed**
+- diff:
+  - new GPU2-only bounded directional evaluator workflow
+  - static authority-surface contract test
+  - Workspace Shell evidence mountpoint marker
+- workflow accepts only frozen request manifests under `manifests/configs/l2o_directional_eval_v1/`
+- permissions are read-only: actions / contents / pull requests
+- no backbone-training operation exists in the new workflow
+- PR #27 is **draft, unmerged, inactive**
+- no merge authority has been granted
 
 ## Next safe action
 
-Open a fresh ChatGPT chat with Workspace Shell selected so the refreshed plugin schema exposes `candidate-pytest`. Continue this durable task from PR #640 and validate PADataset PR #26 exact current head through the authorized off-checkpoint candidate path while durable PADataset authority remains pinned at `befe383fd67c8bca8d8ce370344b33c7e13cd52f`.
+A genuine authority gate has been reached.
 
-In parallel, monitor only PA3-PA4. On SUCCESS, freeze its exact workflow/artifact/checkpoint/config provenance into PR #26 and create the final two directional evaluator requests. Do not launch another backbone.
+If explicit merge/activation authority is granted for **PR #27 only**:
+1. merge PR #27;
+2. verify the exact resulting default-branch workflow SHA;
+3. launch one already-frozen PR #26 directional request on GPU2;
+4. inspect the complete result artifact and scientific receipt before scheduling more cells.
 
-No merges without explicit authority.
+Separately, continue monitoring PA3-PA4. On SUCCESS, freeze backbone #10 and create its final two directional evaluator requests.
+
+Do not merge PR #26 or any backbone PR without separate explicit authority.
