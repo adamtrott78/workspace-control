@@ -11,12 +11,12 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 - ID: mth602-final-multisurrogate-dqnguard-v1
 - Title: MTH 602 final project / PADataset multi-surrogate DQNGuard
-- Status: CHECKPOINTED
+- Status: IN_PROGRESS
 - Capsule schema: v2
 
 ## Goal
 
-Complete deterministic Stage-03 Architecture-C replication at the qualified detv2 profile on the proven dual-GPU PADataset scientific runtime, then compare seed0/seed1/seed2 before making any architecture change while preserving PA2 quarantine and known-only selection/threshold semantics.
+Complete the MTH602/DQNGuard follow-on program with two scientifically separated tracks: (A) repair the published Target–Surrogate control by retraining competent leave-two-out backbones, and (B) develop single-backbone multi-surrogate OSR using a competent target-withheld four-known backbone. In parallel, finish the STFT/time-frequency representation diagnostic for the PA1↔PA4 boundary. Preserve true-target quarantine, known-only selection/threshold semantics, exact provenance, and keep OSR-method changes separate from backbone/representation changes.
 
 ## Repositories
 
@@ -30,28 +30,28 @@ Complete deterministic Stage-03 Architecture-C replication at the qualified detv
 ### workspace-control
 
 - Intent: mutate
-- Remote branch: padataset-lane-b-runner-identity-v1
-- Remote checkpoint: fe9621d848ae3405006fb65e8e691080d66aeb69
+- Remote branch: workspace-shell-candidate-evidence-current-v1
+- Remote checkpoint: 4469009659182c8c2f4d12d727e556f2a2995fc9
 - Remote verified: true
 
 ## Next safe action
 
-On fresh-chat resume, first read this capsule and the exact PR #17 / PR #632 state, then inspect seed0 run 43751609944/job132926587786, seed1 run 43751622546/job132926629552, and automation 6af9be2287e08191b33ea0cb024c43c8. Do not duplicate seed0, seed1, seed2, or the automation. If seed0/seed1 are still running, continue monitoring through connected GitHub/automation surfaces. When the first lane frees, confirm whether the existing automation has already issued seed2; only one seed2 request may exist. Once all three deterministic detv2 replicates are terminal, validate their exact artifacts/invariants and compare outcomes before any Architecture-C change.
+Fresh chat: read this capsule plus PADataset PR #23, PR #21, and Workspace Control PR #636. First confirm refreshed Workspace Shell exposes candidate-pytest, then run candidate-pytest on PR #23 exact SHA 4f27d00cce9ab15120d924963a5ecf049d032c52 while durable PADataset authority remains befe383fd67c8bca8d8ce370344b33c7e13cd52f. If PASS, verify receipt/unchanged authority. Next exercise PR #21 fd15238... PA1 provenance preflight from the persistent checkout and resume STFT only on PASS, preserving the first 120 overlays. Then execute Architecture-B B0 softmax3 on the strong PA2 seed0 backbone.
 
 ## Remaining work
 
-- Monitor seed0 run 43751609944 / job 132926587786 and seed1 run 43751622546 / job 132926629552 to terminal; inspect exact logs, scientific artifacts, receipts, and result_record files.
-- For every terminal replicate verify exact candidate befe383fd67c8bca8d8ce370344b33c7e13cd52f, deterministic_training=true, deterministic_profile=strict_tf32, PA2 quarantine, known-only checkpoint/threshold semantics, cache_len=16384, and target_labels_used_for_tuning=false.
-- Allow the existing DQNGuard Replicate Watch automation to issue exactly one seed2 detv2 request on the first freed lane after exact-head and duplicate-comment checks; do not create a duplicate watcher or seed2 request.
-- Track seed2 to terminal and validate its artifacts/receipt/result_record with the same scientific invariants.
-- Compare deterministic seed0/seed1/seed2 outcomes, including known metrics, unknown AUROC, PA2 precision/recall/F1, OSR macro-F1, threshold, confusion/error structure, and reproducibility digests where available.
-- Decide whether the low-PA2-recall / PA8-collapse pattern is stable across deterministic replicates or primarily training-variance-driven before changing Architecture-C.
-- Persist the replicate comparison and resulting scientific decision in PADataset project-owned documentation/task state.
-- Keep PADataset PR #17 and Workspace Control PR #632 unmerged unless separate explicit merge authority is granted.
+- Fresh chat: confirm candidate-pytest exists, then run `pytest -q tests/test_cross_surrogate_dqnguard.py` at PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52 under task mth602-final-multisurrogate-dqnguard-v1 while durable authority stays befe383fd67c8bca8d8ce370344b33c7e13cd52f.
+- Verify candidate receipt binds durable checkpoint + candidate SHA/tree and ordinary task-bound execution still rejects the off-checkpoint SHA.
+- Materialize PR #21 exact head fd15238aa369118e61b21ab714900861dbb99d2c in persistent STFT checkout; run repaired PA1 provenance preflight; resume only on PASS and skip first 120 completed overlays.
+- After B unit validation, run B0 softmax3 on the strong PA2 seed0 four-known backbone; freeze winner from off-diagonal transfer before true PA2 evaluation.
+- Then B1 expanded5, then B2 with bands; keep A pooled and C hybrid as matched baselines.
+- Separately freeze PA1-aware known-only backbone/HPO and execute Track A corrected leave-two-out matrix.
+- No merges without explicit authority.
 
 ## Blockers / gates
 
-- None.
+- Current conversation still exposes old cached Workspace Shell profile enum; fresh chat is required for candidate-pytest.
+- STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly.
 
 ## Fresh-chat initialization
 
