@@ -209,6 +209,7 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             store.mkdir(mode=0o711)
             cfg = {
                 "candidate_store_root": str(store),
+                "worker_gid": os.getgid(),
                 "sources": {"workspace-control": source},
             }
 
@@ -241,19 +242,27 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             final = Path(result["path"])
             self.assertEqual(stat.S_IMODE(store.stat().st_mode), 0o711)
             self.assertEqual(stat.S_IMODE(target_root.stat().st_mode), 0o711)
-            self.assertEqual(stat.S_IMODE(final.stat().st_mode), 0o755)
+            self.assertEqual(stat.S_IMODE(final.stat().st_mode), 0o750)
+            self.assertEqual(final.stat().st_gid, os.getgid())
             self.assertFalse(target_root.stat().st_mode & 0o022)
-            self.assertFalse(final.stat().st_mode & 0o022)
+            self.assertFalse(final.stat().st_mode & 0o027)
 
-            # Cache hits must repair a stale root-only final checkout.
-            final.chmod(0o700)
+            nested = final / ".git"
+            nested.mkdir(exist_ok=True)
+            nested.chmod(0o700)
+            candidate_materializer.harden_tree(final, os.getgid())
+            self.assertEqual(stat.S_IMODE(nested.stat().st_mode), 0o750)
+
+            # Cache hits must discard a stale root-private tree rather than
+            # certifying worker readability from the top-level mode alone.
+            nested.chmod(0o700)
             with (
                 mock.patch.object(candidate_materializer, "run_git", side_effect=fake_git),
                 mock.patch.object(candidate_materializer.os, "lstat", side_effect=root_owned_store_lstat),
             ):
                 cached = candidate_materializer.materialize(cfg, "workspace-control", sha)
-            self.assertTrue(cached["cache_hit"])
-            self.assertEqual(stat.S_IMODE(final.stat().st_mode), 0o755)
+            self.assertFalse(cached["cache_hit"])
+            self.assertEqual(stat.S_IMODE(Path(cached["path"]).stat().st_mode), 0o750)
 
     def test_live_semantic_acceptance_timeouts_do_not_exceed_profile_ceilings(self):
         profiles = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
@@ -444,6 +453,11 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertIn('"evidence_roots": {"PADataset": padataset_evidence_root}', render)
         self.assertIn('"candidate_materializer_socket": control_root + "/candidate-materializer.sock"', render)
         self.assertIn('"candidate_store_root": "/var/lib/workspace-shell/candidates"', render)
+        self.assertIn('"worker_gid": worker_gid', render)
+        materializer_service = (PLUGIN / "install" / "workspace-shell-candidate-materializer.service.in").read_text()
+        self.assertIn("User=root", materializer_service)
+        self.assertIn("Group=workspace-shell-exec", materializer_service)
+        self.assertIn("UMask=0077", materializer_service)
         self.assertIn('"transport": "public_https"', render)
         self.assertIn('"workspace-shell-candidate-materializer.service"', render)
 

@@ -216,6 +216,7 @@ def render(args):
     candidate_materializer = {
         "socket_path": control_root + "/candidate-materializer.sock",
         "candidate_store_root": "/var/lib/workspace-shell/candidates",
+        "worker_gid": worker_gid,
         "sources": {
             "workspace-control": {
                 "repository": "adamtrott78/workspace-control",

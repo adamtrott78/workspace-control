@@ -108,7 +108,13 @@ def run_git(args, *, env, timeout=45):
     return proc.stdout.strip()
 
 
-def harden_tree(root):
+def worker_readable_mode(mode):
+    owner = stat.S_IMODE(mode) & 0o700
+    group_read_exec = (owner & 0o500) >> 3
+    return owner | group_read_exec
+
+
+def harden_tree(root, worker_gid):
     for current, dirs, files in os.walk(root, topdown=False, followlinks=False):
         for name in files + dirs:
             p = Path(current) / name
@@ -116,12 +122,39 @@ def harden_tree(root):
                 st = os.lstat(p)
                 if stat.S_ISSOCK(st.st_mode) or stat.S_ISFIFO(st.st_mode) or stat.S_ISCHR(st.st_mode) or stat.S_ISBLK(st.st_mode):
                     fail("SOURCE_SPECIAL_FILE_DENIED", f"special file in candidate: {p}")
-                os.chmod(p, st.st_mode & ~0o022, follow_symlinks=False)
-            except (FileNotFoundError, NotImplementedError):
+                if stat.S_ISLNK(st.st_mode):
+                    continue
+                if st.st_gid != worker_gid:
+                    fail("SOURCE_GROUP_MISMATCH", f"candidate entry is not bound to worker group: {p}")
+                os.chmod(p, worker_readable_mode(st.st_mode))
+            except FileNotFoundError:
                 pass
     st = os.lstat(root)
-    os.chmod(root, st.st_mode & ~0o022)
+    if st.st_gid != worker_gid:
+        fail("SOURCE_GROUP_MISMATCH", "candidate root is not bound to worker group")
+    os.chmod(root, worker_readable_mode(st.st_mode))
 
+
+def worker_readable_tree(root, worker_gid):
+    for current, dirs, files in os.walk(root, topdown=True, followlinks=False):
+        for name in dirs + files:
+            p = Path(current) / name
+            st = os.lstat(p)
+            if stat.S_ISLNK(st.st_mode):
+                continue
+            mode = stat.S_IMODE(st.st_mode)
+            if st.st_gid != worker_gid:
+                return False
+            if stat.S_ISDIR(st.st_mode):
+                if (mode & 0o050) != 0o050:
+                    return False
+            elif (mode & 0o040) != 0o040:
+                return False
+            if mode & 0o027:
+                return False
+    st = os.lstat(root)
+    mode = stat.S_IMODE(st.st_mode)
+    return st.st_gid == worker_gid and (mode & 0o050) == 0o050 and not (mode & 0o027)
 
 def materialize(cfg, target, sha):
     if not exact_sha(sha):
@@ -142,6 +175,12 @@ def materialize(cfg, target, sha):
     if source.get("url") != expected_urls.get(source.get("transport")):
         fail("SOURCE_CONFIG_INVALID", "candidate source URL does not exactly match task-scoped repository")
 
+    worker_gid = cfg.get("worker_gid")
+    if not isinstance(worker_gid, int) or worker_gid <= 0:
+        fail("WORKER_GROUP_INVALID", "candidate materializer worker_gid is invalid")
+    if os.getgid() != worker_gid:
+        fail("WORKER_GROUP_MISMATCH", "candidate materializer process group does not match worker_gid")
+
     store = Path(cfg["candidate_store_root"]).resolve()
     st = os.lstat(store)
     if (
@@ -156,20 +195,22 @@ def materialize(cfg, target, sha):
 
     final = target_root / sha
     if final.exists():
-        os.chmod(final, 0o755)
-        observed = run_git(["-C", str(final), "rev-parse", "HEAD"], env=git_env(source), timeout=5)
-        dirty = run_git(["-C", str(final), "status", "--porcelain=v1", "--untracked-files=normal"], env=git_env(source), timeout=5)
-        if observed != sha or dirty:
-            fail("STORE_CORRUPT", "cached candidate does not match exact clean SHA")
-        tree = run_git(["-C", str(final), "rev-parse", "HEAD^{tree}"], env=git_env(source), timeout=5)
-        return {
-            "path": str(final),
-            "candidate_sha": sha,
-            "candidate_tree": tree,
-            "repository": source["repository"],
-            "transport": source["transport"],
-            "cache_hit": True,
-        }
+        if not worker_readable_tree(final, worker_gid):
+            shutil.rmtree(final)
+        else:
+            observed = run_git(["-C", str(final), "rev-parse", "HEAD"], env=git_env(source), timeout=5)
+            dirty = run_git(["-C", str(final), "status", "--porcelain=v1", "--untracked-files=normal"], env=git_env(source), timeout=5)
+            if observed != sha or dirty:
+                fail("STORE_CORRUPT", "cached candidate does not match exact clean SHA")
+            tree = run_git(["-C", str(final), "rev-parse", "HEAD^{tree}"], env=git_env(source), timeout=5)
+            return {
+                "path": str(final),
+                "candidate_sha": sha,
+                "candidate_tree": tree,
+                "repository": source["repository"],
+                "transport": source["transport"],
+                "cache_hit": True,
+            }
 
     temp = target_root / f".tmp-{sha}-{uuid.uuid4().hex}"
     temp.mkdir(mode=0o700)
@@ -183,8 +224,7 @@ def materialize(cfg, target, sha):
         dirty = run_git(["-C", str(temp), "status", "--porcelain=v1", "--untracked-files=normal"], env=env, timeout=5)
         if observed != sha or dirty:
             fail("SOURCE_MISMATCH", "materialized source does not equal requested clean SHA")
-        harden_tree(temp)
-        os.chmod(temp, 0o755)
+        harden_tree(temp, worker_gid)
         try:
             temp.rename(final)
         except FileExistsError:
@@ -223,6 +263,11 @@ def recv_json(conn):
 
 def serve(config_path):
     cfg = load_json(config_path)
+    worker_gid = cfg.get("worker_gid")
+    if not isinstance(worker_gid, int) or worker_gid <= 0:
+        fail("WORKER_GROUP_INVALID", "candidate materializer worker_gid is invalid")
+    if os.getgid() != worker_gid:
+        fail("WORKER_GROUP_MISMATCH", "candidate materializer service group does not match worker_gid")
     sock_path = cfg["socket_path"]
     Path(sock_path).parent.mkdir(parents=True, exist_ok=True)
     try:
