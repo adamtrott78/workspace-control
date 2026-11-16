@@ -213,19 +213,19 @@
           "check": "Canonical backbone bank progress",
           "result": "IN_PROGRESS",
           "evidence": [
-            "8/10 unique canonical backbones are COMPLETE and frozen in PADataset PR #26 canonical manifest.",
-            "PA2-PA3 run 43921420197/job 133489412741 SUCCESS; best epoch 3; best val macro-F1 0.9253955249097198; known-test macro-F1 0.9195729464289638; target_test_consumed=false.",
-            "PA2-PA8 run 43926895324/job 133508635811 SUCCESS; best epoch 2; best val macro-F1 0.9433003897151243; known-test macro-F1 0.9448806320168245; target_test_consumed=false.",
-            "Final two live jobs: PA3-PA4 run 43943016274/job 133565212672 and PA3-PA8 run 43943022113/job 133565235633."
+            "9/10 unique canonical backbones are COMPLETE and frozen in PADataset PR #26.",
+            "PA3-PA8 run 43943022113/job 133565235633 SUCCESS; best epoch 1; best val macro-F1 0.8966316187092961; known-test macro-F1 0.8952296085145685; target_test_consumed=false.",
+            "Final and only remaining backbone: PA3-PA4 run 43943016274/job 133565212672 IN_PROGRESS on GPU0.",
+            "GPU1 is intentionally idle; no unique canonical backbone remains for that lane."
           ]
         },
         {
           "check": "Directional evaluator candidate",
           "result": "CANDIDATE_READY",
           "evidence": [
-            "PADataset draft PR #26 exact head d2a0bca789a134d138e8c065973ef3b25644a7c4 is stacked on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
-            "Evaluator candidate includes frozen request/policy contracts, artifact transport/rehydration guards, provenance-bound result records, strict 20-cell aggregation, repaired matrix reporting, and documented future bounded workflow operation semantics.",
-            "Known-only diagnostic from PA2-PA8 and PA2-PA3 shows errors are dominated by PA4→PA1 confusion (661 and 1017 respectively), strengthening the separate PA1↔PA4 STFT diagnostic rationale without changing Track-A training.",
+            "PADataset draft PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 is stacked on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
+            "PR #26 currently freezes 9 completed canonical backbones and 18 immutable directed evaluator request manifests.",
+            "Post-evaluation result-record, strict 20-cell aggregation, matrix reporting, and bounded evaluator-operation design remain staged.",
             "No .github/workflows files are modified; authoritative Workspace Shell candidate pytest remains gated by stale live CHECKPOINTED authority."
           ]
         }
@@ -442,14 +442,12 @@
     {
       "id": "trackA-directional-evaluator-candidate",
       "kind": "git_commit",
-      "identity": "d2a0bca789a134d138e8c065973ef3b25644a7c4",
+      "identity": "5520601b999c10202457760368f7e13d7bc8a439",
       "required_for_resume": true,
       "evidence": [
         "PADataset PR #26 OPEN/DRAFT/UNMERGED; base exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
-        "Canonical state currently frozen at 8/10 completed backbones and 16 directional request manifests; final PA3-PA4 and PA3-PA8 backbones are live.",
-        "PR #26 additionally contains provenance-bound cell result records, strict 20-cell aggregation, 5x5 matrix reporting with optional explicit baseline comparison, and a documented bounded evaluator-operation design.",
-        "Changed workflow-authority files: none.",
-        "No merge authority."
+        "Canonical state: 9/10 complete, 1 live, 18 frozen directed evaluator requests.",
+        "No workflow authority changes; no merge authority."
       ]
     }
   ],
@@ -480,10 +478,10 @@
       "check": "Track-A canonical matrix progress",
       "result": "IN_PROGRESS",
       "evidence": [
-        "8/10 unique canonical backbones frozen; final two are live.",
-        "GPU0 PA3-PA4 run 43943016274/job 133565212672 queued/in progress.",
-        "GPU1 PA3-PA8 run 43943022113/job 133565235633 queued/in progress.",
-        "Target quarantine preserved on all eight frozen completed backbones."
+        "9/10 unique canonical backbones frozen; one remains.",
+        "GPU0 PA3-PA4 run 43943016274/job 133565212672 IN_PROGRESS.",
+        "GPU1 intentionally idle because no additional unique backbone remains.",
+        "Target quarantine preserved on all nine frozen completed backbones."
       ]
     }
   ],
@@ -493,15 +491,15 @@
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
-    "Finish final Track-A canonical backbones PA3-PA4 and PA3-PA8 on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f. Freeze exact artifact/checkpoint/config provenance on SUCCESS; never train reverse directions.",
-    "Create the final four immutable directional evaluator request manifests, yielding 10 backbones / 20 directed cells.",
+    "Finish the final Track-A canonical backbone PA3-PA4 on exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f. Freeze exact artifact/checkpoint/config provenance on SUCCESS; do not launch any additional backbone training.",
+    "Create its two immutable directional evaluator request manifests, yielding 10 canonical backbones / 20 directed cells.",
     "Refresh live Workspace Shell authority from this IN_PROGRESS continuation without rebinding workspace-control execution 5401045341090a26a42ce3a497c379f8223a3b54, PADataset authority befe383fd67c8bca8d8ce370344b33c7e13cd52f, or recorded dependency generation 4469009659182c8c2f4d12d727e556f2a2995fc9.",
-    "Validate PR #26 through authorized candidate execution; then add/review bounded artifact-download + directional evaluator workflow authority.",
+    "Validate PR #26 through authorized candidate execution; then separately review/activate the bounded artifact-download + directional evaluator workflow operation.",
     "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "Monitor only the final two unique Track-A backbones: GPU0 PA3-PA4 run 43943016274/job 133565212672 and GPU1 PA3-PA8 run 43943022113/job 133565235633, both bound to PADataset PR #24 exact head d1fd5b6d414e7b88675485f576732a424504455f. On each SUCCESS, freeze exact workflow/artifact/checkpoint/config evidence into PR #26 and create its two frozen directional evaluator requests. Do not launch any more backbone trainings after these two. Then refresh Workspace Shell authority under the preserved live SHAs and validate PR #26 before any bounded evaluator workflow authority is added or executed.",
+  "next_safe_action": "Monitor only the final PA3-PA4 backbone run 43943016274/job 133565212672 on GPU0. GPU1 must remain idle because no additional unique backbone remains. On PA3-PA4 SUCCESS, freeze exact workflow/artifact/checkpoint/config evidence into PR #26 and create its two frozen directional evaluator requests, completing the 10-backbone/20-cell bank. Then stop backbone training and move to the preserved Workspace Shell authority-refresh + PR #26 validation gate before any evaluator workflow authority is added or executed.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
-  "notes": "Track A active. 8/10 canonical backbones are frozen; PA3-PA4 and PA3-PA8 are the final live trainings. PR #26 exact head d2a0bca789a134d138e8c065973ef3b25644a7c4 now covers request/policy/artifact/result/aggregation/report contracts and a bounded evaluator-operation design, with zero workflow-authority file changes. Known-only diagnostics show the weaker PA2/* backbones fail primarily at the recurring PA4→PA1 boundary. No workflow authority or merge authority is inferred."
+  "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred."
 }
