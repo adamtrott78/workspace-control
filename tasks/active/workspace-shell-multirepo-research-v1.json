@@ -3,7 +3,7 @@
   "task_id": "workspace-shell-multirepo-research-v1",
   "title": "Workspace Shell multi-repo PADataset research access v1",
   "status": "IN_PROGRESS",
-  "goal": "Extend the live Workspace Shell v1 lineage with a first-class PADataset target that supports exact-SHA/task-bound Git provenance, bounded read-only evidence inspection, and sandboxed network-denied research execution without exposing a generic shell or making the historical PADataset checkout writable.",
+  "goal": "Extend the live Workspace Shell v1 lineage with first-class PADataset access and a permanent candidate-evidence path that can validate exact candidate SHAs without promoting them to durable task authority, while preserving credential isolation, private-repository support, rollback, and exact-SHA authoritative execution.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "workspace-shell-mcp-v1",
   "current_stage": "live_upgrade",
@@ -13,8 +13,11 @@
     "research-bounded executes only approved PADataset Python research paths in the existing hostile-worker bubblewrap sandbox with network denied, credentials absent, and a disposable writable source copy.",
     "Dirty/untracked PADataset state may be inspected by read-only profiles but may not be executed by research-bounded.",
     "The historical PADataset checkout is never switched, reset, cleaned, stashed, deleted, or directly written by Workspace Shell.",
-    "Live upgrade is exact-head gated, snapshots PADataset read-only under /srv/workspace-shell, preserves rollback evidence, and leaves the four Workspace Shell services healthy.",
-    "Unauthorized targets, target/profile combinations, path traversal, oversized reads, arbitrary Python paths, and generic shell/interpreter escape shapes fail closed."
+    "Live upgrade is exact-head gated, snapshots PADataset read-only under /srv/workspace-shell, preserves rollback evidence, and leaves all five Workspace Shell services healthy.",
+    "Unauthorized targets, target/profile combinations, path traversal, oversized reads, arbitrary Python paths, and generic shell/interpreter escape shapes fail closed.",
+    "candidate-pytest may validate an exact candidate SHA from a task-scoped repository without requiring candidate_sha == durable task checkpoint; the result is evidence only and cannot mutate authoritative task state or invoke privileged helpers.",
+    "Candidate source materialization is isolated in a separate trusted service; the hostile worker and job launcher remain network-dead and credential-free.",
+    "Candidate materialization supports credential-free HTTPS for public repositories and root-owned read-only SSH deploy keys with pinned known_hosts for private repositories, without exposing credentials through MCP arguments, receipts, or worker state."
   ],
   "constraints": [
     "Do not weaken the existing distinct frontend/worker/tunnel/root-broker identities or credential isolation.",
@@ -22,9 +25,11 @@
     "Do not add unrestricted bash, sh, python -c, arbitrary executable lookup, PTY, background process, Docker socket, SSH agent, or outbound network access.",
     "Do not mutate the historical PADataset checkout during bootstrap or Stage 00.",
     "Privileged helper trust stores remain empty/fail-closed; this task does not authorize privileged helper execution.",
-    "Bind the clean PADataset execution source to exact SHA 17e1147614f27702e43565089d618182ff71c5af.",
+    "Bind the clean PADataset execution source to exact SHA befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
     "Preserve the historical Lambda checkout in place as read-only evidence; do not require its branch/HEAD to match the clean execution source.",
-    "Historical evidence currently observed at branch leaf2026-review-1571342865, local HEAD b5a09cede6680b9e2a53eac244db4fbd7eaf76ec, dirty, ~107 GB. Treat that identity as runtime evidence, not as a GitHub-resolvable source authority."
+    "Historical evidence currently observed at branch leaf2026-review-1571342865, local HEAD b5a09cede6680b9e2a53eac244db4fbd7eaf76ec, dirty, ~107 GB. Treat that identity as runtime evidence, not as a GitHub-resolvable source authority.",
+    "Do not relax exact durable task-SHA binding for authoritative execution or reviewed privileged helpers.",
+    "Candidate source URLs and credential locations are root-owned configuration, never caller-supplied MCP arguments."
   ],
   "repositories": [
     {
@@ -32,8 +37,8 @@
       "intent": "mutate",
       "base_sha": "44b4e4f2020450c81cec56e86b711cdee7e651d9",
       "remote": {
-        "branch": "workspace-shell-multirepo-research-v1",
-        "checkpoint_sha": "1a9a24fc1bc6e5cda2984e296151a378138600c8",
+        "branch": "workspace-shell-candidate-evidence-current-v1",
+        "checkpoint_sha": "54ac65cbcd4211554710b8f8f4231c6c9554e3cc",
         "verified": true
       },
       "local": null,
@@ -52,7 +57,7 @@
       "base_sha": "17e1147614f27702e43565089d618182ff71c5af",
       "remote": {
         "branch": "mth602-final-multisurrogate-dqnguard-v1",
-        "checkpoint_sha": "17e1147614f27702e43565089d618182ff71c5af",
+        "checkpoint_sha": "befe383fd67c8bca8d8ce370344b33c7e13cd52f",
         "verified": true
       },
       "local": null,
@@ -95,19 +100,20 @@
         "target_contract"
       ],
       "outputs": [
-        "Workspace Shell source changes",
+        "Workspace Shell candidate-evidence source changes",
+        "isolated candidate materializer service",
+        "candidate-pytest bounded execution profile",
         "multirepo regression tests",
-        "live upgrade operator"
+        "transactional live upgrade operator"
       ],
       "validation": [
         {
-          "check": "Exact-head Workspace Shell/PADataset repository validation",
+          "check": "Exact-head current-lineage Workspace Shell candidate-evidence validation",
           "result": "PASS",
           "evidence": [
-            "Execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 was checked out exactly by Lambda validation run #385 / Actions 42880610796.",
-            "Python repository suite passed 548 tests with 1 intentional skip, including the pre-existing evidence-mount safety regression and upgrade Bash syntax.",
-            "Exact same-repository PR-head and bounded runner-isolation gates passed; live Workspace Shell transport isolation diagnostic passed.",
-            "Workflow red conclusion occurs only after the passing candidate-scope suite because the accepted Workspace Shell lineage lacks controller/lambda-ci-controller/v3."
+            "Execution candidate 5401045341090a26a42ce3a497c379f8223a3b54 passed Lambda Workspace Control Validation run 43785491090 SUCCESS.",
+            "workspace-control execution materialization now uses independent exact-SHA shallow fetch with bounded HTTP/1.1 retries, so authority checkout depth cannot hide the execution commit.",
+            "PADataset exact-SHA fetch remains independently retryable; no live service mutation occurred in prior failed attempts."
           ]
         }
       ],
@@ -115,7 +121,7 @@
     },
     {
       "id": "live_upgrade",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "operator+chatgpt",
       "selected_executor": "operator",
       "selected_surface": "lambda+workspace-shell",
@@ -123,12 +129,25 @@
         "validated implementation head"
       ],
       "outputs": [
-        "root-owned PADataset snapshot",
-        "updated live Workspace Shell runtime",
-        "live acceptance receipts"
+        "root-owned exact candidate source store",
+        "workspace-shell-candidate-materializer.service",
+        "updated live Workspace Shell runtime exposing candidate-pytest",
+        "live candidate-evidence acceptance receipt",
+        "refreshed existing ChatGPT Workspace Shell plugin release"
       ],
-      "validation": [],
-      "resume_condition": "Repository implementation is validated. Live upgrade must refresh the independent trusted authority snapshot and then prove both new task IDs through local and ChatGPT Workspace Shell calls."
+      "validation": [
+        {
+          "check": "Transactional live Workspace Shell upgrade",
+          "result": "PASS",
+          "evidence": [
+            "Operator upgrade completed with WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS and WORKSPACE_SHELL_UPGRADE=COMPLETE.",
+            "Live snapshots: authority b5a03299219257032debba105cf6e955bbe659ac; workspace-control execution 5401045341090a26a42ce3a497c379f8223a3b54; PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
+            "Live workspace-shell-candidate-materializer.service is loaded / active / running as root.",
+            "Original authoritative task-bound SHA mismatch behavior remains fail-closed."
+          ]
+        }
+      ],
+      "resume_condition": null
     },
     {
       "id": "stage00_handoff",
@@ -174,6 +193,258 @@
         "Read-only preflight on Lambda observed this historical checkout identity and aborted before mutation.",
         "Checkout is dirty and approximately 107 GB; it must be exposed by read-only bind mount rather than copied or normalized."
       ]
+    },
+    {
+      "id": "workspace-shell-candidate-evidence-runtime-v1",
+      "kind": "git_commit",
+      "identity": "5401045341090a26a42ce3a497c379f8223a3b54",
+      "required_for_resume": true,
+      "evidence": [
+        "Final validated permanent candidate-evidence runtime with bounded retryable PADataset exact-SHA materialization.",
+        "Preserves PADataset durable checkpoint befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
+        "Candidate validation remains evidence-only; authoritative task execution and privileged helper paths retain exact durable task-SHA binding."
+      ]
+    },
+    {
+      "id": "workspace-shell-semantic-authority-enrollment-runtime-validated",
+      "kind": "validation_checkpoint",
+      "identity": "cd009257e08b2bd9f3ac241657895d3ba58c5979",
+      "required_for_resume": true,
+      "evidence": [
+        "Runtime candidate cd009257e08b2bd9f3ac241657895d3ba58c5979 passed Workspace Control Validation #2893.",
+        "Task-mode launcher now requires expected_sha == task_checkpoint_sha and only materializes the already-authorized exact SHA when the installed static source differs.",
+        "Transactional upgrader accepts only the fixed semantic task ID workspace-semantic-execution-migration-v1 and validates its imported capsule source SHA plus exact execution binding.",
+        "Live acceptance path performs workspace_shell_exec git-read for the semantic task and requires the exact bound HEAD 9b02005a58a961ce83ef8790e2d59ec626802591.",
+        "No trusted issuer, helper registry entry, generic shell, or root-policy widening was added."
+      ]
+    },
+    {
+      "id": "workspace-shell-semantic-authority-receipt-acceptance-fix",
+      "kind": "validation_checkpoint",
+      "identity": "ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe",
+      "required_for_resume": true,
+      "evidence": [
+        "First live semantic enrollment attempt reached SEMANTIC_DURABLE_TASK_BINDING=PASS, runtime dependency PASS, MCP readiness PASS and discovery PASS, then safely rolled back on a false-negative stdout assertion.",
+        "MCP output schema guarantees ok but does not guarantee nested execution stdout in raw local tools/call output.",
+        "Corrected candidate validates the live semantic call through MCP success and then proves the execution through the root-owned receipt fields: task_id, expected_git_sha, observed_git_sha, task_checkpoint_sha, source_mode=task, exit_code=0 and privileged=false.",
+        "Workspace Control Validation #2896 SUCCESS on ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe.",
+        "No GPU work, helper/issuer trust widening, semantic SHA rebinding or manual sidecar was introduced."
+      ]
+    },
+    {
+      "id": "workspace-shell-semantic-current-state-rebind",
+      "kind": "authority_enrollment_checkpoint",
+      "identity": "ee586acf180e7fd85f3fe94a7553a52157b026cb",
+      "required_for_resume": true,
+      "evidence": [
+        "Current semantic execution head 74958b5d0d325893fd39045d1e49b5320dca7fa3 passed Workspace #2899, Semantic #224 and Operator #502 and contains the evaluator sealed-store launch gate.",
+        "Current semantic capsule source 629cbb10cd3e7136a34faa2df575ca3b5d481b80 passed Workspace #2900, Semantic #225 and Operator #503 and binds workspace-control execution to 74958b5d0d325893fd39045d1e49b5320dca7fa3.",
+        "Workspace Shell runtime candidate remains ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe, validated by Workspace Control #2896.",
+        "This checkpoint changes only the semantic enrollment provenance tuple; it adds no helper/issuer trust and performs no live/root mutation."
+      ]
+    },
+    {
+      "id": "workspace-shell-evaluator-isolation-bundled-activation",
+      "kind": "validation_checkpoint",
+      "identity": "6d47e3eca88150c6ad127b6e5901936323fe3ca1",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Shell runtime candidate 6d47e3eca88150c6ad127b6e5901936323fe3ca1 passed Workspace Control Validation #2902.",
+        "The transactional upgrader provisions /var/lib/workspace-shell/evaluator-sealed only as root:root mode 0700 and rolls it back if newly created and activation fails.",
+        "Control-side smoke imports the exact semantic execution source, stages evaluator-only oracle/seed/nonce material, reloads it, reproduces the public commitment, and deletes the smoke record.",
+        "evaluator-denial-probe is fixed to caller token sealed-store-v1, network-denied, read-only, and has no caller-chosen path or generic interpreter surface; exit 0 means both directory listing and sentinel read are inaccessible from the hostile-worker sandbox.",
+        "Live acceptance binds the denial receipt to semantic task ID, exact expected/observed/task-checkpoint SHA, source_mode=task, argv_profile=evaluator-denial-probe, fixed redacted argv, privileged=false and exit_code=0.",
+        "No PADataset GPU workload, model inference, generic shell, privileged helper trust, or issuer trust was added."
+      ]
+    },
+    {
+      "id": "workspace-shell-final-semantic-freeze-tuple",
+      "kind": "authority_enrollment_checkpoint",
+      "identity": "d3583b5a423e96a84b4fc08ca9156ebc5b940197",
+      "required_for_resume": true,
+      "evidence": [
+        "Workspace Shell runtime 6d47e3eca88150c6ad127b6e5901936323fe3ca1 passed Workspace Control #2902 and bundles semantic enrollment plus evaluator-isolation acceptance.",
+        "Semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29 passed Workspace #2904, Semantic #226 and Operator #504; it contains the account-free exact-host fake-worker transport harness.",
+        "Semantic capsule/state 8019248f6952743d61e90d5abac754356952c18b passed Workspace #2907, Semantic #229 and Operator #507 and binds workspace-control execution exactly to 7c20097c5f177f23c16a765b95ce94d7161f0d29.",
+        "PADataset execution remains befe383fd67c8bca8d8ce370344b33c7e13cd52f; historical dirty evidence checkout remains read-only and untouched.",
+        "No GPU work, model inference, generic shell, privileged helper trust or issuer trust is authorized by this rebind."
+      ]
+    },
+    {
+      "id": "workspace-shell-evaluator-denial-target-profile-live-failure",
+      "kind": "runtime_failure_checkpoint",
+      "identity": "00b4bfd01016bb11ea33d532145a378befadaaf0",
+      "required_for_resume": true,
+      "evidence": [
+        "Latest root activation used frozen tuple: authority state 00b4bfd01016bb11ea33d532145a378befadaaf0, runtime 6d47e3eca88150c6ad127b6e5901936323fe3ca1, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.",
+        "Operator-reported activation reached semantic durable binding, semantic execution materialization, sealed-root provisioning, evaluator control readback, runtime dependency check, MCP readiness and MCP discovery before the denial probe.",
+        "Live workspace_shell_exec denial probe failed TARGET_PROFILE_DENIED: evaluator-denial-probe is not authorized for target workspace-control; the upgrader then executed rollback and the SSH session closed.",
+        "Repository inspection of exact runtime source 6d47e3… shows plugins/workspace-shell/root/job_launcher.py assert_target_profile includes evaluator-denial-probe in the workspace-control allowlist, and profiles.v1.json defines evaluator-denial-probe.",
+        "Next executor must reconcile the installed/runtime authorization discrepancy before another root activation. Do not weaken the profile grammar or widen root authority.",
+        "Exact root cause isolated after the rollback: plugins/workspace-shell/src/core.js lines 186-193 omit evaluator-denial-probe from the workspace-control Set, while server.js schema, profiles.v1.json and root/job_launcher.py already include/authorize it. The frontend assertTargetProfile call occurs before unixRpc to the launcher."
+      ]
+    },
+    {
+      "id": "workspace-shell-evaluator-denial-frontend-parity-runtime-validated",
+      "kind": "validation_checkpoint",
+      "identity": "2c2087d0a7be2ed897598cab4a95e364e2b528f7",
+      "required_for_resume": true,
+      "evidence": [
+        "Exact runtime candidate 2c2087d0a7be2ed897598cab4a95e364e2b528f7 passed Workspace Control Validation #2914.",
+        "The workspace-control frontend profile set now includes evaluator-denial-probe and matches the already-correct root launcher target matrix.",
+        "Regression coverage requires frontend/root target-matrix equality and server-schema/profile-manifest profile-universe equality.",
+        "No other target/profile authorization changed."
+      ]
+    },
+    {
+      "id": "workspace-shell-evaluator-denial-resolver-live-failure-and-repair",
+      "kind": "runtime_failure_checkpoint",
+      "identity": "af3baf3bdc29bff6ae7114059fdfe4709dc13100",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator retry used authority state 559e7a131eb732f289deb6770e50b5e983f4ca53 with runtime 2c2087d0a7be2ed897598cab4a95e364e2b528f7, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.",
+        "Activation again reached DURABLE_TASK_BINDINGS=PASS, SEMANTIC_DURABLE_TASK_BINDING=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, RUNTIME_NODE_DEPENDENCIES=PASS, LOCAL_MCP_READY=PASS, and LOCAL_MCP_DISCOVERY=PASS.",
+        "The evaluator denial call then failed PROFILE_NOT_AUTHORIZED: unknown Workspace Shell v1 profile and the transactional upgrader executed rollback.",
+        "Exact source inspection pinned the second frontend defect to plugins/workspace-shell/src/core.js::resolveProfile(), which lacked an evaluator-denial-probe case after assertTargetProfile had been repaired.",
+        "Runtime candidate af3baf3bdc29bff6ae7114059fdfe4709dc13100 adds only a fixed-token frontend validator for sealed-store-v1 and the missing resolver case; the caller still cannot choose Python code or evaluator paths.",
+        "Regression coverage now requires frontend target sets, frontend resolver cases, server schema, root-owned manifest, root launcher target sets, and root launcher frozen profile grammar to remain in parity.",
+        "Exact runtime candidate af3baf3bdc29bff6ae7114059fdfe4709dc13100 passed Workspace Control Validation #2916."
+      ]
+    },
+    {
+      "id": "workspace-shell-evaluator-denial-worker-runtime-live-failure",
+      "kind": "runtime_failure_checkpoint",
+      "identity": "e6e397caa0d949b15cfe0ae149308cec8b12087b",
+      "required_for_resume": true,
+      "evidence": [
+        "Operator retry used authority state e6e397caa0d949b15cfe0ae149308cec8b12087b with runtime af3baf3bdc29bff6ae7114059fdfe4709dc13100, PADataset befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.",
+        "Activation reached DURABLE_TASK_BINDINGS=PASS, SEMANTIC_DURABLE_TASK_BINDING=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, RUNTIME_NODE_DEPENDENCIES=PASS, LOCAL_MCP_READY=PASS, LOCAL_MCP_DISCOVERY=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, and LOCAL_TASK_AUTHORITY=PASS.",
+        "The evaluator-denial receipt job-c02602c3-80a8-4233-affe-943194db9cc0 was authorization_decision=ALLOW, privileged=false, source_mode=task, expected/observed/task-checkpoint SHA all 7c20097c5f177f23c16a765b95ce94d7161f0d29, argv_profile=evaluator-denial-probe, redacted_argv=[sealed-store-v1], but exit_code=1 with stdout_bytes_seen=0 and stderr_bytes_seen=144.",
+        "Receipt stderr_sha256 was 8f8a93cfc164206a98ab72ca9c2767ca6c343583261d4e6c838fa00258456113. The upgrader then failed closed and executed rollback.",
+        "Direct post-rollback Workspace Shell validation-bounded execution succeeded with /usr/bin/python3 inside the hostile-worker sandbox, ruling out a generic Python/bubblewrap startup failure.",
+        "The failed transient unit name is deterministically workspace-shell-job-c02602c3-80a8-42.service from the receipt ID. Connected Workspace Shell intentionally cannot inspect arbitrary transient job units, and rollback removed the semantic task from live authority, so the next diagnostic is a local read-only journal query for that exact unit; do not retry activation before recovering the stderr."
+      ]
+    },
+    {
+      "id": "workspace-shell-materialized-task-source-worker-traversal-repair",
+      "kind": "validation_checkpoint",
+      "identity": "381677ac0ae5c17ee0610d286a6f847ad3d392b8",
+      "required_for_resume": true,
+      "evidence": [
+        "Read-only local diagnostic of failed transient unit workspace-shell-job-c02602c3-80a8-42.service recovered only systemd exit status 1; journald did not retain the captured 144-byte stderr.",
+        "An exact non-mutating reproduction of the evaluator denial probe using the same worker UID/GID, systemd properties, bubblewrap isolation, Python flags, and probe payload against /srv/workspace-shell/workspace-control returned exit 0 with JSON {list_denied:true, read_denied:true, ok:true} and empty stderr.",
+        "Exact source inspection isolated the materialized-task delta: candidate store root was installed 0700, candidate target roots were forcibly 0700, and exact final SHA roots could remain 0700, while the hostile worker UID 41011 must traverse that host path before bubblewrap can ro-bind it.",
+        "Runtime candidate 2406e067ee5e2b95fcc2e1582584d709789087b2 introduced the bounded traversal/readability repair but Workspace #2921 failed only because its new unit test incorrectly required root ownership while running as the GitHub runner user; production logic was not relaxed.",
+        "Corrected runtime 381677ac0ae5c17ee0610d286a6f847ad3d392b8 preserves root ownership, sets candidate-store/target parents to 0711, exact authorized checkout roots to 0755, never adds group/world write, repairs cached 0700 final roots, and keeps /etc/workspace-shell/candidate-sources at 0700.",
+        "The upgrade acceptance harness now filters the semantic acceptance receipt to argv_profile=git-read so a later evaluator receipt cannot satisfy or fail the wrong acceptance check.",
+        "Exact runtime 381677ac0ae5c17ee0610d286a6f847ad3d392b8 passed Workspace Control Validation #2922."
+      ]
+    },
+    {
+      "id": "workspace-shell-exact-live-acceptance-receipt-binding",
+      "kind": "validation_checkpoint",
+      "identity": "8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52",
+      "required_for_resume": true,
+      "evidence": [
+        "Fourth root activation retry used authority 7e5ae78d4e167abd0c6f4270454cd118d73264bb with runtime 381677ac0ae5c17ee0610d286a6f847ad3d392b8 and the frozen PADataset/semantic tuple.",
+        "Activation reached DURABLE_TASK_BINDINGS=PASS, SEMANTIC_DURABLE_TASK_BINDING=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, RUNTIME_NODE_DEPENDENCIES=PASS, LOCAL_MCP_READY=PASS, LOCAL_MCP_DISCOVERY=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, and LOCAL_TASK_AUTHORITY=PASS.",
+        "The prior materialized-source runtime crash did not recur. The activation failed only because the semantic acceptance harness's receipt-directory scan returned no matching git-read receipt, after which transactional rollback executed.",
+        "Runtime 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52 removes timestamp/profile directory scans and instead extracts the exact receipt_id from each stored MCP tools/call response, then validates that exact receipt file against task_id, profile, authorization decision, exit status, privilege flag, expected/observed/task-checkpoint SHA, and source_mode.",
+        "Semantic acceptance is bound only to MCP_TASK_SEMANTIC / git-read; evaluator acceptance is bound only to MCP_EVALUATOR_DENIAL / evaluator-denial-probe. One receipt can no longer satisfy, shadow, or fail the other.",
+        "Exact runtime 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52 passed Workspace Control Validation #2925."
+      ]
+    },
+    {
+      "id": "workspace-shell-mcp-explicit-receipt-id-output-contract",
+      "kind": "validation_checkpoint",
+      "identity": "d02bfd36ed06457698a3f1e120d9a84e2349cf5f",
+      "required_for_resume": true,
+      "evidence": [
+        "Fifth root activation retry used authority df0a01271247f3547946d990f270d87009632859 with runtime 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52 and the frozen PADataset/semantic tuple.",
+        "Activation reached DURABLE_TASK_BINDINGS=PASS, SEMANTIC_DURABLE_TASK_BINDING=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, RUNTIME_NODE_DEPENDENCIES=PASS, LOCAL_MCP_READY=PASS, LOCAL_MCP_DISCOVERY=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, and LOCAL_TASK_AUTHORITY=PASS.",
+        "It then failed closed because the raw MCP tools/call structured output did not expose an exact job receipt_id, even though the launcher response contains one and the connected tool adapter exposes it.",
+        "Source inspection identified the contract mismatch: workspace_shell_exec declared outputSchema {ok:boolean} while returning richer structured content, so raw MCP clients had no schema-declared receipt_id field.",
+        "Runtime d02bfd36ed06457698a3f1e120d9a84e2349cf5f adds only an optional exact job receipt_id to workspace_shell_exec outputSchema and mirrors response.receipt_id at top-level structuredContent; existing nested result behavior remains unchanged.",
+        "Upgrade acceptance now reads structuredContent.receipt_id for both semantic and evaluator calls, then validates the exact receipt file against task/profile/SHA/exit/privilege/source-mode invariants.",
+        "Exact runtime d02bfd36ed06457698a3f1e120d9a84e2349cf5f passed Workspace Control Validation #2928."
+      ]
+    },
+    {
+      "id": "workspace-shell-opaque-receipt-evidence-preservation",
+      "kind": "validation_checkpoint",
+      "identity": "aad85eb8ffd4b7a3804905aade0de0fa04543582",
+      "required_for_resume": true,
+      "evidence": [
+        "Sixth root activation retry used authority 08322182a85c1320c56fe9aa4965c58a49d1ba6b with runtime d02bfd36ed06457698a3f1e120d9a84e2349cf5f and the frozen PADataset/semantic tuple.",
+        "Activation reached DURABLE_TASK_BINDINGS=PASS, SEMANTIC_DURABLE_TASK_BINDING=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, RUNTIME_NODE_DEPENDENCIES=PASS, LOCAL_MCP_READY=PASS, and LOCAL_MCP_DISCOVERY=PASS.",
+        "The semantic tools/call then failed MCP output validation with 'Invalid structured content for tool workspace_shell_exec: Invalid at receipt_id'. The SDK rejected the receipt_id before the acceptance layer could inspect the exact root-owned receipt; transactional rollback executed.",
+        "The failed response did not reveal the underlying receipt_id value, so durable state does not assume whether it was a normal job receipt, a rejection receipt, or another bounded opaque identifier.",
+        "Runtime aad85eb8ffd4b7a3804905aade0de0fa04543582 aligns workspace_shell_exec receipt_id with the existing safe receipt-reader grammar /^[a-zA-Z0-9._-]{8,128}$/ instead of job-only UUID syntax.",
+        "Acceptance uses that bounded opaque identifier only to select one exact receipt file, then validates task/profile/authorization/SHA/exit/privilege/source-mode invariants. A rejection receipt therefore survives to evidence reporting instead of being masked by MCP output validation.",
+        "Exact runtime aad85eb8ffd4b7a3804905aade0de0fa04543582 passed Workspace Control Validation #2931."
+      ]
+    },
+    {
+      "id": "workspace-shell-semantic-acceptance-timeout-ceiling",
+      "kind": "validation_checkpoint",
+      "identity": "79e8940589d0ac448d40fd2a1560a4e59e817c73",
+      "required_for_resume": true,
+      "evidence": [
+        "Seventh root retry used authority 650497d7b407130d91950833c6ab80a9fffaeaa7 with runtime aad85eb8ffd4b7a3804905aade0de0fa04543582.",
+        "The evidence-preserving receipt path exposed the exact semantic rejection receipt reject-b96e3caa-2ac5-47d9-811e-94d6a30afdeb.",
+        "Receipt authorization_decision=DENY with authorization_reason='TIMEOUT_DENIED: TIMEOUT_DENIED: timeout exceeds profile ceiling'; task_id was workspace-semantic-execution-migration-v1 and target workspace-control.",
+        "Frozen profiles.v1.json sets git-read max_timeout_ms=30000, while upgrade_multirepo_padataset_v1.sh requested timeout_ms=50000 for semantic git-read. Evaluator-denial-probe already requested 30000 and its ceiling is 30000.",
+        "Runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 changes only the semantic acceptance request timeout from 50000 to 30000 and adds a regression asserting both acceptance timeouts do not exceed their frozen profile ceilings.",
+        "No profile ceiling or execution authority was widened.",
+        "Exact runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73 passed Workspace Control Validation #2934."
+      ]
+    },
+    {
+      "id": "workspace-shell-materialized-source-worker-readability",
+      "kind": "validation_checkpoint",
+      "identity": "df24022f897643282b4ce16aa727fa2dd646f859",
+      "required_for_resume": true,
+      "evidence": [
+        "Eighth root activation retry used authority 17a73471e812a0cf327224ab2c0beb2248200b6e with runtime 79e8940589d0ac448d40fd2a1560a4e59e817c73.",
+        "Semantic receipt job-7e2847ed-3b09-4052-a3b7-1ffc2f53188c was authorization_decision=ALLOW with argv_profile=git-read, source_mode=task, source_dirty=false, exact expected/observed/task checkpoint SHA 7c20097c5f177f23c16a765b95ce94d7161f0d29, but sandboxed rev-parse exited 128 with 139 stderr bytes.",
+        "The exact stderr text was not recovered; no claim is made about its literal contents.",
+        "Source inspection established a structural worker-readability defect: workspace-shell-candidate-materializer.service runs with UMask=0077 and previously Group=root, while harden_tree only removed write bits. Nested Git metadata could therefore remain root:root 0700/0600 even though the final checkout root was traversable.",
+        "Runtime df24022f897643282b4ce16aa727fa2dd646f859 runs the root materializer with primary group workspace-shell-exec, carries worker_gid explicitly in candidate-materializer.json, and fails closed if the service GID differs.",
+        "New exact materialized trees retain root ownership but become worker-group readable/traversable only: directories 0750-equivalent, files group-readable while group/world write and all world access remain denied. Credentials and control sockets remain root-private.",
+        "Cached trees that fail the recursive worker-group/readability invariant are discarded and rematerialized rather than certified from their top-level mode.",
+        "A regression covers nested .git mode repair and stale root-private cache rematerialization.",
+        "Exact runtime df24022f897643282b4ce16aa727fa2dd646f859 passed Workspace Control Validation #2939."
+      ]
+    },
+    {
+      "id": "workspace-shell-materializer-upgrade-worker-gid",
+      "kind": "validation_checkpoint",
+      "identity": "54ac65cbcd4211554710b8f8f4231c6c9554e3cc",
+      "required_for_resume": true,
+      "evidence": [
+        "Ninth root activation retry used authority fbfbdb7706e96cb0d27dc00ed2433b4f280bc807 with runtime df24022f897643282b4ce16aa727fa2dd646f859.",
+        "Semantic MCP execution was rejected before Git execution with authorization_reason CANDIDATE_MATERIALIZER_UNAVAILABLE: [Errno 111] Connection refused.",
+        "Source inspection showed the repaired materializer binary now requires worker_gid and fails closed when absent, render_install.py emits worker_gid, but upgrade_multirepo_padataset_v1.sh manually patched candidate-materializer.json without adding worker_gid.",
+        "Therefore the transactional upgrade started a materializer whose config was incomplete; the service exited and its Unix socket was unavailable.",
+        "Runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc writes worker_gid=41011 into the upgrade-time materializer config and adds a bounded root-only socket readiness probe that requires an INVALID_SHA response before semantic MCP acceptance begins.",
+        "No execution authority or profile policy was widened.",
+        "Exact runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc passed Workspace Control Validation #2942."
+      ]
+    },
+    {
+      "id": "workspace-shell-live-multirepo-activation-accepted",
+      "kind": "live_acceptance_checkpoint",
+      "identity": "54ac65cbcd4211554710b8f8f4231c6c9554e3cc",
+      "required_for_resume": true,
+      "evidence": [
+        "Transactional root activation completed with LOCAL_CANDIDATE_MATERIALIZER_READY=PASS, LOCAL_MCP_READY=PASS, LOCAL_MCP_DISCOVERY=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_TASK_AUTHORITY=PASS.",
+        "Semantic acceptance completed with LOCAL_SEMANTIC_TASK_RECEIPT=PASS and LOCAL_SEMANTIC_TASK_AUTHORITY=PASS; activation receipt job-d479bb9c-2ab2-4b01-b082-0921a173f0ac.",
+        "Evaluator acceptance completed with LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, and EVALUATOR_ISOLATION_ACCEPTANCE=PASS; evaluator denial receipt job-0841ffee-e93e-4316-81a4-0a01a7d7bbfb.",
+        "Activation completed with WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS and backup retained at /var/lib/workspace-shell/upgrades/padataset-multirepo-v1-20261116T174914Z.",
+        "Activation bound authority snapshot 6a1be26bbfc84246f19ed7858d60d04fd90766e2, runtime snapshot 54ac65cbcd4211554710b8f8f4231c6c9554e3cc, PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule 8019248f6952743d61e90d5abac754356952c18b, and semantic execution 7c20097c5f177f23c16a765b95ce94d7161f0d29.",
+        "Independent post-activation Workspace Shell readback receipt job-f960479c-27ee-49d5-adbe-157211222c8e returned live workspace-control HEAD 54ac65cbcd4211554710b8f8f4231c6c9554e3cc, exit 0, clean source, empty stderr.",
+        "Independent post-activation semantic execution receipt job-6fea4bc7-3b94-4f75-9974-163566821214 returned exact HEAD 7c20097c5f177f23c16a765b95ce94d7161f0d29, exit 0, clean source, empty stderr."
+      ]
     }
   ],
   "artifacts": [
@@ -186,11 +457,12 @@
       "regeneration": null,
       "review_requirement": "exact-head validation before Lambda execution",
       "evidence": [
-        "Separates exact authority SHA from exact workspace-control execution SHA and PADataset execution SHA.",
-        "Refreshes /etc/workspace-shell/authority atomically while preserving rollback and independently materializes /srv/workspace-shell/workspace-control.",
-        "Verifies both durable task bindings before mutation and probes both new task IDs locally through MCP before declaring upgrade success.",
-        "Preserves the historical PADataset checkout read-only and continues to source runtime dependencies from the retained accepted dependency closure.",
-        "Rerun hardening at 1a9a24fc1bc6e5cda2984e296151a378138600c8 accepts an already-mounted evidence bind only when device+inode match the historical checkout and mount options contain ro,nosuid,nodev,noexec; unknown/weaker mounts fail closed."
+        "Separates exact authority SHA, workspace-control execution SHA, and explicitly supplied PADataset execution SHA.",
+        "Transactionally installs/rolls back workspace-shell-candidate-materializer.service and preserves any pre-existing private-repository source configuration.",
+        "Accepts the owning Workspace Shell task only as IN_PROGRESS while allowing the dependent MTH602 task to remain CHECKPOINTED.",
+        "Requires the current PADataset SHA explicitly rather than defaulting to a stale research checkpoint.",
+        "Retains read-only evidence-mount verification and local MCP discovery gates.",
+        "Current candidate 6d47e3ec additionally bundles evaluator sealed-store provisioning, exact semantic control readback/commitment verification, and fixed hostile-worker denial acceptance in the same rollback-capable upgrade."
       ]
     },
     {
@@ -217,6 +489,33 @@
         "Procedure records the proven uninstall -> surface existing private plugin install card -> user Install -> browser refresh -> Refresh tools sequence.",
         "Procedure distinguishes plugin/app refresh failures from live MCP frontend failures and forbids repeated reinstall while the server is unhealthy."
       ]
+    },
+    {
+      "path": "plugins/workspace-shell/root/candidate_materializer.py",
+      "state": "VALIDATED_NOT_DEPLOYED",
+      "role": "exact-SHA public/private candidate source materializer",
+      "origin": "candidate-evidence permanent fix",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "exact-head CI plus live candidate smoke",
+      "evidence": [
+        "Runs outside the hostile worker and job launcher network namespace.",
+        "Supports public_https and ssh_deploy_key transports with exact task-scoped repository URL binding.",
+        "Private deploy keys remain root-private under /etc/workspace-shell/candidate-sources with StrictHostKeyChecking and pinned known_hosts."
+      ]
+    },
+    {
+      "path": "plugins/workspace-shell/install/workspace-shell-candidate-materializer.service.in",
+      "state": "VALIDATED_NOT_DEPLOYED",
+      "role": "least-privilege network-capable candidate materializer service",
+      "origin": "candidate-evidence permanent fix",
+      "persistence": "workspace-control Git",
+      "regeneration": null,
+      "review_requirement": "live systemd health acceptance",
+      "evidence": [
+        "Separate fifth service; job launcher remains PrivateNetwork=yes.",
+        "Materializer cannot access frontend/tunnel/approval/replay/helper/job/receipt state and writes only the candidate store/control socket."
+      ]
     }
   ],
   "validation": [
@@ -224,18 +523,24 @@
       "check": "Repository implementation tests",
       "result": "PASS",
       "evidence": [
-        "Exact execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 passed 548 Python tests with 1 intentional skip in Lambda validation run #385 / Actions 42880610796.",
-        "The idempotent evidence-mount safety regression and upgrade operator Bash syntax both passed.",
-        "The only workflow failure is the known non-applicable controller/lambda-ci-controller/v3 wrapper after candidate-scope validation completed successfully."
+        "Exact final execution candidate 296d2591b83d86da898940ccc6f6cc5cbcc45374 passed Lambda Workspace Control Validation run 43784660953 SUCCESS.",
+        "The suite covers candidate authority separation, candidate-pytest runtime paths, public/private materialization, exact repo URL binding, transactional upgrade rollback, frontend allowlist preservation, and bounded retry fetch behavior."
       ]
     },
     {
       "check": "Workspace Control integration validation",
       "result": "PASS",
       "evidence": [
-        "Exact same-repository PR-head gate passed for 1a9a24fc1bc6e5cda2984e296151a378138600c8.",
-        "Bounded workspace-control runner isolation and live Workspace Shell transport isolation diagnostic passed.",
-        "No controller/** change is part of this Workspace Shell candidate; the later missing ./v3 wrapper remains a validator-lineage mismatch."
+        "Exact same-repository PR-head admission and bounded workspace-control runner isolation passed for f23a7a4855a7c23f99a5cadb4143b732c7c153ad.",
+        "The runtime candidate is reconciled onto the current controller-containing and MTH602 authority lineage; no stale task snapshot is introduced."
+      ]
+    },
+    {
+      "check": "Live current authority visibility",
+      "result": "PASS",
+      "evidence": [
+        "Current ChatGPT Workspace Shell call for workspace-shell-multirepo-research-v1 passed frontend task authorization and reached SOURCE_SHA_MISMATCH rather than TASK_NOT_FOUND/TASK_SHA_MISMATCH, proving the owning task is visible in live authority.",
+        "Current MTH602 Workspace Shell failure is TASK_SHA_MISMATCH for a new candidate against durable PADataset checkpoint befe383..., which is the defect this candidate-evidence path is designed to remove without changing authoritative execution rules."
       ]
     },
     {
@@ -267,38 +572,141 @@
       ]
     },
     {
-      "check": "ChatGPT app transport after refresh",
+      "check": "Live candidate materializer service",
       "result": "PASS",
       "evidence": [
-        "Fresh-conversation model-visible Workspace Shell schema exposes PADataset as a target and research-bounded as a profile.",
-        "Old-compatible workspace-shell-mcp-v1 runtime_inventory succeeds through ChatGPT App -> Secure MCP Tunnel -> MCP, proving transport remains healthy.",
-        "Both workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND before PADataset access, isolating the remaining blocker to the trusted task-authority snapshot rather than app discovery or transport."
+        "workspace-shell-candidate-materializer.service LoadState=loaded, ActiveState=active, SubState=running, User=root, Group=root.",
+        "Runtime inventory still reports HTTPS_MTLS_REQUIRED and root-owned launcher/broker sockets."
       ]
     },
     {
-      "check": "Independent authority-root task visibility",
-      "result": "FAIL",
+      "check": "Plugin Creator Workspace Shell release refresh",
+      "result": "PASS",
       "evidence": [
-        "Live calls for both new task IDs return TASK_NOT_FOUND while workspace-shell-mcp-v1 remains visible.",
-        "Accepted live lineage records an independent trusted authority snapshot at /etc/workspace-shell/authority, distinct from executable /srv/workspace-shell/workspace-control.",
-        "The deployed multirepo upgrader refreshed executable/runtime snapshots but did not refresh the independent authority snapshot.",
-        "Candidate ce19452c644599bda23f6e3766c9390fa0d906db corrects this by separately staging authority and execution SHAs with rollback and local MCP task-visibility probes."
+        "Existing private personal plugin plugin_asdk_app_6ae80eae88c081919d9d4fd0d43524ba refreshed in place.",
+        "Current release pluginrel_6afa5f53a31481919a951d996a362865, version 1.0.1.",
+        "No duplicate Workspace Shell plugin was created."
+      ]
+    },
+    {
+      "check": "Positive off-checkpoint candidate-pytest acceptance",
+      "result": "NOT_RUN",
+      "evidence": [
+        "This conversation still exposes the pre-refresh cached workspace_shell_exec enum and therefore cannot submit candidate-pytest client-side.",
+        "A fresh conversation/tool-schema load is required to prove the new positive path."
+      ]
+    },
+    {
+      "check": "Evaluator denial frontend parity repair",
+      "result": "PASS",
+      "evidence": [
+        "Workspace Control Validation #2914 completed SUCCESS on exact runtime candidate 2c2087d0a7be2ed897598cab4a95e364e2b528f7.",
+        "The exact candidate changes only plugins/workspace-shell/src/core.js and tests/test_workspace_shell_multirepo_research.py."
+      ]
+    },
+    {
+      "check": "Evaluator denial frontend resolver parity repair",
+      "result": "PASS",
+      "evidence": [
+        "Exact runtime candidate af3baf3bdc29bff6ae7114059fdfe4709dc13100 completed Workspace Control Validation #2916 SUCCESS.",
+        "The repair adds validateEvaluatorDenialProbe() accepting only argv [\"sealed-store-v1\"] and a matching resolveProfile() case; the root launcher remains the only layer that maps that fixed token to the hard-coded denial-probe Python program.",
+        "Parity regression now includes frontend resolver cases and root launcher expected-profile grammar in addition to target matrix, server schema, and profiles.v1.json."
+      ]
+    },
+    {
+      "check": "Materialized task-source worker traversal and semantic receipt selection",
+      "result": "PASS",
+      "evidence": [
+        "Exact runtime 381677ac0ae5c17ee0610d286a6f847ad3d392b8 completed Workspace Control Validation #2922 SUCCESS.",
+        "Candidate-store parents are root-owned 0711 (traverse-only), exact checkout roots are root-owned 0755/read-only-to-worker, and group/world write remains denied.",
+        "Regression covers new materialization, stale cached 0700 final repair, install/upgrade modes, and semantic git-read receipt-profile filtering."
+      ]
+    },
+    {
+      "check": "Exact MCP response to acceptance receipt binding",
+      "result": "PASS",
+      "evidence": [
+        "Exact runtime 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52 completed Workspace Control Validation #2925 SUCCESS.",
+        "Acceptance now validates the exact job receipt_id returned by each MCP response rather than scanning receipt_root by time/profile.",
+        "Regression asserts exact semantic/evaluator MCP response file binding, semantic git-read profile binding, and absence of receipt_root glob scanning."
+      ]
+    },
+    {
+      "check": "MCP structured output exposes exact opaque receipt identifier",
+      "result": "PASS",
+      "evidence": [
+        "Exact runtime d02bfd36ed06457698a3f1e120d9a84e2349cf5f completed Workspace Control Validation #2928 SUCCESS.",
+        "workspace_shell_exec outputSchema now explicitly permits only ok plus optional exact job receipt_id at the added boundary; no profile, execution, helper, network, sudo, or root authority changed.",
+        "Acceptance consumes only structuredContent.receipt_id and still validates the corresponding root-owned receipt file before certifying semantic/evaluator acceptance."
+      ]
+    },
+    {
+      "check": "Opaque receipt evidence preservation across MCP output validation",
+      "result": "PASS",
+      "evidence": [
+        "Exact runtime aad85eb8ffd4b7a3804905aade0de0fa04543582 completed Workspace Control Validation #2931 SUCCESS.",
+        "workspace_shell_exec receipt_id output now uses the same bounded character/length grammar enforced by the existing no-follow receipt reader.",
+        "Acceptance still validates the exact selected root-owned receipt and does not treat receipt-id shape itself as success evidence."
+      ]
+    },
+    {
+      "check": "Live acceptance caller obeys frozen profile timeout ceilings",
+      "result": "PASS",
+      "evidence": [
+        "git-read frozen ceiling is 30000 ms and semantic activation now requests 30000 ms.",
+        "evaluator-denial-probe frozen ceiling is 30000 ms and activation requests 30000 ms.",
+        "Regression binds both activation request values to their manifest ceilings; Workspace #2934 SUCCESS."
+      ]
+    },
+    {
+      "check": "Materialized exact source is readable by hostile worker without world-readable repository contents",
+      "result": "PASS",
+      "evidence": [
+        "Candidate materializer service primary group is workspace-shell-exec while User remains root and UMask remains 0077.",
+        "Candidate materializer config binds the attested worker_gid and fails closed on service-group mismatch.",
+        "Recursive hardening grants only worker-group read/traverse derived from owner read/execute bits, removes group write and all world access, and rejects group mismatches.",
+        "Stale root-private caches are rematerialized. Workspace #2939 SUCCESS."
+      ]
+    },
+    {
+      "check": "Transactional upgrade binds and verifies candidate materializer worker GID before semantic acceptance",
+      "result": "PASS",
+      "evidence": [
+        "upgrade_multirepo_padataset_v1.sh writes candidate-materializer.json worker_gid=41011.",
+        "A root-only Unix-socket probe must receive the expected INVALID_SHA response before MCP semantic execution is attempted.",
+        "Workspace Control Validation #2942 SUCCESS."
+      ]
+    },
+    {
+      "check": "Live Workspace Shell multirepo activation and evaluator isolation",
+      "result": "PASS",
+      "evidence": [
+        "LOCAL_CANDIDATE_MATERIALIZER_READY=PASS",
+        "LOCAL_SEMANTIC_TASK_RECEIPT=PASS",
+        "LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS",
+        "LOCAL_EVALUATOR_ISOLATION=PASS",
+        "EVALUATOR_ISOLATION_ACCEPTANCE=PASS",
+        "WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS",
+        "Independent live runtime receipt job-f960479c-27ee-49d5-adbe-157211222c8e confirms 54ac65cbcd4211554710b8f8f4231c6c9554e3cc.",
+        "Independent semantic receipt job-6fea4bc7-3b94-4f75-9974-163566821214 confirms 7c20097c5f177f23c16a765b95ce94d7161f0d29."
       ]
     }
   ],
   "blockers": [
-    "Live trusted task authority is still stale: workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1 return TASK_NOT_FOUND. This remains the sole execution gate before PADataset Stage 00.",
-    "The validated host upgrade must be rerun from the new authority-state head with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8. The existing evidence mount may now be reused only if the upgrader verifies its identity and read-only hardening."
+    "Workspace Shell multirepo live activation is accepted and independently verified at runtime 54ac65cbcd4211554710b8f8f4231c6c9554e3cc with evaluator isolation PASS.",
+    "The next gate is no longer Workspace Shell activation. Before any fake-worker execution, derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository authority; do not invent a route.",
+    "Claim-bearing Reasoning Economy execution remains separately gated on reviewed live executor authority, evaluator isolation, and calibrated allowance telemetry.",
+    "GitRunner/controller modernization remains deferred and authority-separated."
   ],
   "remaining_work": [
-    "Deploy the validated multirepo upgrade using the final authority-state head, workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8, and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af.",
-    "Verify live task visibility for workspace-shell-multirepo-research-v1 and mth602-final-multisurrogate-dqnguard-v1.",
-    "Run positive and negative PADataset Workspace Shell acceptance at exact SHA 17e1147614f27702e43565089d618182ff71c5af.",
-    "Begin MTH602 Stage 00 provenance recovery from the clean execution snapshot plus the untouched read-only historical evidence checkout.",
-    "Wire research-bounded to the real DNNs/CUDA runtime internally without changing the external MCP schema."
+    "Validate this live-acceptance authority-state commit.",
+    "Sync the umbrella workspace-semantic-execution-migration-v1 task to the accepted live Workspace Shell runtime and evaluator-isolation checkpoint; validate Workspace/Semantic/Operator exact head.",
+    "Derive the exact reviewed private route/profile/task authority for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable source/docs.",
+    "Run the fake-worker transport only if the reviewed route and authority are explicitly present and it remains account-free, browser-free, model-free, and GPU-free; require exact action/status/result roundtrip.",
+    "Continue toward Stage 12 / real account calibration only after the fake-worker transport acceptance."
   ],
-  "next_safe_action": "Rerun the validated rollback-capable multirepo upgrade from the exact authority-state branch head produced by this checkpoint, with workspace-control execution candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 and PADataset execution SHA 17e1147614f27702e43565089d618182ff71c5af. The upgrader must verify/reuse the existing PADataset evidence mount safely, refresh /etc/workspace-shell/authority separately, and report LOCAL_TASK_AUTHORITY=PASS. Then re-test both durable task IDs through ChatGPT Workspace Shell before any Stage 00 read.",
-  "last_executor": "chatgpt",
-  "last_surface": "github+workspace-shell",
-  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385."
+  "next_safe_action": "Workspace Shell live activation is accepted. Validate this new authority-state commit, sync the umbrella task, then derive the exact reviewed private route for benchmarks/workspace-semantic-execution/live_fake_worker_transport_v1.py from durable repository evidence. Do not invent a route or widen authority. If the reviewed route exists and is account/browser/model/GPU-free, execute the fake-worker transport and require an exact action/status/result roundtrip before proceeding toward Stage 12.",
+  "last_executor": "chatgpt+operator",
+  "last_surface": "github+lambda+workspace-shell+plugin-creator",
+  "notes": "This is an extension of the accepted Workspace Shell v1 security model, not a replacement. Research execution is deliberately sandbox-copy-only and capped by the existing synchronous Workspace Shell runtime ceiling; durable experiment-result promotion is a later capability and is not silently implied here. Canonical plugin edit/reinstall procedure is now plugins/workspace-shell/CHATGPT_PLUGIN_EDIT_WORKFLOW.md and should be reused for Workspace Shell, Heartbeat, and other owned private App-backed MCP plugins unless explicitly superseded.\n\n2026-11-10 authority-root diagnosis: a fresh ChatGPT conversation mounted the refreshed PADataset/research-bounded schema and transport calls succeed, but both new tasks return TASK_NOT_FOUND while the old workspace-shell-mcp-v1 task remains visible. The accepted live lineage uses an independent /etc/workspace-shell/authority snapshot. Candidate ce19452c644599bda23f6e3766c9390fa0d906db formalizes separate authority/execution staging and a local task-visibility smoke test.\n\n2026-11-10 validation checkpoint: authority-state head 0af55c4af8c5d3cb8c753b1fee9944bdfa11bf64 passed 548 Python tests with 1 intentional skip in Lambda validation run #381 / Actions 42879533507. Exact PR-head and runner-isolation gates passed. The workflow red conclusion is the known non-applicable controller/lambda-ci-controller/v3 wrapper mismatch; PR-base comparison contains no controller/** changes. Implementation is promoted to VALIDATED; live authority refresh remains fail-closed.\n\n2026-11-10 rerun hardening: operator preflight reached DURABLE_TASK_BINDINGS=PASS and preserved the historical dirty checkout, then failed before service shutdown because /srv/workspace-shell/PADataset-evidence already existed from the prior partial deployment. Candidate 1a9a24fc1bc6e5cda2984e296151a378138600c8 adds fail-closed idempotent reuse of only the exact hardened bind and passed 548 Python tests (1 intentional skip) in run #385.\n\n2026-11-16 permanent candidate-evidence correction: repeated TASK_SHA_MISMATCH failures were traced to a policy/transport conflation. Candidate validation is now modeled as evidence-only execution on an exact task-scoped repository SHA, while authoritative execution and privileged helpers retain exact durable task-SHA binding. The hostile worker and job launcher remain network-dead. A separate fifth materializer service supports public HTTPS and private read-only SSH deploy keys without exposing credentials through MCP or receipts. Execution candidate faf72bfda6a6ce762dd9adde39499af205e6fc69 passed current-lineage Lambda validation run 43783063540 SUCCESS.\n\n2026-11-16 final live-upgrade hardening: execution candidate f23a7a4855a7c23f99a5cadb4143b732c7c153ad adds transactional backup/restore of /etc/workspace-shell/frontend.json and updates its inspectable-unit allowlist for workspace-shell-candidate-materializer.service while preserving owner/group/mode. Exact-head Lambda validation run 43783505917 completed SUCCESS.\n\n2026-11-16 retryable materialization correction: first operator live-upgrade attempt failed before service mutation on gnutls_handshake while cloning PADataset. Candidate 296d2591b83d86da898940ccc6f6cc5cbcc45374 replaces that full clone with bounded exact-SHA shallow fetch retries over HTTP/1.1; exact-head validation run 43784660953 completed SUCCESS. Live inspection after the failed attempt confirmed the original four services remained active and unchanged.\n\n2026-11-16 shallow-authority correction: execution candidate 5401045341090a26a42ce3a497c379f8223a3b54 replaces local-clone execution materialization with independent exact-SHA remote fetch for workspace-control. Lambda validation run 43785491090 completed SUCCESS.\n\n2026-11-16 live closure: transactional upgrade completed PASS. Fifth candidate-materializer service is live/active/running. Workspace Shell private plugin was refreshed in place to v1.0.1 (release pluginrel_6afa5f53a31481919a951d996a362865). Remaining acceptance is only a positive candidate-pytest from a fresh tool-schema load; the current chat remains client-side cached to the old enum.\n\n2026-11-15 SEMANTIC AUTHORITY ENROLLMENT CANDIDATE: cd009257e08b2bd9f3ac241657895d3ba58c5979 passed Workspace Control Validation #2893. The fix preserves exact task authority while decoupling task-bound execution SHA from the single installed workspace-control checkout. The root-owned transactional upgrader can import only the pinned semantic capsule source 2cec87fbf5c054b632e5ddc7e057384e4228c48a and must live-prove exact semantic execution HEAD 9b02005a58a961ce83ef8790e2d59ec626802591. Live activation remains a root-only operator step because privileged helper/issuer registries remain intentionally empty.\n\n2026-11-16 SEMANTIC ENROLLMENT RETRY FIX: the first root activation safely rolled back after a false-negative local MCP stdout assertion. Corrected receipt-based acceptance at ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe passed Workspace Control Validation #2896. Retry must use the authority-state head containing this checkpoint and preserve semantic capsule source 2cec87fb… / execution binding 9b02005a….\n\n2026-11-16 CURRENT SEMANTIC ENROLLMENT TUPLE: root retry must enroll semantic capsule 629cbb10… bound to execution 74958b5d…, superseding the older 2cec87fb…/9b02005a… tuple. Workspace Shell runtime remains ccdde5c9…; PADataset remains befe383f…. No GPU work is authorized by this change.\n\n2026-11-16 BUNDLED SEMANTIC + EVALUATOR ACTIVATION: Workspace Shell runtime 6d47e3eca88150c6ad127b6e5901936323fe3ca1 passed #2902. The next root activation uses semantic capsule 629cbb10… bound to execution 74958b5d… and now closes both TASK_NOT_FOUND and the live evaluator isolation gate in one rollback-capable window. The worker probe is fixed/non-parameterized and the sealed store remains outside the worker namespace.\n\n2026-11-16 FINAL SEMANTIC FREEZE TUPLE: root activation is now pinned to Workspace Shell runtime 6d47e3ec…, PADataset befe383f…, semantic capsule 8019248f…, and semantic execution 7c20097c…. The semantic execution/capsule pair is 3/3 green and must not move again before activation absent a demonstrated defect.\n\n2026-11-16 LIVE ACTIVATION FAILURE / SAFE ROLLBACK: the final frozen activation progressed through semantic enrollment, exact semantic execution materialization, evaluator sealed-root provisioning/control readback, runtime dependency validation, MCP readiness and discovery, but the evaluator-denial-probe call failed TARGET_PROFILE_DENIED for target workspace-control. Transactional rollback ran. Exact runtime source 6d47e3… already authorizes that target/profile pair, so the next work is to identify the installed launcher/config/runtime mismatch, validate the smallest fix, refreeze the activation tuple, and retry. Do not touch PADataset GPUs.\n\n2026-11-16 ROOT CAUSE PINNED: frontend `src/core.js::assertTargetProfile` is the only frozen runtime layer observed to omit `evaluator-denial-probe` for `workspace-control`; server schema and root launcher already include it. The next executor should make only that parity fix plus regression coverage, validate, refreeze tuple, and retry activation.\n\n2026-11-16 EVALUATOR DENIAL FRONTEND PARITY REPAIR: runtime 2c2087d0a7be2ed897598cab4a95e364e2b528f7 passed Workspace Control Validation #2914. The repair adds only evaluator-denial-probe to the workspace-control frontend allowlist and adds cross-layer profile-parity regression coverage. Activation has not yet been retried.\n\n2026-11-16 SECOND LIVE ACTIVATION FAILURE / RESOLVER PARITY REPAIR: activation at authority state 559e7a13… with runtime 2c2087d0… passed target/profile admission but failed closed at core.js::resolveProfile with PROFILE_NOT_AUTHORIZED for evaluator-denial-probe, then rolled back. Runtime af3baf3bdc29bff6ae7114059fdfe4709dc13100 adds only fixed-token frontend validation/resolution for evaluator-denial-probe and extends parity regression to include resolver and root frozen grammar; Workspace Control #2916 SUCCESS. Activation has not yet been retried.\n\n2026-11-16 THIRD LIVE ACTIVATION FAILURE / WORKER-RUNTIME DIAGNOSTIC GATE: authority e6e397ca… with runtime af3baf3b… passed both frontend admission layers and reached the actual evaluator-denial hostile-worker process. MCP call/authorization passed, but receipt job-c02602c3-80a8-4233-affe-943194db9cc0 recorded exit_code=1, zero stdout, 144 stderr bytes, stderr SHA256 8f8a93cf…. Transactional rollback ran. A post-rollback validation-bounded call proves Python executes successfully in the sandbox. Exact transient unit workspace-shell-job-c02602c3-80a8-42.service must be read from local journal before any further runtime patch or activation retry.\n\n2026-11-16 MATERIALIZED TASK-SOURCE TRAVERSAL REPAIR: the exact evaluator denial probe and systemd/bubblewrap shape reproduce successfully against the installed /srv workspace, while the task-specific candidate path was hidden behind root-only 0700 candidate-store/target/final roots. Runtime 381677ac0ae5c17ee0610d286a6f847ad3d392b8 changes only this materialized-source accessibility boundary to root-owned non-writable 0711 parents and 0755 exact checkout roots, repairs cached 0700 finals, leaves credential source storage 0700, and filters semantic acceptance receipts to git-read. Workspace #2922 SUCCESS. Live activation has not yet been retried.\n\n2026-11-16 EXACT LIVE ACCEPTANCE RECEIPT BINDING: the fourth root retry with materialized-source traversal repaired reached both semantic/evaluator MCP PASS and local task authority; no materialized-source crash recurred. It failed only because the semantic acceptance harness could not find a git-read receipt via receipt_root time/profile scanning, then rolled back. Runtime 8e0a9bc352df1c39ddaeeb4caa1ccd9abea7cf52 now binds each acceptance check to the exact receipt_id returned by its own MCP response and validates the exact receipt file; Workspace #2925 SUCCESS. Live activation has not yet been retried.\n\n2026-11-16 MCP RECEIPT-ID OUTPUT CONTRACT: the fifth root retry reached both semantic/evaluator MCP PASS and local task authority, then rolled back only because raw MCP structured output did not expose a schema-declared receipt_id. Runtime d02bfd36ed06457698a3f1e120d9a84e2349cf5f adds only the opaque exact job receipt_id to workspace_shell_exec outputSchema/top-level structuredContent and updates acceptance to consume it; Workspace #2928 SUCCESS. Live activation has not yet been retried.\n\n2026-11-16 OPAQUE RECEIPT EVIDENCE PRESERVATION: the sixth root retry reached MCP discovery, then the semantic tools/call failed because the newly job-only receipt_id output schema rejected the returned identifier before exact receipt inspection. The error did not expose the identifier, so job-vs-rejection semantics remain unknown. Runtime aad85eb8ffd4b7a3804905aade0de0fa04543582 uses the existing bounded opaque receipt grammar and retains exact receipt invariant checks, ensuring the next retry reveals real receipt evidence rather than another schema mask. Workspace #2931 SUCCESS. Live activation has not yet been retried.\n\n2026-11-16 SEMANTIC ACCEPTANCE TIMEOUT CEILING: the seventh retry finally exposed the exact rejection receipt: TIMEOUT_DENIED because semantic git-read requested 50000 ms against the frozen 30000 ms profile ceiling. Runtime 79e89405… changes only that caller timeout to 30000 ms and adds manifest-ceiling regression coverage; Workspace #2934 SUCCESS. No policy ceiling or authority was widened.\n\n2026-11-16 MATERIALIZED SOURCE WORKER READABILITY: eighth activation passed ALLOW and all exact-SHA/source invariants but sandboxed git-read exited 128. Exact stderr text was not recovered. Source inspection showed candidate materialization under UMask=0077/Group=root could leave nested .git metadata root-private. Runtime df24022f… binds materialized content to workspace-shell-exec group, recursively grants only group read/traverse, denies world access, rematerializes stale root-private caches, and passed Workspace #2939.\n\n2026-11-16 MATERIALIZER UPGRADE CONFIG BINDING: ninth activation rolled back with CANDIDATE_MATERIALIZER_UNAVAILABLE because the hardened materializer required worker_gid while the transactional upgrade path omitted it from candidate-materializer.json. Runtime 54ac65cb… writes worker_gid=41011 and requires a root-only INVALID_SHA socket probe before semantic MCP acceptance; #2942 SUCCESS.\n\n2026-11-16 LIVE ACTIVATION ACCEPTED: transactional multirepo activation completed all required semantic/evaluator/materializer/isolation markers and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Independent post-activation readback confirms live runtime 54ac65cb… and frozen semantic execution 7c20097c… with clean source and exit 0. Workspace Shell activation is no longer the critical-path blocker."
 }

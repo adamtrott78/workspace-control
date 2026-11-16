@@ -86,12 +86,17 @@ def _require(condition: bool, message: str) -> None:
 def _generic_systemd_common(
     profiles: dict[str, Any],
     manifest: dict[str, Any],
+    runner_identity: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     common = copy.deepcopy(profiles["common"])
-    ident = manifest["derived_identity"]
     roots = manifest["roots"]
-    common["User"] = ident["runner_user"]
-    common["Group"] = ident["runner_group"]
+    if runner_identity is None:
+        runner_identity = {
+            "user": manifest["derived_identity"]["runner_user"],
+            "group": manifest["derived_identity"]["runner_group"],
+        }
+    common["User"] = runner_identity["user"]
+    common["Group"] = runner_identity["group"]
     common["Environment"] = [
         f"HOME={roots['home']}",
         f"XDG_CACHE_HOME={roots['staging_cache']}",
@@ -519,6 +524,39 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
             seen_prefixes.add(prefix)
             seen_users.add(controller_user)
 
+            configured_runner_identity = cls.get("runner_identity")
+            if configured_runner_identity is None:
+                runner_identity = {
+                    "user": manifest["derived_identity"]["runner_user"],
+                    "group": manifest["derived_identity"]["runner_group"],
+                }
+            else:
+                _require(
+                    set(configured_runner_identity) == {"unix_user", "unix_group"},
+                    f"{class_id}: runner_identity keys invalid",
+                )
+                runner_identity = {
+                    "user": configured_runner_identity["unix_user"],
+                    "group": configured_runner_identity["unix_group"],
+                }
+                _require(
+                    CONTROLLER_USER.fullmatch(runner_identity["user"]) is not None,
+                    f"{class_id}: invalid runner unix user",
+                )
+                _require(
+                    CONTROLLER_USER.fullmatch(runner_identity["group"]) is not None,
+                    f"{class_id}: invalid runner unix group",
+                )
+                _require(
+                    runner_identity["group"]
+                    == manifest["derived_identity"]["runner_group"],
+                    f"{class_id}: per-class runner group must remain project runner group",
+                )
+            _require(
+                runner_identity["user"] != controller_user,
+                f"{class_id}: runner unix user must differ from controller user",
+            )
+
             contract_id = cls["execution_contract_id"]
             _require(contract_id in contracts, f"{class_id}: unknown execution contract {contract_id}")
             contract = copy.deepcopy(contracts[contract_id])
@@ -565,7 +603,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                     f"{class_id}: invalid payload broker unix user",
                 )
                 _require(
-                    broker_user != manifest["derived_identity"]["runner_user"],
+                    broker_user != runner_identity["user"],
                     f"{class_id}: payload broker user must differ from runner user",
                 )
                 _require(
@@ -595,10 +633,7 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                 "scale_set_name": scale_set,
                 "runner_prefix": prefix,
                 "max_runners": int(cls["max_runners"]),
-                "project_runner_identity": {
-                    "user": manifest["derived_identity"]["runner_user"],
-                    "group": manifest["derived_identity"]["runner_group"],
-                },
+                "project_runner_identity": copy.deepcopy(runner_identity),
                 "payload_broker_identity": payload_broker_identity,
                 "project_roots": copy.deepcopy(manifest["roots"]),
                 "forbidden_paths": copy.deepcopy(manifest["forbidden_paths"]),
@@ -606,7 +641,11 @@ def compile_from_inputs(data: dict[str, Any]) -> dict[str, Any]:
                 "execution_contract": contract,
                 "resource_class_id": resource_id,
                 "resource_class": resource,
-                "systemd_common": _generic_systemd_common(profiles, manifest),
+                "systemd_common": _generic_systemd_common(
+                    profiles,
+                    manifest,
+                    runner_identity,
+                ),
                 "systemd_profile": systemd_profile,
                 "exclusive_resource_claims": [f"gpu:{uuid}" for uuid in gpu_uuids],
                 "bindings": {

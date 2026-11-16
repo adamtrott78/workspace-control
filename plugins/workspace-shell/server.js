@@ -15,6 +15,7 @@ import {
   assertRelativePath,
   assertSha,
   assertTargetProfile,
+  authorizeCandidateEvidence,
   authorizeTaskExecution,
   buildFrontendRequest,
   canonicalDigest,
@@ -329,23 +330,34 @@ function createShellServer() {
         task_id: z.string().min(3).max(100),
         target: z.enum(["workspace-control", "PADataset"]),
         expected_sha: z.string().regex(/^[0-9a-f]{40}$/),
-        profile: z.enum(["git-read", "pytest-bounded", "validation-bounded", "file-list", "file-read", "file-hash", "research-bounded"]),
+        profile: z.enum(["git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash", "research-bounded", "evaluator-denial-probe"]),
         argv: z.array(z.string().max(512)).min(1).max(32),
         cwd: z.string().min(1).max(512),
         timeout_ms: z.number().int().min(1000).max(90000),
       },
-      outputSchema: { ok: z.boolean() },
+      outputSchema: {
+        ok: z.boolean(),
+        receipt_id: z.string().regex(/^[a-zA-Z0-9._-]{8,128}$/).optional(),
+      },
       _meta: {},
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false, idempotentHint: false },
     },
     async (args, extra = {}) => {
       try {
-        authorizeTaskExecution({
-          authorityRoot: config.authority_root,
-          taskId: args.task_id,
-          target: args.target,
-          expectedSha: args.expected_sha,
-        });
+        const candidateMode = args.profile === "candidate-pytest";
+        const authorization = candidateMode
+          ? authorizeCandidateEvidence({
+              authorityRoot: config.authority_root,
+              taskId: args.task_id,
+              target: args.target,
+              candidateSha: args.expected_sha,
+            })
+          : authorizeTaskExecution({
+              authorityRoot: config.authority_root,
+              taskId: args.task_id,
+              target: args.target,
+              expectedSha: args.expected_sha,
+            });
         assertRelativePath(args.cwd, "cwd");
         assertTargetProfile(args.target, args.profile);
         resolveProfile(args.profile, args.argv);
@@ -356,12 +368,14 @@ function createShellServer() {
           task_id: args.task_id,
           target: args.target,
           expected_sha: args.expected_sha,
+          source_mode: candidateMode ? "candidate" : "task",
+          task_checkpoint_sha: authorization.taskCheckpointSha,
           profile: args.profile,
           argv: args.argv,
           cwd: args.cwd,
           timeout_ms: args.timeout_ms,
         }, { timeoutMs: Math.min(95000, args.timeout_ms + 5000), maxResponseBytes: 1024 * 1024, signal: extra.signal });
-        return okResult({ result: response }, "Bounded Workspace Shell execution completed.");
+        return okResult({ receipt_id: response.receipt_id, result: response }, "Bounded Workspace Shell execution completed.");
       } catch (error) {
         return toolError(error);
       }

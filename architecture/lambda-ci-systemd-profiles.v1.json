@@ -122,6 +122,21 @@
       ],
       "CUDA_VISIBLE_DEVICES": "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea",
       "note": "Dedicated PADataset scientific single-GPU sandbox ceiling. This profile preserves the accepted GPU UUID/device-isolation envelope while allowing the scientific_gpu_single_v1 contract its bounded 4h runtime without widening gpu-small authority for existing CI/model classes."
+    },
+    "gpu-scientific-single-2": {
+      "CPUQuota": "1200%",
+      "MemoryHigh": "56G",
+      "MemoryMax": "64G",
+      "TasksMax": 8192,
+      "RuntimeMaxSec": "4h",
+      "DeviceAllow_candidate": [
+        "/dev/nvidiactl rw",
+        "/dev/nvidia-uvm rw",
+        "/dev/nvidia-uvm-tools rw",
+        "UUID-resolved GPU-cfed3394-a935-63aa-9325-c4cae7b568b6 device node rw"
+      ],
+      "CUDA_VISIBLE_DEVICES": "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6",
+      "note": "Second PADataset scientific single-GPU sandbox ceiling. It is isolated to GPU1 and otherwise matches the accepted scientific lane-A resource ceiling."
     }
   },
   "unresolved_before_activation": [

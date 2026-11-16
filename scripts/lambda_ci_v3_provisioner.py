@@ -517,6 +517,37 @@ class V3Provisioner:
             return False
 
         project_id = cls["project_id"]
+        reservation_policy = self.root["host_resource_policy"].get(
+            "reservation_policy", {}
+        )
+        reserved_project_slots = reservation_policy.get(
+            "reserved_project_slots", {}
+        )
+        if not isinstance(reserved_project_slots, dict):
+            raise V3ServiceError("reserved_project_slots must be an object")
+        reserved_deficit = 0
+        for reserved_project, raw_slots in reserved_project_slots.items():
+            if not isinstance(reserved_project, str) or not reserved_project:
+                raise V3ServiceError("reserved project id must be non-empty")
+            try:
+                slots = int(raw_slots)
+            except (TypeError, ValueError) as exc:
+                raise V3ServiceError(
+                    f"reserved slots invalid for {reserved_project}"
+                ) from exc
+            if slots < 0 or slots > host_max:
+                raise V3ServiceError(
+                    f"reserved slots out of range for {reserved_project}"
+                )
+            if reserved_project == project_id:
+                continue
+            active_for_reserved = sum(
+                item["project_id"] == reserved_project for item in active
+            )
+            reserved_deficit += max(0, slots - active_for_reserved)
+        if len(active) >= host_max - reserved_deficit:
+            return False
+
         project_max = int(cls["project_max_active_runners"])
         if sum(item["project_id"] == project_id for item in active) >= project_max:
             return False

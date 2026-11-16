@@ -185,9 +185,10 @@ def build_candidate(repo: Path, go_bin: str) -> bytes:
         output=Path(raw)/"lambda-ci-controller-v3"
         p=subprocess.run(
             [
-                str(go),"-C",str(repo/"controller/lambda-ci-controller"),
+                str(go),
                 "build","-mod=readonly","-trimpath","-o",str(output),"./v3",
             ],
+            cwd=str(repo/"controller/lambda-ci-controller"),
             text=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,check=False,
         )
         if p.returncode:
@@ -280,17 +281,15 @@ def verify_topology(
         after_n=int(now.get("NRestarts") or "0")
         delta=after_n-before_n
         deltas[cid]=delta
-        if delta<0:
+        if cid in active_before and after_n != 0:
             raise ControllerRepairError(
-                f"controller restart counter regressed: {cid}"
+                f"controller auto-restarted after intentional restore: {cid} "
+                f"NRestarts={after_n}"
             )
-        if before_n==0 and delta!=0:
+        if cid not in active_before and after_n != before_n:
             raise ControllerRepairError(
-                f"previously-stable controller restarted during refresh: {cid}"
-            )
-        if before_n>0 and delta>1:
-            raise ControllerRepairError(
-                f"pre-existing restarting controller exceeded bounded restart delta: {cid}"
+                f"inactive controller restart counter changed without activation: {cid} "
+                f"before={before_n} after={after_n}"
             )
     return deltas
 
