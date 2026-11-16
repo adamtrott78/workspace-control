@@ -60,55 +60,47 @@ Refresh v2 is live and successful:
 
 Therefore **live lane-B trust is still refresh-v2**, not v3.
 
-## Refresh-v3 candidate and exact failure
+## Refresh-v3 corrected candidate
 
-Workspace-control refresh-v3 branch:
-- branch: `mth602-laneb-workflow-refresh-v3`
-- exact head: `9ea2444d54d97c0e2a740c660589e6675e1c207d`
-- candidate-pytest receipt: `job-bea40700-793d-4e55-b15d-5d0d812319fc`
-- result: **32 passed**
+The receipt-binding bug is repaired and candidate validation is complete.
 
-The operator attempted the v3 preflight, but it failed **before any mutation**:
+- branch: `mth602-laneb-workflow-refresh-v3-binding-fix-v1`
+- exact base: `9ea2444d54d97c0e2a740c660589e6675e1c207d`
+- exact candidate head: `5a7134056fef65b44e25bf06ac66f975f1903bff`
+- effective helper diff: exactly two receipt-binding lines replaced
+- regression: exact-line assertions for V2 predecessor and V3 output receipt bindings
+- candidate-pytest receipt: `job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b`
+- result: **33 passed**
 
-```
-FileNotFoundError:
-  /var/lib/workspace-ci/v3/padataset-scientific/dual-lane/workflow-refresh-v3/active.json
-```
-
-Exact source bug in
-`scripts/lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py`:
-
-- line 27 currently:
-  `PRIOR_REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT`
-- line 28 currently:
-  `REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT`
-
-Those are reversed.
-
-Correct bindings must be:
+Correct bindings are:
 
 ```python
 PRIOR_REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT
 REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT
 ```
 
+No root/control-plane mutation has been performed by this repair candidate.
+
+GitHub zero-work observation at checkpoint time:
+- PADataset main: `dbf167b23e6a1777a31ad5c4bccde44d26d0aad6`
+- trusted workflow blob on main: `85e8deef5240e2d6d7db34318e6b2c35947a83f3`
+- requested/queued/in-progress/waiting/pending Actions runs: **0**
+
 The failed old v3 operator block must **not** be rerun unchanged.
 
 ## Immediate next action
 
-1. Branch from exact refresh-v3 head `9ea2444d54d97c0e2a740c660589e6675e1c207d`.
-2. Change only the two reversed receipt bindings in the v3 helper.
-3. Add a regression test asserting those exact constant bindings.
-4. Run the complete dual-lane + refresh-v1 + refresh-v2 + refresh-v3 control suite through Workspace Shell `candidate-pytest`.
-5. If PASS, prepare a **new** v3 root/operator block using a fresh zero-work preflight.
-6. Successful v3 must advance trust:
-   - old workflow blob: `8da00f39284745cf6c9032620d63574052cd6d61`
-   - new workflow blob: `85e8deef5240e2d6d7db34318e6b2c35947a83f3`
+1. Run a **new** refresh-v3 root/operator transaction bound to candidate `5a7134056fef65b44e25bf06ac66f975f1903bff`.
+2. Recompute a fresh zero-work preflight immediately before execution.
+3. Require live predecessor policy SHA `70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d`.
+4. Advance only lane-B workflow trust:
+   - old blob: `8da00f39284745cf6c9032620d63574052cd6d61`
+   - new blob: `85e8deef5240e2d6d7db34318e6b2c35947a83f3`
    - PADataset main: `dbf167b23e6a1777a31ad5c4bccde44d26d0aad6`
-   - live predecessor policy SHA: `70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d`
-7. After v3 PASS, rerun **exactly one** frozen PA1->PA2 evaluator cell from PR #26 head `99ba123e1455566e16d86d6faf67fef3be8ab0b9`.
-8. Inspect artifact transport, rehydration, `result_record.json`, `target_labels_used_for_tuning=false`, GPU UUID, and scientific receipt before scheduling any additional cells.
-9. If that acceptance cell passes, schedule the remaining Track-A matrix without retraining any backbone.
+5. After refresh-v3 PASS, inspect the active receipt and live policy before any science.
+6. Then rerun **exactly one** frozen PA1->PA2 evaluator cell from PR #26 head `99ba123e1455566e16d86d6faf67fef3be8ab0b9`.
+7. Inspect artifact transport, rehydration, `result_record.json`, `target_labels_used_for_tuning=false`, GPU UUID, scientific receipt, and final OSR metrics before scheduling anything else.
+8. If that acceptance cell passes, schedule the remaining Track-A matrix without retraining any backbone.
 
 ## Other lanes
 
