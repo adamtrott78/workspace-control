@@ -536,10 +536,31 @@
         "Live lane-B design binds exactly .github/workflows/lambda-ci-scientific-2.yml blob 6280a6e7b2ad8cc379277fa320e8839a94f360ec.",
         "Current reviewed Workspace Shell helper registry contains no PADataset/lane-B workflow refresh helper; no privileged authority was invented or widened."
       ]
+    },
+    {
+      "check": "Lane-B trusted workflow candidate",
+      "result": "MERGED",
+      "evidence": [
+        "PADataset PR #28 candidate head b3afbfb064fe87ac73e5227e114cc991cfb57475 passed Workspace Shell candidate-pytest receipt job-ab9b5733-bbe9-44ac-8e36-37edcdff99c2: 6 passed.",
+        "PR #28 squash-merged to PADataset main 4674d1b07d7d7bb7ee3cbe4ab8a709d536486c13.",
+        "Existing lane-B workflow .github/workflows/lambda-ci-scientific-2.yml now has exact blob 5f29137d9636ed170d3735d0f273220e7cf6f377 and contains bounded l2o_directional_eval while preserving existing smoke/train_backbone/stage03_archc grammar."
+      ]
+    },
+    {
+      "check": "Lane-B one-shot workflow refresh candidate",
+      "result": "PASS_CANDIDATE_NOT_EXECUTED",
+      "evidence": [
+        "Workspace-control refresh branch mth602-laneb-workflow-refresh-v1 is rooted at exact live execution generation 5401045341090a26a42ce3a497c379f8223a3b54, not current main.",
+        "Exact candidate SHA 9dd69558efcbcbdb53b2bfc71d04023900cf0c7c; observed tree 9cc2442bc87f9bced644c8684076c7e8b81a84b9.",
+        "Workspace Shell candidate-pytest receipt job-1066ec8c-8abc-45e0-89fa-cd711cd2a314: 20 passed in 0.09s.",
+        "Receipt binds durable workspace-control checkpoint 4469009659182c8c2f4d12d727e556f2a2995fc9, source_mode=candidate, candidate SHA 9dd69558efcbcbdb53b2bfc71d04023900cf0c7c.",
+        "Candidate layers a one-shot lane-B workflow refresh receipt over immutable dual-lane activation, changes only lane-B controller policy plus reconciler verification state, snapshots all non-target controllers, requires zero-work fresh preflight and one-use exact operator authority, and rolls back on failure.",
+        "Candidate intentionally remains separate from PR #640 because the live-control-plane lineage and PR #640 lineage are diverged."
+      ]
     }
   ],
   "blockers": [
-    "GPU2 evaluator activation is blocked by the live lane-B controller trusted-workflow binding. Lane B is pinned to .github/workflows/lambda-ci-scientific-2.yml blob 6280a6e7b2ad8cc379277fa320e8839a94f360ec; merged evaluator workflow .github/workflows/lambda-ci-l2o-directional-eval-2.yml blob ba825a98f0aa49bbdc78f5ed37faaf33c1982b4a is not in the trusted-workflow set. No reviewed lane-B workflow-refresh helper exists in the current helper registry. Evaluator run 43963122999 and trusted GPU2 smoke run 43963420422 remain queued while shared provisioner is active.",
+    "Lane-B trusted-workflow refresh implementation is validated but root execution is gated on zero active GPU2 work. Two stale queued runs remain: untrusted PR27 evaluator run 43963122999/job 133635479325 and old-blob trusted smoke run 43963420422/job 133636487691. The connected GitHub tool exposes no workflow-run cancel action, so these two runs require user cancellation in GitHub Actions before the zero-work preflight can truthfully pass.",
     "STFT resume is gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
@@ -550,7 +571,7 @@
     "Run the frozen 20-cell Track-A DQNGuard matrix. Then resume Track-B Architecture B and STFT diagnostic.",
     "No merges without explicit authority."
   ],
-  "next_safe_action": "A new reviewed lane-B trusted-workflow refresh path is required before GPU2 can execute the merged evaluator workflow. Prepare/validate a candidate that either (preferred) extends the existing trusted .github/workflows/lambda-ci-scientific-2.yml with the bounded l2o_directional_eval operation and provides a lane-B workflow-blob refresh mechanism, or explicitly adds the new evaluator workflow to lane-B trusted_workflows. Do not mutate live controller trust without separate exact root/operator authority. Existing queued runs 43963122999 and 43963420422 should be treated as blocked, not successful activation. Continue monitoring PA3-PA4 run 43943016274 independently.",
+  "next_safe_action": "User must cancel exactly GitHub Actions runs 43963122999 and 43963420422. After both are terminal, re-check their exact statuses plus PA3-PA4 run 43943016274. Then prepare a fresh zero-work lane-B preflight and exact one-shot root/operator authority receipt bound to workspace-control candidate 9dd69558efcbcbdb53b2bfc71d04023900cf0c7c, old workflow blob 6280a6e7b2ad8cc379277fa320e8839a94f360ec, new blob 5f29137d9636ed170d3735d0f273220e7cf6f377, PADataset main 4674d1b07d7d7bb7ee3cbe4ab8a709d536486c13, and the current lane-B controller policy hashes. Execute only after preflight zeros are true. Then trigger one frozen l2o_directional_eval cell through /lambda-scientific-2 and inspect its complete artifact before scheduling more.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
   "notes": "Track A active. 9/10 canonical backbones are frozen; PA3-PA4 is the sole remaining live training. PR #26 exact head 5520601b999c10202457760368f7e13d7bc8a439 contains 18 frozen directional requests plus the provenance-safe evaluator/result/aggregation/report contracts. GPU1 is intentionally idle. No workflow authority or merge authority is inferred. Workspace Shell stale-authority gate was cleared successfully on 2026-11-16 via authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e; post-refresh receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 proves task-bound execution at pinned PADataset authority. Remaining schema blocker is chat-local only. Workspace Shell Refresh Tools exposed candidate-pytest. PR #26 contract suite passed authoritatively (35 tests), and separate GPU2 evaluator workflow candidate PR #27 passed its authority-surface tests (3 tests). The next blocker is explicit activation/merge authority for PR #27."
