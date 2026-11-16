@@ -23,4 +23,4 @@
   },
   "authority_after_attempt": "CONSUMED_FOR_ATTEMPT_01_REVIEW_REQUIRED",
   "next_safe_action": "Read-only inspect the existing Serve/Funnel mapping. Preserve it. Revise only the conflict-detection/coexistence logic if the intended HTTPS 443 endpoint is free; otherwise choose a separately reviewed non-conflicting endpoint."
-}\n
+}
