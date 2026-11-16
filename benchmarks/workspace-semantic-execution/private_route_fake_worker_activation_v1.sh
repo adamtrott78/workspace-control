@@ -17,6 +17,7 @@ REPORT="$RUNTIME_ROOT/fake-worker.log"
 SERVE_BEFORE="$RUNTIME_ROOT/serve-before.json"
 FUNNEL_BEFORE="$RUNTIME_ROOT/funnel-before.json"
 
+SERVE_ATTEMPTED=0
 SERVE_STARTED=0
 POSTGRES_STARTED=0
 
@@ -28,7 +29,7 @@ fail() {
 cleanup() {
   rc=$?
   set +e
-  if [[ "$SERVE_STARTED" == "1" ]]; then
+  if [[ "$SERVE_ATTEMPTED" == "1" || "$SERVE_STARTED" == "1" ]]; then
     sudo tailscale serve --https=443 off >/dev/null 2>&1 || true
   fi
   if [[ "$POSTGRES_STARTED" == "1" ]]; then
@@ -37,7 +38,8 @@ cleanup() {
   rm -rf -- "$RUNTIME_ROOT" >/dev/null 2>&1 || true
   exit "$rc"
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT TERM
 
 [[ "$(id -u)" -ne 0 ]] || fail "RUN_AS_OPERATOR_NOT_ROOT"
 [[ "$(id -un)" == "atrott" ]] || fail "EXPECTED_OPERATOR_USER_ATROTT"
@@ -101,7 +103,9 @@ sudo tailscale funnel status --json >"$FUNNEL_BEFORE"
 python3 - "$SERVE_BEFORE" "$FUNNEL_BEFORE" <<'PY'
 import json, sys
 for path,label in ((sys.argv[1],"SERVE"),(sys.argv[2],"FUNNEL")):
-    d=json.load(open(path, encoding="utf-8"))
+    d=json.load(open(path, encoding="utf-8")) or {}
+    if not isinstance(d, dict):
+        raise SystemExit(f"{label}_STATUS_JSON_NOT_OBJECT")
     for key in ("TCP","Web","AllowFunnel","Services"):
         if d.get(key):
             raise SystemExit(f"PREEXISTING_{label}_CONFIG:{key}")
@@ -131,12 +135,15 @@ LD_LIBRARY_PATH="$PG_PREFIX/lib" "$PG_PREFIX/bin/createdb"   -h "$PGSOCKET" -p "
 export SEMANTIC_EXECUTION_POSTGRES_DSN="host=$PGSOCKET port=$PG_PORT user=atrott dbname=semantic_execution"
 export WORKSPACE_OPERATOR_EXPECTED_TAILSCALE_LOGIN="$EXPECTED_TAILSCALE_LOGIN"
 
+SERVE_ATTEMPTED=1
 sudo tailscale serve --bg --https=443 "http://127.0.0.1:$BACKEND_PORT"
 SERVE_STARTED=1
 sudo tailscale serve status --json >"$RUNTIME_ROOT/serve-active.json"
 python3 - "$RUNTIME_ROOT/serve-active.json" <<'PY'
 import json, sys
-d=json.load(open(sys.argv[1], encoding="utf-8"))
+d=json.load(open(sys.argv[1], encoding="utf-8")) or {}
+if not isinstance(d, dict):
+    raise SystemExit("SERVE_ACTIVE_JSON_NOT_OBJECT")
 tcp=d.get("TCP") or {}
 if not (tcp.get("443") or {}).get("HTTPS"):
     raise SystemExit("SERVE_HTTPS_443_NOT_ACTIVE")
@@ -162,10 +169,13 @@ grep -q '^LIVE_FAKE_WORKER_TRANSPORT=.*"result":"PASS"' "$REPORT"   || fail "LIV
 
 sudo tailscale serve --https=443 off
 SERVE_STARTED=0
+SERVE_ATTEMPTED=0
 sudo tailscale serve status --json >"$RUNTIME_ROOT/serve-after.json"
 python3 - "$RUNTIME_ROOT/serve-after.json" <<'PY'
 import json, sys
-d=json.load(open(sys.argv[1], encoding="utf-8"))
+d=json.load(open(sys.argv[1], encoding="utf-8")) or {}
+if not isinstance(d, dict):
+    raise SystemExit("SERVE_ROLLBACK_JSON_NOT_OBJECT")
 for key in ("TCP","Web","AllowFunnel","Services"):
     if d.get(key):
         raise SystemExit(f"SERVE_ROLLBACK_NOT_EMPTY:{key}")
