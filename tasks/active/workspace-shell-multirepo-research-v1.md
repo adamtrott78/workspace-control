@@ -24,7 +24,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 - Intent: mutate
 - Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe
+- Remote checkpoint: 6d47e3eca88150c6ad127b6e5901936323fe3ca1
 - Remote verified: true
 
 ### PADataset
@@ -36,7 +36,7 @@ Extend the live Workspace Shell v1 lineage with first-class PADataset access and
 
 ## Next safe action
 
-RETRY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authority-state head produced by this checkpoint using workspace-control runtime candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe, PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 629cbb10cd3e7136a34faa2df575ca3b5d481b80, and semantic execution binding 74958b5d0d325893fd39045d1e49b5320dca7fa3. This intentionally supersedes the older semantic capsule/execution tuple 2cec87fb… / 9b02005a…. The current semantic state is 3/3 green (#2900/#225/#503) and includes the evaluator sealed-store primitive plus claim-bearing launch isolation gate. The corrected Workspace Shell runtime candidate is green at #2896. Require LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, LOCAL_SEMANTIC_TASK_AUTHORITY=PASS and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Do not rebind the semantic task, widen helper/issuer trust, or touch PADataset GPUs.
+RUN ONE VALIDATED ROOT ACTIVATION WINDOW from the exact authority-state head produced by this checkpoint using workspace-control runtime candidate 6d47e3eca88150c6ad127b6e5901936323fe3ca1, PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f, semantic capsule source 629cbb10cd3e7136a34faa2df575ca3b5d481b80, and semantic execution binding 74958b5d0d325893fd39045d1e49b5320dca7fa3. Candidate 6d47e3ec passed Workspace Control #2902 and bundles both semantic authority enrollment and evaluator isolation acceptance. Require SEMANTIC_DURABLE_TASK_BINDING=PASS, LOCAL_SEMANTIC_TASK_MCP=PASS, LOCAL_SEMANTIC_TASK_RECEIPT=PASS, EVALUATOR_SEALED_ROOT=PASS, LOCAL_EVALUATOR_CONTROL_READBACK=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_MCP=PASS, LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS, LOCAL_EVALUATOR_ISOLATION=PASS, EVALUATOR_ISOLATION_ACCEPTANCE=PASS and WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS. Do not use older runtime ccdde5c9, do not widen helper/issuer trust, and do not touch PADataset GPUs.
 
 ## Remaining work
 
@@ -48,9 +48,9 @@ RETRY THE VALIDATED TRANSACTIONAL WORKSPACE SHELL UPGRADE from the exact authori
 
 ## Blockers / gates
 
-- Live semantic authority is not yet activated because the first enrollment attempt safely rolled back on a false-negative acceptance parser. Corrected receipt-based runtime candidate ccdde5c9fa6bfe17f34adea3d6fb13d7ad9b1fbe passed Workspace Control #2896.
-- The semantic enrollment tuple has advanced to current validated semantic capsule 629cbb10cd3e7136a34faa2df575ca3b5d481b80 with exact execution binding 74958b5d0d325893fd39045d1e49b5320dca7fa3 (#2900/#225/#503). Host activation remains a root/operator step because helper/issuer trust remains intentionally empty.
-- After retry success, ChatGPT must independently verify the semantic task resolves at exact HEAD 74958b5d0d325893fd39045d1e49b5320dca7fa3 before any live transport/evaluator acceptance work.
+- Live semantic authority and live evaluator-isolation acceptance are both prepared but not yet activated on the Lambda host. The first semantic enrollment attempt safely rolled back; the false-negative parser was repaired, and current bundled runtime candidate 6d47e3eca88150c6ad127b6e5901936323fe3ca1 passed Workspace Control #2902.
+- Host activation remains a genuine root/operator step because helper/issuer trust is intentionally empty. The transactional upgrade now also provisions a root-owned 0700 evaluator sealed store, proves control write/read/commitment against exact semantic execution source, and proves a fixed hostile-worker denial probe through the existing network-dead bubblewrap sandbox.
+- After root activation, ChatGPT must independently verify workspace-semantic-execution-migration-v1 resolves at exact HEAD 74958b5d0d325893fd39045d1e49b5320dca7fa3 and record the live evaluator-isolation acceptance before claim-bearing scored runs are admitted.
 
 ## Fresh-chat initialization
 
