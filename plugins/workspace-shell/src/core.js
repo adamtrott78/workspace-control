@@ -186,7 +186,7 @@ export function assertTarget(value) {
 export function assertTargetProfile(target, profile) {
   assertTarget(target);
   const allowed = target === "workspace-control"
-    ? new Set(["git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash"])
+    ? new Set(["git-read", "pytest-bounded", "candidate-pytest", "validation-bounded", "file-list", "file-read", "file-hash", "evaluator-denial-probe"])
     : new Set(["git-read", "candidate-pytest", "file-list", "file-read", "file-hash", "research-bounded"]);
   if (!allowed.has(profile)) {
     fail("TARGET_PROFILE_DENIED", `profile ${profile} is not authorized for target ${target}`);

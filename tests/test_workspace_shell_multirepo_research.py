@@ -1,5 +1,6 @@
 import importlib
 import json
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -36,6 +37,48 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             )
         with self.assertRaisesRegex(Exception, "TARGET_PROFILE_DENIED"):
             job_launcher.assert_target_profile("unknown", "git-read")
+
+    def test_target_profile_layers_remain_in_parity(self):
+        core = (PLUGIN / "src" / "core.js").read_text()
+        server = (PLUGIN / "server.js").read_text()
+        launcher = (PLUGIN / "root" / "job_launcher.py").read_text()
+
+        core_match = re.search(
+            r'target === "workspace-control"\s*\?\s*new Set\(\[(.*?)\]\)\s*:\s*new Set\(\[(.*?)\]\)',
+            core,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(core_match)
+        frontend = {
+            "workspace-control": set(re.findall(r'"([^"]+)"', core_match.group(1))),
+            "PADataset": set(re.findall(r'"([^"]+)"', core_match.group(2))),
+        }
+
+        launcher_match = re.search(
+            r'allowed = \{\s*"workspace-control": \{([^}]*)\},\s*"PADataset": \{([^}]*)\},\s*\}',
+            launcher,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(launcher_match)
+        root = {
+            "workspace-control": set(re.findall(r'"([^"]+)"', launcher_match.group(1))),
+            "PADataset": set(re.findall(r'"([^"]+)"', launcher_match.group(2))),
+        }
+
+        server_match = re.search(
+            r'profile:\s*z\.enum\(\[(.*?)\]\)',
+            server,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(server_match)
+        server_profiles = set(re.findall(r'"([^"]+)"', server_match.group(1)))
+        manifest_profiles = set(self.manifest.get("profiles", {}))
+
+        self.assertEqual(frontend, root)
+        self.assertEqual(server_profiles, manifest_profiles)
+        self.assertEqual(set().union(*frontend.values()), server_profiles)
+        self.assertIn("evaluator-denial-probe", frontend["workspace-control"])
+        self.assertNotIn("evaluator-denial-probe", frontend["PADataset"])
 
     def test_evidence_profiles_are_read_only_and_bounded(self):
         listing = job_launcher.resolve_profile(
