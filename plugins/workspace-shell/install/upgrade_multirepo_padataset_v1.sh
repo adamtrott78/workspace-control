@@ -668,7 +668,7 @@ if [[ -n "$EXPECTED_SEMANTIC_CAPSULE_SHA" ]]; then
     --key /etc/workspace-shell/tunnel/client.key \
     -H 'content-type: application/json' \
     -H 'accept: application/json, text/event-stream' \
-    --data-binary '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"workspace_shell_exec","arguments":{"task_id":"workspace-semantic-execution-migration-v1","target":"workspace-control","expected_sha":"'"$EXPECTED_SEMANTIC_EXEC_SHA"'","profile":"git-read","argv":["rev-parse","HEAD"],"cwd":".","timeout_ms":50000}}}' \
+    --data-binary '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"workspace_shell_exec","arguments":{"task_id":"workspace-semantic-execution-migration-v1","target":"workspace-control","expected_sha":"'"$EXPECTED_SEMANTIC_EXEC_SHA"'","profile":"git-read","argv":["rev-parse","HEAD"],"cwd":".","timeout_ms":30000}}}' \
     https://127.0.0.1:8797/mcp >"$MCP_TASK_SEMANTIC"
 
   EVALUATOR_DENIAL_STARTED="$(date +%s)"

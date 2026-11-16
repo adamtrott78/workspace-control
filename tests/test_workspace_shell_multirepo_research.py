@@ -255,6 +255,28 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
             self.assertTrue(cached["cache_hit"])
             self.assertEqual(stat.S_IMODE(final.stat().st_mode), 0o755)
 
+    def test_live_semantic_acceptance_timeouts_do_not_exceed_profile_ceilings(self):
+        profiles = json.loads((PLUGIN / "config" / "profiles.v1.json").read_text())
+        upgrade = (PLUGIN / "install" / "upgrade_multirepo_padataset_v1.sh").read_text()
+
+        git_read_ceiling = profiles["profiles"]["git-read"]["max_timeout_ms"]
+        evaluator_ceiling = profiles["profiles"]["evaluator-denial-probe"]["max_timeout_ms"]
+
+        semantic_match = re.search(
+            r'"profile":"git-read","argv":\["rev-parse","HEAD"\],"cwd":"\.","timeout_ms":(\d+)',
+            upgrade,
+        )
+        evaluator_match = re.search(
+            r'"profile":"evaluator-denial-probe","argv":\["sealed-store-v1"\],"cwd":"\.","timeout_ms":(\d+)',
+            upgrade,
+        )
+        self.assertIsNotNone(semantic_match)
+        self.assertIsNotNone(evaluator_match)
+        self.assertLessEqual(int(semantic_match.group(1)), git_read_ceiling)
+        self.assertLessEqual(int(evaluator_match.group(1)), evaluator_ceiling)
+        self.assertEqual(int(semantic_match.group(1)), 30000)
+        self.assertEqual(int(evaluator_match.group(1)), 30000)
+
     def test_candidate_store_install_modes_and_semantic_receipt_profile_filter(self):
         tmpfiles = (PLUGIN / "install" / "tmpfiles.conf").read_text()
         upgrade = (PLUGIN / "install" / "upgrade_multirepo_padataset_v1.sh").read_text()
