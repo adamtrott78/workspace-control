@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-private-route-activation-authority-v0.2",
+  "status": "AUTHORIZED_FAKE_WORKER_ONLY_ATTEMPT_02",
+  "supersedes": "architecture/workspace-semantic-execution-private-route-activation-authority.v0.1.json",
+  "approval_basis": {
+    "authority_owner": "operator",
+    "approval_date": "2026-11-16",
+    "approval_form": "EXPLICIT_CHAT_APPROVAL",
+    "approved_state_head": "082e5c8cbbca9517843f96b0de3b0b11ea9093fb",
+    "approved_host_review": "architecture/workspace-semantic-execution-private-route-host-review.v0.2.json",
+    "approved_activation_candidate_commit": "2a6f65de5681f000a4b69913979db21953ab36a6",
+    "approved_activation_script_blob_sha": "beef1ade487e117e519b4cec1e9e4d43a36ead57"
+  },
+  "exact_authorized_action": {
+    "host": "gokhan-lambda-vector",
+    "private_base_url": "https://gokhan-lambda-vector.tailca6171.ts.net",
+    "mechanism": "OPERATOR_EXECUTED_EXACT_GIT_SCRIPT",
+    "candidate_commit": "2a6f65de5681f000a4b69913979db21953ab36a6",
+    "script_path": "benchmarks/workspace-semantic-execution/private_route_fake_worker_activation_v2.sh",
+    "script_blob_sha": "beef1ade487e117e519b4cec1e9e4d43a36ead57",
+    "expected_semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29"
+  },
+  "protected_existing_configuration": {
+    "https_port": 443,
+    "hostname": "gokhan-lambda-vector.tailca6171.ts.net:443",
+    "root_path": "/",
+    "root_proxy": "http://127.0.0.1:8888",
+    "funnel_enabled": false,
+    "may_be_changed": false
+  },
+  "temporary_authorized_configuration": {
+    "path": "/operator-bridge/v1",
+    "proxy": "http://127.0.0.1:8765/operator-bridge/v1",
+    "add_only_path": true,
+    "rollback_only_path": true,
+    "exact_preexisting_state_restoration_required": true
+  },
+  "retained_prohibitions": {
+    "global_serve_off": false,
+    "global_serve_reset": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "non_loopback_backend": false,
+    "production_postgres_mutation": false,
+    "real_chatgpt_account": false,
+    "model_inference": false,
+    "browser_automation": false,
+    "gpu_use": false,
+    "workspace_shell_network_widening": false,
+    "helper_registry_widening": false,
+    "generic_shell_authority": false
+  },
+  "required_acceptance": [
+    "TAILSCALE_HOST_BINDING=PASS",
+    "TAILSCALE_OPERATOR_PEER_BINDING=PASS",
+    "TAILSCALE_LOGIN_BINDING=PASS",
+    "TAILSCALE_EXISTING_JUPYTER_ROOT_BINDING=PASS",
+    "TAILSCALE_OPERATOR_ROUTE_ABSENT=PASS",
+    "TAILSCALE_FUNNEL_DISABLED=PASS",
+    "TAILSCALE_JUPYTER_ROOT_PRESERVED=PASS",
+    "TAILSCALE_OPERATOR_ROUTE_EXACT_BINDING=PASS",
+    "LIVE_FAKE_WORKER_TRANSPORT result PASS",
+    "TAILSCALE_EXISTING_CONFIG_EXACTLY_RESTORED=PASS",
+    "TAILSCALE_JUPYTER_ROOT_ROLLBACK_PRESERVED=PASS",
+    "PRIVATE_ROUTE_FAKE_WORKER_ACCEPTANCE_V2=PASS"
+  ],
+  "failure_policy": "FAIL_CLOSED_AND_PATH_SPECIFIC_ROLLBACK. Any mismatch does not authorize global Serve/Funnel mutation or route widening.",
+  "postcondition": "Stage 12 remains unauthorized until Attempt 02 returns the complete required acceptance evidence."
+}

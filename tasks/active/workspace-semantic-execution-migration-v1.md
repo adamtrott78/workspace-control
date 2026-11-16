@@ -70,13 +70,13 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-PRIVATE ROUTE V2 COEXISTENCE CANDIDATE IS VALIDATED, NOT AUTHORIZED. Exact head 429362c93314fa2e17809ea78b04c69d8c9c4e83 passed Workspace #2965, Semantic #265 and Operator #538. The v2 transaction at commit 2a6f65de5681f000a4b69913979db21953ab36a6 / blob beef1ade487e117e519b4cec1e9e4d43a36ead57 preserves the existing HTTPS 443 root handler / -> http://127.0.0.1:8888, temporarily mounts only /operator-bridge/v1 -> http://127.0.0.1:8765/operator-bridge/v1, and rolls back only that path while requiring exact restoration of the preexisting config. Smallest next action: explicit operator approval of this exact new candidate. Do not reuse attempt-01 authority.
+PRIVATE ROUTE V2 ATTEMPT 02 IS EXPLICITLY AUTHORIZED. Execute only transaction 2a6f65de5681f000a4b69913979db21953ab36a6 / blob beef1ade487e117e519b4cec1e9e4d43a36ead57 on gokhan-lambda-vector. It must preserve existing HTTPS 443 root / -> http://127.0.0.1:8888, temporarily add only /operator-bridge/v1 -> http://127.0.0.1:8765/operator-bridge/v1, run the fake-worker harness, remove only that path, and prove exact restoration. On any mismatch/failure stop and diagnose; Stage 12 remains blocked until complete PASS.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: attempt 01 failed closed safely; read-only evidence identified the existing Jupyter root Serve mapping. Coexistence-safe v2 candidate 429362c9… is 3/3 green and uses only /operator-bridge/v1 while preserving / -> 8888. Obtain fresh explicit operator approval of v2, execute exact transaction 2a6f65de…/blob beef1ade…, and require fake-worker PASS plus exact Serve restoration before Stage 12.
+- LIVE INSTANT: coexistence-safe v2 is explicitly authorized for Attempt 02. Execute exact transaction 2a6f65de…/blob beef1ade… on gokhan-lambda-vector; require complete fake-worker PASS and exact restoration of the existing / -> 8888 Serve configuration before Stage 12.
 - REAL-ACCOUNT CALIBRATION: run bounded Stage-12 without widening Firefox permissions, DOM/content automation, or security boundaries.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
@@ -85,11 +85,10 @@ PRIVATE ROUTE V2 COEXISTENCE CANDIDATE IS VALIDATED, NOT AUTHORIZED. Exact head 
 ## Blockers / gates
 
 - Workspace Shell semantic/evaluator activation remains COMPLETE.
-- Attempt 01 is closed as FAILED_CLOSED_PREEXISTING_SERVE_CONFIG; its authority is consumed and transaction 81166627… must not be rerun.
-- Read-only diagnostic proved the existing private Serve configuration is HTTPS 443 with root / -> http://127.0.0.1:8888 and Funnel disabled.
-- Coexistence-safe v2 host review at 429362c93314fa2e17809ea78b04c69d8c9c4e83 is 3/3 green (Workspace #2965 / Semantic #265 / Operator #538) but remains REVIEW_CANDIDATE_NOT_AUTHORITY.
-- Fresh explicit operator approval is required because the exact live mutation/rollback mechanism changed from global-empty Serve assumptions to a path-specific coexistence transaction.
-- Stage 12 remains blocked until v2 receives explicit authority and the exact-host fake-worker transaction returns full PASS plus exact preexisting-config restoration.
+- Attempt 01 remains closed as failed-safe evidence and must not be rerun.
+- Coexistence-safe v2 is now explicitly authorized for one exact fake-worker attempt on gokhan-lambda-vector.
+- The only remaining gate before Stage 12 is complete live Attempt-02 evidence including fake-worker PASS and exact restoration of the preexisting Jupyter Serve mapping.
+- No authority exists for global Serve off/reset, Funnel, public exposure, production Postgres mutation, real ChatGPT account use, model/browser/GPU use, helper widening, or Workspace Shell network widening.
 
 ## Fresh-chat initialization
 
