@@ -205,3 +205,31 @@ B0 source backbone is frozen to:
 Draft PADataset PR #33, exact head `04edac624853ea9e8bb48e09f9240e086fcc2b69`, adds exactly one bounded GPU2 workflow opcode: `archb_cross_surrogate`. Static trust tests passed 2/2 at receipt `job-ceb52813-d732-4f6c-903f-c1bbd503f458`.
 
 **Current gate:** PR #33 is OPEN/DRAFT/UNMERGED. The live lane-B workflow therefore does not yet authorize B0. Explicit merge authority is required. After merge, the exact new main SHA/workflow blob must be bound into a fresh trusted-workflow refresh before any B0 job is submitted.
+
+
+## Architecture-B lane-B trust merge and refresh-v4 gate
+
+Explicit authority `MERGE PR 33` was consumed only for PADataset PR #33.
+
+PR #33 was marked ready-for-review (GitHub cannot merge drafts) and merged at its exact validated head:
+
+- PR #33 head: `04edac624853ea9e8bb48e09f9240e086fcc2b69`
+- merge commit / new PADataset `main`: `6a3c17c27a401f059f9ded1287d274d766f61283`
+- new `.github/workflows/lambda-ci-scientific-2.yml` blob: `650a529aeee51b53234a84b3afea8743cc527688`
+- live predecessor blob remains `85e8deef5240e2d6d7db34318e6b2c35947a83f3` until root activation.
+
+Workspace Control draft PR #643 now implements a **v3 -> v4** one-shot lane-B trusted-workflow refresh:
+
+- exact candidate head: `ef43b5352cf4c3e799a09ff917878b6e32ef1882`
+- requires refresh-v3 active receipt as exact predecessor;
+- preserves all older receipts;
+- requires zero assigned/running/active workflow work;
+- changes only the lane-B controller policy/workflow blob;
+- consumes fresh operator authority with O_EXCL;
+- rollback target is refresh-v3.
+
+Validation:
+- `job-676fbcf1-4593-484c-87bb-92ae8247dccd`: **16 passed** (v3+v4 focused);
+- `job-d67324a2-5b28-492b-ab17-dd62615b20d5`: **37 passed** (full dual-lane + refresh v1/v2/v3/v4 stack).
+
+**Current gate:** root/operator activation of refresh-v4. Do not launch Architecture-B B0 until `PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4=PASS` and postverification confirm blob `650a529a...` is live.
