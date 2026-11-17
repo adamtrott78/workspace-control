@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.3",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Repair the pre-live PowerShell execution-policy blocker without changing the pinned Stage-12 launcher, Linux transaction, harness, candidate branch, browser permissions, or live-consumption boundary.",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.2.json",
+    "authority_status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+    "authority_consumed": false,
+    "prelive_failure": "Pinned launcher was rejected by local PowerShell execution policy before script execution; Firefox/runtime never started and STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS was never reached.",
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "exact_candidate_bindings": {
+    "executable_source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh",
+      "blob_sha": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.3.md",
+      "blob_sha": "62d98d601b451621fd17a869149ed295f1f9ca9a"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "execution_policy_delta": {
+    "persistent_policy_change": false,
+    "set_execution_policy": false,
+    "unblock_file": false,
+    "registry_mutation": false,
+    "group_policy_override": false,
+    "fail_if_machine_policy_defined": true,
+    "fail_if_user_policy_defined": true,
+    "child_process_only_execution_policy": "Bypass",
+    "current_engine_reused": true,
+    "launcher_bytes_unchanged": true
+  },
+  "retained_v02_safety": {
+    "windows_first": true,
+    "single_complete_powershell_line": true,
+    "required_windows_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+    "linux_live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_consumption_marker_is_non_consuming": true,
+    "manual_worker_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "exact_cleanup_restoration_check": true
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "existing_v02_authority_does_not_authorize_v03_procedure": true,
+    "explicit_fresh_operator_approval_required_after_validation": true,
+    "model_reasoning_is_not_authority": true
+  },
+  "required_validation": [
+    "Procedure is one complete PowerShell line and uses only child-process -ExecutionPolicy Bypass.",
+    "Procedure fails closed for MachinePolicy/UserPolicy and contains no Set-ExecutionPolicy, Unblock-File, or registry mutation.",
+    "Exact launcher/Linux/harness/candidate bindings remain unchanged.",
+    "Existing Stage-12 retry, harness, transport and Operator Bridge tests remain green."
+  ],
+  "postcondition": "Validation of v0.3 establishes a reviewed repair candidate only. It does not authorize using the v0.3 invocation under the still-unconsumed v0.2 authority."
+}

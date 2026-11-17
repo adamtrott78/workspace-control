@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 RETRY V0.2 IS EXPLICITLY AUTHORIZED FOR EXACTLY ONE LIVE ATTEMPT, PENDING VALIDATION OF THIS AUTHORITY-PERSISTENCE HEAD. Fresh authority is architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.2.json and binds approved state 229150f4405ab249155936b4a60c4d8209ae4cb4, validated retry review blob 9d9acdc9a3318ca6e490b4f10b1bc45ff565d5a6, executable source b0466c03acb9d6b863df421e2c116c84bff312f6, Linux v2 blob 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness blob 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d, Windows launcher blob d9d474ca6870585c9e4767f551086e17b4525fbc, procedure commit 7a99f4518d8f3ac97d8ee638ee36c1edef952ca2, and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. After this persistence head is exact-head green, execute Windows FIRST using the reviewed single-line procedure; manually authenticate normally and select Instant; require STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS. Then execute the pinned Linux v2 transaction and type that exact fixed readiness marker only at its pre-live prompt. The one-shot live attempt is consumed only when Linux prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS. Thereafter service Q1/Q2/Q3 only with Ctrl+Space -> Ctrl+V -> Enter at their exact READY markers. No silent retry or scope widening.
+STAGE-12 RETRY V0.2 AUTHORITY REMAINS UNCONSUMED, BUT ITS REVIEWED WINDOWS INVOCATION IS BLOCKED BY LOCAL POWERSHELL EXECUTION POLICY. The pinned launcher never executed, Firefox never opened, Linux was not started, no host mutation occurred, and candidate branch remained at 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. Pre-live failure evidence is architecture/workspace-semantic-execution-stage12-real-instant-prelive-setup-01.v0.1.json. Fresh v0.3 review candidate keeps the exact launcher/Linux/harness bytes but invokes the launcher in a child PowerShell with process-only -ExecutionPolicy Bypass, fails closed if MachinePolicy/UserPolicy is defined, and makes no persistent policy/registry change. NEXT: validate v0.3 exact head. If green, promote review to validated-not-authority and obtain fresh explicit operator approval bound to the v0.3 procedure blob before executing it. Do not use v0.3 under the existing v0.2 authority.
 
 ## Remaining work
 
@@ -86,13 +86,12 @@ STAGE-12 RETRY V0.2 IS EXPLICITLY AUTHORIZED FOR EXACTLY ONE LIVE ATTEMPT, PENDI
 
 - Workspace Shell semantic/evaluator activation is COMPLETE.
 - D3 private-route fake-worker acceptance is COMPLETE; fake-worker authority is consumed.
-- Stage-12 Attempt 01 FAILED CLOSED and its v0.1 authority is consumed; its failure/cleanup evidence remains durable.
-- Stage-12 retry v0.2 has fresh explicit operator approval for exactly one live attempt under architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.2.json.
-- Before live execution, this authority-persistence commit must pass exact-head Workspace Control, Semantic Execution and Operator Bridge validation.
-- The retry must execute Windows first and observe STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS before Linux can cross STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
-- After the consumption marker, any success or failure consumes the one-shot retry authority; no silent retry is permitted.
-- Stage-12 authority does not transfer to Reasoning Economy claim-bearing runs, Research Engine live proving, Codex, browser automation, API-key fallback, public exposure, production Postgres mutation, GPU use, or PADataset mutation.
-- Reasoning Economy scored runs remain blocked until Stage-12 live executor calibration plus comparable weekly allowance telemetry are accepted.
+- Stage-12 Attempt 01 failed closed and its v0.1 authority is consumed.
+- Stage-12 retry v0.2 live authority is still UNCONSUMED because the Windows setup failure occurred before the live-consumption marker.
+- The v0.2 Windows procedure is not executable on this host under its current local PowerShell execution policy; the exact pinned launcher was rejected before execution.
+- v0.3 is a review candidate only. It uses child-process-only -ExecutionPolicy Bypass, refuses MachinePolicy/UserPolicy override, and preserves all executable/browser/network/result boundaries.
+- Existing v0.2 authority does not authorize the changed v0.3 procedure. Fresh explicit operator approval is required after v0.3 exact-head validation.
+- No Linux Stage-12 transaction may start until a fresh authority binds the validated v0.3 procedure and Windows readiness is positively observed.
 
 ## Fresh-chat initialization
 

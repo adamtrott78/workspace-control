@@ -12,6 +12,8 @@ LINUX_V2 = (
 )
 REVIEW_V2 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.2.json"
 PROCEDURE_V2 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.2.md"
+PROCEDURE_V3 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.3.md"
+REVIEW_V3 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.3.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -111,6 +113,49 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         )
         self.assertNotIn("try {", text)
         self.assertNotIn("finally {", text)
+
+    def test_v03_execution_policy_repair_is_process_scoped_and_fail_closed(self) -> None:
+        text = PROCEDURE_V3.read_text(encoding="utf-8")
+        self.assertIn("-ExecutionPolicy Bypass -File", text)
+        self.assertIn("Get-ExecutionPolicy -List", text)
+        self.assertIn("MachinePolicy", text)
+        self.assertIn("UserPolicy", text)
+        self.assertIn("GROUP_POLICY_EXECUTION_POLICY_PRESENT", text)
+        self.assertNotIn("Set-ExecutionPolicy", text)
+        self.assertNotIn("Unblock-File", text)
+        self.assertNotIn("reg.exe", text.lower())
+        self.assertNotIn("set-itemproperty", text.lower())
+        self.assertIn("workspace-control-stage12-retry-v3", text)
+        self.assertIn(
+            "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+            text,
+        )
+        self.assertIn(
+            "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+            text,
+        )
+
+    def test_v03_review_is_not_authority_and_keeps_executable_bindings(self) -> None:
+        import json
+
+        review = json.loads(REVIEW_V3.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(review["authority_gate"]["live_retry_authorized"])
+        self.assertTrue(
+            review["authority_gate"]["existing_v02_authority_does_not_authorize_v03_procedure"]
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["windows_operator_launcher"]["blob_sha"],
+            "d9d474ca6870585c9e4767f551086e17b4525fbc",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["linux_private_route_transaction"]["blob_sha"],
+            "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
+            "62d98d601b451621fd17a869149ed295f1f9ca9a",
+        )
 
 
 if __name__ == "__main__":
