@@ -229,7 +229,7 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         import json
 
         review = json.loads(REVIEW_V5.read_text(encoding="utf-8"))
-        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertEqual(review["status"], "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY")
         self.assertFalse(review["authority_gate"]["live_retry_authorized"])
         self.assertTrue(
             review["authority_gate"]["existing_v04_authority_does_not_authorize_v05_procedure"]

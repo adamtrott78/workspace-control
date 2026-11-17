@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 RETRY V0.4 AUTHORITY REMAINS UNCONSUMED, BUT WINDOWS PRELIVE SETUP 03 FAILED BEFORE LAUNCHER/FIREFOX READINESS WITH DOTNET10_NOT_FOUND_IN_REVIEWED_LOCATIONS. The known working SDK is C:\Users\ATrott\.dotnet\dotnet.exe (10.0.404 previously verified), which v0.4 omitted. Linux was not started, live consumption was not reached, and candidate branch remained baseline. Fresh v0.5 review candidate adds only %USERPROFILE%\.dotnet\dotnet.exe to the bounded discovery list; all executable bytes and other safety boundaries remain unchanged. NEXT: validate v0.5 exact head; if green, obtain fresh explicit operator approval binding v0.5 before use. Existing v0.4 authority does not authorize the changed procedure.
+STAGE-12 WINDOWS PRELIVE REPAIR V0.5 IS VALIDATED BUT NOT AUTHORIZED. v0.4 live authority remains unconsumed, but it is exact-procedure-bound and cannot authorize v0.5. v0.5 procedure blob 40049b88799b3bc4683931d0a56a50c07591fc61 keeps source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de unchanged. Its only delta from v0.4 is adding %USERPROFILE%\.dotnet\dotnet.exe to the bounded discovery list; the known working SDK there is 10.0.404. Exact head c149c1aa8499031afd3772b9a964681dffb10f2b passed Workspace #3002 / Semantic #302 / Operator #575. NEXT GATE: fresh explicit operator approval binding v0.5 review/procedure. Do not run v0.5 Windows or Linux until new exact authority is created and validated.
 
 ## Remaining work
 
@@ -84,10 +84,11 @@ STAGE-12 RETRY V0.4 AUTHORITY REMAINS UNCONSUMED, BUT WINDOWS PRELIVE SETUP 03 F
 
 ## Blockers / gates
 
-- v0.4 live authority remains unconsumed because Windows failed before launcher/Firefox readiness and before any Linux live-consumption marker.
-- The exact blocker is a missing reviewed discovery location: %USERPROFILE%\.dotnet\dotnet.exe.
-- v0.5 is review-only and adds only that one location; no install, package manager, persistent PATH edit, registry mutation, or scope widening.
-- Existing v0.4 authority does not authorize v0.5. Fresh approval is required after exact-head validation.
+- v0.4 live authority remains unconsumed but cannot authorize the changed v0.5 procedure.
+- v0.5 repair is VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY at c149c1aa…: Workspace #3002 / Semantic #302 / Operator #575 SUCCESS.
+- v0.5 adds only %USERPROFILE%\.dotnet\dotnet.exe to the bounded .NET discovery list; all executable bytes remain unchanged.
+- No .NET installation, package-manager use, persistent PATH edit, registry mutation, execution-policy widening, scope widening, or silent retry is authorized.
+- Fresh explicit operator approval must bind procedure blob 40049b88… before v0.5 can be authorized.
 
 ## Fresh-chat initialization
 
