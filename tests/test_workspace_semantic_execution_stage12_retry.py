@@ -10,6 +10,8 @@ LINUX_V2 = (
     ROOT
     / "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh"
 )
+REVIEW_V2 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.2.json"
+PROCEDURE_V2 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.2.md"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -77,6 +79,38 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertNotIn("tailscale funnel --bg", self.text)
         self.assertNotIn("0.0.0.0", self.text)
         self.assertIn("PRIVATE_ROUTE_STAGE12_REAL_INSTANT_V2=PASS", self.text)
+
+    def test_retry_review_is_not_authority_and_binds_exact_candidate(self) -> None:
+        import json
+
+        review = json.loads(REVIEW_V2.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(review["authority_gate"]["live_retry_authorized"])
+        self.assertTrue(
+            review["authority_gate"]["explicit_fresh_operator_approval_required"]
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["executable_source_head"],
+            "b0466c03acb9d6b863df421e2c116c84bff312f6",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["linux_private_route_transaction"]["blob_sha"],
+            "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca",
+        )
+
+    def test_retry_procedure_eliminates_multiline_windows_launch(self) -> None:
+        text = PROCEDURE_V2.read_text(encoding="utf-8")
+        self.assertIn("single executable line", text)
+        self.assertIn(
+            "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+            text,
+        )
+        self.assertIn(
+            "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+            text,
+        )
+        self.assertNotIn("try {", text)
+        self.assertNotIn("finally {", text)
 
 
 if __name__ == "__main__":
