@@ -6,7 +6,7 @@
   "goal": "Complete the MTH602/DQNGuard follow-on program with two scientifically separated tracks: (A) repair the published Target–Surrogate control by retraining competent leave-two-out backbones, and (B) develop single-backbone multi-surrogate OSR using a competent target-withheld four-known backbone. In parallel, finish the STFT/time-frequency representation diagnostic for the PA1↔PA4 boundary. Preserve true-target quarantine, known-only selection/threshold semantics, exact provenance, and keep OSR-method changes separate from backbone/representation changes.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "tracka_l2o_control_repair",
+  "current_stage": "trackb_archb_cross_surrogate",
   "acceptance_criteria": [
     "Track A remains a control repair: original leave-two-out target/surrogate taxonomy and original DQNGuard evaluator are preserved while backbones are retrained to genuine convergence under known-only selection.",
     "Track B compares Architecture A (pooled DQN), Architecture B (surrogate-specific DQNs with cross-surrogate selection), and Architecture C (hybrid pooled DQN + deterministic guard) on the same competent target-withheld four-known backbone/evidence partitions.",
@@ -186,7 +186,7 @@
     },
     {
       "id": "tracka_l2o_control_repair",
-      "status": "IN_PROGRESS",
+      "status": "VALIDATED",
       "execution_owner": "chatgpt+automation",
       "selected_executor": "lambda-scientific-lane-a+lane-b",
       "selected_surface": "github+lambda",
@@ -267,9 +267,22 @@
             "Known-only score threshold -1.8992775678634644; known calibration reject 0.0512 at declared 0.05 budget; surrogate-open recall 0.8288 is diagnostic only.",
             "Final metrics: known_reject_rate=0.0508148148148148, unknown_precision=0.9486872615752862, unknown_recall=0.4241380463498646, unknown_f1=0.5861989277130708, osr_acc=0.587447872266894, osr_macro_f1=0.7151037604271367, unknown_auroc=0.8539393309973854."
           ]
+        },
+        {
+          "check": "Complete frozen 20-cell Track-A directional matrix",
+          "result": "PASS_20_OF_20",
+          "evidence": [
+            "Acceptance run 43975684664 plus queued workflow runs #77-#95 all completed SUCCESS; no Track-A directional request remains queued or in progress.",
+            "All 20 result_record.json files are status COMPLETE and all 20 scientific receipts are decision PASS at evaluator candidate b141020bf7b171571879abdf18a836132e80d1d5 on GPU UUID GPU-cfed3394-a935-63aa-9325-c4cae7b568b6.",
+            "All 20 records preserve target_labels_used_for_tuning=false, surrogate_only_open_calibration=true, threshold_source=known_only, and mix_true_open=false.",
+            "Frozen unknown-F1 matrix by target row / surrogate columns: PA1<-{PA2:0.586199,PA3:0.616065,PA4:0.241099,PA8:0.254204}; PA2<-{PA1:0.899485,PA3:0.027741,PA4:0.130573,PA8:0.801033}; PA3<-{PA1:0.984317,PA2:0.001426,PA4:0.961990,PA8:0.054209}; PA4<-{PA1:0.858484,PA2:0.310583,PA3:0.439280,PA8:0.491409}; PA8<-{PA1:0.936550,PA2:0.757011,PA3:0.424513,PA4:0.860657}.",
+            "Against the paper Target-Surrogate Matrix, 17/20 cells improved and 3/20 declined. Mean unknown-F1 rose from 0.4115 to 0.531841 (+0.120341 absolute; +29.2% relative).",
+            "Only one decline is large: PA1<-PA4 0.71 -> 0.241099 (-0.468901). The other declines are PA2<-PA4 0.15 -> 0.130573 (-0.019427) and PA8<-PA2 0.77 -> 0.757011 (-0.012989).",
+            "Best frozen surrogate by target: PA1<-PA3 0.616065; PA2<-PA1 0.899485; PA3<-PA1 0.984317; PA4<-PA1 0.858484; PA8<-PA1 0.936550. PA1/Scan is therefore best for all four targets for which it is an eligible surrogate."
+          ]
         }
       ],
-      "resume_condition": "Acceptance cell PA1->PA2 is fully PASS on stacked draft PR #31 head b141020bf7b171571879abdf18a836132e80d1d5. Schedule the remaining 19 frozen directional cells without retraining backbones; preserve the same repair head, frozen request manifests, surrogate-only calibration, and known-only threshold semantics."
+      "resume_condition": null
     },
     {
       "id": "trackb_archb_cross_surrogate",
@@ -825,21 +838,29 @@
         "Compared with the paper matrix, PA1<-PA4 changed 0.71 -> 0.2410990600144613 while PA4<-PA1 changed 0.84 -> 0.858483687015051. Directional asymmetry therefore remains material under the repaired backbone protocol.",
         "Across the first six comparable paper/new cells, paper mean unknown_f1=0.5583333333333333 and current frozen mean unknown_f1=0.6976080043854656; this is descriptive only and must not drive retries or method selection."
       ]
+    },
+    {
+      "check": "Track-A full-matrix descriptive paper comparison",
+      "result": "PASS_DESCRIPTIVE_ONLY",
+      "evidence": [
+        "Paper mean unknown-F1 across all 20 directional cells: 0.4115.",
+        "Frozen repaired Track-A mean unknown-F1 across all 20 directional cells: 0.5318413915255574.",
+        "Median per-cell delta: +0.093603.",
+        "PA1/Scan surrogate mean across PA2/PA3/PA4/PA8: 0.919709; this is descriptive post-hoc evidence and must not be used to tune/retry Track-A.",
+        "PR #32 GPU0 evaluator scale-out is no longer required to complete Track A because all 20 cells finished successfully on the trusted GPU2 lane; leave PR #32 draft/unmerged absent separate infrastructure authority."
+      ]
     }
   ],
   "blockers": [
-    "GPU0 Track-A evaluator use is blocked on explicit authority to merge PADataset PR #32 and then refresh lane-A trusted-workflow authority to the resulting default-branch workflow blob. Do not infer merge/root authority from the candidate.",
     "STFT resume remains gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
-    "Obtain explicit merge authority for PADataset draft PR #32. After merge, bind the exact new PADataset main SHA and lane-A workflow blob, construct/validate a chained lane-A trusted-workflow refresh, and execute it only under fresh root/operator authority with lane A quiescent.",
-    "Once GPU0 trust is live, redistribute only still-queued Track-A cells: cancel selected GPU2 queued runs first, then resubmit those exact cells once through /lambda-scientific on GPU0. Never duplicate an in-progress or completed cell.",
-    "Continue validating the GPU2 queue; current checkpoint: runs 77-81 succeeded and runs 82-95 are queued. Do not duplicate or performance-select retries.",
-    "After all 20 directional cells are terminal and provenance-valid, aggregate the frozen Track-A matrix.",
-    "Then resume Track-B Architecture B and the separate STFT representation diagnostic."
+    "Track A is complete and validated; do not rerun or performance-select any Track-A cell.",
+    "Advance Track B Architecture B cross-surrogate validation from PADataset PR #23, preserving off-diagonal surrogate selection and true-target quarantine.",
+    "Then complete the separate STFT representation diagnostic only after the live repaired PA1 provenance preflight passes."
   ],
-  "next_safe_action": "User-only authority gate: explicitly authorize merging PADataset PR #32 (GPU0 bounded L2O evaluator). Until that authorization exists, leave GPU2 queue untouched except normal execution. After merge, immediately bind the exact new main/workflow blob, validate a chained lane-A trust refresh, activate under fresh root authority, then cancel-and-transfer only still-queued cells to GPU0.",
+  "next_safe_action": "Advance Track B Architecture B candidate validation on PADataset PR #23 using evidence-only candidate-pytest first; do not consume true-target evidence or alter Track-A results. PR #32 GPU0 evaluator scale-out is optional infrastructure work, not a Track-A blocker.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
-  "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority."
+  "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged."
 }
