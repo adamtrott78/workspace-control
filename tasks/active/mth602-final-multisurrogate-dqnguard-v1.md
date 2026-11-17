@@ -330,3 +330,31 @@ bash <(curl -fsSL "https://raw.githubusercontent.com/adamtrott78/PADataset/fd152
 ```
 
 The bootstrap itself verifies the exact SHA, refuses transient `/tmp` execution for the actual STFT run, performs the real PA1 provenance probe before the long build, and resumes existing output files. Continue only if the live probe resolves a real PA1 legacy base cache and all preflight checks PASS.
+
+### STFT retry gate — exact-checkout import repair
+
+The first local preflight at `fd15238aa369118e61b21ab714900861dbb99d2c` failed **before any cache mutation or GPU work**:
+
+- persistent checkout was correct;
+- environment preflight imported `experiments` from the canonical repo current working directory;
+- stdin Python places current working directory ahead of `PYTHONPATH`, so the exact detached checkout was shadowed;
+- no PA1 provenance decision, overlay build, or training occurred.
+
+Repair:
+
+- PR #21 exact head: `5146d718006e38c6d9110e158c80dfa43b86e882`
+- launcher now `cd "$ROOT"` after the persistent-/tmp guard and before preflight imports
+- candidate-pytest: `job-732c8e5b-8118-4ddb-88b8-b3a8f72208aa` — **2 passed**
+- CPU canary: run `44190444960`, job `134418111372` — **SUCCESS**
+- PR #21 remains **OPEN / DRAFT / UNMERGED**
+- first 120 completed overlays remain preserved
+
+Rerun only this exact repaired head:
+
+```bash
+EXPECTED_SHA=5146d718006e38c6d9110e158c80dfa43b86e882 \
+CHECKOUT="$HOME/adamArchives/worktrees/PADataset-stft-track-ablation-v1" \
+bash <(curl -fsSL "https://raw.githubusercontent.com/adamtrott78/PADataset/5146d718006e38c6d9110e158c80dfa43b86e882/scripts/mth602/bootstrap_stft_track_ablation_persistent.sh")
+```
+
+Continue only if the live PA1 provenance probe resolves a real legacy base cache and all preflight checks PASS. Do not reuse `fd15238...`, do not run from `/tmp`, and do not delete or rebuild the first 120 overlays.
