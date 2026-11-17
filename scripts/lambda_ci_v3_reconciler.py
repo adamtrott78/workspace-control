@@ -219,6 +219,19 @@ PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_ACTIVE_RECEIPT = (
     / "workflow-refresh-v6"
     / "active.json"
 )
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_BLOB = (
+    "85dc8f289a972dddbb1a838d5596def6d872118b"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_PAD_MAIN = (
+    "af4b221f6e6014ce2047e41d9c4e91f511d9fe84"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v7"
+    / "active.json"
+)
 PADATASET_SCIENTIFIC_DUAL_GPU0 = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
 PADATASET_SCIENTIFIC_DUAL_GPU1 = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
 PADATASET_SCIENTIFIC_DUAL_OVERRIDE_DESTINATIONS = set(
@@ -1000,6 +1013,60 @@ def _padataset_scientific_dual_lane_workflow_refresh_v6(
         if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
             raise ReconcileError(
                 f"PADataset lane-B workflow refresh v6 {key} invalid"
+            )
+    return refresh
+
+
+def _padataset_scientific_dual_lane_workflow_refresh_v7(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v7 requires v6 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v7",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v7 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v7",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v7 {key} invalid"
             )
     return refresh
 
@@ -1838,22 +1905,33 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_dual_lane is not None
         else None
     )
+    scientific_dual_workflow_refresh_v7 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v7(
+            scientific_dual_workflow_refresh_v6
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
     scientific_dual_effective_refresh = (
-        scientific_dual_workflow_refresh_v6
-        if scientific_dual_workflow_refresh_v6 is not None
+        scientific_dual_workflow_refresh_v7
+        if scientific_dual_workflow_refresh_v7 is not None
         else (
-            scientific_dual_workflow_refresh_v5
-            if scientific_dual_workflow_refresh_v5 is not None
+            scientific_dual_workflow_refresh_v6
+            if scientific_dual_workflow_refresh_v6 is not None
             else (
-                scientific_dual_workflow_refresh_v4
-                if scientific_dual_workflow_refresh_v4 is not None
+                scientific_dual_workflow_refresh_v5
+                if scientific_dual_workflow_refresh_v5 is not None
                 else (
-                    scientific_dual_workflow_refresh_v3
-                    if scientific_dual_workflow_refresh_v3 is not None
+                    scientific_dual_workflow_refresh_v4
+                    if scientific_dual_workflow_refresh_v4 is not None
                     else (
-                        scientific_dual_workflow_refresh_v2
-                        if scientific_dual_workflow_refresh_v2 is not None
-                        else scientific_dual_workflow_refresh
+                        scientific_dual_workflow_refresh_v3
+                        if scientific_dual_workflow_refresh_v3 is not None
+                        else (
+                            scientific_dual_workflow_refresh_v2
+                            if scientific_dual_workflow_refresh_v2 is not None
+                            else scientific_dual_workflow_refresh
+                        )
                     )
                 )
             )
