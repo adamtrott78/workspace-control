@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 RETRY V0.3 SINGLE-ATTEMPT AUTHORITY IS DURABLE AND VALIDATED. Authority persistence head 6427c304a5b56c5780cf128cbea15f8c8acb9924 passed Workspace #2996 / Semantic #296 / Operator #569. Authority v0.3 binds review blob 7534519b49c2c81d0dd863e3c74f71850d8dad52, procedure blob 62d98d601b451621fd17a869149ed295f1f9ca9a, source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. v0.2 is superseded unconsumed/non-reusable. NEXT: execute the reviewed v0.3 Windows single-line command FIRST. It may use child-process-only -ExecutionPolicy Bypass only if MachinePolicy/UserPolicy are Undefined. Manually authenticate and select Instant; require STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS. Do not start Linux before that marker. The live one-shot authority remains unconsumed until Linux later prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
+STAGE-12 RETRY V0.3 AUTHORITY REMAINS UNCONSUMED, BUT WINDOWS PRELIVE SETUP 02 FAILED BEFORE FIREFOX/RUNTIME READINESS BECAUSE THE PINNED LAUNCHER COULD NOT RESOLVE DOTNET FROM CHILD POWERSHELL PATH. Linux was not started, the live-consumption marker was not reached, and candidate branch remained at 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. Fresh v0.4 review candidate keeps all executable bytes unchanged and adds bounded discovery of an existing .NET 10 executable from reviewed Windows locations, temporary process-environment PATH/DOTNET_ROOT injection, and exact restoration afterward. It performs no install or persistent PATH/registry change. NEXT: validate v0.4 exact head; if green, obtain fresh explicit operator approval bound to v0.4 before using it. Existing v0.3 authority does not authorize the changed v0.4 procedure.
 
 ## Remaining work
 
@@ -84,14 +84,11 @@ STAGE-12 RETRY V0.3 SINGLE-ATTEMPT AUTHORITY IS DURABLE AND VALIDATED. Authority
 
 ## Blockers / gates
 
-- Workspace Shell semantic/evaluator activation is COMPLETE.
-- D3 private-route fake-worker acceptance is COMPLETE; fake-worker authority is consumed.
-- Stage-12 Attempt 01 failed closed and its v0.1 authority is consumed.
-- v0.2 retry authority is superseded unconsumed/non-reusable.
-- v0.3 exact single-attempt authority is VALIDATED at 6427c304…: Workspace #2996 / Semantic #296 / Operator #569 SUCCESS.
-- Current operator action is Windows pre-live setup only. Linux remains blocked until STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS is positively observed.
-- The v0.3 live attempt is not consumed during Windows pre-live setup and is consumed only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
-- Any failure after the live-consumption marker consumes the one-shot authority; no silent retry or scope widening is authorized.
+- Stage-12 v0.3 live authority remains unconsumed because no Linux live-consumption marker was reached.
+- Windows prelive setup 02 proved the execution-policy repair works but the launcher cannot resolve dotnet from inherited PATH.
+- v0.4 is review-only: bounded existing-dotnet discovery, required major version 10, process-environment-only PATH/DOTNET_ROOT injection, and restoration afterward.
+- No .NET installation, package-manager use, persistent PATH edit, registry mutation, or execution-policy widening is authorized.
+- Existing v0.3 authority does not authorize v0.4. Fresh approval is required after exact-head validation.
 
 ## Fresh-chat initialization
 

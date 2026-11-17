@@ -14,6 +14,8 @@ REVIEW_V2 = ROOT / "architecture/workspace-semantic-execution-stage12-real-insta
 PROCEDURE_V2 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.2.md"
 PROCEDURE_V3 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.3.md"
 REVIEW_V3 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.3.json"
+PROCEDURE_V4 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.4.md"
+REVIEW_V4 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.4.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -159,6 +161,48 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertEqual(
             review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
             "62d98d601b451621fd17a869149ed295f1f9ca9a",
+        )
+
+    def test_v04_dotnet_discovery_is_bounded_nonpersistent_and_net10(self) -> None:
+        text = PROCEDURE_V4.read_text(encoding="utf-8")
+        marker = "```powershell\n"
+        start = text.index(marker) + len(marker)
+        end = text.index("\n```", start)
+        command = text[start:end]
+        self.assertIn("Get-Command dotnet", command)
+        self.assertIn("ProgramFiles", command)
+        self.assertIn("LOCALAPPDATA", command)
+        self.assertIn("DOTNET10_NOT_FOUND_IN_REVIEWED_LOCATIONS", command)
+        self.assertIn("DOTNET10_VERSION_MISMATCH", command)
+        self.assertIn("-notmatch '^10\\.'", command)
+        self.assertIn("$OldPath=$env:PATH", command)
+        self.assertIn("$OldDotnetRoot=$env:DOTNET_ROOT", command)
+        self.assertIn("$env:PATH=$OldPath", command)
+        self.assertIn("$env:DOTNET_ROOT=$OldDotnetRoot", command)
+        self.assertNotIn("setx", command.lower())
+        self.assertNotIn("winget", command.lower())
+        self.assertNotIn("choco", command.lower())
+        self.assertNotIn("msiexec", command.lower())
+        self.assertNotIn("Set-ExecutionPolicy", command)
+        self.assertNotIn("SetEnvironmentVariable", command)
+        self.assertIn("-ExecutionPolicy Bypass -File", command)
+
+    def test_v04_review_is_not_authority_and_keeps_executable_bindings(self) -> None:
+        import json
+
+        review = json.loads(REVIEW_V4.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(review["authority_gate"]["live_retry_authorized"])
+        self.assertTrue(
+            review["authority_gate"]["existing_v03_authority_does_not_authorize_v04_procedure"]
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["windows_operator_launcher"]["blob_sha"],
+            "d9d474ca6870585c9e4767f551086e17b4525fbc",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
+            "1d33484a311a98d36c532addfadd16c79ab56f71",
         )
 
 
