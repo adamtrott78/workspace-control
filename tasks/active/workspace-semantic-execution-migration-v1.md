@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 RETRY V0.5 AUTHORITY REMAINS UNCONSUMED, BUT WINDOWS PRELIVE SETUP 04 FAILED AFTER SUCCESSFUL .NET 10 DISCOVERY/BUILD BECAUSE NPM.CMD WAS NOT RESOLVABLE FROM CHILD POWERSHELL PATH. Firefox/runtime readiness was not reached, Linux was not started, live consumption was not reached, and candidate branch remained baseline. Fresh v0.6 review candidate reuses the already-reviewed Stage-10 persistent-runner Node 24 binding from operator-bridge-validation.yml: current node.exe or bounded runner tool cache under %USERPROFILE%\actions-runner\_work\_tool\node\<24.x>\x64, explicit node v24 and npm.cmd validation, process-only PATH exposure, then restoration. NEXT: validate v0.6 exact head; if green, obtain fresh explicit operator approval binding v0.6 before use. Existing v0.5 authority does not authorize the changed procedure.
+STAGE-12 WINDOWS PRELIVE REPAIR V0.6 IS VALIDATED BUT NOT AUTHORIZED. v0.5 live authority remains unconsumed, but it is exact-procedure-bound and cannot authorize v0.6. v0.6 procedure blob dd995d976fb6c3d1f1427d194e58e5037f331573 keeps source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de unchanged. Its only operational delta is reusing the already-reviewed Stage-10 Node 24 binding: current node.exe or bounded runner tool cache under %USERPROFILE%\actions-runner\_work\_tool\node\<24.x>\x64, explicit node/npm validation, process-only PATH exposure, and restoration. Exact head 91875eeaf85bd754c20715164fc1139a49c4c263 passed Workspace #3006 / Semantic #306 / Operator #579. NEXT GATE: fresh explicit operator approval binding v0.6 review/procedure. Do not run v0.6 Windows or Linux until new exact authority is created and validated.
 
 ## Remaining work
 
@@ -84,10 +84,11 @@ STAGE-12 RETRY V0.5 AUTHORITY REMAINS UNCONSUMED, BUT WINDOWS PRELIVE SETUP 04 F
 
 ## Blockers / gates
 
-- v0.5 live authority remains unconsumed because Windows failed before Firefox/runtime readiness and before any Linux live-consumption marker.
-- The exact blocker is npm.cmd not being resolvable in the child PowerShell environment after successful .NET build.
-- v0.6 is review-only and reuses the existing reviewed Stage-10 Node 24 tool-cache binding; it installs nothing and makes no persistent environment change.
-- Existing v0.5 authority does not authorize v0.6. Fresh approval is required after exact-head validation.
+- v0.5 live authority remains unconsumed but cannot authorize the changed v0.6 procedure.
+- v0.6 repair is VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY at 91875eea…: Workspace #3006 / Semantic #306 / Operator #579 SUCCESS.
+- v0.6 reuses the existing reviewed Stage-10 Node 24 runner-tool-cache binding and changes no executable bytes.
+- No Node/npm install, .NET install, persistent PATH edit, registry mutation, execution-policy widening, scope widening, or silent retry is authorized.
+- Fresh explicit operator approval must bind procedure blob dd995d97… before v0.6 can be authorized.
 
 ## Fresh-chat initialization
 

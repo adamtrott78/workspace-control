@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.6",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Reuse the existing reviewed Stage-10 Windows Node 24 tool-cache binding to repair npm.cmd discovery while preserving all executable bytes and Stage-12 authority boundaries.",
   "predecessor": {
@@ -73,5 +73,14 @@
     "existing_v05_authority_does_not_authorize_v06_procedure": true,
     "explicit_fresh_operator_approval_required_after_validation": true,
     "model_reasoning_is_not_authority": true
-  }
+  },
+  "validation": {
+    "validated_head": "91875eeaf85bd754c20715164fc1139a49c4c263",
+    "workspace_control_run": 3006,
+    "semantic_execution_run": 306,
+    "operator_bridge_run": 579,
+    "result": "SUCCESS",
+    "exact_head": true
+  },
+  "postcondition": "v0.6 is repository-validated and grants zero live authority. The still-unconsumed v0.5 authority does not authorize this changed operator procedure. Fresh explicit operator approval must bind the v0.6 procedure blob before any Windows invocation or Linux Stage-12 execution."
 }
