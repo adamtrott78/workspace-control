@@ -170,3 +170,38 @@ Best frozen surrogate by target: PA1<-PA3, PA2<-PA1, PA3<-PA1, PA4<-PA1, PA8<-PA
 This comparison is descriptive only. Do not use target-test metrics for retries, method selection, or Track-A tuning.
 
 GPU0 evaluator PR #32 is no longer required for Track-A completion because the full matrix finished on GPU2; it remains draft/unmerged absent separate infrastructure authority.
+
+
+## Track-B Architecture B B0 gate — 2026-11-17
+
+Workspace Shell evidence-mount repair is now live:
+
+- authority snapshot: `29ba42ffde725c16f5cfc70b3c47ecfd76d2511d`
+- runtime: `f3f999ff0200e2450d83e93887b2450f1ee83e2f`
+- PADataset execution authority: `befe383fd67c8bca8d8ce370344b33c7e13cd52f`
+- `WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS`
+- semantic acceptance receipt: `job-2a411e27-5c65-44b8-8ada-362dd7b90769`
+- evaluator isolation receipt: `job-9ed9aed7-d545-4929-9405-d5782788e461`
+
+Architecture-B implementation candidate is draft PADataset PR #23, exact head:
+
+`82790f9c07d5eb9ea48b37be026672c0a1f7fad8`
+
+Candidate validation:
+- lightweight logic suite: 4 passed;
+- target-consumption ordering suite: 5 passed;
+- frozen B0 request + artifact transport/rehydration contract: **10 passed** at receipt `job-775e5e03-0239-4786-ba94-16fbaa2a09a7`.
+
+Important repair: the evaluator previously materialized `test_open` before `method.fit()`. It now builds only `val_known` + `test_known`, freezes the Architecture-B winner, and only then materializes PA2 target-open. Thus the claim `target_first_consumed_after_winner_frozen=true` is now behaviorally true rather than metadata-only.
+
+B0 source backbone is frozen to:
+- artifact: `14180249360`
+- workflow run: `43751609944`
+- artifact digest: `sha256:f7de2637df85487b21903a448630815fc63c1247253b98ffc754b46586b9b39b`
+- config SHA256: `a9c08353490f944ec1c5fb363002f41a8b32f875914251c30604cc2c03b35188`
+- best-model SHA256: `4fa0c67d1c0c619ab4cde058519ca603fa95d8afb8f58ebf8d564ebafb9989ef`
+- target PA2 remained quarantined: `target_test_consumed=false`.
+
+Draft PADataset PR #33, exact head `04edac624853ea9e8bb48e09f9240e086fcc2b69`, adds exactly one bounded GPU2 workflow opcode: `archb_cross_surrogate`. Static trust tests passed 2/2 at receipt `job-ceb52813-d732-4f6c-903f-c1bbd503f458`.
+
+**Current gate:** PR #33 is OPEN/DRAFT/UNMERGED. The live lane-B workflow therefore does not yet authorize B0. Explicit merge authority is required. After merge, the exact new main SHA/workflow blob must be bound into a fresh trusted-workflow refresh before any B0 job is submitted.
