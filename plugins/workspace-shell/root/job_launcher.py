@@ -494,6 +494,35 @@ def verify_evidence_mount(evidence_root, worker_uid):
     return root
 
 
+def ensure_evidence_mountpoint(workspace_path):
+    """Create only the empty per-job bind target for trusted evidence.
+
+    Candidate materializations are exact clean Git trees, so untracked
+    local_artifacts/evidence is intentionally absent. The launcher may create
+    that empty directory only inside the disposable writable job copy. Refuse
+    any candidate-controlled symlink or non-directory at either path component.
+    """
+    workspace = Path(workspace_path)
+    local_artifacts = workspace / "local_artifacts"
+    evidence = local_artifacts / "evidence"
+
+    for path, label in (
+        (local_artifacts, "local_artifacts"),
+        (evidence, "local_artifacts/evidence"),
+    ):
+        if path.exists() or path.is_symlink():
+            st = os.lstat(path)
+            if stat.S_ISLNK(st.st_mode) or not stat.S_ISDIR(st.st_mode):
+                fail(
+                    "EVIDENCE_MOUNTPOINT_INVALID",
+                    f"{label} must be a real directory inside job scratch",
+                )
+        else:
+            path.mkdir(mode=0o700)
+
+    return evidence
+
+
 def chown_tree(root, uid, gid):
     for current, dirs, files in os.walk(root, topdown=False, followlinks=False):
         for name in files + dirs:
@@ -862,6 +891,8 @@ def run_request(cfg, manifest, request, cancel_check=None):
         job_root.mkdir(mode=0o700)
         workspace_path = job_root / "workspace"
         shutil.copytree(source_root, workspace_path, symlinks=True)
+        if evidence_root is not None:
+            ensure_evidence_mountpoint(workspace_path)
         chown_tree(job_root, worker_uid, worker_gid)
         scratch_path = job_root
 
