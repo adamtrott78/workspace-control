@@ -233,3 +233,92 @@ Validation:
 - `job-d67324a2-5b28-492b-ab17-dd62615b20d5`: **37 passed** (full dual-lane + refresh v1/v2/v3/v4 stack).
 
 **Current gate:** root/operator activation of refresh-v4. Do not launch Architecture-B B0 until `PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4=PASS` and postverification confirm blob `650a529a...` is live.
+
+
+## Fresh-chat handoff checkpoint — B3 live
+
+This section supersedes older "current gate" prose above. The authoritative source remains the JSON capsule.
+
+### Current Architecture-B state
+
+Completed and provenance-valid:
+- B0 run #97 / `44137641475`: PASS. softmax3. Selected PA3.
+- B1 run #98 / `44155496843`: PASS. expanded5. Selected PA8. Development evidence was worse than B0, so B2 retained softmax3.
+- B2 run #99 / `44171978142`: PASS. softmax3 + class-conditional bands. Selected PA3.
+  - development mean cross unknown-F1: `0.12087985437740191`
+  - development mean cross OSR macro-F1: `0.7357077527296183`
+  - development worst cross unknown-F1: `0.0036101083032490976`
+  - descriptive PA2 unknown-F1: `0.1577071577071577`
+  - descriptive PA2 AUROC: `0.85785488767288`
+  - B2 triggered B3 only from pseudo-open complementary-value evidence; PA2 target metrics were not used for the trigger.
+
+### B3 frozen design
+
+PADataset PR #23 exact candidate head:
+`97e6890961f3599af1523729e3a86d98367f1137`
+
+Frozen request:
+`manifests/configs/archb_cross_surrogate_v1/PA2_B3_band_weight_search.json`
+
+B3 keeps:
+- DQN state: `softmax3`
+- DQN training unchanged
+- same backbone / partitions / seed / 30 episodes
+- known-only threshold budget: 5%
+- PA2 sealed until final frozen-winner evaluation
+
+B3 searches only:
+- 8 fixed band-weight rules
+- guard scales `[0.5, 1.0, 2.0]`
+- off-diagonal pseudo-open development evidence only
+- no DQN retraining per weight choice
+
+Implementation/request validation: **26 passed**.
+GPU2 trust validation: **2 passed**.
+
+### Live lane-B trust
+
+PADataset B3 trust PR #36 is merged.
+
+- PADataset main: `af4b221f6e6014ce2047e41d9c4e91f511d9fe84`
+- trusted GPU2 workflow blob: `85dc8f289a972dddbb1a838d5596def6d872118b`
+- refresh-v7 source head: `90ee7fd37d3fa2804fa0ca865f394c6a73341406`
+- refresh-v7 full regression: **61 passed**
+- refresh-v7 active receipt SHA256: `efd03c6858a4c9336f866cebbcf3f62cb4c660d98db305823300a3856cb4bc42`
+- live controller policy SHA256: `e79108ae546b21d838d3a5443b7be63ed31f6bddc439a3f39c0e3df69eb5be0d`
+- refresh-v7 postverify: PASS
+
+### Current live experiment
+
+B3 was submitted exactly once:
+
+- workflow run: **#100**
+- run ID: `44176896203`
+- job ID: `134370560805`
+- candidate: `97e6890961f3599af1523729e3a86d98367f1137`
+- request: `PA2_B3_band_weight_search.json`
+- current checkpoint status: **IN_PROGRESS**
+- current step at checkpoint: `Execute bounded scientific request`
+
+**Do not submit another B3 request.**
+
+### Immediate next action for a fresh worker
+
+1. Read the authoritative JSON capsule first.
+2. Re-read GitHub state for run #100; do not trust this status if it has since changed.
+3. If run #100 is still active: wait/monitor only.
+4. If terminal SUCCESS: download and validate the scientific artifact, including:
+   - scientific PASS receipt
+   - exact PR/request binding
+   - source-backbone rehydration
+   - target quarantine
+   - selected candidate ID and surrogate
+   - B3 band-weight rule and guard scale
+   - off-diagonal pseudo-open selection evidence
+   - known-only threshold
+   - final descriptive PA2 metrics
+5. If terminal FAILURE: determine whether failure occurred before any target/performance evidence. Retry only for a deterministic infrastructure/evaluator defect, never because PA2 performance is poor.
+6. Do not merge PR #23 or unrelated PRs without separate authority.
+7. STFT remains a separate lane, gated on repaired PA1 provenance preflight; do not restart it blindly.
+
+Heartbeat may still be owned by an older conversation. Do not depend on inheriting Heartbeat; durable Git/task state is authoritative.
