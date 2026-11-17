@@ -2,32 +2,32 @@
   "schema_version": 2,
   "task_id": "mth602-final-multisurrogate-dqnguard-v1",
   "title": "MTH 602 final project / PADataset multi-surrogate DQNGuard",
-  "status": "CHECKPOINTED",
-  "goal": "Complete deterministic Stage-03 Architecture-C replication at the qualified detv2 profile on the proven dual-GPU PADataset scientific runtime, then compare seed0/seed1/seed2 before making any architecture change while preserving PA2 quarantine and known-only selection/threshold semantics.",
+  "status": "IN_PROGRESS",
+  "goal": "Complete the MTH602/DQNGuard follow-on program with two scientifically separated tracks: (A) repair the published Target–Surrogate control by retraining competent leave-two-out backbones, and (B) develop single-backbone multi-surrogate OSR using a competent target-withheld four-known backbone. In parallel, finish the STFT/time-frequency representation diagnostic for the PA1↔PA4 boundary. Preserve true-target quarantine, known-only selection/threshold semantics, exact provenance, and keep OSR-method changes separate from backbone/representation changes.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "stage03_detv2_replicates",
+  "current_stage": "trackb_archb_cross_surrogate",
   "acceptance_criteria": [
-    "PADataset PR #17 exact candidate befe383fd67c8bca8d8ce370344b33c7e13cd52f remains OPEN/UNMERGED and is the only scientific execution candidate for these deterministic replicates.",
-    "Stage-03 detv2 uses deterministic_training=true, deterministic_profile=strict_tf32, explicit seeded DataLoaders with num_workers=4, cache_len=16384, PA2 quarantine, known-only checkpoint selection, and the explicit 5% known-rejection threshold budget.",
-    "Dual scientific lanes are proven concurrently usable: lane A runs as ci-padataset on GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea and lane B as ci-padataset-2 on GPU-cfed3394-a935-63aa-9325-c4cae7b568b6, with shared primary group ci-padataset and UID-scoped cleanup guards preserved.",
-    "The deterministic overlap qualification demonstrates simultaneous bounded training on both A4500s before real seed execution.",
-    "Seed0, seed1, and seed2 detv2 each terminalize at exact candidate befe383fd67c8bca8d8ce370344b33c7e13cd52f with target_labels_used_for_tuning=false and valid scientific artifacts/receipts/result records.",
-    "Architecture-C is not modified until the three deterministic replicate outcomes are compared and training variance versus stable PA2 error structure is assessed.",
-    "No merge authority is inferred for PADataset PR #17 or Workspace Control PR #632 from validation, live activation, or successful experiments."
+    "Track A remains a control repair: original leave-two-out target/surrogate taxonomy and original DQNGuard evaluator are preserved while backbones are retrained to genuine convergence under known-only selection.",
+    "Track B compares Architecture A (pooled DQN), Architecture B (surrogate-specific DQNs with cross-surrogate selection), and Architecture C (hybrid pooled DQN + deterministic guard) on the same competent target-withheld four-known backbone/evidence partitions.",
+    "Architecture B excludes the training-surrogate diagonal from selection and selects for off-diagonal transferability; the true target is not consumed until the winner is frozen.",
+    "B0=softmax3; B1=matched expanded5 [Pmax,gap,entropy,energy,logit variance]; B2=winning state plus class-conditional bands.",
+    "STFT remains a separate representation diagnostic/ablation; existing legacy cache and completed overlay files are preserved.",
+    "PA1 legacy-cache resolution is provenance-based/fail-closed; live resume is allowed only after a real PA1 legacy base cache resolves in preflight.",
+    "Workspace Shell candidate execution is evidence-only; authoritative PADataset execution remains pinned to befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
+    "No merge authority is inferred for PR #17, #21, #23, #636, or this handoff PR."
   ],
   "constraints": [
-    "Scientific truth and experiment design remain authoritative in PADataset docs/experiments/multisurrogate_dqnguard/TASK.md; this workspace-control capsule mirrors execution state, infrastructure dependencies, automation ownership, and recovery evidence.",
-    "Preserve PA2 target quarantine, known-only checkpoint selection, known-only 5% rejection-threshold selection, cache_len=16384, and target_labels_used_for_tuning=false.",
-    "Do not weaken or bypass UID-scoped pgrep -u / pkill -u runtime guards; distinct runner identities are the concurrency fix.",
-    "Preserve live capacity policy: host max_active_runners=3, PADataset max_active_runners=2, Workspace Control max_active_runners=1, with one reserved Workspace Control slot.",
-    "Preserve live runner identities and resource isolation: lane A=ci-padataset/GPU0, lane B=ci-padataset-2/GPU1, both primary group ci-padataset.",
-    "Preserve shared PADataset root permissions proven live: jobs=0750 ci-padataset:ci-padataset; staging-cache=0710; logs=0710; per-request workspaces remain UID-private.",
-    "Preserve the live controller-only repair generation at Workspace Control source head fe9621d848ae3405006fb65e8e691080d66aeb69 unless a separately reviewed correction is required.",
-    "Do not duplicate seed0 run 43751609944 / job 132926587786 or seed1 run 43751622546 / job 132926629552.",
-    "Do not create a second seed2 watcher or issue seed2 without first checking PR #17 comments and the existing DQNGuard Replicate Watch automation; seed2 must be issued exactly once.",
-    "Do not change Architecture-C while deterministic replicate evidence is incomplete.",
-    "Do not merge PR #17 or PR #632 without separate explicit merge authority."
+    "Never use true target labels for backbone gradients, DQN fitting, surrogate selection, threshold selection, HPO, retry decisions, or method selection.",
+    "Keep disjoint known-fit, known-guard, known-threshold, and pseudo-open roles.",
+    "Final thresholds remain known-only at the declared reject budget unless a separately documented method changes that contract.",
+    "Track A and Track B stay separate; Track B must not replace the control repair.",
+    "Do not interpret seed0/seed1 differences as initialization variance alone because the current seed also changes data partitions and loader order.",
+    "Monitor PA1↔PA4 per-class confusion/F1, not aggregate macro-F1 alone.",
+    "Do not delete/rebuild the first 120 completed STFT overlay records.",
+    "Do not run STFT from /tmp; use persistent exact-SHA checkout under $HOME/adamArchives/worktrees.",
+    "Do not widen Workspace Shell task authority to validate candidate code; use candidate-pytest.",
+    "No merges without explicit authority."
   ],
   "repositories": [
     {
@@ -41,26 +41,27 @@
       },
       "local": null,
       "allowed_mutation_scope": [
-        "Stage-03 deterministic detv2 replicate evidence/results on PR #17",
-        "exactly one seed2 detv2 launch after duplicate/head checks",
-        "scientific interpretation and task/documentation updates after terminal evidence",
-        "no merge without separate authority"
+        "PR #23 Architecture-B validation/evidence",
+        "PR #21 STFT diagnostic/resume evidence",
+        "mth602-l2o-matrix-repair-v1 Track-A protocol",
+        "scientific documentation/task state",
+        "no merge without authority"
       ]
     },
     {
       "name": "workspace-control",
       "intent": "mutate",
-      "base_sha": "fe9621d848ae3405006fb65e8e691080d66aeb69",
+      "base_sha": "4469009659182c8c2f4d12d727e556f2a2995fc9",
       "remote": {
-        "branch": "padataset-lane-b-runner-identity-v1",
-        "checkpoint_sha": "fe9621d848ae3405006fb65e8e691080d66aeb69",
+        "branch": "workspace-shell-candidate-evidence-current-v1",
+        "checkpoint_sha": "4469009659182c8c2f4d12d727e556f2a2995fc9",
         "verified": true
       },
       "local": null,
       "allowed_mutation_scope": [
-        "durable task capsule and derived handoff synchronization",
-        "reviewed dual-lane infrastructure corrections only if new evidence demonstrates a defect",
-        "no merge of PR #632 without separate authority"
+        "durable MTH602 task capsule + derived handoff",
+        "candidate-evidence acceptance recording",
+        "no merge without authority"
       ]
     }
   ],
@@ -115,31 +116,28 @@
       ],
       "validation": [
         {
-          "check": "Seed0 detv2 terminal scientific result",
-          "result": "NOT_RUN",
+          "check": "Seed0 detv2 backbone",
+          "result": "PASS",
           "evidence": [
-            "run 43751609944 / job 132926587786 is IN_PROGRESS.",
-            "exact-head, bounded-runner, checkout, and request-validation steps passed; Execute bounded scientific request is in progress."
+            "run 43751609944 / job 132926587786 SUCCESS at befe383...; best epoch 12; known-test acc 0.9891026; macro-F1 0.9890941."
           ]
         },
         {
-          "check": "Seed1 detv2 terminal scientific result",
-          "result": "NOT_RUN",
+          "check": "Seed1 detv2 backbone",
+          "result": "PASS",
           "evidence": [
-            "run 43751622546 / job 132926629552 is IN_PROGRESS.",
-            "exact-head, bounded-runner, checkout, and request-validation steps passed; Execute bounded scientific request is in progress."
+            "run 43751622546 / job 132926629552 SUCCESS at befe383...; known-test acc ~0.9267764; macro-F1 ~0.9257635; errors concentrated in PA1↔PA4."
           ]
         },
         {
-          "check": "Seed2 exactly-once launch and terminal scientific result",
+          "check": "Seed2 detv2 backbone",
           "result": "NOT_RUN",
           "evidence": [
-            "seed2 detv2 config exists at exact candidate.",
-            "existing enabled DQNGuard Replicate Watch owns first-free-lane launch after exact-head and duplicate-comment checks."
+            "exactly one request run 43762548685 / job 132960341118 was issued; runner shutdown/cancel signal terminated training during epoch 48; no terminal scientific artifact may be inferred."
           ]
         }
       ],
-      "resume_condition": null
+      "resume_condition": "Resume seed2 only if later fixed-partition/split-sensitivity work requires it; do not duplicate the failed request blindly."
     },
     {
       "id": "stage03_replicate_interpretation",
@@ -157,6 +155,262 @@
       ],
       "validation": [],
       "resume_condition": "all three deterministic detv2 replicates are terminal and validated"
+    },
+    {
+      "id": "forensic_reframe",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt",
+      "selected_executor": "chatgpt",
+      "selected_surface": "github+workspace-shell+historical-evidence",
+      "inputs": [
+        "historical L2O matrix",
+        "PA1/PA4 generator source",
+        "historical tuning lineage"
+      ],
+      "outputs": [
+        "two-track plan",
+        "PA1↔PA4 mechanism hypothesis",
+        "one-epoch confound diagnosis"
+      ],
+      "validation": [
+        {
+          "check": "Historical forensic",
+          "result": "PASS",
+          "evidence": [
+            "All 20 published L2O configs used epochs=1 with highly unequal known performance.",
+            "PA1 Scan is monotone/unique stepping while PA4 Hop is repeated/revisiting; global FFT loses ordering."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "tracka_l2o_control_repair",
+      "status": "VALIDATED",
+      "execution_owner": "chatgpt+automation",
+      "selected_executor": "lambda-scientific-lane-a+lane-b",
+      "selected_surface": "github+lambda",
+      "inputs": [
+        "PADataset PR #24 runtime-only w4 exact head d1fd5b6d414e7b88675485f576732a424504455f",
+        "PADataset PR #26 directional evaluator/artifact contract stack on PR #24",
+        "canonical unordered excluded-pair reduction: 20 directed cells -> 10 unique backbone trainings"
+      ],
+      "outputs": [
+        "10 provenance-frozen canonical leave-two-out backbones",
+        "20 frozen directional DQNGuard evaluation requests",
+        "corrected 20-cell Track-A matrix with true-target quarantine"
+      ],
+      "validation": [
+        {
+          "check": "Reverse-pair backbone equivalence",
+          "result": "PASS",
+          "evidence": [
+            "PA1↔PA4 reverse training produced 176/176 exactly equal model_state_dict tensors for best and final checkpoints.",
+            "Therefore one backbone per unordered excluded pair is sufficient; evaluator direction remains ordered."
+          ]
+        },
+        {
+          "check": "Canonical backbone bank progress",
+          "result": "PASS",
+          "evidence": [
+            "10/10 unique canonical backbones are COMPLETE and frozen in PADataset PR #26.",
+            "Final PA3-PA4 run 43943016274/job 133565212672 SUCCESS; artifact 14277201494 digest sha256:9e4b8ec93e19868cd46c8982503570e406d9b286cd2fa7e715f25e210d0d76b8.",
+            "Final PA3-PA4 best epoch 24; best known-val macro-F1 1.0; known-test macro-F1 1.0; target_test_consumed=false; target quarantine preserved.",
+            "No additional backbone training remains."
+          ]
+        },
+        {
+          "check": "Directional evaluator candidate",
+          "result": "PASS_CANDIDATE_READY_FOR_ACCEPTANCE",
+          "evidence": [
+            "PADataset draft PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 remains OPEN/UNMERGED.",
+            "PR #26 freezes all 10 canonical backbones and all 20 immutable directed evaluator requests.",
+            "Workspace Shell candidate-pytest receipt job-3d9c726d-aa8a-4e79-8d69-718d5bca6e2b: 35 passed.",
+            "Post-evaluation result-record, strict 20-cell aggregation, matrix reporting, artifact transport/rehydration, and bounded evaluator contracts remain staged.",
+            "Do not merge PR #26 without separate explicit authority."
+          ]
+        },
+        {
+          "check": "Lane-B workflow refresh v3 live activation",
+          "result": "PASS_LIVE",
+          "evidence": [
+            "Fresh zero-work preflight observed requested=0, queued=0, in_progress=0, waiting=0, pending=0; scale_set_id=6.",
+            "Root pre-mutation lineage check PASS with predecessor mode V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2 and predecessor policy SHA 70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d.",
+            "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3=PASS using corrected candidate fc6c1cbac894d9350d11bae4859cbbb27b2da175.",
+            "Active refresh-v3 receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab.",
+            "Live lane-B policy SHA a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be.",
+            "Live trusted GPU2 workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3."
+          ]
+        },
+        {
+          "check": "PA1->PA2 Track-A acceptance and evaluator repair",
+          "result": "PASS_ACCEPTANCE",
+          "evidence": [
+            "Initial post-v3 acceptance run 43973955075 / job 133673000667 reached real GPU2 science and exposed an empty optional target val_open concatenation bug; no DQN fitting/result metrics completed.",
+            "First repair on draft PADataset PR #31 made zero-sized optional validation loaders absent while preserving strict required splits; candidate-pytest job-819d2970-edf8-411c-bb7c-1db457dd4541 passed 39 tests.",
+            "Retry run 43974924844 / job 133676329515 progressed further and exposed inherited open_val_frac=0 on the surrogate calibration config; no DQN fitting/result metrics completed.",
+            "Repository lineage showed original L2O surrogate calibration semantics were open_val_frac=0.15, build_balanced_val_open=true, require_true_val_open=true; repaired backbones had changed those only to quarantine the training target.",
+            "Final repair PR #31 exact head b141020bf7b171571879abdf18a836132e80d1d5 restores 15% true-open validation only on the surrogate config while keeping the target config quarantined at zero target-open validation.",
+            "Candidate-pytest job-0d273d89-0dd0-4f45-96d4-69259e41d87c passed 40 tests.",
+            "Acceptance run 43975684664 / job 133678922111 completed SUCCESS; result artifact 14280124476 digest sha256:7a031f733917ed5772de720be892e34900cff1d4870aaee2ea3e45effc43af7a."
+          ]
+        },
+        {
+          "check": "PA1->PA2 acceptance artifact provenance",
+          "result": "PASS",
+          "evidence": [
+            "Frozen source backbone artifact 14208028365 digest sha256:56bc6ba3b124ef2cc042762f7de0f56a0ec19b35986cdffe6a08a6df5a147011; source workflow run 43823548277 / job 133151929831.",
+            "Rehydrated backbone candidate SHA 11338e6c5f9054bd7683658e2ab2fa8ddb5406a5; best_model SHA256 6cad772f2b88e8f768ca8c623112e48b980ce1706e4dc6a1ac40a5c826f690f3; config SHA256 212381aef96580dafe80ba9d36aacdaea8f01283533bf705840aec93168e9aba.",
+            "Rehydration recorded target_test_consumed=false before final evaluation.",
+            "Scientific execution receipt decision PASS at candidate b141020bf7b171571879abdf18a836132e80d1d5 on GPU UUID GPU-cfed3394-a935-63aa-9325-c4cae7b568b6 using runtime tree SHA256 6922847a7ea87c318a36e1fd2cd3af5283e768ff06de90c4cb2558ea0d48cdaa.",
+            "result_record.json status COMPLETE, target_labels_used_for_tuning=false, mix_true_open=false, surrogate_only_open_calibration=true, threshold_source=known_only.",
+            "Known-only score threshold -1.8992775678634644; known calibration reject 0.0512 at declared 0.05 budget; surrogate-open recall 0.8288 is diagnostic only.",
+            "Final metrics: known_reject_rate=0.0508148148148148, unknown_precision=0.9486872615752862, unknown_recall=0.4241380463498646, unknown_f1=0.5861989277130708, osr_acc=0.587447872266894, osr_macro_f1=0.7151037604271367, unknown_auroc=0.8539393309973854."
+          ]
+        },
+        {
+          "check": "Complete frozen 20-cell Track-A directional matrix",
+          "result": "PASS_20_OF_20",
+          "evidence": [
+            "Acceptance run 43975684664 plus queued workflow runs #77-#95 all completed SUCCESS; no Track-A directional request remains queued or in progress.",
+            "All 20 result_record.json files are status COMPLETE and all 20 scientific receipts are decision PASS at evaluator candidate b141020bf7b171571879abdf18a836132e80d1d5 on GPU UUID GPU-cfed3394-a935-63aa-9325-c4cae7b568b6.",
+            "All 20 records preserve target_labels_used_for_tuning=false, surrogate_only_open_calibration=true, threshold_source=known_only, and mix_true_open=false.",
+            "Frozen unknown-F1 matrix by target row / surrogate columns: PA1<-{PA2:0.586199,PA3:0.616065,PA4:0.241099,PA8:0.254204}; PA2<-{PA1:0.899485,PA3:0.027741,PA4:0.130573,PA8:0.801033}; PA3<-{PA1:0.984317,PA2:0.001426,PA4:0.961990,PA8:0.054209}; PA4<-{PA1:0.858484,PA2:0.310583,PA3:0.439280,PA8:0.491409}; PA8<-{PA1:0.936550,PA2:0.757011,PA3:0.424513,PA4:0.860657}.",
+            "Against the paper Target-Surrogate Matrix, 17/20 cells improved and 3/20 declined. Mean unknown-F1 rose from 0.4115 to 0.531841 (+0.120341 absolute; +29.2% relative).",
+            "Only one decline is large: PA1<-PA4 0.71 -> 0.241099 (-0.468901). The other declines are PA2<-PA4 0.15 -> 0.130573 (-0.019427) and PA8<-PA2 0.77 -> 0.757011 (-0.012989).",
+            "Best frozen surrogate by target: PA1<-PA3 0.616065; PA2<-PA1 0.899485; PA3<-PA1 0.984317; PA4<-PA1 0.858484; PA8<-PA1 0.936550. PA1/Scan is therefore best for all four targets for which it is an eligible surrogate."
+          ]
+        }
+      ],
+      "resume_condition": null
+    },
+    {
+      "id": "trackb_archb_cross_surrogate",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt",
+      "selected_executor": "workspace-shell-candidate-pytest+bounded-evaluator",
+      "selected_surface": "github+workspace-shell",
+      "inputs": [
+        "PADataset PR #23 head 4f27d00cce9ab15120d924963a5ecf049d032c52",
+        "strong PA2 seed0 four-known backbone"
+      ],
+      "outputs": [
+        "validated B0",
+        "cross-surrogate matrix",
+        "frozen winner",
+        "true PA2 evaluation"
+      ],
+      "validation": [
+        {
+          "check": "Implementation review",
+          "result": "PASS",
+          "evidence": [
+            "PR #23 implements one DQN per surrogate, own-surrogate diagonal exclusion, known-only threshold, worst-case-first transfer selection, provenance, and softmax3/expanded5 modes."
+          ]
+        },
+        {
+          "check": "Off-checkpoint candidate-pytest",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Live materializer/plugin are deployed, but this conversation still exposes the old cached profile enum. Fresh-chat first action."
+          ]
+        },
+        {
+          "check": "PR #23 candidate-pytest after Track-A completion",
+          "result": "BLOCKED_INFRASTRUCTURE",
+          "evidence": [
+            "PADataset PR #23 remains OPEN/DRAFT at exact head 4f27d00cce9ab15120d924963a5ecf049d032c52.",
+            "Workspace Shell candidate-pytest request for tests/test_cross_surrogate_dqnguard.py was denied before execution.",
+            "Receipt reject-99f5d8f5-fd57-4270-8095-908dcac1e55a, receipt SHA256 8666ce10c349632bc6e7b48b668350e5052d226dac178e01a406fb9c40d2612a: EVIDENCE_MOUNTPOINT_MISSING; workspace lacks local_artifacts/evidence mountpoint.",
+            "No Track-B test result or execution success may be inferred from this denial."
+          ]
+        }
+      ],
+      "resume_condition": "Restore the Workspace Shell local_artifacts/evidence mountpoint, then rerun candidate-pytest at exact PR #23 head before any bounded evaluator execution."
+    },
+    {
+      "id": "stft_representation_diagnostic",
+      "status": "IN_PROGRESS",
+      "execution_owner": "chatgpt+local-lambda",
+      "selected_executor": "persistent-local-preprocess+GPU",
+      "selected_surface": "github+workspace-shell+lambda",
+      "inputs": [
+        "PADataset PR #21 head fd15238aa369118e61b21ab714900861dbb99d2c",
+        "legacy caches",
+        "raw OTA"
+      ],
+      "outputs": [
+        "resumed STFT overlay cache",
+        "PA1↔PA4 diagnostic",
+        "STFT ablation if justified"
+      ],
+      "validation": [
+        {
+          "check": "Repair CPU validation",
+          "result": "PASS",
+          "evidence": [
+            "PR #21 head fd15238aa369118e61b21ab714900861dbb99d2c; Lambda CPU canary 43788103594 SUCCESS; provenance-based HDF5 source_path resolver."
+          ]
+        },
+        {
+          "check": "Durable partial cache",
+          "result": "PASS",
+          "evidence": [
+            "First 120 overlay records are persistent and must be skipped on resume."
+          ]
+        },
+        {
+          "check": "Live repaired PA1 preflight",
+          "result": "NOT_RUN",
+          "evidence": [
+            "Materialize exact fd15238... in persistent checkout and resume only if a real PA1 legacy base cache resolves."
+          ]
+        }
+      ],
+      "resume_condition": "Persistent checkout + PA1 provenance preflight PASS."
+    },
+    {
+      "id": "workspace_shell_candidate_dependency",
+      "status": "VALIDATED",
+      "execution_owner": "workspace-shell-multirepo-research-v1",
+      "selected_executor": "workspace-shell+plugin-creator",
+      "selected_surface": "workspace-shell",
+      "inputs": [
+        "Workspace Control PR #636",
+        "Workspace Shell plugin v1.0.1"
+      ],
+      "outputs": [
+        "positive off-checkpoint candidate-pytest receipt"
+      ],
+      "validation": [
+        {
+          "check": "Live authority refresh",
+          "result": "PASS",
+          "evidence": [
+            "Operator ran byte-identical reviewed upgrade_multirepo_padataset_v1.sh from workspace-control authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e.",
+            "DURABLE_TASK_BINDINGS=PASS; LOCAL_MCP_READY=PASS; LOCAL_MCP_DISCOVERY=PASS; LOCAL_TASK_AUTHORITY=PASS; WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.",
+            "Post-refresh task-bound git_head receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 executed successfully and returned PADataset authority befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
+            "Workspace-control execution remains 5401045341090a26a42ce3a497c379f8223a3b54; PADataset authority remains befe383fd67c8bca8d8ce370344b33c7e13cd52f."
+          ]
+        },
+        {
+          "check": "Live infrastructure",
+          "result": "PASS",
+          "evidence": [
+            "Transactional upgrade PASS; candidate-materializer service active/running; private plugin refreshed in place to v1.0.1 release pluginrel_6afa5f53a31481919a951d996a362865."
+          ]
+        },
+        {
+          "check": "Positive candidate-pytest",
+          "result": "PASS",
+          "evidence": [
+            "Workspace Shell Refresh Tools exposed candidate-pytest.",
+            "PR #26 candidate validation passed repeatedly through off-checkpoint candidate execution; final 10/10 head 99ba123e1455566e16d86d6faf67fef3be8ab0b9 passed 35 tests.",
+            "Ordinary task-bound execution still fails closed on off-checkpoint candidate SHA."
+          ]
+        }
+      ],
+      "resume_condition": null
     }
   ],
   "checkpoints": [
@@ -194,18 +448,6 @@
       ]
     },
     {
-      "id": "dqn-replicate-watch",
-      "kind": "automation",
-      "identity": "6af9be2287e08191b33ea0cb024c43c8",
-      "required_for_resume": true,
-      "evidence": [
-        "Enabled automation title DQNGuard Replicate Watch.",
-        "Tracks seed0 run 43751609944/job132926587786 and seed1 run 43751622546/job132926629552 at exact candidate befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
-        "When first science lane becomes free, checks PR #17 exact head and duplicate comments before issuing exactly one seed2 detv2 request, then tracks seed2.",
-        "Do not create a duplicate automation."
-      ]
-    },
-    {
       "id": "stage03-exploratory-result",
       "kind": "scientific_run",
       "identity": "run43548334097/job132304755828",
@@ -217,72 +459,419 @@
       ]
     },
     {
-      "id": "restore-point:latest",
-      "kind": "recovery_restore_point",
-      "identity": "befe383fd67c8bca8d8ce370344b33c7e13cd52f",
+      "id": "trackA-l2o-repair-candidate",
+      "kind": "git_commit",
+      "identity": "4aae5d293664b1f8fabf6e6d6b3f47bc009a3cc8",
       "required_for_resume": true,
       "evidence": [
-        "Dual-GPU concurrency gate is PASS at overlap runs 43751157452 and 43751163395.",
-        "Real seed0 run 43751609944/job132926587786 and seed1 run 43751622546/job132926629552 are concurrently IN_PROGRESS.",
-        "Existing automation 6af9be2287e08191b33ea0cb024c43c8 owns exact-once seed2 launch/tracking on first freed lane.",
-        "First safe resume action is to inspect current run/automation state without duplicating any request."
+        "Corrected L2O control-repair protocol/config bank; original DQNGuard evaluator unchanged."
+      ]
+    },
+    {
+      "id": "trackB-archB-candidate",
+      "kind": "git_commit",
+      "identity": "4f27d00cce9ab15120d924963a5ecf049d032c52",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset PR #23 OPEN/DRAFT; no merge authority."
+      ]
+    },
+    {
+      "id": "stft-repair-candidate",
+      "kind": "git_commit",
+      "identity": "fd15238aa369118e61b21ab714900861dbb99d2c",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset PR #21 OPEN/DRAFT; CPU canary 43788103594 SUCCESS; first 120 overlay records preserved."
+      ]
+    },
+    {
+      "id": "workspace-shell-live-candidate-evidence",
+      "kind": "runtime_deployment",
+      "identity": "workspace-shell-plugin-v1.0.1+materializer-live",
+      "required_for_resume": true,
+      "evidence": [
+        "Materializer active/running; plugin release pluginrel_6afa5f53a31481919a951d996a362865; positive candidate-pytest still pending fresh schema."
+      ]
+    },
+    {
+      "id": "restore-point:latest",
+      "kind": "recovery_restore_point",
+      "identity": "handoff-20261116-trackB-stft",
+      "required_for_resume": true,
+      "evidence": [
+        "First action candidate-pytest PR #23; then PR #21 PA1 preflight/resume; do not rebuild first 120 STFT records; Track A stays separate."
+      ]
+    },
+    {
+      "id": "trackA-runtime-w4-candidate",
+      "kind": "git_commit",
+      "identity": "d1fd5b6d414e7b88675485f576732a424504455f",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset PR #24 OPEN/DRAFT/UNMERGED; runtime-only num_workers=4 acceleration with frozen batch/scientific semantics.",
+        "Current canonical training jobs are bound to this exact SHA."
+      ]
+    },
+    {
+      "id": "trackA-directional-evaluator-candidate",
+      "kind": "git_commit",
+      "identity": "99ba123e1455566e16d86d6faf67fef3be8ab0b9",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset PR #26 OPEN/DRAFT/UNMERGED; base exact PR #24 head d1fd5b6d414e7b88675485f576732a424504455f.",
+        "Canonical state: 10/10 complete and 20/20 directed evaluator requests frozen.",
+        "Final candidate-pytest receipt job-3d9c726d-aa8a-4e79-8d69-718d5bca6e2b: 35 passed.",
+        "No merge authority."
+      ]
+    },
+    {
+      "id": "trackA-directional-evaluator-repair-candidate",
+      "kind": "git_commit",
+      "identity": "b141020bf7b171571879abdf18a836132e80d1d5",
+      "required_for_resume": true,
+      "evidence": [
+        "PADataset draft PR #31 is stacked directly on PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9; no merge authority.",
+        "Repairs only evaluator handling of intentional zero-sized target validation and restores original 15% surrogate-only calibration split semantics.",
+        "Workspace Shell candidate-pytest receipt job-0d273d89-0dd0-4f45-96d4-69259e41d87c: 40 passed.",
+        "PA1->PA2 acceptance run 43975684664/job 133678922111 SUCCESS; artifact 14280124476 digest sha256:7a031f733917ed5772de720be892e34900cff1d4870aaee2ea3e45effc43af7a."
       ]
     }
   ],
   "artifacts": [],
   "validation": [
     {
-      "check": "Stage-03 detv2 throughput and repeatability qualification",
+      "check": "Workspace Shell candidate-evidence infrastructure",
       "result": "PASS",
       "evidence": [
-        "PADataset PR #17 comment 6898039158.",
-        "strict_tf32 + num_workers=4 probes reached approximately 18.1 steps/s.",
-        "repeat probes produced identical train/validation metrics and identical model-state digest b9a589566027aa9af2000ffbff54284309e1fc6d18836b500d854483611d2846."
+        "Live materializer active/running; plugin v1.0.1 refreshed in place; task-bound SHA mismatch remains fail-closed."
       ]
     },
     {
-      "check": "Dual-lane deterministic concurrency qualification",
-      "result": "PASS",
-      "evidence": [
-        "PADataset PR #17 comment 6899834199.",
-        "lane A run 43751157452 / job 132925180363 SUCCESS.",
-        "lane B run 43751163395 / job 132925197730 SUCCESS.",
-        "simultaneous training approximately 114.6 seconds on distinct UIDs and GPUs."
-      ]
-    },
-    {
-      "check": "Live Workspace Control dual-lane/controller generation",
-      "result": "PASS",
-      "evidence": [
-        "live lane A=ci-padataset and lane B=ci-padataset-2 with shared primary group ci-padataset.",
-        "live shared roots jobs=0750, staging-cache=0710, logs=0710 with least-privilege lane-B access.",
-        "live controller source head fe9621d848ae3405006fb65e8e691080d66aeb69 and controller SHA256 83efe7a9abd398ed004fcf5acd3a39c2cc2598475bfbef04db206a36582bf241.",
-        "host max3 / PADataset max2 / Workspace Control max1 reserved-slot policy verified."
-      ]
-    },
-    {
-      "check": "Current deterministic real replicates",
+      "check": "Architecture-B execution",
       "result": "NOT_RUN",
       "evidence": [
-        "seed0 run 43751609944/job132926587786 IN_PROGRESS.",
-        "seed1 run 43751622546/job132926629552 IN_PROGRESS.",
-        "seed2 pending exactly-once launch by existing DQNGuard Replicate Watch."
+        "PR #23 code reviewed; exact off-checkpoint unit execution awaits fresh schema."
+      ]
+    },
+    {
+      "check": "STFT repair implementation",
+      "result": "PASS",
+      "evidence": [
+        "PR #21 fd15238... passed CPU canary 43788103594; live repaired preflight/resume pending."
+      ]
+    },
+    {
+      "check": "Track-A canonical matrix progress",
+      "result": "PASS",
+      "evidence": [
+        "10/10 unique canonical backbones frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9.",
+        "20/20 immutable directional evaluator requests exist.",
+        "Final PA3-PA4 backbone SUCCESS with target quarantine preserved."
+      ]
+    },
+    {
+      "check": "Workspace Shell authority refresh",
+      "result": "PASS",
+      "evidence": [
+        "Authority snapshot 07d717c5c8ed745e07f9f10090f57e8435c6ad2e installed with reviewed byte-identical upgrade script.",
+        "Post-refresh Workspace Shell task-bound probe receipt job-8d82547b-eb30-4b60-a72c-aa6c36a7e764 PASS at PADataset authority befe383fd67c8bca8d8ce370344b33c7e13cd52f."
+      ]
+    },
+    {
+      "check": "PR #26 off-checkpoint candidate validation",
+      "result": "PASS",
+      "evidence": [
+        "Final PR #26 head 99ba123e1455566e16d86d6faf67fef3be8ab0b9.",
+        "Workspace Shell candidate-pytest receipt job-3d9c726d-aa8a-4e79-8d69-718d5bca6e2b: 35 passed.",
+        "Earlier receipt job-ef08c200-1c9d-4fc3-a10d-4c9d0a1084a4 proved source_mode=candidate and durable PADataset checkpoint befe383fd67c8bca8d8ce370344b33c7e13cd52f; ordinary task-bound path rejected off-checkpoint SHA."
+      ]
+    },
+    {
+      "check": "GPU2 evaluator workflow authority candidate",
+      "result": "PASS_CANDIDATE_NOT_ACTIVE",
+      "evidence": [
+        "PADataset draft PR #27 head 613387d22299bbb11481aa38b745be2f2fc29617 adds a GPU2-only bounded L2O directional evaluator workflow.",
+        "Workspace Shell candidate-pytest receipt job-e81ee184-0f61-40c8-a3e6-42a71bd87ade: 3 passed.",
+        "PR #27 diff is exactly one workflow, one static contract test, and one Workspace Shell evidence mountpoint marker.",
+        "No merge authority has been granted; workflow is not active on main."
+      ]
+    },
+    {
+      "check": "GPU2 evaluator workflow activation",
+      "result": "BLOCKED_CONTROL_PLANE_TRUST",
+      "evidence": [
+        "Explicit user authority MERGE AND ACTIVATE applied to PADataset PR #27 only.",
+        "PR #27 exact head 613387d22299bbb11481aa38b745be2f2fc29617 marked ready and squash-merged successfully.",
+        "PADataset main after merge: 7782be95f409dc7bccf2729915e4014c0178428c.",
+        "Merged evaluator workflow blob: ba825a98f0aa49bbdc78f5ed37faaf33c1982b4a.",
+        "Frozen PA1->PA2 acceptance trigger created run 43963122999 / job 133635479325; run remains queued.",
+        "Existing authorized lane-B smoke trigger created run 43963420422 / job 133636487691; run also remains queued.",
+        "Workspace Shell unit inspection proves workspace-ci-v3-provisioner.service active/running.",
+        "Live lane-B design binds exactly .github/workflows/lambda-ci-scientific-2.yml blob 6280a6e7b2ad8cc379277fa320e8839a94f360ec.",
+        "Current reviewed Workspace Shell helper registry contains no PADataset/lane-B workflow refresh helper; no privileged authority was invented or widened."
+      ]
+    },
+    {
+      "check": "Lane-B trusted workflow candidate",
+      "result": "MERGED",
+      "evidence": [
+        "PADataset PR #28 candidate head b3afbfb064fe87ac73e5227e114cc991cfb57475 passed Workspace Shell candidate-pytest receipt job-ab9b5733-bbe9-44ac-8e36-37edcdff99c2: 6 passed.",
+        "PR #28 squash-merged to PADataset main 4674d1b07d7d7bb7ee3cbe4ab8a709d536486c13.",
+        "Existing lane-B workflow .github/workflows/lambda-ci-scientific-2.yml now has exact blob 5f29137d9636ed170d3735d0f273220e7cf6f377 and contains bounded l2o_directional_eval while preserving existing smoke/train_backbone/stage03_archc grammar."
+      ]
+    },
+    {
+      "check": "Lane-B one-shot workflow refresh candidate",
+      "result": "PASS_CANDIDATE_NOT_EXECUTED",
+      "evidence": [
+        "Workspace-control refresh branch mth602-laneb-workflow-refresh-v1 is rooted at exact live execution generation 5401045341090a26a42ce3a497c379f8223a3b54, not current main.",
+        "Exact candidate SHA 9dd69558efcbcbdb53b2bfc71d04023900cf0c7c; observed tree 9cc2442bc87f9bced644c8684076c7e8b81a84b9.",
+        "Workspace Shell candidate-pytest receipt job-1066ec8c-8abc-45e0-89fa-cd711cd2a314: 20 passed in 0.09s.",
+        "Receipt binds durable workspace-control checkpoint 4469009659182c8c2f4d12d727e556f2a2995fc9, source_mode=candidate, candidate SHA 9dd69558efcbcbdb53b2bfc71d04023900cf0c7c.",
+        "Candidate layers a one-shot lane-B workflow refresh receipt over immutable dual-lane activation, changes only lane-B controller policy plus reconciler verification state, snapshots all non-target controllers, requires zero-work fresh preflight and one-use exact operator authority, and rolls back on failure.",
+        "Candidate intentionally remains separate from PR #640 because the live-control-plane lineage and PR #640 lineage are diverged."
+      ]
+    },
+    {
+      "check": "Lane-B zero-work GitHub gate",
+      "result": "PASS",
+      "evidence": [
+        "Run 43963122999/job 133635479325 completed with conclusion cancelled.",
+        "Run 43963420422/job 133636487691 completed with conclusion cancelled.",
+        "Post-cancellation sweep of all non-completed PADataset Actions runs found zero jobs with label lambda-padataset-scientific-single-gpu-2."
+      ]
+    },
+    {
+      "check": "Final PA3-PA4 backbone",
+      "result": "PASS",
+      "evidence": [
+        "Run 43943016274 / job 133565212672 completed SUCCESS.",
+        "Artifact 14277201494 digest sha256:9e4b8ec93e19868cd46c8982503570e406d9b286cd2fa7e715f25e210d0d76b8.",
+        "Scientific receipt decision PASS; candidate d1fd5b6d414e7b88675485f576732a424504455f; GPU0 UUID exact.",
+        "best_model sha256 d9fd5db822458e47b04b4efd74b9725a758445a84240d469c2d8fc69ba6c7580; config sha256 cfb3294c3a176a2a03b0882928fade4dd18e5aad0e0641241aaed4887c2ae3bb.",
+        "best_epoch=24; best_val_macro_f1=1.0; test_known_macro_f1=1.0; target_test_consumed=false; target quarantine preserved."
+      ]
+    },
+    {
+      "check": "Final PR #26 10-of-10 matrix validation",
+      "result": "PASS",
+      "evidence": [
+        "PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9.",
+        "Canonical matrix completed_backbone_count=10 and remaining_backbone_count=0.",
+        "Final PA3->PA4 and PA4->PA3 frozen evaluator request manifests added, yielding 20 directed requests.",
+        "Workspace Shell candidate-pytest receipt job-3d9c726d-aa8a-4e79-8d69-718d5bca6e2b: 35 passed."
+      ]
+    },
+    {
+      "check": "Lane-B evaluator acceptance run",
+      "result": "CONTROL_PLANE_PASS_WORKFLOW_BUG",
+      "evidence": [
+        "Run 43967496290 / job 133650662301 was admitted to actual GPU2 runner lambda-padataset-scientific-single-gpu-2-c8e7aef948ec.",
+        "Runner proof, exact PR head verification, and exact candidate checkout all passed.",
+        "Validation failed before science execution because workflow line 236 contained malformed heredoc terminator PYY instead of PY.",
+        "No evaluator science ran and no result artifact was produced."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v2 candidate",
+      "result": "PASS_CANDIDATE_NOT_EXECUTED",
+      "evidence": [
+        "PADataset PR #29 one-line heredoc fix merged; main 9889a981e34de81e58f3263630f0cba54a8e9e06.",
+        "Corrected trusted GPU2 workflow blob 8da00f39284745cf6c9032620d63574052cd6d61.",
+        "Workflow candidate receipt job-d594dbe2-1409-479f-bbf0-aef7661b3bee: 6 passed.",
+        "Workspace-control chained refresh-v2 candidate ebff264b5ee5240ee87f8e5860dafecd7b13f005 preserves v1 receipt and advances only lane-B trusted workflow from 5f29137d... to 8da00f39....",
+        "Refresh-v2 candidate receipt job-3f93de6f-2b83-4ae7-a911-51d1d6505da4: 26 passed."
+      ]
+    },
+    {
+      "check": "Second GPU2 evaluator acceptance run",
+      "result": "CONTROL_PLANE_PASS_SHELL_PARSE_BUG",
+      "evidence": [
+        "Run 43969575701 / job 133657867208 admitted successfully to GPU2 after refresh v2.",
+        "Verify exact PR head, prove bounded runner, checkout exact candidate, and validate bounded scientific request all passed.",
+        "Execution failed before evaluator science at Bash parse time: unexpected EOF while looking for matching ')' around nested process substitution/heredoc.",
+        "No evaluator result was produced; tiny artifact 14276199017 contains only pre-execution runtime evidence.",
+        "Root cause fixed in PADataset PR #30 by replacing nested heredoc with python3 -c argument extraction and adding bash -n regression coverage."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v3 candidate",
+      "result": "BUG_FOUND_PRE_MUTATION",
+      "evidence": [
+        "Workspace-control branch mth602-laneb-workflow-refresh-v3 exact head 9ea2444d54d97c0e2a740c660589e6675e1c207d previously passed candidate-pytest receipt job-bea40700-793d-4e55-b15d-5d0d812319fc: 32 passed.",
+        "Operator v3 command failed during preflight before any mutation: FileNotFoundError for /var/lib/workspace-ci/v3/padataset-scientific/dual-lane/workflow-refresh-v3/active.json.",
+        "Exact source bug: scripts/lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py line 27 sets PRIOR_REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT, while line 28 sets REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT.",
+        "Those two bindings are reversed. Correct mapping must be PRIOR_REFRESH_ACTIVE = ...V2_ACTIVE_RECEIPT and REFRESH_ACTIVE = ...V3_ACTIVE_RECEIPT.",
+        "Failure occurred before preflight/authority receipt creation and before root mutation; live state remains refresh-v2."
+      ]
+    },
+    {
+      "check": "GPU2 trusted workflow current code",
+      "result": "PASS_CODE_NOT_LIVE_TRUST",
+      "evidence": [
+        "PADataset PR #30 merged; PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6.",
+        "Corrected existing trusted GPU2 workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3.",
+        "Workflow candidate receipt job-1bf22e23-4965-499e-8482-c517e5c8c560: 7 passed, including bash -n on the actual execution block.",
+        "Live lane-B controller trust still points to refresh-v2 blob 8da00f39284745cf6c9032620d63574052cd6d61 until refresh-v3 succeeds."
+      ]
+    },
+    {
+      "check": "GPU2 evaluator acceptance attempts",
+      "result": "CONTROL_PLANE_PASS_WORKFLOW_FIXED_PENDING_V3",
+      "evidence": [
+        "Run 43967496290/job 133650662301 admitted to actual GPU2 runner; failed before science due PYY heredoc terminator; fixed by PR #29.",
+        "Run 43969575701/job 133657867208 admitted to actual GPU2 runner; exact PR head, bounded runner proof, checkout, and request validation passed; failed before science due unmatched ')' from nested heredoc/process substitution; fixed by PR #30.",
+        "No DQNGuard evaluator science has yet completed; do not infer scientific metrics from either failed acceptance run."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v1",
+      "result": "PASS_LIVE",
+      "evidence": [
+        "Operator refresh-v1 preflight PASS; scale_set_id=6.",
+        "Policy advanced 8c4a2d3dea415999128c78f9086ba2112542e2f334f37c12fc5c466cbdf56929 -> 669aa487f38ab6d3972c0dc970925554b4d05b2647eb842b11543d26d2a2767b.",
+        "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH=PASS; transaction refresh-e8be5357-316f-40f0-9302-56856e98325a.",
+        "Active receipt sha256 7b2c4af51cbcb8d42a5432920769d19d131df5dbb9601110d78c32fbf403502d."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v2",
+      "result": "PASS_LIVE",
+      "evidence": [
+        "Operator refresh-v2 preflight PASS; scale_set_id=6.",
+        "Policy advanced 669aa487f38ab6d3972c0dc970925554b4d05b2647eb842b11543d26d2a2767b -> 70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d.",
+        "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2=PASS; transaction refresh-69d6b04f-e5d7-47c1-9ae7-8015be78d354.",
+        "Active receipt sha256 67875d5c10c337584400ff41f0c5e46ee2ad0ecb7d1b057c8d3058225634a8ab."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v3 binding repair candidate",
+      "result": "PASS_CANDIDATE_READY_FOR_OPERATOR",
+      "evidence": [
+        "New branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 is rooted at exact failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d.",
+        "Exact candidate head 5a7134056fef65b44e25bf06ac66f975f1903bff changes only scripts/lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py (2 lines replaced) and tests/test_lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v3.py (exact binding regression).",
+        "Correct bindings are PRIOR_REFRESH_ACTIVE -> PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT and REFRESH_ACTIVE -> PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT.",
+        "Workspace Shell candidate-pytest receipt job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b: 33 passed.",
+        "GitHub verification at checkpoint time: PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6, workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3, and zero requested/queued/in_progress/waiting/pending PADataset Actions runs.",
+        "No root/control-plane mutation has been performed by this candidate validation."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v3 operator retry after receipt-binding repair",
+      "result": "FAIL_PRE_MUTATION_PREDECESSOR_MODE_BUG",
+      "evidence": [
+        "Fresh zero-work preflight observed requested=0, queued=0, in_progress=0, waiting=0, pending=0; scale_set_id=6.",
+        "Live predecessor policy SHA observed 70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d; computed target policy SHA was a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be.",
+        "Corrected candidate 5a7134056fef65b44e25bf06ac66f975f1903bff failed before authority consumption/controller mutation with: lane-B workflow refresh v2 predecessor binding invalid.",
+        "Source diagnosis: refresh-v2 writes mode V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while refresh-v3 incorrectly validated its predecessor as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3.",
+        "The subsequent rm permission errors were cleanup-only root-owned __pycache__ files in the temporary checkout and did not indicate control-plane mutation."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v3 predecessor-mode repair candidate",
+      "result": "PASS_CANDIDATE_READY_FOR_OPERATOR",
+      "evidence": [
+        "New branch mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 is rooted at validated receipt-binding candidate 5a7134056fef65b44e25bf06ac66f975f1903bff.",
+        "Exact candidate head fc6c1cbac894d9350d11bae4859cbbb27b2da175 changes refresh-v3 predecessor mode validation from V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3 to V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2 and adds a regression assertion.",
+        "Workspace Shell candidate-pytest receipt job-4cf75745-3a81-407b-bfa0-1b9319b54bca: 34 passed.",
+        "No root/control-plane mutation has been performed by this candidate validation."
+      ]
+    },
+    {
+      "check": "Lane-B workflow refresh v3",
+      "result": "PASS_LIVE",
+      "evidence": [
+        "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3=PASS.",
+        "Active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab.",
+        "Live lane-B policy SHA a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be.",
+        "Live lane-B workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3."
+      ]
+    },
+    {
+      "check": "Track-A PA1->PA2 acceptance cell",
+      "result": "PASS",
+      "evidence": [
+        "Final repaired candidate PADataset PR #31 head b141020bf7b171571879abdf18a836132e80d1d5; candidate-pytest job-0d273d89-0dd0-4f45-96d4-69259e41d87c: 40 passed.",
+        "Run 43975684664/job 133678922111 SUCCESS on GPU2; result artifact 14280124476 digest sha256:7a031f733917ed5772de720be892e34900cff1d4870aaee2ea3e45effc43af7a.",
+        "Target labels were final-evaluation-only: target_labels_used_for_tuning=false; surrogate-only calibration true; threshold source known-only.",
+        "Acceptance result_record COMPLETE with osr_macro_f1 0.7151037604271367 and unknown_auroc 0.8539393309973854."
+      ]
+    },
+    {
+      "check": "Remaining Track-A directional matrix scheduling",
+      "result": "PASS_SCHEDULED_19",
+      "evidence": [
+        "Acceptance PA1->PA2 is already COMPLETE/PASS at run 43975684664 / job 133678922111.",
+        "All remaining 19 frozen directional request manifests were submitted exactly once on draft PADataset PR #31 exact head b141020bf7b171571879abdf18a836132e80d1d5 through /lambda-scientific-2.",
+        "Lane A was intentionally not used because current trusted .github/workflows/lambda-ci-scientific.yml does not authorize l2o_directional_eval; no lane-A trust widening was performed.",
+        "PA1-PA2__targetPA2__surPA1: run 43976846146 / job 133682905137.",
+        "PA1-PA3__targetPA1__surPA3: run 43976852562 / job 133682925738.",
+        "PA1-PA3__targetPA3__surPA1: run 43976861761 / job 133682958353.",
+        "PA1-PA4__targetPA1__surPA4: run 43976863664 / job 133682962908.",
+        "PA1-PA4__targetPA4__surPA1: run 43976868643 / job 133682977476.",
+        "PA1-PA8__targetPA1__surPA8: run 43976873429 / job 133682993583.",
+        "PA1-PA8__targetPA8__surPA1: run 43976883865 / job 133683030058.",
+        "PA2-PA3__targetPA2__surPA3: run 43976884703 / job 133683030052.",
+        "PA2-PA3__targetPA3__surPA2: run 43976891377 / job 133683055536.",
+        "PA2-PA4__targetPA2__surPA4: run 43976898797 / job 133683079078.",
+        "PA2-PA4__targetPA4__surPA2: run 43976899738 / job 133683082054.",
+        "PA2-PA8__targetPA2__surPA8: run 43976905024 / job 133683099970.",
+        "PA2-PA8__targetPA8__surPA2: run 43976908306 / job 133683111410.",
+        "PA3-PA4__targetPA3__surPA4: run 43976915138 / job 133683135159.",
+        "PA3-PA4__targetPA4__surPA3: run 43976920323 / job 133683153237.",
+        "PA3-PA8__targetPA3__surPA8: run 43976923772 / job 133683162544.",
+        "PA3-PA8__targetPA8__surPA3: run 43976927445 / job 133683175175.",
+        "PA4-PA8__targetPA4__surPA8: run 43976931114 / job 133683189286.",
+        "PA4-PA8__targetPA8__surPA4: run 43976937980 / job 133683211937."
+      ]
+    },
+    {
+      "check": "GPU0 bounded L2O evaluator candidate",
+      "result": "PASS_CANDIDATE_NOT_LIVE",
+      "evidence": [
+        "PADataset draft PR #32 head e77c82d90b36d6223877909adf2d5d0a490c3beb ports the already-accepted lane-B l2o_directional_eval path to lane A only.",
+        "Lane A remains pinned to ci-padataset / lambda-padataset-scientific-single-gpu / GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea.",
+        "Frozen request validation, artifact transport/rehydration, surrogate-only calibration, known-only thresholding, target_labels_used_for_tuning=false, and scientific receipt generation are unchanged from lane B.",
+        "Workspace Shell candidate-pytest receipt job-7cead1f2-3c5e-4a7d-b870-672c09c52086: 14 passed.",
+        "PR #32 remains OPEN/DRAFT/UNMERGED; current default-branch lane-A workflow does not yet authorize l2o_directional_eval."
+      ]
+    },
+    {
+      "check": "Track-A live result preview through run 81",
+      "result": "PASS_5_ADDITIONAL_CELLS",
+      "evidence": [
+        "Run 43976863664 / workflow #80 / artifact 14282908704 SUCCESS: target PA1 <- surrogate PA4, unknown_f1=0.2410990600144613, unknown_precision=0.8921232876712328, unknown_recall=0.1393840082934822, known_reject_rate=0.0373527014007263, unknown_auroc=0.4308515404134873.",
+        "Run #80 provenance remains frozen/leakage-safe: target_labels_used_for_tuning=false; surrogate_only_open_calibration=true; threshold_source=known_only; mix_true_open=false.",
+        "Run 43976868643 / workflow #81 / artifact 14282869869 SUCCESS: target PA4 <- surrogate PA1, unknown_f1=0.858483687015051, unknown_precision=0.9775601447732596, unknown_recall=0.7652666666666667, known_reject_rate=0.0390572889646483, unknown_auroc=0.9302384730354012.",
+        "Run #81 provenance remains frozen/leakage-safe: target_labels_used_for_tuning=false; surrogate_only_open_calibration=true; threshold_source=known_only; mix_true_open=false.",
+        "Compared with the paper matrix, PA1<-PA4 changed 0.71 -> 0.2410990600144613 while PA4<-PA1 changed 0.84 -> 0.858483687015051. Directional asymmetry therefore remains material under the repaired backbone protocol.",
+        "Across the first six comparable paper/new cells, paper mean unknown_f1=0.5583333333333333 and current frozen mean unknown_f1=0.6976080043854656; this is descriptive only and must not drive retries or method selection."
+      ]
+    },
+    {
+      "check": "Track-A full-matrix descriptive paper comparison",
+      "result": "PASS_DESCRIPTIVE_ONLY",
+      "evidence": [
+        "Paper mean unknown-F1 across all 20 directional cells: 0.4115.",
+        "Frozen repaired Track-A mean unknown-F1 across all 20 directional cells: 0.5318413915255574.",
+        "Median per-cell delta: +0.093603.",
+        "PA1/Scan surrogate mean across PA2/PA3/PA4/PA8: 0.919709; this is descriptive post-hoc evidence and must not be used to tune/retry Track-A.",
+        "PR #32 GPU0 evaluator scale-out is no longer required to complete Track A because all 20 cells finished successfully on the trusted GPU2 lane; leave PR #32 draft/unmerged absent separate infrastructure authority."
       ]
     }
   ],
-  "blockers": [],
-  "remaining_work": [
-    "Monitor seed0 run 43751609944 / job 132926587786 and seed1 run 43751622546 / job 132926629552 to terminal; inspect exact logs, scientific artifacts, receipts, and result_record files.",
-    "For every terminal replicate verify exact candidate befe383fd67c8bca8d8ce370344b33c7e13cd52f, deterministic_training=true, deterministic_profile=strict_tf32, PA2 quarantine, known-only checkpoint/threshold semantics, cache_len=16384, and target_labels_used_for_tuning=false.",
-    "Allow the existing DQNGuard Replicate Watch automation to issue exactly one seed2 detv2 request on the first freed lane after exact-head and duplicate-comment checks; do not create a duplicate watcher or seed2 request.",
-    "Track seed2 to terminal and validate its artifacts/receipt/result_record with the same scientific invariants.",
-    "Compare deterministic seed0/seed1/seed2 outcomes, including known metrics, unknown AUROC, PA2 precision/recall/F1, OSR macro-F1, threshold, confusion/error structure, and reproducibility digests where available.",
-    "Decide whether the low-PA2-recall / PA8-collapse pattern is stable across deterministic replicates or primarily training-variance-driven before changing Architecture-C.",
-    "Persist the replicate comparison and resulting scientific decision in PADataset project-owned documentation/task state.",
-    "Keep PADataset PR #17 and Workspace Control PR #632 unmerged unless separate explicit merge authority is granted."
+  "blockers": [
+    "Track B candidate validation is blocked by Workspace Shell EVIDENCE_MOUNTPOINT_MISSING (receipt reject-99f5d8f5-fd57-4270-8095-908dcac1e55a); restore local_artifacts/evidence mountpoint before retry.",
+    "STFT resume remains gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
-  "next_safe_action": "On fresh-chat resume, first read this capsule and the exact PR #17 / PR #632 state, then inspect seed0 run 43751609944/job132926587786, seed1 run 43751622546/job132926629552, and automation 6af9be2287e08191b33ea0cb024c43c8. Do not duplicate seed0, seed1, seed2, or the automation. If seed0/seed1 are still running, continue monitoring through connected GitHub/automation surfaces. When the first lane frees, confirm whether the existing automation has already issued seed2; only one seed2 request may exist. Once all three deterministic detv2 replicates are terminal, validate their exact artifacts/invariants and compare outcomes before any Architecture-C change.",
+  "remaining_work": [
+    "Track A is complete and validated; do not rerun or performance-select any Track-A cell.",
+    "Advance Track B Architecture B cross-surrogate validation from PADataset PR #23, preserving off-diagonal surrogate selection and true-target quarantine.",
+    "Then complete the separate STFT representation diagnostic only after the live repaired PA1 provenance preflight passes."
+  ],
+  "next_safe_action": "Restore the Workspace Shell local_artifacts/evidence mountpoint, then rerun candidate-pytest for PADataset PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52. Do not launch Track-B science until that evidence-only validation passes.",
   "last_executor": "chatgpt",
-  "last_surface": "github+lambda+workspace-shell+automation",
-  "notes": "This capsule remains an execution/handoff mirror; PADataset scientific truth remains in the PADataset task/docs.\n\n2026-11-15 infrastructure closure: lane-B runner UID isolation, shared-root permissions, scientific lane-B runtime profile, live controller scheduler completion refresh, host-Go-compatible controller repair, and post-restore restart semantics were repaired and validated. The live controller-only repair source is fe9621d848ae3405006fb65e8e691080d66aeb69. UID-scoped pgrep/pkill guards remain intact.\n\n2026-11-15 performance closure: detv1 strict/no-TF32 was too slow; detv2 strict_tf32 with seeded four-worker DataLoaders was repeatable at approximately 18.1 steps/s with identical model-state digest across repeat probes. A first short two-lane probe appeared sequential because REST-attestation skew exceeded its duration; the extended overlap probe at befe383... proved approximately 114.6 seconds of simultaneous training and closed the dual-GPU acceptance gate.\n\nCurrent scientific execution: seed0 and seed1 detv2 were launched on distinct lanes at befe383... and are concurrently in progress. The existing enabled DQNGuard Replicate Watch owns exactly-once seed2 launch/tracking. No user action is required at this checkpoint unless a later root/operator gate is demonstrated."
+  "last_surface": "github+lambda+workspace-control",
+  "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged."
 }

@@ -1,68 +1,172 @@
 <!-- workspace-control:derived-task-handoff -->
 # Workspace Control Task Handoff
 
-Derived human-readable view.
+Authoritative capsule: `tasks/active/mth602-final-multisurrogate-dqnguard-v1.json`
 
-Authoritative capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
+## Current Track-A state
 
-If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
+Track-A backbone training remains **complete**:
 
-## Task
+- PADataset PR #26 base evaluator stack: `99ba123e1455566e16d86d6faf67fef3be8ab0b9`
+- canonical backbones: **10/10 COMPLETE**
+- frozen directional requests: **20/20**
+- no additional backbone training is authorized or needed.
 
-- ID: mth602-final-multisurrogate-dqnguard-v1
-- Title: MTH 602 final project / PADataset multi-surrogate DQNGuard
-- Status: CHECKPOINTED
-- Capsule schema: v2
+The evaluator runtime repair is now stacked in draft PADataset PR #31:
 
-## Goal
+- PR #31 exact head: `b141020bf7b171571879abdf18a836132e80d1d5`
+- base: PR #26 exact head `99ba123e1455566e16d86d6faf67fef3be8ab0b9`
+- candidate-pytest receipt: `job-0d273d89-0dd0-4f45-96d4-69259e41d87c`
+- result: **40 passed**
+- no merge authority.
 
-Complete deterministic Stage-03 Architecture-C replication at the qualified detv2 profile on the proven dual-GPU PADataset scientific runtime, then compare seed0/seed1/seed2 before making any architecture change while preserving PA2 quarantine and known-only selection/threshold semantics.
+The repair is intentionally narrow:
 
-## Repositories
+1. intentional zero-sized **target** validation loaders are treated as absent instead of being concatenated;
+2. required known/test/target-test splits remain strict;
+3. the surrogate calibration config restores the original L2O semantics:
+   - `open_val_frac=0.15`
+   - `build_balanced_val_open=true`
+   - `require_true_val_open=true`
+4. the target config remains quarantined at zero target-open validation.
 
-### PADataset
+## Live GPU2 trust
 
-- Intent: mutate
-- Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: befe383fd67c8bca8d8ce370344b33c7e13cd52f
-- Remote verified: true
+Refresh-v3 is now **LIVE / PASS**:
 
-### workspace-control
+- predecessor policy: `70f49bf44a638460eb7fe209b1a313740955a25627ff012abf99671b9de5634d`
+- active v3 receipt SHA256: `94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab`
+- live lane-B policy SHA: `a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be`
+- trusted workflow blob: `85e8deef5240e2d6d7db34318e6b2c35947a83f3`
+- PADataset main: `dbf167b23e6a1777a31ad5c4bccde44d26d0aad6`
 
-- Intent: mutate
-- Remote branch: padataset-lane-b-runner-identity-v1
-- Remote checkpoint: fe9621d848ae3405006fb65e8e691080d66aeb69
-- Remote verified: true
+## PA1 -> PA2 acceptance cell
 
-## Next safe action
+The required acceptance cell is now **fully PASS**.
 
-On fresh-chat resume, first read this capsule and the exact PR #17 / PR #632 state, then inspect seed0 run 43751609944/job132926587786, seed1 run 43751622546/job132926629552, and automation 6af9be2287e08191b33ea0cb024c43c8. Do not duplicate seed0, seed1, seed2, or the automation. If seed0/seed1 are still running, continue monitoring through connected GitHub/automation surfaces. When the first lane frees, confirm whether the existing automation has already issued seed2; only one seed2 request may exist. Once all three deterministic detv2 replicates are terminal, validate their exact artifacts/invariants and compare outcomes before any Architecture-C change.
+Final run:
 
-## Remaining work
+- run: `43975684664`
+- job: `133678922111`
+- evaluator candidate: `b141020bf7b171571879abdf18a836132e80d1d5`
+- result artifact: `14280124476`
+- result artifact digest: `sha256:7a031f733917ed5772de720be892e34900cff1d4870aaee2ea3e45effc43af7a`
+- GPU UUID: `GPU-cfed3394-a935-63aa-9325-c4cae7b568b6`
+- scientific receipt: **PASS**
 
-- Monitor seed0 run 43751609944 / job 132926587786 and seed1 run 43751622546 / job 132926629552 to terminal; inspect exact logs, scientific artifacts, receipts, and result_record files.
-- For every terminal replicate verify exact candidate befe383fd67c8bca8d8ce370344b33c7e13cd52f, deterministic_training=true, deterministic_profile=strict_tf32, PA2 quarantine, known-only checkpoint/threshold semantics, cache_len=16384, and target_labels_used_for_tuning=false.
-- Allow the existing DQNGuard Replicate Watch automation to issue exactly one seed2 detv2 request on the first freed lane after exact-head and duplicate-comment checks; do not create a duplicate watcher or seed2 request.
-- Track seed2 to terminal and validate its artifacts/receipt/result_record with the same scientific invariants.
-- Compare deterministic seed0/seed1/seed2 outcomes, including known metrics, unknown AUROC, PA2 precision/recall/F1, OSR macro-F1, threshold, confusion/error structure, and reproducibility digests where available.
-- Decide whether the low-PA2-recall / PA8-collapse pattern is stable across deterministic replicates or primarily training-variance-driven before changing Architecture-C.
-- Persist the replicate comparison and resulting scientific decision in PADataset project-owned documentation/task state.
-- Keep PADataset PR #17 and Workspace Control PR #632 unmerged unless separate explicit merge authority is granted.
+Frozen backbone provenance:
 
-## Blockers / gates
+- source artifact: `14208028365`
+- source digest: `sha256:56bc6ba3b124ef2cc042762f7de0f56a0ec19b35986cdffe6a08a6df5a147011`
+- source run/job: `43823548277 / 133151929831`
+- source candidate: `11338e6c5f9054bd7683658e2ab2fa8ddb5406a5`
+- best-model SHA256: `6cad772f2b88e8f768ca8c623112e48b980ce1706e4dc6a1ac40a5c826f690f3`
+- config SHA256: `212381aef96580dafe80ba9d36aacdaea8f01283533bf705840aec93168e9aba`
+- rehydration recorded `target_test_consumed=false` before final evaluation.
 
-- None.
+Scientific invariants verified:
 
-## Fresh-chat initialization
+- `target_labels_used_for_tuning=false`
+- `mix_true_open=false`
+- `surrogate_only_open_calibration=true`
+- threshold source: `known_only`
+- known reject calibration: `0.0512` at declared `0.05` budget
+- surrogate-open recall `0.8288` is diagnostic only.
 
-@GitHub
+Final PA1 -> PA2 metrics:
 
-https://github.com/adamtrott78/workspace-control
+- known reject rate: `0.0508148148148148`
+- unknown precision: `0.9486872615752862`
+- unknown recall: `0.4241380463498646`
+- unknown F1: `0.5861989277130708`
+- OSR accuracy: `0.587447872266894`
+- OSR macro-F1: `0.7151037604271367`
+- unknown AUROC: `0.8539393309973854`
 
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
+Two earlier post-v3 acceptance runs were deterministic code-path failures before a complete result record:
+- `43973955075 / 133673000667`: empty optional target `val_open` concatenation.
+- `43974924844 / 133676329515`: surrogate config inherited target quarantine `open_val_frac=0`.
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Neither failure is evidence for scientific method selection or target-informed retry.
+
+## Immediate next action
+
+Schedule the **remaining 19 frozen Track-A directional evaluator cells** on exact PR #31 head `b141020bf7b171571879abdf18a836132e80d1d5`.
+
+Requirements:
+
+- no backbone retraining;
+- no modification of frozen request manifests;
+- no target labels for DQN fitting, surrogate selection, threshold selection, HPO, retry decisions, or method selection;
+- preserve surrogate-only open calibration and known-only thresholds;
+- aggregate the 20-cell matrix only after all cells are terminal and provenance-valid.
+
+## Other lanes
+
+- Track B Architecture B remains separate.
+- STFT remains separate and is still gated on repaired PA1 provenance preflight.
+- Preserve the first 120 completed STFT overlay records.
+- Do not merge PR #31, PR #26, PR #23, PR #21, or unrelated workspace-control branches without separate explicit authority.
+
+## Remaining Track-A matrix queue
+
+All other **19** frozen directional cells were submitted exactly once on PR #31 head `b141020bf7b171571879abdf18a836132e80d1d5` through the trusted GPU2 workflow.
+
+Workflow run numbers are **77-95**, with GitHub run IDs from `43976846146` through `43976937980` (exact per-cell run/job binding is authoritative in the JSON capsule).
+
+Do **not** enqueue duplicates. Current lane A was deliberately left unchanged because its trusted workflow does not authorize `l2o_directional_eval`.
+
+A safe operator-side tmux queue view is:
+
+```bash
+tmux new -s mth602-matrix 'watch -n 3 "gh run list -R adamtrott78/PADataset -w lambda-ci-scientific-2.yml -L 25"'
+```
+
+Detach with `Ctrl-B D`; reattach with `tmux attach -t mth602-matrix`.
+
+
+## GPU0 evaluator scale-out candidate
+
+GPU0 support is now engineered and candidate-validated, but **not live yet**.
+
+- PADataset draft PR #32
+- exact head: `e77c82d90b36d6223877909adf2d5d0a490c3beb`
+- lane A remains `ci-padataset` / `lambda-padataset-scientific-single-gpu` / GPU0 `GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea`
+- candidate-pytest receipt: `job-7cead1f2-3c5e-4a7d-b870-672c09c52086`
+- result: **14 passed**
+- PR remains OPEN/DRAFT/UNMERGED; no merge authority has been inferred.
+
+The candidate ports the already-accepted GPU2 bounded `l2o_directional_eval` path to GPU0 without changing frozen request, provenance, target-quarantine, surrogate-calibration, or known-only-threshold semantics.
+
+Current authority gate: explicit permission is required to merge PR #32. After merge, a new default-branch workflow blob/main SHA must be bound into a chained lane-A trusted-workflow refresh and activated under fresh root/operator authority before any `/lambda-scientific ... l2o_directional_eval:...` request can be admitted on GPU0.
+
+Do not cancel GPU2 queued cells until GPU0 trust is live. At this checkpoint run 77 is SUCCESS, run 78 is IN_PROGRESS, and runs 79-95 are still queued.
+
+
+## Track-A complete matrix — 2026-11-17
+
+All 20 frozen directional Track-A cells are now terminal **SUCCESS/PASS**. Acceptance run 43975684664 plus workflow runs #77-#95 completed on the trusted GPU2 lane at evaluator head `b141020bf7b171571879abdf18a836132e80d1d5`.
+
+Every result preserves:
+- `target_labels_used_for_tuning=false`
+- `surrogate_only_open_calibration=true`
+- `threshold_source=known_only`
+- `mix_true_open=false`
+
+Unknown-F1 matrix:
+
+| target \ surrogate | PA1 | PA2 | PA3 | PA4 | PA8 |
+|---|---:|---:|---:|---:|---:|
+| PA1 | — | 0.586199 | 0.616065 | 0.241099 | 0.254204 |
+| PA2 | 0.899485 | — | 0.027741 | 0.130573 | 0.801033 |
+| PA3 | 0.984317 | 0.001426 | — | 0.961990 | 0.054209 |
+| PA4 | 0.858484 | 0.310583 | 0.439280 | — | 0.491409 |
+| PA8 | 0.936550 | 0.757011 | 0.424513 | 0.860657 | — |
+
+Paper comparison: **17/20 cells improved, 3/20 declined**. Mean unknown-F1 changed from **0.4115** to **0.531841** (+0.120341 absolute, +29.2% relative). The only large regression is PA1<-PA4 (0.71 -> 0.241099); the other two declines are small: PA2<-PA4 (0.15 -> 0.130573) and PA8<-PA2 (0.77 -> 0.757011).
+
+Best frozen surrogate by target: PA1<-PA3, PA2<-PA1, PA3<-PA1, PA4<-PA1, PA8<-PA1. PA1/Scan is therefore the best eligible surrogate for all four other targets.
+
+This comparison is descriptive only. Do not use target-test metrics for retries, method selection, or Track-A tuning.
+
+GPU0 evaluator PR #32 is no longer required for Track-A completion because the full matrix finished on GPU2; it remains draft/unmerged absent separate infrastructure authority.

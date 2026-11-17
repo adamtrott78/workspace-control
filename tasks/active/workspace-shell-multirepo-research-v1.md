@@ -66,3 +66,18 @@ Start from the normal workspace-control root route.
 Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
 Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
+
+
+## Candidate evidence mountpoint repair — Track B unblock
+
+PADataset candidate validation exposed a deterministic launcher defect: clean exact-SHA candidate materializations do not contain the ignored/untracked `local_artifacts/evidence/` directory, while the launcher required that directory to pre-exist before binding the verified read-only evidence root.
+
+Validated runtime: `f3f999ff0200e2450d83e93887b2450f1ee83e2f`.
+
+The fix creates only the empty bind target inside disposable per-job writable scratch and fails closed on symlink/non-directory path components. It does not mutate the candidate store, PADataset execution source, historical evidence source, task authority, profiles, network policy, credentials, or privileged-helper policy.
+
+Focused candidate validation: `job-a31b81ba-8ce9-4f29-903d-a6bcdfb3aa0c` — **4 passed**.
+
+The installed-plugin diff from live runtime `54ac65cbcd4211554710b8f8f4231c6c9554e3cc` is limited to the 31-line `job_launcher.py` repair.
+
+Activation remains a root/operator gate using the existing transactional upgrader and the frozen PADataset/semantic tuple. No merge authority is implied by draft PR #642.
