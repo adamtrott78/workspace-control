@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 RETRY V0.5 IS EXPLICITLY AUTHORIZED FOR EXACTLY ONE LIVE ATTEMPT, PENDING EXACT-HEAD VALIDATION OF THIS AUTHORITY-PERSISTENCE COMMIT. Authority v0.5 binds final approved state b4123f957f5368100fe621bcd6b2c6876f792347, review blob d6f2115d43644e450dd5ade5d266ba05cbb3a54d, procedure blob 40049b88799b3bc4683931d0a56a50c07591fc61, source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. v0.4 is superseded unconsumed/non-reusable. After validation, execute Windows v0.5 first. It may resolve existing .NET 10 from the reviewed bounded locations including %USERPROFILE%\.dotnet\dotnet.exe, and only temporarily adjust process PATH/DOTNET_ROOT. Do not start Linux until Windows prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS. Live consumption remains at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
+STAGE-12 RETRY V0.5 SINGLE-ATTEMPT AUTHORITY IS DURABLE AND VALIDATED. Authority persistence head f84195c55d7da458536087935e817e7d96da7609 passed Workspace #3004 / Semantic #304 / Operator #577. Authority v0.5 binds review blob d6f2115d43644e450dd5ade5d266ba05cbb3a54d, procedure blob 40049b88799b3bc4683931d0a56a50c07591fc61, source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. NEXT: execute the reviewed Windows v0.5 single-line command FIRST. It may discover existing .NET 10 only from the reviewed bounded locations including %USERPROFILE%\.dotnet\dotnet.exe and temporarily adjust process PATH/DOTNET_ROOT, restoring both afterward. Manually authenticate and select Instant; require STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS. Do not start Linux before that marker. Live one-shot authority remains unconsumed until Linux later prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
 
 ## Remaining work
 
@@ -85,11 +85,11 @@ STAGE-12 RETRY V0.5 IS EXPLICITLY AUTHORIZED FOR EXACTLY ONE LIVE ATTEMPT, PENDI
 ## Blockers / gates
 
 - Stage-12 Attempt 01 v0.1 authority is consumed.
-- v0.2, v0.3 and v0.4 authorities were not consumed but are superseded/non-reusable.
-- v0.5 has fresh explicit operator approval for exactly one live attempt.
-- This authority-persistence head must pass exact-head Workspace/Semantic/Operator validation before Windows execution.
-- Windows v0.5 must resolve existing .NET 10 from reviewed locations including %USERPROFILE%\.dotnet\dotnet.exe, start the pinned launcher, and reach STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS before Linux starts.
-- The live retry is consumed only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS; no silent retry or scope widening is authorized.
+- v0.2, v0.3 and v0.4 authorities are superseded unconsumed/non-reusable.
+- v0.5 exact single-attempt authority is VALIDATED at f84195c5…: Workspace #3004 / Semantic #304 / Operator #577 SUCCESS.
+- Current operator action is Windows v0.5 pre-live setup only. Linux remains blocked until STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS is observed.
+- The v0.5 live attempt is not consumed during Windows pre-live setup and is consumed only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
+- No .NET installation, package-manager use, persistent PATH edit, registry mutation, execution-policy widening, browser/network/API/DB/GPU/Workspace Shell scope widening, or silent retry is authorized.
 
 ## Fresh-chat initialization
 
