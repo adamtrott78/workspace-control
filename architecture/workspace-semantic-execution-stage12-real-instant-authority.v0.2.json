@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v0.2",
-  "status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+  "status": "SUPERSEDED_UNCONSUMED_BY_STAGE12_V03_AUTHORITY",
   "purpose": "Record fresh explicit operator authority for exactly one bounded Stage-12 real ChatGPT Instant retry after failed Attempt 01. The retry is bound to the validated v0.2 procedure and moves live-attempt consumption behind a positive Windows-runtime readiness gate. This authority does not widen browser, credential, API, network, database, GPU, Workspace Shell, or task-state permissions.",
   "approval_basis": {
     "authority_owner": "operator",
@@ -130,5 +130,13 @@
     "no credential automation, page scraping, automatic typing/submission, browser permission widening, API-key fallback, public exposure, production DB mutation, GPU use, or PADataset mutation"
   ],
   "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Any source/blob/route/browser-permission/candidate-branch/runtime mismatch or live failure does not authorize scope widening or silent retry. Before the live consumption marker, aborting is non-consuming. After the marker, any success or failure consumes this one attempt. Preserve evidence, restore exact preexisting Tailscale state, and require fresh reviewed authority for another attempt.",
-  "postcondition": "This authority permits exactly one Stage-12 retry under the pinned v0.2 procedure. It authorizes no later Reasoning Economy claim-bearing runs, Research Engine live proving, Codex use, API billing, public exposure, production Postgres mutation, GPU use, PADataset mutation, or browser automation."
+  "postcondition": "This v0.2 authority was never consumed, but it is superseded and non-reusable. It authorizes no further Windows or Linux Stage-12 action.",
+  "supersession_record": {
+    "superseded": true,
+    "superseded_date": "2026-11-17",
+    "consumed": false,
+    "reason": "The v0.2 Windows invocation is blocked by local PowerShell execution policy. A separately reviewed v0.3 procedure changes only the Windows invocation mechanism and therefore requires fresh exact authority.",
+    "successor_authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.3.json",
+    "reusable": false
+  }
 }
