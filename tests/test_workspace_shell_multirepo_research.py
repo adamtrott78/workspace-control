@@ -592,6 +592,37 @@ class WorkspaceShellMultirepoResearchTests(unittest.TestCase):
         self.assertIn('receipt.get("argv_profile") == "evaluator-denial-probe"', upgrade)
         self.assertIn('receipt.get("redacted_argv") == ["sealed-store-v1"]', upgrade)
 
+    def test_candidate_job_scratch_creates_safe_evidence_mountpoint(self):
+        with tempfile.TemporaryDirectory() as td:
+            workspace = Path(td) / "workspace"
+            workspace.mkdir()
+            mountpoint = job_launcher.ensure_evidence_mountpoint(workspace)
+            self.assertEqual(
+                mountpoint,
+                workspace / "local_artifacts" / "evidence",
+            )
+            self.assertTrue(mountpoint.is_dir())
+            self.assertFalse(mountpoint.is_symlink())
+
+    def test_candidate_job_scratch_rejects_evidence_symlink(self):
+        with tempfile.TemporaryDirectory() as td:
+            workspace = Path(td) / "workspace"
+            workspace.mkdir()
+            target = Path(td) / "outside"
+            target.mkdir()
+            (workspace / "local_artifacts").symlink_to(target, target_is_directory=True)
+            with self.assertRaisesRegex(Exception, "EVIDENCE_MOUNTPOINT_INVALID"):
+                job_launcher.ensure_evidence_mountpoint(workspace)
+
+    def test_candidate_job_scratch_rejects_non_directory_evidence_path(self):
+        with tempfile.TemporaryDirectory() as td:
+            workspace = Path(td) / "workspace"
+            evidence_parent = workspace / "local_artifacts"
+            evidence_parent.mkdir(parents=True)
+            (evidence_parent / "evidence").write_text("not a mountpoint")
+            with self.assertRaisesRegex(Exception, "EVIDENCE_MOUNTPOINT_INVALID"):
+                job_launcher.ensure_evidence_mountpoint(workspace)
+
     def test_launcher_binds_evidence_inside_workspace_without_schema_change(self):
         source = (PLUGIN / "root" / "job_launcher.py").read_text()
         self.assertIn('def build_bwrap_command(cfg, workspace_path, cwd, resolved, evidence_root=None):', source)
