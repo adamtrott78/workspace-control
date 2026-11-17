@@ -473,9 +473,30 @@
             "Exact refresh-v5 trust regression re-run under Workspace Shell candidate-pytest receipt job-2457fe97-d394-476b-8421-ee3699935659: 45 passed.",
             "GitHub zero-work observation immediately before operator handoff found no active GPU2 scientific workflow runs."
           ]
+        },
+        {
+          "check": "Lane-B workflow refresh v5 live activation",
+          "result": "PASS_LIVE",
+          "evidence": [
+            "Operator preflight observed ACTIVE_GPU2_WORKFLOW_RUNS=0 and exact PADataset main/workflow blob before mutation.",
+            "Authorization id 4401a1e7-3631-4be0-832d-771dfd229f05; preflight SHA256 e46f3f1d414ef5eca8e58e66ce236cc8ce7df6bfdf4ef5730a57e4b86fc617bc; authority SHA256 acbdac50e0f192db91baf74aa487c21fa87ee3c9b46b0cdc2018373db8d69ec4.",
+            "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5=PASS; transaction receipt /var/lib/workspace-ci/v3/padataset-scientific/dual-lane/workflow-refresh-v5/transactions/refresh-7e5360e2-90f5-4314-9bac-732224e3a3ba/receipt.json.",
+            "REFRESH_V5_POSTVERIFY=PASS; active receipt SHA256 6945a2f5abb7d5e7d459adca2941aa39a85a768b8d3c0fd000d097b7c8f7f6e7; controller policy SHA256 5b316150c43335366a0e73813a5b2864bcc70a699f49e487bdc71e30753d929d; workflow blob ba549b4d1560b18a9e40ef531387bc1accc90d43; PADataset main b0cbf6c1436e18cb5b793596dd790560bd2cec08."
+          ]
+        },
+        {
+          "check": "Architecture-B B1 single-run admission",
+          "result": "ADMITTED_ONCE",
+          "evidence": [
+            "Exactly one issue comment was submitted on PADataset PR #23: /lambda-scientific-2 9862f4fb3c0cc15aacf60883f089c105f018c989 archb_cross_surrogate:manifests/configs/archb_cross_surrogate_v1/PA2_B1_expanded5.json.",
+            "GitHub comment id 6958101245.",
+            "Workflow run #98 / run id 44155496843 / job id 134295009383 was created and is queued.",
+            "Job admission name exactly binds PR #23, candidate SHA 9862f4fb3c0cc15aacf60883f089c105f018c989, and the frozen B1 request path.",
+            "No duplicate B1 request has been submitted."
+          ]
         }
       ],
-      "resume_condition": "Fresh root/operator activation of Workspace Control PR #644 exact head d6e2e7303c0e128f5847178253ab792ff1187d6a is required. Preflight must prove lane-B assigned_jobs=0, running_jobs=0, active_workflow_runs=0 and bind PADataset main b0cbf6c1436e18cb5b793596dd790560bd2cec08 / workflow blob ba549b4d1560b18a9e40ef531387bc1accc90d43. After PASS, submit exactly one B1 request on PR #23 head 9862f4fb3c0cc15aacf60883f089c105f018c989."
+      "resume_condition": "Wait for workflow run #98 / 44155496843 terminal completion and validate B1 artifacts. Do not submit another B1 request."
     },
     {
       "id": "stft_representation_diagnostic",
@@ -1011,16 +1032,14 @@
     }
   ],
   "blockers": [
-    "Refresh-v5 is authorized but requires the user/operator root transaction because no pre-signed reviewed Workspace Shell root helper exists for this exact v5 mutation. After PASS/postverify, submit exactly one B1 request.",
+    "Architecture-B B1 is now admitted exactly once as workflow run #98 / 44155496843. Next action is terminal artifact validation only; do not duplicate.",
     "STFT resume remains gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
-    "Operator gate: create a fresh zero-work lane-B preflight and fresh one-shot V5 operator authority bound to source head d6e2e7303c0e128f5847178253ab792ff1187d6a, predecessor refresh-v4 receipt/policy, PADataset main b0cbf6c1436e18cb5b793596dd790560bd2cec08, and workflow blob ba549b4d1560b18a9e40ef531387bc1accc90d43.",
-    "Activate scripts/lambda_ci_v3_padataset_scientific_dual_workflow_refresh_v5.py and require PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5=PASS with postverify.",
-    "Then submit exactly one B1 request on PR #23 exact head 9862f4fb3c0cc15aacf60883f089c105f018c989 using manifests/configs/archb_cross_surrogate_v1/PA2_B1_expanded5.json.",
-    "Validate B1 artifact/provenance; do not use PA2 target-test performance for retry/tuning."
+    "Validate workflow run #98 / 44155496843 at terminal completion; inspect scientific receipt, result_record.json, selected surrogate, expanded5 state, source-backbone rehydration, target quarantine, own-surrogate diagonal exclusion, and known-only threshold.",
+    "Compare B0 vs B1 only under the predeclared B2 state-mode decision rule; PA2 target-test metrics remain descriptive and may not drive tuning/retry."
   ],
-  "next_safe_action": "Run the exact refresh-v5 root/operator transaction bound to d6e2e7303c0e128f5847178253ab792ff1187d6a. Require PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5=PASS and REFRESH_V5_POSTVERIFY=PASS; then submit exactly one B1 request on PR #23 head 9862f4fb3c0cc15aacf60883f089c105f018c989.",
+  "next_safe_action": "Wait for the single admitted Architecture-B B1 workflow run #98 / 44155496843 to finish, then validate its artifact and frozen scientific invariants. Do not submit another B1 request.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
   "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged. Workspace Shell mountpoint repair is live at runtime f3f999ff0200e2450d83e93887b2450f1ee83e2f with authority snapshot 29ba42ffde725c16f5cfc70b3c47ecfd76d2511d. Architecture-B PR #23 is candidate-validated at 82790f9c07d5eb9ea48b37be026672c0a1f7fad8, including a repair that physically delays target-open materialization until after winner freeze. Draft PADataset PR #33 stages the bounded GPU2 archb_cross_surrogate opcode but is not live. PADataset PR #33 was explicitly authorized and merged at 6a3c17c27a401f059f9ded1287d274d766f61283; default-branch GPU2 workflow blob is now 650a529aeee51b53234a84b3afea8743cc527688. Workspace Control draft PR #643 stages chained refresh-v4 at ef43b5352cf4c3e799a09ff917878b6e32ef1882; 37 dual-lane/refresh regression tests pass. Live trust remains refresh-v3 until root/operator v4 activation. PADataset PR #34 was explicitly authorized and merged at b0cbf6c1436e18cb5b793596dd790560bd2cec08; default-branch GPU2 workflow blob is now ba549b4d1560b18a9e40ef531387bc1accc90d43. Workspace Control draft PR #644 stages chained refresh-v5 at d6e2e7303c0e128f5847178253ab792ff1187d6a; 45 dual-lane/refresh regression tests pass. Live trust remains refresh-v4 until root/operator v5 activation."
