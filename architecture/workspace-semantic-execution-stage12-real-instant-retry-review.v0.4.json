@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.4",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Repair the non-consuming dotnet PATH blocker while preserving exact pinned launcher/Linux/harness bytes and all Stage-12 live/browser/network/result boundaries.",
   "predecessor": {
@@ -66,5 +66,14 @@
     "existing_v03_authority_does_not_authorize_v04_procedure": true,
     "explicit_fresh_operator_approval_required_after_validation": true,
     "model_reasoning_is_not_authority": true
-  }
+  },
+  "validation": {
+    "validated_head": "752e0f81e15826659e4b78b5169c57e29c8ae806",
+    "workspace_control_run": 2998,
+    "semantic_execution_run": 298,
+    "operator_bridge_run": 571,
+    "result": "SUCCESS",
+    "exact_head": true
+  },
+  "postcondition": "v0.4 is repository-validated and grants zero live authority. The still-unconsumed v0.3 authority does not authorize this changed operator procedure. Fresh explicit operator approval must bind the v0.4 procedure blob before any Windows invocation or Linux Stage-12 execution."
 }

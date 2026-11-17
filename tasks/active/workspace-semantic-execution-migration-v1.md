@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 RETRY V0.3 AUTHORITY REMAINS UNCONSUMED, BUT WINDOWS PRELIVE SETUP 02 FAILED BEFORE FIREFOX/RUNTIME READINESS BECAUSE THE PINNED LAUNCHER COULD NOT RESOLVE DOTNET FROM CHILD POWERSHELL PATH. Linux was not started, the live-consumption marker was not reached, and candidate branch remained at 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. Fresh v0.4 review candidate keeps all executable bytes unchanged and adds bounded discovery of an existing .NET 10 executable from reviewed Windows locations, temporary process-environment PATH/DOTNET_ROOT injection, and exact restoration afterward. It performs no install or persistent PATH/registry change. NEXT: validate v0.4 exact head; if green, obtain fresh explicit operator approval bound to v0.4 before using it. Existing v0.3 authority does not authorize the changed v0.4 procedure.
+STAGE-12 WINDOWS PRELIVE REPAIR V0.4 IS VALIDATED BUT NOT AUTHORIZED. v0.3 live authority remains unconsumed, but it is exact-procedure-bound and cannot authorize v0.4. v0.4 procedure blob 1d33484a311a98d36c532addfadd16c79ab56f71 keeps source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de unchanged. It only adds bounded discovery of an existing .NET 10 executable plus temporary process PATH/DOTNET_ROOT setup and restoration; no install or persistent PATH/registry change. Exact head 752e0f81e15826659e4b78b5169c57e29c8ae806 passed Workspace #2998 / Semantic #298 / Operator #571. NEXT GATE: fresh explicit operator approval binding v0.4 review/procedure. Do not run v0.4 Windows or Linux until new exact authority is created and validated.
 
 ## Remaining work
 
@@ -84,11 +84,11 @@ STAGE-12 RETRY V0.3 AUTHORITY REMAINS UNCONSUMED, BUT WINDOWS PRELIVE SETUP 02 F
 
 ## Blockers / gates
 
-- Stage-12 v0.3 live authority remains unconsumed because no Linux live-consumption marker was reached.
-- Windows prelive setup 02 proved the execution-policy repair works but the launcher cannot resolve dotnet from inherited PATH.
-- v0.4 is review-only: bounded existing-dotnet discovery, required major version 10, process-environment-only PATH/DOTNET_ROOT injection, and restoration afterward.
+- Stage-12 v0.3 live authority remains unconsumed but cannot authorize the changed v0.4 procedure.
+- v0.4 repair is VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY at 752e0f81…: Workspace #2998 / Semantic #298 / Operator #571 SUCCESS.
+- v0.4 keeps all executable bytes unchanged and only adds bounded existing-.NET-10 discovery plus temporary process environment setup/restoration.
 - No .NET installation, package-manager use, persistent PATH edit, registry mutation, or execution-policy widening is authorized.
-- Existing v0.3 authority does not authorize v0.4. Fresh approval is required after exact-head validation.
+- Fresh explicit operator approval must bind procedure blob 1d33484a… before v0.4 can be authorized.
 
 ## Fresh-chat initialization
 
