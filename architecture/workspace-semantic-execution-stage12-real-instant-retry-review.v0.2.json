@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.2",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Fresh Stage-12 retry candidate after failed Attempt 01. Prevent accidental authority consumption when the Windows managed runtime has not actually been prepared, while preserving the existing browser/manual-auth/immutable-candidate boundaries.",
+  "failure_basis": {
+    "attempt_path": "architecture/workspace-semantic-execution-stage12-real-instant-attempt-01.v0.1.json",
+    "attempt_result": "FAILED_CLOSED_AUTHORITY_CONSUMED",
+    "exact_failure": "Linux reached STAGE12_Q1_READY after the live transaction began, but Windows PowerShell was still at a multiline continuation prompt so the pinned launcher never executed and no isolated Firefox worker existed.",
+    "q1_candidate_published": false,
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "final_tailscale_state_restored": true
+  },
+  "exact_candidate_bindings": {
+    "executable_source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh",
+      "blob_sha": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.2.md",
+      "content_commit": "7a99f4518d8f3ac97d8ee638ee36c1edef952ca2"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "retry_safety_delta": {
+    "windows_first": true,
+    "windows_invocation_must_be_single_complete_powershell_line": true,
+    "required_observed_windows_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+    "linux_candidate_baseline_recheck_before_arm": true,
+    "linux_exact_preexisting_serve_funnel_preflight_before_arm": true,
+    "linux_manual_readiness_gate": "Type the exact observed Windows marker into the v2 Linux prompt.",
+    "live_authority_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "consumption_occurs_after_windows_readiness_gate": true,
+    "no_live_route_or_real_model_action_before_consumption_marker": true,
+    "abnormal_exit_route_cleanup_is_independently_verified": true,
+    "cleanup_failure_preserves_runtime_evidence": true
+  },
+  "human_interaction_boundary": {
+    "normal_chatgpt_authentication": "MANUAL_ONLY",
+    "model_selection": "MANUAL_INSTANT_SELECTION",
+    "readiness_confirmation": "Manual transcription of the fixed non-result readiness marker only",
+    "readiness_confirmation_is_model_result_relay": false,
+    "worker_service_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "manual_actions_only_at_reviewed_markers": true,
+    "credential_automation": false,
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "result_relay_by_human": false
+  },
+  "browser_boundary": {
+    "profile": "TEMPORARY_ISOLATED_FIREFOX_PROFILE",
+    "allowed_extension_permissions": [
+      "nativeMessaging",
+      "tabs",
+      "sessions"
+    ],
+    "content_scripts": false,
+    "host_permissions": false,
+    "dom_or_page_content_scraping": false,
+    "browser_permission_widening": false
+  },
+  "host_runtime_boundary": {
+    "backend_bind": "127.0.0.1:8765",
+    "temporary_path": "/operator-bridge/v1",
+    "preserve_existing_root_mapping": true,
+    "exact_preexisting_serve_funnel_snapshot_restoration_required": true,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "production_postgres_mutation": false,
+    "temporary_isolated_postgres": true,
+    "gpu_required": false
+  },
+  "required_validation": [
+    "bash -n passes for v2 transaction",
+    "readiness marker gate text exists and is checked exactly",
+    "candidate baseline check occurs before readiness gate",
+    "live-authority consumption marker occurs before venv/Postgres/Serve/harness mutation",
+    "abnormal-exit cleanup verifies exact Serve/Funnel snapshot and preserves evidence on cleanup failure",
+    "existing Stage-12 harness safety/continuity/stale-generation tests remain green",
+    "existing Operator Bridge validation remains green"
+  ],
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "prior_authority_reusable": false,
+    "explicit_fresh_operator_approval_required": true,
+    "approval_must_bind_exact_candidate_source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "approval_must_bind_exact_linux_v2_blob": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca",
+    "approval_must_bind_procedure_commit": "7a99f4518d8f3ac97d8ee638ee36c1edef952ca2",
+    "model_reasoning_is_not_authority": true
+  },
+  "postcondition": "Validation of this retry review candidate may establish readiness for a fresh operator authority decision only. It does not authorize a second live Stage-12 attempt."
+}
