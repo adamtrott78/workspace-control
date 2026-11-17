@@ -101,14 +101,15 @@ class PADatasetScientificDualWorkflowRefreshV4Tests(unittest.TestCase):
         self.assertNotIn('run_systemctl("stop", PROVISIONER_UNIT)', HELPER)
         self.assertNotIn('run_systemctl("restart"', HELPER)
 
-    def test_v4_is_effective_preference_over_v3(self):
+    def test_v4_remains_fallback_preference_over_v3(self):
         block = REC[
             REC.index("scientific_dual_workflow_refresh_v4 ="):
             REC.index("scientific_overrides =")
         ]
+        self.assertIn("scientific_dual_workflow_refresh_v4", block)
         self.assertIn(
             "scientific_dual_workflow_refresh_v4\n"
-            "        if scientific_dual_workflow_refresh_v4 is not None",
+            "            if scientific_dual_workflow_refresh_v4 is not None",
             block,
         )
         self.assertIn("scientific_dual_workflow_refresh_v3", block)
