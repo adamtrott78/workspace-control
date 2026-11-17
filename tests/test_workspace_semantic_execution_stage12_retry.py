@@ -18,6 +18,8 @@ PROCEDURE_V4 = ROOT / "architecture/workspace-semantic-execution-stage12-real-in
 REVIEW_V4 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.4.json"
 PROCEDURE_V5 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.5.md"
 REVIEW_V5 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.5.json"
+PROCEDURE_V6 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.6.md"
+REVIEW_V6 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.6.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -245,6 +247,51 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertEqual(
             review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
             "40049b88799b3bc4683931d0a56a50c07591fc61",
+        )
+
+    def test_v06_reuses_bounded_stage10_node24_toolcache_binding(self) -> None:
+        text = PROCEDURE_V6.read_text(encoding="utf-8")
+        marker = "```powershell\n"
+        start = text.index(marker) + len(marker)
+        end = text.index("\n```", start)
+        command = text[start:end]
+        self.assertIn("Get-Command node.exe", command)
+        self.assertIn("RUNNER_TOOL_CACHE", command)
+        self.assertIn("actions-runner\\_work\\_tool", command)
+        self.assertIn("'^24\\.\\d+\\.\\d+", command)
+        self.assertIn("'x64'", command)
+        self.assertIn("'node.exe'", command)
+        self.assertIn("'npm.cmd'", command)
+        self.assertIn("NODE24_NOT_FOUND_IN_REVIEWED_LOCATIONS", command)
+        self.assertIn("NODE24_VERSION_MISMATCH", command)
+        self.assertIn("NPM_NOT_AVAILABLE_IN_REVIEWED_NODE24", command)
+        self.assertIn("$env:PATH=$OldPath", command)
+        self.assertNotIn("winget", command.lower())
+        self.assertNotIn("choco", command.lower())
+        self.assertNotIn("npm install -g", command.lower())
+        self.assertNotIn("setx", command.lower())
+
+    def test_v06_review_is_not_authority_and_keeps_executable_bindings(self) -> None:
+        import json
+
+        review = json.loads(REVIEW_V6.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(review["authority_gate"]["live_retry_authorized"])
+        self.assertTrue(
+            review["authority_gate"]["existing_v05_authority_does_not_authorize_v06_procedure"]
+        )
+        self.assertEqual(review["node_delta"]["required_major_version"], 24)
+        self.assertEqual(
+            review["exact_candidate_bindings"]["reviewed_node_binding_source"]["blob_sha"],
+            "1ea4135e0ff80454b5a8e5feac139d0177d3b764",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["windows_operator_launcher"]["blob_sha"],
+            "d9d474ca6870585c9e4767f551086e17b4525fbc",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
+            "dd995d976fb6c3d1f1427d194e58e5037f331573",
         )
 
 

@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-prelive-setup-04-v0.1",
+  "status": "PRELIVE_SETUP_FAILED_NON_CONSUMING",
+  "date": "2026-11-17",
+  "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.5.json",
+  "authority_blob": "ff88eef7840cd9eeebbcf791a496376252fb3955",
+  "authority_consumed": false,
+  "live_consumption_marker_observed": false,
+  "windows_dotnet_discovery_passed": true,
+  "windows_dotnet_build_passed": true,
+  "windows_launcher_completed": false,
+  "isolated_firefox_started": false,
+  "failure": "v0.5 exact pinned launcher completed Stage-12 .NET build, then failed because npm.cmd was not resolvable from child PowerShell PATH.",
+  "candidate_branch_head_after_failure": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+  "linux_transaction_started": false,
+  "repair_candidate_review": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.6.json"
+}
