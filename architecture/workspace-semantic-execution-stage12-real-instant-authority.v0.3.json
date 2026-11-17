@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v0.3",
-  "status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+  "status": "SUPERSEDED_UNCONSUMED_BY_STAGE12_V04_AUTHORITY",
   "purpose": "Record fresh explicit operator authority for exactly one bounded Stage-12 real ChatGPT Instant retry using the validated v0.3 Windows pre-live repair. The repair changes only the Windows invocation mechanism to a child PowerShell process with process-scoped execution-policy Bypass; the pinned launcher/Linux/harness bytes and all browser/network/result boundaries remain unchanged.",
   "approval_basis": {
     "authority_owner": "operator",
@@ -147,5 +147,13 @@
     "Windows launcher final STAGE12_WINDOWS_CLEANUP=PASS"
   ],
   "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, any success or failure consumes the one attempt. Do not widen execution policy, browser, network, API, DB, GPU, Workspace Shell, or result authority and do not silently retry.",
-  "postcondition": "This authority permits exactly one Stage-12 retry under the pinned v0.3 operator procedure. It authorizes no later Reasoning Economy claim-bearing runs, Research Engine live proving, Codex use, API billing, public exposure, production Postgres mutation, GPU use, PADataset mutation, or browser automation."
+  "postcondition": "This v0.3 authority was never consumed, but it is superseded and non-reusable. It authorizes no further Windows or Linux Stage-12 action.",
+  "supersession_record": {
+    "superseded": true,
+    "superseded_date": "2026-11-17",
+    "consumed": false,
+    "reason": "v0.3 Windows pre-live setup reached the pinned launcher but failed before Firefox/runtime readiness because dotnet was not resolvable from child PowerShell PATH. The separately reviewed v0.4 procedure changes only bounded .NET discovery and temporary process environment setup.",
+    "successor_authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.4.json",
+    "reusable": false
+  }
 }

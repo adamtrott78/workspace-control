@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 WINDOWS PRELIVE REPAIR V0.4 IS VALIDATED BUT NOT AUTHORIZED. v0.3 live authority remains unconsumed, but it is exact-procedure-bound and cannot authorize v0.4. v0.4 procedure blob 1d33484a311a98d36c532addfadd16c79ab56f71 keeps source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de unchanged. It only adds bounded discovery of an existing .NET 10 executable plus temporary process PATH/DOTNET_ROOT setup and restoration; no install or persistent PATH/registry change. Exact head 752e0f81e15826659e4b78b5169c57e29c8ae806 passed Workspace #2998 / Semantic #298 / Operator #571. NEXT GATE: fresh explicit operator approval binding v0.4 review/procedure. Do not run v0.4 Windows or Linux until new exact authority is created and validated.
+STAGE-12 RETRY V0.4 IS EXPLICITLY AUTHORIZED FOR EXACTLY ONE LIVE ATTEMPT, PENDING EXACT-HEAD VALIDATION OF THIS AUTHORITY-PERSISTENCE COMMIT. Authority v0.4 binds final approved state 4e1beced08e99570643b627e4c9746653ed39b7b, review blob c6bce20ce9d982832d0b717ab117ea8a28ac68b1, procedure blob 1d33484a311a98d36c532addfadd16c79ab56f71, source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. v0.3 is superseded unconsumed/non-reusable. After validation, execute Windows v0.4 first; no Linux until the exact Windows readiness marker. Live consumption remains STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
 
 ## Remaining work
 
@@ -84,11 +84,12 @@ STAGE-12 WINDOWS PRELIVE REPAIR V0.4 IS VALIDATED BUT NOT AUTHORIZED. v0.3 live 
 
 ## Blockers / gates
 
-- Stage-12 v0.3 live authority remains unconsumed but cannot authorize the changed v0.4 procedure.
-- v0.4 repair is VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY at 752e0f81…: Workspace #2998 / Semantic #298 / Operator #571 SUCCESS.
-- v0.4 keeps all executable bytes unchanged and only adds bounded existing-.NET-10 discovery plus temporary process environment setup/restoration.
-- No .NET installation, package-manager use, persistent PATH edit, registry mutation, or execution-policy widening is authorized.
-- Fresh explicit operator approval must bind procedure blob 1d33484a… before v0.4 can be authorized.
+- Stage-12 Attempt 01 v0.1 authority is consumed.
+- v0.2 and v0.3 authorities were not consumed but are superseded/non-reusable.
+- v0.4 has fresh explicit operator approval for exactly one live attempt.
+- This authority-persistence head must pass exact-head Workspace/Semantic/Operator validation before Windows execution.
+- Windows must reach STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS before Linux starts.
+- No .NET installation, persistent PATH edit, registry mutation, execution-policy widening, scope widening, or silent retry is authorized.
 
 ## Fresh-chat initialization
 
