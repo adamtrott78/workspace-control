@@ -141,3 +141,32 @@ The candidate ports the already-accepted GPU2 bounded `l2o_directional_eval` pat
 Current authority gate: explicit permission is required to merge PR #32. After merge, a new default-branch workflow blob/main SHA must be bound into a chained lane-A trusted-workflow refresh and activated under fresh root/operator authority before any `/lambda-scientific ... l2o_directional_eval:...` request can be admitted on GPU0.
 
 Do not cancel GPU2 queued cells until GPU0 trust is live. At this checkpoint run 77 is SUCCESS, run 78 is IN_PROGRESS, and runs 79-95 are still queued.
+
+
+## Track-A complete matrix — 2026-11-17
+
+All 20 frozen directional Track-A cells are now terminal **SUCCESS/PASS**. Acceptance run 43975684664 plus workflow runs #77-#95 completed on the trusted GPU2 lane at evaluator head `b141020bf7b171571879abdf18a836132e80d1d5`.
+
+Every result preserves:
+- `target_labels_used_for_tuning=false`
+- `surrogate_only_open_calibration=true`
+- `threshold_source=known_only`
+- `mix_true_open=false`
+
+Unknown-F1 matrix:
+
+| target \ surrogate | PA1 | PA2 | PA3 | PA4 | PA8 |
+|---|---:|---:|---:|---:|---:|
+| PA1 | — | 0.586199 | 0.616065 | 0.241099 | 0.254204 |
+| PA2 | 0.899485 | — | 0.027741 | 0.130573 | 0.801033 |
+| PA3 | 0.984317 | 0.001426 | — | 0.961990 | 0.054209 |
+| PA4 | 0.858484 | 0.310583 | 0.439280 | — | 0.491409 |
+| PA8 | 0.936550 | 0.757011 | 0.424513 | 0.860657 | — |
+
+Paper comparison: **17/20 cells improved, 3/20 declined**. Mean unknown-F1 changed from **0.4115** to **0.531841** (+0.120341 absolute, +29.2% relative). The only large regression is PA1<-PA4 (0.71 -> 0.241099); the other two declines are small: PA2<-PA4 (0.15 -> 0.130573) and PA8<-PA2 (0.77 -> 0.757011).
+
+Best frozen surrogate by target: PA1<-PA3, PA2<-PA1, PA3<-PA1, PA4<-PA1, PA8<-PA1. PA1/Scan is therefore the best eligible surrogate for all four other targets.
+
+This comparison is descriptive only. Do not use target-test metrics for retries, method selection, or Track-A tuning.
+
+GPU0 evaluator PR #32 is no longer required for Track-A completion because the full matrix finished on GPU2; it remains draft/unmerged absent separate infrastructure authority.
