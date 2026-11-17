@@ -291,8 +291,9 @@
       "selected_executor": "workspace-shell-candidate-pytest+bounded-evaluator",
       "selected_surface": "github+workspace-shell",
       "inputs": [
-        "PADataset PR #23 head 4f27d00cce9ab15120d924963a5ecf049d032c52",
-        "strong PA2 seed0 four-known backbone"
+        "PADataset PR #23 exact head 82790f9c07d5eb9ea48b37be026672c0a1f7fad8",
+        "strong PA2 seed0 four-known backbone artifact 14180249360",
+        "PADataset trust PR #33 exact head 04edac624853ea9e8bb48e09f9240e086fcc2b69"
       ],
       "outputs": [
         "validated B0",
@@ -324,9 +325,39 @@
             "Receipt reject-99f5d8f5-fd57-4270-8095-908dcac1e55a, receipt SHA256 8666ce10c349632bc6e7b48b668350e5052d226dac178e01a406fb9c40d2612a: EVIDENCE_MOUNTPOINT_MISSING; workspace lacks local_artifacts/evidence mountpoint.",
             "No Track-B test result or execution success may be inferred from this denial."
           ]
+        },
+        {
+          "check": "Workspace Shell evidence-mount repair live activation",
+          "result": "PASS_LIVE",
+          "evidence": [
+            "Operator activation completed with WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS.",
+            "Live authority snapshot 29ba42ffde725c16f5cfc70b3c47ecfd76d2511d; runtime snapshot f3f999ff0200e2450d83e93887b2450f1ee83e2f; PADataset execution befe383fd67c8bca8d8ce370344b33c7e13cd52f.",
+            "Semantic acceptance receipt job-2a411e27-5c65-44b8-8ada-362dd7b90769; evaluator isolation receipt job-9ed9aed7-d545-4929-9405-d5782788e461; evaluator isolation PASS."
+          ]
+        },
+        {
+          "check": "Architecture-B PR #23 candidate validation",
+          "result": "PASS_CANDIDATE",
+          "evidence": [
+            "Initial candidate execution reached PR #23 and failed only because isolated Workspace Shell Python intentionally lacks torch; no scientific result was produced.",
+            "Test harness was isolated from heavy runtime dependencies without changing scientific code; receipt job-4fc4939b-3d3b-465c-a699-941f65e60471 passed 4 tests.",
+            "Evaluator leakage-order repair moved target-open materialization until after method.fit freezes the Architecture-B winner; receipt job-06440df1-0460-4a03-848e-7abc8253dc9f passed 5 tests.",
+            "Frozen B0 request plus hardened artifact transport/rehydration contract added on PR #23 head 82790f9c07d5eb9ea48b37be026672c0a1f7fad8; receipt job-775e5e03-0239-4786-ba94-16fbaa2a09a7 passed 10 tests."
+          ]
+        },
+        {
+          "check": "Architecture-B GPU2 trusted-workflow candidate",
+          "result": "PASS_CANDIDATE_NOT_LIVE",
+          "evidence": [
+            "PADataset draft PR #33 exact head 04edac624853ea9e8bb48e09f9240e086fcc2b69 adds exactly one bounded lane-B opcode archb_cross_surrogate.",
+            "B0 is fixed to target PA2, softmax3, best_model, partition seed 1701, DQN seed 42, 30 episodes, 5% known-only threshold budget.",
+            "Source backbone is fixed to artifact 14180249360 / workflow run 43751609944 / digest sha256:f7de2637df85487b21903a448630815fc63c1247253b98ffc754b46586b9b39b / config hash a9c08353490f944ec1c5fb363002f41a8b32f875914251c30604cc2c03b35188 / best_model hash 4fa0c67d1c0c619ab4cde058519ca603fa95d8afb8f58ebf8d564ebafb9989ef.",
+            "Workflow candidate validation receipt job-ceb52813-d732-4f6c-903f-c1bbd503f458: 2 passed.",
+            "PR #33 remains OPEN/DRAFT/UNMERGED; current live lane-B workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3 does not authorize Architecture B."
+          ]
         }
       ],
-      "resume_condition": "Restore the Workspace Shell local_artifacts/evidence mountpoint, then rerun candidate-pytest at exact PR #23 head before any bounded evaluator execution."
+      "resume_condition": "Explicitly authorize merging PADataset PR #33. After merge, bind the exact new main SHA and lane-B workflow blob into a chained trusted-workflow refresh, activate it under fresh root/operator authority, then issue exactly one B0 request against PR #23 head 82790f9c07d5eb9ea48b37be026672c0a1f7fad8."
     },
     {
       "id": "stft_representation_diagnostic",
@@ -862,16 +893,18 @@
     }
   ],
   "blockers": [
-    "Track B candidate validation is blocked by Workspace Shell EVIDENCE_MOUNTPOINT_MISSING (receipt reject-99f5d8f5-fd57-4270-8095-908dcac1e55a); restore local_artifacts/evidence mountpoint before retry.",
+    "Track B B0 GPU execution is blocked on explicit merge authority for PADataset PR #33, followed by a fresh lane-B trusted-workflow refresh to the resulting default-branch workflow blob. Do not infer merge/root authority.",
     "STFT resume remains gated on live repaired PA1 provenance preflight; do not restart blindly."
   ],
   "remaining_work": [
-    "Track A is complete and validated; do not rerun or performance-select any Track-A cell.",
-    "Advance Track B Architecture B cross-surrogate validation from PADataset PR #23, preserving off-diagonal surrogate selection and true-target quarantine.",
-    "Then complete the separate STFT representation diagnostic only after the live repaired PA1 provenance preflight passes."
+    "Obtain explicit merge authority for PADataset PR #33 only; PR #23 remains draft and may be evaluated by exact SHA after trust activation.",
+    "After PR #33 merge, bind exact PADataset main SHA plus .github/workflows/lambda-ci-scientific-2.yml blob into a chained lane-B trusted-workflow refresh and validate/activate under fresh root authority.",
+    "Submit exactly one Architecture-B B0 request on PR #23 exact head 82790f9c07d5eb9ea48b37be026672c0a1f7fad8 using manifests/configs/archb_cross_surrogate_v1/PA2_B0_softmax3.json.",
+    "Validate artifact/result provenance before any B1/B2 decision; target metrics must not drive retries or method changes.",
+    "Then continue B1 expanded5 and B2 bands only under the frozen development sequence."
   ],
-  "next_safe_action": "Restore the Workspace Shell local_artifacts/evidence mountpoint, then rerun candidate-pytest for PADataset PR #23 exact head 4f27d00cce9ab15120d924963a5ecf049d032c52. Do not launch Track-B science until that evidence-only validation passes.",
+  "next_safe_action": "User-only authority gate: explicitly authorize merging PADataset PR #33 (bounded GPU2 Architecture-B evaluator). After merge, do not launch science until the new default-branch workflow blob is bound and activated through a fresh lane-B trusted-workflow refresh.",
   "last_executor": "chatgpt",
   "last_surface": "github+lambda+workspace-control",
-  "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged."
+  "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged. Workspace Shell mountpoint repair is live at runtime f3f999ff0200e2450d83e93887b2450f1ee83e2f with authority snapshot 29ba42ffde725c16f5cfc70b3c47ecfd76d2511d. Architecture-B PR #23 is candidate-validated at 82790f9c07d5eb9ea48b37be026672c0a1f7fad8, including a repair that physically delays target-open materialization until after winner freeze. Draft PADataset PR #33 stages the bounded GPU2 archb_cross_surrogate opcode but is not live."
 }
