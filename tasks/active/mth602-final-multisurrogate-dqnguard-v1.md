@@ -309,3 +309,24 @@ Architecture-B B3 is terminal; do not submit another B3 job.
 Return to the separate STFT representation diagnostic. First verify the repaired PA1 provenance preflight against the persistent exact-SHA checkout. **Do not restart STFT blindly. Preserve the first 120 completed overlay records.**
 
 No merge authority is implied for PADataset PR #23, STFT PR #21, or unrelated branches.
+
+### Current STFT gate — local/operator-only
+
+Read-only connected checks confirm the remaining STFT preflight cannot be executed through the current bounded Workspace Shell surface:
+
+- PR #21 exact head: `fd15238aa369118e61b21ab714900861dbb99d2c`
+- PR state: **OPEN / DRAFT / UNMERGED**
+- Lambda CPU canary: `43788103594` **SUCCESS**
+- Workspace Shell candidate attempt: `job-6405de5a-fbc9-4ff7-92ee-3fc90a3758c1`; sandbox lacks `h5py`, so no live-data preflight ran and no STFT/data mutation occurred
+- durable PR #21 execution evidence states raw OTA + legacy-cache materialization are intentionally outside connected CI/Workspace Shell authority
+- first 120 completed overlay records remain authoritative and must be skipped, not rebuilt
+
+Smallest next operator action:
+
+```bash
+EXPECTED_SHA=fd15238aa369118e61b21ab714900861dbb99d2c \
+CHECKOUT="$HOME/adamArchives/worktrees/PADataset-stft-track-ablation-v1" \
+bash <(curl -fsSL "https://raw.githubusercontent.com/adamtrott78/PADataset/fd15238aa369118e61b21ab714900861dbb99d2c/scripts/mth602/bootstrap_stft_track_ablation_persistent.sh")
+```
+
+The bootstrap itself verifies the exact SHA, refuses transient `/tmp` execution for the actual STFT run, performs the real PA1 provenance probe before the long build, and resumes existing output files. Continue only if the live probe resolves a real PA1 legacy base cache and all preflight checks PASS.
