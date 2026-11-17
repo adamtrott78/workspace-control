@@ -202,7 +202,6 @@ PY
 echo "STAGE12_PRELIVE_WINDOWS_CONFIRMATION_REQUIRED=$WINDOWS_READY_MARKER"
 read -r -p "After the pinned Windows launcher has printed $WINDOWS_READY_MARKER, type that exact marker here and press Enter: " WINDOWS_READY
 [[ "$WINDOWS_READY" == "$WINDOWS_READY_MARKER" ]] || fail "WINDOWS_READY_CONFIRMATION_MISMATCH"
-LIVE_ATTEMPT_ARMED=1
 echo "STAGE12_WINDOWS_READY_GATE=PASS"
 echo "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
 
@@ -265,39 +264,10 @@ CAL_RC=$?
 set -e
 
 remove_route_only
+verify_restored_snapshot
 ROUTE_ATTEMPTED=0
-
-sudo tailscale serve status --json >"$RUNTIME_ROOT/serve-after.json"
-sudo tailscale funnel status --json >"$RUNTIME_ROOT/funnel-after.json"
-python3 - "$SERVE_BEFORE" "$FUNNEL_BEFORE"   "$RUNTIME_ROOT/serve-after.json" "$RUNTIME_ROOT/funnel-after.json" <<'PY'
-import json, sys
-
-def load(path):
-    d=json.load(open(path, encoding="utf-8")) or {}
-    if not isinstance(d, dict):
-        raise SystemExit(f"STATUS_JSON_NOT_OBJECT:{path}")
-    return {
-        "TCP": d.get("TCP") or {},
-        "Web": d.get("Web") or {},
-        "AllowFunnel": d.get("AllowFunnel") or {},
-        "Services": d.get("Services") or {},
-    }
-
-before_serve=load(sys.argv[1])
-before_funnel=load(sys.argv[2])
-after_serve=load(sys.argv[3])
-after_funnel=load(sys.argv[4])
-if after_serve != before_serve:
-    raise SystemExit(
-        f"SERVE_ROLLBACK_MISMATCH:before={before_serve!r}:after={after_serve!r}"
-    )
-if after_funnel != before_funnel:
-    raise SystemExit(
-        f"FUNNEL_ROLLBACK_MISMATCH:before={before_funnel!r}:after={after_funnel!r}"
-    )
-print("TAILSCALE_EXISTING_CONFIG_EXACTLY_RESTORED=PASS")
-print("TAILSCALE_JUPYTER_ROOT_ROLLBACK_PRESERVED=PASS")
-PY
+echo "TAILSCALE_EXISTING_CONFIG_EXACTLY_RESTORED=PASS"
+echo "TAILSCALE_JUPYTER_ROOT_ROLLBACK_PRESERVED=PASS"
 
 LD_LIBRARY_PATH="$PG_PREFIX/lib" "$PG_PREFIX/bin/pg_ctl"   -D "$PGDATA" -m fast -w stop >/dev/null
 POSTGRES_STARTED=0
