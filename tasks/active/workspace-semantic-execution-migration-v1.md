@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 RETRY V0.2 AUTHORITY REMAINS UNCONSUMED, BUT ITS REVIEWED WINDOWS INVOCATION IS BLOCKED BY LOCAL POWERSHELL EXECUTION POLICY. The pinned launcher never executed, Firefox never opened, Linux was not started, no host mutation occurred, and candidate branch remained at 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. Pre-live failure evidence is architecture/workspace-semantic-execution-stage12-real-instant-prelive-setup-01.v0.1.json. Fresh v0.3 review candidate keeps the exact launcher/Linux/harness bytes but invokes the launcher in a child PowerShell with process-only -ExecutionPolicy Bypass, fails closed if MachinePolicy/UserPolicy is defined, and makes no persistent policy/registry change. NEXT: validate v0.3 exact head. If green, promote review to validated-not-authority and obtain fresh explicit operator approval bound to the v0.3 procedure blob before executing it. Do not use v0.3 under the existing v0.2 authority.
+STAGE-12 WINDOWS PRELIVE REPAIR V0.3 IS VALIDATED BUT NOT AUTHORIZED. v0.2 live authority remains unconsumed, but it is bound to the blocked v0.2 Windows procedure and cannot authorize v0.3. v0.3 procedure blob 62d98d601b451621fd17a869149ed295f1f9ca9a keeps executable source b0466c03acb9d6b863df421e2c116c84bff312f6, Linux v2 blob 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness blob 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d, Windows launcher blob d9d474ca6870585c9e4767f551086e17b4525fbc and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de unchanged. Its only operational delta is a child PowerShell invocation with process-only -ExecutionPolicy Bypass; it refuses MachinePolicy/UserPolicy override and makes no persistent policy/registry change. Exact candidate head 6021af35944cf052c760c2645d53a89f276c2533 passed Workspace #2994 / Semantic #294 / Operator #567. NEXT GATE: fresh explicit operator approval binding v0.3 review/procedure. Do not run the v0.3 Windows command or any Linux Stage-12 transaction until new authority is durably created and exact-head validated.
 
 ## Remaining work
 
@@ -87,11 +87,11 @@ STAGE-12 RETRY V0.2 AUTHORITY REMAINS UNCONSUMED, BUT ITS REVIEWED WINDOWS INVOC
 - Workspace Shell semantic/evaluator activation is COMPLETE.
 - D3 private-route fake-worker acceptance is COMPLETE; fake-worker authority is consumed.
 - Stage-12 Attempt 01 failed closed and its v0.1 authority is consumed.
-- Stage-12 retry v0.2 live authority is still UNCONSUMED because the Windows setup failure occurred before the live-consumption marker.
-- The v0.2 Windows procedure is not executable on this host under its current local PowerShell execution policy; the exact pinned launcher was rejected before execution.
-- v0.3 is a review candidate only. It uses child-process-only -ExecutionPolicy Bypass, refuses MachinePolicy/UserPolicy override, and preserves all executable/browser/network/result boundaries.
-- Existing v0.2 authority does not authorize the changed v0.3 procedure. Fresh explicit operator approval is required after v0.3 exact-head validation.
-- No Linux Stage-12 transaction may start until a fresh authority binds the validated v0.3 procedure and Windows readiness is positively observed.
+- Stage-12 retry v0.2 authority remains UNCONSUMED because its Windows setup failed before the live-consumption marker.
+- v0.2 cannot be reused for the changed v0.3 operator procedure because authority is exact-procedure-bound.
+- v0.3 repair is VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY at 6021af35…: Workspace #2994 / Semantic #294 / Operator #567 SUCCESS.
+- Fresh explicit operator approval must bind procedure blob 62d98d60… before a new authority artifact can authorize v0.3.
+- No Windows v0.3 invocation and no Linux Stage-12 transaction may start before that fresh authority is created and validated.
 
 ## Fresh-chat initialization
 

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.3",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Repair the pre-live PowerShell execution-policy blocker without changing the pinned Stage-12 launcher, Linux transaction, harness, candidate branch, browser permissions, or live-consumption boundary.",
   "predecessor": {
@@ -70,5 +70,13 @@
     "Exact launcher/Linux/harness/candidate bindings remain unchanged.",
     "Existing Stage-12 retry, harness, transport and Operator Bridge tests remain green."
   ],
-  "postcondition": "Validation of v0.3 establishes a reviewed repair candidate only. It does not authorize using the v0.3 invocation under the still-unconsumed v0.2 authority."
+  "postcondition": "The v0.3 repair is repository-validated and grants zero live authority. The still-unconsumed v0.2 authority does not authorize this changed operator procedure. Fresh explicit operator approval must bind the v0.3 procedure blob before any Windows invocation or Linux Stage-12 execution.",
+  "validation": {
+    "validated_head": "6021af35944cf052c760c2645d53a89f276c2533",
+    "workspace_control_run": 2994,
+    "semantic_execution_run": 294,
+    "operator_bridge_run": 567,
+    "result": "SUCCESS",
+    "exact_head": true
+  }
 }
