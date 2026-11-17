@@ -116,16 +116,20 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
 
     def test_v03_execution_policy_repair_is_process_scoped_and_fail_closed(self) -> None:
         text = PROCEDURE_V3.read_text(encoding="utf-8")
-        self.assertIn("-ExecutionPolicy Bypass -File", text)
-        self.assertIn("Get-ExecutionPolicy -List", text)
-        self.assertIn("MachinePolicy", text)
-        self.assertIn("UserPolicy", text)
-        self.assertIn("GROUP_POLICY_EXECUTION_POLICY_PRESENT", text)
-        self.assertNotIn("Set-ExecutionPolicy", text)
-        self.assertNotIn("Unblock-File", text)
-        self.assertNotIn("reg.exe", text.lower())
-        self.assertNotIn("set-itemproperty", text.lower())
-        self.assertIn("workspace-control-stage12-retry-v3", text)
+        marker = "```powershell\n"
+        start = text.index(marker) + len(marker)
+        end = text.index("\n```", start)
+        command = text[start:end]
+        self.assertIn("-ExecutionPolicy Bypass -File", command)
+        self.assertIn("Get-ExecutionPolicy -List", command)
+        self.assertIn("MachinePolicy", command)
+        self.assertIn("UserPolicy", command)
+        self.assertIn("GROUP_POLICY_EXECUTION_POLICY_PRESENT", command)
+        self.assertNotIn("Set-ExecutionPolicy", command)
+        self.assertNotIn("Unblock-File", command)
+        self.assertNotIn("reg.exe", command.lower())
+        self.assertNotIn("set-itemproperty", command.lower())
+        self.assertIn("workspace-control-stage12-retry-v3", command)
         self.assertIn(
             "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
             text,
