@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.5",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Add the exact already-known user-profile .NET SDK location omitted by v0.4 while preserving all executable bytes and safety boundaries.",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.4.json",
+    "authority_status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+    "authority_consumed": false,
+    "prelive_failure": "v0.4 failed with DOTNET10_NOT_FOUND_IN_REVIEWED_LOCATIONS before launcher execution/Firefox readiness because its bounded discovery list omitted %USERPROFILE%\\.dotnet\\dotnet.exe.",
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "exact_candidate_bindings": {
+    "executable_source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh",
+      "blob_sha": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.5.md",
+      "blob_sha": "40049b88799b3bc4683931d0a56a50c07591fc61"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "dotnet_delta": {
+    "previous_reviewed_locations": [
+      "Get-Command dotnet",
+      "%ProgramFiles%\\dotnet\\dotnet.exe",
+      "%ProgramFiles(x86)%\\dotnet\\dotnet.exe",
+      "%LOCALAPPDATA%\\Microsoft\\dotnet\\dotnet.exe"
+    ],
+    "added_location": "%USERPROFILE%\\.dotnet\\dotnet.exe",
+    "prior_working_observation": "C:\\Users\\ATrott\\.dotnet\\dotnet.exe; SDK 10.0.404 previously verified",
+    "required_major_version": 10,
+    "install_allowed": false,
+    "persistent_path_change": false,
+    "registry_mutation": false,
+    "package_manager_use": false,
+    "child_environment_only": true,
+    "restore_original_path_and_dotnet_root": true
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "existing_v04_authority_does_not_authorize_v05_procedure": true,
+    "explicit_fresh_operator_approval_required_after_validation": true,
+    "model_reasoning_is_not_authority": true
+  }
+}

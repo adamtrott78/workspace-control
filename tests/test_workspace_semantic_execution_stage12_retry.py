@@ -16,6 +16,8 @@ PROCEDURE_V3 = ROOT / "architecture/workspace-semantic-execution-stage12-real-in
 REVIEW_V3 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.3.json"
 PROCEDURE_V4 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.4.md"
 REVIEW_V4 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.4.json"
+PROCEDURE_V5 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.5.md"
+REVIEW_V5 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.5.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -203,6 +205,46 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertEqual(
             review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
             "1d33484a311a98d36c532addfadd16c79ab56f71",
+        )
+
+    def test_v05_adds_only_userprofile_dotnet_location(self) -> None:
+        text = PROCEDURE_V5.read_text(encoding="utf-8")
+        marker = "```powershell\n"
+        start = text.index(marker) + len(marker)
+        end = text.index("\n```", start)
+        command = text[start:end]
+        self.assertIn("$env:USERPROFILE", command)
+        self.assertIn("'.dotnet\\dotnet.exe'", command)
+        self.assertIn("DOTNET10_NOT_FOUND_IN_REVIEWED_LOCATIONS", command)
+        self.assertIn("-notmatch '^10\\.'", command)
+        self.assertIn("$env:PATH=$OldPath", command)
+        self.assertIn("$env:DOTNET_ROOT=$OldDotnetRoot", command)
+        self.assertNotIn("winget", command.lower())
+        self.assertNotIn("choco", command.lower())
+        self.assertNotIn("msiexec", command.lower())
+        self.assertNotIn("setx", command.lower())
+        self.assertIn("-ExecutionPolicy Bypass -File", command)
+
+    def test_v05_review_is_not_authority_and_keeps_executable_bindings(self) -> None:
+        import json
+
+        review = json.loads(REVIEW_V5.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(review["authority_gate"]["live_retry_authorized"])
+        self.assertTrue(
+            review["authority_gate"]["existing_v04_authority_does_not_authorize_v05_procedure"]
+        )
+        self.assertEqual(
+            review["dotnet_delta"]["added_location"],
+            "%USERPROFILE%\\.dotnet\\dotnet.exe",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["windows_operator_launcher"]["blob_sha"],
+            "d9d474ca6870585c9e4767f551086e17b4525fbc",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
+            "40049b88799b3bc4683931d0a56a50c07591fc61",
         )
 
 
