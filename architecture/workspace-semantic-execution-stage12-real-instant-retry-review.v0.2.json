@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.2",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Fresh Stage-12 retry candidate after failed Attempt 01. Prevent accidental authority consumption when the Windows managed runtime has not actually been prepared, while preserving the existing browser/manual-auth/immutable-candidate boundaries.",
   "failure_basis": {
@@ -104,5 +104,13 @@
     "approval_must_bind_procedure_commit": "7a99f4518d8f3ac97d8ee638ee36c1edef952ca2",
     "model_reasoning_is_not_authority": true
   },
-  "postcondition": "Validation of this retry review candidate may establish readiness for a fresh operator authority decision only. It does not authorize a second live Stage-12 attempt."
+  "postcondition": "This retry review candidate is repository-validated but grants zero live authority. A second live Stage-12 attempt requires a new narrow authority artifact created only after fresh explicit operator approval binding the exact reviewed source/procedure.",
+  "validation": {
+    "validated_head": "cae09bc6c97eb4dd689e10f320176a567afda194",
+    "workspace_control_run": 2989,
+    "semantic_execution_run": 289,
+    "operator_bridge_run": 562,
+    "result": "SUCCESS",
+    "exact_head": true
+  }
 }
