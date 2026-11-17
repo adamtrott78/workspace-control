@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 7c20097c5f177f23c16a765b95ce94d7161f0d29
+- Remote checkpoint: fba38cb2e032bce4799a825f8121e9ed6ed2e786
 - Remote verified: true
 
 ### PADataset
@@ -70,25 +70,27 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 WINDOWS PRELIVE REPAIR V0.6 IS VALIDATED BUT NOT AUTHORIZED. v0.5 live authority remains unconsumed, but it is exact-procedure-bound and cannot authorize v0.6. v0.6 procedure blob dd995d976fb6c3d1f1427d194e58e5037f331573 keeps source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de unchanged. Its only operational delta is reusing the already-reviewed Stage-10 Node 24 binding: current node.exe or bounded runner tool cache under %USERPROFILE%\actions-runner\_work\_tool\node\<24.x>\x64, explicit node/npm validation, process-only PATH exposure, and restoration. Exact head 91875eeaf85bd754c20715164fc1139a49c4c263 passed Workspace #3006 / Semantic #306 / Operator #579. NEXT GATE: fresh explicit operator approval binding v0.6 review/procedure. Do not run v0.6 Windows or Linux until new exact authority is created and validated.
+STAGE-12 WINDOWS PRELIVE REPAIR V0.6 IS FULLY VALIDATED BUT NOT AUTHORIZED. Validated review candidate head 91875eeaf85bd754c20715164fc1139a49c4c263 passed Workspace #3006 / Semantic #306 / Operator #579; final validated handoff state fba38cb2e032bce4799a825f8121e9ed6ed2e786 passed Workspace #3007 / Semantic #307 / Operator #580. v0.6 procedure blob dd995d976fb6c3d1f1427d194e58e5037f331573 keeps executable source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 blob 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness blob 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de unchanged. Its only operational delta from v0.5 is the reviewed Node 24 binding: current node.exe or bounded runner tool cache under %USERPROFILE%\actions-runner\_work\_tool\node\<24.x>\x64, explicit node/npm validation, process-only PATH exposure, and restoration. v0.5 live authority remains unconsumed but is exact-procedure-bound and cannot authorize v0.6. NEXT GATE: obtain fresh explicit operator approval binding v0.6 review/procedure; then create and exact-head validate v0.6 authority before any Windows or Linux execution.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: D3 remains ACCEPTED; Attempt 01 failed closed and consumed its old authority. Retry v0.2 now has fresh explicit single-attempt operator authority bound to exact source/procedure; execute only after the authority-persistence head validates. Windows readiness must precede Linux live-consumption marker.
-- REAL-ACCOUNT CALIBRATION: exactly one retry is freshly authorized under authority v0.2. Pre-live Windows setup does not consume the attempt; consumption occurs only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS after exact Windows-ready confirmation. Require full Q1/Q2/stale-fence/Q3 PASS, exact route restoration, and Windows cleanup.
+- LIVE INSTANT: D3 remains ACCEPTED; Attempt 01 failed closed and consumed v0.1 authority. Windows pre-live retries v0.2-v0.5 failed before live consumption and their authorities are superseded/non-reusable. v0.6 Node-24 repair is fully validated but NOT authorized. Next gate is fresh explicit operator approval binding v0.6; Windows readiness must still precede Linux live consumption.
+- REAL-ACCOUNT CALIBRATION: no v0.6 live attempt is authorized yet. After fresh exact v0.6 authority is created and validated, execute Windows-first pre-live setup, require STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS, then run exactly one Linux attempt whose authority is consumed only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS. Require full Q1/Q2/stale-fence/Q3 PASS, exact route restoration, and Windows cleanup.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
 - PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
 
 ## Blockers / gates
 
-- v0.5 live authority remains unconsumed but cannot authorize the changed v0.6 procedure.
+- Stage-12 v0.1 authority is consumed by failed Attempt 01.
+- v0.2, v0.3 and v0.4 authorities are superseded unconsumed/non-reusable; v0.5 authority also remains unconsumed but cannot authorize v0.6.
 - v0.6 repair is VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY at 91875eea…: Workspace #3006 / Semantic #306 / Operator #579 SUCCESS.
-- v0.6 reuses the existing reviewed Stage-10 Node 24 runner-tool-cache binding and changes no executable bytes.
+- Final v0.6 handoff state fba38cb2… passed Workspace #3007 / Semantic #307 / Operator #580 SUCCESS.
+- v0.6 reuses the reviewed Stage-10 Node 24 runner-tool-cache binding and changes no executable bytes.
 - No Node/npm install, .NET install, persistent PATH edit, registry mutation, execution-policy widening, scope widening, or silent retry is authorized.
-- Fresh explicit operator approval must bind procedure blob dd995d97… before v0.6 can be authorized.
+- Fresh explicit operator approval must bind v0.6 procedure blob dd995d97… before any v0.6 authority can be created or any Windows/Linux Stage-12 execution can start.
 
 ## Fresh-chat initialization
 
