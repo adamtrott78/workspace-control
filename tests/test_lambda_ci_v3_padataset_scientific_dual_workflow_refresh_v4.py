@@ -106,13 +106,9 @@ class PADatasetScientificDualWorkflowRefreshV4Tests(unittest.TestCase):
             REC.index("scientific_dual_workflow_refresh_v4 ="):
             REC.index("scientific_overrides =")
         ]
-        self.assertIn("scientific_dual_workflow_refresh_v4", block)
-        self.assertIn(
-            "scientific_dual_workflow_refresh_v4\n"
-            "            if scientific_dual_workflow_refresh_v4 is not None",
-            block,
-        )
-        self.assertIn("scientific_dual_workflow_refresh_v3", block)
+        v4 = block.index("scientific_dual_workflow_refresh_v4", 1)
+        v3 = block.rindex("scientific_dual_workflow_refresh_v3")
+        self.assertLess(v4, v3)
 
 
 if __name__ == "__main__":
