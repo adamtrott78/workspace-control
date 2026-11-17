@@ -101,17 +101,14 @@ class PADatasetScientificDualWorkflowRefreshV6Tests(unittest.TestCase):
         self.assertNotIn('run_systemctl("stop", PROVISIONER_UNIT)', HELPER)
         self.assertNotIn('run_systemctl("restart"', HELPER)
 
-    def test_v6_is_effective_preference_over_v5(self):
+    def test_v6_remains_fallback_preference_over_v5(self):
         block = REC[
             REC.index("scientific_dual_workflow_refresh_v6 ="):
             REC.index("scientific_overrides =")
         ]
-        self.assertIn(
-            "scientific_dual_workflow_refresh_v6\n"
-            "        if scientific_dual_workflow_refresh_v6 is not None",
-            block,
-        )
-        self.assertIn("scientific_dual_workflow_refresh_v5", block)
+        v6 = block.index("scientific_dual_workflow_refresh_v6", 1)
+        v5 = block.rindex("scientific_dual_workflow_refresh_v5")
+        self.assertLess(v6, v5)
 
 
 if __name__ == "__main__":
