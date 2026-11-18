@@ -10,7 +10,7 @@ Render one row per immutable experiment admission.
 
 ```text
 <PROGRAM> — <WAVE> LIVE DASHBOARD
-<N> immutable experiments | refresh <Ns> | <local timestamp>
+<N> immutable experiments | refresh 1s | <local timestamp>
 Successful-run median: GPU0=<time> GPU1=<time> (used only for RUNNING ETA)
 
 EXPERIMENT          GPU  STATUS        ELAPSED   ETA LEFT      TOTAL       RUN ID
@@ -190,6 +190,6 @@ When a future worker is asked for "the same tmux/dashboard format":
 3. Bind each row to the provider's exact durable run/job ID.
 4. Resolve run IDs directly or paginate exhaustively.
 5. Show normalized status, lane, running/queued elapsed, approximate running ETA, completed total runtime, and run ID.
-6. Refresh in place every few seconds.
+6. Refresh in place every 1 second by default; allow a slower override when provider/API limits require it.
 7. Keep the view read-only.
 8. Preserve tmux detach/reattach behavior.
