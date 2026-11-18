@@ -143,6 +143,49 @@ Proposed default pilot gate:
 
 This is a practical pilot gate, **not statistical significance**. Statistical claims wait for the multi-seed stage.
 
+## A1.1 Implementation reality and controller design
+
+Repository inspection confirms:
+
+- the reviewed HPO **search-space manifest exists**;
+- the competency audit exists;
+- both trusted scientific GPU workflows already support bounded `train_backbone:manifests/configs/...json` execution;
+- there is currently **no HPO controller/orchestrator** in the repository;
+- therefore A1 should be implemented without widening runner/workflow authority.
+
+### Required implementation surfaces
+
+- [ ] `experiments/l2o_hpo_generate.py` — deterministic candidate/config generation from the frozen HPO-space manifest.
+- [ ] `experiments/l2o_hpo_rank.py` — known-only result ingestion, gate audit, lexicographic ranking, and promotion.
+- [ ] `manifests/hpo/l2o_repair_pilot_v2/` — immutable generated candidate configs with trial IDs and parent-pair bindings.
+- [ ] machine-readable pilot state/ledger recording requested, queued, running, terminal, promoted, rejected, and frozen trials.
+- [ ] tests proving no target-open/test metric is accepted by ranking/promotion code.
+- [ ] tests proving a frozen pair cannot silently receive a different HPO recipe after target-open evaluation.
+- [ ] reuse existing `train_backbone` trusted operation on GPU0/GPU1; **no new privileged operation is required**.
+- [ ] reuse existing standard directional evaluator only after a backbone candidate is frozen.
+
+### Proposed gate-first wave policy
+
+This is a bounded adaptation of the existing 96→24→6 resource ladder and must be frozen before launch:
+
+1. Generate one deterministic ordered candidate sequence shared across all three weak pairs.
+2. Launch screen trials in waves of **8 candidates per unresolved pair**, 8 epochs each.
+3. Rank only by known-validation macro-F1 then min-class F1.
+4. Promote the best **2 candidates per pair** from each useful screen wave to 24-epoch refinement.
+5. Promote the best refined candidate to a 60-epoch finalist.
+6. If the finalist clears macro >=0.95 and min-class >=0.90, freeze that pair immediately.
+7. If it fails, launch the next deterministic screen wave; never resample candidates based on target-open results.
+8. Stop at the existing maximum search budget if the gate is not reached.
+9. Once a pair freezes, run known-test once, then its two standard-DQNGuard directional OSR evaluations.
+
+Why waves instead of launching all 96 screens:
+- satisfies the operator requirement to learn quickly whether deeper training matters;
+- keeps both GPUs busy without blindly spending the full search budget;
+- preserves a deterministic predeclared candidate order;
+- allows early success without target-informed HPO.
+
+Wave size 8 is a proposed default and may be adjusted before freeze based on measured 8-epoch runtime.
+
 ## A2. Uniform full-matrix training regime
 
 ### Branch 1 — weak pilot strongly supports H1
