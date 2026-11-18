@@ -216,3 +216,7 @@
 - [x] Freeze v1.0 review/procedure: foreground fallback blob `2e0d2248…`, procedure `9a43ba28…`, review `680596a3…`; no live authority.
 - [ ] Exact-head validate v1.0 review-state persistence 3/3.
 - [ ] Verify consumed v0.9 Linux route restoration + Windows/stale-stage cleanup before requesting v1.0 live approval.
+
+- [x] v1.0 review-state `ecdc71c8…` passed Workspace #3031 / Semantic #331 / Operator #604; review remains non-authoritative.
+- [ ] Exact-head validate v1.0 validation-state persistence 3/3.
+- [ ] Verify v0.9 Linux route restoration + Windows/stale-stage cleanup before requesting v1.0 approval.

@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.0 FOREGROUND REPAIR CODE IS 3/3 VALIDATED AT 1ecc094a62e2ed96b278ab954d46246e26dc33fd (#3030/#330/#603). v1.0 review/procedure candidate binds TrayApplicationContext blob 2e0d2248…, unchanged launcher d9d474ca…, Linux v3 3eb352f4…, harness 7b1feb8f…, candidate baseline 0bc1bc0e…. NEXT: exact-head validate the v1.0 review-state persistence 3/3. Separately, verify consumed v0.9 Linux route restoration and Windows cleanup. Only after both gates are satisfied may fresh explicit v1.0 approval be requested.
+STAGE-12 V1.0 REVIEW IS 3/3 VALIDATED: code source 1ecc094a… passed #3030/#330/#603 and review-state ecdc71c8… passed #3031/#331/#604. NEXT: exact-head validate this v1.0 validation-state persistence commit 3/3. In parallel, obtain exact predecessor-cleanup evidence from the consumed v0.9 run (Linux route restoration + Windows cleanup/stale-stage cleanup). Fresh explicit v1.0 approval is gated on BOTH final-state validation and verified predecessor cleanup.
 
 ## Remaining work
 
@@ -85,10 +85,10 @@ STAGE-12 V1.0 FOREGROUND REPAIR CODE IS 3/3 VALIDATED AT 1ecc094a62e2ed96b278ab9
 ## Blockers / gates
 
 - v0.9 authority is consumed/non-reusable.
-- v1.0 foreground repair code candidate is 3/3 validated.
-- v1.0 review/procedure persistence must itself pass exact-head Workspace/Semantic/Operator validation.
-- Prior v0.9 Linux route restoration and Windows cleanup must be verified before any v1.0 live execution.
-- No v1.0 live authority exists; fresh explicit operator approval is required only after review-state validation and cleanup evidence.
+- v1.0 foreground code candidate is 3/3 validated at 1ecc094a… (#3030/#330/#603).
+- v1.0 review-state ecdc71c8… is 3/3 validated (#3031/#331/#604).
+- The v1.0 validation-state persistence commit must itself pass exact-head Workspace/Semantic/Operator validation.
+- Consumed v0.9 Linux route restoration and Windows/stale-stage cleanup remain unverified; fresh v1.0 approval cannot be requested until cleanup evidence is confirmed.
 
 ## Fresh-chat initialization
 
