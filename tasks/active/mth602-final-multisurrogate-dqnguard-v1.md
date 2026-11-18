@@ -358,3 +358,36 @@ bash <(curl -fsSL "https://raw.githubusercontent.com/adamtrott78/PADataset/5146d
 ```
 
 Continue only if the live PA1 provenance probe resolves a real legacy base cache and all preflight checks PASS. Do not reuse `fd15238...`, do not run from `/tmp`, and do not delete or rebuild the first 120 overlays.
+
+### STFT record-121 provenance repair
+
+The local retry at `5146d718006e38c6d9110e158c80dfa43b86e882` cleared the real environment/provenance gate:
+
+- environment + raw OTA access PASS;
+- GPU/CPU STFT transform check PASS;
+- real PA1 legacy base cache resolved;
+- trajectory and legacy-provenance tests PASS;
+- records 1–120 were preserved and skipped.
+
+The run then failed before building record 121 because historical raw source `ota_pa1_run01__shard_001__PA1.mat` could not be resolved by exact path, realpath, or protocol+basename. This older cache lineage can omit `protocol_name`.
+
+Repair head: `122f5d21e648498b4afaa6b857b69f39dbb18222`
+
+- keep exact path -> realpath -> protocol+basename precedence;
+- add basename fallback only when exactly one cache file matches across all indexed roots;
+- ambiguity remains a hard failure;
+- `--probe-only` now resolves all 375 discovered source records before Phase 1 and reports `provenance_records_resolved`;
+- functional h5py regressions cover unique-basename success and ambiguity failure;
+- Workspace Shell static contract: `job-708219d4-46f9-4dd6-9ec1-70a36e99bbcb` — **3 passed**;
+- CPU canary run `44235462841` / job `134570401465` — **SUCCESS**;
+- PR #21 remains **OPEN / DRAFT / UNMERGED**.
+
+Run only this exact head:
+
+```bash
+EXPECTED_SHA=122f5d21e648498b4afaa6b857b69f39dbb18222 \
+CHECKOUT="$HOME/adamArchives/worktrees/PADataset-stft-track-ablation-v1" \
+bash <(curl -fsSL "https://raw.githubusercontent.com/adamtrott78/PADataset/122f5d21e648498b4afaa6b857b69f39dbb18222/scripts/mth602/bootstrap_stft_track_ablation_persistent.sh")
+```
+
+Accept Phase 1 only after the probe reports `provenance_records_resolved=375`. Preserve/skip the first 120 overlays; do not use `--force`, do not run from `/tmp`, and do not widen Workspace Shell authority.
