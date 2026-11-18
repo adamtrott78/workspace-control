@@ -116,6 +116,8 @@ def fetch_runs():
 
 This preserves a low request count (normally one or two collection requests per refresh) while preventing false `NOT FOUND` rows caused by first-page truncation.
 
+Render refresh and provider polling are separate clocks: render the terminal every 1 second so elapsed/ETA counters move smoothly, but poll GitHub every 5 seconds by default. This gives a 1-second dashboard without wasting API quota on unchanged workflow state.
+
 ## ETA policy
 
 ETA is presentation-only and must be explicitly approximate.
