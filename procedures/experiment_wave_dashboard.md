@@ -75,6 +75,47 @@ Required implementation behavior:
 
 Direct-by-ID resolution is preferred for small/medium fixed waves because it is simple and fail-closed.
 
+### Reference paginated GitHub implementation
+
+For dashboards that refresh frequently, avoid 24 direct API calls every refresh. Paginate the workflow collection until all immutable admitted IDs are resolved, then stop early:
+
+```python
+RUN_IDS = {rid for _, _, _, rid in RUNS}
+
+def fetch_runs():
+    found = {}
+    page = 1
+
+    while True:
+        url = (
+            f"repos/{REPO}/actions/runs"
+            f"?event=issue_comment&per_page=100&page={page}"
+        )
+        raw = subprocess.check_output(
+            ["gh", "api", "-X", "GET", url],
+            text=True,
+            stderr=subprocess.PIPE,
+        )
+        data = json.loads(raw)
+        batch = data.get("workflow_runs", [])
+
+        for r in batch:
+            rid = int(r["id"])
+            if rid in RUN_IDS:
+                found[rid] = r
+
+        if RUN_IDS.issubset(found):
+            break
+        if not batch or len(batch) < 100:
+            break
+
+        page += 1
+
+    return found
+```
+
+This preserves a low request count (normally one or two collection requests per refresh) while preventing false `NOT FOUND` rows caused by first-page truncation.
+
 ## ETA policy
 
 ETA is presentation-only and must be explicitly approximate.
