@@ -507,3 +507,33 @@ For rigorous variance attribution:
 3. do not use one overloaded `seed` variable that simultaneously changes splits, loader order, and initialization.
 
 Final synthesis resumes only after these expanded validation stages are resolved or explicitly scoped out.
+
+## Research Program v2 — authoritative 2026-11-18 interview freeze
+
+The experimental program is **not** at final synthesis. The operator selected a rigorous MTH602-to-journal expansion.
+
+Full requirements/checklist:
+`tasks/active/mth602-final-multisurrogate-dqnguard-v1-research-program-v2.md`
+
+Priority:
+1. H1 backbone competence;
+2. resolve H2 vs H4 (intrinsic target dependence vs useful target-blind selector);
+3. H5 multi-surrogate DQNGuard if needed;
+4. H3 STFT representation as a bounded lower-priority ablation.
+
+Immediate sequence:
+- audit all 10 canonical backbones for min-class F1 + epoch stability;
+- HPO PA2-PA3, PA2-PA8, PA3-PA8 first using known-only evidence;
+- initial stop when val macro-F1 >=0.95 and min-class F1 >=0.90;
+- after each weak backbone freezes, immediately run both standard-DQNGuard directional OSR cells;
+- use those target-open results only as an exploratory research-investment gate, never to choose per-cell HPO settings;
+- if justified, freeze a tighter/stability-aware regime and apply a comparable budget across all 10 canonical pairs;
+- recompute the full 20-cell matrix;
+- rerun historical surrogate Rules A-C;
+- pilot FFT vs STFT replacement vs FFT+STFT on the three PA1/PA4-confounded weak pairs plus a strong control, then expand only under a frozen rule;
+- keep standard DQNGuard frozen through those controls;
+- run H5 only after controls if surrogate dependence remains;
+- final robustness target is 5 partition seeds x 10 model/training seeds after all method choices are frozen;
+- before the earlier of the course due date and 2026-12-01, pivot to a complete report, slide deck, and durable post-finals journal checkpoint.
+
+No new GPU job, merge, or trust widening is authorized by this planning interview.
