@@ -1,210 +1,145 @@
 # Experiment Wave Dashboard
 
-Purpose: standard operator-facing terminal view for long-running multi-experiment scientific waves.
+Purpose: standard operator-facing terminal view for long-running scientific experiment waves.
 
-This format was adopted during task `mth602-final-multisurrogate-dqnguard-v1` on 2026-11-18 after the H1 weak-backbone HPO wave0 run. It is intentionally compact, tmux-friendly, and designed for repeated use across future experiment campaigns.
+## Architecture invariant
+
+**Primary telemetry MUST be host-local when the operator is already on the execution machine.**
+
+The dashboard refresh loop must not call `gh`, GitHub REST, GitHub GraphQL, or any other provider API.
+
+Use local execution evidence instead:
+
+- process table / process age;
+- local runner temp/result directories;
+- `train_progress.json`;
+- `history.json`;
+- `train_complete.json`;
+- `train_error.json`;
+- a persistent local dashboard cache outside ephemeral runner temp directories;
+- GPU telemetry such as `nvidia-smi`.
+
+GitHub/provider state is control-plane evidence, not the live telemetry source. If later reconciliation is needed, perform it separately and explicitly; do not put it in the dashboard refresh loop.
+
+This rule was adopted after a 2026-11-18 MTH602 HPO dashboard exhausted the authenticated user's GitHub REST quota by polling workflow runs too aggressively.
 
 ## Required view
 
 Render one row per immutable experiment admission.
 
 ```text
-<PROGRAM> — <WAVE> LIVE DASHBOARD
-<N> immutable experiments | refresh 1s | <local timestamp>
-Successful-run median: GPU0=<time> GPU1=<time> (used only for RUNNING ETA)
+<PROGRAM> — <WAVE> LOCAL DASHBOARD
+<N> immutable experiments | refresh 1s
+Source: LOCAL HOST ONLY — GitHub API calls: 0
 
-EXPERIMENT          GPU  STATUS        ELAPSED   ETA LEFT      TOTAL       RUN ID
---------------------------------------------------------------------------------
-PAIR/TRIAL          G0   RUNNING       0:42:13     ~18:05          -  123456789
-PAIR/TRIAL          G1   SUCCESS             -          -    1:02:44  123456790
-PAIR/TRIAL          G0   FAILURE             -          -      06:18  123456791
-PAIR/TRIAL          G1   QUEUED          31:22          -          -  123456792
---------------------------------------------------------------------------------
-SUCCESS nn   FAILED nn   RUNNING nn   QUEUED nn   OTHER nn
+EXPERIMENT          GPU  STATUS      EPOCH    PROG    ELAPSED   ETA LEFT      TOTAL       RUN ID
+-------------------------------------------------------------------------------------------------
+PAIR/TRIAL          G0   RUNNING       6/8   74.3%    1:17:42     ~26:51          -  123456789
+PAIR/TRIAL          G1   SUCCESS         -       -          -          -      34:15  123456790
+PAIR/TRIAL          G0   INFRA-OOM       -       -          -          -       00:18  123456791
+PAIR/TRIAL          G1   WAITING         -       -          -          -          -  123456792
 ```
 
-## Column semantics
+## Status semantics
 
-- `EXPERIMENT`: stable human-readable experiment identity, normally pair + trial or equivalent immutable job key.
-- `GPU`: execution lane/GPU assigned by the admitted request.
-- `STATUS`: normalized `SUCCESS`, `FAILURE`, `RUNNING`, `QUEUED`, or `OTHER`.
-- `ELAPSED`:
-  - RUNNING: wall time since actual run start.
-  - QUEUED: wall time since admission/creation.
-  - completed jobs: use `-`; completed duration belongs in TOTAL.
-- `ETA LEFT`: only for RUNNING jobs. Estimate from median completed successful runtime for the same execution lane when available. Prefix estimates with `~`. If elapsed already exceeds the median, display `>median` rather than fabricating a negative ETA.
-- `TOTAL`: completed job wall time from actual start through terminal completion.
-- `RUN ID`: durable provider/workflow run identifier.
+- `RUNNING`: a matching local experiment process is active.
+- `SUCCESS`: local `train_complete.json` exists or a previously observed terminal success is in the persistent cache.
+- `INFRA-OOM`: local `train_error.json` contains CUDA/out-of-memory evidence.
+- `ERROR`: other local terminal training error.
+- `INCOMPLETE`: nonterminal local progress exists but no matching active process and no terminal record exists.
+- `WAITING`: immutable admitted experiment is not currently visible on the host and has no terminal cache record.
 
-## Status rules
+**Do not label a host-invisible experiment `QUEUED` unless a local scheduler/runner queue provides that fact.** Host-local telemetry cannot infer the remote provider queue merely from absence.
 
-Use provider truth as authoritative.
+## Timing semantics
 
-For GitHub Actions:
+Use local scientific runtime, not provider workflow wall time.
 
-- `status=completed, conclusion=success` -> SUCCESS
-- `status=completed, conclusion!=success` -> FAILURE (or preserve a more precise terminal label if useful)
-- `status=in_progress` -> RUNNING
-- `status=queued` -> QUEUED
-- anything else -> OTHER
+- RUNNING `ELAPSED`: local process age.
+- RUNNING `ETA LEFT`: extrapolate from the current overall training fraction when available.
+- terminal `TOTAL`: `elapsed_sec` written by `pa_train_one.py` in `train_complete.json` or `train_error.json`.
 
-The dashboard is an observation surface only. It does not create retry, promotion, merge, cancellation, or process-kill authority.
+Never mix GitHub workflow wall time with local training elapsed under the same column.
 
-## Critical retrieval invariant
+## Progress and ETA
 
-Never infer that an experiment is missing merely because it is absent from one collection page.
-
-The first implementation used:
-
-```bash
-gh api repos/OWNER/REPO/actions/runs?event=issue_comment\&per_page=100
-```
-
-and four older valid runs incorrectly rendered as `NOT FOUND` after they fell beyond the first 100 results.
-
-Required implementation behavior:
-
-1. Start from the exact immutable set of admitted run IDs.
-2. Resolve every admitted run ID independently with:
-   ```bash
-   gh api repos/OWNER/REPO/actions/runs/RUN_ID
-   ```
-   or fully paginate the collection until every admitted ID is resolved.
-3. Only display `NOT FOUND` when the provider returns a genuine not-found result for that exact run ID.
-4. A collection-page miss is `UNRESOLVED`, not evidence that the experiment does not exist.
-
-Direct-by-ID resolution is preferred for small/medium fixed waves because it is simple and fail-closed.
-
-### Reference paginated GitHub implementation
-
-For dashboards that refresh frequently, avoid 24 direct API calls every refresh. Paginate the workflow collection until all immutable admitted IDs are resolved, then stop early:
-
-```python
-RUN_IDS = {rid for _, _, _, rid in RUNS}
-
-def fetch_runs():
-    found = {}
-    page = 1
-
-    while True:
-        raw = subprocess.check_output(
-            [
-                "gh", "api", "-X", "GET",
-                f"repos/{REPO}/actions/runs",
-                "-f", "event=issue_comment",
-                "-F", "per_page=100",
-                "-F", f"page={page}",
-            ],
-            text=True,
-            stderr=subprocess.PIPE,
-        )
-        data = json.loads(raw)
-        batch = data.get("workflow_runs", [])
-
-        for r in batch:
-            rid = int(r["id"])
-            if rid in RUN_IDS:
-                found[rid] = r
-
-        if RUN_IDS.issubset(found):
-            break
-        if not batch or len(batch) < 100:
-            break
-
-        page += 1
-
-    return found
-```
-
-This preserves a low request count (normally one or two collection requests per refresh) while preventing false `NOT FOUND` rows caused by first-page truncation.
-
-Render refresh and provider polling are separate clocks: render the terminal every 1 second so elapsed/ETA counters move smoothly, but poll GitHub every 5 seconds by default. This gives a 1-second dashboard without wasting API quota on unchanged workflow state.
-
-## ETA policy
-
-ETA is presentation-only and must be explicitly approximate.
-
-Preferred estimator:
+Preferred overall fraction:
 
 ```text
-baseline(gpu_lane) = median(total_runtime of SUCCESS jobs on same lane)
-eta_left = baseline - current_elapsed
+overall_fraction = ((epoch - 1) + step / steps) / epochs
+eta_left = process_elapsed * (1 - overall_fraction) / overall_fraction
 ```
 
-If there are no successful completed jobs on that lane, show `?`.
-If current elapsed exceeds baseline, show `>median`.
+Only show ETA when the fraction is meaningful. Prefix estimated values with `~`.
 
-Do not mix failed infrastructure runtimes into successful scientific runtime estimates unless the dashboard explicitly labels that estimator.
+## Ephemeral runner results and persistent cache
 
-## tmux usage
+Current PADataset scientific workflows write live results under:
 
-Preferred behavior is a persistent named tmux session containing only the dashboard.
-
-Example:
-
-```bash
-SESSION="experiment-wave-dashboard"
-
-tmux has-session -t "$SESSION" 2>/dev/null || \
-  tmux new-session -d -s "$SESSION"
-
-tmux send-keys -t "$SESSION" \
-  "python3 /tmp/experiment_wave_watch.py" C-m
-
-tmux attach -t "$SESSION"
+```text
+/srv/workspace-ci/padataset/jobs/*/runner/_work/_temp/scientific-results/backbone/<run_name>/
 ```
 
-Operator controls:
+Runner temp data may disappear after job cleanup. Therefore the dashboard must keep a user-owned persistent terminal cache, for example:
 
-- detach without stopping dashboard: `Ctrl+B`, then `D`
-- reattach: `tmux attach -t experiment-wave-dashboard`
-- stop dashboard only: `Ctrl+C`
+```text
+~/.cache/workspace-control/experiment-dashboards/<wave>.json
+```
 
-Do not substitute an empty persistent shell when the operator requests the experiment dashboard.
+When a terminal local result is observed, immediately persist its status and `elapsed_sec` to the cache. On restart, load that cache before scanning live runner state.
 
-## Current MTH602 reference instance
+## Immutable identity
 
-Wave: H1 weak-backbone HPO wave0.
+The dashboard may retain provider run IDs as immutable identity metadata for operator reference, but it must not query those IDs during normal rendering.
 
-Immutable size: 24 experiments = 8 trial vectors x 3 weak pairs.
+The admission set should come from durable task state or a frozen local dashboard manifest.
 
-Pairs:
+## GPU telemetry
 
-- PA2-PA3
-- PA2-PA8
-- PA3-PA8
+Display local GPU utilization/memory when available using `nvidia-smi`. GPU telemetry is observational only and does not authorize process termination, retry, or resource reallocation.
 
-Trial IDs:
+## tmux behavior
 
-- t000 through t007
+The preferred dashboard runs in a persistent named tmux session.
 
-Lane convention for this wave:
+- display refresh: 1 second;
+- GitHub/provider API calls in refresh loop: **0**;
+- detach: `Ctrl+B`, then `D`;
+- reattach: `tmux attach -t <session>`;
+- stop dashboard only: `Ctrl+C`.
 
-- even trials: GPU0
-- odd trials: GPU1
+Do not substitute an empty persistent shell when the operator asks for the experiment dashboard.
 
-The reference display was accepted by the operator on 2026-11-18.
+## Current MTH602 implementation
+
+Reference script:
+
+```text
+scripts/mth602_wave0_local_dashboard.py
+```
+
+Current wave:
+
+- task: `mth602-final-multisurrogate-dqnguard-v1`
+- 24 immutable H1 weak-backbone screen experiments;
+- pairs: PA2-PA3, PA2-PA8, PA3-PA8;
+- trials: t000 through t007;
+- even trials: lane G0;
+- odd trials: lane G1;
+- exact provider run IDs retained only as display identity;
+- no `gh` or GitHub API calls.
 
 ## Reuse checklist
 
-When a future worker is asked for "the same tmux/dashboard format":
+When a future worker is asked for "the same dashboard/tmux format":
 
-1. Identify the exact immutable experiment admissions from durable state.
-2. Build one row per admission.
-3. Bind each row to the provider's exact durable run/job ID.
-4. Resolve run IDs directly or paginate exhaustively.
-5. Show normalized status, lane, running/queued elapsed, approximate running ETA, completed total runtime, and run ID.
-6. Refresh in place every 1 second by default; allow a slower override when provider/API limits require it.
-7. Keep the view read-only.
-8. Preserve tmux detach/reattach behavior.
-
-
-## Provider failure handling
-
-A provider/API failure must not cause the dashboard to hammer the provider every render tick.
-
-- Render clock: 1 second.
-- Normal provider poll clock: 5 seconds.
-- On provider poll failure: preserve the last good snapshot, surface the provider error in a compact status line, and wait at least 5 seconds before the next provider attempt.
-- Capture and display stderr from `gh api`; a non-zero exit code alone is not a diagnosis.
-- For GitHub CLI GET requests with query parameters, prefer explicit `-f/-F` fields over manually concatenating the query string. This avoids shell/CLI parsing ambiguity and makes failures easier to inspect.
+1. Read the durable immutable admission set.
+2. Build one row per experiment.
+3. Prefer local process and artifact telemetry.
+4. Persist terminal observations outside ephemeral runner temp.
+5. Refresh the screen every second.
+6. Use local progress for ETA.
+7. Use `WAITING`, not `QUEUED`, when queue state is not locally observable.
+8. Keep provider IDs as metadata only.
+9. Make **zero automatic provider API calls** from the dashboard.
+10. Keep the dashboard read-only; it must not retry, cancel, kill, promote, merge, or otherwise mutate execution state.
