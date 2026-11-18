@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.9 OPERATOR APPROVAL RECEIVED. Fresh explicit approval 'pls go yes authorize fuck' binds final review head a84eb08eeb8c7ccc45f73cf480589fd1c3a29f0a, review blob de0139b45824924a8a7d3833469ddee264d10623, procedure blob 5113b2e72db6d4bae15b94fe4ff204b71758b86f, Linux v3 blob 3eb352f456d84de565514e2a7046e847ea0d25ea, harness 7b1feb8f…, Windows launcher d9d474ca…, and candidate baseline 0bc1bc0e…. NEXT GATE: exact-head validate the v0.9 authority-persistence commit 3/3. Only after green may Windows v0.9 pre-live setup start. Live authority remains unconsumed until Linux prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
+STAGE-12 V0.9 AUTHORITY IS VALIDATED. Exact authority head b3798222efe44e61752ffd1f2b38322018f9e0a6 passed Workspace #3026 / Semantic #326 / Operator #599. Authority blob f08bdab3f78bc926724e45510edfab2ecfa31fed binds final review a84eb08e…, procedure 5113b2e7…, Linux v3 3eb352f4…, unchanged harness 7b1feb8f…, Windows launcher d9d474ca…, and candidate baseline 0bc1bc0e…. NEXT AUTHORIZED ACTION: establish a fresh Windows v0.9 pre-live runtime using the exact one-line command in procedure v0.9. If the old v0.8 Windows process is still at its cleanup prompt, press Enter once to tear it down first. Then ensure all Firefox windows are closed and no stale %TEMP%\workspace-control-stage12-retry-v7 directory remains before rerunning the unchanged exact Windows command. Authenticate manually, select Instant manually, press Enter once at the manual-auth prompt, and leave the final cleanup prompt waiting. Do not start Linux v3 until STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS is printed for v0.9.
 
 ## Remaining work
 
@@ -84,10 +84,10 @@ STAGE-12 V0.9 OPERATOR APPROVAL RECEIVED. Fresh explicit approval 'pls go yes au
 
 ## Blockers / gates
 
-- v0.8 authority is invalidated unconsumed/non-reusable after Linux v2 pre-live failure.
-- Fresh explicit v0.9 operator approval has been received and narrow single-attempt authority is being persisted.
-- The v0.9 authority-persistence commit must itself pass exact-head Workspace/Semantic/Operator validation before Windows/Linux execution.
-- No live execution may begin until that authority validation is green.
+- Stage-12 v0.9 authority is validated and permits exactly one live retry.
+- Windows v0.9 pre-live setup must be re-established first using the exact unchanged one-line procedure command.
+- Any leftover v0.8 Windows cleanup prompt/runtime must be torn down before starting the v0.9 Windows setup.
+- Linux v3 must not start until Windows prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS under the v0.9 run.
 - After STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, any success or failure consumes the one v0.9 attempt.
 
 ## Fresh-chat initialization

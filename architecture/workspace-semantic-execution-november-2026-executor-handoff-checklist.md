@@ -201,3 +201,6 @@
 
 - [x] Fresh explicit v0.9 approval received: `pls go yes authorize fuck`; binds final review head `a84eb08e…`, review `de0139b…`, procedure `5113b2e7…`, Linux v3 `3eb352f4…`, unchanged harness/launcher, candidate baseline `0bc1bc0e…`.
 - [ ] Validate v0.9 authority-persistence head 3/3 before any Windows/Linux execution.
+
+- [x] v0.9 authority persistence `b3798222…` passed Workspace #3026 / Semantic #326 / Operator #599; authority blob `f08bdab3…` is validated for exactly one live attempt.
+- [ ] Re-establish fresh Windows v0.9 pre-live runtime; if old v0.8 cleanup prompt is still open, clean it first. Leave the new final cleanup prompt waiting after the Windows-ready marker.
