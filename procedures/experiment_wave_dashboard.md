@@ -103,6 +103,7 @@ Display local GPU utilization/memory when available using `nvidia-smi`. GPU tele
 The preferred dashboard runs in a persistent named tmux session.
 
 - display refresh: 1 second;
+- renderer: use the terminal alternate screen and cursor-home redraws so each refresh overwrites one fixed frame instead of appending to tmux scrollback;
 - GitHub/provider API calls in refresh loop: **0**;
 - detach: `Ctrl+B`, then `D`;
 - reattach: `tmux attach -t <session>`;
