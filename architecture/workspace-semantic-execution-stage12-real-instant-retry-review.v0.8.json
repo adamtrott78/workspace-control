@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.8",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Repair the pre-execution v0.7 PowerShell ProgramFiles(x86) escape defect while preserving every pinned Stage-12 executable artifact and authority/browser/network/result boundary.",
   "predecessor": {
@@ -77,11 +77,14 @@
     "model_reasoning_is_not_authority": true
   },
   "validation": {
-    "candidate_head": null,
-    "workspace_control_run": null,
-    "semantic_execution_run": null,
-    "operator_bridge_run": null,
-    "result": "PENDING"
+    "candidate_head": "f0051fb3534da19073faee7b33f04edd999c12df",
+    "workspace_control_run": 3016,
+    "semantic_execution_run": 316,
+    "operator_bridge_run": 589,
+    "result": "SUCCESS",
+    "exact_head": true,
+    "operator_first_attempt_note": "Initial Operator #589 validation job hit an unrelated Stage-09 CI TimeoutException after v0.8-specific tests passed; one bounded rerun on the identical SHA passed.",
+    "escape_regression": "PASS_NO_BACKSLASH_DOLLAR_BRACE_AND_EXACT_TWO_PROGRAMFILES_X86_REFERENCES"
   },
-  "postcondition": "v0.8 is a review candidate only. No Windows or Linux Stage-12 execution is authorized. Exact-head validation and fresh explicit operator approval are required before any v0.8 authority artifact can be created."
+  "postcondition": "v0.8 review candidate is repository-validated and grants zero live authority. Persist/final-state validation must pass before fresh explicit operator approval can bind v0.8 procedure blob 58c714ba5c0c6e6dee337ce70f0c4b550e65a87c."
 }

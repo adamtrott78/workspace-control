@@ -70,14 +70,14 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.7 AUTHORITY IS INVALIDATED UNCONSUMED BEFORE EXECUTION. Exact-byte audit of bound procedure blob 620e78f044189ab679019380a76d3f8c62711ca0 found two literal backslashes immediately preceding ${env:ProgramFiles(x86)}; PowerShell parser validation did not catch the semantic defect. No Windows/Linux execution occurred and live consumption was not reached. v0.8 review-only procedure blob 58c714ba5c0c6e6dee337ce70f0c4b550e65a87c removes exactly those two command backslashes and changes no other command byte; source b0466c03…, launcher d9d474ca…, Linux v2 962cf39d…, harness 7b1feb8f… and candidate baseline 0bc1bc0e… remain unchanged. NEXT ACTION: exact-head validate v0.8 review candidate 3/3. If green, persist and validate final review state, then obtain fresh explicit operator approval; prior v0.7 authority is not reusable.
+STAGE-12 V0.8 REVIEW CANDIDATE IS 3/3 VALIDATED AT f0051fb3534da19073faee7b33f04edd999c12df: Workspace #3016 / Semantic #316 / Operator #589 SUCCESS. Procedure blob 58c714ba5c0c6e6dee337ce70f0c4b550e65a87c removes exactly two stray backslashes before ${env:ProgramFiles(x86)} and changes no other command byte; all pinned source/launcher/Linux/harness/candidate-result bindings remain unchanged. NEXT GATE: exact-head validate this final v0.8 validation-state persistence commit 3/3. Only after green obtain fresh explicit operator approval binding v0.8; prior v0.7 authorization is not reusable. No Windows/Linux execution is authorized yet.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: D3 remains ACCEPTED. v0.7 authority was invalidated unconsumed before execution after exact-byte audit found two ProgramFiles(x86) escape defects. v0.8 is the review-only two-backslash repair; validate it 3/3, freeze/validate final review state, then obtain fresh exact approval before any new authority.
-- REAL-ACCOUNT CALIBRATION: no live retry is currently authorized. v0.8 must pass candidate and final-state validation and receive fresh explicit operator approval. Only then may a new one-shot authority be created/validated and Windows executed first.
+- LIVE INSTANT: D3 remains ACCEPTED. v0.8 exact two-backslash repair is candidate-validated at f0051fb3… (#3016/#316/#589). Validate the final review-state persistence 3/3, then obtain fresh explicit v0.8 approval before any authority creation.
+- REAL-ACCOUNT CALIBRATION: no live retry is authorized. After final v0.8 review-state validation and fresh explicit approval, create and exact-head validate a new one-shot v0.8 authority, then execute Windows first; Linux remains blocked until the exact Windows readiness marker.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
 - PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
@@ -85,11 +85,11 @@ STAGE-12 V0.7 AUTHORITY IS INVALIDATED UNCONSUMED BEFORE EXECUTION. Exact-byte a
 ## Blockers / gates
 
 - Stage-12 v0.1 authority is consumed by failed Attempt 01.
-- v0.2-v0.5 authorities are superseded unconsumed/non-reusable; v0.6 never produced authority.
-- v0.7 authority is invalidated unconsumed/non-reusable after pre-execution exact-byte audit found two literal backslashes before ${env:ProgramFiles(x86)}.
+- v0.2-v0.5 authorities are superseded unconsumed/non-reusable; v0.6 never produced authority; v0.7 authority is invalidated unconsumed/non-reusable.
 - No v0.7 Windows/Linux execution occurred and STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS was not reached.
-- v0.8 procedure blob 58c714ba… removes exactly those two backslashes and changes no other command byte; all pinned executable/security bindings remain unchanged.
-- v0.8 is REVIEW_CANDIDATE_NOT_AUTHORITY and must pass exact-head Workspace/Semantic/Operator validation, then final-state validation, before fresh approval may be requested.
+- v0.8 procedure blob 58c714ba… is candidate-validated at f0051fb3…: Workspace #3016 / Semantic #316 / Operator #589 SUCCESS.
+- This final v0.8 validation-state persistence commit must itself pass exact-head Workspace/Semantic/Operator validation before fresh v0.8 approval may be requested.
+- No v0.8 live authority exists; prior v0.7 authorization is not reusable.
 - No live retry, install, persistent PATH/registry/policy mutation, browser/network widening, production DB mutation, GPU/PADataset mutation, or generic Workspace Shell widening is authorized.
 
 ## Fresh-chat initialization

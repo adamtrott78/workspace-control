@@ -361,7 +361,10 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         import json
 
         review = json.loads(REVIEW_V8.read_text(encoding="utf-8"))
-        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertEqual(
+            review["status"],
+            "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
+        )
         self.assertFalse(review["authority_gate"]["live_retry_authorized"])
         self.assertTrue(
             review["authority_gate"]["v07_authority_does_not_authorize_v08_procedure"]
@@ -372,6 +375,14 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         )
         self.assertEqual(review["procedure_delta"]["removed_literal_backslashes"], 2)
         self.assertTrue(review["procedure_delta"]["no_other_command_byte_change"])
+        self.assertEqual(
+            review["validation"]["candidate_head"],
+            "f0051fb3534da19073faee7b33f04edd999c12df",
+        )
+        self.assertEqual(review["validation"]["workspace_control_run"], 3016)
+        self.assertEqual(review["validation"]["semantic_execution_run"], 316)
+        self.assertEqual(review["validation"]["operator_bridge_run"], 589)
+        self.assertEqual(review["validation"]["result"], "SUCCESS")
 
 
 if __name__ == "__main__":
