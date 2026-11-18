@@ -24,6 +24,7 @@ PROCEDURE_V7 = ROOT / "architecture/workspace-semantic-execution-stage12-real-in
 REVIEW_V7 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.7.json"
 PROCEDURE_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.8.md"
 REVIEW_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.8.json"
+AUTHORITY_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.8.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -383,6 +384,66 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertEqual(review["validation"]["semantic_execution_run"], 316)
         self.assertEqual(review["validation"]["operator_bridge_run"], 589)
         self.assertEqual(review["validation"]["result"], "SUCCESS")
+
+    def test_v08_authority_binds_exact_validated_review_and_invalidated_v07(self) -> None:
+        import json
+
+        authority = json.loads(AUTHORITY_V8.read_text(encoding="utf-8"))
+        self.assertEqual(
+            authority["status"],
+            "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["approved_final_state_head"],
+            "fc2921819bb61f110004add32563d34df66dfa84",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["approved_review_blob_sha"],
+            "3d4f3a589e317baf51bbcb9f3341448bbc7cda48",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["approved_procedure_blob_sha"],
+            "58c714ba5c0c6e6dee337ce70f0c4b550e65a87c",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["candidate_validation"],
+            {
+                "workspace_control_run": 3016,
+                "semantic_execution_run": 316,
+                "operator_bridge_run": 589,
+                "result": "SUCCESS",
+            },
+        )
+        self.assertEqual(
+            authority["approval_basis"]["final_state_validation"],
+            {
+                "validated_head": "fc2921819bb61f110004add32563d34df66dfa84",
+                "workspace_control_run": 3017,
+                "semantic_execution_run": 317,
+                "operator_bridge_run": 590,
+                "result": "SUCCESS",
+            },
+        )
+        self.assertEqual(
+            authority["predecessor_authority"]["prior_status"],
+            "INVALIDATED_UNCONSUMED_PREEXECUTION_PROCEDURE_ESCAPE_DEFECT",
+        )
+        self.assertFalse(authority["predecessor_authority"]["consumed"])
+        self.assertTrue(authority["predecessor_authority"]["invalidated"])
+        self.assertFalse(authority["predecessor_authority"]["reusable"])
+        self.assertEqual(
+            authority["exact_authorized_execution"]["operator_procedure"]["blob_sha"],
+            "58c714ba5c0c6e6dee337ce70f0c4b550e65a87c",
+        )
+        self.assertEqual(
+            authority["exact_authorized_execution"]["candidate_result_branch"]["required_baseline_head"],
+            "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+        )
+        self.assertEqual(authority["authority_consumption"]["attempts_authorized"], 1)
+        self.assertEqual(
+            authority["authority_consumption"]["live_authority_consumption_marker"],
+            "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+        )
 
 
 if __name__ == "__main__":
