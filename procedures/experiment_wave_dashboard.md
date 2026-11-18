@@ -21,6 +21,21 @@ Use local execution evidence instead:
 
 GitHub/provider state is control-plane evidence, not the live telemetry source. If later reconciliation is needed, perform it separately and explicitly; do not put it in the dashboard refresh loop.
 
+### Isolated-runner visibility
+
+If the scientific runner is intentionally isolated with controls such as `ProtectProc=invisible`, a normal operator shell may be unable to see the runner process arguments or job-local result directories even though `nvidia-smi` shows the GPU is busy.
+
+In that case, the preferred fallback is a **read-only elevated host observer**:
+
+- run the exact reviewed dashboard script with `sudo`;
+- use root only to read the isolated process table and project job/result directories;
+- make no network/API calls;
+- do not change runner permissions, groups, ACLs, workflow authority, process state, or systemd state;
+- write only the dashboard's persistent user cache, and keep that cache owned by the invoking operator;
+- label unprivileged invisibility as `HIDDEN`, never as `WAITING`.
+
+This is preferable to weakening runner isolation or granting the operator durable read access to candidate job trees. The elevated observer is observational only.
+
 This rule was adopted after a 2026-11-18 MTH602 HPO dashboard exhausted the authenticated user's GitHub REST quota by polling workflow runs too aggressively.
 
 ## Required view
@@ -104,6 +119,7 @@ The preferred dashboard runs in a persistent named tmux session.
 
 - display refresh: 1 second;
 - renderer: use the terminal alternate screen and cursor-home redraws so each refresh overwrites one fixed frame instead of appending to tmux scrollback;
+- when runner isolation hides exact state, invoke the reviewed dashboard with `sudo -E python3 <dashboard>` rather than adding provider polling or weakening isolation;
 - GitHub/provider API calls in refresh loop: **0**;
 - detach: `Ctrl+B`, then `D`;
 - reattach: `tmux attach -t <session>`;
