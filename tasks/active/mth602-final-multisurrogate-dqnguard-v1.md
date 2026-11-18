@@ -454,3 +454,56 @@ Next action:
 - do **not** launch another STFT or B3 job;
 - treat the unfinished detv2 seed2 replicate as optional unless the synthesis identifies a specific fixed-partition/split-sensitivity question that actually requires it;
 - preserve true-target quarantine and descriptive-only treatment of final target metrics.
+
+### Expanded scientific validation — reopened after STFT terminal PASS
+
+The prior transition directly to final synthesis was premature.
+
+#### 1. STFT representation question remains open at the OSR level
+
+The completed `stft_tracks64_v1` run did train a backbone where the two legacy FFT real/imag channels were replaced with STFT-derived centroid/spread tracks while preserving the eight-channel interface. It also showed that PA1 versus PA4 trajectory features are nearly perfectly separable.
+
+However, this did **not** run a matched DQNGuard OSR comparison against the legacy FFT representation. The representation diagnostic therefore establishes information availability/mechanism, not end-to-end OSR improvement.
+
+Required next experiment: matched FFT vs STFT DQNGuard evaluation, beginning with the PA1-PA4 canonical pair (both directions) under identical partitions/training/evaluator semantics. The STFT choice is post-hoc/exploratory for this pair because PA1/PA4 labels were already used in the trajectory diagnostic.
+
+#### 2. Track-A backbone qualification is incomplete
+
+The frozen repair protocol states a competency gate of known-validation macro-F1 >= 0.95 and minimum known-class F1 >= 0.90, with known-only HPO required for failures.
+
+At least three canonical pairs fail the macro gate:
+- PA2-PA3: selected val macro-F1 ~0.9254; known-test macro-F1 0.9195729464;
+- PA2-PA8: selected val macro-F1 ~0.9433; known-test macro-F1 0.9448806320;
+- PA3-PA8: selected val macro-F1 ~0.8966; known-test macro-F1 0.8952296085.
+
+Therefore the current repaired matrix is a major improvement over the paper's one-epoch matrix, but it is not yet the fully competency-qualified/tuned matrix described by the protocol. Audit min-class F1 for all ten backbones and perform bounded known-only HPO where required.
+
+#### 3. Backbone quality does not explain the matrix change
+
+Across all 20 repaired directional cells, canonical known-test macro-F1 versus repaired unknown-F1 is only moderately related (Pearson r ~0.461; Spearman rho ~0.267).
+
+Averaging both directions per canonical backbone gives Pearson r ~0.585 but Spearman rho ~0.019, showing a non-monotonic relationship dominated by the few low-quality backbones and heavy ceiling effects.
+
+Using the presentation's displayed two-decimal historical matrix, known-test macro-F1 versus the improvement in unknown-F1 is approximately Pearson r ~0.110 and Spearman rho ~-0.032 at the directional-cell level. Thus the large change from the paper matrix is not simply explained by higher final closed-set macro-F1.
+
+#### 4. Re-test the original three target-blind surrogate rules
+
+The paper/presentation evaluated:
+- Rule A: surrogate calibration-open recall at the known-only threshold;
+- Rule B: confidence geometry using P1, P1-P2 gap, and entropy;
+- Rule C: feature geometry using nearest-known-centroid distance / centroid-margin statistics.
+
+Historical outcome: Rule A had essentially zero correlation and picked 2/5 best surrogates; Rule B pointed in the wrong direction; Rule C was the strongest simple positive signal but picked only 1/5.
+
+These must be rerun on the competency-qualified matrix before concluding that simple surrogate selection fails under properly trained backbones. Freeze formulas before inspecting the new target-open outcomes.
+
+#### 5. Replication policy
+
+Do not spend a 10-seed budget until backbone recipe, representation, DQNGuard variant, and selector rules are frozen.
+
+For rigorous variance attribution:
+1. fix data partitions and run 10 independent model/training seeds for the final recipe;
+2. separately evaluate partition sensitivity using explicit partition seeds (for example several partition seeds with multiple model seeds each);
+3. do not use one overloaded `seed` variable that simultaneously changes splits, loader order, and initialization.
+
+Final synthesis resumes only after these expanded validation stages are resolved or explicitly scoped out.
