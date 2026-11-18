@@ -10,6 +10,10 @@ LINUX_V2 = (
     ROOT
     / "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh"
 )
+LINUX_V3 = (
+    ROOT
+    / "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v3.sh"
+)
 REVIEW_V2 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.2.json"
 PROCEDURE_V2 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.2.md"
 PROCEDURE_V3 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.3.md"
@@ -25,6 +29,8 @@ REVIEW_V7 = ROOT / "architecture/workspace-semantic-execution-stage12-real-insta
 PROCEDURE_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.8.md"
 REVIEW_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.8.json"
 AUTHORITY_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.8.json"
+PROCEDURE_V9 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.9.md"
+REVIEW_V9 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.9.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -444,6 +450,56 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
             authority["authority_consumption"]["live_authority_consumption_marker"],
             "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
         )
+
+    def test_v09_linux_v3_repairs_only_three_literal_newline_sequences(self) -> None:
+        text2 = LINUX_V2.read_text(encoding="utf-8")
+        text3 = LINUX_V3.read_text(encoding="utf-8")
+        self.assertEqual(text2.count("\\n"), 3)
+        self.assertEqual(text3.count("\\n"), 0)
+        self.assertEqual(text2.replace("\\n", "\n"), text3)
+        self.assertEqual(len(text2) - len(text3), 3)
+        for declaration in (
+            'HARNESS_REL="benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py"',
+            'REPO_URL="https://github.com/adamtrott78/workspace-control.git"',
+            'CANDIDATE_BASELINE="0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"',
+            'WINDOWS_READY_MARKER="STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS"',
+        ):
+            self.assertIn(declaration + "\n", text3)
+
+    def test_v09_linux_v3_is_bash_syntax_valid(self) -> None:
+        proc = subprocess.run(
+            ["bash", "-n", str(LINUX_V3)],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_v09_review_is_not_authority_and_invalidates_v08_binding(self) -> None:
+        import json
+
+        review = json.loads(REVIEW_V9.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(review["authority_gate"]["live_retry_authorized"])
+        self.assertTrue(
+            review["authority_gate"]["v08_authority_does_not_authorize_v09_linux_v3"]
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["linux_predecessor_transaction"]["blob_sha"],
+            "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["linux_private_route_transaction"]["blob_sha"],
+            "3eb352f456d84de565514e2a7046e847ea0d25ea",
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
+            "5113b2e72db6d4bae15b94fe4ff204b71758b86f",
+        )
+        self.assertEqual(review["linux_delta"]["literal_backslash_n_occurrences_before"], 3)
+        self.assertEqual(review["linux_delta"]["literal_backslash_n_occurrences_after"], 0)
+        self.assertTrue(review["linux_delta"]["no_other_linux_transaction_byte_change"])
 
 
 if __name__ == "__main__":

@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.8 WINDOWS READY GATE IS SATISFIED. Exact Windows launcher is held at the final cleanup prompt after printing STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS; do not press Enter there. worker-result-candidates-v1 remains baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. NEXT AUTHORIZED ACTION: on gokhan-lambda-vector as user atrott, materialize exact source b0466c03acb9d6b863df421e2c116c84bff312f6, verify Linux transaction blob 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, and execute benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh. Workspace Shell cannot perform this because the reviewed script requires network plus interactive sudo/tailscale root operations. At the Linux confirmation prompt type exactly STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS. The live attempt becomes consumed only when Linux then prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
+STAGE-12 V0.8 FAILED CLOSED BEFORE LIVE CONSUMPTION AND IS INVALIDATED UNCONSUMED. Exact Linux v2 blob 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca failed with REPO_URL unbound because physical line 18 contains exactly three literal \\n sequences joining HARNESS_REL, REPO_URL, CANDIDATE_BASELINE and WINDOWS_READY_MARKER. v0.9 review-only repair creates Linux v3 blob 3eb352f456d84de565514e2a7046e847ea0d25ea, replacing exactly those three two-byte sequences with real LF line breaks and changing no other Linux transaction byte. NEXT GATE: exact-head validate the v0.9 review candidate 3/3, then persist final validated review state and obtain fresh explicit operator approval. Do not execute Linux v3 under v0.8 authority.
 
 ## Remaining work
 
@@ -84,13 +84,12 @@ STAGE-12 V0.8 WINDOWS READY GATE IS SATISFIED. Exact Windows launcher is held at
 
 ## Blockers / gates
 
-- Stage-12 v0.1 authority is consumed by failed Attempt 01.
-- v0.2-v0.5 authorities are superseded unconsumed/non-reusable; v0.6 never produced authority; v0.7 authority is invalidated unconsumed/non-reusable.
-- v0.8 retains one validated exact live-attempt authority and remains unconsumed.
-- Windows v0.8 is now ready and held correctly at the final cleanup prompt after printing STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS.
-- The exact Linux v2 transaction requires the real atrott login, network access, interactive sudo, and sudo tailscale operations; Workspace Shell cannot execute it because those capabilities are intentionally forbidden.
-- At the Linux readiness confirmation prompt, the operator must type exactly STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS. Immediately after that, the Linux transaction prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS and the one live attempt becomes consumed.
-- After consumption, any success or failure consumes the one attempt; no silent retry or scope widening is authorized.
+- v0.8 authority is invalidated unconsumed/non-reusable after the exact Linux v2 transaction failed before live consumption with REPO_URL unbound.
+- Linux v2 blob 962cf39d… contains three literal backslash+n sequences joining four required declarations; bash -n did not catch the semantic defect.
+- v0.9 Linux v3 candidate blob 3eb352f456d84de565514e2a7046e847ea0d25ea repairs only those three sequences; fresh validation and fresh explicit operator approval are required before any live retry.
+- No changed Linux bytes may execute under v0.8 authority.
+- Candidate result branch remains exact baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de.
+- No browser/network/API/DB/GPU/Workspace Shell authority widening is authorized.
 
 ## Fresh-chat initialization
 

@@ -191,3 +191,7 @@
 
 - [x] 2026-11-18 v0.8 Windows ready gate re-established: `STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS`; PowerShell held at final cleanup prompt; e6e24ee0… passed #3021/#321/#594; candidate baseline unchanged.
 - [ ] Run exact Linux v2 transaction from source `b0466c03…`, verify blob `962cf39d…`, then type the exact Windows-ready marker at the Linux gate. Live authority is consumed only when Linux prints `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`.
+
+- [x] 2026-11-18 v0.8 Linux pre-live failed non-consumingly: exact v2 blob `962cf39d…` hit `REPO_URL: unbound variable` before the live marker; exact audit found three literal `\\n` sequences joining four declarations.
+- [x] v0.8 authority invalidated unconsumed/non-reusable; changed Linux bytes cannot inherit it.
+- [ ] v0.9 review-only Linux v3 candidate `3eb352f4…` changes only those three literal newline sequences to real LF bytes; validate 3/3, persist final review state, then obtain fresh explicit approval.

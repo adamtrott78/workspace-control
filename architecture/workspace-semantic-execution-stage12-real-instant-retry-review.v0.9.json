@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.9",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Repair the exact pre-live Linux v2 literal-newline declaration defect exposed by v0.8 execution while preserving all Windows, harness, private-route, result, and live-consumption boundaries.",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.8.json",
+    "prior_authority_status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+    "invalidated_unconsumed": true,
+    "windows_execution_started": true,
+    "windows_ready_marker_observed": true,
+    "linux_execution_started": true,
+    "live_authority_consumed": false,
+    "linux_failure": "REPO_URL unbound at line 102 before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "exact_candidate_bindings": {
+    "windows_executable_source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v3.sh",
+      "blob_sha": "3eb352f456d84de565514e2a7046e847ea0d25ea"
+    },
+    "linux_predecessor_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh",
+      "blob_sha": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.9.md",
+      "blob_sha": "5113b2e72db6d4bae15b94fe4ff204b71758b86f"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "linux_delta": {
+    "scope": "LINUX_DECLARATION_LINE_ENDINGS_ONLY",
+    "literal_backslash_n_occurrences_before": 3,
+    "literal_backslash_n_occurrences_after": 0,
+    "replacement": "each two-byte backslash+n sequence becomes one LF byte",
+    "affected_declarations": [
+      "HARNESS_REL",
+      "REPO_URL",
+      "CANDIDATE_BASELINE",
+      "WINDOWS_READY_MARKER"
+    ],
+    "no_other_linux_transaction_byte_change": true,
+    "v2_length": 10886,
+    "v3_length": 10883,
+    "length_delta": -3
+  },
+  "retained_safety": {
+    "required_windows_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+    "linux_live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_consumption_marker_is_non_consuming": true,
+    "candidate_baseline_recheck": true,
+    "private_route_only": true,
+    "tailscale_funnel": false,
+    "production_postgres_mutation": false,
+    "credential_automation": false,
+    "automatic_typing_or_submission": false,
+    "gpu_use": false,
+    "padataset_mutation": false
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "v08_authority_does_not_authorize_v09_linux_v3": true,
+    "explicit_fresh_operator_approval_required_after_validation": true,
+    "model_reasoning_is_not_authority": true
+  },
+  "validation": {
+    "candidate_head": null,
+    "workspace_control_run": null,
+    "semantic_execution_run": null,
+    "operator_bridge_run": null,
+    "result": "PENDING"
+  },
+  "postcondition": "v0.9 is review-only. No Linux v3 live action is authorized until candidate and final-state exact-head validation pass and fresh explicit operator approval binds the exact v0.9 procedure and Linux v3 blob."
+}
