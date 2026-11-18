@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.9",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Repair the exact pre-live Linux v2 literal-newline declaration defect exposed by v0.8 execution while preserving all Windows, harness, private-route, result, and live-consumption boundaries.",
   "predecessor": {
@@ -81,11 +81,14 @@
     "model_reasoning_is_not_authority": true
   },
   "validation": {
-    "candidate_head": null,
-    "workspace_control_run": null,
-    "semantic_execution_run": null,
-    "operator_bridge_run": null,
-    "result": "PENDING"
+    "candidate_head": "efaf5170bdb815007ff37b00f4fc6791417319c4",
+    "workspace_control_run": 3024,
+    "semantic_execution_run": 324,
+    "operator_bridge_run": 597,
+    "result": "SUCCESS",
+    "exact_head": true,
+    "linux_v3_literal_newline_regression": "PASS",
+    "bash_syntax_validation": "PASS"
   },
-  "postcondition": "v0.9 is review-only. No Linux v3 live action is authorized until candidate and final-state exact-head validation pass and fresh explicit operator approval binds the exact v0.9 procedure and Linux v3 blob."
+  "postcondition": "v0.9 review candidate is repository-validated at efaf5170bdb815007ff37b00f4fc6791417319c4 and grants zero live authority. Persist/final-state validation must pass before fresh explicit operator approval can bind procedure blob 5113b2e72db6d4bae15b94fe4ff204b71758b86f and Linux v3 blob 3eb352f456d84de565514e2a7046e847ea0d25ea."
 }

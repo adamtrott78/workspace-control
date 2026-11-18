@@ -195,3 +195,6 @@
 - [x] 2026-11-18 v0.8 Linux pre-live failed non-consumingly: exact v2 blob `962cf39d…` hit `REPO_URL: unbound variable` before the live marker; exact audit found three literal `\\n` sequences joining four declarations.
 - [x] v0.8 authority invalidated unconsumed/non-reusable; changed Linux bytes cannot inherit it.
 - [ ] v0.9 review-only Linux v3 candidate `3eb352f4…` changes only those three literal newline sequences to real LF bytes; validate 3/3, persist final review state, then obtain fresh explicit approval.
+
+- [x] v0.9 Linux declaration repair exact candidate `efaf5170…` passed Workspace #3024 / Semantic #324 / Operator #597.
+- [ ] **CURRENT GATE:** validate final v0.9 review-state persistence 3/3, then request fresh explicit v0.9 approval; v0.8 authority is not reusable.

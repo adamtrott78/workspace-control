@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.8 FAILED CLOSED BEFORE LIVE CONSUMPTION AND IS INVALIDATED UNCONSUMED. Exact Linux v2 blob 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca failed with REPO_URL unbound because physical line 18 contains exactly three literal \\n sequences joining HARNESS_REL, REPO_URL, CANDIDATE_BASELINE and WINDOWS_READY_MARKER. v0.9 review-only repair creates Linux v3 blob 3eb352f456d84de565514e2a7046e847ea0d25ea, replacing exactly those three two-byte sequences with real LF line breaks and changing no other Linux transaction byte. NEXT GATE: exact-head validate the v0.9 review candidate 3/3, then persist final validated review state and obtain fresh explicit operator approval. Do not execute Linux v3 under v0.8 authority.
+STAGE-12 V0.9 REVIEW CANDIDATE IS 3/3 VALIDATED AT efaf5170bdb815007ff37b00f4fc6791417319c4: Workspace #3024 / Semantic #324 / Operator #597 SUCCESS. Linux v3 blob 3eb352f456d84de565514e2a7046e847ea0d25ea changes only the three literal backslash+n sequences to real LF line breaks; Windows launcher, harness, candidate baseline, private-route and consumption semantics are unchanged. NEXT GATE: exact-head validate this final v0.9 validation-state persistence commit 3/3. Only after green obtain fresh explicit operator approval binding v0.9; v0.8 authority is invalidated unconsumed/non-reusable.
 
 ## Remaining work
 
@@ -84,12 +84,11 @@ STAGE-12 V0.8 FAILED CLOSED BEFORE LIVE CONSUMPTION AND IS INVALIDATED UNCONSUME
 
 ## Blockers / gates
 
-- v0.8 authority is invalidated unconsumed/non-reusable after the exact Linux v2 transaction failed before live consumption with REPO_URL unbound.
-- Linux v2 blob 962cf39d… contains three literal backslash+n sequences joining four required declarations; bash -n did not catch the semantic defect.
-- v0.9 Linux v3 candidate blob 3eb352f456d84de565514e2a7046e847ea0d25ea repairs only those three sequences; fresh validation and fresh explicit operator approval are required before any live retry.
-- No changed Linux bytes may execute under v0.8 authority.
-- Candidate result branch remains exact baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de.
-- No browser/network/API/DB/GPU/Workspace Shell authority widening is authorized.
+- v0.8 authority is invalidated unconsumed/non-reusable after Linux v2 failed before live consumption.
+- v0.9 Linux v3 review candidate efaf5170… is candidate-validated 3/3 (#3024/#324/#597).
+- This final v0.9 validation-state persistence commit must itself pass exact-head Workspace/Semantic/Operator validation before fresh approval may be requested.
+- No v0.9 live authority exists; v0.8 approval is not reusable.
+- No changed Linux bytes may execute without fresh explicit operator approval.
 
 ## Fresh-chat initialization
 
