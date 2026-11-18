@@ -32,6 +32,7 @@ AUTHORITY_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-in
 PROCEDURE_V9 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.9.md"
 REVIEW_V9 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.9.json"
 AUTHORITY_V9 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.9.json"
+TRAY_APPLICATION_CONTEXT = ROOT / "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -575,6 +576,22 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
             "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
         )
         self.assertEqual(authority["authority_consumption"]["attempts_authorized"], 1)
+
+    def test_stage12_local_prepared_invokes_native_firefox_foreground_fallback_before_capture(self) -> None:
+        text = TRAY_APPLICATION_CONTEXT.read_text(encoding="utf-8")
+        block_start = text.index(
+            "if (result.Outcome == DispatchOutcome.LocalPrepared)"
+        )
+        block_end = text.index(
+            "else if (result.Outcome == DispatchOutcome.NoAction)",
+            block_start,
+        )
+        block = text[block_start:block_end]
+        foreground = "_workerWindowSafety.ForegroundPreparedWorkerWindow();"
+        capture = "_workerWindowSafety.RecordPreparedWorkerWindow();"
+        self.assertIn(foreground, block)
+        self.assertIn(capture, block)
+        self.assertLess(block.index(foreground), block.index(capture))
 
 
 if __name__ == "__main__":

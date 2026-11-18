@@ -166,6 +166,7 @@ public sealed class TrayApplicationContext : ApplicationContext
             var result = await _dispatch.DispatchAsync();
             if (result.Outcome == DispatchOutcome.LocalPrepared)
             {
+                _workerWindowSafety.ForegroundPreparedWorkerWindow();
                 _workerWindowSafety.RecordPreparedWorkerWindow();
             }
             else if (result.Outcome == DispatchOutcome.NoAction)

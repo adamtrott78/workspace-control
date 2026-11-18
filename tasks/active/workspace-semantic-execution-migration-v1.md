@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.9 REMAINS AUTHORIZED AND UNCONSUMED AFTER PRE-LIVE CLEANUP ABORT 02. The Windows launcher cleanup prompt was submitted before Linux started; STAGE12_WINDOWS_CLEANUP=PASS printed and the outer wrapper then hit the known transient SharedContracts.dll lock. NEXT: perform only the bounded stale-stage cleanup for %TEMP%\workspace-control-stage12-retry-v7, close Firefox, rerun the exact unchanged v0.9 Windows command, authenticate/select Instant, press Enter once only at the manual-auth prompt, then STOP and leave the final cleanup prompt untouched. Linux v3 may start only after that fresh Windows-ready marker.
+STAGE-12 V0.9 LIVE ATTEMPT IS CONSUMED AND FAILED AT Q1 FOREGROUND ACTIVATION. Fail closed: terminate/allow the current Linux run to exit and verify exact Tailscale route restoration; then clean up the Windows helper. In parallel, validate the bounded repair candidate that adds the existing Win32 ForegroundPreparedWorkerWindow fallback to the LocalPrepared hotkey path before capturing the worker window. No manual Firefox focusing/pasting and no live retry under v0.9.
 
 ## Remaining work
 
@@ -84,11 +84,10 @@ STAGE-12 V0.9 REMAINS AUTHORIZED AND UNCONSUMED AFTER PRE-LIVE CLEANUP ABORT 02.
 
 ## Blockers / gates
 
-- v0.9 authority remains validated and unconsumed.
-- Current Windows runtime is gone because the final cleanup prompt was submitted before Linux started.
-- The temp checkout may remain because WorkspaceOperator cleanup races with outer Remove-Item and transiently locks SharedContracts.dll.
-- Before another Windows rerun, remove only the stale Stage-12 temp checkout after the bound WorkspaceOperator process has fully exited.
-- Do not start Linux until a fresh Windows v0.9 run prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS and the final cleanup prompt is left untouched.
+- v0.9 authority is consumed and non-reusable after Q1 Windows foreground activation failure.
+- Current Linux v0.9 run must be terminated/allowed to fail and restore the private Tailscale route before any retry.
+- Windows helper must be cleaned up after Linux cleanup completes.
+- A fresh Windows foreground-fallback repair candidate must pass repository validation, then fresh review/final-state validation, then explicit operator approval before another live attempt.
 
 ## Fresh-chat initialization
 

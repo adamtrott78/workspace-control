@@ -207,3 +207,7 @@
 
 - [x] 2026-11-18 v0.9 Windows pre-live cleanup abort 02: final cleanup prompt was submitted before Linux; launcher cleanup PASS, outer temp deletion raced on `SharedContracts.dll`; no live consumption marker; authority remains unconsumed.
 - [ ] Bounded stale-stage cleanup, then rerun exact unchanged v0.9 Windows command. At final cleanup prompt, do **not** press Enter until Linux reports Stage-12 result.
+
+- [x] Stage-12 v0.9 live authority consumed at `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`; Q1 exposed Windows foreground activation defect. No Q1 candidate accepted; v0.9 non-reusable.
+- [ ] Validate bounded foreground-fallback repair candidate: LocalPrepared hotkey path must invoke existing Win32 `ForegroundPreparedWorkerWindow()` before `RecordPreparedWorkerWindow()`.
+- [ ] After candidate validation, freeze fresh retry review/procedure and obtain new explicit operator approval before any live retry.

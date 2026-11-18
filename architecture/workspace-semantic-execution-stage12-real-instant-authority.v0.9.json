@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v0.9",
-  "status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+  "status": "CONSUMED_FAILED_STAGE12_Q1_WINDOWS_FOREGROUND_ACTIVATION_DEFECT",
   "purpose": "Fresh exact authority for one Stage-12 retry using validated v0.9 Linux declaration-line repair. v0.9 changes only three literal backslash+n byte pairs in the Linux transaction into real LF line breaks; Windows launcher, harness, candidate-result namespace, browser/network boundaries, and live-consumption semantics remain unchanged.",
   "approval_basis": {
     "authority_owner": "operator",
@@ -160,5 +160,25 @@
     "source_or_authority_branch_result_writes": false
   },
   "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, any success or failure consumes the one attempt. Do not install Node/npm or .NET, persistently edit PATH, mutate registry, widen execution policy/browser/network/API/DB/GPU/Workspace Shell/result authority, or silently retry.",
-  "postcondition": "This authority permits exactly one Stage-12 v0.9 retry under the exact bindings above and no later workload authority."
+  "postcondition": "v0.9 live authority was consumed at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS and failed at Q1 because the pinned Windows hotkey path did not invoke its existing native foreground fallback. This authority is non-reusable.",
+  "consumption_record": {
+    "consumed": true,
+    "consumed_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "consumed_marker_observed": true,
+    "windows_ready_gate_observed": true,
+    "q1_ready_observed": true,
+    "q1_candidate_published": false,
+    "candidate_branch_observed_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "failure_class": "WINDOWS_FOREGROUND_ACTIVATION_DEFECT",
+    "failure_observation": "At STAGE12_Q1_READY, Ctrl+Space did not bring isolated Firefox to the foreground. Exact pinned source activates the managed Firefox tab/window through the WebExtension but TrayApplicationContext does not invoke the existing Win32 ForegroundPreparedWorkerWindow fallback after LocalPrepared.",
+    "root_cause_source": {
+      "source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+      "tray_application_context_blob": "66ddfb3948e7ae648160e683f6c3fdcecacee51d",
+      "firefox_adapter_behavior": "ACTIVATE_WORKER_BINDING calls browser.tabs.update(active=true) and browser.windows.update(focused=true); OS-level foreground is not verified by that adapter result.",
+      "missing_call": "_workerWindowSafety.ForegroundPreparedWorkerWindow()",
+      "existing_native_fallback": "Win32WorkerWindowSafetyPort.ForegroundPreparedWorkerWindow() verifies GetForegroundWindow after SetForegroundWindow."
+    },
+    "reusable": false,
+    "retry_requires_fresh_diagnosis_review_validation_and_operator_approval": true
+  }
 }
