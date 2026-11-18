@@ -88,5 +88,13 @@
     "exact_head": true,
     "powershell_parser_regression": "PASS_WINDOWS_OPERATOR_VALIDATION"
   },
-  "postcondition": "v0.7 is repository-validated and grants zero live authority. The prior v0.6 approval does not authorize this changed procedure. Persist/final-state validation must pass before fresh explicit operator approval can bind v0.7."
+  "postcondition": "v0.7 procedure is validated and remains non-authoritative. Approval-gate state is being frozen from exact green head 8bc74726…; the freeze commit itself must pass Workspace/Semantic/Operator validation before fresh operator approval may be accepted.",
+  "final_state_validation": {
+    "validated_head": "8bc74726d29e4f718e4b54bbb61cfcbc7ee87a09",
+    "workspace_control_run": 3012,
+    "semantic_execution_run": 312,
+    "operator_bridge_run": 585,
+    "result": "SUCCESS",
+    "note": "6d546836… initially failed only because the regression test still expected pre-validation review status; 8bc74726… changed only that lifecycle assertion and bound it to the already-validated v0.7 evidence. No executable or authority bytes changed."
+  }
 }
