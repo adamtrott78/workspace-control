@@ -19,6 +19,7 @@ import json
 import os
 import shlex
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -298,93 +299,128 @@ def color_status(status):
 def render():
     cache = load_cache()
 
-    while True:
-        proc = process_rows()
-        counts = {}
-        rows_out = []
+    # Use the terminal alternate screen so refreshes overwrite one fixed frame
+    # instead of adding a new dashboard to tmux scrollback every second.
+    sys.stdout.write("\033[?1049h\033[?25l\033[H")
+    sys.stdout.flush()
 
-        for pair, trial, lane, rid in sorted(RUNS, key=lambda x: (x[0], x[1])):
-            rn = run_name(pair, trial)
-            local_terminal, progress = best_local_record(rn, proc)
+    try:
+        while True:
+            proc = process_rows()
+            counts = {}
+            rows_out = []
 
-            cached = cache["runs"].get(rn, {})
-            if local_terminal:
-                cached.update(local_terminal)
-                cache["runs"][rn] = cached
+            for pair, trial, lane, rid in sorted(RUNS, key=lambda x: (x[0], x[1])):
+                rn = run_name(pair, trial)
+                local_terminal, progress = best_local_record(rn, proc)
 
-            active = proc.get(rn)
-            if active:
-                status = "RUNNING"
-                elapsed = active.get("elapsed")
-                epoch, pct, eta = progress_fields(progress, elapsed)
-                total = None
-            else:
-                status = cached.get("status")
-                elapsed = None
-                eta = None
-                total = cached.get("total")
-                epoch, pct, _ = progress_fields(progress, None)
+                cached = cache["runs"].get(rn, {})
+                if local_terminal:
+                    cached.update(local_terminal)
+                    cache["runs"][rn] = cached
 
-                if not status:
-                    # A nonterminal artifact without a process is not evidence of queue state.
-                    if progress:
-                        status = "INCOMPLETE"
-                    else:
-                        status = "WAITING"
+                active = proc.get(rn)
+                if active:
+                    status = "RUNNING"
+                    elapsed = active.get("elapsed")
+                    epoch, pct, eta = progress_fields(progress, elapsed)
+                    total = None
+                else:
+                    status = cached.get("status")
+                    elapsed = None
+                    eta = None
+                    total = cached.get("total")
+                    epoch, pct, _ = progress_fields(progress, None)
 
-            counts[status] = counts.get(status, 0) + 1
-            rows_out.append(
-                (pair, trial, lane, status, epoch, pct, elapsed, eta, total, rid)
+                    if not status:
+                        # A nonterminal artifact without a process is not evidence of queue state.
+                        if progress:
+                            status = "INCOMPLETE"
+                        else:
+                            status = "WAITING"
+
+                counts[status] = counts.get(status, 0) + 1
+                rows_out.append(
+                    (pair, trial, lane, status, epoch, pct, elapsed, eta, total, rid)
+                )
+
+            cache["updated_at_epoch"] = time.time()
+            try:
+                save_cache(cache)
+            except Exception:
+                pass
+
+            frame = []
+            frame.append(BOLD + TITLE + RESET)
+            frame.append(
+                f"{len(RUNS)} immutable screen experiments | refresh {REFRESH_SEC:g}s | "
+                f"{time.strftime('%Y-%m-%d %H:%M:%S %Z')}"
             )
-
-        cache["updated_at_epoch"] = time.time()
-        try:
-            save_cache(cache)
-        except Exception:
-            pass
-
-        print("\033[2J\033[H", end="")
-        print(BOLD + TITLE + RESET)
-        print(
-            f"{len(RUNS)} immutable screen experiments | refresh {REFRESH_SEC:g}s | "
-            f"{time.strftime('%Y-%m-%d %H:%M:%S %Z')}"
-        )
-        print(DIM + "Source: LOCAL HOST ONLY — process table + /srv/workspace-ci result files + persistent local cache; GitHub API calls: 0" + RESET)
-        print(gpu_line())
-        print()
-        print(
-            BOLD
-            + f"{'EXPERIMENT':<19} {'GPU':<4} {'STATUS':<10} {'EPOCH':>7} "
-              f"{'PROG':>7} {'ELAPSED':>10} {'ETA LEFT':>10} {'TOTAL':>10} {'RUN ID':>12}"
-            + RESET
-        )
-        print("-" * 105)
-
-        for pair, trial, lane, status, epoch, pct, elapsed, eta, total, rid in rows_out:
-            prog = f"{pct:5.1f}%" if pct is not None else "-"
-            print(
-                f"{pair + ' ' + trial:<19} "
-                f"G{lane:<3} "
-                f"{color_status(status)} "
-                f"{epoch:>7} "
-                f"{prog:>7} "
-                f"{fmt(elapsed):>10} "
-                f"{('~' + fmt(eta)) if eta is not None else '-':>10} "
-                f"{fmt(total):>10} "
-                f"{rid:>12}"
+            frame.append(
+                DIM
+                + "Source: LOCAL HOST ONLY — process table + /srv/workspace-ci result files + persistent local cache; GitHub API calls: 0"
+                + RESET
             )
+            frame.append(gpu_line())
+            frame.append("")
+            frame.append(
+                BOLD
+                + f"{'EXPERIMENT':<19} {'GPU':<4} {'STATUS':<10} {'EPOCH':>7} "
+                  f"{'PROG':>7} {'ELAPSED':>10} {'ETA LEFT':>10} {'TOTAL':>10} {'RUN ID':>12}"
+                + RESET
+            )
+            frame.append("-" * 105)
 
-        print("-" * 105)
-        order = ["SUCCESS", "INFRA-OOM", "ERROR", "RUNNING", "WAITING", "INCOMPLETE"]
-        summary = "   ".join(f"{k} {counts.get(k, 0):2d}" for k in order if counts.get(k, 0))
-        print(summary or "No states observed")
-        print()
-        print(DIM + "RUNNING elapsed = local process age. ETA = local progress fraction extrapolation." + RESET)
-        print(DIM + "SUCCESS/ERROR total = pa_train_one.py elapsed_sec when locally observed/cached." + RESET)
-        print(DIM + "WAITING = admitted experiment not currently visible on this host; it does NOT claim GitHub queue state." + RESET)
-        print("Ctrl+B then D = detach tmux | Ctrl+C = stop dashboard")
+            for pair, trial, lane, status, epoch, pct, elapsed, eta, total, rid in rows_out:
+                prog = f"{pct:5.1f}%" if pct is not None else "-"
+                frame.append(
+                    f"{pair + ' ' + trial:<19} "
+                    f"G{lane:<3} "
+                    f"{color_status(status)} "
+                    f"{epoch:>7} "
+                    f"{prog:>7} "
+                    f"{fmt(elapsed):>10} "
+                    f"{('~' + fmt(eta)) if eta is not None else '-':>10} "
+                    f"{fmt(total):>10} "
+                    f"{rid:>12}"
+                )
 
-        time.sleep(REFRESH_SEC)
+            frame.append("-" * 105)
+            order = ["SUCCESS", "INFRA-OOM", "ERROR", "RUNNING", "WAITING", "INCOMPLETE"]
+            summary = "   ".join(
+                f"{k} {counts.get(k, 0):2d}"
+                for k in order
+                if counts.get(k, 0)
+            )
+            frame.append(summary or "No states observed")
+            frame.append("")
+            frame.append(
+                DIM
+                + "RUNNING elapsed = local process age. ETA = local progress fraction extrapolation."
+                + RESET
+            )
+            frame.append(
+                DIM
+                + "SUCCESS/ERROR total = pa_train_one.py elapsed_sec when locally observed/cached."
+                + RESET
+            )
+            frame.append(
+                DIM
+                + "WAITING = admitted experiment not currently visible on this host; it does NOT claim GitHub queue state."
+                + RESET
+            )
+            frame.append("Ctrl+B then D = detach tmux | Ctrl+C = stop dashboard")
+
+            # Home cursor, overwrite the fixed frame, then erase any remnants
+            # from a previously longer frame. Nothing is appended to scrollback.
+            sys.stdout.write("\033[H" + "\n".join(frame) + "\033[J")
+            sys.stdout.flush()
+
+            time.sleep(REFRESH_SEC)
+    finally:
+        # Restore cursor and the user's normal tmux screen/scrollback.
+        sys.stdout.write("\033[?25h\033[?1049l")
+        sys.stdout.flush()
 
 
 if __name__ == "__main__":
