@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.9 AUTHORITY IS VALIDATED. Exact authority head b3798222efe44e61752ffd1f2b38322018f9e0a6 passed Workspace #3026 / Semantic #326 / Operator #599. Authority blob f08bdab3f78bc926724e45510edfab2ecfa31fed binds final review a84eb08e…, procedure 5113b2e7…, Linux v3 3eb352f4…, unchanged harness 7b1feb8f…, Windows launcher d9d474ca…, and candidate baseline 0bc1bc0e…. NEXT AUTHORIZED ACTION: establish a fresh Windows v0.9 pre-live runtime using the exact one-line command in procedure v0.9. If the old v0.8 Windows process is still at its cleanup prompt, press Enter once to tear it down first. Then ensure all Firefox windows are closed and no stale %TEMP%\workspace-control-stage12-retry-v7 directory remains before rerunning the unchanged exact Windows command. Authenticate manually, select Instant manually, press Enter once at the manual-auth prompt, and leave the final cleanup prompt waiting. Do not start Linux v3 until STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS is printed for v0.9.
+STAGE-12 V0.9 REMAINS AUTHORIZED AND UNCONSUMED AFTER PRE-LIVE CLEANUP ABORT 02. The Windows launcher cleanup prompt was submitted before Linux started; STAGE12_WINDOWS_CLEANUP=PASS printed and the outer wrapper then hit the known transient SharedContracts.dll lock. NEXT: perform only the bounded stale-stage cleanup for %TEMP%\workspace-control-stage12-retry-v7, close Firefox, rerun the exact unchanged v0.9 Windows command, authenticate/select Instant, press Enter once only at the manual-auth prompt, then STOP and leave the final cleanup prompt untouched. Linux v3 may start only after that fresh Windows-ready marker.
 
 ## Remaining work
 
@@ -84,11 +84,11 @@ STAGE-12 V0.9 AUTHORITY IS VALIDATED. Exact authority head b3798222efe44e61752ff
 
 ## Blockers / gates
 
-- Stage-12 v0.9 authority is validated and permits exactly one live retry.
-- Windows v0.9 pre-live setup must be re-established first using the exact unchanged one-line procedure command.
-- Any leftover v0.8 Windows cleanup prompt/runtime must be torn down before starting the v0.9 Windows setup.
-- Linux v3 must not start until Windows prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS under the v0.9 run.
-- After STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, any success or failure consumes the one v0.9 attempt.
+- v0.9 authority remains validated and unconsumed.
+- Current Windows runtime is gone because the final cleanup prompt was submitted before Linux started.
+- The temp checkout may remain because WorkspaceOperator cleanup races with outer Remove-Item and transiently locks SharedContracts.dll.
+- Before another Windows rerun, remove only the stale Stage-12 temp checkout after the bound WorkspaceOperator process has fully exited.
+- Do not start Linux until a fresh Windows v0.9 run prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS and the final cleanup prompt is left untouched.
 
 ## Fresh-chat initialization
 

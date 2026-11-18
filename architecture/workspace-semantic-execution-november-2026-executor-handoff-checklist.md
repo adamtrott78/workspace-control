@@ -204,3 +204,6 @@
 
 - [x] v0.9 authority persistence `b3798222…` passed Workspace #3026 / Semantic #326 / Operator #599; authority blob `f08bdab3…` is validated for exactly one live attempt.
 - [ ] Re-establish fresh Windows v0.9 pre-live runtime; if old v0.8 cleanup prompt is still open, clean it first. Leave the new final cleanup prompt waiting after the Windows-ready marker.
+
+- [x] 2026-11-18 v0.9 Windows pre-live cleanup abort 02: final cleanup prompt was submitted before Linux; launcher cleanup PASS, outer temp deletion raced on `SharedContracts.dll`; no live consumption marker; authority remains unconsumed.
+- [ ] Bounded stale-stage cleanup, then rerun exact unchanged v0.9 Windows command. At final cleanup prompt, do **not** press Enter until Linux reports Stage-12 result.
