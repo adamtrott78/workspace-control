@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.8 AUTHORITY REMAINS UNCONSUMED AFTER A PRE-LIVE WINDOWS CLEANUP ABORT. The exact Windows launcher reached STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS, but its final cleanup prompt was advanced before Linux started, yielding STAGE12_WINDOWS_CLEANUP=PASS and tearing down the temporary Firefox/helper state. No STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS occurred; candidate branch remains baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. NEXT AUTHORIZED ACTION: restart the exact same reviewed v0.8 Windows one-line procedure under the existing authority. Authenticate manually and select Instant manually. At the first manual-auth prompt press Enter exactly once; when the later cleanup prompt appears, DO NOT press Enter. Leave Windows running. Only after the restarted Windows process prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS may Linux begin.
+STAGE-12 V0.8 AUTHORITY REMAINS UNCONSUMED. Two pre-live Windows restart failures occurred without Linux: first Firefox was still open; after Firefox was closed, the exact reviewed staging directory %TEMP%\workspace-control-stage12-retry-v7 remained from the failed launcher and triggered STAGE12_STAGE_DIRECTORY_ALREADY_EXISTS. Candidate branch remains baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. AUTHORIZED RECOVERY: with all Firefox windows closed, remove only %TEMP%\workspace-control-stage12-retry-v7 under the existing FAIL_CLOSED_AND_CLEAN_UP authority, then rerun the exact unchanged v0.8 Windows one-line procedure. Authenticate manually and select Instant manually. At the first manual-auth prompt press Enter exactly once; leave the later cleanup prompt waiting. Do not start Linux until STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS is printed again.
 
 ## Remaining work
 
@@ -86,11 +86,11 @@ STAGE-12 V0.8 AUTHORITY REMAINS UNCONSUMED AFTER A PRE-LIVE WINDOWS CLEANUP ABOR
 
 - Stage-12 v0.1 authority is consumed by failed Attempt 01.
 - v0.2-v0.5 authorities are superseded unconsumed/non-reusable; v0.6 never produced authority; v0.7 authority is invalidated unconsumed/non-reusable.
-- v0.8 retains one validated exact live-attempt authority; its first Windows pre-live run reached manual-auth/Instant confirmation but then cleaned up before Linux started.
-- The live v0.8 attempt remains unconsumed because STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS was never reached.
-- Restart the exact unchanged Windows v0.8 procedure and leave its final cleanup prompt waiting while Linux runs.
-- Linux must not start until the restarted Windows process again prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS.
-- After live consumption, any success or failure consumes the one attempt; no silent retry or scope widening is authorized.
+- v0.8 retains one validated exact live-attempt authority and remains unconsumed.
+- First restarted Windows pre-live invocation failed because Firefox was still open; second invocation then failed on the exact stale temp stage directory.
+- Before retry, all Firefox windows must be closed and only %TEMP%\workspace-control-stage12-retry-v7 may be removed as fail-closed cleanup.
+- After cleanup, rerun the exact unchanged v0.8 Windows procedure. Linux remains blocked until STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS appears again.
+- After STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, any success or failure consumes the one attempt; no silent retry or scope widening is authorized.
 
 ## Fresh-chat initialization
 
