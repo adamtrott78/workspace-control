@@ -519,8 +519,16 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         authority = json.loads(AUTHORITY_V9.read_text(encoding="utf-8"))
         self.assertEqual(
             authority["status"],
-            "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+            "CONSUMED_FAILED_STAGE12_Q1_WINDOWS_FOREGROUND_ACTIVATION_DEFECT",
         )
+        self.assertTrue(authority["consumption_record"]["consumed"])
+        self.assertTrue(
+            authority["consumption_record"]["consumed_marker_observed"]
+        )
+        self.assertFalse(
+            authority["consumption_record"]["q1_candidate_published"]
+        )
+        self.assertFalse(authority["consumption_record"]["reusable"])
         self.assertEqual(
             authority["approval_basis"]["approval_utterance"],
             "pls go yes authorize fuck",
