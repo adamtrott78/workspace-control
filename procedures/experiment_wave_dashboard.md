@@ -87,12 +87,14 @@ def fetch_runs():
     page = 1
 
     while True:
-        url = (
-            f"repos/{REPO}/actions/runs"
-            f"?event=issue_comment&per_page=100&page={page}"
-        )
         raw = subprocess.check_output(
-            ["gh", "api", "-X", "GET", url],
+            [
+                "gh", "api", "-X", "GET",
+                f"repos/{REPO}/actions/runs",
+                "-f", "event=issue_comment",
+                "-F", "per_page=100",
+                "-F", f"page={page}",
+            ],
             text=True,
             stderr=subprocess.PIPE,
         )
@@ -195,3 +197,14 @@ When a future worker is asked for "the same tmux/dashboard format":
 6. Refresh in place every 1 second by default; allow a slower override when provider/API limits require it.
 7. Keep the view read-only.
 8. Preserve tmux detach/reattach behavior.
+
+
+## Provider failure handling
+
+A provider/API failure must not cause the dashboard to hammer the provider every render tick.
+
+- Render clock: 1 second.
+- Normal provider poll clock: 5 seconds.
+- On provider poll failure: preserve the last good snapshot, surface the provider error in a compact status line, and wait at least 5 seconds before the next provider attempt.
+- Capture and display stderr from `gh api`; a non-zero exit code alone is not a diagnosis.
+- For GitHub CLI GET requests with query parameters, prefer explicit `-f/-F` fields over manually concatenating the query string. This avoids shell/CLI parsing ambiguity and makes failures easier to inspect.
