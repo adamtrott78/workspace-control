@@ -198,3 +198,6 @@
 
 - [x] v0.9 Linux declaration repair exact candidate `efaf5170…` passed Workspace #3024 / Semantic #324 / Operator #597.
 - [ ] **CURRENT GATE:** validate final v0.9 review-state persistence 3/3, then request fresh explicit v0.9 approval; v0.8 authority is not reusable.
+
+- [x] Fresh explicit v0.9 approval received: `pls go yes authorize fuck`; binds final review head `a84eb08e…`, review `de0139b…`, procedure `5113b2e7…`, Linux v3 `3eb352f4…`, unchanged harness/launcher, candidate baseline `0bc1bc0e…`.
+- [ ] Validate v0.9 authority-persistence head 3/3 before any Windows/Linux execution.

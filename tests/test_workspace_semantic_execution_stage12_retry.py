@@ -31,6 +31,7 @@ REVIEW_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-insta
 AUTHORITY_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.8.json"
 PROCEDURE_V9 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.9.md"
 REVIEW_V9 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.9.json"
+AUTHORITY_V9 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.9.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -510,6 +511,70 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertEqual(review["linux_delta"]["literal_backslash_n_occurrences_before"], 3)
         self.assertEqual(review["linux_delta"]["literal_backslash_n_occurrences_after"], 0)
         self.assertTrue(review["linux_delta"]["no_other_linux_transaction_byte_change"])
+
+    def test_v09_authority_binds_exact_validated_review_and_linux_v3(self) -> None:
+        import json
+
+        authority = json.loads(AUTHORITY_V9.read_text(encoding="utf-8"))
+        self.assertEqual(
+            authority["status"],
+            "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["approval_utterance"],
+            "pls go yes authorize fuck",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["approved_final_state_head"],
+            "a84eb08eeb8c7ccc45f73cf480589fd1c3a29f0a",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["approved_review_blob_sha"],
+            "de0139b45824924a8a7d3833469ddee264d10623",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["approved_procedure_blob_sha"],
+            "5113b2e72db6d4bae15b94fe4ff204b71758b86f",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["approved_linux_v3_blob_sha"],
+            "3eb352f456d84de565514e2a7046e847ea0d25ea",
+        )
+        self.assertEqual(
+            authority["approval_basis"]["candidate_validation"],
+            {
+                "workspace_control_run": 3024,
+                "semantic_execution_run": 324,
+                "operator_bridge_run": 597,
+                "result": "SUCCESS",
+            },
+        )
+        self.assertEqual(
+            authority["approval_basis"]["final_state_validation"],
+            {
+                "validated_head": "a84eb08eeb8c7ccc45f73cf480589fd1c3a29f0a",
+                "workspace_control_run": 3025,
+                "semantic_execution_run": 325,
+                "operator_bridge_run": 598,
+                "result": "SUCCESS",
+            },
+        )
+        self.assertEqual(
+            authority["predecessor_authority"]["prior_status"],
+            "INVALIDATED_UNCONSUMED_PRELIVE_LINUX_LITERAL_NEWLINE_DEFECT",
+        )
+        self.assertFalse(authority["predecessor_authority"]["consumed"])
+        self.assertTrue(authority["predecessor_authority"]["invalidated"])
+        self.assertFalse(authority["predecessor_authority"]["reusable"])
+        self.assertEqual(
+            authority["exact_authorized_execution"]["linux_transaction"]["blob_sha"],
+            "3eb352f456d84de565514e2a7046e847ea0d25ea",
+        )
+        self.assertEqual(
+            authority["exact_authorized_execution"]["candidate_result_branch"]["required_baseline_head"],
+            "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+        )
+        self.assertEqual(authority["authority_consumption"]["attempts_authorized"], 1)
 
 
 if __name__ == "__main__":
