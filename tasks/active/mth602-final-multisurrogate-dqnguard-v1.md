@@ -391,3 +391,38 @@ bash <(curl -fsSL "https://raw.githubusercontent.com/adamtrott78/PADataset/122f5
 ```
 
 Accept Phase 1 only after the probe reports `provenance_records_resolved=375`. Preserve/skip the first 120 overlays; do not use `--force`, do not run from `/tmp`, and do not widen Workspace Shell authority.
+
+### STFT canonical source-universe repair
+
+The local retry at `122f5d21e648498b4afaa6b857b69f39dbb18222` failed **before Phase 1** in the new all-source preflight on `ota_pa1_run01__shard_001__PA1.mat`.
+
+Repository production history establishes that this file is not part of the frozen unified-core experiment corpus:
+
+- final cache source is one `ota_core_high_run01` bank root;
+- each of 20 shards contributes exactly PA1 part 1, PA1 part 2, PA2, PA3, PA4, PA8;
+- all three protocols are included;
+- canonical source universe is therefore **3 × 20 × 6 = 360 records**.
+
+Generic directory discovery saw 375 files because 15 dedicated `ota_pa1_run01` artifacts are co-located in those directories. They must not be remapped into the core cache.
+
+Correct repair head: `a5cbd0d2a9e8e287d0288498735e5a4221ed3683`
+
+- freeze STFT source selection to the documented 360 canonical unified-core files;
+- fail closed on any missing canonical file;
+- count/ignore noncanonical extras;
+- restore strict exact source_path -> realpath -> protocol+basename provenance resolution; no basename-only fallback;
+- resolve all 360 canonical records before Phase 1;
+- preserve/skip the first 120 existing overlays;
+- Workspace Shell static contract `job-7a3c08ba-7511-403b-b898-576e1bd6bc3f`: **3 passed**;
+- CPU canary run `44236003500` / job `134572181770`: **SUCCESS**;
+- PR #21 remains **OPEN / DRAFT / UNMERGED**.
+
+Run only this exact head:
+
+```bash
+EXPECTED_SHA=a5cbd0d2a9e8e287d0288498735e5a4221ed3683 \
+CHECKOUT="$HOME/adamArchives/worktrees/PADataset-stft-track-ablation-v1" \
+bash <(curl -fsSL "https://raw.githubusercontent.com/adamtrott78/PADataset/a5cbd0d2a9e8e287d0288498735e5a4221ed3683/scripts/mth602/bootstrap_stft_track_ablation_persistent.sh")
+```
+
+Accept Phase 1 only when the probe reports `canonical_source_records=360` and `provenance_records_resolved=360`. Do not use `--force`, do not run from `/tmp`, and do not delete/rebuild the first 120 overlays.
