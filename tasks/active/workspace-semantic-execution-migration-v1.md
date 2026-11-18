@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.8 AUTHORITY IS VALIDATED. Exact authority head 26ca22aed80d06793ea21ac598d3b90ec53b96f4 passed Workspace #3018 / Semantic #318 / Operator #591. Authority blob 3b506265b05dc30e72d3e10ec42d2ce736fd6bc2 binds procedure blob 58c714ba5c0c6e6dee337ce70f0c4b550e65a87c, source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. NEXT AUTHORIZED ACTION: execute the exact reviewed Windows v0.8 one-line PowerShell command. Authenticate manually to normal ChatGPT and select Instant manually. Do not start Linux until Windows prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS. The live attempt remains unconsumed until Linux prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
+STAGE-12 V0.8 AUTHORITY REMAINS UNCONSUMED AFTER A PRE-LIVE WINDOWS CLEANUP ABORT. The exact Windows launcher reached STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS, but its final cleanup prompt was advanced before Linux started, yielding STAGE12_WINDOWS_CLEANUP=PASS and tearing down the temporary Firefox/helper state. No STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS occurred; candidate branch remains baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de. NEXT AUTHORIZED ACTION: restart the exact same reviewed v0.8 Windows one-line procedure under the existing authority. Authenticate manually and select Instant manually. At the first manual-auth prompt press Enter exactly once; when the later cleanup prompt appears, DO NOT press Enter. Leave Windows running. Only after the restarted Windows process prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS may Linux begin.
 
 ## Remaining work
 
@@ -86,10 +86,11 @@ STAGE-12 V0.8 AUTHORITY IS VALIDATED. Exact authority head 26ca22aed80d06793ea21
 
 - Stage-12 v0.1 authority is consumed by failed Attempt 01.
 - v0.2-v0.5 authorities are superseded unconsumed/non-reusable; v0.6 never produced authority; v0.7 authority is invalidated unconsumed/non-reusable.
-- v0.8 has one validated exact live-attempt authority at 26ca22ae… (#3018/#318/#591).
-- Windows v0.8 must run first and reach STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS before Linux may start.
-- Live consumption occurs only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS; after that marker any success or failure consumes the one attempt.
-- No silent retry, Node/.NET install, persistent PATH/registry/policy mutation, browser/network widening, production DB mutation, GPU/PADataset mutation, or generic Workspace Shell widening is authorized.
+- v0.8 retains one validated exact live-attempt authority; its first Windows pre-live run reached manual-auth/Instant confirmation but then cleaned up before Linux started.
+- The live v0.8 attempt remains unconsumed because STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS was never reached.
+- Restart the exact unchanged Windows v0.8 procedure and leave its final cleanup prompt waiting while Linux runs.
+- Linux must not start until the restarted Windows process again prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS.
+- After live consumption, any success or failure consumes the one attempt; no silent retry or scope widening is authorized.
 
 ## Fresh-chat initialization
 
