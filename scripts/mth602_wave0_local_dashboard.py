@@ -17,6 +17,7 @@ from __future__ import annotations
 import glob
 import json
 import os
+import pwd
 import shlex
 import subprocess
 import sys
@@ -25,7 +26,19 @@ from pathlib import Path
 
 TITLE = "MTH602 H1 WEAK-BACKBONE HPO — WAVE 0 LOCAL DASHBOARD"
 REFRESH_SEC = 1.0
-CACHE = Path.home() / ".cache/workspace-control/experiment-dashboards/mth602-h1-wave0.json"
+
+OBSERVER_ELEVATED = os.geteuid() == 0
+if OBSERVER_ELEVATED and os.environ.get("SUDO_USER"):
+    _pw = pwd.getpwnam(os.environ["SUDO_USER"])
+    OPERATOR_HOME = Path(_pw.pw_dir)
+    OPERATOR_UID = _pw.pw_uid
+    OPERATOR_GID = _pw.pw_gid
+else:
+    OPERATOR_HOME = Path.home()
+    OPERATOR_UID = os.getuid()
+    OPERATOR_GID = os.getgid()
+
+CACHE = OPERATOR_HOME / ".cache/workspace-control/experiment-dashboards/mth602-h1-wave0.json"
 
 # Immutable admission mapping. lane is the experiment lane, not nvidia-smi index.
 RUNS = [
@@ -67,9 +80,11 @@ SEED = {
     "l2o_hpo_v2_PA2_PA3_t002_screen": {"status": "INFRA-OOM"},
     "l2o_hpo_v2_PA2_PA8_t002_screen": {"status": "INFRA-OOM"},
     "l2o_hpo_v2_PA3_PA8_t002_screen": {"status": "INFRA-OOM"},
+    "l2o_hpo_v2_PA2_PA3_t003_screen": {"status": "SUCCESS", "total": 2076.7},
     "l2o_hpo_v2_PA2_PA3_t004_screen": {"status": "SUCCESS", "total": 2019.8},
     "l2o_hpo_v2_PA2_PA8_t004_screen": {"status": "SUCCESS", "total": 2021.4},
     "l2o_hpo_v2_PA2_PA3_t006_screen": {"status": "SUCCESS", "total": 2010.2},
+    "l2o_hpo_v2_PA2_PA8_t006_screen": {"status": "SUCCESS", "total": 2021.9},
 }
 
 RESET = "\033[0m"
@@ -122,10 +137,34 @@ def load_cache():
 
 
 def save_cache(cache):
-    CACHE.parent.mkdir(parents=True, exist_ok=True)
+    # When invoked with sudo, keep the persistent cache owned by the operator,
+    # not root, so later unprivileged inspection remains possible.
+    chain = [
+        OPERATOR_HOME / ".cache",
+        OPERATOR_HOME / ".cache/workspace-control",
+        OPERATOR_HOME / ".cache/workspace-control/experiment-dashboards",
+    ]
+    for d in chain:
+        d.mkdir(exist_ok=True)
+        if OBSERVER_ELEVATED:
+            try:
+                os.chown(d, OPERATOR_UID, OPERATOR_GID)
+            except OSError:
+                pass
+
     tmp = CACHE.with_suffix(".tmp")
     tmp.write_text(json.dumps(cache, indent=2, sort_keys=True) + "\n")
+    if OBSERVER_ELEVATED:
+        try:
+            os.chown(tmp, OPERATOR_UID, OPERATOR_GID)
+        except OSError:
+            pass
     tmp.replace(CACHE)
+    if OBSERVER_ELEVATED:
+        try:
+            os.chown(CACHE, OPERATOR_UID, OPERATOR_GID)
+        except OSError:
+            pass
 
 
 def gpu_line():
@@ -293,6 +332,8 @@ def color_status(status):
         return MAGENTA + f"{status:<10}" + RESET
     if status == "WAITING":
         return CYAN + f"{status:<10}" + RESET
+    if status == "HIDDEN":
+        return MAGENTA + f"{status:<10}" + RESET
     return GRAY + f"{status:<10}" + RESET
 
 
@@ -333,11 +374,14 @@ def render():
                     epoch, pct, _ = progress_fields(progress, None)
 
                     if not status:
-                        # A nonterminal artifact without a process is not evidence of queue state.
+                        # Without root, systemd ProtectProc/runner directory isolation can hide
+                        # a real scientific job. Never mislabel that as WAITING.
                         if progress:
                             status = "INCOMPLETE"
-                        else:
+                        elif OBSERVER_ELEVATED:
                             status = "WAITING"
+                        else:
+                            status = "HIDDEN"
 
                 counts[status] = counts.get(status, 0) + 1
                 rows_out.append(
@@ -358,9 +402,19 @@ def render():
             )
             frame.append(
                 DIM
-                + "Source: LOCAL HOST ONLY — process table + /srv/workspace-ci result files + persistent local cache; GitHub API calls: 0"
+                + (
+                    "Source: HOST ROOT OBSERVER — isolated runner process/result telemetry + persistent local cache; GitHub API calls: 0"
+                    if OBSERVER_ELEVATED
+                    else "Source: LIMITED USER VIEW — isolated runners may be hidden; rerun with sudo for exact local state; GitHub API calls: 0"
+                )
                 + RESET
             )
+            if not OBSERVER_ELEVATED:
+                frame.append(
+                    RED
+                    + "WARNING: this user cannot reliably observe ci-padataset/ci-padataset-2 runner state. Use: sudo -E python3 <dashboard>"
+                    + RESET
+                )
             frame.append(gpu_line())
             frame.append("")
             frame.append(
@@ -386,7 +440,7 @@ def render():
                 )
 
             frame.append("-" * 105)
-            order = ["SUCCESS", "INFRA-OOM", "ERROR", "RUNNING", "WAITING", "INCOMPLETE"]
+            order = ["SUCCESS", "INFRA-OOM", "ERROR", "RUNNING", "WAITING", "INCOMPLETE", "HIDDEN"]
             summary = "   ".join(
                 f"{k} {counts.get(k, 0):2d}"
                 for k in order
@@ -406,7 +460,11 @@ def render():
             )
             frame.append(
                 DIM
-                + "WAITING = admitted experiment not currently visible on this host; it does NOT claim GitHub queue state."
+                + (
+                    "WAITING = admitted experiment not dispatched on this host yet; it does NOT claim GitHub queue state."
+                    if OBSERVER_ELEVATED
+                    else "HIDDEN = exact runner state is protected from the current user; use sudo observer mode."
+                )
                 + RESET
             )
             frame.append("Ctrl+B then D = detach tmux | Ctrl+C = stop dashboard")
