@@ -188,3 +188,6 @@
 
 - [x] 2026-11-18 v0.8 restart cleanup 02: Firefox-open guard failed closed; after manual Firefox close, stale `%TEMP%\workspace-control-stage12-retry-v7` blocked rerun. No Linux/live marker; authority remains unconsumed.
 - [ ] Remove only the exact stale temp staging directory under fail-closed cleanup authority, then rerun the exact unchanged Windows v0.8 command with Firefox closed.
+
+- [x] 2026-11-18 v0.8 Windows ready gate re-established: `STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS`; PowerShell held at final cleanup prompt; e6e24ee0… passed #3021/#321/#594; candidate baseline unchanged.
+- [ ] Run exact Linux v2 transaction from source `b0466c03…`, verify blob `962cf39d…`, then type the exact Windows-ready marker at the Linux gate. Live authority is consumed only when Linux prints `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`.
