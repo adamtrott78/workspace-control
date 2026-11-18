@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v0.5",
-  "status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+  "status": "SUPERSEDED_UNCONSUMED_BY_STAGE12_V07_AUTHORITY",
   "purpose": "Fresh exact authority for one Stage-12 retry using validated v0.5 Windows pre-live repair. v0.5 adds only the known existing user-profile .NET SDK location %USERPROFILE%\\.dotnet\\dotnet.exe to the bounded discovery list; pinned launcher/Linux/harness bytes and all browser/network/result boundaries remain unchanged.",
   "approval_basis": {
     "authority_owner": "operator",
@@ -141,5 +141,13 @@
     "source_or_authority_branch_result_writes": false
   },
   "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, any success or failure consumes the one attempt. Do not install .NET, persistently edit PATH, widen execution policy/browser/network/API/DB/GPU/Workspace Shell/result authority, or silently retry.",
-  "postcondition": "This authority permits exactly one Stage-12 retry under v0.5 and no later workload authority."
+  "postcondition": "This v0.5 authority was never consumed, but it is superseded and non-reusable. It authorizes no further Windows or Linux Stage-12 action.",
+  "supersession_record": {
+    "superseded": true,
+    "superseded_date": "2026-11-18",
+    "consumed": false,
+    "reason": "v0.5 Windows pre-live setup failed before live consumption because npm.cmd was not resolvable. v0.6 approval was never persisted after its procedure was found malformed. Separately reviewed and validated v0.7 repairs only operator-side PowerShell/Node binding construction and now has fresh exact operator approval.",
+    "successor_authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.7.json",
+    "reusable": false
+  }
 }
