@@ -397,8 +397,18 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         authority = json.loads(AUTHORITY_V8.read_text(encoding="utf-8"))
         self.assertEqual(
             authority["status"],
-            "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+            "INVALIDATED_UNCONSUMED_PRELIVE_LINUX_LITERAL_NEWLINE_DEFECT",
         )
+        self.assertTrue(authority["invalidation_record"]["invalidated"])
+        self.assertFalse(authority["invalidation_record"]["consumed"])
+        self.assertFalse(
+            authority["invalidation_record"]["live_authority_consumption_marker_observed"]
+        )
+        self.assertEqual(
+            authority["invalidation_record"]["failure_marker"],
+            "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh: line 102: REPO_URL: unbound variable",
+        )
+        self.assertFalse(authority["invalidation_record"]["reusable"])
         self.assertEqual(
             authority["approval_basis"]["approved_final_state_head"],
             "fc2921819bb61f110004add32563d34df66dfa84",
