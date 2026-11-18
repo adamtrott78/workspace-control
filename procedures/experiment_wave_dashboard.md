@@ -160,3 +160,32 @@ When a future worker is asked for "the same dashboard/tmux format":
 8. Keep provider IDs as metadata only.
 9. Make **zero automatic provider API calls** from the dashboard.
 10. Keep the dashboard read-only; it must not retry, cancel, kill, promote, merge, or otherwise mutate execution state.
+
+
+## Accepted live reference — MTH602 H1 wave0
+
+Validated by the operator on 2026-11-18 at approximately 14:02 EST using the elevated local observer.
+
+Observed properties:
+
+- fixed alternate-screen rendering; no scrollback spam;
+- 1-second display refresh;
+- zero GitHub API calls;
+- both isolated scientific GPU lanes visible simultaneously;
+- local GPU utilization/memory visible;
+- live per-run epoch, progress percentage, process elapsed, and extrapolated ETA;
+- terminal success and infrastructure-OOM states retained in the persistent operator-owned cache;
+- immutable provider run IDs displayed only as identity metadata.
+
+Representative validated state:
+
+```text
+SUCCESS  8   INFRA-OOM  6   RUNNING  2   WAITING  8
+
+PA3-PA8 t003   G1   RUNNING   3/8   28.9%   05:51   ~14:22
+PA3-PA8 t006   G0   RUNNING   1/8   11.8%   03:42   ~27:44
+```
+
+At the same instant, host-local GPU telemetry showed both GPUs actively utilized, confirming the root observer could see both isolated scientific lanes correctly.
+
+This implementation is the reusable default for future experiment-wave dashboards unless a future execution backend provides an equally local, read-only telemetry surface with stronger provenance.
