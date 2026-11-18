@@ -14,8 +14,8 @@ This document supersedes the earlier assumption that the experimental program wa
 - [x] Work aggressively while time remains.
 - [x] Before the earliest deliverable deadline, pivot to a durable complete project checkpoint with a coherent narrative, finished report, and finished slide presentation.
 - [x] Preserve enough exact experiment/provenance state that the journal program can resume after finals without reconstructing decisions from chat history.
-- [ ] Record the exact MTH602 due date when known.
-- [ ] Research-to-deliverables pivot must occur early enough that both report and slides are complete before the earlier of the course due date and 2026-12-01.
+- [x] MTH602 hard due date: **2026-12-09**.
+- [x] Target completion date for both report and slides: **2026-12-01**. The 2026-12-09 course deadline is contingency slack, not the normal research target.
 
 ### 0.2 Hypothesis priority
 
@@ -134,9 +134,7 @@ The immediate target-open OSR evaluations are an **exploratory investment gate**
 
 ### A1 decision gate
 
-**Not yet frozen:** the phrase “improve significantly” needs a practical-effect threshold before launch.
-
-Proposed default pilot gate:
+**FROZEN by operator:** practical-effect pilot gate:
 - mean directional Unknown-F1 improvement for each repaired weak backbone >= +0.05 absolute versus the current repaired baseline; and
 - neither direction regresses by more than 0.02 absolute; and
 - known-reject budget remains satisfied.
@@ -320,12 +318,22 @@ Proposed strong control:
 6. [ ] Measure Unknown F1, OSR macro-F1, AUROC, known rejection, per-class known confusion, and training stability.
 7. [ ] Explicitly label PA1/PA4-motivated representation work as post-hoc/exploratory because the trajectory diagnostic already inspected those labels.
 
-### Expansion gate
+### Expansion gate — FROZEN
 
-- [ ] Freeze a quantitative expansion rule before pilot target results are inspected.
-- [ ] If STFT replacement or augmentation clears the rule, expand the winning representation to all 10 canonical pairs / 20 directional cells.
-- [ ] If replacement helps PA1↔PA4 but harms controls, prioritize R2 augmentation over wholesale FFT replacement.
-- [ ] If neither R1 nor R2 provides useful end-to-end benefit, stop H3 and preserve the mechanism diagnostic as a negative/interpretive result.
+Select the better of R1 (STFT replacement) and R2 (FFT+STFT) on the predeclared pilot set using standard DQNGuard.
+
+Expand the winning representation to the full matrix only if all are true:
+- aggregate mean directional Unknown-F1 improvement across the **three PA1/PA4-confounded pilot pairs** is >= **+0.05 absolute** versus matched R0 FFT;
+- no relevant pilot direction regresses by more than **0.02 absolute**;
+- the strong control pair PA1-PA2 has mean two-direction Unknown-F1 change >= **-0.02**;
+- known-reject budget remains satisfied.
+
+The three confounded pairs and PA1-PA2 are exploratory/development evidence because they motivate/select the representation. The remaining canonical pairs become the cleaner confirmatory expansion set. Full-matrix reporting must keep pilot/development versus confirmatory status explicit.
+
+- [x] Quantitative STFT expansion rule frozen before target-open pilot inspection.
+- [ ] If R1/R2 clears the rule, expand to all 10 canonical pairs / 20 directional cells.
+- [ ] If replacement helps the confounded pairs but hurts control, prefer testing R2 augmentation over wholesale replacement.
+- [ ] If neither R1 nor R2 clears the gate, stop H3 and preserve the mechanism diagnostic as a negative/interpretive result.
 
 ---
 
@@ -357,7 +365,7 @@ Future implementation candidates:
 
 # 5. CATEGORY E — Final replication / variance program
 
-Operator-selected rigor level: **full factorial 5 partition seeds × 10 training/model seeds** for the final frozen configuration.
+Operator-selected rigor level: **full factorial 5 partition seeds × 10 backbone training/model seeds** for the final frozen configuration. Where provenance and seed semantics match the final frozen design, the existing initial matrix/run may count as the first seed rather than being needlessly duplicated.
 
 ## E1. Freeze before replication
 
@@ -422,18 +430,16 @@ Do **not** silently multiply the main design by a DQN-seed axis without explicit
 
 ## G1. Deadline policy
 
-Deliverables must be complete before the earlier of:
-- the actual MTH602 project due date; or
-- 2026-12-01.
+- **Target report + slide completion:** 2026-12-01.
+- **Hard MTH602 course deadline:** 2026-12-09.
+- The Dec. 1 target exists to preserve time for finals preparation and to avoid dependence on late-November/December model/tool availability.
 
-Exact course due date is currently **TBD**.
-
-Proposed operating rule:
-- research continues aggressively until **5 days remain before the earliest deadline**;
-- at that point, stop opening new experiment branches unless required to complete an already-selected core result;
-- freeze a durable project evidence checkpoint and pivot to deliverables.
-
-This buffer is a proposed default and can be tightened/relaxed once the exact due date is recorded.
+Operating rule:
+- research proceeds aggressively now;
+- by **2026-11-26** (five days before the Dec. 1 target), reassess whether any newly opened experiment can finish, validate, and materially improve the MTH602 narrative without threatening deliverables;
+- after that checkpoint, default to finishing already-selected core experiments and producing the report/slides;
+- extend research past Dec. 1 only deliberately if a near-complete high-value result justifies using some of the contingency window before Dec. 9;
+- regardless of journal ambitions, no MTH602 deliverable may depend on an unfinished experiment after the final pivot.
 
 ## G2. Minimum complete project checkpoint before pivot
 
@@ -529,10 +535,13 @@ No claim is made here that a correction is required.
 
 # 11. Unresolved decisions that do NOT block the first weak-backbone pilot
 
-1. **Exact MTH602 due date.** Needed for the hard pivot calendar.
-2. **Pilot “significant improvement” threshold.** Proposed default: mean two-direction ΔUnknown-F1 >= +0.05, no direction worse than -0.02.
-3. **Epoch-stability metric/threshold.** Capture traces now; freeze criterion only if the weak pilot shows it is needed.
-4. **STFT expansion threshold.** Must be frozen before STFT target-open pilot results are inspected.
-5. **DQN seed axis in final replication.** Proposed: fixed in main 5×10; separate sensitivity study.
-6. **Exact partition/model seed lists.** Freeze before final replication.
-7. **Exact journal article scope.** Intentionally deferred until MTH602 results reveal which of H1/H2/H4/H5 are strongest.
+1. **Epoch-stability metric/threshold.** Capture traces now; freeze the criterion after the initial weak-backbone pilot if it proves useful.
+2. **DQN seed axis in final replication.** Proposed: fixed in main 5×10; separate sensitivity study.
+3. **Exact partition/model seed lists.** Freeze before final replication.
+4. **Exact journal article scope.** Intentionally deferred until MTH602 results reveal which of H1/H2/H4/H5 are strongest.
+
+Resolved:
+- MTH602 hard due date = 2026-12-09; target deliverable completion = 2026-12-01.
+- H1 practical pilot gate accepted: mean two-direction ΔUnknown-F1 >= +0.05, no direction worse than -0.02, known-reject budget satisfied.
+- STFT expansion gate frozen above.
+- final robustness = 5 partitions × 10 backbone training/model seeds; compatible existing initial run may serve as seed 1.
