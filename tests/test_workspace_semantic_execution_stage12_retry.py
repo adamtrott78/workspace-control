@@ -307,11 +307,14 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertNotIn("npm install -g", command.lower())
         self.assertNotIn("setx", command.lower())
 
-    def test_v07_review_is_not_authority_and_keeps_executable_bindings(self) -> None:
+    def test_v07_validated_review_is_not_authority_and_keeps_exact_bindings(self) -> None:
         import json
 
         review = json.loads(REVIEW_V7.read_text(encoding="utf-8"))
-        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertEqual(
+            review["status"],
+            "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
+        )
         self.assertFalse(review["authority_gate"]["live_retry_authorized"])
         self.assertTrue(
             review["authority_gate"]["v06_operator_approval_does_not_authorize_v07_procedure"]
@@ -325,6 +328,14 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
             review["exact_candidate_bindings"]["windows_operator_launcher"]["blob_sha"],
             "d9d474ca6870585c9e4767f551086e17b4525fbc",
         )
+        self.assertEqual(
+            review["validation"]["candidate_head"],
+            "215287bb1bb49b90d5cf207fb4ebf368a57c7ec3",
+        )
+        self.assertEqual(review["validation"]["workspace_control_run"], 3010)
+        self.assertEqual(review["validation"]["semantic_execution_run"], 310)
+        self.assertEqual(review["validation"]["operator_bridge_run"], 583)
+        self.assertEqual(review["validation"]["result"], "SUCCESS")
 
 
 if __name__ == "__main__":
