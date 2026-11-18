@@ -540,92 +540,105 @@ No new GPU job, merge, or trust widening is authorized by this planning intervie
 
 ## Fresh-chat checkpoint — H1 HPO wave0 live
 
-This section supersedes the earlier GPU0-blocked snapshot. The authoritative source remains the JSON capsule.
+This section supersedes earlier wave0 snapshots. The authoritative source remains the JSON capsule.
 
 ### Exact bindings
 
-- Workspace Control PR #640 head at checkpoint: `67e5d7a30ab9ce58c474376802f3ffd693a41281`
-- PADataset HPO controller PR #37: **OPEN / DRAFT / UNMERGED**
-- PR #37 exact live-wave head: `8b176ce931a1d802127ec2591d38ad0a4cedafb4`
-- 24/24 immutable wave0 screen jobs admitted exactly once: 8 trial vectors × 3 weak canonical pairs
-- lane split: 12 GPU0 / 12 GPU1
+- Workspace Control PR #640 pre-checkpoint head: `eede3734422caf2b901cbf1cd5221a4a366e168a`
+- PADataset PR #37: **OPEN / DRAFT / UNMERGED**
+- exact live-wave head: `8b176ce931a1d802127ec2591d38ad0a4cedafb4`
+- 24/24 immutable screen jobs admitted exactly once; duplicates: 0
+- current snapshot: **4 SUCCESS / 6 infrastructure FAILURE / 2 IN_PROGRESS / 12 QUEUED**
 - **Do not advance PR #37 head while any exact-head-bound wave0 job is queued/running.**
 - No merge authority is implied.
 
-### GPU0 recovery
+### Strict known-validation ingestion
 
-GPU0 originally produced four deterministic pre-epoch infrastructure OOM failures because unrelated host-local processes consumed nearly all VRAM. Those runs contain **no scientific HPO evidence**.
+Validated downstream extractor/ranker:
+- branch `mth602-l2o-hpo-audit-v2`
+- head `2e02e098245c2e3c877666174fcafd38dfb03056`
+- extractor blob `2522663949d62eddfb106017de0d8f8e91528004`
+- ranker blob `371ec41e496c48ed10c4ceac9904f4d1b31c809d`
+- validation receipt `job-d0af3549-8c72-445d-a723-a4d53ee082b5` — **21 passed**
 
-GPU0 subsequently recovered without authority widening or process killing:
+Ranking rule from the reviewed code/tests:
+`min-class feasible (>=0.90) first -> val macro-F1 -> val min-class F1`.
 
-- `PA2-PA3__t004__screen`
-- run `44343691752`
-- job `134940231711`
-- **SUCCESS**
-- artifact `14448887969`
-- digest `sha256:10b264f29ad7e8440f7081aaf68741e74125cd52647bd890aed07d677a39e3d3`
-- best epoch `7`
-- best known-val macro-F1 `0.9636429463079487`
-- known-test macro-F1 `0.9629794380523286`
-- `target_test_consumed=false`
+Target/test/OSR fields are forbidden from ranking input.
 
-The epoch trace is highly unstable (e.g. macro-F1 ~0.167 on epochs 3/4/6, then ~0.964 on epoch 7), which reinforces the separate stability analysis. **Do not declare the pair competency-qualified from macro-F1 alone; the frozen gate also requires min-class validation F1 >= 0.90 and controller/extractor confirmation.**
+Successful screens ingested so far:
 
-Current GPU0 trial at checkpoint:
-- `PA2-PA8__t004__screen`
-- run `44343698092`
-- job `134940254925`
-- **IN_PROGRESS**
+| Trial | Run | Artifact | Best epoch | Known-val macro-F1 | Min-class val F1 | Screen gate |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| PA2-PA3 t001 | 44343604175 | 14448511271 | 3 | 0.9155588 | 0.8602978 | fail |
+| PA2-PA8 t001 | 44343612614 | 14452562651 | 5 | 0.9532694 | 0.9255079 | pass |
+| PA2-PA3 t004 | 44343691752 | 14448887969 | 7 | 0.9636429 | 0.9453491 | pass |
+| PA2-PA8 t004 | 44343698092 | 14453324498 | 7 | 0.9023084 | 0.8369748 | fail |
 
-### GPU1 live
+Current provisional successful-only ordering:
+- PA2-PA3: `t004 > t001`; current winner clears both screen thresholds.
+- PA2-PA8: `t001 > t004`; current winner clears both screen thresholds.
+- PA3-PA8: no successful screen artifact ingested yet.
 
-Current GPU1 trial at checkpoint:
-- `PA2-PA8__t001__screen`
-- run `44343612614`
-- job `134939950045`
-- **IN_PROGRESS**
+These are **not promotions and not freezes**. The bounded screen wave is still incomplete, and only a terminal finalist may freeze a pair.
 
-Existing GPU1 queue should continue. Do not duplicate requests.
+### Infrastructure-only failures
 
-### Earlier GPU0 OOM trials
+Six GPU0 trials are excluded from scientific ranking because CUDA OOM occurred before usable scientific evidence:
 
-Four earlier wave0 instances failed before completing epoch 1 and are excluded from HPO ranking:
+- PA2-PA3 t000 — run 44343583046
+- PA2-PA8 t000 — run 44343586571
+- PA3-PA8 t000 — run 44343593644
+- PA2-PA3 t002 — run 44343625925
+- PA2-PA8 t002 — run 44343634712 / job 134940029562 / tiny failure artifact 14444819572
+- PA3-PA8 t002 — run 44343640671 / job 134940050111 / tiny failure artifact 14446805993
 
-- `PA2-PA3__t000__screen`
-- `PA2-PA8__t000__screen`
-- `PA3-PA8__t000__screen`
-- `PA2-PA3__t002__screen`
+The two newly confirmed t002 failures have the same external-VRAM OOM signature as the earlier failures. **Do not retry them while the admitted queue is still progressing.** After wave ingestion, the deterministic controller may decide whether any missing trial needs one infrastructure retry; that decision must remain target/test/OSR-blind.
 
-Now that GPU0 has recovered, **do not automatically resubmit them**. First let the admitted wave progress and ingest the available evidence; the deterministic controller should decide whether one infrastructure retry is actually required to complete the frozen screen set.
+### Active jobs
 
-### Side branch already prepared
+- GPU1: `PA3-PA8__t001__screen` — run `44343618795` / job `134939973259` — **IN_PROGRESS**
+- GPU0: `PA2-PA3__t006__screen` — run `44343738180` / job `134940393559` — **IN_PROGRESS**
 
-Branch:
-`mth602-l2o-hpo-audit-v2`
+Both are inside the bounded scientific execution step.
 
-Head:
-`2e02e098245c2e3c877666174fcafd38dfb03056`
+### Queued jobs
 
-Validation:
-`job-d0af3549-8c72-445d-a723-a4d53ee082b5` — **21 passed**
+12 already-admitted requests remain queued:
 
-Contains:
-- all-10 backbone competence/stability audit;
-- strict known-validation-only artifact extraction;
-- HPO ranking-input generation;
-- finalist artifact -> temporary canonical matrix rebinding;
-- automatic creation of the two standard-DQNGuard directional evaluation requests.
+- PA2-PA3 t003 — 44343647186
+- PA2-PA8 t003 — 44343655822
+- PA3-PA8 t003 — 44343668555
+- PA3-PA8 t004 — 44343707552
+- PA2-PA3 t005 — 44343716800
+- PA2-PA8 t005 — 44343721573
+- PA3-PA8 t005 — 44343731277
+- PA2-PA8 t006 — 44343747081
+- PA3-PA8 t006 — 44343756497
+- PA2-PA3 t007 — 44343766238
+- PA2-PA8 t007 — 44343773182
+- PA3-PA8 t007 — 44343778619
 
-Keep this side branch separate until the live PR #37 wave is terminal because live requests are exact-head-bound to `8b176ce...`.
+Do not duplicate any request.
+
+### Epoch stability observations
+
+Instability remains substantial and is preserved as a second-stage scientific variable, not a new gate. Examples:
+- PA2-PA3 t004: validation macro-F1 ~0.167 on epochs 3/4/6, then 0.9636 on epoch 7.
+- PA2-PA8 t001: peak 0.9533 at epoch 5, then 0.6404 by epoch 8.
+- PA2-PA3 t001: peak 0.9156 at epoch 3, then 0.3001 by epoch 8.
+
+Do not invent a stability threshold until the weak-pair pilot supplies enough evidence.
 
 ### Immediate next action
 
-1. Re-read PR #640 JSON capsule and PR #37 live state.
-2. Monitor only the already-admitted wave0 jobs.
-3. Download/validate terminal artifacts as they arrive.
-4. Feed terminal screen results through the strict known-only extractor/controller.
-5. Rank by known-validation macro-F1 then min-class F1; target/test/OSR metrics must never affect HPO ranking.
-6. Promote/freeze according to the documented gate-first policy.
-7. After a weak pair freezes at macro >=0.95 and min-class >=0.90, run its two standard-DQNGuard directional OSR evaluations using the prebuilt downstream plumbing.
-8. Apply the H1 exploratory gate only after those two directions are frozen: mean ΔUnknown-F1 >= +0.05, neither direction < -0.02, known-reject budget respected.
-9. Continue autonomously until a genuine authority/operator gate or user-only scientific choice is reached.
+1. Re-read PR #37 current workflow state.
+2. Monitor only the 24 already-admitted wave0 runs.
+3. Download and provenance-check each new SUCCESS artifact.
+4. Strict-extract known-validation macro-F1 and min-class F1; keep target/test/OSR fields out of ranking input.
+5. Keep infrastructure failures excluded from ranking.
+6. Do not issue a retry while already-admitted wave0 work remains queued/running.
+7. When the bounded screen wave is sufficiently terminal, run the deterministic ranker and let it decide top-2 refine promotion and whether any one-time infrastructure retry is necessary for missing evidence.
+8. Do not advance PR #37 until its exact-head-bound queue is dead.
+9. Only a terminal 60-epoch finalist that clears macro >=0.95 and min-class >=0.90 may freeze a pair.
+10. After freeze, use the prebuilt downstream plumbing for the two standard-DQNGuard directional evaluations and then apply the frozen H1 +0.05 / -0.02 gate.
