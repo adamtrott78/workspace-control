@@ -20,6 +20,8 @@ PROCEDURE_V5 = ROOT / "architecture/workspace-semantic-execution-stage12-real-in
 REVIEW_V5 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.5.json"
 PROCEDURE_V6 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.6.md"
 REVIEW_V6 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.6.json"
+PROCEDURE_V7 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.7.md"
+REVIEW_V7 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.7.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -271,27 +273,57 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertNotIn("npm install -g", command.lower())
         self.assertNotIn("setx", command.lower())
 
-    def test_v06_review_is_not_authority_and_keeps_executable_bindings(self) -> None:
+    def test_v06_review_is_invalidated_before_authority(self) -> None:
         import json
 
         review = json.loads(REVIEW_V6.read_text(encoding="utf-8"))
-        self.assertEqual(review["status"], "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertEqual(review["status"], "INVALIDATED_PREAUTH_PROCEDURE_DEFECT")
+        self.assertFalse(review["authority_gate"]["live_retry_authorized"])
+        self.assertFalse(review["invalidation"]["authority_artifact_created"])
+        self.assertFalse(review["invalidation"]["windows_execution_started"])
+        self.assertFalse(review["invalidation"]["linux_execution_started"])
+        self.assertFalse(review["invalidation"]["live_authority_consumed"])
+        self.assertEqual(
+            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
+            "dd995d976fb6c3d1f1427d194e58e5037f331573",
+        )
+
+    def test_v07_repairs_powershell_structure_and_bounded_node_fallback(self) -> None:
+        text = PROCEDURE_V7.read_text(encoding="utf-8")
+        marker = "~~~powershell\n".replace("~~~", "```")
+        start = text.index(marker) + len(marker)
+        end = text.index("\n```", start)
+        command = text[start:end]
+        self.assertIn("$DotnetDir=Split-Path -Parent $DotnetPath", command)
+        self.assertIn("Where-Object { $_.Name -match '^24\\.\\d+\\.\\d+$' }", command)
+        self.assertIn("$CurrentNodeVersion", command)
+        self.assertIn("$CurrentNpmVersion", command)
+        self.assertIn("$env:DOTNET_ROOT=$DotnetDir; try {", command)
+        self.assertEqual(command.count("try { git init -q $Stage"), 1)
+        self.assertNotIn("^24\\.\\d+\\.\\d+ try {", command)
+        self.assertNotIn("$env:DOTNET_ROOT=$DotnetDir try {", command)
+        self.assertNotIn("winget", command.lower())
+        self.assertNotIn("choco", command.lower())
+        self.assertNotIn("npm install -g", command.lower())
+        self.assertNotIn("setx", command.lower())
+
+    def test_v07_review_is_not_authority_and_keeps_executable_bindings(self) -> None:
+        import json
+
+        review = json.loads(REVIEW_V7.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
         self.assertFalse(review["authority_gate"]["live_retry_authorized"])
         self.assertTrue(
-            review["authority_gate"]["existing_v05_authority_does_not_authorize_v06_procedure"]
+            review["authority_gate"]["v06_operator_approval_does_not_authorize_v07_procedure"]
         )
-        self.assertEqual(review["node_delta"]["required_major_version"], 24)
+        self.assertEqual(review["procedure_delta"]["required_node_major_version"], 24)
         self.assertEqual(
-            review["exact_candidate_bindings"]["reviewed_node_binding_source"]["blob_sha"],
-            "1ea4135e0ff80454b5a8e5feac139d0177d3b764",
+            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
+            "620e78f044189ab679019380a76d3f8c62711ca0",
         )
         self.assertEqual(
             review["exact_candidate_bindings"]["windows_operator_launcher"]["blob_sha"],
             "d9d474ca6870585c9e4767f551086e17b4525fbc",
-        )
-        self.assertEqual(
-            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
-            "dd995d976fb6c3d1f1427d194e58e5037f331573",
         )
 
 

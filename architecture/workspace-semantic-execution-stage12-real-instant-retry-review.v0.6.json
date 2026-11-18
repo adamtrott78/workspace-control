@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.6",
-  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "INVALIDATED_PREAUTH_PROCEDURE_DEFECT",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Reuse the existing reviewed Stage-10 Windows Node 24 tool-cache binding to repair npm.cmd discovery while preserving all executable bytes and Stage-12 authority boundaries.",
   "predecessor": {
@@ -82,5 +82,22 @@
     "result": "SUCCESS",
     "exact_head": true
   },
-  "postcondition": "v0.6 is repository-validated and grants zero live authority. The still-unconsumed v0.5 authority does not authorize this changed operator procedure. Fresh explicit operator approval must bind the v0.6 procedure blob before any Windows invocation or Linux Stage-12 execution."
+  "postcondition": "v0.6 is invalidated before authority persistence or live execution. The operator's v0.6 approval is not reusable for the changed v0.7 procedure.",
+  "invalidation": {
+    "discovered_date": "2026-11-18",
+    "discovered_at_handoff_head": "beb5662fd22026d0215c676515e7489210a88034",
+    "operator_approval_observed": true,
+    "approval_utterance": "DO IT",
+    "authority_artifact_created": false,
+    "windows_execution_started": false,
+    "linux_execution_started": false,
+    "live_authority_consumed": false,
+    "defects": [
+      "The exact v0.6 PowerShell command splices a duplicated Stage-12 try block into the Node 24 version-regex expression, making the one-line command non-executable.",
+      "The exact v0.6 command uses $DotnetDir without assigning it from the validated $DotnetPath.",
+      "The exact v0.6 command does not implement the reviewed fallback semantics when a currently resolved node.exe exists but is not a valid Node 24 + npm pair."
+    ],
+    "successor_review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.7.json",
+    "successor_procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.7.md"
+  }
 }
