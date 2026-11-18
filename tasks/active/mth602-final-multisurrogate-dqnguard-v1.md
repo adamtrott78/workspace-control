@@ -426,3 +426,31 @@ bash <(curl -fsSL "https://raw.githubusercontent.com/adamtrott78/PADataset/a5cbd
 ```
 
 Accept Phase 1 only when the probe reports `canonical_source_records=360` and `provenance_records_resolved=360`. Do not use `--force`, do not run from `/tmp`, and do not delete/rebuild the first 120 overlays.
+
+### STFT terminal PASS and synthesis handoff
+
+The exact persistent STFT run at `a5cbd0d2a9e8e287d0288498735e5a4221ed3683` is terminal **PASS**.
+
+Execution evidence:
+- driver `exit_code=0`, `success=true`;
+- diagnostic exit code `0`;
+- training exit code `0`;
+- cache manifest `source_records=360`, `files_skipped=120`, `files_built=240`, `samples_built=99848`;
+- first 120 overlay records were preserved and the remaining 240 were built;
+- training early-stopped at epoch 17 with best epoch 7; known validation accuracy and macro-F1 were both 1.0;
+- PA1/PA4 trajectory diagnostic used 59,903 samples across 180 groups and achieved mean accuracy `0.9996493848663203`, mean macro-F1 `0.9996493838114462`, mean AUROC `0.9999995428914733`;
+- strongest single trajectory metrics include mean absolute step bins AUROC `0.9908634178287573`, unique states `0.9892150330513103`, revisit fraction `0.9428091345349965`, and monotonic fraction `0.823980670835702`.
+
+Scientific interpretation: the PA1↔PA4 failure mode is strongly consistent with a representation issue. Their temporal/frequency trajectories are almost perfectly separable once ordering-sensitive STFT-derived trajectory information is exposed, while a global FFT can obscure that ordering.
+
+No additional STFT tuning/retry is justified.
+
+### Current stage
+
+`final_scientific_synthesis`
+
+Next action:
+- synthesize Track A, Architecture B, and STFT findings into the final MTH602 result narrative;
+- do **not** launch another STFT or B3 job;
+- treat the unfinished detv2 seed2 replicate as optional unless the synthesis identifies a specific fixed-partition/split-sensitivity question that actually requires it;
+- preserve true-target quarantine and descriptive-only treatment of final target metrics.
