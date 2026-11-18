@@ -22,6 +22,8 @@ PROCEDURE_V6 = ROOT / "architecture/workspace-semantic-execution-stage12-real-in
 REVIEW_V6 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.6.json"
 PROCEDURE_V7 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.7.md"
 REVIEW_V7 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.7.json"
+PROCEDURE_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.8.md"
+REVIEW_V8 = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.8.json"
 
 
 class Stage12RetryTransactionStaticTests(unittest.TestCase):
@@ -336,6 +338,40 @@ class Stage12RetryTransactionStaticTests(unittest.TestCase):
         self.assertEqual(review["validation"]["semantic_execution_run"], 310)
         self.assertEqual(review["validation"]["operator_bridge_run"], 583)
         self.assertEqual(review["validation"]["result"], "SUCCESS")
+
+    def test_v08_removes_only_programfiles_x86_escape_defect(self) -> None:
+        text7 = PROCEDURE_V7.read_text(encoding="utf-8")
+        text8 = PROCEDURE_V8.read_text(encoding="utf-8")
+        marker = "~~~powershell\n".replace("~~~", "```")
+        start7 = text7.index(marker) + len(marker)
+        end7 = text7.index("\n```", start7)
+        start8 = text8.index(marker) + len(marker)
+        end8 = text8.index("\n```", start8)
+        command7 = text7[start7:end7]
+        command8 = text8[start8:end8]
+        bad = "\\${env:ProgramFiles(x86)}"
+        good = "${env:ProgramFiles(x86)}"
+        self.assertEqual(command7.count(bad), 2)
+        self.assertEqual(command8.count(bad), 0)
+        self.assertEqual(command8.count(good), 2)
+        self.assertEqual(command7.replace(bad, good), command8)
+        self.assertEqual(len(command7) - len(command8), 2)
+
+    def test_v08_review_is_not_authority_and_keeps_exact_bindings(self) -> None:
+        import json
+
+        review = json.loads(REVIEW_V8.read_text(encoding="utf-8"))
+        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertFalse(review["authority_gate"]["live_retry_authorized"])
+        self.assertTrue(
+            review["authority_gate"]["v07_authority_does_not_authorize_v08_procedure"]
+        )
+        self.assertEqual(
+            review["exact_candidate_bindings"]["operator_procedure"]["blob_sha"],
+            "58c714ba5c0c6e6dee337ce70f0c4b550e65a87c",
+        )
+        self.assertEqual(review["procedure_delta"]["removed_literal_backslashes"], 2)
+        self.assertTrue(review["procedure_delta"]["no_other_command_byte_change"])
 
 
 if __name__ == "__main__":
