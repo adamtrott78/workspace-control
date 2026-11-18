@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.9 LIVE ATTEMPT IS CONSUMED AND FAILED AT Q1 FOREGROUND ACTIVATION. Fail closed: terminate/allow the current Linux run to exit and verify exact Tailscale route restoration; then clean up the Windows helper. In parallel, validate the bounded repair candidate that adds the existing Win32 ForegroundPreparedWorkerWindow fallback to the LocalPrepared hotkey path before capturing the worker window. No manual Firefox focusing/pasting and no live retry under v0.9.
+STAGE-12 V1.0 FOREGROUND REPAIR CODE IS 3/3 VALIDATED AT 1ecc094a62e2ed96b278ab954d46246e26dc33fd (#3030/#330/#603). v1.0 review/procedure candidate binds TrayApplicationContext blob 2e0d2248…, unchanged launcher d9d474ca…, Linux v3 3eb352f4…, harness 7b1feb8f…, candidate baseline 0bc1bc0e…. NEXT: exact-head validate the v1.0 review-state persistence 3/3. Separately, verify consumed v0.9 Linux route restoration and Windows cleanup. Only after both gates are satisfied may fresh explicit v1.0 approval be requested.
 
 ## Remaining work
 
@@ -84,10 +84,11 @@ STAGE-12 V0.9 LIVE ATTEMPT IS CONSUMED AND FAILED AT Q1 FOREGROUND ACTIVATION. F
 
 ## Blockers / gates
 
-- v0.9 authority is consumed and non-reusable after Q1 Windows foreground activation failure.
-- Current Linux v0.9 run must be terminated/allowed to fail and restore the private Tailscale route before any retry.
-- Windows helper must be cleaned up after Linux cleanup completes.
-- A fresh Windows foreground-fallback repair candidate must pass repository validation, then fresh review/final-state validation, then explicit operator approval before another live attempt.
+- v0.9 authority is consumed/non-reusable.
+- v1.0 foreground repair code candidate is 3/3 validated.
+- v1.0 review/procedure persistence must itself pass exact-head Workspace/Semantic/Operator validation.
+- Prior v0.9 Linux route restoration and Windows cleanup must be verified before any v1.0 live execution.
+- No v1.0 live authority exists; fresh explicit operator approval is required only after review-state validation and cleanup evidence.
 
 ## Fresh-chat initialization
 

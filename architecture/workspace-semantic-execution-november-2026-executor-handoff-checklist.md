@@ -211,3 +211,8 @@
 - [x] Stage-12 v0.9 live authority consumed at `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`; Q1 exposed Windows foreground activation defect. No Q1 candidate accepted; v0.9 non-reusable.
 - [ ] Validate bounded foreground-fallback repair candidate: LocalPrepared hotkey path must invoke existing Win32 `ForegroundPreparedWorkerWindow()` before `RecordPreparedWorkerWindow()`.
 - [ ] After candidate validation, freeze fresh retry review/procedure and obtain new explicit operator approval before any live retry.
+
+- [x] Foreground repair code candidate `1ecc094a…` passed Workspace #3030 / Semantic #330 / Operator #603.
+- [x] Freeze v1.0 review/procedure: foreground fallback blob `2e0d2248…`, procedure `9a43ba28…`, review `680596a3…`; no live authority.
+- [ ] Exact-head validate v1.0 review-state persistence 3/3.
+- [ ] Verify consumed v0.9 Linux route restoration + Windows/stale-stage cleanup before requesting v1.0 live approval.
