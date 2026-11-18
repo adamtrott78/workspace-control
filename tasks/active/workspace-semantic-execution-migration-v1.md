@@ -70,14 +70,14 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V0.6 APPROVAL WAS RECEIVED BUT FAILED CLOSED BEFORE AUTHORITY PERSISTENCE: exact procedure blob dd995d976fb6c3d1f1427d194e58e5037f331573 is malformed and cannot be executed safely. No v0.6 authority artifact was created, Windows/Linux did not start, and live authority was not consumed. A v0.7 review-only repair now binds procedure blob 620e78f044189ab679019380a76d3f8c62711ca0, keeps source b0466c03acb9d6b863df421e2c116c84bff312f6, launcher d9d474ca6870585c9e4767f551086e17b4525fbc, Linux v2 962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca, harness 7b1feb8fa13cf0ea46883b07831e829fd9e7e75d and candidate baseline 0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de unchanged. NEXT ACTION: exact-head validate this v0.7 review candidate 3/3. If green, persist final validation metadata and revalidate that final state. Only then request fresh explicit operator approval binding v0.7; the prior v0.6 approval is not reusable.
+STAGE-12 V0.7 REVIEW CANDIDATE IS 3/3 VALIDATED AT 215287bb1bb49b90d5cf207fb4ebf368a57c7ec3: Workspace #3010 / Semantic #310 / Operator #583 SUCCESS. Procedure blob 620e78f044189ab679019380a76d3f8c62711ca0 changes only operator-side PowerShell construction and preserves source b0466c03…, launcher d9d474ca…, Linux v2 962cf39d…, harness 7b1feb8f… and candidate baseline 0bc1bc0e…. Operator #583 includes a Windows non-executing parse of the exact fenced command. NEXT GATE: exact-head validate this final validation-state persistence commit 3/3. Only after that is green obtain fresh explicit operator approval binding v0.7; prior v0.6 approval is not reusable. Do not create authority or execute Windows/Linux before fresh v0.7 approval.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: D3 remains ACCEPTED. Attempt 01 failed closed and consumed v0.1 authority. v0.2-v0.5 pre-live retries failed before live consumption. v0.6 operator approval was received but no authority was created because exact procedure inspection found a malformed PowerShell command. v0.7 is the review-only command-construction repair; validate it 3/3, then obtain fresh exact approval before authority persistence.
-- REAL-ACCOUNT CALIBRATION: no v0.7 live attempt is authorized. After v0.7 review and final state are exact-head validated and fresh explicit approval is received, create/validate a new one-shot authority, execute Windows first, require STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS, then run exactly one Linux attempt whose authority is consumed only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
+- LIVE INSTANT: D3 remains ACCEPTED. v0.7 operator-side command-construction repair is 3/3 validated at 215287bb… (#3010/#310/#583), including exact PowerShell parse validation on Windows. Final validation-state persistence must now pass 3/3, then fresh explicit operator approval is required before one-shot authority creation.
+- REAL-ACCOUNT CALIBRATION: no v0.7 live attempt is authorized. After this final validation-state commit passes 3/3 and fresh explicit approval binds procedure blob 620e78f0…, create and exact-head validate a new one-shot authority, then execute Windows first; Linux remains blocked until STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
 - PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
@@ -86,10 +86,10 @@ STAGE-12 V0.6 APPROVAL WAS RECEIVED BUT FAILED CLOSED BEFORE AUTHORITY PERSISTEN
 
 - Stage-12 v0.1 authority is consumed by failed Attempt 01.
 - v0.2-v0.4 authorities are superseded unconsumed/non-reusable; v0.5 remains unconsumed but is exact-procedure-bound and cannot authorize v0.7.
-- Operator approval for v0.6 was received, but no v0.6 authority was persisted because exact procedure blob dd995d97… was discovered to contain a pre-authority PowerShell construction defect.
-- v0.6 Windows/Linux execution never started and STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS was not reached.
-- v0.7 procedure blob 620e78f0… repairs only the operator-side command construction; pinned source/launcher/Linux/harness/candidate baseline remain unchanged.
-- v0.7 is REVIEW_CANDIDATE_NOT_AUTHORITY and must pass exact-head Workspace/Semantic/Operator validation before any fresh approval can be requested.
+- v0.6 operator approval was received but intentionally never persisted as authority because exact procedure bytes were malformed; Windows/Linux never started and live authority was not consumed.
+- v0.7 review candidate at 215287bb… passed Workspace #3010 / Semantic #310 / Operator #583, including a Windows non-executing parse of the exact PowerShell command.
+- This final validation-state persistence commit must itself pass exact-head Workspace/Semantic/Operator validation before v0.7 can be presented for fresh explicit operator approval.
+- No v0.7 live authority exists yet; prior v0.6 approval is not reusable.
 - No Node/npm install, .NET install, persistent PATH edit, registry mutation, execution-policy widening, scope widening, or silent retry is authorized.
 
 ## Fresh-chat initialization
