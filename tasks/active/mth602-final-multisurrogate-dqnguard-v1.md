@@ -537,3 +537,95 @@ Immediate sequence:
 - before the earlier of the course due date and 2026-12-01, pivot to a complete report, slide deck, and durable post-finals journal checkpoint.
 
 No new GPU job, merge, or trust widening is authorized by this planning interview.
+
+## Fresh-chat checkpoint — H1 HPO wave0 live
+
+This section supersedes the earlier GPU0-blocked snapshot. The authoritative source remains the JSON capsule.
+
+### Exact bindings
+
+- Workspace Control PR #640 head at checkpoint: `67e5d7a30ab9ce58c474376802f3ffd693a41281`
+- PADataset HPO controller PR #37: **OPEN / DRAFT / UNMERGED**
+- PR #37 exact live-wave head: `8b176ce931a1d802127ec2591d38ad0a4cedafb4`
+- 24/24 immutable wave0 screen jobs admitted exactly once: 8 trial vectors × 3 weak canonical pairs
+- lane split: 12 GPU0 / 12 GPU1
+- **Do not advance PR #37 head while any exact-head-bound wave0 job is queued/running.**
+- No merge authority is implied.
+
+### GPU0 recovery
+
+GPU0 originally produced four deterministic pre-epoch infrastructure OOM failures because unrelated host-local processes consumed nearly all VRAM. Those runs contain **no scientific HPO evidence**.
+
+GPU0 subsequently recovered without authority widening or process killing:
+
+- `PA2-PA3__t004__screen`
+- run `44343691752`
+- job `134940231711`
+- **SUCCESS**
+- artifact `14448887969`
+- digest `sha256:10b264f29ad7e8440f7081aaf68741e74125cd52647bd890aed07d677a39e3d3`
+- best epoch `7`
+- best known-val macro-F1 `0.9636429463079487`
+- known-test macro-F1 `0.9629794380523286`
+- `target_test_consumed=false`
+
+The epoch trace is highly unstable (e.g. macro-F1 ~0.167 on epochs 3/4/6, then ~0.964 on epoch 7), which reinforces the separate stability analysis. **Do not declare the pair competency-qualified from macro-F1 alone; the frozen gate also requires min-class validation F1 >= 0.90 and controller/extractor confirmation.**
+
+Current GPU0 trial at checkpoint:
+- `PA2-PA8__t004__screen`
+- run `44343698092`
+- job `134940254925`
+- **IN_PROGRESS**
+
+### GPU1 live
+
+Current GPU1 trial at checkpoint:
+- `PA2-PA8__t001__screen`
+- run `44343612614`
+- job `134939950045`
+- **IN_PROGRESS**
+
+Existing GPU1 queue should continue. Do not duplicate requests.
+
+### Earlier GPU0 OOM trials
+
+Four earlier wave0 instances failed before completing epoch 1 and are excluded from HPO ranking:
+
+- `PA2-PA3__t000__screen`
+- `PA2-PA8__t000__screen`
+- `PA3-PA8__t000__screen`
+- `PA2-PA3__t002__screen`
+
+Now that GPU0 has recovered, **do not automatically resubmit them**. First let the admitted wave progress and ingest the available evidence; the deterministic controller should decide whether one infrastructure retry is actually required to complete the frozen screen set.
+
+### Side branch already prepared
+
+Branch:
+`mth602-l2o-hpo-audit-v2`
+
+Head:
+`2e02e098245c2e3c877666174fcafd38dfb03056`
+
+Validation:
+`job-d0af3549-8c72-445d-a723-a4d53ee082b5` — **21 passed**
+
+Contains:
+- all-10 backbone competence/stability audit;
+- strict known-validation-only artifact extraction;
+- HPO ranking-input generation;
+- finalist artifact -> temporary canonical matrix rebinding;
+- automatic creation of the two standard-DQNGuard directional evaluation requests.
+
+Keep this side branch separate until the live PR #37 wave is terminal because live requests are exact-head-bound to `8b176ce...`.
+
+### Immediate next action
+
+1. Re-read PR #640 JSON capsule and PR #37 live state.
+2. Monitor only the already-admitted wave0 jobs.
+3. Download/validate terminal artifacts as they arrive.
+4. Feed terminal screen results through the strict known-only extractor/controller.
+5. Rank by known-validation macro-F1 then min-class F1; target/test/OSR metrics must never affect HPO ranking.
+6. Promote/freeze according to the documented gate-first policy.
+7. After a weak pair freezes at macro >=0.95 and min-class >=0.90, run its two standard-DQNGuard directional OSR evaluations using the prebuilt downstream plumbing.
+8. Apply the H1 exploratory gate only after those two directions are frozen: mean ΔUnknown-F1 >= +0.05, neither direction < -0.02, known-reject budget respected.
+9. Continue autonomously until a genuine authority/operator gate or user-only scientific choice is reached.
