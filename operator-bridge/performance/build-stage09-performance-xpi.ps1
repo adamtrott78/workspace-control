@@ -34,7 +34,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $perf "background.js") -Destination $stage
 
     $core = Get-Content -LiteralPath $coreSource -Raw
-    $production = 'const WORKER_START_URL = "https://chatgpt.com/";'
+    $production = 'const WORKER_START_URL = "https://chatgpt.com/?temporary-chat=true";'
     $benchmark = 'const WORKER_START_URL = "' + $FakeWorkerUrl + '";'
     if (-not $core.Contains($production)) {
         throw "Reviewed production worker URL constant was not found."
