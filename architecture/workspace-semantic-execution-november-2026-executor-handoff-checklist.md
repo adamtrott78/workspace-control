@@ -220,3 +220,7 @@
 - [x] v1.0 review-state `ecdc71c8…` passed Workspace #3031 / Semantic #331 / Operator #604; review remains non-authoritative.
 - [ ] Exact-head validate v1.0 validation-state persistence 3/3.
 - [ ] Verify v0.9 Linux route restoration + Windows/stale-stage cleanup before requesting v1.0 approval.
+
+- [x] v1.0 validation-state persistence `bd366f93…` passed Workspace #3032 / Semantic #332 / Operator #605; review remains non-authoritative.
+- [ ] Verify consumed v0.9 predecessor cleanup: exact Linux Tailscale restoration + temporary Postgres stop, Windows helper/Firefox cleanup, and stale Stage-12 temp directory removal.
+- [ ] Only after cleanup evidence: request fresh explicit v1.0 approval.

@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.0 REVIEW IS 3/3 VALIDATED: code source 1ecc094a… passed #3030/#330/#603 and review-state ecdc71c8… passed #3031/#331/#604. NEXT: exact-head validate this v1.0 validation-state persistence commit 3/3. In parallel, obtain exact predecessor-cleanup evidence from the consumed v0.9 run (Linux route restoration + Windows cleanup/stale-stage cleanup). Fresh explicit v1.0 approval is gated on BOTH final-state validation and verified predecessor cleanup.
+STAGE-12 V1.0 REVIEW AND FINAL VALIDATION STATE ARE 3/3 GREEN: code source 1ecc094a… passed #3030/#330/#603; review-state ecdc71c8… passed #3031/#331/#604; validation-state persistence bd366f93… passed #3032/#332/#605. Review remains NON-AUTHORITY. NEXT GATE: verify predecessor cleanup from the consumed v0.9 attempt: Linux must have restored the exact preexisting Tailscale Serve/Funnel state and stopped the temporary PostgreSQL runtime; Windows helper/isolated Firefox must be cleaned up and stale %TEMP%\workspace-control-stage12-retry-v7 removed. After that evidence is confirmed, request fresh explicit v1.0 operator approval.
 
 ## Remaining work
 
@@ -85,9 +85,9 @@ STAGE-12 V1.0 REVIEW IS 3/3 VALIDATED: code source 1ecc094a… passed #3030/#330
 ## Blockers / gates
 
 - v0.9 authority is consumed/non-reusable.
-- v1.0 foreground code candidate is 3/3 validated at 1ecc094a… (#3030/#330/#603).
+- v1.0 foreground code candidate 1ecc094a… is 3/3 validated (#3030/#330/#603).
 - v1.0 review-state ecdc71c8… is 3/3 validated (#3031/#331/#604).
-- The v1.0 validation-state persistence commit must itself pass exact-head Workspace/Semantic/Operator validation.
+- v1.0 validation-state persistence bd366f93… is 3/3 validated (#3032/#332/#605).
 - Consumed v0.9 Linux route restoration and Windows/stale-stage cleanup remain unverified; fresh v1.0 approval cannot be requested until cleanup evidence is confirmed.
 
 ## Fresh-chat initialization
