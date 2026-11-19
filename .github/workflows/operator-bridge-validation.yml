@@ -81,7 +81,8 @@ jobs:
             "operator-bridge/performance/prepare-stage09-target-profile.ps1",
             "operator-bridge/tools/run-stage09-target-firefox.ps1",
             "operator-bridge/tools/run-stage09-target-matrix.ps1",
-            "operator-bridge/tools/run-stage10-usability.ps1"
+            "operator-bridge/tools/run-stage10-usability.ps1",
+            "operator-bridge/tools/workspace-operator-dev.ps1"
           )
           foreach ($target in $targets) {
             $tokens = $null
