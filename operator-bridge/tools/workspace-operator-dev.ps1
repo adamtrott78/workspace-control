@@ -1,3 +1,4 @@
+# Windows-only fast-loop harness: content-free smoke actions remain operator-triggered.
 [CmdletBinding()]
 param(
   [ValidateSet("smoke","reset","restart","start","online","stop","offline","status")]
