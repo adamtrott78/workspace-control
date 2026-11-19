@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.0",
-  "status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+  "status": "CONSUMED_FAILED_STAGE12_Q1_BRIDGE_DISABLED_HOTKEY_UNREGISTERED",
   "purpose": "Fresh exact authority for one Stage-12 v1.0 retry using the validated Windows native foreground fallback in the LocalPrepared hotkey path. Linux transaction, Real-Instant harness, Windows launcher, candidate-result namespace, manual typing boundary, browser/network boundaries, and live-consumption semantics remain unchanged.",
   "approval_basis": {
     "authority_owner": "operator",
@@ -183,7 +183,7 @@
     "source_or_authority_branch_result_writes": false
   },
   "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, any success or failure consumes the one attempt. Do not install Node/npm or .NET, persistently edit PATH, mutate registry, widen execution policy/browser/network/API/DB/GPU/Workspace Shell/result authority, or silently retry.",
-  "postcondition": "This authority permits exactly one Stage-12 v1.0 retry under the exact bindings above and no later workload authority. No Windows or Linux live execution is permitted until this authority-persistence Git head itself passes exact-head Workspace/Semantic/Operator validation.",
+  "postcondition": "v1.0 live authority was consumed at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS. Q1 then demonstrated that Ctrl+Space was not globally registered because the helper bridge remained disabled at startup; therefore no dispatch occurred, no clipboard write occurred, and neither Firefox focus path nor the v1.0 native foreground fallback was exercised. This authority is non-reusable.",
   "predecessor_cleanup": {
     "required": true,
     "linux_cleanup_marker": "STAGE12_V09_LINUX_CLEANUP_VERIFIED=PASS",
@@ -191,5 +191,27 @@
     "cleanup_closure_head": "a0a4db44e95155c4167f796712c3999c21c2053d",
     "cleanup_closure_validation": "Workspace #3035 / Semantic #335 / Operator #608 = SUCCESS",
     "satisfied": true
+  },
+  "consumption_record": {
+    "consumed": true,
+    "consumed_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "consumed_marker_observed": true,
+    "windows_ready_gate_observed": true,
+    "q1_ready_observed": true,
+    "q1_candidate_published": false,
+    "candidate_branch_observed_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "failure_class": "BRIDGE_DISABLED_HOTKEY_UNREGISTERED",
+    "operator_observation": "At STAGE12_Q1_READY, Ctrl+Space did not foreground Firefox and did not replace the clipboard packet; Ctrl+Space reached the Linux terminal as ^@.",
+    "code_diagnosis": {
+      "bridge_initial_state": "OFF",
+      "tray_toggle_is_only_enable_call_in_current_runtime": "TrayApplicationContext.ToggleClicked -> _bridgeController.SetEnabled(true)",
+      "program_startup_enable_call_present": false,
+      "stage12_launcher_enable_action_present": false,
+      "consequence": "WindowsHotkeyRegistrar.Register() is never called, so Ctrl+Space is not globally captured and SingleFlightDispatchCoordinator.DispatchAsync() is never entered.",
+      "clipboard_and_foreground_paths_reached": false,
+      "v10_foreground_repair_exercised": false
+    },
+    "reusable": false,
+    "retry_requires_fresh_review_validation_and_operator_approval": true
   }
 }

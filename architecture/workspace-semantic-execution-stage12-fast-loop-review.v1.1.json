@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
+    "prior_status": "CONSUMED_FAILED_STAGE12_Q1_BRIDGE_DISABLED_HOTKEY_UNREGISTERED",
+    "consumed": true,
+    "reusable": false,
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "root_cause": {
+    "classification": "BRIDGE_DISABLED_HOTKEY_UNREGISTERED",
+    "evidence": [
+      "BridgeState defaults disabled.",
+      "BridgeController registers the scheduler hotkey only from SetEnabled(true).",
+      "TrayApplicationContext currently calls SetEnabled only from the manual tray ToggleClicked handler.",
+      "Program constructs TrayApplicationContext but does not enable the bridge.",
+      "run-stage12-real-instant.ps1 starts WorkspaceOperator but does not toggle or request bridge enablement.",
+      "At Q1 the operator observed Ctrl+Space fall through to the Linux terminal as ^@ and the clipboard retained the previously copied Windows-ready marker."
+    ],
+    "consequence": "The Q1 dispatch path never ran. Clipboard and Firefox foreground behavior were not exercised; the v1.0 foreground fallback is therefore not disproven by this attempt."
+  },
+  "design_goal": "Reduce redesign validation to a fast Windows-only local loop, with explicit lifecycle controls, before any costly Linux/Tailscale/PostgreSQL/real-account Stage-12 run.",
+  "proposed_source_mutation_scope": [
+    "operator-bridge/src/WorkspaceOperator/Program.cs",
+    "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+    "operator-bridge/src/WorkspaceOperator/Bootstrap/LocalSmokeOperatorActionPort.cs",
+    "operator-bridge/tools/run-stage12-real-instant.ps1",
+    "operator-bridge/tools/workspace-operator-dev.ps1",
+    "operator-bridge/tests/WorkspaceOperator.Tests/BridgeControllerTests.cs",
+    "operator-bridge/tests/WorkspaceOperator.Tests/SingleFlightDispatchCoordinatorTests.cs",
+    "operator-bridge/tests/WorkspaceOperator.Tests/OperatorStartupModeTests.cs"
+  ],
+  "proposed_changes": [
+    {
+      "id": "START_ENABLED_EXPLICITLY",
+      "behavior": "Add an explicit --bridge-start-enabled startup switch. Stage-12 and the dev harness pass it. Startup must fail closed if global hotkey registration fails.",
+      "safety": "Default non-remote behavior remains OFF unless the explicit switch is present."
+    },
+    {
+      "id": "LOCAL_SMOKE_ACTION",
+      "behavior": "Add an explicit development-only local smoke action port that creates one synthetic CREATE_AND_SERVICE action with a known content-free test packet. This exercises browser binding creation, clipboard write, final browser focus, and the native foreground fallback without Linux/Tailscale/PostgreSQL.",
+      "safety": "Available only under an explicit smoke-mode CLI switch; no remote authority, credentials, DOM/page-content access, automatic paste, or automatic submission."
+    },
+    {
+      "id": "FAST_DEV_LIFECYCLE",
+      "behavior": "Add workspace-operator-dev.ps1 with start, stop, reset, status, and smoke actions. Reuse incremental build output and a dedicated dev-only Firefox profile so repeated UI iterations do not re-clone, recreate the Python environment, start PostgreSQL, configure Tailscale, or require a new ChatGPT login every time.",
+      "safety": "The persistent profile is dedicated to this dev harness only and is never the user's daily Firefox profile."
+    },
+    {
+      "id": "STAGE12_PREFLIGHT_MARKER",
+      "behavior": "Stage-12 Windows launcher must pass --bridge-start-enabled and print a dedicated HOTKEY_REGISTERED/BRIDGE_ENABLED readiness marker only after the helper remains alive after registration.",
+      "safety": "Linux live-consumption remains blocked until the Windows readiness gate includes this startup proof."
+    },
+    {
+      "id": "PRODUCTION_CONTROL_DIRECTION",
+      "behavior": "For production, separate a tiny always-on per-user supervisor from the dispatch bridge. Expose typed status/online/offline/restart controls through the Workspace control plane/plugin, analogous to Heartbeat. 'Offline' disables dispatch and unregisters the hotkey without removing the supervisor, avoiding a remote-start chicken-and-egg problem.",
+      "safety": "No generic shell control, no arbitrary process execution, no admin service requirement, and no widening of model execution authority."
+    }
+  ],
+  "fast_loop_acceptance": [
+    "One Windows command starts or resets the dev runtime.",
+    "No Linux terminal, sudo, Tailscale route, PostgreSQL, Python venv, Git clone, or candidate branch is required for hotkey/clipboard/foreground smoke testing.",
+    "The helper proves the bridge is enabled and global hotkey registration succeeded before declaring ready.",
+    "One Ctrl+Space causes a known smoke packet to replace the clipboard and brings the dedicated Firefox window to OS foreground.",
+    "A stop command returns helper/Firefox/dev state to a known clean state.",
+    "A status command reports source SHA, helper state, Firefox state, bridge enabled state, and smoke readiness without page-content access."
+  ],
+  "authority_gate": {
+    "source_mutation_authorized": false,
+    "reason": "The current semantic-execution task capsule does not authorize operator-bridge source/tool mutation. This review names the exact proposed files so the operator can explicitly approve that bounded scope.",
+    "model_reasoning_is_not_authority": true
+  }
+}

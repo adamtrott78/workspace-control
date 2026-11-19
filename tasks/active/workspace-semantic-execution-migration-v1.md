@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: a0a4db44e95155c4167f796712c3999c21c2053d
+- Remote checkpoint: b818951634fc04837f5e01bf7fd0c2f135d3f938
 - Remote verified: true
 
 ### PADataset
@@ -70,14 +70,14 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.0 AUTHORITY-PERSISTENCE VALIDATION GATE — operator explicitly approved exactly one v1.0 attempt with utterance 'christ ofc i approve it GO' after cleanup-closure head a0a4db44… passed Workspace #3035 / Semantic #335 / Operator #608. Authority binds review e525b37d…, procedure 9a43ba28…, foreground source 1ecc094a… / blob 2e0d2248…, unchanged Linux v3 3eb352f4…, harness 7b1feb8f…, launcher d9d474ca…, and candidate baseline 0bc1bc0e…. NEXT ACTION: exact-head validate the authority-persistence state with Workspace Control, Semantic Execution, and Operator Bridge. DO NOT begin Windows or Linux execution until all three are SUCCESS. After 3/3 green, begin the exact Windows-first v1.0 pre-live setup from procedure v1.0; Linux remains blocked until Windows prints STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS.
+STAGE-12 V1.1 SOURCE-SCOPE GATE — v1.0 authority is consumed/non-reusable after Q1 proved the helper bridge was never enabled, so Ctrl+Space was not globally registered and dispatch never ran. Review candidate architecture/workspace-semantic-execution-stage12-fast-loop-review.v1.1.json defines the bounded redesign: explicit startup enablement, Windows-only local smoke action, one-command start/stop/reset/status/smoke lifecycle, and a production supervisor/control direction. CURRENT TASK MUTATION SCOPE DOES NOT AUTHORIZE operator-bridge source/tool writes. NEXT ACTION: obtain explicit operator approval for the exact proposed source mutation scope in the v1.1 review. Do not create live retry authority and do not run Stage-12 again before the Windows-only smoke path is implemented and validated.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: Stage-12 v0.9 is consumed/non-reusable. v1.0 foreground repair/review and predecessor cleanup are validated; fresh one-shot operator approval is received. Exact-head validate the v1.0 authority-persistence state 3/3, then begin Windows-first pre-live setup.
-- REAL-ACCOUNT CALIBRATION: v1.0 one-shot authority has explicit operator approval and exact byte bindings. Do not execute until authority persistence is 3/3 green; then run the exact Windows-first procedure, require the Windows ready marker, and only afterward run the unchanged Linux v3 transaction.
+- LIVE INSTANT: v1.0 is consumed/non-reusable. Q1 root cause is bridge disabled at startup, leaving Ctrl+Space unregistered and preventing dispatch. Implement and validate the Windows-only v1.1 fast smoke/lifecycle path before any further real-account Stage-12 attempt.
+- REAL-ACCOUNT CALIBRATION: blocked until v1.1 Windows-only smoke proves startup hotkey registration, clipboard packet write, Firefox focus, and native foreground locally. Do not spend another live Stage-12 attempt on Windows interaction debugging.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
 - PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
@@ -89,7 +89,8 @@ STAGE-12 V1.0 AUTHORITY-PERSISTENCE VALIDATION GATE — operator explicitly appr
 - v1.0 review-state ecdc71c8… is 3/3 validated (#3031/#331/#604).
 - v1.0 validation-state persistence bd366f93… is 3/3 validated (#3032/#332/#605).
 - Final bookkeeping head 7b5b7bc2… is 3/3 validated (#3033/#333/#606).
-- Fresh one-shot v1.0 operator approval is received and bound to exact validated bytes. Live execution remains blocked until the authority-persistence head itself passes exact-head Workspace/Semantic/Operator validation 3/3.
+- Stage-12 v1.0 authority is consumed/non-reusable after Q1 BRIDGE_DISABLED_HOTKEY_UNREGISTERED failure; no candidate was published and candidate branch remained at 0bc1bc0e….
+- v1.1 redesign source implementation is blocked by the current task mutation scope, which does not include operator-bridge/src/** or operator-bridge/tools/**. Exact proposed files are recorded in architecture/workspace-semantic-execution-stage12-fast-loop-review.v1.1.json and require explicit operator approval.
 
 ## Fresh-chat initialization
 

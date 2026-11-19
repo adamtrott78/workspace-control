@@ -228,3 +228,11 @@
 - [x] FINAL HANDOFF BASIS: `7b5b7bc2…` passed Workspace #3033 / Semantic #333 / Operator #606; v1.0 review remains validated non-authority.
 - [x] PREDECESSOR CLEANUP GATE: exact `STAGE12_V09_LINUX_CLEANUP_VERIFIED=PASS` and `STAGE12_V09_WINDOWS_CLEANUP_VERIFIED=PASS` observed from bounded operator cleanup on 2026-11-19.
 - [x] CLEANUP-CLOSURE VALIDATION GATE: `a0a4db44…` passed Workspace #3035 / Semantic #335 / Operator #608.\n- [x] Fresh explicit v1.0 approval received: `christ ofc i approve it GO`; binds procedure `9a43ba28…`, review `e525b37d…`, foreground source `1ecc094a…` / blob `2e0d2248…`, Linux v3 `3eb352f4…`, harness `7b1feb8f…`, launcher `d9d474ca…`, candidate baseline `0bc1bc0e…`.\n- [ ] AUTHORITY-PERSISTENCE GATE: exact-head validate v1.0 authority state with Workspace/Semantic/Operator 3/3 before any Windows/Linux execution.\n- [ ] After authority persistence is 3/3 green, run exact Windows-first v1.0 pre-live setup and leave its final cleanup prompt untouched while Linux runs.
+
+
+- [x] Stage-12 v1.0 authority persistence `b8189516…` passed Workspace #3036 / Semantic #336 / Operator #609.
+- [x] Stage-12 v1.0 live authority consumed at `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`; Q1 failed before dispatch because bridge startup remained OFF and Ctrl+Space was not globally registered. Candidate branch remained `0bc1bc0e…`.
+- [x] Root cause audit: `BridgeController.SetEnabled(true)` is only reached by the manual tray toggle in current runtime; Program/Stage-12 launcher do not enable it. Clipboard/focus/native-foreground paths were not exercised.
+- [x] Freeze v1.1 fast-loop review/procedure: explicit start-enabled mode, Windows-only synthetic local smoke, one-command start/stop/reset/status/smoke dev lifecycle, production bounded supervisor direction.
+- [ ] CURRENT GATE: explicit operator approval for the exact v1.1 source mutation scope recorded in `architecture/workspace-semantic-execution-stage12-fast-loop-review.v1.1.json`; current task mutation scope does not authorize `operator-bridge/src/**` or `operator-bridge/tools/**`.
+- [ ] After source-scope approval, implement + CI-validate the Windows-only smoke path before creating any new Stage-12 live authority.
