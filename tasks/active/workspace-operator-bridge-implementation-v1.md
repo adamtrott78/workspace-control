@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: c454616a6069ade3636f100374a92277a33a46dc
+- Remote checkpoint: 7639a74478ed3e07c7054f166915d0ef137148c9
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS FAST SMOKE PASSED — operator observed Ctrl+Space foreground the dedicated Firefox window and clipboard fill with WORKSPACE_OPERATOR_SMOKE_PACKET_V1; screenshot shows the packet in the ChatGPT composer. Remaining UX defect is disposable web-ext Firefox profile requiring repeated ChatGPT login. Current candidate switches workspace-operator-dev.ps1 to a dedicated persistent non-default profile under LOCALAPPDATA with --firefox-profile, --profile-create-if-missing, and --keep-profile-changes. NEXT ACTION: exact-head validate this persistent-profile candidate 3/3; after green validation, operator performs one reset, logs in once if needed, then verifies a second reset preserves the session.
+PERSISTENT FIREFOX PROFILE VALIDATED — source 7639a744… passed Workspace #3052 / Semantic #352 / Operator #625. Windows-only dispatch smoke already passed end-to-end. NEXT ACTION: operator runs the current bookkeeping-tip smoke once, logs into ChatGPT in the dedicated Workspace Operator profile if required, then runs `wop reset` and verifies ChatGPT remains logged in after Firefox relaunch. PASS closes the repeated-login UX defect. Normal Firefox profile must remain untouched.
 
 ## Remaining work
 

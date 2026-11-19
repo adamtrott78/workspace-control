@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "WINDOWS_ONLY_SMOKE_PASSED_PERSISTENT_PROFILE_CANDIDATE",
+  "status": "PERSISTENT_PROFILE_VALIDATED_AWAITING_SESSION_PERSISTENCE_CHECK",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -209,7 +209,25 @@
       ],
       "default_firefox_profile_touched": false,
       "intended_effect": "ChatGPT cookies/session persist across wop reset/restart.",
-      "first_use_note": "A one-time login may still be required when the dedicated persistent profile is created."
+      "first_use_note": "A one-time login may still be required when the dedicated persistent profile is created.",
+      "validation": {
+        "source_head": "7639a74478ed3e07c7054f166915d0ef137148c9",
+        "workspace_control_run": 3052,
+        "semantic_execution_run": 352,
+        "operator_bridge_run": 625,
+        "result": "SUCCESS"
+      }
+    },
+    "session_persistence_check": {
+      "live_authority_required": false,
+      "procedure": [
+        "Launch the Windows-only smoke on the current bookkeeping tip containing validated source 7639a744….",
+        "If the dedicated profile is new, sign into ChatGPT once.",
+        "Run wop reset.",
+        "Verify the relaunched dedicated Firefox profile is still authenticated to ChatGPT."
+      ],
+      "pass_condition": "ChatGPT session remains authenticated across reset/relaunch.",
+      "normal_firefox_profile_must_remain_untouched": true
     }
   }
 }

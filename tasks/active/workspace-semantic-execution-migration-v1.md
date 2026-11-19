@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: c454616a6069ade3636f100374a92277a33a46dc
+- Remote checkpoint: 7639a74478ed3e07c7054f166915d0ef137148c9
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 WINDOWS-ONLY FAST SMOKE PASSED — hotkey, browser preparation, clipboard, focus, and native foreground all succeeded locally. Remaining dev UX issue is repeated ChatGPT login because web-ext currently uses a temporary Firefox profile. Candidate persists a dedicated non-default Workspace Operator Firefox profile across reset/restart using --firefox-profile + --keep-profile-changes. NEXT ACTION: exact-head validate candidate 3/3, then verify login persists across two Windows-only resets. No real-account Stage-12 authority exists.
+STAGE-12 V1.1 LOCAL INTERACTION PATH PASSED; PERSISTENT PROFILE VALIDATED — hotkey/browser/clipboard/focus smoke passed, and dedicated persistent Firefox profile source 7639a744… is 3/3 green (#3052/#352/#625). NEXT ACTION: Windows-only session-persistence check: launch current tip, login once if needed, then `wop reset`; PASS requires ChatGPT still authenticated after relaunch. No live Stage-12 authority exists.
 
 ## Remaining work
 

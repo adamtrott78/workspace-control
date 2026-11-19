@@ -266,3 +266,8 @@
 - [x] Remaining repeated-login issue identified as web-ext temporary-profile lifecycle, separate from dispatch correctness.
 - [ ] CURRENT GATE: validate dedicated persistent non-default Firefox profile candidate (`--firefox-profile` + `--profile-create-if-missing` + `--keep-profile-changes`) 3/3.
 - [ ] After validation: first reset may require one login; second reset must preserve the ChatGPT session without touching the user's normal Firefox profile.
+
+
+- [x] Dedicated persistent Firefox profile source `7639a744…` passed Workspace #3052 / Semantic #352 / Operator #625.
+- [ ] CURRENT GATE: launch persistent Workspace Operator profile, login once if needed, run `wop reset`, and verify ChatGPT remains authenticated after relaunch.
+- [ ] PASS closes repeated-login UX defect; normal/default Firefox profile remains untouched.
