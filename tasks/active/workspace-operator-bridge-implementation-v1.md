@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 380d291947ebdfbbb661c57165774a02df4cc6a7
+- Remote checkpoint: 093f85032abdd9ea336a9dcc2bb95eee948bac92
 - Remote verified: true
 
 ## Next safe action
 
-STAGE-12 FAST-LOOP IMPLEMENTATION CANDIDATE 380d2919… — v1.0 Q1 root cause is bridge startup disabled, leaving Ctrl+Space unregistered. Diagnosis/review head f0a8313b… passed Workspace #3037 / Semantic #337 / Operator #610. Existing owner scope authorizes operator-bridge/**. Candidate adds explicit --bridge-start-enabled, a one-shot --local-smoke action, and workspace-operator-dev.ps1 smoke/reset/restart/start/online/stop/offline/status lifecycle. NEXT ACTION: exact-head validate this implementation candidate; after green validation, run the Windows-only smoke before any new real-account Stage-12 authority.
+STAGE-12 FAST-LOOP IMPLEMENTATION CANDIDATE 093f8503… — prior synchronized head 21cefb25… passed Workspace #3039 and Semantic #339 but Operator #612 failed at compile before runtime because Program.cs used ?? across two different concrete action-port types. 093f8503… applies the one-line explicit IOperatorActionPort conditional repair. NEXT ACTION: exact-head validate the repaired synchronized implementation state; after 3/3 green, run the Windows-only synthetic smoke before any live Stage-12 retry.
 
 ## Remaining work
 

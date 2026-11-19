@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "VALIDATED_DESIGN_SOURCE_IMPLEMENTED_AWAITING_EXACT_HEAD_VALIDATION",
+  "status": "IMPLEMENTATION_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -84,8 +84,17 @@
       "operator_bridge_run": 610,
       "result": "SUCCESS"
     },
-    "implementation_candidate_head": "380d291947ebdfbbb661c57165774a02df4cc6a7",
+    "implementation_candidate_head": "093f85032abdd9ea336a9dcc2bb95eee948bac92",
     "live_retry_authorized": false,
-    "model_reasoning_is_not_authority": true
+    "model_reasoning_is_not_authority": true,
+    "prior_candidate_failure": {
+      "head": "21cefb253a50f973e95305ceaefd87372171040f",
+      "workspace_control_run": 3039,
+      "semantic_execution_run": 339,
+      "operator_bridge_run": 612,
+      "result": "OPERATOR_COMPILE_FAILURE",
+      "defect": "Program.cs used ?? between HttpOperatorBridgeClient and LocalSmokeOperatorActionPort concrete types; source never reached runtime."
+    },
+    "compile_repair": "Explicit IOperatorActionPort conditional at 093f85032abdd9ea336a9dcc2bb95eee948bac92."
   }
 }

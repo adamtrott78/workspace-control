@@ -236,5 +236,7 @@
 - [x] Freeze v1.1 fast-loop review/procedure: explicit start-enabled mode, Windows-only synthetic local smoke, one-command start/stop/reset/status/smoke dev lifecycle, production bounded supervisor direction.
 - [x] v1.1 diagnosis/review `f0a8313b…` passed Workspace #3037 / Semantic #337 / Operator #610; owner task `workspace-operator-bridge-implementation-v1` already authorizes `operator-bridge/**` mutation.
 - [x] v1.1 fast-loop source candidate `380d2919…` adds `--bridge-start-enabled`, deterministic `--local-smoke`, and `workspace-operator-dev.ps1` lifecycle controls.
-- [ ] CURRENT GATE: exact-head validate synchronized v1.1 implementation state 3/3.
+- [x] First synchronized v1.1 implementation head `21cefb25…` passed Workspace #3039 / Semantic #339 but Operator #612 failed at compile before runtime (CS0019 concrete-type coalescing).
+- [x] Minimal compile repair `093f8503…` changes only action-port selection to an explicit `IOperatorActionPort` conditional.
+- [ ] CURRENT GATE: exact-head validate the repaired synchronized v1.1 implementation state 3/3.
 - [ ] After validation is green, run the Windows-only synthetic smoke before creating any new Stage-12 live authority.
