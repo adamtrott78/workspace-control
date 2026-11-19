@@ -36,6 +36,20 @@ public sealed class RuntimeModeDetectorTests
     }
 
     [TestMethod]
+    public void ExplicitStartEnabledSmokeSelectsUiModeWithRedirectedStdio()
+    {
+        Assert.IsFalse(
+            RuntimeModeDetector.IsNativeHostProxy(
+                new[]
+                {
+                    "--bridge-start-enabled",
+                    "--local-smoke"
+                },
+                inputRedirected: true,
+                outputRedirected: true));
+    }
+
+    [TestMethod]
     public void FirefoxOriginArgumentsStillSelectProxyWithRedirectedStdio()
     {
         Assert.IsTrue(

@@ -36,7 +36,8 @@ public sealed class TrayApplicationContext : ApplicationContext
         SchedulerHotkeyBinding? schedulerHotkey = null,
         Func<WorkloadStatusSnapshot>? workloadStatusProvider = null,
         IOperatorActionPort? operatorActionPort = null,
-        IDisposable? operatorActionLifetime = null)
+        IDisposable? operatorActionLifetime = null,
+        bool startEnabled = false)
     {
         _diagnostics = JsonLineDiagnosticsSink.CreateDefault();
         _hotkeyWindow = new HotkeyMessageWindow();
@@ -117,6 +118,11 @@ public sealed class TrayApplicationContext : ApplicationContext
         _notifyIcon.ContextMenuStrip.Items.Add(exitItem);
 
         _hotkeyWindow.HotkeyPressed += HotkeyPressed;
+
+        if (startEnabled)
+        {
+            _bridgeController.SetEnabled(true);
+        }
 
         _statusTimer = new System.Windows.Forms.Timer
         {

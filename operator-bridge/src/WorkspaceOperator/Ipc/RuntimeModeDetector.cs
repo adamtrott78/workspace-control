@@ -28,6 +28,14 @@ public static class RuntimeModeDetector
                     StringComparison.OrdinalIgnoreCase) ||
                 arg.StartsWith(
                     "--operator-bridge-url=",
+                    StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(
+                    arg,
+                    "--bridge-start-enabled",
+                    StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(
+                    arg,
+                    "--local-smoke",
                     StringComparison.OrdinalIgnoreCase)))
         {
             return false;

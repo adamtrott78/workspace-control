@@ -1,4 +1,6 @@
+using WorkspaceControl.OperatorBridge.Bootstrap;
 using WorkspaceControl.OperatorBridge.Ipc;
+using WorkspaceControl.OperatorBridge.Ports;
 using WorkspaceControl.OperatorBridge.Windows;
 using WorkspaceControl.OperatorBridge.Windows.Hotkey;
 using WorkspaceControl.OperatorBridge.Windows.Remote;
@@ -23,10 +25,19 @@ internal static class Program
         ApplicationConfiguration.Initialize();
         var idleProbeMilliseconds = ParseIdleProbe(args);
         var schedulerHotkey = ParseSchedulerHotkey(args);
+        var startEnabled = HasFlag(args, "--bridge-start-enabled");
+        var localSmoke = HasFlag(args, "--local-smoke");
         var remoteConfiguration =
             RemoteOperatorBridgeConfiguration.Parse(
                 args,
                 $"workspaceoperator-{Guid.NewGuid():N}");
+
+        if (localSmoke && remoteConfiguration is not null)
+        {
+            throw new ArgumentException(
+                "--local-smoke cannot be combined with --operator-bridge-url.");
+        }
+
         HttpOperatorBridgeClient? remoteClient = null;
 
         try
@@ -34,16 +45,38 @@ internal static class Program
             remoteClient = remoteConfiguration is null
                 ? null
                 : HttpOperatorBridgeClient.Create(remoteConfiguration);
+            var localSmokePort = localSmoke
+                ? new LocalSmokeOperatorActionPort()
+                : null;
+            IOperatorActionPort? actionPort = remoteClient ?? localSmokePort;
+            Func<WorkloadStatusSnapshot>? statusProvider =
+                remoteClient is not null
+                    ? () => remoteClient.CurrentStatus
+                    : localSmokePort is not null
+                        ? () => new WorkloadStatusSnapshot(
+                            localSmokePort.HasReadyAction ? 1 : 0,
+                            0)
+                        : null;
 
-            System.Windows.Forms.Application.Run(
-                new TrayApplicationContext(
-                    idleProbeMilliseconds,
-                    schedulerHotkey,
-                    workloadStatusProvider: remoteClient is null
-                        ? null
-                        : () => remoteClient.CurrentStatus,
-                    operatorActionPort: remoteClient,
-                    operatorActionLifetime: remoteClient));
+            var context = new TrayApplicationContext(
+                idleProbeMilliseconds,
+                schedulerHotkey,
+                workloadStatusProvider: statusProvider,
+                operatorActionPort: actionPort,
+                operatorActionLifetime: remoteClient,
+                startEnabled: startEnabled);
+
+            if (startEnabled)
+            {
+                Console.WriteLine("WORKSPACE_OPERATOR_BRIDGE_ENABLED=PASS");
+            }
+
+            if (localSmoke)
+            {
+                Console.WriteLine("WORKSPACE_OPERATOR_LOCAL_SMOKE_READY=PASS");
+            }
+
+            System.Windows.Forms.Application.Run(context);
         }
         catch
         {
@@ -51,6 +84,12 @@ internal static class Program
             throw;
         }
     }
+
+    private static bool HasFlag(string[] args, string flag) =>
+        args.Any(arg => string.Equals(
+            arg,
+            flag,
+            StringComparison.OrdinalIgnoreCase));
 
     private static SchedulerHotkeyBinding ParseSchedulerHotkey(string[] args)
     {
