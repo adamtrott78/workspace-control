@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "IMPLEMENTATION_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION",
+  "status": "FINAL_IMPLEMENTATION_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -84,7 +84,7 @@
       "operator_bridge_run": 610,
       "result": "SUCCESS"
     },
-    "implementation_candidate_head": "17486d41c845163da1b2e01916b3886561836e15",
+    "implementation_candidate_head": "fca55ac8cbdc0d28d7fa84cb5a5e31ddc80347d8",
     "live_retry_authorized": false,
     "model_reasoning_is_not_authority": true,
     "prior_candidate_failure": {
@@ -109,6 +109,21 @@
         "result": "LITERAL_BACKSLASH_N_SERIALIZATION_COMPILE_FAILURE"
       }
     ],
-    "serialization_repair": "17486d41c845163da1b2e01916b3886561836e15 replaces only literal backslash+n bytes with real LF line breaks."
+    "serialization_repair": "17486d41c845163da1b2e01916b3886561836e15 replaces only literal backslash+n bytes with real LF line breaks.",
+    "lifecycle_hardening": {
+      "commits": [
+        "3f15d4e2acbbe7809e674635a5baf27ac72c43d9",
+        "fca55ac8cbdc0d28d7fa84cb5a5e31ddc80347d8"
+      ],
+      "dev_script_blob": "1f7eec4e565b9d855bcb15911358fe369673cab5",
+      "workflow_blob": "7dae1fa5f8d88aad568f3f89cebafc2f9319c0a5",
+      "checks": [
+        "No $PID parameter collision.",
+        "Smoke mode fails closed if Firefox is already open.",
+        "Stop kills exact recorded PIDs plus exact-path WorkspaceOperator native-host children.",
+        "Partial startup directly unwinds registry/process/workdir state.",
+        "Operator CI parses workspace-operator-dev.ps1."
+      ]
+    }
   }
 }

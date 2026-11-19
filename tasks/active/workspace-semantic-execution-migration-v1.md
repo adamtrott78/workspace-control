@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 17486d41c845163da1b2e01916b3886561836e15
+- Remote checkpoint: fca55ac8cbdc0d28d7fa84cb5a5e31ddc80347d8
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 FAST-LOOP IMPLEMENTATION CANDIDATE 17486d41… — 26ec6f37… passed Workspace #3041 but Operator #614 failed before runtime because the prior patch serialized literal backslash+n characters into Program.cs. 17486d41… replaces only those literal bytes with real line breaks. NEXT ACTION: exact-head validate this repaired synchronized state 3/3; after green validation, run only the Windows synthetic smoke. Do not create new real-account Stage-12 authority until local smoke passes.
+STAGE-12 V1.1 FAST-LOOP FINAL IMPLEMENTATION CANDIDATE fca55ac8… — explicit bridge startup/local smoke is implemented; prior compile/serialization defects are repaired; lifecycle cleanup is hardened and the control script is now PowerShell-parse validated in Operator CI. NEXT ACTION: exact-head validate the synchronized final candidate 3/3; after green validation, run only the Windows synthetic smoke. Do not create new real-account Stage-12 authority until local smoke passes.
 
 ## Remaining work
 

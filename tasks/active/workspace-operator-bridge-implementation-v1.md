@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 17486d41c845163da1b2e01916b3886561836e15
+- Remote checkpoint: fca55ac8cbdc0d28d7fa84cb5a5e31ddc80347d8
 - Remote verified: true
 
 ## Next safe action
 
-STAGE-12 FAST-LOOP IMPLEMENTATION CANDIDATE 17486d41… — prior synchronized head 26ec6f37… passed Workspace #3041 but Operator #614 failed before runtime because a tool-generated repair contained literal backslash+n bytes in Program.cs. 17486d41… replaces only those literal bytes with real line breaks. NEXT ACTION: exact-head validate the repaired synchronized implementation state; after 3/3 green, run the Windows-only synthetic smoke before any live Stage-12 retry.
+STAGE-12 FAST-LOOP FINAL IMPLEMENTATION CANDIDATE fca55ac8… — explicit start-enabled/local-smoke source is present, compile serialization defects are repaired, workspace-operator-dev.ps1 cleanup is hardened, and the dev script is included in the Windows PowerShell parse gate. NEXT ACTION: exact-head validate this synchronized final candidate 3/3. After green validation, run the Windows-only synthetic smoke. No Linux/Tailscale/PostgreSQL/live-account setup and no new Stage-12 authority until the local smoke passes.
 
 ## Remaining work
 
