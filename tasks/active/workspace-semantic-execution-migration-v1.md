@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 97410a1c49189287550c95473ee1e862578d1609
+- Remote checkpoint: a69bb92d99bffc4e6df05ed59809cbdddff61f0a
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 FAST-LOOP RUNTIME-GUARD REPAIR CANDIDATE 97410a1c… — Windows-only smoke built successfully but stopped before launch on the unnecessary existing-Firefox guard, so no dispatch behavior was exercised. Candidate 97410a1c… removes that guard, fixes the PowerShell $PID parameter collision, and adds operator-bridge/src build caching for short reset loops. NEXT ACTION: exact-head validate 3/3; after green validation rerun only the Windows synthetic smoke. No new real-account Stage-12 authority exists.
+STAGE-12 V1.1 WINDOWS-ONLY FAST SMOKE GATE — executable source a69bb92d… is 3/3 green (#3048/#348/#621). Run `wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a` on Windows and press Ctrl+Space exactly once. PASS requires clipboard WORKSPACE_OPERATOR_SMOKE_PACKET_V1 plus dedicated Firefox OS foreground. This does not consume or create any real-account Stage-12 authority. Only after this local smoke passes may a future live retry review proceed.
 
 ## Remaining work
 

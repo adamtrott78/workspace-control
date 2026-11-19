@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "RUNTIME_GUARD_REPAIR_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION",
+  "status": "VALIDATED_IMPLEMENTATION_AWAITING_WINDOWS_ONLY_SMOKE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -84,7 +84,7 @@
       "operator_bridge_run": 610,
       "result": "SUCCESS"
     },
-    "implementation_candidate_head": "97410a1c49189287550c95473ee1e862578d1609",
+    "implementation_candidate_head": "a69bb92d99bffc4e6df05ed59809cbdddff61f0a",
     "live_retry_authorized": false,
     "model_reasoning_is_not_authority": true,
     "prior_candidate_failure": {
@@ -143,6 +143,20 @@
         "Cache dotnet build by HEAD:operator-bridge/src tree hash with WORKSPACE_OPERATOR_BUILD_CACHE=MISS/HIT markers."
       ],
       "live_retry_authorized": false
+    },
+    "implementation_validation": {
+      "workspace_control_run": 3048,
+      "semantic_execution_run": 348,
+      "operator_bridge_run": 621,
+      "result": "SUCCESS"
+    },
+    "windows_only_smoke": {
+      "source_head": "a69bb92d99bffc4e6df05ed59809cbdddff61f0a",
+      "script_blob": "e694374d158d09cc22a26210ccf9a7a4504056d8",
+      "command": "wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a",
+      "expected_clipboard": "WORKSPACE_OPERATOR_SMOKE_PACKET_V1",
+      "expected_foreground": "dedicated Firefox window",
+      "live_authority_required": false
     }
   }
 }

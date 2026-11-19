@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 97410a1c49189287550c95473ee1e862578d1609
+- Remote checkpoint: a69bb92d99bffc4e6df05ed59809cbdddff61f0a
 - Remote verified: true
 
 ## Next safe action
 
-STAGE-12 FAST-LOOP RUNTIME-GUARD REPAIR CANDIDATE 97410a1c… — first Windows-only smoke at eac272f9… built successfully but stopped before runtime on DEV_SMOKE_REQUIRES_EXISTING_FIREFOX_CLOSED. Exact green script inspection also showed the intended $PID/runtime cleanup edits had not landed. 97410a1c… removes the unnecessary Firefox exclusivity guard, fixes Test-Pid to avoid PowerShell $PID collision, and adds source-tree build caching so repeated smoke/reset runs can skip the .NET rebuild when operator-bridge/src is unchanged. NEXT ACTION: exact-head validate this synchronized candidate; after 3/3 green, rerun Windows-only smoke. No Linux/Tailscale/PostgreSQL/live-account setup.
+WINDOWS-ONLY FAST SMOKE GATE — runtime-guard/build-cache source a69bb92d… passed Workspace #3048 / Semantic #348 / Operator #621. The first eac272f9… smoke never launched because the obsolete existing-Firefox guard fired after build. That guard is removed, Test-Pid uses $ProcessId, and repeat runs cache the .NET build by operator-bridge/src tree. NEXT ACTION: operator runs `wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a`, then presses Ctrl+Space once. PASS requires clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1 and the dedicated Firefox window foregrounded. No Linux/Tailscale/PostgreSQL/live authority is involved.
 
 ## Remaining work
 

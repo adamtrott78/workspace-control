@@ -247,3 +247,8 @@
 - [x] Exact script audit found the intended runtime hardening had not landed; candidate `97410a1c…` removes Firefox exclusivity, fixes reserved `$PID` parameter use, and adds source-tree build caching.
 - [ ] CURRENT GATE: exact-head validate `97410a1c…` synchronized runtime-guard repair 3/3.
 - [ ] After green validation, rerun only Windows synthetic smoke; expected one Ctrl+Space -> clipboard smoke packet + dedicated Firefox foreground.
+
+
+- [x] Runtime-guard/build-cache executable source `a69bb92d…` passed Workspace #3048 / Semantic #348 / Operator #621.
+- [ ] CURRENT GATE: Windows-only smoke on exact `a69bb92d…`: run `wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a`, press Ctrl+Space once, verify clipboard `WORKSPACE_OPERATOR_SMOKE_PACKET_V1` and dedicated Firefox foreground.
+- [ ] Only after local smoke passes: review whether any additional foreground/clipboard fix is needed; do not create a real-account Stage-12 authority before that evidence.
