@@ -48,7 +48,9 @@ internal static class Program
             var localSmokePort = localSmoke
                 ? new LocalSmokeOperatorActionPort()
                 : null;
-            IOperatorActionPort? actionPort = remoteClient is not null\n                ? remoteClient\n                : localSmokePort;
+            IOperatorActionPort? actionPort = remoteClient is not null
+                ? remoteClient
+                : localSmokePort;
             Func<WorkloadStatusSnapshot>? statusProvider =
                 remoteClient is not null
                     ? () => remoteClient.CurrentStatus
