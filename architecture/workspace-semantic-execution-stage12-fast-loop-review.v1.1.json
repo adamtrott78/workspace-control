@@ -84,7 +84,7 @@
       "operator_bridge_run": 610,
       "result": "SUCCESS"
     },
-    "implementation_candidate_head": "093f85032abdd9ea336a9dcc2bb95eee948bac92",
+    "implementation_candidate_head": "17486d41c845163da1b2e01916b3886561836e15",
     "live_retry_authorized": false,
     "model_reasoning_is_not_authority": true,
     "prior_candidate_failure": {
@@ -95,6 +95,20 @@
       "result": "OPERATOR_COMPILE_FAILURE",
       "defect": "Program.cs used ?? between HttpOperatorBridgeClient and LocalSmokeOperatorActionPort concrete types; source never reached runtime."
     },
-    "compile_repair": "Explicit IOperatorActionPort conditional at 093f85032abdd9ea336a9dcc2bb95eee948bac92."
+    "compile_repair": "Explicit IOperatorActionPort conditional at 093f85032abdd9ea336a9dcc2bb95eee948bac92.",
+    "prior_candidate_failures": [
+      {
+        "head": "21cefb253a50f973e95305ceaefd87372171040f",
+        "operator_bridge_run": 612,
+        "result": "CS0019_CONCRETE_TYPE_COALESCING"
+      },
+      {
+        "head": "26ec6f378944e55fea7bb1f66150af46049c5876",
+        "workspace_control_run": 3041,
+        "operator_bridge_run": 614,
+        "result": "LITERAL_BACKSLASH_N_SERIALIZATION_COMPILE_FAILURE"
+      }
+    ],
+    "serialization_repair": "17486d41c845163da1b2e01916b3886561836e15 replaces only literal backslash+n bytes with real LF line breaks."
   }
 }

@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 093f85032abdd9ea336a9dcc2bb95eee948bac92
+- Remote checkpoint: 17486d41c845163da1b2e01916b3886561836e15
 - Remote verified: true
 
 ## Next safe action
 
-STAGE-12 FAST-LOOP IMPLEMENTATION CANDIDATE 093f8503… — prior synchronized head 21cefb25… passed Workspace #3039 and Semantic #339 but Operator #612 failed at compile before runtime because Program.cs used ?? across two different concrete action-port types. 093f8503… applies the one-line explicit IOperatorActionPort conditional repair. NEXT ACTION: exact-head validate the repaired synchronized implementation state; after 3/3 green, run the Windows-only synthetic smoke before any live Stage-12 retry.
+STAGE-12 FAST-LOOP IMPLEMENTATION CANDIDATE 17486d41… — prior synchronized head 26ec6f37… passed Workspace #3041 but Operator #614 failed before runtime because a tool-generated repair contained literal backslash+n bytes in Program.cs. 17486d41… replaces only those literal bytes with real line breaks. NEXT ACTION: exact-head validate the repaired synchronized implementation state; after 3/3 green, run the Windows-only synthetic smoke before any live Stage-12 retry.
 
 ## Remaining work
 

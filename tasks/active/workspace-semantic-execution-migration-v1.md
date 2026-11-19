@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 093f85032abdd9ea336a9dcc2bb95eee948bac92
+- Remote checkpoint: 17486d41c845163da1b2e01916b3886561836e15
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 FAST-LOOP REPAIRED IMPLEMENTATION CANDIDATE 093f8503… — prior synchronized head 21cefb25… passed Workspace #3039 / Semantic #339 but Operator #612 failed at compile before runtime on a concrete-type ?? expression in Program.cs. 093f8503… applies the one-line explicit IOperatorActionPort conditional repair. NEXT ACTION: exact-head validate the repaired synchronized state 3/3; after green validation, run only the Windows synthetic smoke. Do not create new real-account Stage-12 authority until local smoke passes.
+STAGE-12 V1.1 FAST-LOOP IMPLEMENTATION CANDIDATE 17486d41… — 26ec6f37… passed Workspace #3041 but Operator #614 failed before runtime because the prior patch serialized literal backslash+n characters into Program.cs. 17486d41… replaces only those literal bytes with real line breaks. NEXT ACTION: exact-head validate this repaired synchronized state 3/3; after green validation, run only the Windows synthetic smoke. Do not create new real-account Stage-12 authority until local smoke passes.
 
 ## Remaining work
 
