@@ -31,7 +31,7 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         source = CORE.read_text(encoding="utf-8")
         background = BACKGROUND.read_text(encoding="utf-8")
         self.assertIn(
-            'const WORKER_START_URL = "https://chatgpt.com/";',
+            'const WORKER_START_URL = "https://chatgpt.com/?temporary-chat=true";',
             source,
         )
         self.assertIn(
