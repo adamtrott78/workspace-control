@@ -642,3 +642,67 @@ Do not invent a stability threshold until the weak-pair pilot supplies enough ev
 8. Do not advance PR #37 until its exact-head-bound queue is dead.
 9. Only a terminal 60-epoch finalist that clears macro >=0.95 and min-class >=0.90 may freeze a pair.
 10. After freeze, use the prebuilt downstream plumbing for the two standard-DQNGuard directional evaluations and then apply the frozen H1 +0.05 / -0.02 gate.
+
+
+## Fresh-chat checkpoint — H1 HPO wave0 attempt2 infrastructure retries
+
+This section supersedes the earlier wave0-live checkpoint. The authoritative source remains the JSON capsule.
+
+### Attempt1 closure
+
+- PADataset PR #37 remains **OPEN / DRAFT / UNMERGED** at exact head `8b176ce931a1d802127ec2591d38ad0a4cedafb4`.
+- Original wave0: **24/24 terminal**.
+- Scientific successes: **18**.
+- Infrastructure-only CUDA OOM failures: **6**.
+- The six OOMs are exactly `t000` and `t002` for PA2-PA3, PA2-PA8, and PA3-PA8; they failed before a usable validation epoch and remain excluded from scientific ranking.
+- No target/test/OSR evidence is used for HPO selection.
+
+### Provisional observed leaders
+
+Strict checkpoint extraction confirms the strongest observed attempt1 candidates:
+
+| Pair | Trial | Known-val macro-F1 | Min-class val F1 |
+| --- | --- | ---: | ---: |
+| PA2-PA3 | t003 | 0.9879791290 | 0.9818181818 |
+| PA2-PA3 | t005 | 0.9783293686 | 0.9670056497 |
+| PA2-PA8 | t003 | 0.9884992938 | 0.9827105410 |
+| PA2-PA8 | t007 | 0.9820379425 | 0.9725561352 |
+| PA3-PA8 | t005 | 0.9837465208 | 0.9752290465 |
+| PA3-PA8 | t001 | 0.9749894729 | 0.9619534355 |
+
+All six artifacts preserve `target_test_consumed=false`.
+
+These leaders are **provisional only**. They are not promotion authority because two deterministic screen candidates per pair were missing from attempt1.
+
+### Why one retry is required
+
+Wave0 was frozen as eight deterministic candidates per unresolved pair. Because `t000` and `t002` lack scientific evidence, promoting from only six candidates would silently change the reviewed screen set. The missing candidates could in principle outrank the observed leaders.
+
+The durable controller therefore requires exactly one infrastructure retry of each missing deterministic trial before refine promotion.
+
+### Attempt2 admissions
+
+Exactly one rerun was requested for each failed workflow job on 2026-11-19. No new issue-comment admission, trial ID, hyperparameter vector, or candidate head was created.
+
+| Trial | Workflow run | Original job | Attempt2 state at request |
+| --- | ---: | ---: | --- |
+| PA2-PA3 t000 | 44343583046 | 134939846163 | QUEUED |
+| PA2-PA8 t000 | 44343586571 | 134939857208 | QUEUED |
+| PA3-PA8 t000 | 44343593644 | 134939880831 | QUEUED |
+| PA2-PA3 t002 | 44343625925 | 134939997323 | QUEUED |
+| PA2-PA8 t002 | 44343634712 | 134940029562 | QUEUED |
+| PA3-PA8 t002 | 44343640671 | 134940050111 | QUEUED |
+
+Each workflow is now `run_attempt=2`.
+
+### Immediate next action
+
+1. Monitor only these six attempt2 retries.
+2. Do **not** issue any additional retry.
+3. Do **not** advance PR #37 while they remain queued/running.
+4. Strict-extract any successful attempt2 artifacts with `experiments/l2o_hpo_extract.py`.
+5. Once all six are terminal, rank the complete screen evidence with `experiments/l2o_hpo_rank.py`.
+6. Promote the top **2 per pair** to the frozen 24-epoch refine stage.
+7. Promote the best refined candidate per pair to a 60-epoch finalist.
+8. Freeze only a terminal finalist clearing validation macro-F1 >=0.95 and min-class F1 >=0.90.
+9. Only after freeze, run the two standard-DQNGuard directional OSR cells and apply the H1 investment gate.
