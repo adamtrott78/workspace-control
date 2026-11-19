@@ -168,7 +168,7 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --firefox
   Write-Host ""
   Write-Host "STAGE12_WINDOWS_RUNTIME_READY=PASS"
   Write-Host "The dedicated persistent Workspace Operator Firefox profile is open."
-  Write-Host "The worker is launched at https://chatgpt.com/?temporary-chat=true. Sign in normally if the dedicated profile is not already authenticated."
+  Write-Host "The worker is launched at https://chatgpt.com/?temporary-chat=true; sign in normally if the dedicated profile is not already authenticated."
   Write-Host "Do not paste credentials into this terminal and do not use credential automation."
   Write-Host "Select the normal ChatGPT Instant mode for the calibration."
   [void](Read-Host "After normal manual login is complete and Instant is selected, press Enter here")
