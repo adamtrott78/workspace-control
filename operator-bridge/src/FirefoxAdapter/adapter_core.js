@@ -4,7 +4,7 @@
   const PROTOCOL_VERSION = "1.0";
   const NATIVE_HOST_NAME = "com.workspacecontrol.operator_bridge";
   const MANAGED_TAB_VALUE = "workspaceControlOperatorBindingV1";
-  const WORKER_START_URL = "https://chatgpt.com/";
+  const WORKER_START_URL = "https://chatgpt.com/?temporary-chat=true";
   const CHATGPT_ORIGIN = "https://chatgpt.com";
   const MAX_COMMAND_CACHE = 256;
 
@@ -225,7 +225,9 @@
           ? payload.expected_binding_generation + 1
           : 1;
 
-      const tab = await this.browser.tabs.create({
+      const reusableBootstrapTab = await this.findReusableBootstrapTab();
+      const createdNewTab = reusableBootstrapTab === null;
+      const tab = reusableBootstrapTab || await this.browser.tabs.create({
         url: this.workerStartUrl,
         active: false
       });
@@ -244,7 +246,9 @@
           MANAGED_TAB_VALUE,
           metadata);
       } catch {
-        await this.browser.tabs.remove(tab.id).catch(() => {});
+        if (createdNewTab) {
+          await this.browser.tabs.remove(tab.id).catch(() => {});
+        }
         return createResult(resultOperation, "UNKNOWN", {
           normalized_error: "BINDING_METADATA_WRITE_FAILED",
           worker_slot_id: payload.worker_slot_id,
@@ -408,6 +412,39 @@
       }
 
       return match;
+    }
+
+    async findReusableBootstrapTab() {
+      const tabs = await this.browser.tabs.query({});
+      const candidates = [];
+
+      for (const tab of tabs) {
+        if (
+          !Number.isInteger(tab.id) ||
+          tab.active !== true ||
+          tab.discarded === true ||
+          tab.url !== this.workerStartUrl
+        ) {
+          continue;
+        }
+
+        let stored;
+        try {
+          stored = await this.browser.sessions.getTabValue(
+            tab.id,
+            MANAGED_TAB_VALUE);
+        } catch {
+          continue;
+        }
+
+        if (sanitizedMetadata(stored)) {
+          continue;
+        }
+
+        candidates.push(tab);
+      }
+
+      return candidates.length === 1 ? candidates[0] : null;
     }
 
     async findManagedBinding(payload) {

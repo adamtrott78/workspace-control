@@ -135,7 +135,7 @@ test("origin reduction never returns raw URL text", () => {
   assert.equal(classifyOrigin("not a url"), "UNKNOWN");
 });
 
-test("unmanaged ChatGPT tab is never adopted; ensure creates a new managed tab", async () => {
+test("unmanaged non-bootstrap ChatGPT tab is never adopted", async () => {
   const browser = new MockBrowser([
     { id: 1, url: "https://chatgpt.com/c/unmanaged", active: true }
   ]);
@@ -159,6 +159,46 @@ test("unmanaged ChatGPT tab is never adopted; ensure creates a new managed tab",
     url: WORKER_START_URL,
     active: false
   });
+});
+
+test("exact active temporary-chat bootstrap tab is adopted instead of duplicated", async () => {
+  const browser = new MockBrowser([
+    { id: 2, url: WORKER_START_URL, active: true }
+  ]);
+  const adapter = new FirefoxAdapterCore(browser, {
+    idFactory: () => "binding-bootstrap"
+  });
+
+  const result = await adapter.handleCommand(command(
+    "req-bootstrap",
+    "ENSURE_WORKER_SURFACE",
+    { worker_slot_id: "slot-bootstrap", session_generation: 1 }
+  ));
+
+  assert.equal(result.outcome, "APPLIED");
+  assert.equal(result.binding_ref, "binding-bootstrap");
+  assert.equal(browser.tabsById.size, 1);
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.create").length,
+    0
+  );
+  assert.deepEqual(
+    browser.tabValues.get(2).get(MANAGED_TAB_VALUE),
+    {
+      managed: true,
+      binding_ref: "binding-bootstrap",
+      binding_generation: 1,
+      worker_slot_id: "slot-bootstrap",
+      session_generation: 1
+    }
+  );
+});
+
+test("worker start URL is the requested temporary-chat route", () => {
+  assert.equal(
+    WORKER_START_URL,
+    "https://chatgpt.com/?temporary-chat=true"
+  );
 });
 
 test("binding metadata contains only non-authoritative local identity", async () => {

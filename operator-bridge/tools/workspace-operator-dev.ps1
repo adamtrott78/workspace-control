@@ -17,6 +17,7 @@ $statePath = Join-Path $runtimeRoot "runtime.json"
 $registryPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\com.workspacecontrol.operator_bridge"
 $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
 $firefoxProfile = Join-Path $runtimeRoot "firefox-profile"
+$temporaryChatUrl = "https://chatgpt.com/?temporary-chat=true"
 
 function Get-Dotnet10 {
   $candidates = @()
@@ -239,7 +240,7 @@ function Start-DevRuntime([bool]$LocalSmoke) {
     $launcher = Join-Path $work "run-web-ext.cmd"
     @"
 @echo off
-call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --no-reload --no-input --arg=-no-remote
+call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --start-url "$temporaryChatUrl" --no-reload --no-input --arg=-no-remote
 "@ | Set-Content -LiteralPath $launcher -Encoding ASCII
 
     $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d","/c",$launcher) -RedirectStandardOutput $webOut -RedirectStandardError $webErr -PassThru

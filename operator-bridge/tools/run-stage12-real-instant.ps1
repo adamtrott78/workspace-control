@@ -21,6 +21,8 @@ if (Get-Process firefox -ErrorAction SilentlyContinue) {
 }
 
 $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
+$temporaryChatUrl = "https://chatgpt.com/?temporary-chat=true"
+$firefoxProfile = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage12\firefox-profile"
 if (-not (Test-Path -LiteralPath $firefox -PathType Leaf)) {
   throw "Firefox is required at $firefox"
 }
@@ -135,7 +137,8 @@ try {
     "--operator-bridge-timeout-ms=5000",
     "--operator-status-refresh-ms=500",
     "--operator-claim-lease-ms=30000",
-    "--scheduler-hotkey=$SchedulerHotkey"
+    "--scheduler-hotkey=$SchedulerHotkey",
+    "--bridge-start-enabled"
   ) -RedirectStandardOutput $helperOut -RedirectStandardError $helperErr -PassThru
 
   Start-Sleep -Milliseconds 750
@@ -148,7 +151,7 @@ try {
   $launcher = Join-Path $work "run-web-ext.cmd"
   @"
 @echo off
-call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-reload --no-input --arg=-no-remote
+call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --start-url "$temporaryChatUrl" --no-reload --no-input --arg=-no-remote
 "@ | Set-Content -LiteralPath $launcher -Encoding ASCII
 
   $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @(
@@ -164,8 +167,8 @@ call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --no-relo
 
   Write-Host ""
   Write-Host "STAGE12_WINDOWS_RUNTIME_READY=PASS"
-  Write-Host "A temporary isolated Firefox profile is open."
-  Write-Host "In that Firefox window, navigate to https://chatgpt.com and sign in normally."
+  Write-Host "The dedicated persistent Workspace Operator Firefox profile is open."
+  Write-Host "The worker is launched at https://chatgpt.com/?temporary-chat=true. Sign in normally if the dedicated profile is not already authenticated."
   Write-Host "Do not paste credentials into this terminal and do not use credential automation."
   Write-Host "Select the normal ChatGPT Instant mode for the calibration."
   [void](Read-Host "After normal manual login is complete and Instant is selected, press Enter here")
