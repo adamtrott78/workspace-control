@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "CLIPBOARD_FIX_VALIDATED_AWAITING_WINDOWS_ONLY_SMOKE_RETRY",
+  "status": "WINDOWS_ONLY_SMOKE_PASSED_PERSISTENT_PROFILE_CANDIDATE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -186,6 +186,30 @@
         "result": "SUCCESS"
       },
       "live_retry_authorized": false
+    },
+    "windows_only_smoke_result": {
+      "observed_at": "2026-11-19",
+      "hotkey_capture": true,
+      "browser_prepare": true,
+      "clipboard": true,
+      "clipboard_value": "WORKSPACE_OPERATOR_SMOKE_PACKET_V1",
+      "browser_focus": true,
+      "native_foreground": true,
+      "chatgpt_compose_observed": true,
+      "result": "PASS",
+      "live_authority_used": false
+    },
+    "persistent_profile_candidate": {
+      "source_path": "operator-bridge/tools/workspace-operator-dev.ps1",
+      "profile_path": "%LOCALAPPDATA%\\WorkspaceControl\\OperatorBridge\\DevRuntime\\firefox-profile",
+      "web_ext_flags": [
+        "--firefox-profile",
+        "--profile-create-if-missing",
+        "--keep-profile-changes"
+      ],
+      "default_firefox_profile_touched": false,
+      "intended_effect": "ChatGPT cookies/session persist across wop reset/restart.",
+      "first_use_note": "A one-time login may still be required when the dedicated persistent profile is created."
     }
   }
 }

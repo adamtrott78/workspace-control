@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 053899196fb06ae5248bec58a7ded813e6ae3d1c
+- Remote checkpoint: c454616a6069ade3636f100374a92277a33a46dc
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 WINDOWS-ONLY FAST SMOKE RETRY — first hotkey smoke proved global Ctrl+Space registration and browser adapter connection/preparation, then failed exactly at clipboard write because WinFormsClipboardWriter required STA while async dispatch resumed non-STA. Source 05389919… fixes clipboard by synchronous STA marshaling + bounded clipboard-busy retry and is 3/3 green (#3050/#350/#623). NEXT ACTION: rerun Windows synthetic smoke only; expected Ctrl+Space -> clipboard packet -> browser focus/native foreground. No real-account Stage-12 authority exists.
+STAGE-12 V1.1 WINDOWS-ONLY FAST SMOKE PASSED — hotkey, browser preparation, clipboard, focus, and native foreground all succeeded locally. Remaining dev UX issue is repeated ChatGPT login because web-ext currently uses a temporary Firefox profile. Candidate persists a dedicated non-default Workspace Operator Firefox profile across reset/restart using --firefox-profile + --keep-profile-changes. NEXT ACTION: exact-head validate candidate 3/3, then verify login persists across two Windows-only resets. No real-account Stage-12 authority exists.
 
 ## Remaining work
 

@@ -16,6 +16,7 @@ $runtimeRoot = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\DevR
 $statePath = Join-Path $runtimeRoot "runtime.json"
 $registryPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\com.workspacecontrol.operator_bridge"
 $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
+$firefoxProfile = Join-Path $runtimeRoot "firefox-profile"
 
 function Get-Dotnet10 {
   $candidates = @()
@@ -238,7 +239,7 @@ function Start-DevRuntime([bool]$LocalSmoke) {
     $launcher = Join-Path $work "run-web-ext.cmd"
     @"
 @echo off
-call "$webExt" run --source-dir "$extension" --firefox "$firefox" --no-reload --no-input --arg=-no-remote
+call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --no-reload --no-input --arg=-no-remote
 "@ | Set-Content -LiteralPath $launcher -Encoding ASCII
 
     $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d","/c",$launcher) -RedirectStandardOutput $webOut -RedirectStandardError $webErr -PassThru
@@ -266,6 +267,7 @@ call "$webExt" run --source-dir "$extension" --firefox "$firefox" --no-reload --
       helper_pid = $helperProcess.Id
       web_ext_pid = $webExtProcess.Id
       firefox_pids = $newFirefox
+      firefox_profile = $firefoxProfile
       workspace_operator_pids = $newOperator
       scheduler_hotkey = $SchedulerHotkey
       started_at = [DateTimeOffset]::UtcNow.ToString("O")
@@ -319,6 +321,7 @@ function Show-Status {
   Write-Host ("HELPER_ALIVE=" + $helperAlive)
   Write-Host ("WEB_EXT_ALIVE=" + $webAlive)
   Write-Host ("FIREFOX_ALIVE_COUNT=" + $firefoxAlive)
+  Write-Host ("FIREFOX_PROFILE=" + $state.firefox_profile)
   Write-Host ("HOTKEY=" + $state.scheduler_hotkey)
 }
 

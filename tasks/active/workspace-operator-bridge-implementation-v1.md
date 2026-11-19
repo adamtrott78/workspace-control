@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 053899196fb06ae5248bec58a7ded813e6ae3d1c
+- Remote checkpoint: c454616a6069ade3636f100374a92277a33a46dc
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY FAST SMOKE RETRY — exact diagnostics from the first real hotkey smoke showed browser adapter connected and dispatch reached CLIPBOARD_FAILED with InvalidOperationException, proving browser preparation succeeded and focus was never attempted. WinFormsClipboardWriter source 05389919… now self-marshals writes onto an STA thread and retries transient clipboard-busy ExternalException. Source passed Workspace #3050 / Semantic #350 / Operator #623. NEXT ACTION: rerun Windows-only smoke on the current bookkeeping tip that contains this exact operator-bridge source; press Ctrl+Space once. Verify clipboard WORKSPACE_OPERATOR_SMOKE_PACKET_V1 and dedicated Firefox foreground. No Linux/live authority.
+WINDOWS FAST SMOKE PASSED — operator observed Ctrl+Space foreground the dedicated Firefox window and clipboard fill with WORKSPACE_OPERATOR_SMOKE_PACKET_V1; screenshot shows the packet in the ChatGPT composer. Remaining UX defect is disposable web-ext Firefox profile requiring repeated ChatGPT login. Current candidate switches workspace-operator-dev.ps1 to a dedicated persistent non-default profile under LOCALAPPDATA with --firefox-profile, --profile-create-if-missing, and --keep-profile-changes. NEXT ACTION: exact-head validate this persistent-profile candidate 3/3; after green validation, operator performs one reset, logs in once if needed, then verifies a second reset preserves the session.
 
 ## Remaining work
 

@@ -259,3 +259,10 @@
 - [x] Clipboard fix `05389919…` passed Workspace #3050 / Semantic #350 / Operator #623.
 - [ ] CURRENT GATE: rerun Windows-only smoke with clipboard-fixed source; one Ctrl+Space must set clipboard exactly `WORKSPACE_OPERATOR_SMOKE_PACKET_V1` and foreground the dedicated Firefox window.
 - [ ] If clipboard passes but foreground fails, isolate only the final focus/native-foreground layer; do not return to Linux/full Stage-12 setup.
+
+
+- [x] WINDOWS-ONLY FAST SMOKE PASS: Ctrl+Space foregrounded managed Firefox and clipboard became `WORKSPACE_OPERATOR_SMOKE_PACKET_V1`; screenshot shows packet in ChatGPT composer.
+- [x] Local dispatch chain is proven end-to-end: hotkey -> browser prepare -> clipboard -> browser focus -> native foreground.
+- [x] Remaining repeated-login issue identified as web-ext temporary-profile lifecycle, separate from dispatch correctness.
+- [ ] CURRENT GATE: validate dedicated persistent non-default Firefox profile candidate (`--firefox-profile` + `--profile-create-if-missing` + `--keep-profile-changes`) 3/3.
+- [ ] After validation: first reset may require one login; second reset must preserve the ChatGPT session without touching the user's normal Firefox profile.
