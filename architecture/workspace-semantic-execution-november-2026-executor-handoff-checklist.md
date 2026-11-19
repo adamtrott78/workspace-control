@@ -240,3 +240,10 @@
 - [x] Minimal compile repair `093f8503…` changes only action-port selection to an explicit `IOperatorActionPort` conditional.
 - [ ] CURRENT GATE: exact-head validate the repaired synchronized v1.1 implementation state 3/3.
 - [ ] After validation is green, run the Windows-only synthetic smoke before creating any new Stage-12 live authority.
+
+
+- [x] Final hardened fast-loop head `eac272f9…` passed Workspace #3045 / Semantic #345 / Operator #618.
+- [x] First Windows-only smoke built successfully but stopped before runtime on `DEV_SMOKE_REQUIRES_EXISTING_FIREFOX_CLOSED`; hotkey/clipboard/foreground were not exercised.
+- [x] Exact script audit found the intended runtime hardening had not landed; candidate `97410a1c…` removes Firefox exclusivity, fixes reserved `$PID` parameter use, and adds source-tree build caching.
+- [ ] CURRENT GATE: exact-head validate `97410a1c…` synchronized runtime-guard repair 3/3.
+- [ ] After green validation, rerun only Windows synthetic smoke; expected one Ctrl+Space -> clipboard smoke packet + dedicated Firefox foreground.

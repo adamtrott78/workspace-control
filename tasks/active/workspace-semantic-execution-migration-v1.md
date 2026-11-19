@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: fca55ac8cbdc0d28d7fa84cb5a5e31ddc80347d8
+- Remote checkpoint: 97410a1c49189287550c95473ee1e862578d1609
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 FAST-LOOP FINAL IMPLEMENTATION CANDIDATE fca55ac8… — explicit bridge startup/local smoke is implemented; prior compile/serialization defects are repaired; lifecycle cleanup is hardened and the control script is now PowerShell-parse validated in Operator CI. NEXT ACTION: exact-head validate the synchronized final candidate 3/3; after green validation, run only the Windows synthetic smoke. Do not create new real-account Stage-12 authority until local smoke passes.
+STAGE-12 V1.1 FAST-LOOP RUNTIME-GUARD REPAIR CANDIDATE 97410a1c… — Windows-only smoke built successfully but stopped before launch on the unnecessary existing-Firefox guard, so no dispatch behavior was exercised. Candidate 97410a1c… removes that guard, fixes the PowerShell $PID parameter collision, and adds operator-bridge/src build caching for short reset loops. NEXT ACTION: exact-head validate 3/3; after green validation rerun only the Windows synthetic smoke. No new real-account Stage-12 authority exists.
 
 ## Remaining work
 

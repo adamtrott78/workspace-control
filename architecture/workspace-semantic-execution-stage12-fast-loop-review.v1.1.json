@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "FINAL_IMPLEMENTATION_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION",
+  "status": "RUNTIME_GUARD_REPAIR_CANDIDATE_AWAITING_EXACT_HEAD_VALIDATION",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -84,7 +84,7 @@
       "operator_bridge_run": 610,
       "result": "SUCCESS"
     },
-    "implementation_candidate_head": "fca55ac8cbdc0d28d7fa84cb5a5e31ddc80347d8",
+    "implementation_candidate_head": "97410a1c49189287550c95473ee1e862578d1609",
     "live_retry_authorized": false,
     "model_reasoning_is_not_authority": true,
     "prior_candidate_failure": {
@@ -124,6 +124,25 @@
         "Partial startup directly unwinds registry/process/workdir state.",
         "Operator CI parses workspace-operator-dev.ps1."
       ]
+    },
+    "first_windows_smoke": {
+      "attempted_source_head": "eac272f9aaad6c0b211cc775c27bef0f22a4cd1f",
+      "build_result": "SUCCESS",
+      "runtime_started": false,
+      "failure_marker": "DEV_SMOKE_REQUIRES_EXISTING_FIREFOX_CLOSED",
+      "hotkey_exercised": false,
+      "clipboard_exercised": false,
+      "foreground_exercised": false
+    },
+    "runtime_guard_repair": {
+      "head": "97410a1c49189287550c95473ee1e862578d1609",
+      "script_blob": "b060c20078c09390f341155085b5733aba80c83c",
+      "changes": [
+        "Remove existing-Firefox exclusivity guard; dedicated -no-remote Firefox is tracked by before/after PID delta.",
+        "Rename Test-Pid parameter from reserved automatic $PID to $ProcessId.",
+        "Cache dotnet build by HEAD:operator-bridge/src tree hash with WORKSPACE_OPERATOR_BUILD_CACHE=MISS/HIT markers."
+      ],
+      "live_retry_authorized": false
     }
   }
 }

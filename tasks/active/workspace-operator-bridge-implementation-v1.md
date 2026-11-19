@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: fca55ac8cbdc0d28d7fa84cb5a5e31ddc80347d8
+- Remote checkpoint: 97410a1c49189287550c95473ee1e862578d1609
 - Remote verified: true
 
 ## Next safe action
 
-STAGE-12 FAST-LOOP FINAL IMPLEMENTATION CANDIDATE fca55ac8… — explicit start-enabled/local-smoke source is present, compile serialization defects are repaired, workspace-operator-dev.ps1 cleanup is hardened, and the dev script is included in the Windows PowerShell parse gate. NEXT ACTION: exact-head validate this synchronized final candidate 3/3. After green validation, run the Windows-only synthetic smoke. No Linux/Tailscale/PostgreSQL/live-account setup and no new Stage-12 authority until the local smoke passes.
+STAGE-12 FAST-LOOP RUNTIME-GUARD REPAIR CANDIDATE 97410a1c… — first Windows-only smoke at eac272f9… built successfully but stopped before runtime on DEV_SMOKE_REQUIRES_EXISTING_FIREFOX_CLOSED. Exact green script inspection also showed the intended $PID/runtime cleanup edits had not landed. 97410a1c… removes the unnecessary Firefox exclusivity guard, fixes Test-Pid to avoid PowerShell $PID collision, and adds source-tree build caching so repeated smoke/reset runs can skip the .NET rebuild when operator-bridge/src is unchanged. NEXT ACTION: exact-head validate this synchronized candidate; after 3/3 green, rerun Windows-only smoke. No Linux/Tailscale/PostgreSQL/live-account setup.
 
 ## Remaining work
 
