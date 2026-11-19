@@ -226,5 +226,5 @@
 - [ ] Only after cleanup evidence: request fresh explicit v1.0 approval.
 
 - [x] FINAL HANDOFF BASIS: `7b5b7bc2…` passed Workspace #3033 / Semantic #333 / Operator #606; v1.0 review remains validated non-authority.
-- [ ] PREDECESSOR CLEANUP GATE: require exact `STAGE12_V09_LINUX_CLEANUP_VERIFIED=PASS` and `STAGE12_V09_WINDOWS_CLEANUP_VERIFIED=PASS` before requesting fresh v1.0 approval.
-- [ ] After both cleanup markers are verified, request fresh explicit v1.0 approval bound to procedure `9a43ba28…`, review `e525b37d…`, foreground source `1ecc094a…`, Linux v3 `3eb352f4…`, harness `7b1feb8f…`, launcher `d9d474ca…`, candidate baseline `0bc1bc0e…`.
+- [x] PREDECESSOR CLEANUP GATE: exact `STAGE12_V09_LINUX_CLEANUP_VERIFIED=PASS` and `STAGE12_V09_WINDOWS_CLEANUP_VERIFIED=PASS` observed from bounded operator cleanup on 2026-11-19.
+- [ ] CLEANUP-CLOSURE VALIDATION GATE: exact-head validate the cleanup-closure state with Workspace/Semantic/Operator 3/3 before requesting approval.\n- [ ] After the cleanup-closure head is 3/3 green, request fresh explicit v1.0 approval bound to procedure `9a43ba28…`, review `e525b37d…`, foreground source `1ecc094a…`, Linux v3 `3eb352f4…`, harness `7b1feb8f…`, launcher `d9d474ca…`, candidate baseline `0bc1bc0e…`.
