@@ -224,3 +224,7 @@
 - [x] v1.0 validation-state persistence `bd366f93…` passed Workspace #3032 / Semantic #332 / Operator #605; review remains non-authoritative.
 - [ ] Verify consumed v0.9 predecessor cleanup: exact Linux Tailscale restoration + temporary Postgres stop, Windows helper/Firefox cleanup, and stale Stage-12 temp directory removal.
 - [ ] Only after cleanup evidence: request fresh explicit v1.0 approval.
+
+- [x] FINAL HANDOFF BASIS: `7b5b7bc2…` passed Workspace #3033 / Semantic #333 / Operator #606; v1.0 review remains validated non-authority.
+- [ ] PREDECESSOR CLEANUP GATE: require exact `STAGE12_V09_LINUX_CLEANUP_VERIFIED=PASS` and `STAGE12_V09_WINDOWS_CLEANUP_VERIFIED=PASS` before requesting fresh v1.0 approval.
+- [ ] After both cleanup markers are verified, request fresh explicit v1.0 approval bound to procedure `9a43ba28…`, review `e525b37d…`, foreground source `1ecc094a…`, Linux v3 `3eb352f4…`, harness `7b1feb8f…`, launcher `d9d474ca…`, candidate baseline `0bc1bc0e…`.
