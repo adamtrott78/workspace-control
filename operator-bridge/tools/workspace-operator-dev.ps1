@@ -61,8 +61,8 @@ function Read-State {
   return Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
 }
 
-function Test-Pid([int]$Pid) {
-  return $null -ne (Get-Process -Id $Pid -ErrorAction SilentlyContinue)
+function Test-Pid([int]$ProcessId) {
+  return $null -ne (Get-Process -Id $ProcessId -ErrorAction SilentlyContinue)
 }
 
 function Remove-TreeWithRetry([string]$Path) {
@@ -168,10 +168,28 @@ function Start-DevRuntime([bool]$LocalSmoke) {
   $nativeManifest = $null
 
   try {
-    & $dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.slnx") --configuration Release
-    if ($LASTEXITCODE -ne 0) { throw "DEV_BUILD_FAILED" }
-
     $helper = Join-Path $bridgeRoot "src\WorkspaceOperator\bin\Release\net10.0-windows\WorkspaceOperator.exe"
+    $buildStamp = Join-Path $runtimeRoot "build-source-tree.txt"
+    $buildTree = (git -C $repo rev-parse "HEAD:operator-bridge/src").Trim().ToLowerInvariant()
+    if ($LASTEXITCODE -ne 0 -or $buildTree -notmatch "^[0-9a-f]{40}$") {
+      throw "DEV_BUILD_TREE_UNAVAILABLE"
+    }
+
+    $cachedTree = if (Test-Path -LiteralPath $buildStamp -PathType Leaf) {
+      (Get-Content -LiteralPath $buildStamp -Raw).Trim().ToLowerInvariant()
+    } else {
+      ""
+    }
+
+    if ($cachedTree -ne $buildTree -or -not (Test-Path -LiteralPath $helper -PathType Leaf)) {
+      & $dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.slnx") --configuration Release
+      if ($LASTEXITCODE -ne 0) { throw "DEV_BUILD_FAILED" }
+      Set-Content -LiteralPath $buildStamp -Value $buildTree -Encoding ASCII
+      Write-Host "WORKSPACE_OPERATOR_BUILD_CACHE=MISS"
+    } else {
+      Write-Host "WORKSPACE_OPERATOR_BUILD_CACHE=HIT"
+    }
+
     $webExt = Ensure-WebExt $nodeDir
     $work = Join-Path $runtimeRoot ("run-" + [guid]::NewGuid().ToString("N"))
     New-Item -ItemType Directory -Path $work -Force | Out-Null
@@ -190,9 +208,6 @@ function Start-DevRuntime([bool]$LocalSmoke) {
     $registryExisted = Test-Path -LiteralPath $registryPath
     $registryOldValue = if ($registryExisted) { (Get-Item -LiteralPath $registryPath).GetValue("") } else { $null }
     $beforeFirefox = @(Get-Process firefox -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
-    if ($LocalSmoke -and $beforeFirefox.Count -gt 0) {
-      throw "DEV_SMOKE_REQUIRES_EXISTING_FIREFOX_CLOSED"
-    }
     $beforeOperator = @(Get-Process WorkspaceOperator -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
 
     New-Item -ItemType Directory -Path $registryPath -Force | Out-Null
