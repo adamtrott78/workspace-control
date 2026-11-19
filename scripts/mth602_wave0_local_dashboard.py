@@ -255,42 +255,63 @@ def candidate_dirs(rn: str, proc):
 
 
 def best_local_record(rn, proc):
+    # Multiple workflow attempts can leave multiple runner-temp directories for
+    # the same immutable run_name. Select the newest observed terminal/progress
+    # record so an attempt-2 success supersedes an older attempt-1 OOM.
     terminal = None
+    terminal_mtime = -1.0
     progress = None
 
     for rd in candidate_dirs(rn, proc):
-        complete = read_json(rd / "train_complete.json")
+        complete_path = rd / "train_complete.json"
+        complete = read_json(complete_path)
         if complete:
-            terminal = {
-                "status": "SUCCESS",
-                "total": complete.get("elapsed_sec"),
-                "run_dir": str(rd),
-            }
-            break
+            try:
+                mtime = complete_path.stat().st_mtime
+            except Exception:
+                mtime = 0.0
+            if mtime >= terminal_mtime:
+                terminal_mtime = mtime
+                terminal = {
+                    "status": "SUCCESS",
+                    "total": complete.get("elapsed_sec"),
+                    "run_dir": str(rd),
+                    "_mtime": mtime,
+                }
 
-        err = read_json(rd / "train_error.json")
+        err_path = rd / "train_error.json"
+        err = read_json(err_path)
         if err:
-            msg = str(err.get("error", ""))
-            status = "INFRA-OOM" if ("OutOfMemory" in msg or "out of memory" in msg.lower()) else "ERROR"
-            terminal = {
-                "status": status,
-                "total": err.get("elapsed_sec"),
-                "error": msg,
-                "run_dir": str(rd),
-            }
-            break
+            try:
+                mtime = err_path.stat().st_mtime
+            except Exception:
+                mtime = 0.0
+            if mtime >= terminal_mtime:
+                msg = str(err.get("error", ""))
+                status = "INFRA-OOM" if ("OutOfMemory" in msg or "out of memory" in msg.lower()) else "ERROR"
+                terminal_mtime = mtime
+                terminal = {
+                    "status": status,
+                    "total": err.get("elapsed_sec"),
+                    "error": msg,
+                    "run_dir": str(rd),
+                    "_mtime": mtime,
+                }
 
-        p = read_json(rd / "train_progress.json")
+        progress_path = rd / "train_progress.json"
+        p = read_json(progress_path)
         if p:
             try:
-                mtime = (rd / "train_progress.json").stat().st_mtime
+                mtime = progress_path.stat().st_mtime
             except Exception:
-                mtime = 0
+                mtime = 0.0
             if progress is None or mtime > progress["_mtime"]:
                 p["_mtime"] = mtime
                 p["_run_dir"] = str(rd)
                 progress = p
 
+    if terminal is not None:
+        terminal.pop("_mtime", None)
     return terminal, progress
 
 
