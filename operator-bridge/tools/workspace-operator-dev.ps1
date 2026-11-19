@@ -93,6 +93,11 @@ function Stop-DevRuntime {
   foreach ($pidValue in ($pids | Select-Object -Unique)) {
     Stop-Process -Id $pidValue -Force -ErrorAction SilentlyContinue
   }
+  if ($state.helper_path) {
+    @(Get-CimInstance Win32_Process -Filter "Name='WorkspaceOperator.exe'" -ErrorAction SilentlyContinue |
+      Where-Object { [string]$_.ExecutablePath -eq [string]$state.helper_path }) |
+      ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+  }
   Start-Sleep -Milliseconds 500
 
   if (Test-Path -LiteralPath $registryPath) {
@@ -155,6 +160,13 @@ function Start-DevRuntime([bool]$LocalSmoke) {
   $env:PATH = "$(Split-Path -Parent $dotnet);$nodeDir;$oldPath"
   $env:DOTNET_ROOT = Split-Path -Parent $dotnet
 
+  $work = $null
+  $helperProcess = $null
+  $webExtProcess = $null
+  $registryExisted = $false
+  $registryOldValue = $null
+  $nativeManifest = $null
+
   try {
     & $dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.slnx") --configuration Release
     if ($LASTEXITCODE -ne 0) { throw "DEV_BUILD_FAILED" }
@@ -178,6 +190,9 @@ function Start-DevRuntime([bool]$LocalSmoke) {
     $registryExisted = Test-Path -LiteralPath $registryPath
     $registryOldValue = if ($registryExisted) { (Get-Item -LiteralPath $registryPath).GetValue("") } else { $null }
     $beforeFirefox = @(Get-Process firefox -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
+    if ($LocalSmoke -and $beforeFirefox.Count -gt 0) {
+      throw "DEV_SMOKE_REQUIRES_EXISTING_FIREFOX_CLOSED"
+    }
     $beforeOperator = @(Get-Process WorkspaceOperator -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
 
     New-Item -ItemType Directory -Path $registryPath -Force | Out-Null
@@ -231,6 +246,7 @@ call "$webExt" run --source-dir "$extension" --firefox "$firefox" --no-reload --
       native_manifest = $nativeManifest
       registry_existed = $registryExisted
       registry_old_value = $registryOldValue
+      helper_path = $helper
       helper_pid = $helperProcess.Id
       web_ext_pid = $webExtProcess.Id
       firefox_pids = $newFirefox
@@ -246,7 +262,25 @@ call "$webExt" run --source-dir "$extension" --firefox "$firefox" --no-reload --
       Write-Host "WORKSPACE_OPERATOR_SMOKE_READY=Press Ctrl+Space once. Expected clipboard: WORKSPACE_OPERATOR_SMOKE_PACKET_V1; expected foreground: the dedicated Firefox window."
     }
   } catch {
-    try { Stop-DevRuntime } catch {}
+    if ($webExtProcess -and -not $webExtProcess.HasExited) {
+      Stop-Process -Id $webExtProcess.Id -Force -ErrorAction SilentlyContinue
+    }
+    if ($helperProcess -and -not $helperProcess.HasExited) {
+      Stop-Process -Id $helperProcess.Id -Force -ErrorAction SilentlyContinue
+    }
+    if ($nativeManifest -and (Test-Path -LiteralPath $registryPath)) {
+      $current = (Get-Item -LiteralPath $registryPath).GetValue("")
+      if ([string]$current -eq [string]$nativeManifest) {
+        if ($registryExisted) {
+          Set-Item -LiteralPath $registryPath -Value $registryOldValue
+        } else {
+          Remove-Item -LiteralPath $registryPath -Recurse -Force
+        }
+      }
+    }
+    if ($work) {
+      try { Remove-TreeWithRetry $work } catch {}
+    }
     throw
   } finally {
     $env:PATH = $oldPath
