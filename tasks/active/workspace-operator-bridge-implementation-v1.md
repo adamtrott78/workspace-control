@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 866e2805def9d7bb1e5640715a72c72efc895480
+- Remote checkpoint: 380d291947ebdfbbb661c57165774a02df4cc6a7
 - Remote verified: true
 
 ## Next safe action
 
-STAGE 10 IS COMPLETE; RETAIN CTRL+SPACE. NEXT OPERATOR-BRIDGE ACTION IS THE LIVE TRANSPORT / STAGE-12 GATE: only after exact reviewed Workspace Shell semantic authority exists, prove the validated localhost backend + private Tailscale Serve path carries one fake-worker action/status/result round trip on the exact host. Do not use a manual sidecar, arbitrary shell/root widening, or real ChatGPT account before that preflight. The optional impl_11 WebView2 comparison remains PLANNED/non-critical and may be deferred; authoritative UX-09 performance remains suspended until final production gating.
+STAGE-12 FAST-LOOP IMPLEMENTATION CANDIDATE 380d2919… — v1.0 Q1 root cause is bridge startup disabled, leaving Ctrl+Space unregistered. Diagnosis/review head f0a8313b… passed Workspace #3037 / Semantic #337 / Operator #610. Existing owner scope authorizes operator-bridge/**. Candidate adds explicit --bridge-start-enabled, a one-shot --local-smoke action, and workspace-operator-dev.ps1 smoke/reset/restart/start/online/stop/offline/status lifecycle. NEXT ACTION: exact-head validate this implementation candidate; after green validation, run the Windows-only smoke before any new real-account Stage-12 authority.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ STAGE 10 IS COMPLETE; RETAIN CTRL+SPACE. NEXT OPERATOR-BRIDGE ACTION IS THE LIVE
 ## Blockers / gates
 
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
-- Production action/status transport is now implemented and validated in code, but the real Tailscale Serve -> localhost backend path has not yet been activated/preflighted on the Linux Workspace Control host and Windows WorkspaceWorkers client. INST-01 remains PARTIAL until that exact-host path carries a fake-worker action end-to-end.
+- Real-account Stage-12 retry is paused until the Windows-only fast smoke proves global Ctrl+Space registration, clipboard replacement, Firefox focus, and native foreground behavior. No new live retry authority exists.
 
 ## Fresh-chat initialization
 

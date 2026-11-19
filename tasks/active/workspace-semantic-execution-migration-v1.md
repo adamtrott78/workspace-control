@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: b818951634fc04837f5e01bf7fd0c2f135d3f938
+- Remote checkpoint: 380d291947ebdfbbb661c57165774a02df4cc6a7
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 SOURCE-SCOPE GATE — v1.0 authority is consumed/non-reusable after Q1 proved the helper bridge was never enabled, so Ctrl+Space was not globally registered and dispatch never ran. Review candidate architecture/workspace-semantic-execution-stage12-fast-loop-review.v1.1.json defines the bounded redesign: explicit startup enablement, Windows-only local smoke action, one-command start/stop/reset/status/smoke lifecycle, and a production supervisor/control direction. CURRENT TASK MUTATION SCOPE DOES NOT AUTHORIZE operator-bridge source/tool writes. NEXT ACTION: obtain explicit operator approval for the exact proposed source mutation scope in the v1.1 review. Do not create live retry authority and do not run Stage-12 again before the Windows-only smoke path is implemented and validated.
+STAGE-12 V1.1 FAST-LOOP IMPLEMENTATION CANDIDATE 380d2919… — v1.0 is consumed/non-reusable. Diagnosis/review f0a8313b… is exact-head 3/3 green (#3037/#337/#610). Existing owner task workspace-operator-bridge-implementation-v1 explicitly authorizes operator-bridge/** mutation. Candidate 380d2919… adds --bridge-start-enabled, deterministic one-shot --local-smoke, and workspace-operator-dev.ps1 lifecycle controls. NEXT ACTION: exact-head validate the synchronized implementation state; after green validation, run only the Windows synthetic smoke. Do not create new real-account Stage-12 authority until local smoke passes.
 
 ## Remaining work
 
@@ -90,7 +90,7 @@ STAGE-12 V1.1 SOURCE-SCOPE GATE — v1.0 authority is consumed/non-reusable afte
 - v1.0 validation-state persistence bd366f93… is 3/3 validated (#3032/#332/#605).
 - Final bookkeeping head 7b5b7bc2… is 3/3 validated (#3033/#333/#606).
 - Stage-12 v1.0 authority is consumed/non-reusable after Q1 BRIDGE_DISABLED_HOTKEY_UNREGISTERED failure; no candidate was published and candidate branch remained at 0bc1bc0e….
-- v1.1 redesign source implementation is blocked by the current task mutation scope, which does not include operator-bridge/src/** or operator-bridge/tools/**. Exact proposed files are recorded in architecture/workspace-semantic-execution-stage12-fast-loop-review.v1.1.json and require explicit operator approval.
+- No new live Stage-12 authority exists. Windows-only local smoke must pass after v1.1 implementation is exact-head validated.
 
 ## Fresh-chat initialization
 

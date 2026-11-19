@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_DESIGN_SOURCE_IMPLEMENTED_AWAITING_EXACT_HEAD_VALIDATION",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -58,6 +58,11 @@
       "id": "PRODUCTION_CONTROL_DIRECTION",
       "behavior": "For production, separate a tiny always-on per-user supervisor from the dispatch bridge. Expose typed status/online/offline/restart controls through the Workspace control plane/plugin, analogous to Heartbeat. 'Offline' disables dispatch and unregisters the hotkey without removing the supervisor, avoiding a remote-start chicken-and-egg problem.",
       "safety": "No generic shell control, no arbitrary process execution, no admin service requirement, and no widening of model execution authority."
+    },
+    {
+      "id": "CLEANUP_RACE_OWNERSHIP",
+      "behavior": "The fast lifecycle stop/reset path owns exact process shutdown and bounded retry of its work directory, eliminating the observed SharedContracts.dll cleanup race from the giant outer Stage-12 wrapper.",
+      "safety": "Only recorded process IDs/work directories/native-host registry state owned by the dev runtime are changed."
     }
   ],
   "fast_loop_acceptance": [
@@ -69,8 +74,18 @@
     "A status command reports source SHA, helper state, Firefox state, bridge enabled state, and smoke readiness without page-content access."
   ],
   "authority_gate": {
-    "source_mutation_authorized": false,
-    "reason": "The current semantic-execution task capsule does not authorize operator-bridge source/tool mutation. This review names the exact proposed files so the operator can explicitly approve that bounded scope.",
+    "source_mutation_authorized": true,
+    "authority_owner_task": "workspace-operator-bridge-implementation-v1",
+    "authority_evidence": "Owner capsule allowed_mutation_scope includes operator-bridge/**, operator-bridge tests, and operator-bridge validation workflow on workspace-semantic-execution-migration-v1.",
+    "diagnosis_review_validated_head": "f0a8313b2c1bdf8a9a84536aac727afe191a5920",
+    "diagnosis_review_validation": {
+      "workspace_control_run": 3037,
+      "semantic_execution_run": 337,
+      "operator_bridge_run": 610,
+      "result": "SUCCESS"
+    },
+    "implementation_candidate_head": "380d291947ebdfbbb661c57165774a02df4cc6a7",
+    "live_retry_authorized": false,
     "model_reasoning_is_not_authority": true
   }
 }

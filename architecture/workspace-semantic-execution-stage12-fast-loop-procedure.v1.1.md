@@ -82,8 +82,12 @@ Use a small per-user supervisor that remains available while the dispatch bridge
 
 These can later be surfaced through a Workspace Control plugin/tool similarly to Heartbeat. The supervisor must not expose generic shell/process execution. Offline should unregister the hotkey and stop dispatch while leaving the bounded supervisor reachable, which avoids the problem of trying to remotely start a process that is completely absent.
 
-## Authority gate
+## Source authority and live authority
 
-This file is review-only. It authorizes no source mutation and no live retry.
+The owning task `workspace-operator-bridge-implementation-v1` explicitly permits `operator-bridge/**` mutations, so the bounded fast-loop implementation may proceed under that existing source authority.
 
-The current task's mutation scope does not include `operator-bridge/src/**` or `operator-bridge/tools/**`. Source implementation requires fresh operator approval for the exact file scope recorded in the v1.1 review artifact.
+Implementation candidate `380d291947ebdfbbb661c57165774a02df4cc6a7` adds explicit startup enablement, a one-shot Windows-only local smoke action, and `workspace-operator-dev.ps1` lifecycle controls.
+
+This artifact grants **zero live Stage-12 retry authority**. A future real-account retry remains a separately reviewed, exact-byte, single-attempt authority gate.
+
+The Windows-only synthetic smoke path is the required proving loop before any future live retry.

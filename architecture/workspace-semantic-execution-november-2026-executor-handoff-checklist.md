@@ -234,5 +234,7 @@
 - [x] Stage-12 v1.0 live authority consumed at `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`; Q1 failed before dispatch because bridge startup remained OFF and Ctrl+Space was not globally registered. Candidate branch remained `0bc1bc0e…`.
 - [x] Root cause audit: `BridgeController.SetEnabled(true)` is only reached by the manual tray toggle in current runtime; Program/Stage-12 launcher do not enable it. Clipboard/focus/native-foreground paths were not exercised.
 - [x] Freeze v1.1 fast-loop review/procedure: explicit start-enabled mode, Windows-only synthetic local smoke, one-command start/stop/reset/status/smoke dev lifecycle, production bounded supervisor direction.
-- [ ] CURRENT GATE: explicit operator approval for the exact v1.1 source mutation scope recorded in `architecture/workspace-semantic-execution-stage12-fast-loop-review.v1.1.json`; current task mutation scope does not authorize `operator-bridge/src/**` or `operator-bridge/tools/**`.
-- [ ] After source-scope approval, implement + CI-validate the Windows-only smoke path before creating any new Stage-12 live authority.
+- [x] v1.1 diagnosis/review `f0a8313b…` passed Workspace #3037 / Semantic #337 / Operator #610; owner task `workspace-operator-bridge-implementation-v1` already authorizes `operator-bridge/**` mutation.
+- [x] v1.1 fast-loop source candidate `380d2919…` adds `--bridge-start-enabled`, deterministic `--local-smoke`, and `workspace-operator-dev.ps1` lifecycle controls.
+- [ ] CURRENT GATE: exact-head validate synchronized v1.1 implementation state 3/3.
+- [ ] After validation is green, run the Windows-only synthetic smoke before creating any new Stage-12 live authority.
