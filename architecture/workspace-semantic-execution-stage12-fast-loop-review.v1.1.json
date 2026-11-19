@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "PERSISTENT_PROFILE_VALIDATED_AWAITING_SESSION_PERSISTENCE_CHECK",
+  "status": "TEMPORARY_CHAT_SOURCE_VALIDATED_AWAITING_UI_AND_PLUGIN_PROBE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -228,6 +228,28 @@
       ],
       "pass_condition": "ChatGPT session remains authenticated across reset/relaunch.",
       "normal_firefox_profile_must_remain_untouched": true
+    },
+    "temporary_chat_candidate": {
+      "source_head": "d08172db8e1b1d3efd7ecda9053fc9a72d7962e6",
+      "worker_start_url": "https://chatgpt.com/?temporary-chat=true",
+      "bootstrap_tab_policy": "Reuse exactly one active unmanaged bootstrap tab only when URL exactly matches fixed worker_start_url; never adopt arbitrary unmanaged ChatGPT tabs.",
+      "fast_dev_persistent_profile": true,
+      "stage12_persistent_profile": true,
+      "validation": {
+        "workspace_control_run": 3057,
+        "semantic_execution_run": 357,
+        "operator_bridge_run": 630,
+        "result": "SUCCESS"
+      },
+      "live_retry_authorized": false
+    },
+    "plugin_probe": {
+      "documentation_facts": [
+        "Temporary Chat supports plugins only when Personalized; Unpersonalized Temporary Chat does not use plugins.",
+        "Installed plugins may be invoked with @ mentions, but official docs do not specify whether unaccepted raw text @github is equivalent to selecting the mention."
+      ],
+      "empirical_question": "Does sending literal raw @github without Tab/click/autocomplete acceptance invoke the installed GitHub plugin in a Personalized Temporary Chat?",
+      "automatic_typing_or_selection_authorized": false
     }
   }
 }

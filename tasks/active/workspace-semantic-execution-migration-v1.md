@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 7639a74478ed3e07c7054f166915d0ef137148c9
+- Remote checkpoint: d08172db8e1b1d3efd7ecda9053fc9a72d7962e6
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 LOCAL INTERACTION PATH PASSED; PERSISTENT PROFILE VALIDATED — hotkey/browser/clipboard/focus smoke passed, and dedicated persistent Firefox profile source 7639a744… is 3/3 green (#3052/#352/#625). NEXT ACTION: Windows-only session-persistence check: launch current tip, login once if needed, then `wop reset`; PASS requires ChatGPT still authenticated after relaunch. No live Stage-12 authority exists.
+STAGE-12 V1.1 TEMPORARY-CHAT UI + PLUGIN PROBE GATE — local interaction path and persistent login are already proven. Exact Temporary Chat/no-duplicate-tab source d08172db… is 3/3 green (#3057/#357/#630). NEXT ACTION: Windows-only smoke on the current bookkeeping tip: verify launch at https://chatgpt.com/?temporary-chat=true and no extra tab after Ctrl+Space; then empirically test whether literal raw `@github` in a Personalized Temporary Chat invokes the installed GitHub plugin without autocomplete acceptance. No real-account Stage-12 authority exists.
 
 ## Remaining work
 

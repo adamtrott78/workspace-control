@@ -271,3 +271,12 @@
 - [x] Dedicated persistent Firefox profile source `7639a744…` passed Workspace #3052 / Semantic #352 / Operator #625.
 - [ ] CURRENT GATE: launch persistent Workspace Operator profile, login once if needed, run `wop reset`, and verify ChatGPT remains authenticated after relaunch.
 - [ ] PASS closes repeated-login UX defect; normal/default Firefox profile remains untouched.
+
+
+- [x] Temporary Chat/no-duplicate-bootstrap-tab source `d08172db…` passed Workspace #3057 / Semantic #357 / Operator #630.
+- [x] Worker start URL fixed to `https://chatgpt.com/?temporary-chat=true`; dev + Stage-12 launchers use the dedicated persistent profile at that route.
+- [x] Adapter reuses exactly one active unmanaged bootstrap tab only when it exactly matches the fixed Temporary Chat URL; arbitrary unmanaged ChatGPT tabs remain non-adoptable.
+- [ ] CURRENT GATE: Windows-only UI check — launch current tip, confirm Temporary Chat opens directly, press Ctrl+Space once, confirm the same tab is serviced and no stray bootstrap tab remains.
+- [ ] PLUGIN PROBE: in a Personalized Temporary Chat, send a literal raw `@github` probe without Tab/click/autocomplete acceptance; determine empirically whether structured GitHub plugin invocation occurs.
+- [ ] If raw `@github` does not invoke the plugin, test plain-language explicit plugin request before considering any UI-selection requirement. Preserve no-auto-typing/no-auto-selection boundary.
+- [ ] After UI/plugin evidence, add convenient per-user Workspace Operator lifecycle shims analogous to Heartbeat: up/down/reset/status/self-test.
