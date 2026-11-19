@@ -1,0 +1,289 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-semantic-execution-worker-result-v0.1",
+  "title": "Workspace Semantic Execution Worker Result Publication v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "publication_id",
+    "action_id",
+    "action_generation",
+    "process_id",
+    "process_generation",
+    "executor_id",
+    "worker_slot_id",
+    "session_generation",
+    "packet_sha256",
+    "kind",
+    "observed_at"
+  ],
+  "properties": {
+    "publication_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "process_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "process_generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "executor_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "worker_slot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "packet_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "kind": {
+      "enum": [
+        "RESULT",
+        "TOO_LARGE",
+        "INTRINSICALLY_DIFFICULT",
+        "WAIT_EXTERNAL"
+      ]
+    },
+    "observed_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "result_payload_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "result_payload_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "wait_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "children": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "process_id",
+          "objective"
+        ],
+        "properties": {
+          "process_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "objective": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dependencies": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "mandatory_constraints": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "provenance_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "authority_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "validator_contracts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "output_schema_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "RESULT"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "result_payload_ref",
+          "result_payload_sha256"
+        ],
+        "properties": {
+          "children": {
+            "maxItems": 0
+          },
+          "wait_key": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "TOO_LARGE"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "reason",
+          "children"
+        ],
+        "properties": {
+          "children": {
+            "minItems": 1
+          },
+          "result_payload_ref": {
+            "type": "null"
+          },
+          "result_payload_sha256": {
+            "type": "null"
+          },
+          "wait_key": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "INTRINSICALLY_DIFFICULT"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "reason"
+        ],
+        "properties": {
+          "children": {
+            "maxItems": 0
+          },
+          "result_payload_ref": {
+            "type": "null"
+          },
+          "result_payload_sha256": {
+            "type": "null"
+          },
+          "wait_key": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "WAIT_EXTERNAL"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "wait_key"
+        ],
+        "properties": {
+          "children": {
+            "maxItems": 0
+          },
+          "result_payload_ref": {
+            "type": "null"
+          },
+          "result_payload_sha256": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "x-workspace-invariants": [
+    "The worker result is a proposal/evidence publication and cannot grant or widen execution authority.",
+    "source_ref and source_sha256 are supplied by the intake adapter from exact immutable bytes and are not worker-controlled JSON fields.",
+    "Every publication is bound to exact action/process/session generations and the exact packet_sha256.",
+    "Consumers must reject stale, conflicting, unknown-field, or mismatched publications fail-closed.",
+    "Consumer ChatGPT page state is never authoritative result evidence."
+  ]
+}

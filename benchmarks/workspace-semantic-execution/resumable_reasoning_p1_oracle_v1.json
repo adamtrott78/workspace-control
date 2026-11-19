@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-iterate-shard-rollout-p1-v1",
+  "visibility": "evaluator_only_do_not_supply_to_reasoning_worker",
+  "experiment_results": {
+    "E_revert_s1": {
+      "shard": "s1",
+      "p95_latency_ms": 205,
+      "other_shards_changed": false,
+      "interpretation_hint": "Only the reverted shard recovers."
+    },
+    "E_revert_s2": {
+      "shard": "s2",
+      "p95_latency_ms": 211,
+      "other_shards_changed": false,
+      "interpretation_hint": "Only the reverted shard recovers."
+    },
+    "E_revert_s3": {
+      "shard": "s3",
+      "p95_latency_ms": 207,
+      "other_shards_changed": false,
+      "interpretation_hint": "Only the reverted shard recovers."
+    },
+    "E_revert_s4": {
+      "shard": "s4",
+      "p95_latency_ms": 214,
+      "other_shards_changed": false,
+      "interpretation_hint": "Only the reverted shard recovers."
+    },
+    "E_revert_s5": {
+      "shard": "s5",
+      "p95_latency_ms": 209,
+      "other_shards_changed": false,
+      "interpretation_hint": "Only the reverted shard recovers."
+    },
+    "E_revert_s6": {
+      "shard": "s6",
+      "p95_latency_ms": 206,
+      "other_shards_changed": false,
+      "interpretation_hint": "Only the reverted shard recovers."
+    },
+    "E_scale_shared_db": {
+      "all_shards_p95_delta_ms": -4,
+      "interpretation_hint": "Extra shared database capacity has negligible effect."
+    },
+    "E_network_bypass": {
+      "all_shards_p95_delta_ms": -6,
+      "interpretation_hint": "Alternate network fabric has negligible effect."
+    }
+  },
+  "terminal_criteria": {
+    "expected_hypothesis": "H_shard_policy",
+    "minimum_unique_experiments": 7,
+    "required_experiment_groups": [
+      [
+        "E_revert_s1"
+      ],
+      [
+        "E_revert_s2"
+      ],
+      [
+        "E_revert_s3"
+      ],
+      [
+        "E_revert_s4"
+      ],
+      [
+        "E_revert_s5"
+      ],
+      [
+        "E_revert_s6"
+      ],
+      [
+        "E_scale_shared_db",
+        "E_network_bypass"
+      ]
+    ],
+    "required_rejected_hypotheses": [
+      "H_shared_db"
+    ],
+    "required_addressed_observations": [
+      "O2"
+    ]
+  },
+  "seal_note": "Static hidden oracle for horizon-heavy/decomposable taxonomy fixture. Scored workers must not receive this file."
+}

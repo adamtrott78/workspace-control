@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
+  "status": "TEMPORARY_CHAT_SOURCE_VALIDATED_AWAITING_UI_AND_PLUGIN_PROBE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
+    "prior_status": "CONSUMED_FAILED_STAGE12_Q1_BRIDGE_DISABLED_HOTKEY_UNREGISTERED",
+    "consumed": true,
+    "reusable": false,
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "root_cause": {
+    "classification": "BRIDGE_DISABLED_HOTKEY_UNREGISTERED",
+    "evidence": [
+      "BridgeState defaults disabled.",
+      "BridgeController registers the scheduler hotkey only from SetEnabled(true).",
+      "TrayApplicationContext currently calls SetEnabled only from the manual tray ToggleClicked handler.",
+      "Program constructs TrayApplicationContext but does not enable the bridge.",
+      "run-stage12-real-instant.ps1 starts WorkspaceOperator but does not toggle or request bridge enablement.",
+      "At Q1 the operator observed Ctrl+Space fall through to the Linux terminal as ^@ and the clipboard retained the previously copied Windows-ready marker."
+    ],
+    "consequence": "The Q1 dispatch path never ran. Clipboard and Firefox foreground behavior were not exercised; the v1.0 foreground fallback is therefore not disproven by this attempt."
+  },
+  "design_goal": "Reduce redesign validation to a fast Windows-only local loop, with explicit lifecycle controls, before any costly Linux/Tailscale/PostgreSQL/real-account Stage-12 run.",
+  "proposed_source_mutation_scope": [
+    "operator-bridge/src/WorkspaceOperator/Program.cs",
+    "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+    "operator-bridge/src/WorkspaceOperator/Bootstrap/LocalSmokeOperatorActionPort.cs",
+    "operator-bridge/tools/run-stage12-real-instant.ps1",
+    "operator-bridge/tools/workspace-operator-dev.ps1",
+    "operator-bridge/tests/WorkspaceOperator.Tests/BridgeControllerTests.cs",
+    "operator-bridge/tests/WorkspaceOperator.Tests/SingleFlightDispatchCoordinatorTests.cs",
+    "operator-bridge/tests/WorkspaceOperator.Tests/OperatorStartupModeTests.cs"
+  ],
+  "proposed_changes": [
+    {
+      "id": "START_ENABLED_EXPLICITLY",
+      "behavior": "Add an explicit --bridge-start-enabled startup switch. Stage-12 and the dev harness pass it. Startup must fail closed if global hotkey registration fails.",
+      "safety": "Default non-remote behavior remains OFF unless the explicit switch is present."
+    },
+    {
+      "id": "LOCAL_SMOKE_ACTION",
+      "behavior": "Add an explicit development-only local smoke action port that creates one synthetic CREATE_AND_SERVICE action with a known content-free test packet. This exercises browser binding creation, clipboard write, final browser focus, and the native foreground fallback without Linux/Tailscale/PostgreSQL.",
+      "safety": "Available only under an explicit smoke-mode CLI switch; no remote authority, credentials, DOM/page-content access, automatic paste, or automatic submission."
+    },
+    {
+      "id": "FAST_DEV_LIFECYCLE",
+      "behavior": "Add workspace-operator-dev.ps1 with start, stop, reset, status, and smoke actions. Reuse incremental build output and a dedicated dev-only Firefox profile so repeated UI iterations do not re-clone, recreate the Python environment, start PostgreSQL, configure Tailscale, or require a new ChatGPT login every time.",
+      "safety": "The persistent profile is dedicated to this dev harness only and is never the user's daily Firefox profile."
+    },
+    {
+      "id": "STAGE12_PREFLIGHT_MARKER",
+      "behavior": "Stage-12 Windows launcher must pass --bridge-start-enabled and print a dedicated HOTKEY_REGISTERED/BRIDGE_ENABLED readiness marker only after the helper remains alive after registration.",
+      "safety": "Linux live-consumption remains blocked until the Windows readiness gate includes this startup proof."
+    },
+    {
+      "id": "PRODUCTION_CONTROL_DIRECTION",
+      "behavior": "For production, separate a tiny always-on per-user supervisor from the dispatch bridge. Expose typed status/online/offline/restart controls through the Workspace control plane/plugin, analogous to Heartbeat. 'Offline' disables dispatch and unregisters the hotkey without removing the supervisor, avoiding a remote-start chicken-and-egg problem.",
+      "safety": "No generic shell control, no arbitrary process execution, no admin service requirement, and no widening of model execution authority."
+    },
+    {
+      "id": "CLEANUP_RACE_OWNERSHIP",
+      "behavior": "The fast lifecycle stop/reset path owns exact process shutdown and bounded retry of its work directory, eliminating the observed SharedContracts.dll cleanup race from the giant outer Stage-12 wrapper.",
+      "safety": "Only recorded process IDs/work directories/native-host registry state owned by the dev runtime are changed."
+    }
+  ],
+  "fast_loop_acceptance": [
+    "One Windows command starts or resets the dev runtime.",
+    "No Linux terminal, sudo, Tailscale route, PostgreSQL, Python venv, Git clone, or candidate branch is required for hotkey/clipboard/foreground smoke testing.",
+    "The helper proves the bridge is enabled and global hotkey registration succeeded before declaring ready.",
+    "One Ctrl+Space causes a known smoke packet to replace the clipboard and brings the dedicated Firefox window to OS foreground.",
+    "A stop command returns helper/Firefox/dev state to a known clean state.",
+    "A status command reports source SHA, helper state, Firefox state, bridge enabled state, and smoke readiness without page-content access."
+  ],
+  "authority_gate": {
+    "source_mutation_authorized": true,
+    "authority_owner_task": "workspace-operator-bridge-implementation-v1",
+    "authority_evidence": "Owner capsule allowed_mutation_scope includes operator-bridge/**, operator-bridge tests, and operator-bridge validation workflow on workspace-semantic-execution-migration-v1.",
+    "diagnosis_review_validated_head": "f0a8313b2c1bdf8a9a84536aac727afe191a5920",
+    "diagnosis_review_validation": {
+      "workspace_control_run": 3037,
+      "semantic_execution_run": 337,
+      "operator_bridge_run": 610,
+      "result": "SUCCESS"
+    },
+    "implementation_candidate_head": "a69bb92d99bffc4e6df05ed59809cbdddff61f0a",
+    "live_retry_authorized": false,
+    "model_reasoning_is_not_authority": true,
+    "prior_candidate_failure": {
+      "head": "21cefb253a50f973e95305ceaefd87372171040f",
+      "workspace_control_run": 3039,
+      "semantic_execution_run": 339,
+      "operator_bridge_run": 612,
+      "result": "OPERATOR_COMPILE_FAILURE",
+      "defect": "Program.cs used ?? between HttpOperatorBridgeClient and LocalSmokeOperatorActionPort concrete types; source never reached runtime."
+    },
+    "compile_repair": "Explicit IOperatorActionPort conditional at 093f85032abdd9ea336a9dcc2bb95eee948bac92.",
+    "prior_candidate_failures": [
+      {
+        "head": "21cefb253a50f973e95305ceaefd87372171040f",
+        "operator_bridge_run": 612,
+        "result": "CS0019_CONCRETE_TYPE_COALESCING"
+      },
+      {
+        "head": "26ec6f378944e55fea7bb1f66150af46049c5876",
+        "workspace_control_run": 3041,
+        "operator_bridge_run": 614,
+        "result": "LITERAL_BACKSLASH_N_SERIALIZATION_COMPILE_FAILURE"
+      }
+    ],
+    "serialization_repair": "17486d41c845163da1b2e01916b3886561836e15 replaces only literal backslash+n bytes with real LF line breaks.",
+    "lifecycle_hardening": {
+      "commits": [
+        "3f15d4e2acbbe7809e674635a5baf27ac72c43d9",
+        "fca55ac8cbdc0d28d7fa84cb5a5e31ddc80347d8"
+      ],
+      "dev_script_blob": "1f7eec4e565b9d855bcb15911358fe369673cab5",
+      "workflow_blob": "7dae1fa5f8d88aad568f3f89cebafc2f9319c0a5",
+      "checks": [
+        "No $PID parameter collision.",
+        "Smoke mode fails closed if Firefox is already open.",
+        "Stop kills exact recorded PIDs plus exact-path WorkspaceOperator native-host children.",
+        "Partial startup directly unwinds registry/process/workdir state.",
+        "Operator CI parses workspace-operator-dev.ps1."
+      ]
+    },
+    "first_windows_smoke": {
+      "attempted_source_head": "eac272f9aaad6c0b211cc775c27bef0f22a4cd1f",
+      "build_result": "SUCCESS",
+      "runtime_started": false,
+      "failure_marker": "DEV_SMOKE_REQUIRES_EXISTING_FIREFOX_CLOSED",
+      "hotkey_exercised": false,
+      "clipboard_exercised": false,
+      "foreground_exercised": false
+    },
+    "runtime_guard_repair": {
+      "head": "97410a1c49189287550c95473ee1e862578d1609",
+      "script_blob": "b060c20078c09390f341155085b5733aba80c83c",
+      "changes": [
+        "Remove existing-Firefox exclusivity guard; dedicated -no-remote Firefox is tracked by before/after PID delta.",
+        "Rename Test-Pid parameter from reserved automatic $PID to $ProcessId.",
+        "Cache dotnet build by HEAD:operator-bridge/src tree hash with WORKSPACE_OPERATOR_BUILD_CACHE=MISS/HIT markers."
+      ],
+      "live_retry_authorized": false
+    },
+    "implementation_validation": {
+      "workspace_control_run": 3048,
+      "semantic_execution_run": 348,
+      "operator_bridge_run": 621,
+      "result": "SUCCESS"
+    },
+    "windows_only_smoke": {
+      "source_head": "a69bb92d99bffc4e6df05ed59809cbdddff61f0a",
+      "script_blob": "e694374d158d09cc22a26210ccf9a7a4504056d8",
+      "command": "wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a",
+      "expected_clipboard": "WORKSPACE_OPERATOR_SMOKE_PACKET_V1",
+      "expected_foreground": "dedicated Firefox window",
+      "live_authority_required": false
+    },
+    "clipboard_failure_evidence": {
+      "observed_at": "2026-11-19",
+      "browser_adapter_connected": true,
+      "dispatch_outcome": "CLIPBOARD_FAILED",
+      "normalized_error": "InvalidOperationException",
+      "subsequent_outcomes": "NO_ACTION",
+      "browser_prepare_succeeded": true,
+      "clipboard_succeeded": false,
+      "browser_focus_attempted": false,
+      "native_foreground_attempted": false
+    },
+    "clipboard_fix": {
+      "source_head": "053899196fb06ae5248bec58a7ded813e6ae3d1c",
+      "source_path": "operator-bridge/src/WorkspaceOperator/Windows/Clipboard/WinFormsClipboardWriter.cs",
+      "source_blob": "58a010d9661327383348ee3bd3ab58e0a2400a80",
+      "behavior": [
+        "Write directly when already STA.",
+        "Otherwise synchronously marshal the clipboard write onto a short STA worker thread.",
+        "Retry transient ExternalException clipboard-busy failures up to five attempts with bounded backoff.",
+        "Propagate any remaining exception to the existing dispatch failure path."
+      ],
+      "validation": {
+        "workspace_control_run": 3050,
+        "semantic_execution_run": 350,
+        "operator_bridge_run": 623,
+        "result": "SUCCESS"
+      },
+      "live_retry_authorized": false
+    },
+    "windows_only_smoke_result": {
+      "observed_at": "2026-11-19",
+      "hotkey_capture": true,
+      "browser_prepare": true,
+      "clipboard": true,
+      "clipboard_value": "WORKSPACE_OPERATOR_SMOKE_PACKET_V1",
+      "browser_focus": true,
+      "native_foreground": true,
+      "chatgpt_compose_observed": true,
+      "result": "PASS",
+      "live_authority_used": false
+    },
+    "persistent_profile_candidate": {
+      "source_path": "operator-bridge/tools/workspace-operator-dev.ps1",
+      "profile_path": "%LOCALAPPDATA%\\WorkspaceControl\\OperatorBridge\\DevRuntime\\firefox-profile",
+      "web_ext_flags": [
+        "--firefox-profile",
+        "--profile-create-if-missing",
+        "--keep-profile-changes"
+      ],
+      "default_firefox_profile_touched": false,
+      "intended_effect": "ChatGPT cookies/session persist across wop reset/restart.",
+      "first_use_note": "A one-time login may still be required when the dedicated persistent profile is created.",
+      "validation": {
+        "source_head": "7639a74478ed3e07c7054f166915d0ef137148c9",
+        "workspace_control_run": 3052,
+        "semantic_execution_run": 352,
+        "operator_bridge_run": 625,
+        "result": "SUCCESS"
+      }
+    },
+    "session_persistence_check": {
+      "live_authority_required": false,
+      "procedure": [
+        "Launch the Windows-only smoke on the current bookkeeping tip containing validated source 7639a744….",
+        "If the dedicated profile is new, sign into ChatGPT once.",
+        "Run wop reset.",
+        "Verify the relaunched dedicated Firefox profile is still authenticated to ChatGPT."
+      ],
+      "pass_condition": "ChatGPT session remains authenticated across reset/relaunch.",
+      "normal_firefox_profile_must_remain_untouched": true
+    },
+    "temporary_chat_candidate": {
+      "source_head": "d08172db8e1b1d3efd7ecda9053fc9a72d7962e6",
+      "worker_start_url": "https://chatgpt.com/?temporary-chat=true",
+      "bootstrap_tab_policy": "Reuse exactly one active unmanaged bootstrap tab only when URL exactly matches fixed worker_start_url; never adopt arbitrary unmanaged ChatGPT tabs.",
+      "fast_dev_persistent_profile": true,
+      "stage12_persistent_profile": true,
+      "validation": {
+        "workspace_control_run": 3057,
+        "semantic_execution_run": 357,
+        "operator_bridge_run": 630,
+        "result": "SUCCESS"
+      },
+      "live_retry_authorized": false
+    },
+    "plugin_probe": {
+      "documentation_facts": [
+        "Temporary Chat supports plugins only when Personalized; Unpersonalized Temporary Chat does not use plugins.",
+        "Installed plugins may be invoked with @ mentions, but official docs do not specify whether unaccepted raw text @github is equivalent to selecting the mention."
+      ],
+      "empirical_question": "Does sending literal raw @github without Tab/click/autocomplete acceptance invoke the installed GitHub plugin in a Personalized Temporary Chat?",
+      "automatic_typing_or_selection_authorized": false
+    }
+  }
+}

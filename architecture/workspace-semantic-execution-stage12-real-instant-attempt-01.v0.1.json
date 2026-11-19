@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-attempt-01-v0.1",
+  "status": "FAILED_CLOSED_AUTHORITY_CONSUMED",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "date": "2026-11-17",
+  "authority_artifact": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.1.json",
+  "authorized_source_head": "b282ccdebae222d70454db46fc287fdc4809cd6a",
+  "exact_bindings": {
+    "handoff_head": "a01ecab0f9bfca84d145e7fc91eae980b0e4dddf",
+    "candidate_baseline": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
+    "harness_blob": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d",
+    "linux_transaction_blob": "28248b17bc775ad938c221c240a3c7f3e204e82b",
+    "windows_launcher_blob": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+  },
+  "pre_attempt_verification": {
+    "migration_handoff_head": "PASS",
+    "candidate_baseline": "PASS",
+    "exact_source_head": "PASS",
+    "linux_transaction_blob": "PASS",
+    "harness_blob": "PASS",
+    "tailscale_host_binding": "PASS",
+    "tailscale_operator_peer_binding": "PASS",
+    "tailscale_login_binding": "PASS",
+    "existing_jupyter_root_binding": "PASS",
+    "stage12_route_absent_before_mutation": "PASS",
+    "funnel_disabled_before_mutation": "PASS",
+    "psycopg_dependency_pin": "PASS"
+  },
+  "live_execution": {
+    "authority_consumed": true,
+    "consumption_point": "Linux authorized Stage-12 transaction began after exact preflight.",
+    "private_route_activated": true,
+    "jupyter_root_preserved_during_route_activation": true,
+    "funnel_disabled_during_route_activation": true,
+    "reached_marker": "STAGE12_Q1_READY",
+    "q1_candidate_published": false,
+    "q2_started": false,
+    "q3_started": false
+  },
+  "failure": {
+    "phase": "Q1_REAL_INSTANT_OPERATOR_SERVICE",
+    "classification": "OPERATOR_SEQUENCE_PRECONDITION_MISSING",
+    "exact_cause": "The Windows PowerShell remained at the multiline continuation prompt after the reviewed launcher invocation block (`>> }`), so the pinned Stage-12 Windows launcher never actually executed. The isolated Firefox profile therefore never launched. Linux nevertheless reached STAGE12_Q1_READY, and Ctrl+Space had no managed worker runtime to service.",
+    "windows_launcher_started": false,
+    "isolated_firefox_started": false,
+    "automatic_browser_or_submission_workaround_used": false,
+    "retry_attempted": false
+  },
+  "candidate_branch_evidence": {
+    "branch": "worker-result-candidates-v1",
+    "head_after_failure": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "unchanged_from_baseline": true,
+    "q1_candidate_exists": false
+  },
+  "cleanup_and_restoration": {
+    "linux_runtime_root_removed": true,
+    "initial_post_abort_check_found_stage12_route_still_present": true,
+    "explicit_reviewed_route_only_cleanup_command": "sudo tailscale serve --https=443 --set-path=/operator-bridge/v1 off",
+    "final_serve_status": "tailnet-only root / -> http://127.0.0.1:8888 only",
+    "final_funnel_status": "tailnet-only root / -> http://127.0.0.1:8888 only; no Funnel exposure",
+    "stage12_route_removed": true,
+    "jupyter_root_restored": true,
+    "funnel_disabled": true,
+    "windows_launcher_runtime_cleanup_required": false,
+    "windows_launcher_runtime_cleanup_reason": "The pinned launcher never executed and therefore created no Firefox/helper/native-messaging runtime to clean up."
+  },
+  "acceptance": {
+    "stage12_q1_real_instant": "FAIL_NOT_EXECUTED",
+    "persistent_session_reuse": "NOT_REACHED",
+    "stale_session_fence": "NOT_REACHED",
+    "calibration_result_pass": false,
+    "private_route_stage12_real_instant_pass": false
+  },
+  "authority_postcondition": {
+    "prior_authority_consumed": true,
+    "retry_authorized": false,
+    "required_next_gate": "Fresh diagnosis, reviewed candidate/procedure, exact-head validation, and fresh explicit operator approval before any second live Stage-12 attempt.",
+    "prohibited_next_actions": [
+      "Do not silently retry Stage 12.",
+      "Do not start the previously pinned Windows launcher as a late continuation of Attempt 01.",
+      "Do not reuse the consumed authority artifact.",
+      "Do not widen browser, network, API, credential, Workspace Shell, database, GPU, or candidate-branch permissions."
+    ]
+  }
+}

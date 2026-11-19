@@ -1,0 +1,545 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-flow-catalog-v0.1",
+  "status": "UX_01_FLOW_BASELINE_DESIGN_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "journey_ref": "architecture/workspace-semantic-execution-operator-journeys.v0.1.md",
+  "global_invariants": [
+    "NEXT_WORKER_IS_SCHEDULER_SELECTED",
+    "NO_TAB_TITLE_ROUTING",
+    "NO_MANUAL_STATE_RELAY",
+    "NO_CHATGPT_CONTENT_AUTOMATION_V0",
+    "CLIPBOARD_MUTATION_ONLY_ON_EXPLICIT_SERVICE_ACTION",
+    "FOCUS_CHANGE_ONLY_ON_EXPLICIT_OPERATOR_ACTION",
+    "LOCAL_PREPARED_IS_NOT_DURABLE_ACK",
+    "UNKNOWN_CONTINUITY_FAILS_CLOSED",
+    "DURABLE_STATE_SURVIVES_SESSION_LOSS",
+    "JUDGMENT_AND_BLOCKED_ACTIONS_ARE_NOT_ROUTINE_READY_CYCLES"
+  ],
+  "action_effects": {
+    "SERVICE_EXISTING": {
+      "focus": "TARGET_WORKER_TAB",
+      "clipboard": "PACKET",
+      "human": [
+        "CTRL_V",
+        "ENTER"
+      ],
+      "ack": "DURABLE_WORKER_TRANSITION"
+    },
+    "CREATE_AND_SERVICE": {
+      "focus": "NEW_WORKER_TAB",
+      "clipboard": "BOOTSTRAP_OR_RESUME_PACKET",
+      "human": [
+        "CTRL_V",
+        "ENTER"
+      ],
+      "ack": "FIRST_VALID_WORKER_TRANSITION"
+    },
+    "RESTORE_AND_SERVICE": {
+      "focus": "RESTORED_WORKER_TAB",
+      "clipboard": "PACKET",
+      "human": [
+        "CTRL_V",
+        "ENTER"
+      ],
+      "ack": "DURABLE_WORKER_TRANSITION"
+    },
+    "RETIRE": {
+      "focus": "UNCHANGED_PREFERRED",
+      "clipboard": "UNCHANGED",
+      "human": [],
+      "ack": "LOCAL_OPERATION_RECEIPT"
+    },
+    "RETIRE_AND_ADVANCE": {
+      "focus": "NEXT_WORKER_TAB",
+      "clipboard": "NEXT_PACKET",
+      "human": [
+        "CTRL_V",
+        "ENTER"
+      ],
+      "ack": "NEXT_WORKER_DURABLE_TRANSITION"
+    },
+    "ROTATE_AND_SERVICE": {
+      "focus": "REPLACEMENT_WORKER_TAB",
+      "clipboard": "RESUME_PACKET",
+      "human": [
+        "CTRL_V",
+        "ENTER"
+      ],
+      "ack": "REPLACEMENT_DURABLE_TRANSITION"
+    },
+    "NO_ACTION": {
+      "focus": "UNCHANGED",
+      "clipboard": "UNCHANGED",
+      "human": [],
+      "ack": "NONE"
+    },
+    "OPEN_JUDGMENT_GATE": {
+      "focus": "OPERATOR_CONSOLE",
+      "clipboard": "UNCHANGED",
+      "human": [
+        "SUBSTANTIVE_DECISION"
+      ],
+      "ack": "AUTHORITY_PATH_TRANSITION"
+    },
+    "BLOCK": {
+      "focus": "UNCHANGED",
+      "clipboard": "UNCHANGED",
+      "human": [],
+      "ack": "RECOVERY_REQUIRED"
+    }
+  },
+  "flows": [
+    [
+      "J-001",
+      "BRIDGE_DISABLED",
+      "NO_WORK",
+      "HOTKEY_PASSTHROUGH",
+      "UNCHANGED",
+      "UNCHANGED",
+      "NONE",
+      "UX-06"
+    ],
+    [
+      "J-002",
+      "BRIDGE_ON_ZERO_READY",
+      "NO_WORK",
+      "NO_ACTION",
+      "UNCHANGED",
+      "UNCHANGED",
+      "NONE",
+      "UX-06"
+    ],
+    [
+      "J-003",
+      "EXISTING_ACTIVE_WORKER_READY",
+      "ROUTINE",
+      "SERVICE_EXISTING",
+      "TARGET_WORKER_TAB",
+      "PACKET",
+      "DURABLE_WORKER_TRANSITION",
+      "UX-03/UX-04"
+    ],
+    [
+      "J-004",
+      "DISCARDED_WORKER_READY",
+      "ROUTINE",
+      "RESTORE_AND_SERVICE",
+      "RESTORED_WORKER_TAB",
+      "PACKET",
+      "DURABLE_WORKER_TRANSITION",
+      "UX-04/UX-09"
+    ],
+    [
+      "J-005",
+      "NEW_WORKER_FIREFOX_READY",
+      "ROUTINE",
+      "CREATE_AND_SERVICE",
+      "NEW_WORKER_TAB",
+      "PACKET",
+      "FIRST_VALID_WORKER_TRANSITION",
+      "UX-04"
+    ],
+    [
+      "J-006",
+      "NEW_WORKER_FIREFOX_STOPPED",
+      "ROUTINE",
+      "CREATE_AND_SERVICE",
+      "NEW_WORKER_TAB",
+      "PACKET",
+      "FIRST_VALID_WORKER_TRANSITION",
+      "UX-04/UX-09"
+    ],
+    [
+      "J-007",
+      "MULTIPLE_READY",
+      "ROUTINE_BATCH",
+      "SERVICE_HIGHEST_PRIORITY",
+      "SCHEDULER_SELECTED_TAB",
+      "PACKET",
+      "PER_ACTION_DURABLE_ACK",
+      "UX-03"
+    ],
+    [
+      "J-008",
+      "A_UNCONFIRMED_B_READY",
+      "ROUTINE_BATCH",
+      "SERVICE_B",
+      "B_TAB",
+      "B_PACKET",
+      "B_DURABLE_ACK",
+      "UX-03"
+    ],
+    [
+      "J-009",
+      "DURABLE_RESULT_ARRIVES_BACKGROUND",
+      "MACHINE_EVENT",
+      "QUEUE_RECOMPUTE",
+      "UNCHANGED",
+      "UNCHANGED",
+      "RESULT_ALREADY_DURABLE",
+      "CORE"
+    ],
+    [
+      "J-010",
+      "WORKER_WAITING_EXTERNAL",
+      "MACHINE_EVENT",
+      "NO_HUMAN_POLL",
+      "UNCHANGED",
+      "UNCHANGED",
+      "EXTERNAL_EVENT",
+      "CORE"
+    ],
+    [
+      "J-011",
+      "RETIRE_ONLY",
+      "LOCAL_ONLY",
+      "RETIRE",
+      "UNCHANGED_PREFERRED",
+      "UNCHANGED",
+      "LOCAL_RECEIPT",
+      "UX-04"
+    ],
+    [
+      "J-012",
+      "RETIRE_PLUS_NEXT_READY",
+      "ROUTINE_COMPOSITE",
+      "RETIRE_AND_ADVANCE",
+      "NEXT_WORKER_TAB",
+      "NEXT_PACKET",
+      "NEXT_WORKER_DURABLE_ACK",
+      "UX-03/UX-04"
+    ],
+    [
+      "J-013",
+      "ROTATION_REQUIRED",
+      "ROUTINE_COMPOSITE",
+      "ROTATE_AND_SERVICE",
+      "REPLACEMENT_TAB",
+      "RESUME_PACKET",
+      "REPLACEMENT_DURABLE_ACK",
+      "UX-04"
+    ],
+    [
+      "J-014",
+      "MAPPED_TAB_MISSING",
+      "RECOVERY",
+      "REVALIDATE_OR_REPLACE",
+      "SAFE_REPLACEMENT_OR_UNCHANGED",
+      "PACKET_ONLY_IF_VALID",
+      "RECOVERED_WORKER_ACK",
+      "UX-07"
+    ],
+    [
+      "J-015",
+      "NEW_TAB_AUTH_OK",
+      "ROUTINE",
+      "CREATE_AND_SERVICE",
+      "NEW_WORKER_TAB",
+      "PACKET",
+      "FIRST_VALID_WORKER_TRANSITION",
+      "UX-04"
+    ],
+    [
+      "J-016",
+      "NEW_TAB_REQUIRES_LOGIN",
+      "RECOVERY",
+      "ENTER_AUTH_RECOVERY",
+      "AUTH_UI_MANUAL",
+      "NO_NEW_BACKGROUND_CHANGE",
+      "NONE_UNTIL_RECOVERED",
+      "UX-07"
+    ],
+    [
+      "J-017",
+      "LOGIN_REFRESHES_ALL_WORKER_TABS",
+      "RECOVERY",
+      "FAIL_CONTINUITY_CLOSED_AND_REBUILD",
+      "RECOVERY_MANAGED",
+      "UNCHANGED_UNTIL_VALID_PACKET",
+      "NEW_GENERATION_ACKS",
+      "UX-04/UX-07"
+    ],
+    [
+      "J-018",
+      "FOCUSED_WORKER_VISIBLY_LOGGED_OUT",
+      "RECOVERY",
+      "EXPLICIT_RECOVERY_SIGNAL",
+      "AUTH_UI",
+      "UNCHANGED",
+      "NONE_UNTIL_RECOVERED",
+      "UX-06/UX-07"
+    ],
+    [
+      "J-019",
+      "CHAT_CONTINUITY_LOST_DURABLE_STATE_OK",
+      "RECOVERY",
+      "ROTATE_AND_SERVICE",
+      "REPLACEMENT_TAB",
+      "RESUME_PACKET",
+      "REPLACEMENT_DURABLE_ACK",
+      "UX-04/UX-07"
+    ],
+    [
+      "J-020",
+      "LOCAL_PREPARED_NOT_PASTED",
+      "SENT_UNCONFIRMED",
+      "SKIP_FOR_DUPLICATE_PREVENTION",
+      "UNCHANGED",
+      "UNCHANGED",
+      "WAIT_DURABLE_ACK",
+      "UX-03"
+    ],
+    [
+      "J-021",
+      "PASTED_NO_ACK_YET",
+      "SENT_UNCONFIRMED",
+      "SKIP_FOR_DUPLICATE_PREVENTION",
+      "UNCHANGED",
+      "UNCHANGED",
+      "WAIT_DURABLE_ACK",
+      "UX-03"
+    ],
+    [
+      "J-022",
+      "DURABLE_ACK_ARRIVES",
+      "MACHINE_EVENT",
+      "COMPLETE_ACTION",
+      "UNCHANGED",
+      "UNCHANGED",
+      "ACK_PRESENT",
+      "CORE"
+    ],
+    [
+      "J-023",
+      "NO_ACK_EXTENDED",
+      "RECOVERY_OBSERVATION",
+      "NO_AUTO_RESEND",
+      "UNCHANGED",
+      "UNCHANGED",
+      "STILL_WAITING",
+      "UX-06/UX-07"
+    ],
+    [
+      "J-024",
+      "EXPLICIT_RETRY_REQUESTED",
+      "RECOVERY",
+      "REVALIDATE_THEN_RETRY_OR_NOOP",
+      "VALID_TARGET_OR_UNCHANGED",
+      "PACKET_ONLY_IF_STILL_VALID",
+      "NEW_OR_EXISTING_ACK",
+      "UX-03/UX-07"
+    ],
+    [
+      "J-025",
+      "HELPER_STARTS_BRIDGE_OFF",
+      "NO_WORK",
+      "NONE",
+      "UNCHANGED",
+      "UNCHANGED",
+      "NONE",
+      "UX-06/UX-12"
+    ],
+    [
+      "J-026",
+      "HELPER_RESTART",
+      "RECOVERY",
+      "REHYDRATE_LOCAL_CACHE",
+      "UNCHANGED",
+      "UNCHANGED",
+      "DURABLE_STATE",
+      "UX-07"
+    ],
+    [
+      "J-027",
+      "FIREFOX_RESTART",
+      "RECOVERY",
+      "REINVENTORY_SESSIONS",
+      "UNCHANGED_OR_RECOVERY_TAB",
+      "UNCHANGED",
+      "DURABLE_STATE",
+      "UX-07"
+    ],
+    [
+      "J-028",
+      "EXTENSION_CONNECTION_DOWN",
+      "BLOCKED",
+      "BLOCK",
+      "UNCHANGED",
+      "UNCHANGED",
+      "RECOVERY_REQUIRED",
+      "UX-07"
+    ],
+    [
+      "J-029",
+      "WRONG_FIREFOX_PROFILE",
+      "RECOVERY",
+      "TARGET_DEDICATED_PROFILE",
+      "WORKER_PROFILE_ONLY",
+      "PACKET_ONLY_AFTER_VALID_TARGET",
+      "DURABLE_ACK",
+      "UX-02/UX-12"
+    ],
+    [
+      "J-030",
+      "VALUABLE_CLIPBOARD_PRESENT",
+      "ROUTINE",
+      "SERVICE_SELECTED_ACTION",
+      "TARGET_WORKER_TAB",
+      "PACKET_REPLACES_CLIPBOARD",
+      "DURABLE_ACK",
+      "UX-05"
+    ],
+    [
+      "J-031",
+      "RAPID_DOUBLE_HOTKEY",
+      "CONCURRENCY",
+      "ATOMIC_CLAIM_OR_NEXT_ACTION",
+      "VALID_TARGET_ONLY",
+      "NO_DUPLICATE_PACKET",
+      "DURABLE_ACK",
+      "UX-03/UX-05"
+    ],
+    [
+      "J-032",
+      "HOTKEY_DURING_COLD_START",
+      "LOCAL_BUSY",
+      "NO_DUPLICATE_LAUNCH",
+      "UNCHANGED_OR_IN_PROGRESS_TARGET",
+      "NO_DUPLICATE_WRITE",
+      "LOCAL_PREP_RESULT",
+      "UX-03/UX-05"
+    ],
+    [
+      "J-033",
+      "JUDGMENT_GATE_NEXT",
+      "JUDGMENT",
+      "OPEN_JUDGMENT_GATE",
+      "OPERATOR_CONSOLE",
+      "UNCHANGED",
+      "AUTHORITY_PATH_TRANSITION",
+      "UX-06"
+    ],
+    [
+      "J-034",
+      "ACTION_AUTHORITY_BLOCKED",
+      "BLOCKED",
+      "SERVICE_OTHER_ELIGIBLE_OR_NO_ACTION",
+      "SAFE_ELIGIBLE_TARGET_OR_UNCHANGED",
+      "PACKET_ONLY_FOR_ELIGIBLE_ACTION",
+      "NONE_FOR_BLOCKED",
+      "CORE/UX-06"
+    ],
+    [
+      "J-035",
+      "ORCHESTRATOR_UNREACHABLE",
+      "BLOCKED",
+      "BLOCK",
+      "UNCHANGED",
+      "UNCHANGED",
+      "RECOVERY_REQUIRED",
+      "UX-07"
+    ],
+    [
+      "J-036",
+      "CACHED_ACTION_STALE",
+      "NORMAL_RACE",
+      "FETCH_FRESH_ACTION",
+      "FRESH_TARGET_OR_UNCHANGED",
+      "FRESH_PACKET_OR_UNCHANGED",
+      "FRESH_ACTION_ACK",
+      "UX-03"
+    ],
+    [
+      "J-037",
+      "EXECUTOR_ROLE_OR_TOOLSET_MISMATCH",
+      "ROUTINE_OR_RECOVERY",
+      "ROTATE_OR_CREATE",
+      "COMPATIBLE_TAB",
+      "COMPATIBLE_PACKET",
+      "COMPATIBLE_WORKER_ACK",
+      "UX-04"
+    ],
+    [
+      "J-038",
+      "MODEL_CONFIG_UNVERIFIABLE",
+      "RECOVERY",
+      "FAIL_IDENTITY_CLOSED",
+      "SETUP_OR_CONSOLE",
+      "UNCHANGED",
+      "CONFIRMED_SETUP_THEN_WORKER_ACK",
+      "UX-04/UX-07/UX-08"
+    ],
+    [
+      "J-039",
+      "SESSION_POOL_OVER_RESOURCE_POLICY",
+      "LOCAL_ONLY_OR_COMPOSITE",
+      "DISCARD_RETIRE_OR_ADVANCE",
+      "POLICY_SELECTED",
+      "PACKET_ONLY_IF_ADVANCING",
+      "LOCAL_RECEIPT_OR_WORKER_ACK",
+      "UX-04/UX-09"
+    ],
+    [
+      "J-040",
+      "DISCARDED_WORKER_NEXT",
+      "ROUTINE",
+      "RESTORE_AND_SERVICE",
+      "RESTORED_TAB",
+      "PACKET",
+      "DURABLE_WORKER_TRANSITION",
+      "UX-04/UX-09"
+    ],
+    [
+      "J-041",
+      "LAST_READY_WORKER_DISPATCHED",
+      "ROUTINE_END_BATCH",
+      "SERVICE_SELECTED_ACTION",
+      "TARGET_TAB",
+      "PACKET",
+      "DURABLE_ACK_LATER",
+      "UX-06"
+    ],
+    [
+      "J-042",
+      "ALL_CURRENT_WORK_COMPLETE",
+      "NO_WORK",
+      "NO_ACTION",
+      "UNCHANGED",
+      "UNCHANGED",
+      "NONE",
+      "UX-06"
+    ]
+  ],
+  "column_order": [
+    "journey_id",
+    "trigger",
+    "class",
+    "ctrl_b_behavior",
+    "focus_effect",
+    "clipboard_effect",
+    "acknowledgment",
+    "detailed_design_owner"
+  ],
+  "coverage": {
+    "enable_disable_no_work": true,
+    "existing_worker_reuse": true,
+    "discarded_worker_reuse": true,
+    "new_worker_creation": true,
+    "cold_browser_start": true,
+    "batch_service": true,
+    "external_wait": true,
+    "retire_rotate": true,
+    "tab_loss": true,
+    "authentication_and_all_tabs_refresh": true,
+    "continuity_loss": true,
+    "durable_ack_and_retry": true,
+    "helper_firefox_extension_failure": true,
+    "clipboard_focus_races": true,
+    "scheduler_races": true,
+    "authority_and_judgment": true,
+    "executor_mismatch": true,
+    "ram_session_pressure": true,
+    "end_of_batch": true
+  }
+}

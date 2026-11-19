@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.8",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Repair the pre-execution v0.7 PowerShell ProgramFiles(x86) escape defect while preserving every pinned Stage-12 executable artifact and authority/browser/network/result boundary.",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.7.json",
+    "prior_authority_status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+    "invalidated_unconsumed": true,
+    "windows_execution_started": false,
+    "linux_execution_started": false,
+    "live_authority_consumed": false,
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "exact_candidate_bindings": {
+    "executable_source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh",
+      "blob_sha": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.8.md",
+      "blob_sha": "58c714ba5c0c6e6dee337ce70f0c4b550e65a87c"
+    },
+    "reviewed_node_binding_source": {
+      "path": ".github/workflows/operator-bridge-validation.yml",
+      "blob_sha": "1ea4135e0ff80454b5a8e5feac139d0177d3b764"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "procedure_delta": {
+    "scope": "OPERATOR_SIDE_PRELIVE_COMMAND_ONLY",
+    "v07_command_length": 4768,
+    "v08_command_length": 4766,
+    "removed_literal_backslashes": 2,
+    "exact_bad_token": "\\${env:ProgramFiles(x86)}",
+    "exact_repaired_token": "${env:ProgramFiles(x86)}",
+    "bad_token_occurrences_before": 2,
+    "bad_token_occurrences_after": 0,
+    "no_other_command_byte_change": true,
+    "node_install_allowed": false,
+    "dotnet_install_allowed": false,
+    "package_manager_bootstrap": false,
+    "persistent_path_change": false,
+    "registry_mutation": false
+  },
+  "retained_safety": {
+    "required_dotnet_major_version": 10,
+    "required_node_major_version": 24,
+    "process_scoped_execution_policy_bypass": true,
+    "group_policy_fail_closed": true,
+    "persistent_execution_policy_change": false,
+    "windows_first": true,
+    "required_windows_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+    "linux_live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_consumption_marker_is_non_consuming": true
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "v07_authority_does_not_authorize_v08_procedure": true,
+    "explicit_fresh_operator_approval_required_after_validation": true,
+    "model_reasoning_is_not_authority": true
+  },
+  "validation": {
+    "candidate_head": "f0051fb3534da19073faee7b33f04edd999c12df",
+    "workspace_control_run": 3016,
+    "semantic_execution_run": 316,
+    "operator_bridge_run": 589,
+    "result": "SUCCESS",
+    "exact_head": true,
+    "operator_first_attempt_note": "Initial Operator #589 validation job hit an unrelated Stage-09 CI TimeoutException after v0.8-specific tests passed; one bounded rerun on the identical SHA passed.",
+    "escape_regression": "PASS_NO_BACKSLASH_DOLLAR_BRACE_AND_EXACT_TWO_PROGRAMFILES_X86_REFERENCES"
+  },
+  "postcondition": "v0.8 review candidate is repository-validated and grants zero live authority. Persist/final-state validation must pass before fresh explicit operator approval can bind v0.8 procedure blob 58c714ba5c0c6e6dee337ce70f0c4b550e65a87c."
+}

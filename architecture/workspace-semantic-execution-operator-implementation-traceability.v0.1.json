@@ -1,0 +1,872 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-implementation-traceability-v0.1",
+  "status": "IMPLEMENTATION_TRACEABILITY_BASELINE",
+  "owning_task": "workspace-operator-bridge-implementation-v1",
+  "parent_freeze_head": "0a110b570410d6d3310afc8ef4591e4aa383c0b8",
+  "policy": "Every frozen requirement has one or more implementation stages and verification obligations. Implementation may not mark a requirement SATISFIED without evidence from the mapped stage/tests.",
+  "requirements": [
+    {
+      "requirement": "UX-M001/UX-M002",
+      "summary": "single scheduler command; routine <= hotkey+paste+Enter",
+      "stages": [
+        "impl_02_windows_helper_kernel",
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "hotkey dispatch tests",
+        "20-cycle motor rhythm",
+        "20-action mixed trial"
+      ]
+    },
+    {
+      "requirement": "UX-M003/UX-M004/UX-M005",
+      "summary": "zero worker selection, prompt editing, manual state relay",
+      "stages": [
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "integrated routing tests",
+        "UT-02 objective counters"
+      ]
+    },
+    {
+      "requirement": "UX-M006/UX-M007",
+      "summary": "no background clipboard mutation/focus steal",
+      "stages": [
+        "impl_02_windows_helper_kernel",
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "bridge-off/no-work/background-ack tests",
+        "UT-12"
+      ]
+    },
+    {
+      "requirement": "UX-M008/UX-M009",
+      "summary": "master toggle and READY_MANUAL_CYCLES presentation",
+      "stages": [
+        "impl_02_windows_helper_kernel",
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "toggle tests",
+        "operator presentation/usability trials"
+      ]
+    },
+    {
+      "requirement": "UX-M010/UX-M020/UX-M024",
+      "summary": "local prepared != durable ack; no auto resend; durable state completion",
+      "stages": [
+        "impl_05_simulator_and_fake_worker",
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "verification": [
+        "slow/no-ack fixtures",
+        "ack observer/generation tests"
+      ]
+    },
+    {
+      "requirement": "UX-M011/UX-M014/UX-M015/UX-M016",
+      "summary": "independent batch service, reuse, bounded pool, discard",
+      "stages": [
+        "impl_05_simulator_and_fake_worker",
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_09_performance_benchmark_execution"
+      ],
+      "verification": [
+        "concurrent worker fixtures",
+        "2-live/4-burst/discard benchmark"
+      ]
+    },
+    {
+      "requirement": "UX-M013",
+      "summary": "dedicated managed worker environment; Firefox baseline; replaceable BrowserPort",
+      "stages": [
+        "impl_04_firefox_mv3_adapter",
+        "impl_11_webview2_comparison_spike"
+      ],
+      "verification": [
+        "Firefox profile/binding tests",
+        "WebView2 parity/promotion disposition"
+      ]
+    },
+    {
+      "requirement": "UX-M017/UX-M030/UX-M031",
+      "summary": "browser IDs non-authoritative; fail closed; idempotent local ops",
+      "stages": [
+        "impl_01_repository_bootstrap_and_contract_harness",
+        "impl_03_native_messaging_and_local_ipc",
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "verification": [
+        "protocol identity tests",
+        "duplicate request tests",
+        "stale/ambiguous recovery fixtures"
+      ]
+    },
+    {
+      "requirement": "UX-M018/UX-M019/UX-M021",
+      "summary": "restart/auth-refresh/reboot recovery",
+      "stages": [
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "verification": [
+        "tab loss/browser crash/helper crash/auth refresh/reboot fixtures"
+      ]
+    },
+    {
+      "requirement": "UX-M022/UX-M023/UX-M025/UX-M026",
+      "summary": "no ChatGPT content automation; chrome-level only; policy gate; least privilege",
+      "stages": [
+        "impl_04_firefox_mv3_adapter",
+        "impl_08_packaging_install_update_rollback",
+        "impl_12_real_account_calibration"
+      ],
+      "verification": [
+        "manifest static tests",
+        "security checklist",
+        "fresh policy review",
+        "real-account boundary audit"
+      ]
+    },
+    {
+      "requirement": "UX-M027/UX-M028/UX-M029/UX-M033",
+      "summary": "ports/adapters, single truth, typed state, no authority creation",
+      "stages": [
+        "impl_01_repository_bootstrap_and_contract_harness",
+        "impl_05_simulator_and_fake_worker",
+        "impl_13_production_readiness_review"
+      ],
+      "verification": [
+        "dependency tests/review",
+        "state-machine fixtures",
+        "final authority review"
+      ]
+    },
+    {
+      "requirement": "UX-P001..UX-P006",
+      "summary": "latency/resource budgets",
+      "stages": [
+        "impl_09_performance_benchmark_execution",
+        "impl_12_real_account_calibration"
+      ],
+      "verification": [
+        "UX-09 mechanical benchmark",
+        "real ChatGPT calibration"
+      ]
+    },
+    {
+      "requirement": "UX-Q001..UX-Q007",
+      "summary": "operator effort and error metrics",
+      "stages": [
+        "impl_10_usability_trial_execution"
+      ],
+      "verification": [
+        "UX-11 UT-01..UT-12"
+      ]
+    },
+    {
+      "requirement": "UX-08 security checklist",
+      "summary": "implementation security/privacy boundary",
+      "stages": [
+        "impl_01_repository_bootstrap_and_contract_harness",
+        "impl_04_firefox_mv3_adapter",
+        "impl_08_packaging_install_update_rollback",
+        "impl_12_real_account_calibration"
+      ],
+      "verification": [
+        "static permission checks",
+        "artifact checklist",
+        "install-state review"
+      ]
+    },
+    {
+      "requirement": "UX-10 simulator contract",
+      "summary": "deterministic fake worker + CI/human modes + fault matrix",
+      "stages": [
+        "impl_05_simulator_and_fake_worker",
+        "impl_06_integrated_local_bridge_e2e",
+        "impl_07_recovery_and_fault_closure"
+      ],
+      "verification": [
+        "required L0-L4 scenario matrix"
+      ]
+    },
+    {
+      "requirement": "UX-12 implementation stack",
+      "summary": ".NET 10/WinForms + Firefox MV3 + Native Messaging/named pipe",
+      "stages": [
+        "impl_01_repository_bootstrap_and_contract_harness",
+        "impl_02_windows_helper_kernel",
+        "impl_03_native_messaging_and_local_ipc",
+        "impl_04_firefox_mv3_adapter"
+      ],
+      "verification": [
+        "build/contract tests and implementation review"
+      ]
+    }
+  ],
+  "stage_evidence": {
+    "impl_01_repository_bootstrap_and_contract_harness": {
+      "status": "VALIDATED",
+      "checkpoint": "0fabe069aa39914f84b00ac78a2f26f57238ef4c",
+      "validations": [
+        "Operator Bridge Validation #1 SUCCESS",
+        "Workspace Control Validation #2379 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/WorkspaceOperatorBridge.slnx",
+        "operator-bridge/src/SharedContracts/**",
+        "operator-bridge/src/WorkspaceOperator/**",
+        "operator-bridge/src/FirefoxAdapter/manifest.json",
+        "operator-bridge/src/FirefoxAdapter/background.js",
+        "operator-bridge/protocol/browser_adapter_v1.schema.json",
+        "operator-bridge/tests/**",
+        "tests/test_workspace_semantic_execution_operator_bridge_contracts.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "claim": "Build/test/security-contract infrastructure validated; no Stage-02+ runtime behavior claimed."
+    },
+    "impl_02_windows_helper_kernel": {
+      "status": "VALIDATED",
+      "checkpoint": "82e5463587efcaaf8471f352a3ad3eb5a3b70537",
+      "validations": [
+        "Operator Bridge Validation #6 SUCCESS",
+        "Workspace Control Validation #2384 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/src/WorkspaceOperator/Application/**",
+        "operator-bridge/src/WorkspaceOperator/Ports/**",
+        "operator-bridge/src/WorkspaceOperator/Diagnostics/**",
+        "operator-bridge/src/WorkspaceOperator/Windows/**",
+        "operator-bridge/src/WorkspaceOperator/Bootstrap/**",
+        "operator-bridge/tests/WorkspaceOperator.Tests/**",
+        "tests/test_workspace_semantic_execution_operator_bridge_contracts.py"
+      ],
+      "evidence": {
+        "hotkey": "Ctrl+B RegisterHotKey with MOD_NOREPEAT; conflict and unregister behavior unit-tested",
+        "bridge_off": "zero claim/browser/clipboard side effects",
+        "single_flight": "concurrent second dispatch returns BUSY without second claim",
+        "clipboard_order": "prepare -> revalidate -> clipboard -> focus -> LOCAL_PREPARED",
+        "diagnostics": "packet text and exception message content excluded",
+        "idle_ci_smoke": {
+          "duration_seconds": 7.305,
+          "max_working_set_mib": 43.293,
+          "cpu_percent_one_logical_cpu_mean": 1.4973,
+          "interpretation": "CI smoke only; UX-09 target-machine measurement remains authoritative"
+        }
+      },
+      "claim": "Stage-02 local Windows helper kernel validated; no Native Messaging, named pipe, Firefox lifecycle, simulator, or real-account behavior claimed."
+    },
+    "impl_03_native_messaging_and_local_ipc": {
+      "status": "VALIDATED",
+      "checkpoint": "c001bbda287f05ce3f2ceae7e003e3552903fd9c",
+      "validations": [
+        "Operator Bridge Validation #10 SUCCESS",
+        "Workspace Control Validation #2388 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/src/SharedContracts/Protocol/**",
+        "operator-bridge/src/WorkspaceOperator/Ipc/**",
+        "operator-bridge/src/WorkspaceOperator/Program.cs",
+        "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+        "operator-bridge/tests/Protocol.Tests/**",
+        "operator-bridge/tests/WorkspaceOperator.Tests/LocalIpcServerTests.cs",
+        "operator-bridge/tests/WorkspaceOperator.Tests/NativeHostRegistrationTests.cs",
+        "operator-bridge/tests/WorkspaceOperator.Tests/RuntimeModeDetectorTests.cs"
+      ],
+      "evidence": {
+        "framing": "uint32 little-endian + UTF-8 JSON; 65536-byte ceiling",
+        "fail_closed": [
+          "wrong version",
+          "unknown message/field",
+          "malformed JSON",
+          "oversize/truncated frame",
+          "forbidden content fields"
+        ],
+        "idempotency": "request_id/idempotency_key FIRST/DUPLICATE_SAME/CONFLICT",
+        "local_security": "PipeOptions.CurrentUserOnly plus standard/elevated pipe-name separation",
+        "reconnect": "primary helper server accepted a second client after first disconnect",
+        "tests": {
+          "protocol": 8,
+          "workspace_operator": 18,
+          "integration": 1
+        }
+      },
+      "claim": "Stage-03 transport boundary validated; no Firefox tab lifecycle, simulator, or real-account behavior claimed."
+    },
+    "impl_04_firefox_mv3_adapter": {
+      "status": "VALIDATED",
+      "checkpoint": "ef0e1d6974c7c7a958e8ae0e6b95e2ed92d26436",
+      "validations": [
+        "Operator Bridge Validation #12 SUCCESS",
+        "Workspace Control Validation #2390 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/src/FirefoxAdapter/manifest.json",
+        "operator-bridge/src/FirefoxAdapter/adapter_core.js",
+        "operator-bridge/src/FirefoxAdapter/background.js",
+        "operator-bridge/tests/FirefoxAdapter.Tests/firefox_adapter.test.js",
+        "tests/test_workspace_semantic_execution_operator_bridge_firefox.py"
+      ],
+      "evidence": {
+        "node_mocked_browser_tests": {
+          "tests": 10,
+          "pass": 10,
+          "fail": 0
+        },
+        "permissions": [
+          "nativeMessaging",
+          "tabs",
+          "sessions"
+        ],
+        "managed_identity": "sessions metadata only; unmanaged ChatGPT tabs are never adopted",
+        "navigation": "fixed https://chatgpt.com/ start URL; no command-supplied arbitrary URL",
+        "url_boundary": "raw URL reduced locally to CHATGPT_ORIGIN/OFF_CHATGPT_ORIGIN/UNKNOWN before IPC",
+        "idempotency": "duplicate same request/key returns cached result; conflicting key rejected",
+        "generation_fencing": "expected binding generation mismatch rejects lifecycle mutation"
+      },
+      "claim": "Stage-04 Firefox BrowserPort adapter validated with mocked browser APIs; no simulator worker or real-account behavior claimed."
+    },
+    "impl_05_simulator_and_fake_worker": {
+      "status": "VALIDATED",
+      "checkpoint": "8bf4c2b6d13dc9d917ee831828c718fbca57648a",
+      "validations": [
+        "Operator Bridge Validation #15 SUCCESS",
+        "Workspace Control Validation #2393 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/WorkspaceOperatorBridge.Simulator.slnx",
+        "operator-bridge/simulator/**",
+        "operator-bridge/tests/Simulator.Tests/**",
+        "tests/test_workspace_semantic_execution_operator_bridge_simulator.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "evidence": {
+        "frozen_l0_l1_coverage": {
+          "required": 36,
+          "covered": 36
+        },
+        "simulator_tests": {
+          "passed": 38,
+          "failed": 0
+        },
+        "deterministic_replay": "every scenario run twice with identical content-free SHA-256 trace",
+        "production_separation": "production solution excludes simulator projects; production source/protocol exclude SIM_HUMAN_SUBMIT and FaultInjector",
+        "integrity": "payload hash mismatch cannot append durable transition or acknowledge action",
+        "fencing": "late/wrong-generation events cannot advance current state; duplicate events idempotent",
+        "recovery_idempotency": "same recovery ID advances generation at most once"
+      },
+      "claim": "Stage-05 deterministic fake-world implementation validated without ChatGPT account access; real OS/browser integration begins in Stage 06."
+    },
+    "impl_06_integrated_local_bridge_e2e": {
+      "status": "VALIDATED",
+      "checkpoint": "8c0f97f23e181b850728b2b42c970b71d93c3991",
+      "validations": [
+        "Operator Bridge Validation #24 SUCCESS",
+        "Workspace Control Validation #2402 SUCCESS"
+      ],
+      "implementation": [
+        "operator-bridge/WorkspaceOperatorBridge.Integration.slnx",
+        "operator-bridge/integration/**",
+        "operator-bridge/tests/LocalBridgeE2E.Tests/**",
+        "operator-bridge/simulator/Scenarios/stage06-l2-l3-catalog.json",
+        "operator-bridge/simulator/Scenarios/adapter-parity-result.schema.json",
+        "operator-bridge/simulator/FirefoxProfile/**",
+        "operator-bridge/tools/run-stage06-firefox.ps1",
+        "operator-bridge/src/WorkspaceOperator/Application/**",
+        "operator-bridge/src/WorkspaceOperator/Ipc/**",
+        "operator-bridge/src/FirefoxAdapter/adapter_core.js",
+        "tests/test_workspace_semantic_execution_operator_bridge_integration.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "evidence": {
+        "frozen_l2_l3_required_gate_subset": {
+          "required": 11,
+          "covered": 11
+        },
+        "firefox_mocked_browser_tests": {
+          "passed": 14,
+          "failed": 0
+        },
+        "simulator_tests": {
+          "passed": 38,
+          "failed": 0
+        },
+        "production_tests": {
+          "protocol": {
+            "passed": 8,
+            "failed": 0
+          },
+          "workspace_operator": {
+            "passed": 20,
+            "failed": 0
+          },
+          "integration": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "layer2_real_helper": {
+          "passed": 5,
+          "failed": 0,
+          "real_os_clipboard": true,
+          "real_ctrl_b_register_hotkey": true
+        },
+        "layer3_firefox": {
+          "firefox_version": "159.0.1",
+          "web_ext_version": "10.8.0",
+          "native_messaging_connected": true,
+          "result": "PASS",
+          "fake_worker_origin": "http://127.0.0.1:8765",
+          "trace_sha256": "4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477",
+          "predicates": {
+            "unmanaged_lookalike_not_adopted": true,
+            "managed_surface_created_instead": true,
+            "binding_ambiguity_fails_closed": true,
+            "service_existing": true,
+            "create_worker": true,
+            "restore_discarded": true,
+            "executor_identity_unproven_fails_closed": true,
+            "adapter_parity": true,
+            "no_background_clipboard_mutation": true,
+            "no_background_helper_browser_effect": true
+          },
+          "restore_detail": {
+            "seed": "APPLIED",
+            "discard": "APPLIED",
+            "dispatch": "LOCAL_PREPARED",
+            "simulator_human_submit": true,
+            "restore_delta": 1,
+            "generation_before": 0,
+            "generation_after": 0
+          }
+        },
+        "adapter_parity": {
+          "in_memory": "COMPLETED/TRUSTED",
+          "firefox": "COMPLETED/TRUSTED",
+          "local_binding_ids_in_authoritative_state": false
+        },
+        "helper_idle_ci_smoke": {
+          "duration_seconds": 6.377,
+          "max_working_set_mib": 42.355,
+          "cpu_percent_one_logical_cpu_mean": 0.245,
+          "interpretation": "CI smoke only; UX-09 target-machine measurement remains authoritative"
+        }
+      },
+      "claim": "Stage-06 real-helper + real-Firefox integration validated against fake workers with no ChatGPT account access; recovery/fault closure begins in Stage 07."
+    },
+    "impl_07_recovery_and_fault_closure": {
+      "status": "VALIDATED",
+      "checkpoint": "5166fdf44af3548ae1f9bc3e773f948f22f212e1",
+      "validations": [
+        "Operator Bridge Validation #30 SUCCESS on promotion head",
+        "Workspace Control Validation #2408 SUCCESS on promotion head",
+        "Operator Bridge Validation #29 SUCCESS on implementation head",
+        "Workspace Control Validation #2407 SUCCESS on implementation head"
+      ],
+      "implementation": [
+        "operator-bridge/src/WorkspaceOperator/Application/RecoveryContracts.cs",
+        "operator-bridge/src/WorkspaceOperator/Application/RecoveryCoordinator.cs",
+        "operator-bridge/src/WorkspaceOperator/Ports/IRecoveryPorts.cs",
+        "operator-bridge/src/WorkspaceOperator/Windows/JsonRecoveryStateStore.cs",
+        "operator-bridge/src/WorkspaceOperator/Application/SingleFlightDispatchCoordinator.cs",
+        "operator-bridge/integration/**",
+        "operator-bridge/tests/WorkspaceOperator.Tests/RecoveryCoordinatorTests.cs",
+        "operator-bridge/tests/LocalBridgeE2E.Tests/LayerTwoTests.cs",
+        "operator-bridge/simulator/Scenarios/stage07-recovery-catalog.json",
+        "operator-bridge/tools/run-stage07-firefox.ps1",
+        "tests/test_workspace_semantic_execution_operator_bridge_integration.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "evidence": {
+        "frozen_recovery_catalog": {
+          "required": 14,
+          "covered": 14
+        },
+        "firefox_mocked_browser_tests": {
+          "passed": 14,
+          "failed": 0
+        },
+        "simulator_tests": {
+          "passed": 38,
+          "failed": 0
+        },
+        "production_tests": {
+          "protocol": {
+            "passed": 8,
+            "failed": 0
+          },
+          "workspace_operator": {
+            "passed": 24,
+            "failed": 0
+          },
+          "integration": {
+            "passed": 1,
+            "failed": 0
+          }
+        },
+        "layer2_real_helper": {
+          "total_suite": {
+            "passed": 12,
+            "failed": 0
+          },
+          "stage07_fixtures": [
+            "SIM-008",
+            "SIM-021",
+            "SIM-022",
+            "SIM-023",
+            "SIM-024",
+            "SIM-033",
+            "SIM-034"
+          ],
+          "blocking_recovery_before_claim": true,
+          "unknown_create_blocked_no_duplicate": true
+        },
+        "layer3_firefox": {
+          "firefox_version": "159.0.1",
+          "web_ext_version": "10.8.0",
+          "native_messaging_connected": true,
+          "result": "PASS",
+          "predicates": {
+            "sim018_tab_closed_before_submit": true,
+            "sim019_browser_crash": true,
+            "sim020_adapter_disconnect_reinventory": true,
+            "sim022_unknown_create_no_duplicate": true,
+            "sim028_metadata_only_auth_entry": true,
+            "sim029_auth_refresh_all_tabs": true,
+            "sim033_cold_restart_no_stale_replay": true,
+            "no_background_clipboard_mutation": true,
+            "no_background_helper_browser_effect": true
+          },
+          "authority_reconcile_once_each": true,
+          "auth_generation_advances": 2,
+          "cold_restart_claim_count": 1,
+          "trace_sha256": "4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477"
+        },
+        "helper_idle_ci_smoke": {
+          "duration_seconds": 6.392,
+          "max_working_set_mib": 42.426,
+          "cpu_percent_one_logical_cpu_mean": 0.2444,
+          "interpretation": "CI smoke only; UX-09 target-machine measurement remains authoritative"
+        }
+      },
+      "claim": "Stage-07 recovery/fault closure is exact-head clean at the durable promotion head; Stage 08 packaging/install/update/rollback is the next authorized stage.",
+      "implementation_head": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e"
+    },
+    "impl_08_packaging_install_update_rollback": {
+      "status": "VALIDATED",
+      "checkpoint": "26284233edb00c4a7005dac3d5c52b2add814156",
+      "validations": [
+        "Operator Bridge Validation #36 SUCCESS on promotion head",
+        "Workspace Control Validation #2414 SUCCESS on promotion head",
+        "Operator Bridge Validation #34 SUCCESS on implementation head",
+        "Workspace Control Validation #2412 SUCCESS on implementation head"
+      ],
+      "implementation": [
+        "operator-bridge/packaging/STAGE08.md",
+        "operator-bridge/packaging/SIGNED-XPI-INSTALL.md",
+        "operator-bridge/packaging/build-package.ps1",
+        "operator-bridge/packaging/install.ps1",
+        "operator-bridge/packaging/rollback.ps1",
+        "operator-bridge/packaging/uninstall.ps1",
+        "operator-bridge/packaging/stage08-smoke.ps1",
+        "tests/test_workspace_semantic_execution_operator_bridge_packaging.py",
+        ".github/workflows/operator-bridge-validation.yml"
+      ],
+      "evidence": {
+        "package_binding": {
+          "source_sha": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175",
+          "workflow_artifact_id": 13747726653,
+          "xpi_mode": "CI_UNSIGNED_FIXTURE",
+          "signed_xpi_ci_claim": "NOT_CLAIMED",
+          "production_signed_xpi_flow": "MANUAL_FIREFOX_SIGNATURE_VERIFICATION_REQUIRED"
+        },
+        "lifecycle": {
+          "self_contained_win_x64": "PASS",
+          "clean_install_smoke": "PASS",
+          "native_host_registration": "PASS",
+          "upgrade_smoke": "PASS",
+          "rollback_previous_helper_xpi": "PASS",
+          "uninstall_owned_scope_only": "PASS"
+        },
+        "isolation": {
+          "unrelated_filesystem_unchanged": "PASS",
+          "unrelated_registry_unchanged": "PASS",
+          "unrelated_firefox_profile_unchanged": "PASS",
+          "admin_required_by_install_surface": false,
+          "automatic_self_updater": false,
+          "direct_firefox_profile_mutation": false
+        },
+        "frozen_identity": {
+          "extension_id": "workspace-control-operator@adamtrott78.local",
+          "firefox_permissions": [
+            "nativeMessaging",
+            "tabs",
+            "sessions"
+          ],
+          "native_host_name": "com.workspacecontrol.operator_bridge"
+        },
+        "repair": "Operator Bridge #33 exposed a stale staging-path native-host manifest; final-release manifest regeneration fixed the defect and strict rollback validation passed unchanged in #34."
+      },
+      "claim": "Stage-08 packaging/install/update/rollback is exact-head clean at the durable promotion head; Stage 09 performance benchmark execution is the next authorized stage.",
+      "implementation_head": "cac009bd18960c01f9dc4d2a20bac34eb6a0a175"
+    },
+    "impl_09_performance_benchmark_execution": {
+      "status": "SUSPENDED",
+      "checkpoint": "e244efad098df6559dae5874b5783782a305cf32",
+      "validations": [
+        "Workspace Control Validation #2459 / run 42814425643 SUCCESS on exact head 3fd98235678a7d6f0f728d82b4611eed8697152e",
+        "Operator Bridge Validation #85 / run 42814425603 SUCCESS on exact head 3fd98235678a7d6f0f728d82b4611eed8697152e",
+        "Triggered Operator Bridge run 42815030650 validation SUCCESS; target-performance job 129827357688 FAIL at Firefox adapter identity preflight",
+        "Workspace Control Validation #2557 and Operator Bridge Validation #186 SUCCESS on fail-fast repair head e244efad098df6559dae5874b5783782a305cf32",
+        "Workspace Control Validation #2558 and Operator Bridge Validation #187 SUCCESS on durable run-185 diagnosis head 053816f7c9f42aed09af08997fdebd045c92d7cd"
+      ],
+      "implementation": [
+        "operator-bridge/performance/**",
+        "operator-bridge/tools/run-stage09-ci.ps1",
+        "operator-bridge/tools/run-stage09-target-firefox.ps1",
+        "operator-bridge/tools/run-stage09-target-matrix.ps1",
+        "operator-bridge/src/WorkspaceOperator/Ports/IWorkerEnvironmentLauncher.cs",
+        "operator-bridge/src/WorkspaceOperator/Application/LaunchingBrowserPort.cs",
+        "operator-bridge/src/WorkspaceOperator/Windows/Firefox/FirefoxWorkerEnvironmentLauncher.cs",
+        "operator-bridge/tests/WorkspaceOperator.Tests/LaunchingBrowserPortTests.cs",
+        "tests/test_workspace_semantic_execution_operator_bridge_performance.py",
+        ".github/workflows/operator-bridge-validation.yml",
+        "benchmarks/workspace-semantic-execution/operator_bridge/stage09-ci-regression.339788d1.json"
+      ],
+      "evidence": {
+        "ci_regression": {
+          "evidence_class": "GITHUB_HOSTED_WINDOWS_CI",
+          "target_contract_complete": false,
+          "artifact_id": 13753443601,
+          "artifact_name": "operator-bridge-stage09-ci-832777a8015d6ef9ee2bdedf22553e28a6549553",
+          "plan_only_target_matrix": "PASS",
+          "interpretation": "Regression and executable target-plan signal only; not UX-09 target acceptance."
+        },
+        "target_contract": {
+          "state": "DEFERRED_FINAL_PROMOTION_GATE",
+          "canonical_runner": "operator-bridge/tools/run-stage09-target-matrix.ps1",
+          "self_hosted_workflow_job": "target-performance",
+          "required_runner_labels": [
+            "self-hosted",
+            "windows",
+            "x64",
+            "workspace-operator-target"
+          ],
+          "required_interactive_user_session": true,
+          "required_windows": {
+            "warmup_seconds": 60,
+            "steady_state_seconds": 120,
+            "sample_rate_hz": 1
+          },
+          "required_repetitions": {
+            "browser_resource": 3,
+            "discard_restore": 5,
+            "reuse": 50,
+            "restore": 30,
+            "create": 30,
+            "cold_start": 10,
+            "local_primitives": 100
+          },
+          "browser_order": [
+            "firefox->chrome",
+            "chrome->firefox",
+            "firefox->chrome"
+          ],
+          "chrome_memory_saver_disabled_and_recorded": true,
+          "exact_head_native_host_binding_with_restore": true,
+          "last_target_run": {
+            "workflow_run_id": 43075229854,
+            "target_job_id": 130715185761,
+            "source_sha": "819011a0e52dc6816eb5bf918e8ff63fd10fd936",
+            "exact_head_checkout": "PASS",
+            "interactive_preconditions": "PASS",
+            "target_profile_verification": "PASS",
+            "adapter_preflight": "PASS",
+            "early_unrelated_cpu_validity": "PASS",
+            "deep_resource_measurement": "EXECUTED_BUT_NOT_PRESERVED_AS_FINAL_EVIDENCE",
+            "terminal_failure": "Full Firefox replicate is missing exact latency evidence.",
+            "target_evidence_file": "NOT_PRODUCED",
+            "ram_summary_recoverable_from_github_logs": false
+          },
+          "next_diagnostic": "Deferred until after impl_12. Before impl_13, run the authoritative target matrix from the then-current validated implementation head. The fail-fast replicate boundary must stop immediately on collector/incomplete evidence, and the final run must preserve stage09-target-evidence.json before production promotion."
+        },
+        "cold_start": {
+          "production_launch_path": "VALIDATED",
+          "fixed_profile": "WorkspaceWorkers",
+          "connection_timeout_seconds": 8,
+          "target_probe_repetitions": 10,
+          "target_measurement": "NOT_RUN",
+          "process_cleanup": "only launcher-returned Firefox process tree"
+        },
+        "security": {
+          "content_free": true,
+          "dom_or_page_content": false,
+          "credentials_or_tokens": false,
+          "synthetic_paste_enter_send_mouse": false,
+          "real_chatgpt_account": false
+        }
+      },
+      "claim": "Stage-09 infrastructure and fail-fast target harness are validated, but authoritative UX-09 acceptance is intentionally deferred. Stage 09 is SUSPENDED and does not block Stages 10-12; all frozen UX-09 budgets remain mandatory before Stage 13 production readiness.",
+      "blocker": "No intermediate development blocker. Production promotion remains blocked until the authoritative long-form UX-09 benchmark produces valid complete target evidence and every frozen budget passes."
+    },
+    "impl_10_usability_trial_execution": {
+      "status": "IN_PROGRESS",
+      "checkpoint": "3121cf8bb8eb197ccc217fe6ff4c763c3ea5b2a0",
+      "validations": [
+        "Stage-08 packaging/install/update/rollback remains validated.",
+        "Explicit operator sequencing amendment authorizes usability work before the deferred long-form UX-09 benchmark while preserving UX-09 as a final production gate.",
+        "UT-11 bridge-off trial executed in Operator Bridge run #194 / stage10-usability job 130809245969 on exact head 3121cf8bb8eb197ccc217fe6ff4c763c3ea5b2a0.",
+        "UT-11 structured result OBJECTIVE_PASS: wrong_worker_dispatches=0, wrong_packet_dispatches=0, rejected_state_submissions=0, content_policy=CONTENT_FREE.",
+        "Operator observation: Ctrl+B retained normal foreground-application behavior; clipboard unchanged; no scheduler action or bridge-driven focus change observed.",
+        "GitHub job failure was wrapper-only: Windows process exit code disagreed with the emitted structured OBJECTIVE_PASS. UT-11 acceptance is preserved; no rerun required.",
+        "UT-01 first interactive attempt on Operator Bridge run #196 demonstrated no Ctrl+B clipboard effect. Operator verified clipboard history remained unchanged; no paste/Enter was performed.",
+        "Root cause isolated to Stage-10 integration harness entry point missing [STAThread], while production helper is [STAThread] and WinFormsClipboardWriter requires STA. First UT-01 attempt is INVALIDATED; rerun required after repair validation.",
+        "UT-01 attempt 2 on run #198 still showed no clipboard/focus effect after [STAThread] entry-point repair. Screenshot showed three fake-worker tabs although seed creates only slot-1 and slot-3, demonstrating browser dispatch progressed far enough to create slot-2 before clipboard/focus completion.",
+        "Root cause refined: Stage-10 harness lacked an explicit WindowsFormsSynchronizationContext. Async dispatch awaits browser IPC before WinFormsClipboardWriter; without a UI synchronization context the continuation can resume on a non-STA thread and fail before clipboard/focus. Harness repair preserves the real WinFormsClipboardWriter and adds fail-fast structured dispatch diagnostics.",
+        "UT-01 attempt 3 / Operator Bridge run #201 was INVALID before human-trial readiness: Firefox launched, but the harness never emitted STAGE10_USABILITY_READY and no Stage-10 result artifact was produced. User Ctrl+B opened Firefox Bookmarks, confirming ordinary browser handling after the bridge harness had failed to become ready.",
+        "Repair: integration executable now uses a synchronous [STAThread] Main, all early Stage-10 startup failures are converted into structured evidence, and STAGE10_USABILITY_READY is written only after UsabilityApplicationContext construction and explicit hotkey-registration/bridge-enabled confirmation.",
+        "UT-01 attempt 4 / Operator Bridge run #203 failed before READY with no structured result. The harness had installed WindowsFormsSynchronizationContext before synchronously blocking on hub.WaitForConnectionAsync(...).GetAwaiter().GetResult(), while the WinForms message loop had not started.",
+        "Repair moves WindowsFormsSynchronizationContext installation into UsabilityApplicationContext construction, after adapter connection and browser seeding, immediately before the WinForms message loop. READY remains gated on confirmed global hotkey registration.",
+        "UT-01 attempt 5 / Operator Bridge run #206 demonstrated the primary human loop is functional on the real Windows path: Ctrl+B global interception works, the synthetic packet reaches the clipboard, and fake-worker submission works.",
+        "Operator accidentally pressed Ctrl+B again before paste/Enter on some cycles. Review of SingleFlightDispatchCoordinator showed its _inFlight guard ends at LocalPrepared, so a later Ctrl+B can claim the next queued action before durable acknowledgment. This is a real human-handoff recovery gap.",
+        "Recovery rule added to the Stage-10 human harness: after LocalPrepared, repeated Ctrl+B is safely ignored until the matching fake-worker submission receives durable acknowledgment. Rapid presses caught by the existing Busy guard are also treated as safe recovered repeats rather than objective failure.",
+        "UT-01 recovery rerun on job 130952654587 completed all 5 actions with 5 durable acknowledgments and blocked 8 repeated Ctrl+B presses, but recorded 2 rejected submissions. Operator observed that repeated Ctrl+B was blocked before paste, yet could still move tabs after paste and before Enter.",
+        "Fake-worker inspection confirmed paste alone does not submit; only Enter triggers POST /submit. Therefore durable acknowledgment is not being cleared by paste.",
+        "Recovery hardening: treat simulator action status AwaitingDurableAck as authoritative on every Ctrl+B. While such an action exists, do not claim another action; idempotently re-focus the same worker binding and remain on the same handoff until Enter is durably acknowledged."
+      ],
+      "implementation": [],
+      "evidence": {
+        "real_chatgpt_account": false,
+        "fake_worker_only": true,
+        "stage09_required_before_production_readiness": true,
+        "ut11": {
+          "status": "PASS",
+          "workflow_run_id": 43105416484,
+          "workflow_run_number": 194,
+          "job_id": 130809245969,
+          "source_sha": "3121cf8bb8eb197ccc217fe6ff4c763c3ea5b2a0",
+          "structured_result": "OBJECTIVE_PASS",
+          "start_timestamp": "2026-11-11T21:50:07.5893511+00:00",
+          "end_timestamp": "2026-11-11T22:05:07.6446644+00:00",
+          "configured_hotkey": "Ctrl+B",
+          "wrong_worker_dispatches": 0,
+          "wrong_packet_dispatches": 0,
+          "rejected_state_submissions": 0,
+          "content_policy": "CONTENT_FREE",
+          "operator_observation": {
+            "ctrl_b_normal": true,
+            "clipboard_unchanged": true,
+            "scheduler_action_observed": false,
+            "unexpected_bridge_focus_observed": false
+          },
+          "wrapper_exit_code_disagreement": true,
+          "rerun_required": false
+        },
+        "ut01_attempt_1": {
+          "status": "INVALIDATED",
+          "workflow_run_id": 43111473974,
+          "job_id": 130830089070,
+          "source_sha": "7f2a54989637c4e8b6834303db5fba642a06afc0",
+          "operator_observation": {
+            "ctrl_b_clipboard_effect_observed": false,
+            "clipboard_history_changed": false,
+            "pasted_packet": false,
+            "enter_pressed": false
+          },
+          "demonstrated_blocker": "STAGE10_HARNESS_NOT_STA",
+          "rerun_required": true
+        },
+        "ut01_attempt_2": {
+          "status": "INVALIDATED",
+          "workflow_run_id": 43114304915,
+          "job_id": 130839656985,
+          "source_sha": "d60dbf126e9741fe97d406ebabcebf36ae81883a",
+          "operator_observation": {
+            "fake_worker_tabs_visible": 3,
+            "ctrl_b_clipboard_effect_observed": false,
+            "focus_change_observed": false,
+            "pasted_packet": false,
+            "enter_pressed": false
+          },
+          "demonstrated_progress": "BROWSER_DISPATCH_PROGRESS_INFERRED_FROM_EXTRA_SLOT2_TAB",
+          "refined_blocker": "STAGE10_ASYNC_CONTINUATION_NOT_BOUND_TO_WINFORMS_SYNCHRONIZATION_CONTEXT",
+          "rerun_required": true
+        },
+        "ut01_attempt_3": {
+          "status": "INVALIDATED",
+          "workflow_run_id": 43116636497,
+          "job_id": 130847896498,
+          "source_sha": "2c75c613d056b68aaf800da9d5659656142e27ec",
+          "workflow_failure": "Stage 10 usability harness never reached ready state.",
+          "ready_marker_emitted": false,
+          "result_artifact_emitted": false,
+          "operator_observation": {
+            "firefox_received_ctrl_b_as_bookmarks": true,
+            "clipboard_changed": false
+          },
+          "blocker": "STAGE10_PRE_READY_HARNESS_EXIT",
+          "rerun_required": true
+        },
+        "ut01_attempt_4": {
+          "status": "INVALIDATED",
+          "workflow_run_id": 43118642783,
+          "job_id": 130854639357,
+          "source_sha": "a10556a24aa1231f8c70b7453929045394b8e8ce",
+          "ready_marker_emitted": false,
+          "result_artifact_emitted": false,
+          "workflow_failure": "Stage 10 usability harness never reached ready state.",
+          "diagnosed_startup_risk": "WINFORMS_SYNCHRONIZATION_CONTEXT_INSTALLED_BEFORE_BLOCKING_ASYNC_ADAPTER_WAIT",
+          "rerun_required": true
+        },
+        "ut01_attempt_5": {
+          "status": "PARTIAL_FUNCTIONAL_SUCCESS_WITH_RECOVERY_GAP",
+          "workflow_run_id": 43145923429,
+          "job_id": 130944865182,
+          "source_sha": "099412bc92dde500b95ee96dce21e76d1a36f184",
+          "operator_observation": {
+            "global_ctrl_b_interception_worked": true,
+            "synthetic_packet_clipboard_delivery_worked": true,
+            "fake_worker_submission_worked": true,
+            "repeated_ctrl_b_before_ack_observed": true
+          },
+          "demonstrated_gap": "NEXT_ACTION_CAN_BE_CLAIMED_AFTER_LOCAL_PREPARED_BEFORE_DURABLE_ACK",
+          "repair": "BLOCK_REPEAT_CTRL_B_UNTIL_MATCHING_DURABLE_ACK",
+          "rerun_required": true
+        },
+        "ut01_recovery_rerun": {
+          "status": "PARTIAL_RECOVERY_SUCCESS",
+          "workflow_run_id": 43147582603,
+          "job_id": 130952654587,
+          "source_sha": "b5d9ae62b15d5496925f634aa4582dd435b23c0e",
+          "structured_result": {
+            "result": "OBJECTIVE_FAIL",
+            "actions_completed": 5,
+            "valid_durable_acks": 5,
+            "hotkey_presses": 13,
+            "handoff_blocked_presses": 8,
+            "safely_recovered_repeat_presses": 8,
+            "rejected_state_submissions": 2,
+            "wrong_worker_dispatches": 0,
+            "wrong_packet_dispatches": 0,
+            "dispatch_failures": 0
+          },
+          "operator_observation": {
+            "repeated_ctrl_b_before_paste_blocked": true,
+            "repeated_ctrl_b_after_paste_before_enter_still_moved_tabs": true
+          },
+          "diagnosis": "LOCAL_LATCH_RECOVERY_INSUFFICIENT_AFTER_PASTE_PHASE",
+          "repair": "AUTHORITATIVE_AWAITING_DURABLE_ACK_REFOCUS",
+          "rerun_required": true
+        }
+      },
+      "claim": "Stage 10 active. UT-11 PASS. UT-01 happy path passes; repeated Ctrl+B recovery now uses authoritative AwaitingDurableAck state and same-worker refocus until Enter/ack.",
+      "blocker": "Validate AwaitingDurableAck-driven refocus and rerun UT-01 recovery sequence."
+    }
+  }
+}

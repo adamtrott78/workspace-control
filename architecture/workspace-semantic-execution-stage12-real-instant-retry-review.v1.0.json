@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.0",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Repair the consumed v0.9 Q1 Windows foreground activation failure by invoking the already-existing verified Win32 foreground fallback in the LocalPrepared hotkey path while preserving all other Stage-12 safety and transport boundaries.",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.9.json",
+    "prior_authority_status": "CONSUMED_FAILED_STAGE12_Q1_WINDOWS_FOREGROUND_ACTIVATION_DEFECT",
+    "consumed": true,
+    "reusable": false,
+    "live_consumption_marker_observed": true,
+    "q1_ready_observed": true,
+    "q1_candidate_published": false,
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "exact_candidate_bindings": {
+    "windows_executable_source_head": "1ecc094a62e2ed96b278ab954d46246e26dc33fd",
+    "windows_foreground_repair": {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+      "blob_sha": "2e0d2248927aaff4afbbe9e036bc810d729cdb3d"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v3.sh",
+      "blob_sha": "3eb352f456d84de565514e2a7046e847ea0d25ea"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.0.md",
+      "blob_sha": "9a43ba2875464975d29297345e53814e6f9529f8"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "foreground_delta": {
+    "scope": "LOCAL_PREPARED_NATIVE_FOREGROUND_FALLBACK_ONLY",
+    "inserted_call": "_workerWindowSafety.ForegroundPreparedWorkerWindow();",
+    "insertion_order": "immediately before _workerWindowSafety.RecordPreparedWorkerWindow();",
+    "existing_fallback_implementation": "Win32WorkerWindowSafetyPort.ForegroundPreparedWorkerWindow",
+    "existing_fallback_behavior": "find/capture sole visible Firefox window when needed, restore if iconic, call SetForegroundWindow, verify GetForegroundWindow for up to 10 x 25ms",
+    "firefox_adapter_focus_request_unchanged": true,
+    "automatic_typing_or_submission_added": false,
+    "clipboard_semantics_changed": false,
+    "linux_bytes_changed": false,
+    "launcher_bytes_changed": false
+  },
+  "retained_safety": {
+    "manual_login_only": true,
+    "manual_instant_selection_only": true,
+    "worker_service_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "credential_automation": false,
+    "dom_or_page_content_scraping": false,
+    "automatic_typing_or_submission": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "production_postgres_mutation": false,
+    "gpu_use": false,
+    "padataset_mutation": false,
+    "workspace_shell_authority_widening": false,
+    "candidate_result_source_or_authority_branch": false,
+    "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+  },
+  "validation": {
+    "candidate_head": "1ecc094a62e2ed96b278ab954d46246e26dc33fd",
+    "workspace_control_run": 3030,
+    "semantic_execution_run": 330,
+    "operator_bridge_run": 603,
+    "result": "SUCCESS",
+    "exact_head": true,
+    "regression_guard": "PASS"
+  },
+  "predecessor_cleanup_gate": {
+    "required_before_live_retry": true,
+    "linux_route_restoration_verified": false,
+    "windows_cleanup_verified": false,
+    "stale_stage_cleanup_verified": false,
+    "note": "These cleanup facts remain runtime gates and are not inferred from model reasoning."
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "explicit_fresh_operator_approval_required_after_review_validation": true,
+    "v09_authority_reusable": false,
+    "model_reasoning_is_not_authority": true
+  },
+  "postcondition": "v1.0 foreground-repair review candidate is repository-validated and grants zero live authority. Final validation-state persistence must itself pass exact-head validation. Predecessor v0.9 runtime cleanup must be verified before fresh explicit operator approval may bind v1.0.",
+  "review_state_validation": {
+    "head": "ecdc71c8b85db52305d73fd476005eaa5fea01c6",
+    "workspace_control_run": 3031,
+    "semantic_execution_run": 331,
+    "operator_bridge_run": 604,
+    "result": "SUCCESS",
+    "exact_head": true
+  }
+}

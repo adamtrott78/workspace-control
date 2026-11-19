@@ -1,0 +1,1963 @@
+using System.Collections.Concurrent;
+using System.Drawing;
+using System.Text.Json;
+using WorkspaceControl.OperatorBridge.Application;
+using WorkspaceControl.OperatorBridge.Ipc;
+using WorkspaceControl.OperatorBridge.Ports;
+using WorkspaceControl.OperatorBridge.Simulator.Scenarios;
+using WorkspaceControl.OperatorBridge.Simulator.State;
+using WorkspaceControl.OperatorBridge.Windows;
+using WorkspaceControl.OperatorBridge.Windows.Clipboard;
+using WorkspaceControl.OperatorBridge.Windows.Hotkey;
+
+namespace WorkspaceControl.OperatorBridge.IntegrationHarness;
+
+internal static class UsabilityHarness
+{
+    private const string AdapterVersion = "0.1.10-usability";
+
+    public static int Run(string[] args)
+    {
+        var trialId = GetArgument(args, "--usability-trial")?.ToUpperInvariant()
+            ?? "UNKNOWN";
+        var resultPath = GetArgument(args, "--result")
+            ?? Path.Combine(Environment.CurrentDirectory, $"stage10-{trialId.ToLowerInvariant()}-result.json");
+
+        try
+        {
+            return RunCore(args, trialId, resultPath);
+        }
+        catch (Exception exception)
+        {
+            WriteSetupFailure(
+                resultPath,
+                trialId,
+                "EARLY_STARTUP_" + exception.GetType().Name);
+            return 1;
+        }
+    }
+
+    private static int RunCore(
+        string[] args,
+        string trialId,
+        string resultPath)
+    {
+        if (trialId == "UNKNOWN")
+        {
+            throw new ArgumentException("--usability-trial is required.");
+        }
+
+        ApplicationConfiguration.Initialize();
+
+        var schedulerHotkey = SchedulerHotkeyBinding.Parse(
+            GetArgument(args, "--scheduler-hotkey"));
+
+        var readyPath = GetArgument(args, "--ready")
+            ?? resultPath + ".ready.json";
+        var durationSeconds = int.TryParse(GetArgument(args, "--duration-seconds"), out var parsedDuration)
+            ? parsedDuration
+            : 900;
+
+        if (durationSeconds is < 10 or > 7200)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(durationSeconds),
+                "Stage 10 duration must be from 10 through 7200 seconds.");
+        }
+
+        var world = new SimulatorWorld();
+        SeedTrial(world, trialId);
+
+        var diagnostics = new CaptureDiagnostics();
+        var bridgeState = new BridgeState();
+        var hub = new BrowserCommandHub(
+            bridgeState,
+            diagnostics,
+            requiredAdapterKind: "FIREFOX_EXTENSION",
+            requiredAdapterVersion: AdapterVersion);
+
+        using var ipcCancellation = new CancellationTokenSource();
+        var pipeName = ElevationScope.PipeName(ElevationScope.Current());
+        var ipcTask = new LocalIpcServer(
+            pipeName,
+            hub,
+            diagnostics).RunAsync(ipcCancellation.Token);
+
+        var submissions = new ConcurrentQueue<UsabilitySubmissionRequest>();
+        using var fakeWorker = new FakeWorkerLoopbackServer(
+            8765,
+            submission =>
+            {
+                var request = new UsabilitySubmissionRequest(submission);
+                submissions.Enqueue(request);
+                return request.Completion.Task;
+            });
+        fakeWorker.Start();
+
+        try
+        {
+            var connected = hub.WaitForConnectionAsync(
+                    TimeSpan.FromSeconds(90))
+                .GetAwaiter()
+                .GetResult();
+
+            if (!connected)
+            {
+                WriteSetupFailure(
+                    resultPath,
+                    trialId,
+                    "ADAPTER_CONNECTION_NOT_OBSERVED");
+                return 1;
+            }
+
+            var browser = new IpcBrowserPort(hub);
+            SeedBrowser(browser, trialId);
+
+            var workerWindowSafety = new WorkerWindowSafetyController(
+                new Win32WorkerWindowSafetyPort());
+            if (trialId == "UT-12")
+            {
+                // UT-12 starts from a synthetically pre-existing
+                // SENT/UNCONFIRMED worker. Reproduce the production
+                // prerequisite before exposing READY=0: the managed worker
+                // target was prepared while the dedicated Firefox launch was
+                // already foreground, and its exact Firefox HWND was captured
+                // while that identity was trusted. Setup never forces OS
+                // foreground. The later no-work press must not rediscover,
+                // recapture, or foreground any Firefox window.
+                RequireApplied(
+                    browser.FocusTargetAsync(
+                            new BrowserTarget("slot-1", 0),
+                            CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult(),
+                    "prime UT-12 trusted worker target");
+                if (!workerWindowSafety.RecordPreparedWorkerWindow())
+                {
+                    throw new InvalidOperationException(
+                        "UT12_TRUSTED_WORKER_WINDOW_CAPTURE_FAILED");
+                }
+                Console.WriteLine(
+                    "STAGE10_UT12_TRUSTED_WORKER_WINDOW_CAPTURED");
+            }
+
+            using var context = new UsabilityApplicationContext(
+                trialId,
+                resultPath,
+                durationSeconds,
+                world,
+                submissions,
+                bridgeState,
+                browser,
+                diagnostics,
+                schedulerHotkey,
+                workerWindowSafety);
+
+            if (trialId != "UT-11" &&
+                (!context.HotkeyRegistered || !context.BridgeEnabled))
+            {
+                throw new InvalidOperationException(
+                    "STAGE10_HOTKEY_REGISTRATION_NOT_CONFIRMED");
+            }
+
+            Directory.CreateDirectory(
+                Path.GetDirectoryName(Path.GetFullPath(readyPath))!);
+            File.WriteAllText(
+                readyPath,
+                JsonSerializer.Serialize(
+                    new
+                    {
+                        schema_version = 1,
+                        evidence_class = "STAGE10_USABILITY_READY",
+                        trial_id = trialId,
+                        adapter_version = AdapterVersion,
+                        fake_worker_origin = "http://127.0.0.1:8765",
+                        configured_hotkey = schedulerHotkey.DisplayName,
+                        hotkey_registered = context.HotkeyRegistered,
+                        bridge_enabled = context.BridgeEnabled,
+                        content_policy = "CONTENT_FREE"
+                    },
+                    new JsonSerializerOptions { WriteIndented = true }));
+
+            System.Windows.Forms.Application.Run(context);
+            return context.ExitCode;
+        }
+        catch (Exception exception)
+        {
+            WriteSetupFailure(
+                resultPath,
+                trialId,
+                exception.GetType().Name);
+            return 1;
+        }
+        finally
+        {
+            ipcCancellation.Cancel();
+            try
+            {
+                ipcTask.GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
+    }
+
+    private static void SeedTrial(
+        SimulatorWorld world,
+        string trialId)
+    {
+        switch (trialId)
+        {
+            case "UT-11":
+                return;
+            case "UT-01":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.NotEstablished,
+                    bindingPresent: false);
+                world.Sessions.Add(
+                    "slot-3",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Queue("ut01-01", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut01-02", "CREATE_AND_SERVICE", "slot-2", 0);
+                world.Queue("ut01-03", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut01-04", "RESTORE_AND_SERVICE", "slot-3", 0);
+                world.Queue("ut01-05", "SERVICE_EXISTING", "slot-2", 0);
+                return;
+            case "UT-03":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.NotEstablished,
+                    bindingPresent: false);
+                world.Sessions.Add(
+                    "slot-3",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Queue("ut03-01", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut03-02", "CREATE_AND_SERVICE", "slot-2", 0);
+                world.Queue("ut03-03", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut03-04", "RESTORE_AND_SERVICE", "slot-3", 0);
+                world.Queue("ut03-05", "SERVICE_EXISTING", "slot-2", 0);
+                world.Queue("ut03-06", "SERVICE_EXISTING", "slot-3", 0);
+                return;
+            case "UT-04":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-3",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-4",
+                    0,
+                    SimContinuity.NotEstablished,
+                    bindingPresent: false);
+                world.Sessions.Add(
+                    "slot-5",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+
+                var pendingOne = world.Queue(
+                    "ut04-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                var claimedOne = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedOne, pendingOne) ||
+                    !world.Actions.MarkLocalPrepared(pendingOne))
+                {
+                    throw new InvalidOperationException(
+                        "UT04_PENDING_ONE_SEED_FAILED");
+                }
+
+                var pendingTwo = world.Queue(
+                    "ut04-pending-02",
+                    "SERVICE_EXISTING",
+                    "slot-2",
+                    0);
+                var claimedTwo = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedTwo, pendingTwo) ||
+                    !world.Actions.MarkLocalPrepared(pendingTwo))
+                {
+                    throw new InvalidOperationException(
+                        "UT04_PENDING_TWO_SEED_FAILED");
+                }
+
+                world.Queue("ut04-01", "SERVICE_EXISTING", "slot-3", 0);
+                world.Queue("ut04-02", "CREATE_AND_SERVICE", "slot-4", 0);
+                world.Queue("ut04-03", "RESTORE_AND_SERVICE", "slot-5", 0);
+                world.Queue("ut04-04", "SERVICE_EXISTING", "slot-3", 0);
+                return;
+            case "UT-05":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Queue(
+                    "ut05-judgment-01",
+                    "OPEN_JUDGMENT_GATE",
+                    "slot-1",
+                    0);
+                world.Queue(
+                    "ut05-service-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                return;
+            case "UT-06":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                var pendingSix = world.Queue(
+                    "ut06-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                var claimedSix = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedSix, pendingSix) ||
+                    !world.Actions.MarkLocalPrepared(pendingSix))
+                {
+                    throw new InvalidOperationException(
+                        "UT06_PENDING_SEED_FAILED");
+                }
+                return;
+            case "UT-07":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-3",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+
+                var pendingSevenOne = world.Queue(
+                    "ut07-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                var claimedSevenOne = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedSevenOne, pendingSevenOne) ||
+                    !world.Actions.MarkLocalPrepared(pendingSevenOne))
+                {
+                    throw new InvalidOperationException(
+                        "UT07_PENDING_ONE_SEED_FAILED");
+                }
+
+                var pendingSevenTwo = world.Queue(
+                    "ut07-pending-02",
+                    "SERVICE_EXISTING",
+                    "slot-2",
+                    0);
+                var claimedSevenTwo = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedSevenTwo, pendingSevenTwo) ||
+                    !world.Actions.MarkLocalPrepared(pendingSevenTwo))
+                {
+                    throw new InvalidOperationException(
+                        "UT07_PENDING_TWO_SEED_FAILED");
+                }
+                return;
+            case "UT-08":
+                world.Sessions.Add(
+                    "slot-1",
+                    2,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                world.Sessions.Add(
+                    "slot-2",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                var pendingEight = world.Queue(
+                    "ut08-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    2);
+                var claimedEight = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedEight, pendingEight) ||
+                    !world.Actions.MarkLocalPrepared(pendingEight))
+                {
+                    throw new InvalidOperationException(
+                        "UT08_PENDING_SEED_FAILED");
+                }
+                return;
+            case "UT-12":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                var pendingTwelve = world.Queue(
+                    "ut12-pending-01",
+                    "SERVICE_EXISTING",
+                    "slot-1",
+                    0);
+                var claimedTwelve = world.Actions.ClaimNext();
+                if (!ReferenceEquals(claimedTwelve, pendingTwelve) ||
+                    !world.Actions.MarkLocalPrepared(pendingTwelve))
+                {
+                    throw new InvalidOperationException(
+                        "UT12_PENDING_SEED_FAILED");
+                }
+                return;
+            case "UT-02":
+                world.Sessions.Add("slot-1", 0, SimContinuity.Trusted, bindingPresent: true);
+                world.Sessions.Add("slot-2", 0, SimContinuity.NotEstablished, bindingPresent: false);
+                world.Sessions.Add("slot-3", 0, SimContinuity.Trusted, bindingPresent: true);
+                world.Sessions.Add("slot-4", 0, SimContinuity.Trusted, bindingPresent: true);
+                world.Sessions.Add("slot-5", 0, SimContinuity.NotEstablished, bindingPresent: false);
+                world.Sessions.Add("slot-6", 0, SimContinuity.Trusted, bindingPresent: true);
+
+                world.Queue("ut02-01", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut02-02", "DISCARD_SESSION", "slot-4", 0);
+                world.Queue("ut02-03", "RESTORE_AND_SERVICE", "slot-3", 0);
+                world.Queue("ut02-04", "CREATE_AND_SERVICE", "slot-2", 0);
+                world.Queue("ut02-05", "SERVICE_EXISTING", "slot-1", 0);
+                world.Queue("ut02-06", "RESTORE_AND_SERVICE", "slot-4", 0);
+                world.Queue("ut02-07", "RETIRE_SESSION", "slot-6", 0);
+                world.Queue("ut02-08", "CREATE_AND_SERVICE", "slot-6", 0);
+                world.Queue("ut02-09", "SERVICE_EXISTING", "slot-2", 0);
+                world.Queue("ut02-10", "DISCARD_SESSION", "slot-1", 0);
+                world.Queue("ut02-11", "RESTORE_AND_SERVICE", "slot-1", 0);
+                world.Queue("ut02-12", "SERVICE_EXISTING", "slot-3", 0);
+                world.Queue("ut02-13", "CREATE_AND_SERVICE", "slot-5", 0);
+                world.Queue("ut02-14", "SERVICE_EXISTING", "slot-6", 0);
+                world.Queue("ut02-15", "DISCARD_SESSION", "slot-4", 0);
+                world.Queue("ut02-16", "RESTORE_AND_SERVICE", "slot-4", 0);
+                world.Queue("ut02-17", "SERVICE_EXISTING", "slot-5", 0);
+                world.Queue("ut02-18", "SERVICE_EXISTING", "slot-2", 0);
+                world.Queue("ut02-19", "SERVICE_EXISTING", "slot-3", 0);
+                world.Queue("ut02-20", "SERVICE_EXISTING", "slot-1", 0);
+                return;
+            case "UT-10":
+                world.Sessions.Add(
+                    "slot-1",
+                    0,
+                    SimContinuity.Trusted,
+                    bindingPresent: true);
+                for (var index = 1; index <= 20; index++)
+                {
+                    world.Queue(
+                        $"ut10-{index:D2}",
+                        "SERVICE_EXISTING",
+                        "slot-1",
+                        0);
+                }
+                return;
+            default:
+                throw new ArgumentException(
+                    $"Stage 10 usability harness does not yet implement {trialId}.");
+        }
+    }
+
+    private static void SeedBrowser(
+        IpcBrowserPort browser,
+        string trialId)
+    {
+        if (trialId == "UT-11")
+        {
+            return;
+        }
+
+        var slotOneGeneration = trialId == "UT-08" ? 2 : 0;
+        RequireApplied(
+            browser.CreateTargetAsync(
+                    new BrowserTarget("slot-1", slotOneGeneration),
+                    CancellationToken.None)
+                .GetAwaiter()
+                .GetResult(),
+            "seed slot-1");
+
+        if (trialId == "UT-06")
+        {
+            RequireApplied(
+                browser.CloseTargetAsync(
+                        new BrowserTarget("slot-1", 0),
+                        CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult(),
+                "simulate UT-06 managed tab loss");
+        }
+
+        if (trialId == "UT-07")
+        {
+            foreach (var slot in new[] { "slot-2", "slot-3" })
+            {
+                RequireApplied(
+                    browser.CreateTargetAsync(
+                            new BrowserTarget(slot, 0),
+                            CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult(),
+                    $"seed {slot}");
+            }
+        }
+
+        if (trialId == "UT-08")
+        {
+            RequireApplied(
+                browser.CreateTargetAsync(
+                        new BrowserTarget("slot-2", 0),
+                        CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult(),
+                "seed slot-2");
+        }
+
+        if (trialId is "UT-01" or "UT-02" or "UT-03")
+        {
+            RequireApplied(
+                browser.CreateTargetAsync(
+                        new BrowserTarget("slot-3", 0),
+                        CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult(),
+                "seed slot-3");
+            RequireApplied(
+                browser.DiscardTargetAsync(
+                        new BrowserTarget("slot-3", 0),
+                        CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult(),
+                "discard slot-3");
+        }
+
+        if (trialId == "UT-02")
+        {
+            foreach (var slot in new[] { "slot-4", "slot-6" })
+            {
+                RequireApplied(
+                    browser.CreateTargetAsync(
+                            new BrowserTarget(slot, 0),
+                            CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult(),
+                    $"seed {slot}");
+            }
+        }
+
+        if (trialId == "UT-04")
+        {
+            foreach (var slot in new[] { "slot-2", "slot-3", "slot-5" })
+            {
+                RequireApplied(
+                    browser.CreateTargetAsync(
+                            new BrowserTarget(slot, 0),
+                            CancellationToken.None)
+                        .GetAwaiter()
+                        .GetResult(),
+                    $"seed {slot}");
+            }
+            RequireApplied(
+                browser.DiscardTargetAsync(
+                        new BrowserTarget("slot-5", 0),
+                        CancellationToken.None)
+                    .GetAwaiter()
+                    .GetResult(),
+                "discard slot-5");
+        }
+    }
+
+    private static void RequireApplied(
+        BrowserResult result,
+        string operation)
+    {
+        if (!result.IsApplied)
+        {
+            throw new InvalidOperationException(
+                $"Stage 10 browser setup failed at {operation}: " +
+                (result.NormalizedError ?? result.Outcome.ToString()));
+        }
+    }
+
+    private static void WriteSetupFailure(
+        string resultPath,
+        string trialId,
+        string normalizedError)
+    {
+        Directory.CreateDirectory(
+            Path.GetDirectoryName(Path.GetFullPath(resultPath))!);
+        File.WriteAllText(
+            resultPath,
+            JsonSerializer.Serialize(
+                new
+                {
+                    schema_version = 1,
+                    stage = "impl_10_usability_trial_execution",
+                    evidence_class = "STAGE10_USABILITY_PARTIAL",
+                    trial_id = trialId,
+                    result = "INVALID",
+                    normalized_error = normalizedError,
+                    content_policy = "CONTENT_FREE"
+                },
+                new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    private static string? GetArgument(
+        string[] args,
+        string name)
+    {
+        var prefix = name + "=";
+        return args.FirstOrDefault(arg =>
+                arg.StartsWith(
+                    prefix,
+                    StringComparison.OrdinalIgnoreCase))
+            ?[prefix.Length..];
+    }
+}
+
+internal sealed class UsabilityApplicationContext : ApplicationContext
+{
+    private readonly string _trialId;
+    private readonly string _resultPath;
+    private readonly DateTimeOffset _started = DateTimeOffset.UtcNow;
+    private readonly TimeSpan _duration;
+    private readonly SimulatorWorld _world;
+    private readonly ConcurrentQueue<UsabilitySubmissionRequest> _submissions;
+    private readonly UsabilityBrowserPort _browser;
+    private readonly UsabilityClipboardWriter _clipboard;
+    private readonly UsabilityOperatorSurface _operatorSurface;
+    private readonly RecoveryCoordinator? _recovery;
+    private readonly SimulatorRecoveryAuthorityPort? _recoveryAuthority;
+    private readonly bool _ut08RecoveryRehydrated;
+    private readonly BridgeController _bridgeController;
+    private readonly SingleFlightDispatchCoordinator _dispatch;
+    private readonly HotkeyMessageWindow _hotkeyWindow;
+    private readonly System.Windows.Forms.Timer _timer;
+    private readonly NotifyIcon _notifyIcon;
+    private readonly ToolStripMenuItem _readyItem;
+    private readonly ToolStripMenuItem _sentItem;
+    private readonly WorkerWindowSafetyController _workerWindowSafety;
+    private Icon? _statusIcon;
+    private DateTimeOffset? _allCompletedAt;
+    private int _dispatching;
+    private int _awaitingHumanSubmit;
+    private string? _awaitingActionId;
+    private bool _finishing;
+    private int _maxSentUnconfirmed;
+    private bool _multipleSentUnconfirmedWithReadyObserved;
+    private DateTimeOffset? _ut12NoWorkObservedAt;
+
+    private static (
+        RecoveryCoordinator? Coordinator,
+        SimulatorRecoveryAuthorityPort? Authority,
+        bool Ut08Rehydrated) CreateRecoverySetup(
+            string trialId,
+            SimulatorWorld world,
+            IManagedBrowserInventory inventory,
+            CaptureDiagnostics diagnostics)
+    {
+        if (trialId is not ("UT-06" or "UT-07" or "UT-08"))
+        {
+            return (null, null, false);
+        }
+
+        var stateStore = new InMemoryRecoveryStateStore();
+        var authority = new SimulatorRecoveryAuthorityPort(world);
+
+        if (trialId == "UT-06")
+        {
+            var recovery = new RecoveryCoordinator(
+                stateStore,
+                authority,
+                inventory,
+                diagnostics);
+            recovery.BeginAsync(
+                    "ut06-managed-tab-loss",
+                    RecoveryScope.SessionScoped,
+                    RecoverySignal.ManagedTabClosed,
+                    [new RecoverySessionRef("slot-1", 0)])
+                .GetAwaiter()
+                .GetResult();
+            return (recovery, authority, false);
+        }
+
+        if (trialId == "UT-07")
+        {
+            var recovery = new RecoveryCoordinator(
+                stateStore,
+                authority,
+                inventory,
+                diagnostics);
+            recovery.BeginAsync(
+                    "ut07-profile-auth-refresh",
+                    RecoveryScope.AuthDomainScoped,
+                    RecoverySignal.OperatorReportedAuthRefresh,
+                    [
+                        new RecoverySessionRef("slot-1", 0),
+                        new RecoverySessionRef("slot-2", 0)
+                    ])
+                .GetAwaiter()
+                .GetResult();
+            return (recovery, authority, false);
+        }
+
+        var first = new RecoveryCoordinator(
+            stateStore,
+            authority,
+            inventory,
+            diagnostics);
+        first.BeginAsync(
+                "ut08-cold-restart",
+                RecoveryScope.LocalBridgeGlobal,
+                RecoverySignal.SystemResumeOrHelperColdStart,
+                [new RecoverySessionRef("slot-1", 2)])
+            .GetAwaiter()
+            .GetResult();
+
+        var restarted = new RecoveryCoordinator(
+            stateStore,
+            authority,
+            inventory,
+            diagnostics);
+        var loaded = restarted.InitializeAsync()
+            .GetAwaiter()
+            .GetResult();
+        var rehydrated =
+            loaded is not null &&
+            string.Equals(
+                loaded.RecoveryId,
+                "ut08-cold-restart",
+                StringComparison.Ordinal) &&
+            restarted.BlocksDispatch;
+
+        return (restarted, authority, rehydrated);
+    }
+
+    public UsabilityApplicationContext(
+        string trialId,
+        string resultPath,
+        int durationSeconds,
+        SimulatorWorld world,
+        ConcurrentQueue<UsabilitySubmissionRequest> submissions,
+        BridgeState bridgeState,
+        IpcBrowserPort browser,
+        CaptureDiagnostics diagnostics,
+        SchedulerHotkeyBinding schedulerHotkey,
+        WorkerWindowSafetyController workerWindowSafety)
+    {
+        _trialId = trialId;
+        _resultPath = resultPath;
+        _duration = TimeSpan.FromSeconds(durationSeconds);
+        _world = world;
+        _submissions = submissions;
+        _browser = new UsabilityBrowserPort(browser);
+        _clipboard = new UsabilityClipboardWriter();
+        var recoverySetup = CreateRecoverySetup(
+            trialId,
+            world,
+            _browser,
+            diagnostics);
+        _recovery = recoverySetup.Coordinator;
+        _recoveryAuthority = recoverySetup.Authority;
+        _ut08RecoveryRehydrated = recoverySetup.Ut08Rehydrated;
+        _operatorSurface = new UsabilityOperatorSurface(
+            trialId,
+            world,
+            _recovery,
+            _clipboard,
+            _browser);
+        _workerWindowSafety = workerWindowSafety;
+
+        SynchronizationContext.SetSynchronizationContext(
+            new WindowsFormsSynchronizationContext());
+
+        _hotkeyWindow = new HotkeyMessageWindow();
+        var hotkey = new WindowsHotkeyRegistrar(
+            _hotkeyWindow.Handle,
+            schedulerHotkey);
+        ConfiguredHotkey = schedulerHotkey.DisplayName;
+        _bridgeController = new BridgeController(
+            bridgeState,
+            hotkey,
+            diagnostics);
+        _dispatch = new SingleFlightDispatchCoordinator(
+            bridgeState,
+            new SimulatorOperatorActionPort(world),
+            _browser,
+            _clipboard,
+            new SystemMonotonicClock(),
+            diagnostics,
+            _operatorSurface,
+            _recovery);
+
+        _hotkeyWindow.HotkeyPressed += HotkeyPressed;
+
+        if (_trialId != "UT-11")
+        {
+            _bridgeController.SetEnabled(true);
+        }
+
+        HotkeyRegistered = hotkey.IsRegistered;
+        if (_trialId != "UT-11" &&
+            (!HotkeyRegistered || !_bridgeController.IsEnabled))
+        {
+            throw new InvalidOperationException(
+                "STAGE10_HOTKEY_REGISTRATION_NOT_CONFIRMED");
+        }
+
+        _readyItem = new ToolStripMenuItem("Ready now: 0")
+        {
+            Enabled = false
+        };
+        _sentItem = new ToolStripMenuItem("Sent / unconfirmed: 0")
+        {
+            Enabled = false
+        };
+        _notifyIcon = new NotifyIcon
+        {
+            Icon = SystemIcons.Application,
+            Text = "Workspace Worker Bridge",
+            Visible = true,
+            ContextMenuStrip = new ContextMenuStrip()
+        };
+        _notifyIcon.ContextMenuStrip.Items.Add(_readyItem);
+        _notifyIcon.ContextMenuStrip.Items.Add(_sentItem);
+
+        _timer = new System.Windows.Forms.Timer { Interval = 100 };
+        _timer.Tick += TimerTick;
+        RefreshWorkloadPresentation();
+        _timer.Start();
+    }
+
+    public int ExitCode { get; private set; }
+    public bool HotkeyRegistered { get; private set; }
+    public bool BridgeEnabled => _bridgeController.IsEnabled;
+    public string ConfiguredHotkey { get; }
+    public int HotkeyPresses { get; private set; }
+    public int NoActionPresses { get; private set; }
+    public int NoWorkMinimizeAttempts { get; private set; }
+    public int NoWorkMinimizeSuccesses { get; private set; }
+    public int BusyPresses { get; private set; }
+    public int HandoffBlockedPresses { get; private set; }
+    public int HandoffRefocuses { get; private set; }
+    public int NativeForegroundAttempts { get; private set; }
+    public int NativeForegroundSuccesses { get; private set; }
+    public int InterruptionPromptsIssued { get; private set; }
+    public int Ut04BackgroundAcksApplied { get; private set; }
+    public int Ut05JudgmentGateOpens { get; private set; }
+    public int Ut05JudgmentClipboardWrites { get; private set; }
+    public int Ut05JudgmentBrowserEffects { get; private set; }
+    public int Ut12BackgroundAcksApplied { get; private set; }
+    public int Ut12NoWorkClipboardWrites { get; private set; }
+    public int Ut12NoWorkBrowserEffects { get; private set; }
+    public int Ut12BackgroundAckClipboardWrites { get; private set; }
+    public int Ut12BackgroundAckBrowserEffects { get; private set; }
+    public int MaxSentUnconfirmed => _maxSentUnconfirmed;
+    public bool MultipleSentUnconfirmedWithReadyObserved =>
+        _multipleSentUnconfirmedWithReadyObserved;
+    public int ValidDurableAcks { get; private set; }
+    public int WrongWorkerDispatches { get; private set; }
+    public int WrongPacketDispatches { get; private set; }
+    public int RejectedStateSubmissions { get; private set; }
+    public int DispatchFailures { get; private set; }
+    public int ClipboardFailedDispatches { get; private set; }
+    public string? LastDispatchOutcome { get; private set; }
+    public string? LastDispatchError { get; private set; }
+
+    private async void HotkeyPressed(object? sender, EventArgs e)
+    {
+        HotkeyPresses++;
+        Console.WriteLine(
+            $"STAGE10_HOTKEY_RECEIVED trial={_trialId} count={HotkeyPresses}");
+        var clipboardWritesBeforeDispatch = _clipboard.WriteCount;
+        var browserEffectsBeforeDispatch = _browser.EffectCount;
+
+        if (Volatile.Read(ref _awaitingHumanSubmit) != 0)
+        {
+            HandoffBlockedPresses++;
+
+            var pending = _world.Actions.Actions.FirstOrDefault(action =>
+                action.ActionId == _awaitingActionId &&
+                action.Status == SimActionStatus.AwaitingDurableAck);
+            if (pending is null)
+            {
+                DispatchFailures++;
+                LastDispatchOutcome = "HandoffStateMismatch";
+                LastDispatchError = "AWAITING_HUMAN_SUBMIT_ACTION_MISSING";
+                Finish();
+                return;
+            }
+
+            var focus = await _browser.FocusTargetAsync(
+                new BrowserTarget(
+                    pending.WorkerSlotId,
+                    pending.SessionGeneration),
+                CancellationToken.None);
+            if (!focus.IsApplied)
+            {
+                DispatchFailures++;
+                LastDispatchOutcome = "HandoffRefocusFailed";
+                LastDispatchError =
+                    focus.NormalizedError ?? "HANDOFF_REFOCUS_FAILED";
+                Finish();
+                return;
+            }
+
+            NativeForegroundAttempts++;
+            if (!_workerWindowSafety.ForegroundPreparedWorkerWindow())
+            {
+                DispatchFailures++;
+                LastDispatchOutcome = "HandoffNativeForegroundFailed";
+                LastDispatchError = "WORKER_WINDOW_NOT_FOREGROUNDED";
+                Finish();
+                return;
+            }
+
+            NativeForegroundSuccesses++;
+            HandoffRefocuses++;
+            return;
+        }
+
+        if (Interlocked.Exchange(ref _dispatching, 1) != 0)
+        {
+            BusyPresses++;
+            return;
+        }
+
+        try
+        {
+            var result = await _dispatch.DispatchAsync();
+            LastDispatchOutcome = result.Outcome.ToString();
+            LastDispatchError = result.NormalizedError;
+
+            if (result.Outcome == DispatchOutcome.LocalPrepared)
+            {
+                _awaitingActionId = result.ActionId;
+                Volatile.Write(ref _awaitingHumanSubmit, 1);
+
+                NativeForegroundAttempts++;
+                if (!_workerWindowSafety.ForegroundPreparedWorkerWindow())
+                {
+                    DispatchFailures++;
+                    LastDispatchOutcome = "NativeForegroundFailed";
+                    LastDispatchError = "WORKER_WINDOW_NOT_FOREGROUNDED";
+                    Finish();
+                    return;
+                }
+
+                NativeForegroundSuccesses++;
+                _workerWindowSafety.RecordPreparedWorkerWindow();
+            }
+            else if (result.Outcome == DispatchOutcome.JudgmentGateOpened)
+            {
+                Ut05JudgmentGateOpens++;
+                Ut05JudgmentClipboardWrites +=
+                    _clipboard.WriteCount - clipboardWritesBeforeDispatch;
+                Ut05JudgmentBrowserEffects +=
+                    _browser.EffectCount - browserEffectsBeforeDispatch;
+            }
+            else if (result.Outcome == DispatchOutcome.NoAction)
+            {
+                NoActionPresses++;
+                NoWorkMinimizeAttempts++;
+
+                var minimized = _workerWindowSafety.MinimizeAfterNoAction();
+                if (minimized)
+                {
+                    NoWorkMinimizeSuccesses++;
+                }
+                if (_trialId == "UT-12" &&
+                    _ut12NoWorkObservedAt is null)
+                {
+                    _ut12NoWorkObservedAt = DateTimeOffset.UtcNow;
+                    Ut12NoWorkClipboardWrites = _clipboard.WriteCount;
+                    Ut12NoWorkBrowserEffects = _browser.EffectCount;
+                }
+                _notifyIcon.ShowBalloonTip(
+                    1500,
+                    "Workspace Worker Bridge",
+                    minimized
+                        ? "Nothing needs service; worker Firefox minimized"
+                        : "Nothing needs service",
+                    ToolTipIcon.None);
+            }
+            else if (result.Outcome == DispatchOutcome.Busy)
+            {
+                BusyPresses++;
+            }
+            else if (result.Outcome == DispatchOutcome.ClipboardFailed)
+            {
+                ClipboardFailedDispatches++;
+                DispatchFailures++;
+                Finish();
+            }
+            else if (result.Outcome is
+                DispatchOutcome.Disabled or
+                DispatchOutcome.BrowserPrepareFailed or
+                DispatchOutcome.BrowserMaintenanceFailed or
+                DispatchOutcome.Stale or
+                DispatchOutcome.BrowserFocusFailed or
+                DispatchOutcome.Failed)
+            {
+                DispatchFailures++;
+                Finish();
+            }
+        }
+        finally
+        {
+            RefreshWorkloadPresentation();
+            Volatile.Write(ref _dispatching, 0);
+        }
+    }
+
+    private async void TimerTick(object? sender, EventArgs e)
+    {
+        if (_finishing)
+        {
+            return;
+        }
+
+        _timer.Stop();
+        try
+        {
+            while (_submissions.TryDequeue(out var request))
+            {
+                var applied = await ApplySubmissionAsync(request.Submission);
+                request.Completion.TrySetResult(applied);
+            }
+
+            ApplyUt04BackgroundAcksIfReady();
+            ApplyUt12BackgroundAckIfReady();
+            RefreshWorkloadPresentation();
+
+            if (ShouldFinish())
+            {
+                Finish();
+                return;
+            }
+        }
+        catch
+        {
+            ExitCode = 1;
+            Finish();
+            return;
+        }
+        finally
+        {
+            if (!_finishing)
+            {
+                _timer.Start();
+            }
+        }
+    }
+
+    private async Task<bool> ApplySubmissionAsync(
+        FakeWorkerSubmission submission)
+    {
+        var action = _world.Actions.Actions.FirstOrDefault(
+            item => item.ActionId == submission.ActionId);
+
+        if (action is null)
+        {
+            WrongPacketDispatches++;
+            return false;
+        }
+
+        var inventory = await _browser.InventoryAsync();
+        var active = inventory.FirstOrDefault(item => item.Active);
+        if (active is null ||
+            active.WorkerSlotId != submission.WorkerSlotId ||
+            active.SessionGeneration != submission.SessionGeneration)
+        {
+            WrongWorkerDispatches++;
+            return false;
+        }
+
+        if (action.ExpectedPayloadSha256 != submission.PayloadSha256 ||
+            action.WorkerSlotId != submission.WorkerSlotId ||
+            action.SessionGeneration != submission.SessionGeneration)
+        {
+            WrongPacketDispatches++;
+            return false;
+        }
+
+        var applied = _world.HumanSubmit(
+            action,
+            submission.PayloadSha256);
+        if (applied)
+        {
+            ValidDurableAcks++;
+            if (_trialId == "UT-03" &&
+                ValidDurableAcks <= 5)
+            {
+                InterruptionPromptsIssued++;
+                _notifyIcon.ShowBalloonTip(
+                    5000,
+                    "Workspace Worker Bridge",
+                    $"Interruption {InterruptionPromptsIssued}/5: switch to another normal app for 30-60 seconds or take a short idle. Return and resume only with {ConfiguredHotkey}; do not search worker tabs or reconstruct state.",
+                    ToolTipIcon.None);
+            }
+            if (string.Equals(
+                    _awaitingActionId,
+                    submission.ActionId,
+                    StringComparison.Ordinal))
+            {
+                _awaitingActionId = null;
+                Volatile.Write(ref _awaitingHumanSubmit, 0);
+            }
+        }
+        else
+        {
+            RejectedStateSubmissions++;
+        }
+        return applied;
+    }
+
+    private void ApplyUt04BackgroundAcksIfReady()
+    {
+        if (_trialId != "UT-04" ||
+            Ut04BackgroundAcksApplied >= 2 ||
+            Volatile.Read(ref _awaitingHumanSubmit) != 0)
+        {
+            return;
+        }
+
+        var newWorkCompleted = _world.Actions.Actions
+            .Where(action =>
+                action.ActionId.StartsWith(
+                    "ut04-",
+                    StringComparison.Ordinal) &&
+                !action.ActionId.StartsWith(
+                    "ut04-pending-",
+                    StringComparison.Ordinal))
+            .All(action => action.Status == SimActionStatus.Completed);
+        if (!newWorkCompleted)
+        {
+            return;
+        }
+
+        foreach (var pending in _world.Actions.Actions.Where(action =>
+                     action.ActionId.StartsWith(
+                         "ut04-pending-",
+                         StringComparison.Ordinal) &&
+                     action.Status == SimActionStatus.AwaitingDurableAck))
+        {
+            if (_world.Actions.ApplyAck(pending))
+            {
+                ValidDurableAcks++;
+                Ut04BackgroundAcksApplied++;
+            }
+        }
+    }
+
+    private void ApplyUt12BackgroundAckIfReady()
+    {
+        if (_trialId != "UT-12" ||
+            Ut12BackgroundAcksApplied >= 1 ||
+            _ut12NoWorkObservedAt is null ||
+            DateTimeOffset.UtcNow - _ut12NoWorkObservedAt.Value <
+                TimeSpan.FromSeconds(3))
+        {
+            return;
+        }
+
+        var pending = _world.Actions.Actions.SingleOrDefault(action =>
+            action.ActionId == "ut12-pending-01" &&
+            action.Status == SimActionStatus.AwaitingDurableAck);
+        if (pending is null)
+        {
+            return;
+        }
+
+        var clipboardBefore = _clipboard.WriteCount;
+        var browserEffectsBefore = _browser.EffectCount;
+        if (_world.Actions.ApplyAck(pending))
+        {
+            ValidDurableAcks++;
+            Ut12BackgroundAcksApplied++;
+            Ut12BackgroundAckClipboardWrites +=
+                _clipboard.WriteCount - clipboardBefore;
+            Ut12BackgroundAckBrowserEffects +=
+                _browser.EffectCount - browserEffectsBefore;
+        }
+    }
+
+    private bool IsExpectedRecoverySuperseded(SimAction action) =>
+        _trialId switch
+        {
+            "UT-06" => action.ActionId == "ut06-pending-01",
+            "UT-07" => action.ActionId is
+                "ut07-pending-01" or
+                "ut07-pending-02",
+            "UT-08" => action.ActionId == "ut08-pending-01",
+            _ => false
+        };
+
+    private bool IsTerminalForTrial(SimAction action) =>
+        action.Status == SimActionStatus.Completed ||
+        (IsExpectedRecoverySuperseded(action) &&
+         action.Status == SimActionStatus.Superseded);
+
+    private bool ShouldFinish()
+    {
+        if (_trialId == "UT-11")
+        {
+            return DateTimeOffset.UtcNow - _started >= _duration;
+        }
+
+        if (_trialId is "UT-06" or "UT-07" or "UT-08" &&
+            _operatorSurface.RecoveryReadyCount == 0)
+        {
+            // Recovery trials can temporarily make every currently seeded
+            // action terminal before the operator completes the recovery
+            // boundary and the post-recovery service action is queued.
+            // Never let the completion grace timer tear down a live modal
+            // recovery/manual-auth prompt.
+            _allCompletedAt = null;
+            return false;
+        }
+
+        var allCompleted = _world.Actions.Actions.Count > 0 &&
+            _world.Actions.Actions.All(IsTerminalForTrial);
+        if (!allCompleted)
+        {
+            _allCompletedAt = null;
+            return false;
+        }
+
+        _allCompletedAt ??= DateTimeOffset.UtcNow;
+        return DateTimeOffset.UtcNow - _allCompletedAt >=
+            TimeSpan.FromSeconds(4);
+    }
+
+    private void Finish()
+    {
+        if (_finishing)
+        {
+            return;
+        }
+        _finishing = true;
+        _timer.Stop();
+
+        var intended = _world.Actions.Actions.Count;
+        var completed = _world.Actions.Actions.Count(
+            action => action.Status == SimActionStatus.Completed);
+        var terminal = _world.Actions.Actions.Count(IsTerminalForTrial);
+        var serviceActionsIntended = _world.Actions.Actions.Count(IsServiceAction);
+        var serviceActionsExpectedToAck = _world.Actions.Actions.Count(action =>
+            IsServiceAction(action) &&
+            !IsExpectedRecoverySuperseded(action));
+        var localOnlyActionsIntended = _world.Actions.Actions.Count(action =>
+            action.ActionType is "DISCARD_SESSION" or "RETIRE_SESSION");
+        var distinctServiceWorkers = _world.Actions.Actions
+            .Where(IsServiceAction)
+            .Select(action => action.WorkerSlotId)
+            .Distinct(StringComparer.Ordinal)
+            .Count();
+        var objectivePass = _trialId == "UT-11"
+            ? true
+            : terminal == intended &&
+              ValidDurableAcks == serviceActionsExpectedToAck &&
+              WrongWorkerDispatches == 0 &&
+              WrongPacketDispatches == 0 &&
+              RejectedStateSubmissions == 0 &&
+              DispatchFailures == 0 &&
+              (_trialId != "UT-05" ||
+               (intended == 2 &&
+                serviceActionsIntended == 1 &&
+                Ut05JudgmentGateOpens == 1 &&
+                _operatorSurface.JudgmentOpenCount == 1 &&
+                _operatorSurface.JudgmentDecisionCount == 1 &&
+                _operatorSurface.ExactGateObserved &&
+                Ut05JudgmentClipboardWrites == 0 &&
+                Ut05JudgmentBrowserEffects == 0)) &&
+              (_trialId != "UT-06" ||
+               (intended == 2 &&
+                completed == 1 &&
+                serviceActionsIntended == 2 &&
+                serviceActionsExpectedToAck == 1 &&
+                _operatorSurface.RecoveryOpenCount == 1 &&
+                _operatorSurface.RecoveryDecisionCount == 1 &&
+                _operatorSurface.RecoveryReadyCount == 1 &&
+                _operatorSurface.RecoveryInstructionSteps <= 3 &&
+                _operatorSurface.RecoveryClipboardWrites == 0 &&
+                _operatorSurface.RecoveryBrowserEffects == 0 &&
+                _recoveryAuthority?.FreezeCount == 1 &&
+                _recoveryAuthority.ReconcileCount == 1 &&
+                _recoveryAuthority.AdvanceCount == 1 &&
+                _world.Sessions.Get("slot-1")?.Generation == 1 &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut06-pending-01" &&
+                    action.Status == SimActionStatus.Superseded &&
+                    action.ClaimCount == 1) &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut06-service-01" &&
+                    action.SessionGeneration == 1 &&
+                    action.Status == SimActionStatus.Completed))) &&
+              (_trialId != "UT-07" ||
+               (intended == 3 &&
+                completed == 1 &&
+                serviceActionsIntended == 3 &&
+                serviceActionsExpectedToAck == 1 &&
+                _operatorSurface.RecoveryOpenCount == 1 &&
+                _operatorSurface.RecoveryDecisionCount == 1 &&
+                _operatorSurface.RecoveryReadyCount == 1 &&
+                _operatorSurface.ManualAuthPrompts == 1 &&
+                _operatorSurface.RecoveryInstructionSteps <= 3 &&
+                _operatorSurface.RecoveryClipboardWrites == 0 &&
+                _operatorSurface.RecoveryBrowserEffects == 0 &&
+                _world.AuthAutomationCount == 0 &&
+                _recoveryAuthority?.FreezeCount == 1 &&
+                _recoveryAuthority.ReconcileCount == 1 &&
+                _recoveryAuthority.AdvanceCount == 2 &&
+                _world.Sessions.Get("slot-1")?.Generation == 1 &&
+                _world.Sessions.Get("slot-2")?.Generation == 1 &&
+                _world.Actions.Actions.Count(action =>
+                    action.ActionId.StartsWith(
+                        "ut07-pending-",
+                        StringComparison.Ordinal) &&
+                    action.Status == SimActionStatus.Superseded &&
+                    action.ClaimCount == 1) == 2 &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut07-service-01" &&
+                    action.WorkerSlotId == "slot-3" &&
+                    action.Status == SimActionStatus.Completed))) &&
+              (_trialId != "UT-08" ||
+               (intended == 2 &&
+                completed == 1 &&
+                serviceActionsIntended == 2 &&
+                serviceActionsExpectedToAck == 1 &&
+                _ut08RecoveryRehydrated &&
+                _operatorSurface.RecoveryOpenCount == 1 &&
+                _operatorSurface.RecoveryDecisionCount == 1 &&
+                _operatorSurface.RecoveryReadyCount == 1 &&
+                _operatorSurface.RecoveryInstructionSteps <= 3 &&
+                _operatorSurface.RecoveryClipboardWrites == 0 &&
+                _operatorSurface.RecoveryBrowserEffects == 0 &&
+                _recoveryAuthority?.FreezeCount == 1 &&
+                _recoveryAuthority.ReconcileCount == 1 &&
+                _recoveryAuthority.AdvanceCount == 1 &&
+                _world.Sessions.Get("slot-1")?.Generation == 3 &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut08-pending-01" &&
+                    action.Status == SimActionStatus.Superseded &&
+                    action.ClaimCount == 1) &&
+                _world.Actions.Actions.Any(action =>
+                    action.ActionId == "ut08-service-01" &&
+                    action.WorkerSlotId == "slot-2" &&
+                    action.Status == SimActionStatus.Completed))) &&
+              (_trialId != "UT-12" ||
+               (intended == 1 &&
+                serviceActionsIntended == 1 &&
+                NoActionPresses >= 1 &&
+                NoWorkMinimizeAttempts >= 1 &&
+                NoWorkMinimizeSuccesses >= 1 &&
+                Ut12BackgroundAcksApplied == 1 &&
+                Ut12NoWorkClipboardWrites == 0 &&
+                Ut12NoWorkBrowserEffects == 0 &&
+                Ut12BackgroundAckClipboardWrites == 0 &&
+                Ut12BackgroundAckBrowserEffects == 0 &&
+                _clipboard.WriteCount == 0 &&
+                _browser.EffectCount == 0)) &&
+              (_trialId != "UT-04" ||
+               (intended == 6 &&
+                serviceActionsIntended == 6 &&
+                Ut04BackgroundAcksApplied == 2 &&
+                MaxSentUnconfirmed >= 2 &&
+                MultipleSentUnconfirmedWithReadyObserved)) &&
+              (_trialId != "UT-03" ||
+               (intended == 6 &&
+                serviceActionsIntended == 6 &&
+                InterruptionPromptsIssued == 5)) &&
+              (_trialId != "UT-02" ||
+               (intended == 20 &&
+                localOnlyActionsIntended > 0 &&
+                distinctServiceWorkers >= 2));
+
+        Directory.CreateDirectory(
+            Path.GetDirectoryName(Path.GetFullPath(_resultPath))!);
+        File.WriteAllText(
+            _resultPath,
+            JsonSerializer.Serialize(
+                new
+                {
+                    schema_version = 1,
+                    stage = "impl_10_usability_trial_execution",
+                    evidence_class = "STAGE10_USABILITY_PARTIAL",
+                    trial_id = _trialId,
+                    result = objectivePass ? "OBJECTIVE_PASS" : "OBJECTIVE_FAIL",
+                    manual_observation_state = "PENDING_OPERATOR_COUNTS_AND_RATINGS",
+                    adapter_id = "FIREFOX_EXTENSION",
+                    adapter_version = "0.1.10-usability",
+                    configured_hotkey = ConfiguredHotkey,
+                    start_timestamp = _started,
+                    end_timestamp = DateTimeOffset.UtcNow,
+                    actions_intended = intended,
+                    actions_completed = completed,
+                    actions_terminal = terminal,
+                    service_actions_intended = serviceActionsIntended,
+                    service_actions_expected_durable_acks =
+                        serviceActionsExpectedToAck,
+                    local_only_actions_intended = localOnlyActionsIntended,
+                    distinct_service_workers = distinctServiceWorkers,
+                    valid_durable_acks = ValidDurableAcks,
+                    hotkey_presses = HotkeyPresses,
+                    no_action_presses = NoActionPresses,
+                    no_work_minimize_attempts = NoWorkMinimizeAttempts,
+                    no_work_minimize_successes = NoWorkMinimizeSuccesses,
+                    busy_presses = BusyPresses,
+                    handoff_blocked_presses = HandoffBlockedPresses,
+                    handoff_refocuses = HandoffRefocuses,
+                    safely_recovered_repeat_presses =
+                        BusyPresses + HandoffBlockedPresses,
+                    interruption_prompts_required =
+                        _trialId == "UT-03" ? 5 : 0,
+                    interruption_prompts_issued =
+                        InterruptionPromptsIssued,
+                    ut04_preexisting_sent_unconfirmed =
+                        _trialId == "UT-04" ? 2 : 0,
+                    ut04_background_acks_applied =
+                        Ut04BackgroundAcksApplied,
+                    ut05_judgment_gate_opens =
+                        Ut05JudgmentGateOpens,
+                    ut05_operator_surface_opens =
+                        _operatorSurface.JudgmentOpenCount,
+                    ut05_judgment_decisions =
+                        _operatorSurface.JudgmentDecisionCount,
+                    ut05_exact_gate_observed =
+                        _operatorSurface.ExactGateObserved,
+                    ut05_judgment_action_id =
+                        _operatorSurface.LastJudgmentActionId,
+                    ut05_judgment_clipboard_writes =
+                        Ut05JudgmentClipboardWrites,
+                    ut05_judgment_browser_effects =
+                        Ut05JudgmentBrowserEffects,
+                    ut12_no_work_observed =
+                        _ut12NoWorkObservedAt is not null,
+                    ut12_background_acks_applied =
+                        Ut12BackgroundAcksApplied,
+                    ut12_no_work_clipboard_writes =
+                        Ut12NoWorkClipboardWrites,
+                    ut12_no_work_browser_effects =
+                        Ut12NoWorkBrowserEffects,
+                    ut12_background_ack_clipboard_writes =
+                        Ut12BackgroundAckClipboardWrites,
+                    ut12_background_ack_browser_effects =
+                        Ut12BackgroundAckBrowserEffects,
+                    recovery_surface_opens =
+                        _operatorSurface.RecoveryOpenCount,
+                    recovery_decisions =
+                        _operatorSurface.RecoveryDecisionCount,
+                    recovery_ready_count =
+                        _operatorSurface.RecoveryReadyCount,
+                    recovery_instruction_steps =
+                        _operatorSurface.RecoveryInstructionSteps,
+                    recovery_manual_auth_prompts =
+                        _operatorSurface.ManualAuthPrompts,
+                    recovery_clipboard_writes =
+                        _operatorSurface.RecoveryClipboardWrites,
+                    recovery_browser_effects =
+                        _operatorSurface.RecoveryBrowserEffects,
+                    recovery_last_status =
+                        _operatorSurface.LastRecoveryStatus,
+                    recovery_last_id =
+                        _operatorSurface.LastRecoveryId,
+                    recovery_authority_freeze_count =
+                        _recoveryAuthority?.FreezeCount ?? 0,
+                    recovery_authority_reconcile_count =
+                        _recoveryAuthority?.ReconcileCount ?? 0,
+                    recovery_authority_generation_advances =
+                        _recoveryAuthority?.AdvanceCount ?? 0,
+                    ut08_recovery_rehydrated =
+                        _ut08RecoveryRehydrated,
+                    ut06_slot1_generation =
+                        _trialId == "UT-06"
+                            ? _world.Sessions.Get("slot-1")?.Generation
+                            : null,
+                    ut07_slot1_generation =
+                        _trialId == "UT-07"
+                            ? _world.Sessions.Get("slot-1")?.Generation
+                            : null,
+                    ut07_slot2_generation =
+                        _trialId == "UT-07"
+                            ? _world.Sessions.Get("slot-2")?.Generation
+                            : null,
+                    ut08_slot1_generation =
+                        _trialId == "UT-08"
+                            ? _world.Sessions.Get("slot-1")?.Generation
+                            : null,
+                    bridge_clipboard_writes =
+                        _clipboard.WriteCount,
+                    bridge_browser_effects =
+                        _browser.EffectCount,
+                    bridge_browser_focus_commands =
+                        _browser.FocusCount,
+                    native_foreground_attempts =
+                        NativeForegroundAttempts,
+                    native_foreground_successes =
+                        NativeForegroundSuccesses,
+                    max_sent_unconfirmed =
+                        MaxSentUnconfirmed,
+                    multiple_sent_unconfirmed_with_ready_observed =
+                        MultipleSentUnconfirmedWithReadyObserved,
+                    awaiting_human_submit =
+                        Volatile.Read(ref _awaitingHumanSubmit) != 0,
+                    wrong_worker_dispatches = WrongWorkerDispatches,
+                    wrong_packet_dispatches = WrongPacketDispatches,
+                    rejected_state_submissions = RejectedStateSubmissions,
+                    dispatch_failures = DispatchFailures,
+                    clipboard_failed_dispatches = ClipboardFailedDispatches,
+                    last_dispatch_outcome = LastDispatchOutcome,
+                    last_dispatch_error = LastDispatchError,
+                    trace_sha256 = _world.Trace.Sha256(),
+                    content_policy = "CONTENT_FREE"
+                },
+                new JsonSerializerOptions { WriteIndented = true }));
+
+        ExitCode = objectivePass ? 0 : 1;
+        ExitThread();
+    }
+
+    private void RefreshWorkloadPresentation()
+    {
+        var ready = _world.Actions.Actions.Count(action =>
+            action.Status == SimActionStatus.Queued &&
+            IsServiceAction(action));
+        var sentUnconfirmed = _world.Actions.Actions.Count(action =>
+            action.Status == SimActionStatus.AwaitingDurableAck);
+
+        _maxSentUnconfirmed = Math.Max(
+            _maxSentUnconfirmed,
+            sentUnconfirmed);
+        if (ready > 0 && sentUnconfirmed >= 2)
+        {
+            _multipleSentUnconfirmedWithReadyObserved = true;
+        }
+
+        var presentation = WorkloadStatusPresentation.Project(
+            _bridgeController.IsEnabled,
+            new WorkloadStatusSnapshot(ready, sentUnconfirmed),
+            ConfiguredHotkey);
+
+        _readyItem.Text = presentation.ReadyLabel;
+        _sentItem.Text = presentation.SentUnconfirmedLabel;
+        _notifyIcon.Text = presentation.Tooltip;
+
+        var nextIcon = WorkloadTrayIconFactory.Create(presentation);
+        var previous = _statusIcon;
+        _statusIcon = nextIcon;
+        _notifyIcon.Icon = nextIcon;
+        previous?.Dispose();
+    }
+
+    private static bool IsServiceAction(SimAction action) =>
+        action.ActionType is
+            "SERVICE_EXISTING" or
+            "CREATE_AND_SERVICE" or
+            "RESTORE_AND_SERVICE";
+
+    protected override void ExitThreadCore()
+    {
+        try
+        {
+            _bridgeController.SetEnabled(false);
+        }
+        catch
+        {
+        }
+
+        _hotkeyWindow.HotkeyPressed -= HotkeyPressed;
+        _timer.Dispose();
+        _notifyIcon.Visible = false;
+        _notifyIcon.Dispose();
+        _statusIcon?.Dispose();
+        _hotkeyWindow.Dispose();
+        base.ExitThreadCore();
+    }
+}
+
+internal sealed record UsabilitySubmissionRequest(
+    FakeWorkerSubmission Submission)
+{
+    public TaskCompletionSource<bool> Completion { get; } =
+        new(TaskCreationOptions.RunContinuationsAsynchronously);
+}
+
+
+internal sealed class UsabilityClipboardWriter : IClipboardWriter
+{
+    private readonly WinFormsClipboardWriter _inner = new();
+
+    public int WriteCount { get; private set; }
+
+    public void WriteText(string text)
+    {
+        _inner.WriteText(text);
+        WriteCount++;
+    }
+}
+
+internal sealed class UsabilityBrowserPort :
+    IBrowserPort,
+    IManagedBrowserInventory
+{
+    private readonly IpcBrowserPort _inner;
+
+    public UsabilityBrowserPort(IpcBrowserPort inner)
+    {
+        _inner = inner;
+    }
+
+    public int PrepareCount { get; private set; }
+    public int FocusCount { get; private set; }
+    public int CreateCount { get; private set; }
+    public int RestoreCount { get; private set; }
+    public int DiscardCount { get; private set; }
+    public int CloseCount { get; private set; }
+    public int InventoryCount { get; private set; }
+
+    public int EffectCount =>
+        PrepareCount +
+        FocusCount +
+        CreateCount +
+        RestoreCount +
+        DiscardCount +
+        CloseCount;
+
+    public async Task<BrowserResult> PrepareTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        PrepareCount++;
+        return await _inner.PrepareTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> FocusTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        FocusCount++;
+        return await _inner.FocusTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> CreateTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        CreateCount++;
+        return await _inner.CreateTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> RestoreTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        RestoreCount++;
+        return await _inner.RestoreTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> DiscardTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        DiscardCount++;
+        return await _inner.DiscardTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<BrowserResult> CloseTargetAsync(
+        BrowserTarget target,
+        CancellationToken cancellationToken)
+    {
+        CloseCount++;
+        return await _inner.CloseTargetAsync(target, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<BrowserInventoryEntry>> InventoryAsync(
+        CancellationToken cancellationToken = default)
+    {
+        InventoryCount++;
+        return await _inner.InventoryAsync(cancellationToken);
+    }
+}
+
+internal sealed class UsabilityOperatorSurface : IOperatorSurfacePort
+{
+    private readonly string _trialId;
+    private readonly SimulatorWorld _world;
+    private readonly RecoveryCoordinator? _recovery;
+    private readonly UsabilityClipboardWriter _clipboard;
+    private readonly UsabilityBrowserPort _browser;
+    private bool _recoveryResumeActionQueued;
+
+    public UsabilityOperatorSurface(
+        string trialId,
+        SimulatorWorld world,
+        RecoveryCoordinator? recovery,
+        UsabilityClipboardWriter clipboard,
+        UsabilityBrowserPort browser)
+    {
+        _trialId = trialId;
+        _world = world;
+        _recovery = recovery;
+        _clipboard = clipboard;
+        _browser = browser;
+    }
+
+    public int JudgmentOpenCount { get; private set; }
+    public int JudgmentDecisionCount { get; private set; }
+    public int RecoveryOpenCount { get; private set; }
+    public int RecoveryDecisionCount { get; private set; }
+    public int RecoveryReadyCount { get; private set; }
+    public int RecoveryInstructionSteps { get; private set; }
+    public int ManualAuthPrompts { get; private set; }
+    public int RecoveryClipboardWrites { get; private set; }
+    public int RecoveryBrowserEffects { get; private set; }
+    public bool ExactGateObserved { get; private set; }
+    public string? LastJudgmentActionId { get; private set; }
+    public string? LastRecoveryStatus { get; private set; }
+    public string? LastRecoveryId { get; private set; }
+
+    public Task OpenJudgmentAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var action = _world.Actions.Actions.SingleOrDefault(item =>
+            item.ActionType == "OPEN_JUDGMENT_GATE" &&
+            item.Status == SimActionStatus.ClaimedLocal);
+        if (action is null)
+        {
+            throw new InvalidOperationException(
+                "UT05_EXACT_JUDGMENT_GATE_NOT_FOUND");
+        }
+
+        JudgmentOpenCount++;
+        ExactGateObserved = true;
+        LastJudgmentActionId = action.ActionId;
+        Console.WriteLine(
+            $"STAGE10_JUDGMENT_OPENING action_id={action.ActionId}");
+
+        var decision = ShowOperatorDialog(
+            $"UT-05 judgment gate\n\nAction: {action.ActionId}\n\n" +
+            "Choose Yes to record the bounded simulator-authority judgment. " +
+            "No worker packet is serviced at this gate.",
+            "Workspace Worker Bridge - Judgment Gate",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button1);
+        Console.WriteLine(
+            $"STAGE10_JUDGMENT_DECISION result={decision}");
+
+        if (decision != DialogResult.Yes)
+        {
+            throw new InvalidOperationException(
+                "UT05_JUDGMENT_REJECTED_BY_OPERATOR");
+        }
+        if (action.Status != SimActionStatus.ClaimedLocal)
+        {
+            throw new InvalidOperationException(
+                "UT05_JUDGMENT_GATE_STATE_CHANGED");
+        }
+
+        JudgmentDecisionCount++;
+        _world.Trace.Record(
+            "usability_judgment_authority",
+            "JUDGMENT_DECISION_APPLIED",
+            action.ActionId,
+            action.WorkerSlotId,
+            action.SessionGeneration);
+        return Task.CompletedTask;
+    }
+
+    public async Task OpenRecoveryAsync(CancellationToken cancellationToken)
+    {
+        RecoveryOpenCount++;
+        if (_recovery is null)
+        {
+            return;
+        }
+
+        var clipboardBefore = _clipboard.WriteCount;
+        var browserEffectsBefore = _browser.EffectCount;
+        LastRecoveryId = _recovery.Current?.RecoveryId;
+
+        RecoveryInstructionSteps++;
+        ShowOperatorDialog(
+            RecoveryInstruction(),
+            "Workspace Worker Bridge - Recovery",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
+        RecoveryDecisionCount++;
+
+        RecoveryIncident result;
+        if (_trialId == "UT-07")
+        {
+            var waiting = await _recovery.ReconcileAsync(
+                cancellationToken);
+            LastRecoveryStatus = waiting.Status.ToString();
+            if (waiting.Status != RecoveryStatus.AwaitingManualAuth)
+            {
+                throw new InvalidOperationException(
+                    "UT07_EXPECTED_MANUAL_AUTH_BOUNDARY");
+            }
+
+            ManualAuthPrompts++;
+            RecoveryInstructionSteps++;
+            ShowOperatorDialog(
+                "UT-07 simulated profile-wide authentication boundary. " +
+                "Production recovery requires normal manual login here; " +
+                "this fake-worker trial performs no credential automation. " +
+                "Click OK to record that the operator returned from authentication.",
+                "Workspace Worker Bridge - Manual Auth Boundary",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            _world.ProveNoAuthAutomation();
+
+            result = await _recovery.MarkManualAuthReturnedAsync(
+                cancellationToken);
+        }
+        else
+        {
+            result = await _recovery.ReconcileAsync(
+                cancellationToken);
+        }
+
+        LastRecoveryStatus = result.Status.ToString();
+        if (result.Status != RecoveryStatus.ReadyToResume)
+        {
+            throw new InvalidOperationException(
+                "STAGE10_RECOVERY_NOT_READY_TO_RESUME");
+        }
+
+        RecoveryReadyCount++;
+        QueuePostRecoveryAction();
+        await _recovery.MarkHealthyAsync(cancellationToken);
+
+        RecoveryClipboardWrites +=
+            _clipboard.WriteCount - clipboardBefore;
+        RecoveryBrowserEffects +=
+            _browser.EffectCount - browserEffectsBefore;
+    }
+
+    private static DialogResult ShowOperatorDialog(
+        string text,
+        string caption,
+        MessageBoxButtons buttons,
+        MessageBoxIcon icon,
+        MessageBoxDefaultButton defaultButton = MessageBoxDefaultButton.Button1)
+    {
+        using var owner = new TopMostOperatorDialogOwner();
+        owner.Show();
+        owner.Activate();
+        try
+        {
+            return MessageBox.Show(
+                owner,
+                text,
+                caption,
+                buttons,
+                icon,
+                defaultButton);
+        }
+        finally
+        {
+            owner.Close();
+        }
+    }
+
+    private sealed class TopMostOperatorDialogOwner : Form
+    {
+        public TopMostOperatorDialogOwner()
+        {
+            TopMost = true;
+            ShowInTaskbar = false;
+            StartPosition = FormStartPosition.Manual;
+            FormBorderStyle = FormBorderStyle.None;
+            Size = new Size(1, 1);
+            Location = new Point(-32000, -32000);
+            Opacity = 0;
+        }
+
+        protected override bool ShowWithoutActivation => false;
+    }
+
+    private string RecoveryInstruction() =>
+        _trialId switch
+        {
+            "UT-06" =>
+                "UT-06 managed worker surface loss is fenced. " +
+                "Click OK to reconcile durable state and advance the lost " +
+                "session generation. Do not inspect or search Firefox tabs.",
+            "UT-07" =>
+                "UT-07 profile-wide auth refresh is fenced across two " +
+                "sent/unconfirmed sessions. Click OK to reconcile durable " +
+                "state. Do not inspect worker tabs or reconstruct state.",
+            "UT-08" =>
+                "UT-08 helper cold-restart incident was rehydrated from " +
+                "durable recovery state. Click OK to reconcile it. " +
+                "Do not inspect worker tabs or replay the old packet.",
+            _ =>
+                "Recovery is required. Click OK to reconcile durable state."
+        };
+
+    private void QueuePostRecoveryAction()
+    {
+        if (_recoveryResumeActionQueued)
+        {
+            return;
+        }
+
+        switch (_trialId)
+        {
+            case "UT-06":
+                _world.Queue(
+                    "ut06-service-01",
+                    "CREATE_AND_SERVICE",
+                    "slot-1",
+                    1);
+                break;
+            case "UT-07":
+                _world.Queue(
+                    "ut07-service-01",
+                    "SERVICE_EXISTING",
+                    "slot-3",
+                    0);
+                break;
+            case "UT-08":
+                _world.Queue(
+                    "ut08-service-01",
+                    "SERVICE_EXISTING",
+                    "slot-2",
+                    0);
+                break;
+        }
+
+        _recoveryResumeActionQueued = true;
+    }
+}

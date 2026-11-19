@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "stage": "impl_10_usability_trial_execution",
+  "trial_id": "UT-02",
+  "acceptance_state": "OBJECTIVE_PASS_MINIMIZE_ON_EMPTY_OPERATOR_CONFIRMED",
+  "provenance": {
+    "workflow_run_id": 43288769135,
+    "workflow_run_number": 237,
+    "job_id": 131431294172,
+    "source_sha": "acc61e9b5b9cdc50d6ff53538588e652c68c52c1",
+    "artifact_id": 13978146719
+  },
+  "structured_result": {
+    "evidence_class": "STAGE10_USABILITY_PARTIAL",
+    "result": "OBJECTIVE_PASS",
+    "adapter_id": "FIREFOX_EXTENSION",
+    "adapter_version": "0.1.10-usability",
+    "configured_hotkey": "Ctrl+Space",
+    "start_timestamp": "2026-11-12T19:24:49.718771+00:00",
+    "end_timestamp": "2026-11-12T19:45:33.6374148+00:00",
+    "actions_intended": 20,
+    "actions_completed": 20,
+    "service_actions_intended": 16,
+    "local_only_actions_intended": 4,
+    "distinct_service_workers": 6,
+    "valid_durable_acks": 16,
+    "hotkey_presses": 17,
+    "no_action_presses": 1,
+    "no_work_minimize_attempts": 1,
+    "no_work_minimize_successes": 1,
+    "busy_presses": 0,
+    "handoff_blocked_presses": 0,
+    "handoff_refocuses": 0,
+    "safely_recovered_repeat_presses": 0,
+    "awaiting_human_submit": false,
+    "wrong_worker_dispatches": 0,
+    "wrong_packet_dispatches": 0,
+    "rejected_state_submissions": 0,
+    "dispatch_failures": 0,
+    "clipboard_failed_dispatches": 0,
+    "last_dispatch_outcome": "NoAction",
+    "last_dispatch_error": null,
+    "trace_sha256": "70088c5390a2b634f8a56215f775bce78a0a3c3a8791ed8a1d8a35abbed2fcaa",
+    "content_policy": "CONTENT_FREE"
+  },
+  "operator_observation": {
+    "dedicated_workspaceworkers_window_disappeared_as_intended": true,
+    "behavior_is_minimize_not_terminate": true,
+    "operator_understood_minimize_semantics": true,
+    "overall_behavior_rating": "10/10"
+  },
+  "runner_topology": {
+    "runner_name": "workspace-operator-target",
+    "lifecycle": "PERSISTENT_INTERACTIVE_WINDOWS",
+    "re_register_after_job_completion": false
+  }
+}

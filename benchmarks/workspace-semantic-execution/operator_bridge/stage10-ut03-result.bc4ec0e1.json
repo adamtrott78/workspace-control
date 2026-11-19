@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "stage": "impl_10_usability_trial_execution",
+  "trial_id": "UT-03",
+  "acceptance_state": "OBJECTIVE_PASS_OPERATOR_REPORTED_WENT_WELL_SUBJECTIVE_DETAIL_PENDING",
+  "provenance": {
+    "workflow_run_id": 43296982057,
+    "workflow_run_number": 243,
+    "job_id": 131462981442,
+    "source_sha": "bc4ec0e1dad7a55148224ffd7ffaf6e246615fdc",
+    "artifact_id": 13981151249
+  },
+  "structured_result": {
+    "evidence_class": "STAGE10_USABILITY_PARTIAL",
+    "result": "OBJECTIVE_PASS",
+    "manual_observation_state": "PENDING_OPERATOR_COUNTS_AND_RATINGS",
+    "adapter_id": "FIREFOX_EXTENSION",
+    "adapter_version": "0.1.10-usability",
+    "configured_hotkey": "Ctrl+Space",
+    "start_timestamp": "2026-11-12T20:18:06.5153732+00:00",
+    "end_timestamp": "2026-11-12T20:18:35.3923487+00:00",
+    "actions_intended": 6,
+    "actions_completed": 6,
+    "service_actions_intended": 6,
+    "local_only_actions_intended": 0,
+    "distinct_service_workers": 3,
+    "valid_durable_acks": 6,
+    "hotkey_presses": 15,
+    "no_action_presses": 1,
+    "no_work_minimize_attempts": 1,
+    "no_work_minimize_successes": 1,
+    "busy_presses": 0,
+    "handoff_blocked_presses": 8,
+    "handoff_refocuses": 8,
+    "safely_recovered_repeat_presses": 8,
+    "interruption_prompts_required": 5,
+    "interruption_prompts_issued": 5,
+    "awaiting_human_submit": false,
+    "wrong_worker_dispatches": 0,
+    "wrong_packet_dispatches": 0,
+    "rejected_state_submissions": 0,
+    "dispatch_failures": 0,
+    "clipboard_failed_dispatches": 0,
+    "last_dispatch_outcome": "NoAction",
+    "last_dispatch_error": null,
+    "trace_sha256": "ccbfd2f8dff0f4881c89778ceac1cb267b4c6c4c0647c971945186766f2d0054",
+    "content_policy": "CONTENT_FREE"
+  },
+  "operator_observation": {
+    "summary": "went well",
+    "detailed_subjective_ratings_state": "PENDING_NOT_INFERRED"
+  }
+}
