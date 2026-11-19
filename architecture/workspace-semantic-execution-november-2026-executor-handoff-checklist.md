@@ -252,3 +252,10 @@
 - [x] Runtime-guard/build-cache executable source `a69bb92d…` passed Workspace #3048 / Semantic #348 / Operator #621.
 - [ ] CURRENT GATE: Windows-only smoke on exact `a69bb92d…`: run `wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a`, press Ctrl+Space once, verify clipboard `WORKSPACE_OPERATOR_SMOKE_PACKET_V1` and dedicated Firefox foreground.
 - [ ] Only after local smoke passes: review whether any additional foreground/clipboard fix is needed; do not create a real-account Stage-12 authority before that evidence.
+
+
+- [x] Windows-only smoke proved global Ctrl+Space capture and adapter connection; diagnostics showed browser preparation succeeded, then `CLIPBOARD_FAILED InvalidOperationException`; clipboard and foreground were therefore not reached.
+- [x] Clipboard source `05389919…` self-marshals non-STA writes onto STA and adds bounded clipboard-busy retry.
+- [x] Clipboard fix `05389919…` passed Workspace #3050 / Semantic #350 / Operator #623.
+- [ ] CURRENT GATE: rerun Windows-only smoke with clipboard-fixed source; one Ctrl+Space must set clipboard exactly `WORKSPACE_OPERATOR_SMOKE_PACKET_V1` and foreground the dedicated Firefox window.
+- [ ] If clipboard passes but foreground fails, isolate only the final focus/native-foreground layer; do not return to Linux/full Stage-12 setup.

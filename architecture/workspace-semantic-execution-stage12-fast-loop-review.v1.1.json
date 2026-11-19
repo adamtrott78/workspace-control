@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "VALIDATED_IMPLEMENTATION_AWAITING_WINDOWS_ONLY_SMOKE",
+  "status": "CLIPBOARD_FIX_VALIDATED_AWAITING_WINDOWS_ONLY_SMOKE_RETRY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -157,6 +157,35 @@
       "expected_clipboard": "WORKSPACE_OPERATOR_SMOKE_PACKET_V1",
       "expected_foreground": "dedicated Firefox window",
       "live_authority_required": false
+    },
+    "clipboard_failure_evidence": {
+      "observed_at": "2026-11-19",
+      "browser_adapter_connected": true,
+      "dispatch_outcome": "CLIPBOARD_FAILED",
+      "normalized_error": "InvalidOperationException",
+      "subsequent_outcomes": "NO_ACTION",
+      "browser_prepare_succeeded": true,
+      "clipboard_succeeded": false,
+      "browser_focus_attempted": false,
+      "native_foreground_attempted": false
+    },
+    "clipboard_fix": {
+      "source_head": "053899196fb06ae5248bec58a7ded813e6ae3d1c",
+      "source_path": "operator-bridge/src/WorkspaceOperator/Windows/Clipboard/WinFormsClipboardWriter.cs",
+      "source_blob": "58a010d9661327383348ee3bd3ab58e0a2400a80",
+      "behavior": [
+        "Write directly when already STA.",
+        "Otherwise synchronously marshal the clipboard write onto a short STA worker thread.",
+        "Retry transient ExternalException clipboard-busy failures up to five attempts with bounded backoff.",
+        "Propagate any remaining exception to the existing dispatch failure path."
+      ],
+      "validation": {
+        "workspace_control_run": 3050,
+        "semantic_execution_run": 350,
+        "operator_bridge_run": 623,
+        "result": "SUCCESS"
+      },
+      "live_retry_authorized": false
     }
   }
 }

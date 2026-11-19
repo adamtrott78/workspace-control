@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: a69bb92d99bffc4e6df05ed59809cbdddff61f0a
+- Remote checkpoint: 053899196fb06ae5248bec58a7ded813e6ae3d1c
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY FAST SMOKE GATE — runtime-guard/build-cache source a69bb92d… passed Workspace #3048 / Semantic #348 / Operator #621. The first eac272f9… smoke never launched because the obsolete existing-Firefox guard fired after build. That guard is removed, Test-Pid uses $ProcessId, and repeat runs cache the .NET build by operator-bridge/src tree. NEXT ACTION: operator runs `wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a`, then presses Ctrl+Space once. PASS requires clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1 and the dedicated Firefox window foregrounded. No Linux/Tailscale/PostgreSQL/live authority is involved.
+WINDOWS-ONLY FAST SMOKE RETRY — exact diagnostics from the first real hotkey smoke showed browser adapter connected and dispatch reached CLIPBOARD_FAILED with InvalidOperationException, proving browser preparation succeeded and focus was never attempted. WinFormsClipboardWriter source 05389919… now self-marshals writes onto an STA thread and retries transient clipboard-busy ExternalException. Source passed Workspace #3050 / Semantic #350 / Operator #623. NEXT ACTION: rerun Windows-only smoke on the current bookkeeping tip that contains this exact operator-bridge source; press Ctrl+Space once. Verify clipboard WORKSPACE_OPERATOR_SMOKE_PACKET_V1 and dedicated Firefox foreground. No Linux/live authority.
 
 ## Remaining work
 

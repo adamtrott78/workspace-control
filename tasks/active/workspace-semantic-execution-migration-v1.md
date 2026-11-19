@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: a69bb92d99bffc4e6df05ed59809cbdddff61f0a
+- Remote checkpoint: 053899196fb06ae5248bec58a7ded813e6ae3d1c
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 WINDOWS-ONLY FAST SMOKE GATE — executable source a69bb92d… is 3/3 green (#3048/#348/#621). Run `wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a` on Windows and press Ctrl+Space exactly once. PASS requires clipboard WORKSPACE_OPERATOR_SMOKE_PACKET_V1 plus dedicated Firefox OS foreground. This does not consume or create any real-account Stage-12 authority. Only after this local smoke passes may a future live retry review proceed.
+STAGE-12 V1.1 WINDOWS-ONLY FAST SMOKE RETRY — first hotkey smoke proved global Ctrl+Space registration and browser adapter connection/preparation, then failed exactly at clipboard write because WinFormsClipboardWriter required STA while async dispatch resumed non-STA. Source 05389919… fixes clipboard by synchronous STA marshaling + bounded clipboard-busy retry and is 3/3 green (#3050/#350/#623). NEXT ACTION: rerun Windows synthetic smoke only; expected Ctrl+Space -> clipboard packet -> browser focus/native foreground. No real-account Stage-12 authority exists.
 
 ## Remaining work
 
