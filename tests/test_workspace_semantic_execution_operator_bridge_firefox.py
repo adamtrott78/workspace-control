@@ -86,23 +86,33 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         self.assertIn("WORKSPACE_OPERATOR_SELF_TEST=PASS", text)
         self.assertIn('"self-test" { Invoke-SelfTest }', text)
 
-    def test_convenience_commands_are_current_user_profile_scoped(self):
+    def test_convenience_commands_use_existing_current_user_path_without_policy_mutation(self):
         text = COMMAND_INSTALLER.read_text(encoding="utf-8")
-        self.assertIn("$PROFILE.CurrentUserAllHosts", text)
-        self.assertIn("# BEGIN WORKSPACE OPERATOR COMMANDS V1", text)
-        self.assertIn("function global:wop-up", text)
-        self.assertIn("function global:wop-down", text)
-        self.assertIn("function global:wop-reset", text)
-        self.assertIn("function global:wop-status", text)
-        self.assertIn("function global:wop-self-test", text)
+        self.assertIn('Microsoft\\WindowsApps', text)
+        self.assertIn("Test-CommandDirectoryOnPath", text)
+        self.assertIn("WORKSPACE_OPERATOR_COMMAND_PATH=PASS", text)
+        self.assertIn("workspace-control-owned:wop-command-v2", text)
+        self.assertIn("workspace-control-owned:wop-driver-v2", text)
+        for command in (
+            "wop",
+            "wop-up",
+            "wop-down",
+            "wop-reset",
+            "wop-status",
+            "wop-self-test",
+        ):
+            self.assertIn(f'"{command}"', text)
         self.assertIn("DevCheckout", text)
         self.assertIn("workspace-operator-dev.ps1", text)
         self.assertIn("WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS", text)
+        self.assertIn("Remove-LegacyProfileBlock", text)
+        self.assertIn("# BEGIN WORKSPACE OPERATOR COMMANDS V1", text)
         self.assertNotIn("Set-ExecutionPolicy", text)
+        self.assertNotIn("[Environment]::SetEnvironmentVariable", text)
         self.assertNotIn("HKLM:", text)
         self.assertNotIn("Start-Service", text)
         self.assertNotIn("Register-ScheduledTask", text)
-        self.assertNotIn("[Environment]::SetEnvironmentVariable", text)
+        self.assertNotIn("Invoke-Expression", text)
 
     def test_dedicated_firefox_launchers_suppress_session_restore(self):
         dev = DEV_RUNTIME.read_text(encoding="utf-8")

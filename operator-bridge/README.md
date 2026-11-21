@@ -36,14 +36,18 @@ The dedicated GitHub Actions workflow performs the same checks on
 
 ## Per-user convenience commands
 
-The Windows development/operator lifecycle can be installed into the current
-user's PowerShell all-hosts profile without administrator rights:
+The Windows development/operator lifecycle can be exposed as persistent
+current-user commands without administrator rights or PowerShell profile
+execution. The installer places owned `.cmd` shims in
+`%LOCALAPPDATA%\Microsoft\WindowsApps` only when that exact directory already
+exists and is already present on the user's `PATH`; it never modifies `PATH`
+or execution policy.
 
 ```powershell
 & .\operator-bridge\tools\install-wop-commands.ps1
 ```
 
-The managed profile block defines:
+Installed commands:
 
 - `wop-up [sha]` — start the existing Workspace Operator dev lifecycle.
 - `wop-down` — stop only the recorded runtime-owned helper/Firefox tree.
@@ -51,9 +55,12 @@ The managed profile block defines:
 - `wop-status` — report current content-free runtime status.
 - `wop-self-test [sha]` — read-only verification of repository SHA, .NET 10,
   Node 24, Firefox availability, and current runtime health.
+- `wop <action> [sha]` — retain the general reviewed lifecycle entrypoint.
 
-The installer also persists the existing `wop <action> [sha]` wrapper. It edits
-only `$PROFILE.CurrentUserAllHosts` between an owned marker pair, does not
-change execution policy, PATH, services, scheduled tasks, machine-wide registry,
-browser profiles, credentials, or execution authority, and can be removed with
-`install-wop-commands.ps1 -Remove`.
+Each shim launches a fixed current-user driver with `-NoProfile` and a
+per-process `-ExecutionPolicy Bypass`; the installer never changes the user's
+persisted execution policy. It also removes the obsolete owned v1 profile block
+if a prior installation wrote one. It does not modify machine PATH, services,
+scheduled tasks, machine-wide registry, browser profiles, credentials, or
+execution authority. `install-wop-commands.ps1 -Remove` removes only files with
+the exact Workspace Control ownership markers.

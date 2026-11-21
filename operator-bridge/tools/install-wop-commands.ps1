@@ -1,60 +1,138 @@
-# Installs current-user PowerShell commands for the Workspace Operator dev lifecycle.
+# Installs current-user executable shims for the Workspace Operator dev lifecycle.
 [CmdletBinding()]
 param(
-  [string]$ProfilePath = $PROFILE.CurrentUserAllHosts,
   [switch]$Remove
 )
 
 $ErrorActionPreference = "Stop"
 
-$beginMarker = "# BEGIN WORKSPACE OPERATOR COMMANDS V1"
-$endMarker = "# END WORKSPACE OPERATOR COMMANDS V1"
+$legacyBegin = "# BEGIN WORKSPACE OPERATOR COMMANDS V1"
+$legacyEnd = "# END WORKSPACE OPERATOR COMMANDS V1"
+$shimMarker = "@rem workspace-control-owned:wop-command-v2"
+$driverMarker = "# workspace-control-owned:wop-driver-v2"
+$commandRoot = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Commands"
+$commandDirectory = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps"
+$driverPath = Join-Path $commandRoot "wop-driver.ps1"
+$legacyProfilePath = $PROFILE.CurrentUserAllHosts
+$commandNames = @(
+  "wop",
+  "wop-up",
+  "wop-down",
+  "wop-reset",
+  "wop-status",
+  "wop-self-test"
+)
 
-function Remove-ManagedBlock([string]$Content) {
-  if ([string]::IsNullOrEmpty($Content)) { return "" }
+function Remove-LegacyProfileBlock {
+  if (-not (Test-Path -LiteralPath $legacyProfilePath -PathType Leaf)) {
+    Write-Host "WORKSPACE_OPERATOR_LEGACY_PROFILE_BLOCK=ABSENT"
+    return
+  }
 
+  $content = Get-Content -LiteralPath $legacyProfilePath -Raw
   $pattern = "(?ms)^" +
-    [regex]::Escape($beginMarker) +
+    [regex]::Escape($legacyBegin) +
     "\r?\n.*?^" +
-    [regex]::Escape($endMarker) +
+    [regex]::Escape($legacyEnd) +
     "\r?\n?"
-  return [regex]::Replace($Content, $pattern, "")
+  $updated = [regex]::Replace($content, $pattern, "")
+
+  if ($updated -ne $content) {
+    Set-Content -LiteralPath $legacyProfilePath -Value $updated.TrimEnd() -Encoding UTF8
+    Write-Host "WORKSPACE_OPERATOR_LEGACY_PROFILE_BLOCK=REMOVED"
+  } else {
+    Write-Host "WORKSPACE_OPERATOR_LEGACY_PROFILE_BLOCK=ABSENT"
+  }
 }
 
-$existing = if (Test-Path -LiteralPath $ProfilePath -PathType Leaf) {
-  Get-Content -LiteralPath $ProfilePath -Raw
-} else {
-  ""
+function Test-CommandDirectoryOnPath {
+  $expected = [System.IO.Path]::GetFullPath($commandDirectory).TrimEnd("\")
+  foreach ($entry in ($env:PATH -split ";")) {
+    if ([string]::IsNullOrWhiteSpace($entry)) { continue }
+    try {
+      $expanded = [Environment]::ExpandEnvironmentVariables($entry)
+      $actual = [System.IO.Path]::GetFullPath($expanded).TrimEnd("\")
+      if ($actual.Equals(
+        $expected,
+        [System.StringComparison]::OrdinalIgnoreCase)) {
+        return $true
+      }
+    } catch {}
+  }
+  return $false
 }
-$withoutManagedBlock = Remove-ManagedBlock $existing
+
+function Assert-OwnedOrAbsent([string]$Path, [string]$ExpectedMarker) {
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return }
+  $firstLine = Get-Content -LiteralPath $Path -TotalCount 1
+  if ($firstLine -ne $ExpectedMarker) {
+    throw "WOP_COMMAND_PATH_COLLISION:$Path"
+  }
+}
+
+function Remove-OwnedFile([string]$Path, [string]$ExpectedMarker) {
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return }
+  Assert-OwnedOrAbsent $Path $ExpectedMarker
+  Remove-Item -LiteralPath $Path -Force
+}
+
+Remove-LegacyProfileBlock
+
+if (-not (Test-Path -LiteralPath $commandDirectory -PathType Container)) {
+  throw "WOP_WINDOWS_APPS_DIRECTORY_MISSING:$commandDirectory"
+}
+if (-not (Test-CommandDirectoryOnPath)) {
+  throw "WOP_WINDOWS_APPS_NOT_ON_PATH:$commandDirectory"
+}
 
 if ($Remove) {
-  $directory = Split-Path -Parent $ProfilePath
-  if (-not [string]::IsNullOrWhiteSpace($directory)) {
-    New-Item -ItemType Directory -Path $directory -Force | Out-Null
+  foreach ($name in $commandNames) {
+    Remove-OwnedFile (Join-Path $commandDirectory ($name + ".cmd")) $shimMarker
   }
-  Set-Content -LiteralPath $ProfilePath -Value $withoutManagedBlock.TrimEnd() -Encoding UTF8
+  Remove-OwnedFile $driverPath $driverMarker
+  if (Test-Path -LiteralPath $commandRoot -PathType Container) {
+    $remaining = @(Get-ChildItem -LiteralPath $commandRoot -Force -ErrorAction SilentlyContinue)
+    if ($remaining.Count -eq 0) {
+      Remove-Item -LiteralPath $commandRoot -Force
+    }
+  }
   Write-Host "WORKSPACE_OPERATOR_COMMANDS_REMOVED=PASS"
-  Write-Host ("PROFILE_PATH=" + $ProfilePath)
+  Write-Host ("COMMAND_DIRECTORY=" + $commandDirectory)
   return
 }
 
-$managedBlock = @'
-# BEGIN WORKSPACE OPERATOR COMMANDS V1
-function global:wop {
-  [CmdletBinding()]
-  param(
-    [ValidateSet("smoke","reset","restart","start","online","stop","offline","status","self-test")]
-    [string]$Action = "status",
-    [string]$Sha = ""
-  )
+$probe = Join-Path $commandDirectory ("wop-write-probe-" + [guid]::NewGuid().ToString("N") + ".tmp")
+try {
+  Set-Content -LiteralPath $probe -Value "probe" -Encoding ASCII
+} finally {
+  Remove-Item -LiteralPath $probe -Force -ErrorAction SilentlyContinue
+}
+Write-Host "WORKSPACE_OPERATOR_COMMAND_PATH=PASS"
 
+New-Item -ItemType Directory -Path $commandRoot -Force | Out-Null
+
+$driver = @'
+# workspace-control-owned:wop-driver-v2
+[CmdletBinding()]
+param(
+  [ValidateSet("smoke","reset","restart","start","online","stop","offline","status","self-test")]
+  [string]$Action = "status",
+  [string]$Sha = ""
+)
+
+$ErrorActionPreference = "Stop"
+
+try {
   $W = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\DevCheckout"
   if (-not (Test-Path -LiteralPath (Join-Path $W ".git") -PathType Container)) {
     throw "WOP_DEV_CHECKOUT_MISSING:$W"
   }
 
   if (-not [string]::IsNullOrWhiteSpace($Sha)) {
+    if ($Sha -notmatch "^[0-9a-fA-F]{40}$") {
+      throw "WOP_SHA_INVALID:$Sha"
+    }
+
     git -C $W fetch origin workspace-semantic-execution-migration-v1
     if ($LASTEXITCODE -ne 0) { throw "WOP_FETCH_FAILED" }
 
@@ -70,67 +148,64 @@ function global:wop {
     }
   }
 
-  $Script = Join-Path $W "operator-bridge\tools\workspace-operator-dev.ps1"
-  if (-not (Test-Path -LiteralPath $Script -PathType Leaf)) {
-    throw "WOP_SCRIPT_MISSING:$Script"
+  $script = Join-Path $W "operator-bridge\tools\workspace-operator-dev.ps1"
+  if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
+    throw "WOP_SCRIPT_MISSING:$script"
   }
 
-  $Engine = (Get-Process -Id $PID).Path
-  & $Engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $Script $Action -RepositoryRoot $W
-  if ($LASTEXITCODE -ne 0) {
-    throw "WOP_ACTION_FAILED:$Action:$LASTEXITCODE"
+  $engine = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
+  if (-not (Test-Path -LiteralPath $engine -PathType Leaf)) {
+    throw "WOP_POWERSHELL_ENGINE_MISSING:$engine"
   }
-}
 
-function global:wop-up {
-  [CmdletBinding()]
-  param([string]$Sha = "")
-  wop -Action start -Sha $Sha
+  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script $Action -RepositoryRoot $W
+  $exitCode = $LASTEXITCODE
+  if ($exitCode -ne 0) {
+    throw "WOP_ACTION_FAILED:${Action}:${exitCode}"
+  }
+  exit 0
+} catch {
+  Write-Error $_
+  exit 1
 }
-
-function global:wop-down {
-  [CmdletBinding()]
-  param()
-  wop -Action stop
-}
-
-function global:wop-reset {
-  [CmdletBinding()]
-  param([string]$Sha = "")
-  wop -Action reset -Sha $Sha
-}
-
-function global:wop-status {
-  [CmdletBinding()]
-  param()
-  wop -Action status
-}
-
-function global:wop-self-test {
-  [CmdletBinding()]
-  param([string]$Sha = "")
-  wop -Action self-test -Sha $Sha
-}
-# END WORKSPACE OPERATOR COMMANDS V1
 '@
 
-$directory = Split-Path -Parent $ProfilePath
-if (-not [string]::IsNullOrWhiteSpace($directory)) {
-  New-Item -ItemType Directory -Path $directory -Force | Out-Null
+$driverTemp = $driverPath + "." + [guid]::NewGuid().ToString("N") + ".tmp"
+Set-Content -LiteralPath $driverTemp -Value $driver -Encoding UTF8
+if (Test-Path -LiteralPath $driverPath -PathType Leaf) {
+  Assert-OwnedOrAbsent $driverPath $driverMarker
+}
+Move-Item -LiteralPath $driverTemp -Destination $driverPath -Force
+
+$shimActions = [ordered]@{
+  "wop" = ""
+  "wop-up" = "start"
+  "wop-down" = "stop"
+  "wop-reset" = "reset"
+  "wop-status" = "status"
+  "wop-self-test" = "self-test"
 }
 
-$prefix = $withoutManagedBlock.TrimEnd()
-$newContent = if ([string]::IsNullOrWhiteSpace($prefix)) {
-  $managedBlock + [Environment]::NewLine
-} else {
-  $prefix + [Environment]::NewLine + [Environment]::NewLine +
-    $managedBlock + [Environment]::NewLine
-}
-Set-Content -LiteralPath $ProfilePath -Value $newContent -Encoding UTF8
+foreach ($entry in $shimActions.GetEnumerator()) {
+  $path = Join-Path $commandDirectory ($entry.Key + ".cmd")
+  Assert-OwnedOrAbsent $path $shimMarker
 
-# Make the commands available in the current PowerShell process as well as future sessions.
-Invoke-Expression $managedBlock
+  $actionPrefix = if ([string]::IsNullOrWhiteSpace([string]$entry.Value)) {
+    ""
+  } else {
+    ([string]$entry.Value) + " "
+  }
+
+  $shim = @"
+$shimMarker
+@echo off
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -ExecutionPolicy Bypass -File "$driverPath" $actionPrefix%*
+exit /b %ERRORLEVEL%
+"@
+  Set-Content -LiteralPath $path -Value $shim -Encoding ASCII
+}
 
 Write-Host "WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS"
-Write-Host ("PROFILE_PATH=" + $ProfilePath)
+Write-Host ("COMMAND_DIRECTORY=" + $commandDirectory)
+Write-Host ("DRIVER_PATH=" + $driverPath)
 Write-Host "COMMANDS=wop,wop-up,wop-down,wop-reset,wop-status,wop-self-test"
