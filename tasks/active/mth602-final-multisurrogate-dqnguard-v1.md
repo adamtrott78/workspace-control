@@ -767,3 +767,36 @@ The dashboard is read-only, refreshes every second, uses root-local runner/proce
 7. Pair freeze requires validation macro-F1 >=0.95 and minimum known-class validation F1 >=0.90.
 8. Only after a pair freezes may its two standard-DQNGuard directional OSR evaluations run.
 9. Target-open results are exploratory H1 investment evidence only; they must never retroactively choose HPO settings.
+
+
+## H1 finalist OSR overlap — 2026-11-21
+
+Two finalist pairs are now frozen from **known-validation-only** evidence while PA2-PA3 t005 continues its deterministic epoch-0 replay:
+
+- **PA2-PA8 t007**: artifact `14719755202`; best epoch `18`; val macro-F1 `0.9876063834565111`; minimum known-class F1 `0.9811405985319028` (PA1); competence gate **PASS**; `target_test_consumed=false`.
+- **PA3-PA8 t001**: artifact `14717512029`; best epoch `5`; val macro-F1 `0.9749894729486733`; minimum known-class F1 `0.9619534355479841` (PA4); competence gate **PASS**; `target_test_consumed=false`.
+
+PADataset PR #37 remains frozen at exact head `ab87931408651b0b3516d910b13474822fb2a93d`; it has **not** advanced.
+
+A separate draft overlap candidate was created for pair-specific post-freeze directional OSR:
+
+- PADataset PR #38
+- branch: `mth602-h1-finalist-osr-overlap-v1`
+- exact head: `51ba24cf9a9a53234225fbbf6fa41e4073bdac8d`
+- diff: exactly the canonical matrix plus the four PA2/PA8 and PA3/PA8 directional request manifests
+- candidate-pytest receipt: `job-ce7c50ab-2c7a-4eb7-8070-d3e662e69efe`
+- validation: **20 passed**
+- accepted evaluator implementation files are exact blob matches to successful evaluator head `b141020bf7b171571879abdf18a836132e80d1d5`.
+
+Four GPU1 request comments were submitted exactly once on PR #38:
+
+- `7067493529`: PA2 <- PA8
+- `7067493896`: PA8 <- PA2
+- `7067494169`: PA3 <- PA8
+- `7067494602`: PA8 <- PA3
+
+Workflow-run IDs are not yet durably observed; do not infer admission until GitHub returns them.
+
+The scientific firewall remains strict: these target-open results may only apply the predeclared H1 exploratory investment gate. They must **never** influence PA2-PA3 replay acceptance, checkpoint choice, HPO settings, or retry decisions.
+
+Frozen baseline Unknown-F1 values for the investment comparison are PA2<-PA8 `0.801033`, PA8<-PA2 `0.757011`, PA3<-PA8 `0.054209`, and PA8<-PA3 `0.424513`. The gate remains mean two-direction ΔUnknown-F1 >= `+0.05`, neither direction regresses by more than `-0.02`, and the known-reject budget remains satisfied.
