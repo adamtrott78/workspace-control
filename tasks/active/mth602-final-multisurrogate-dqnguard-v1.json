@@ -2718,13 +2718,13 @@
     }
   },
   "h1_finalist_osr_overlap": {
-    "status": "ALL_THREE_FROZEN_PA2PA3_REBOUND_PENDING_VALIDATION",
+    "status": "ALL_THREE_FROZEN_TARGET_EVAL_ADAPTER_PENDING_VALIDATION",
     "scientific_role": "pair-specific H1 post-freeze standard-DQNGuard directional OSR investment gate",
     "pr37_frozen_head": "ab87931408651b0b3516d910b13474822fb2a93d",
     "pr37_head_advanced": false,
     "overlap_pr": 38,
     "overlap_branch": "mth602-h1-finalist-osr-overlap-v1",
-    "overlap_head": "9cc3179217b009db14d89a5a3f36f461ccce770e",
+    "overlap_head": "573be0e7281f18c42c5f0ec326e4090a52f80d93",
     "overlap_diff_scope": [
       "manifests/l2o_canonical_backbone_matrix_v1.json",
       "manifests/configs/l2o_directional_eval_v1/PA2-PA8__targetPA2__surPA8.json",
@@ -2910,6 +2910,16 @@
         "scientific-receipt.json",
         "nvidia-smi",
         "persistent operator-owned cache"
+      ]
+    },
+    "target_eval_adapter": {
+      "reason": "finalist configs correctly quarantine target during training with open_val_frac=0; post-freeze evaluator must reconstruct the frozen Track-A 15% target-open partition to materialize val_open/test_open",
+      "target_labels_used_for_fitting": false,
+      "target_labels_used_for_thresholding": false,
+      "mix_true_open": false,
+      "files": [
+        "experiments/l2o_directional_contract.py",
+        "tests/test_l2o_directional_contract.py"
       ]
     }
   }
