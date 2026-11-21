@@ -5,6 +5,7 @@
   const NATIVE_HOST_NAME = "com.workspacecontrol.operator_bridge";
   const MANAGED_TAB_VALUE = "workspaceControlOperatorBindingV1";
   const WORKER_START_URL = "https://chatgpt.com/?temporary-chat=true";
+  const LEGACY_DEV_WORKER_URL = "http://127.0.0.1:8765/fake-worker.html";
   const CHATGPT_ORIGIN = "https://chatgpt.com";
   const MAX_COMMAND_CACHE = 256;
 
@@ -426,17 +427,22 @@
         Number.isInteger(tab.id) &&
         tab.active === true &&
         tab.discarded !== true &&
-        (tab.url === "about:newtab" || tab.url === "about:blank")
+        (
+          tab.url === "about:newtab" ||
+          tab.url === "about:blank" ||
+          tab.url === LEGACY_DEV_WORKER_URL
+        )
       );
 
       if (candidates.length !== 1) {
         return false;
       }
 
+      const candidate = candidates[0];
       let stored;
       try {
         stored = await this.browser.sessions.getTabValue(
-          candidates[0].id,
+          candidate.id,
           MANAGED_TAB_VALUE);
       } catch {
         return false;
@@ -447,9 +453,35 @@
       }
 
       try {
-        await this.browser.tabs.update(candidates[0].id, {
+        await this.browser.tabs.update(candidate.id, {
           url: this.workerStartUrl
         });
+
+        if (
+          candidate.url === LEGACY_DEV_WORKER_URL &&
+          tabs.length === 2
+        ) {
+          const staleBlank = tabs.find(tab =>
+            tab.id !== candidate.id &&
+            Number.isInteger(tab.id) &&
+            tab.discarded !== true &&
+            (tab.url === "about:newtab" || tab.url === "about:blank")
+          );
+
+          if (staleBlank) {
+            let blankStored = null;
+            try {
+              blankStored = await this.browser.sessions.getTabValue(
+                staleBlank.id,
+                MANAGED_TAB_VALUE);
+            } catch {}
+
+            if (!sanitizedMetadata(blankStored)) {
+              await this.browser.tabs.remove(staleBlank.id).catch(() => {});
+            }
+          }
+        }
+
         return true;
       } catch {
         return false;

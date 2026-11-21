@@ -58,6 +58,15 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         self.assertNotIn("--start-url", dev)
         self.assertNotIn("--start-url", stage12)
 
+    def test_bootstrap_repair_is_exactly_scoped_to_legacy_fake_worker(self):
+        source = CORE.read_text(encoding="utf-8")
+        self.assertIn(
+            'const LEGACY_DEV_WORKER_URL = "http://127.0.0.1:8765/fake-worker.html";',
+            source,
+        )
+        self.assertIn("tab.url === LEGACY_DEV_WORKER_URL", source)
+        self.assertNotIn("startsWith(\"http://127.0.0.1:8765", source)
+
     def test_dev_runtime_prefers_graceful_managed_firefox_shutdown(self):
         text = DEV_RUNTIME.read_text(encoding="utf-8")
         self.assertIn("function Stop-ManagedFirefox", text)

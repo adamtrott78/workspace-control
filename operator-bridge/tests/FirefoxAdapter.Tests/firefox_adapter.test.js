@@ -180,6 +180,57 @@ test("initialize navigates exactly one active blank startup tab to temporary cha
   assert.equal(browser.tabValues.get(20), undefined);
 });
 
+test("initialize repairs exact legacy fake-worker residue without leaving the stale blank tab", async () => {
+  const browser = new MockBrowser([
+    { id: 22, url: "http://127.0.0.1:8765/fake-worker.html", active: true },
+    { id: 23, url: "about:newtab", active: false }
+  ]);
+  const adapter = new FirefoxAdapterCore(browser);
+
+  await adapter.initialize();
+
+  assert.equal(browser.tabsById.size, 1);
+  assert.equal(browser.tabsById.get(22).url, WORKER_START_URL);
+  assert.equal(browser.tabsById.has(23), false);
+  assert.deepEqual(
+    browser.calls.find(call =>
+      call[0] === "tabs.update" &&
+      call[1] === 22 &&
+      call[2]?.url === WORKER_START_URL),
+    ["tabs.update", 22, { url: WORKER_START_URL }]
+  );
+  assert.deepEqual(
+    browser.calls.find(call =>
+      call[0] === "tabs.remove" &&
+      call[1] === 23),
+    ["tabs.remove", 23]
+  );
+});
+
+test("initialize does not repair arbitrary localhost pages", async () => {
+  const browser = new MockBrowser([
+    { id: 24, url: "http://127.0.0.1:8765/not-the-legacy-worker.html", active: true },
+    { id: 25, url: "about:newtab", active: false }
+  ]);
+  const adapter = new FirefoxAdapterCore(browser);
+
+  await adapter.initialize();
+
+  assert.equal(
+    browser.tabsById.get(24).url,
+    "http://127.0.0.1:8765/not-the-legacy-worker.html"
+  );
+  assert.equal(browser.tabsById.has(25), true);
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.update").length,
+    0
+  );
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.remove").length,
+    0
+  );
+});
+
 test("initialize does not navigate arbitrary unmanaged tabs", async () => {
   const browser = new MockBrowser([
     { id: 21, url: "https://example.com/", active: true }
