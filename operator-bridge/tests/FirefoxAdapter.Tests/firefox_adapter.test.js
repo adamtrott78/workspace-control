@@ -157,11 +157,11 @@ test("unmanaged non-bootstrap ChatGPT tab is never adopted", async () => {
   const createCall = browser.calls.find(call => call[0] === "tabs.create");
   assert.deepEqual(createCall[1], {
     url: WORKER_START_URL,
-    active: false
+    active: true
   });
 });
 
-test("initialize navigates exactly one active blank startup tab to temporary chat", async () => {
+test("initialize leaves the visible startup blank untouched until operator dispatch", async () => {
   const browser = new MockBrowser([
     { id: 20, url: "about:newtab", active: true }
   ]);
@@ -169,114 +169,102 @@ test("initialize navigates exactly one active blank startup tab to temporary cha
 
   await adapter.initialize();
 
-  assert.equal(browser.tabsById.get(20).url, WORKER_START_URL);
-  assert.deepEqual(
-    browser.calls.find(call =>
-      call[0] === "tabs.update" &&
-      call[1] === 20 &&
-      call[2]?.url === WORKER_START_URL),
-    ["tabs.update", 20, { url: WORKER_START_URL }]
-  );
-  assert.equal(browser.tabValues.get(20), undefined);
-});
-
-test("initialize repairs exact legacy fake-worker residue without leaving the stale blank tab", async () => {
-  const browser = new MockBrowser([
-    { id: 22, url: "http://127.0.0.1:8765/fake-worker.html", active: true },
-    { id: 23, url: "about:newtab", active: false }
-  ]);
-  const adapter = new FirefoxAdapterCore(browser);
-
-  await adapter.initialize();
-
-  assert.equal(browser.tabsById.size, 1);
-  assert.equal(browser.tabsById.get(22).url, WORKER_START_URL);
-  assert.equal(browser.tabsById.has(23), false);
-  assert.deepEqual(
-    browser.calls.find(call =>
-      call[0] === "tabs.update" &&
-      call[1] === 22 &&
-      call[2]?.url === WORKER_START_URL),
-    ["tabs.update", 22, { url: WORKER_START_URL }]
-  );
-  assert.deepEqual(
-    browser.calls.find(call =>
-      call[0] === "tabs.remove" &&
-      call[1] === 23),
-    ["tabs.remove", 23]
-  );
-});
-
-test("initialize does not repair arbitrary localhost pages", async () => {
-  const browser = new MockBrowser([
-    { id: 24, url: "http://127.0.0.1:8765/not-the-legacy-worker.html", active: true },
-    { id: 25, url: "about:newtab", active: false }
-  ]);
-  const adapter = new FirefoxAdapterCore(browser);
-
-  await adapter.initialize();
-
-  assert.equal(
-    browser.tabsById.get(24).url,
-    "http://127.0.0.1:8765/not-the-legacy-worker.html"
-  );
-  assert.equal(browser.tabsById.has(25), true);
+  assert.equal(browser.tabsById.get(20).url, "about:newtab");
   assert.equal(
     browser.calls.filter(call => call[0] === "tabs.update").length,
     0
   );
-  assert.equal(
-    browser.calls.filter(call => call[0] === "tabs.remove").length,
-    0
-  );
-});
-
-test("initialize does not navigate arbitrary unmanaged tabs", async () => {
-  const browser = new MockBrowser([
-    { id: 21, url: "https://example.com/", active: true }
-  ]);
-  const adapter = new FirefoxAdapterCore(browser);
-
-  await adapter.initialize();
-
-  assert.equal(browser.tabsById.get(21).url, "https://example.com/");
-  assert.equal(
-    browser.calls.filter(call => call[0] === "tabs.update").length,
-    0
-  );
-});
-
-test("exact active temporary-chat bootstrap tab is adopted instead of duplicated", async () => {
-  const browser = new MockBrowser([
-    { id: 2, url: WORKER_START_URL, active: true }
-  ]);
-  const adapter = new FirefoxAdapterCore(browser, {
-    idFactory: () => "binding-bootstrap"
-  });
-
-  const result = await adapter.handleCommand(command(
-    "req-bootstrap",
-    "ENSURE_WORKER_SURFACE",
-    { worker_slot_id: "slot-bootstrap", session_generation: 1 }
-  ));
-
-  assert.equal(result.outcome, "APPLIED");
-  assert.equal(result.binding_ref, "binding-bootstrap");
-  assert.equal(browser.tabsById.size, 1);
   assert.equal(
     browser.calls.filter(call => call[0] === "tabs.create").length,
     0
   );
-  assert.deepEqual(
-    browser.tabValues.get(2).get(MANAGED_TAB_VALUE),
-    {
-      managed: true,
-      binding_ref: "binding-bootstrap",
-      binding_generation: 1,
-      worker_slot_id: "slot-bootstrap",
-      session_generation: 1
-    }
+});
+
+test("create opens and focuses fresh temporary chat then closes exact startup blank", async () => {
+  const browser = new MockBrowser([
+    { id: 22, url: "about:blank", active: true }
+  ]);
+  const adapter = new FirefoxAdapterCore(browser, {
+    idFactory: () => "binding-visual"
+  });
+
+  const result = await adapter.handleCommand(command(
+    "req-visual",
+    "CREATE_WORKER_BINDING",
+    { worker_slot_id: "slot-visual", session_generation: 1 }
+  ));
+
+  assert.equal(result.outcome, "APPLIED");
+  assert.equal(browser.tabsById.has(22), false);
+  assert.equal(browser.tabsById.size, 1);
+
+  const created = Array.from(browser.tabsById.values())[0];
+  assert.equal(created.url, WORKER_START_URL);
+  assert.equal(created.active, true);
+
+  const createIndex = browser.calls.findIndex(call =>
+    call[0] === "tabs.create" &&
+    call[1]?.url === WORKER_START_URL &&
+    call[1]?.active === true);
+  const focusIndex = browser.calls.findIndex(call =>
+    call[0] === "windows.update" &&
+    call[1] === created.windowId &&
+    call[2]?.focused === true);
+  const closeIndex = browser.calls.findIndex(call =>
+    call[0] === "tabs.remove" &&
+    call[1] === 22);
+
+  assert.ok(createIndex >= 0);
+  assert.ok(focusIndex > createIndex);
+  assert.ok(closeIndex > focusIndex);
+});
+
+test("create never closes an arbitrary unmanaged tab", async () => {
+  const browser = new MockBrowser([
+    { id: 24, url: "https://chatgpt.com/c/unmanaged", active: true }
+  ]);
+  const adapter = new FirefoxAdapterCore(browser, {
+    idFactory: () => "binding-safe-create"
+  });
+
+  const result = await adapter.handleCommand(command(
+    "req-safe-create",
+    "CREATE_WORKER_BINDING",
+    { worker_slot_id: "slot-safe", session_generation: 1 }
+  ));
+
+  assert.equal(result.outcome, "APPLIED");
+  assert.equal(browser.tabsById.has(24), true);
+  assert.equal(browser.tabsById.size, 2);
+  assert.equal(
+    browser.calls.filter(call =>
+      call[0] === "tabs.remove" && call[1] === 24).length,
+    0
   );
+});
+
+test("exact active temporary chat is not adopted as the new worker", async () => {
+  const browser = new MockBrowser([
+    { id: 2, url: WORKER_START_URL, active: true }
+  ]);
+  const adapter = new FirefoxAdapterCore(browser, {
+    idFactory: () => "binding-fresh"
+  });
+
+  const result = await adapter.handleCommand(command(
+    "req-fresh",
+    "CREATE_WORKER_BINDING",
+    { worker_slot_id: "slot-fresh", session_generation: 1 }
+  ));
+
+  assert.equal(result.outcome, "APPLIED");
+  assert.equal(result.binding_ref, "binding-fresh");
+  assert.equal(browser.tabsById.size, 2);
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.create").length,
+    1
+  );
+  assert.equal(browser.tabValues.get(2), undefined);
 });
 
 test("worker start URL is the requested temporary-chat route", () => {

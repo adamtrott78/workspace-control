@@ -5,7 +5,6 @@
   const NATIVE_HOST_NAME = "com.workspacecontrol.operator_bridge";
   const MANAGED_TAB_VALUE = "workspaceControlOperatorBindingV1";
   const WORKER_START_URL = "https://chatgpt.com/?temporary-chat=true";
-  const LEGACY_DEV_WORKER_URL = "http://127.0.0.1:8765/fake-worker.html";
   const CHATGPT_ORIGIN = "https://chatgpt.com";
   const MAX_COMMAND_CACHE = 256;
 
@@ -94,7 +93,6 @@
 
     async initialize() {
       await this.inventoryManagedBindings();
-      await this.prepareBootstrapSurface();
     }
 
     async handleCommand(message) {
@@ -227,12 +225,31 @@
           ? payload.expected_binding_generation + 1
           : 1;
 
-      const reusableBootstrapTab = await this.findReusableBootstrapTab();
-      const createdNewTab = reusableBootstrapTab === null;
-      const tab = reusableBootstrapTab || await this.browser.tabs.create({
+      const startupBlank = await this.findDisposableStartupBlankTab();
+      const tab = await this.browser.tabs.create({
         url: this.workerStartUrl,
-        active: false
+        active: true
       });
+
+      if (!Number.isInteger(tab.windowId)) {
+        await this.browser.tabs.remove(tab.id).catch(() => {});
+        return createResult(resultOperation, "UNKNOWN", {
+          normalized_error: "WINDOW_FOCUS_TARGET_UNAVAILABLE",
+          worker_slot_id: payload.worker_slot_id,
+          session_generation: payload.session_generation
+        });
+      }
+
+      try {
+        await this.browser.windows.update(tab.windowId, { focused: true });
+      } catch {
+        await this.browser.tabs.remove(tab.id).catch(() => {});
+        return createResult(resultOperation, "NOT_APPLIED", {
+          normalized_error: "WINDOW_FOCUS_FAILED",
+          worker_slot_id: payload.worker_slot_id,
+          session_generation: payload.session_generation
+        });
+      }
 
       const metadata = {
         managed: true,
@@ -248,14 +265,38 @@
           MANAGED_TAB_VALUE,
           metadata);
       } catch {
-        if (createdNewTab) {
-          await this.browser.tabs.remove(tab.id).catch(() => {});
-        }
+        await this.browser.tabs.remove(tab.id).catch(() => {});
         return createResult(resultOperation, "UNKNOWN", {
           normalized_error: "BINDING_METADATA_WRITE_FAILED",
           worker_slot_id: payload.worker_slot_id,
           session_generation: payload.session_generation
         });
+      }
+
+      if (startupBlank) {
+        try {
+          const currentBlank = await this.browser.tabs.get(startupBlank.id);
+          const stored = await this.browser.sessions.getTabValue(
+            startupBlank.id,
+            MANAGED_TAB_VALUE);
+          if (
+            !sanitizedMetadata(stored) &&
+            currentBlank.discarded !== true &&
+            (
+              currentBlank.url === "about:newtab" ||
+              currentBlank.url === "about:blank"
+            )
+          ) {
+            await this.browser.tabs.remove(startupBlank.id);
+          }
+        } catch {
+          await this.browser.tabs.remove(tab.id).catch(() => {});
+          return createResult(resultOperation, "UNKNOWN", {
+            normalized_error: "STARTUP_BLANK_CLOSE_FAILED",
+            worker_slot_id: payload.worker_slot_id,
+            session_generation: payload.session_generation
+          });
+        }
       }
 
       this.cacheBinding(tab.id, metadata);
@@ -416,79 +457,7 @@
       return match;
     }
 
-    async prepareBootstrapSurface() {
-      const managed = await this.collectManagedTabs();
-      if (managed.length > 0) {
-        return false;
-      }
-
-      const tabs = await this.browser.tabs.query({});
-      const candidates = tabs.filter(tab =>
-        Number.isInteger(tab.id) &&
-        tab.active === true &&
-        tab.discarded !== true &&
-        (
-          tab.url === "about:newtab" ||
-          tab.url === "about:blank" ||
-          tab.url === LEGACY_DEV_WORKER_URL
-        )
-      );
-
-      if (candidates.length !== 1) {
-        return false;
-      }
-
-      const candidate = candidates[0];
-      let stored;
-      try {
-        stored = await this.browser.sessions.getTabValue(
-          candidate.id,
-          MANAGED_TAB_VALUE);
-      } catch {
-        return false;
-      }
-
-      if (sanitizedMetadata(stored)) {
-        return false;
-      }
-
-      try {
-        await this.browser.tabs.update(candidate.id, {
-          url: this.workerStartUrl
-        });
-
-        if (
-          candidate.url === LEGACY_DEV_WORKER_URL &&
-          tabs.length === 2
-        ) {
-          const staleBlank = tabs.find(tab =>
-            tab.id !== candidate.id &&
-            Number.isInteger(tab.id) &&
-            tab.discarded !== true &&
-            (tab.url === "about:newtab" || tab.url === "about:blank")
-          );
-
-          if (staleBlank) {
-            let blankStored = null;
-            try {
-              blankStored = await this.browser.sessions.getTabValue(
-                staleBlank.id,
-                MANAGED_TAB_VALUE);
-            } catch {}
-
-            if (!sanitizedMetadata(blankStored)) {
-              await this.browser.tabs.remove(staleBlank.id).catch(() => {});
-            }
-          }
-        }
-
-        return true;
-      } catch {
-        return false;
-      }
-    }
-
-    async findReusableBootstrapTab() {
+    async findDisposableStartupBlankTab() {
       const tabs = await this.browser.tabs.query({});
       const candidates = [];
 
@@ -497,7 +466,7 @@
           !Number.isInteger(tab.id) ||
           tab.active !== true ||
           tab.discarded === true ||
-          tab.url !== this.workerStartUrl
+          (tab.url !== "about:newtab" && tab.url !== "about:blank")
         ) {
           continue;
         }
@@ -511,11 +480,9 @@
           continue;
         }
 
-        if (sanitizedMetadata(stored)) {
-          continue;
+        if (!sanitizedMetadata(stored)) {
+          candidates.push(tab);
         }
-
-        candidates.push(tab);
       }
 
       return candidates.length === 1 ? candidates[0] : null;

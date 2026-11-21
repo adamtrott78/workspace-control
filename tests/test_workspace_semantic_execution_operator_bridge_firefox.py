@@ -47,25 +47,19 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
             re.compile(r"url\s*:\s*payload\.", re.IGNORECASE),
         )
 
-    def test_bootstrap_navigation_is_adapter_owned_and_launchers_do_not_use_start_url(self):
+    def test_operator_dispatch_owns_new_tab_focus_and_blank_cleanup(self):
         source = CORE.read_text(encoding="utf-8")
         dev = DEV_RUNTIME.read_text(encoding="utf-8")
         stage12 = STAGE12.read_text(encoding="utf-8")
-        self.assertIn("await this.prepareBootstrapSurface()", source)
-        self.assertIn('tab.url === "about:newtab"', source)
-        self.assertIn('tab.url === "about:blank"', source)
+        self.assertNotIn("await this.prepareBootstrapSurface()", source)
+        self.assertIn("const startupBlank = await this.findDisposableStartupBlankTab()", source)
         self.assertIn("url: this.workerStartUrl", source)
+        self.assertIn("active: true", source)
+        self.assertIn("await this.browser.windows.update(tab.windowId, { focused: true })", source)
+        self.assertIn("await this.browser.tabs.remove(startupBlank.id)", source)
+        self.assertNotIn("LEGACY_DEV_WORKER_URL", source)
         self.assertNotIn("--start-url", dev)
         self.assertNotIn("--start-url", stage12)
-
-    def test_bootstrap_repair_is_exactly_scoped_to_legacy_fake_worker(self):
-        source = CORE.read_text(encoding="utf-8")
-        self.assertIn(
-            'const LEGACY_DEV_WORKER_URL = "http://127.0.0.1:8765/fake-worker.html";',
-            source,
-        )
-        self.assertIn("tab.url === LEGACY_DEV_WORKER_URL", source)
-        self.assertNotIn("startsWith(\"http://127.0.0.1:8765", source)
 
     def test_dedicated_firefox_launchers_suppress_session_restore(self):
         dev = DEV_RUNTIME.read_text(encoding="utf-8")
