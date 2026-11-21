@@ -10,7 +10,7 @@
 **Current live semantic-host status:** Workspace Shell multirepo activation ACCEPTED at runtime `54ac65cbcd4211554710b8f8f4231c6c9554e3cc`; semantic execution `7c20097c5f177f23c16a765b95ce94d7161f0d29` independently verified; evaluator isolation ACCEPTED; exact fake-worker private-route round trip accepted with restoration of the preexisting Jupyter Serve state.
 **Current Windows Operator front-end status:** **FUNCTIONALLY ACCEPTED.** On the validated `e1e4778a…` line the operator directly confirmed the complete manual loop: clean dedicated Firefox startup, Ctrl+Space opens/focuses a fresh Personalized Temporary Chat and closes the startup blank, clipboard staging works, a premature second Ctrl+Space alerts/refocuses and does not advance/minimize, plain Enter in the foreground prepared worker unlocks the loop, and the following no-work Ctrl+Space minimizes the dedicated Firefox window. Literal raw `@github` invocation in Personalized Temporary Chat is also empirically accepted. No automatic paste, typing, Enter, Send, DOM/page-content scraping, or credential automation was introduced.
 **Current next hard gate:** **decision gate before D4.** Functional front-end work no longer blocks system proving. No reusable Stage-12 live authority exists. If the operator chooses to proceed, freeze an updated bounded real-account Stage-12 review/procedure against the current validated front-end head, validate it 3/3, obtain fresh explicit one-shot authority, then execute D4. After D4, E1–E3 are the first true whole-system proving run: live mixed `research-iterate`, mixed executors, and forced worker/session/process-loss recovery.
-**Optional non-blocking front-end polish:** convenient aliases/shims `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` remain unimplemented. The existing `wop` dev lifecycle is sufficient for current smoke/proving work, so these aliases are not a D4/E1 blocker.
+**Required operator convenience layer:** source for persistent current-user commands `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` is validated at `3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da` (Workspace #3078 / Semantic #378 / Operator #651 PASS). Adam explicitly classified these commands as necessary before proceeding. One bounded Windows profile install/verification remains; it does not create live Stage-12 authority.
 **Stage-10 human status:** COMPLETE. UT-05, UT-06, UT-07, UT-08, UT-12, UT-11 and UT-09 ACCEPTED; final hotkey disposition is **RETAIN Ctrl+Space**.
 
 ## Fresh-chat recovery protocol
@@ -84,7 +84,12 @@
   - [x] Literal raw `@github` invocation works in Personalized Temporary Chat without Tab/click/autocomplete selection.
   - [x] Passive human-submit confirmation is fail-closed: before plain Enter is observed in the captured foreground worker Firefox window, another Ctrl+Space alerts/refocuses and cannot advance/minimize; after Enter, the next press resumes normal dispatch.
   - [x] Final durable implementation/bookkeeping head `e1e4778ad3583c817e25d0836964181b88cdd62a` passed Workspace #3075 / Semantic #375 / Operator #648, and the operator directly confirmed the complete sequence works.
-- [ ] **A7 — Optional convenience aliases only:** add `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` if desired. This is polish, not a blocker for D4 or E1–E3.
+- [ ] **A7 — Install and accept persistent per-user convenience commands before D4.**
+  - [x] Source `3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da` adds a current-user PowerShell all-hosts profile installer that persists the existing `wop` wrapper plus `wop-up`, `wop-down`, `wop-reset`, `wop-status`, and `wop-self-test`.
+  - [x] `wop-self-test` is read-only: repository SHA, .NET 10, Node 24, Firefox availability, and runtime health only; it does not launch Firefox or mutate bridge state.
+  - [x] Installer edits only its owned marker block in `$PROFILE.CurrentUserAllHosts`; no admin rights, machine PATH, execution-policy mutation, service, scheduled task, credential store, browser-profile mutation, or authority widening.
+  - [x] Exact-head validation: Workspace #3078 PASS; Semantic #378 PASS; Operator #651 PASS, including Windows PowerShell parse of the installer.
+  - [ ] **CURRENT GATE:** install the validated command block once on Adam's Windows machine, then require `wop-self-test` PASS and `wop-status` to execute from the same shell.
 
 ### B. Reasoning Economy — parallel, repository-safe lane
 
@@ -199,7 +204,7 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 - [x] Literal raw `@github` invocation accepted in Personalized Temporary Chat without plugin UI selection.
 - [x] Human-submit gate accepted: premature repeat Ctrl+Space before plain Enter alerts/refocuses and cannot advance/minimize; plain Enter while captured worker Firefox is foreground unlocks the next press; no-work then minimizes only the dedicated Firefox window.
 - [x] Final functional front-end state is durable at `e1e4778ad3583c817e25d0836964181b88cdd62a` with Workspace #3075 / Semantic #375 / Operator #648 PASS and direct operator acceptance.
-- [ ] Optional polish only: add `wop-up` / `wop-down` / `wop-reset` / `wop-status` / `wop-self-test` aliases if the operator wants them. Existing `wop` lifecycle commands are sufficient for current proving work.
+- [ ] Required operator UX gate: install the validated `3c606ac1…` current-user command block and verify `wop-self-test` + `wop-status`; Adam explicitly requires these aliases before D4.
 - [ ] **NEXT CRITICAL TEST IF CHOSEN — D4:** prepare a fresh, exact, single-attempt Stage-12 real-account calibration review/authority against the current front-end state; do not inherit or revive any consumed historical authority.
 - [ ] **THEN E1–E3:** run the live mixed Research Engine `research-iterate` workflow, deliberately inject one worker/session/process loss, recover from durable state without manual reconstruction, and capture live resource/soak evidence.
 - [ ] E4 economics remains dependent on calibrated allowance evidence; B4/Codex gates remain independent and must not be bypassed.
@@ -208,7 +213,7 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 ### Decision status
 
 **Functional front end: DONE.**  
-**Convenience aliases: OPTIONAL / NOT DONE.**  
+**Convenience aliases: SOURCE VALIDATED / WINDOWS INSTALL + ACCEPTANCE PENDING.**  
 **Whole-system real-account proof: NOT DONE.**  
 **No live Stage-12 authority currently exists.**  
 **Do not start D4/E1 automatically; operator requested this checklist reconciliation first and will choose the next step afterward.**

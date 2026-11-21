@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "FRONTEND_FAST_LOOP_ACCEPTED_AWAITING_NEXT_DECISION",
+  "status": "CONVENIENCE_COMMANDS_VALIDATED_AWAITING_WINDOWS_INSTALL",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -348,5 +348,27 @@
     "functional_frontend_complete": true,
     "optional_convenience_aliases_complete": false,
     "d4_real_account_calibration_complete": false
+  },
+  "convenience_commands": {
+    "source_head": "3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da",
+    "validation": {
+      "workspace_control_run": 3078,
+      "semantic_execution_run": 378,
+      "operator_bridge_run": 651,
+      "result": "SUCCESS"
+    },
+    "profile_scope": "$PROFILE.CurrentUserAllHosts",
+    "commands": [
+      "wop",
+      "wop-up",
+      "wop-down",
+      "wop-reset",
+      "wop-status",
+      "wop-self-test"
+    ],
+    "self_test": "read-only prerequisite/runtime health check",
+    "installer_path": "operator-bridge/tools/install-wop-commands.ps1",
+    "windows_install_accepted": false,
+    "live_authority_created": false
   }
 }

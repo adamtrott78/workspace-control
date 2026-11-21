@@ -24,24 +24,23 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: e1e4778ad3583c817e25d0836964181b88cdd62a
+- Remote checkpoint: 3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da
 - Remote verified: true
 
 ## Next safe action
 
-FUNCTIONAL WINDOWS FRONT END IS ACCEPTED. Do not redo local fast-loop/browser repairs. The operator directly confirmed the final e1e4778a… sequence: clean startup; first Ctrl+Space opens/focuses fresh Personalized Temporary Chat, closes startup blank and stages clipboard; premature repeat Ctrl+Space before Enter alerts/refocuses without advance/minimize; plain Enter in foreground prepared worker unlocks the next press; with no work, the following press minimizes the dedicated Firefox window. No live Stage-12 authority exists. Decision gate: either add optional lifecycle aliases (wop-up/down/reset/status/self-test) or, if the operator chooses system proving, freeze a fresh exact D4 Stage-12 review/procedure against current validated source and request new one-shot authority. Do not launch D4 automatically.
+WINDOWS OPERATOR-ONLY COMMAND INSTALL GATE. Convenience-command source 3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da is exact-head 3/3 green (#3078/#378/#651), and Adam requires it before D4. Use the existing session wop wrapper only to check out that exact SHA, then invoke operator-bridge/tools/install-wop-commands.ps1 directly in the current PowerShell so the global commands are available immediately and persist through $PROFILE.CurrentUserAllHosts. Verify WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS, then wop-self-test must print WORKSPACE_OPERATOR_SELF_TEST=PASS and wop-status must execute. No live Stage-12 authority exists and no D4 run is authorized by this install.
 
 ## Remaining work
 
-- Optional non-blocking convenience aliases: wop-up / wop-down / wop-reset / wop-status / wop-self-test.
-- If selected by the operator, prepare a fresh bounded real-account Stage-12 review/procedure against current validated front-end state; validate 3/3 and obtain explicit one-shot authority before execution.
-- After D4 passes, participate in the integrated E1–E3 live research-iterate + forced-loss + resource/soak proving sequence.
-- Preserve no-auto-typing/paste/Enter/Send, no DOM/page-content scraping, no credential automation, no authority widening.
+- Install/accept the validated current-user convenience commands on Adam's Windows machine: wop-up, wop-down, wop-reset, wop-status, wop-self-test.
+- After alias acceptance, if Adam chooses D4, freeze a fresh bounded real-account Stage-12 review/procedure against the current validated front-end/command state, validate 3/3, and obtain explicit one-shot authority before execution.
+- After D4 passes, participate in E1–E3 using Research Engine research-iterate: live mixed executors, forced worker/session/process loss, durable recovery, and resource/soak evidence.
 
 ## Blockers / gates
 
-- LIVE STAGE-12 AUTHORITY: functional Windows front end is accepted, but no reusable real-account Stage-12 authority exists. Any D4 run requires a fresh exact review/procedure, 3/3 validation and explicit operator approval.
-- OPTIONAL UX POLISH is not a blocker: convenience alias commands remain unimplemented.
+- WINDOWS USER-PROFILE INSTALL: connected repository/Linux tools cannot mutate Adam's local PowerShell profile. One explicit operator command is required to install and immediately load the validated convenience block.
+- LIVE STAGE-12 AUTHORITY: no reusable real-account Stage-12 authority exists; alias installation does not create authority.
 
 ## Fresh-chat initialization
 

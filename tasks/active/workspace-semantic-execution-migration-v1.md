@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: e1e4778ad3583c817e25d0836964181b88cdd62a
+- Remote checkpoint: 3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-CHECKLIST RECONCILIATION / DECISION GATE. Functional Windows front end is accepted at e1e4778ad3583c817e25d0836964181b88cdd62a after direct operator observation; do not redo the fast-loop repair chain. No reusable Stage-12 live authority exists. If the operator chooses to test the system in action, the next critical path is D4: freeze a fresh bounded real-account Stage-12 review/procedure against current validated source, validate 3/3, obtain explicit one-shot approval, then execute one calibration. After D4, proceed to E1–E3 live mixed research-iterate + forced worker/session/process loss + resource/soak evidence. Optional wop-up/down/reset/status/self-test aliases are polish only and do not block D4/E1. Do not launch anything until the operator chooses.
+A7 WINDOWS COMMAND INSTALL GATE BEFORE D4. Source 3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da for persistent wop-up/down/reset/status/self-test is exact-head 3/3 green (#3078/#378/#651). Adam explicitly requires these aliases before proceeding. One operator-only Windows profile install/verification remains because connected tools cannot mutate his local PowerShell profile. After A7 acceptance, explain/freeze D4 only if Adam chooses: fresh exact Stage-12 review/procedure, 3/3 validation, explicit single-attempt authority, then bounded real-account calibration. Research Engine research-iterate remains the agreed E1–E3 whole-system proving workload after D4.
 
 ## Remaining work
 
@@ -84,13 +84,14 @@ CHECKLIST RECONCILIATION / DECISION GATE. Functional Windows front end is accept
 
 ## Blockers / gates
 
+- WINDOWS CONVENIENCE COMMAND ACCEPTANCE: validated source exists, but Adam's local current-user PowerShell profile must be updated and wop-self-test/wop-status observed before proceeding because he explicitly requires these aliases.
 - v0.9 authority is consumed/non-reusable.
 - v1.0 foreground repair source 1ecc094a… is 3/3 validated (#3030/#330/#603).
 - v1.0 review-state ecdc71c8… is 3/3 validated (#3031/#331/#604).
 - v1.0 validation-state persistence bd366f93… is 3/3 validated (#3032/#332/#605).
 - Final bookkeeping head 7b5b7bc2… is 3/3 validated (#3033/#333/#606).
 - Stage-12 v1.0 authority is consumed/non-reusable after Q1 BRIDGE_DISABLED_HOTKEY_UNREGISTERED failure; no candidate was published and candidate branch remained at 0bc1bc0e….
-- No reusable live Stage-12 authority exists. Functional Windows front end is accepted, but D4 requires a fresh exact review/procedure, 3/3 validation and explicit one-shot operator approval. Do not infer authority from successful local smoke.
+- No reusable live Stage-12 authority exists. D4 still requires a fresh exact review/procedure, 3/3 validation and explicit one-shot approval after A7.
 
 ## Fresh-chat initialization
 
