@@ -23,7 +23,9 @@ class PADatasetScientificWorkflowRefreshV2Tests(unittest.TestCase):
 
     def test_operator_launcher_is_exact_and_non_generic(self):
         for marker in (
-            'EXPECTED_SOURCE_HEAD = "613c0cc8295a521396e794af9f221ff7665e3275"',
+            'p.add_argument("--expected-head", required=True)',
+            '"source_head": args.expected_head',
+            '"--expected-head", args.expected_head',
             'EXPECTED_PAD_MAIN = "34e150ae4fe349889a054aa2c12d33393cf64f66"',
             'EXPECTED_WORKFLOW_BLOB = "bca2eabe3afe70ec3115391e5a6c24daefd1498b"',
             'EXPECTED_CONFIRM = "MERGE_PR39_AND_ACTIVATE_GPU0_L2O"',
