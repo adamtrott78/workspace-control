@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: b749417849914c395bef5ac267b3c385edbdff04
+- Remote checkpoint: aa44c9a844eb5927565e1911e96155dfb0f68207
 - Remote verified: true
 
 ### PADataset
@@ -70,14 +70,14 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 WINDOWS FAST-LOOP RESIDUE-DEFER GATE — source b7494178… is 3/3 green (#3063/#363/#636). Second recovery smoke proved exact runtime process cleanup PASS but old run-ee58… deletion still failed, so the remaining failure is non-authoritative filesystem residue after owned processes are dead. New harness journals/defer-cleans that residue, clears old state, and continues with a fresh GUID runtime. NEXT ACTION: Windows-only wop smoke on current bookkeeping tip with no manual cleanup; verify deferred residue markers, successful persistent Temporary Chat launch, retained auth, same-tab Ctrl+Space, clipboard packet, and foreground. Raw @github invocation is already proven. No new live Stage-12 authority exists.
+STAGE-12 V1.1 WINDOWS FAST-LOOP STALE-BOOTSTRAP GATE — repair aa44c9a844eb5927565e1911e96155dfb0f68207 is exact-head 3/3 green (#3065/#365/#638). The prior smoke on 288c33fd… proved runtime-owned process cleanup PASS, deferred verified-dead run-ee58… residue, DEV_OFFLINE PASS, fresh runtime startup and hotkey registration, then exposed a distinct persistent-profile regression: Firefox restored the exact legacy simulator URL http://127.0.0.1:8765/fake-worker.html plus a blank tab. aa44c9a… narrowly repairs only that exact legacy bootstrap residue to the fixed Temporary Chat URL and removes the one stale blank tab in the exact two-tab residue shape. NEXT ACTION: Windows-only wop smoke on the current bookkeeping tip with no manual Firefox cleanup; require Temporary Chat, no stray blank/duplicate tab, retained auth or at most one login, same-tab Ctrl+Space, clipboard packet and native foreground. Raw @github invocation is already proven. No new live Stage-12 authority exists.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: v1.0 is consumed/non-reusable. Q1 root cause is bridge disabled at startup, leaving Ctrl+Space unregistered and preventing dispatch. Implement and validate the Windows-only v1.1 fast smoke/lifecycle path before any further real-account Stage-12 attempt.
-- REAL-ACCOUNT CALIBRATION: blocked until v1.1 Windows-only smoke proves startup hotkey registration, clipboard packet write, Firefox focus, and native foreground locally. Do not spend another live Stage-12 attempt on Windows interaction debugging.
+- LIVE INSTANT: v1.0 is consumed/non-reusable. The v1.1 local path now has verified-dead residue recovery plus exact legacy fake-worker bootstrap repair validated at aa44c9a…. Complete the Windows-only smoke gate before any further real-account Stage-12 attempt.
+- REAL-ACCOUNT CALIBRATION: blocked until the rerun Windows-only smoke proves Temporary Chat startup from the persistent profile with no stale fake-worker/blank duplicate, then proves Ctrl+Space packet write, Firefox focus and native foreground. Do not spend another live Stage-12 attempt on local Windows interaction debugging.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
 - PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
@@ -90,7 +90,7 @@ STAGE-12 V1.1 WINDOWS FAST-LOOP RESIDUE-DEFER GATE — source b7494178… is 3/3
 - v1.0 validation-state persistence bd366f93… is 3/3 validated (#3032/#332/#605).
 - Final bookkeeping head 7b5b7bc2… is 3/3 validated (#3033/#333/#606).
 - Stage-12 v1.0 authority is consumed/non-reusable after Q1 BRIDGE_DISABLED_HOTKEY_UNREGISTERED failure; no candidate was published and candidate branch remained at 0bc1bc0e….
-- No new live Stage-12 authority exists. Windows-only local smoke must pass after v1.1 implementation is exact-head validated.
+- No new live Stage-12 authority exists. Repair aa44c9a… is exact-head 3/3 validated, but the Windows-only smoke must now prove the persistent profile recovers from the legacy fake-worker residue into Personalized Temporary Chat with no stray blank/duplicate tab and still passes Ctrl+Space clipboard + foreground.
 
 ## Fresh-chat initialization
 

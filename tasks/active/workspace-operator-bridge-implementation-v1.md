@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: b749417849914c395bef5ac267b3c385edbdff04
+- Remote checkpoint: aa44c9a844eb5927565e1911e96155dfb0f68207
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY RESIDUE-DEFER RECOVERY SMOKE — source b7494178… passed Workspace #3063 / Semantic #363 / Operator #636. The retry on bookkeeping tip d9e3bee1… proved runtime-owned process cleanup with WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS, but the old run-ee58… directory still could not be deleted and teardown stopped at DEV_RUNTIME_CLEANUP_FAILED. This proves the remaining blocker is filesystem residue after owned processes are dead. b7494178… journals an undeletable verified-dead workdir to cleanup-residue.jsonl, clears old state/registry binding, emits WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=DEFERRED, and continues startup with a fresh GUID runtime. NEXT ACTION: run wop smoke on the current bookkeeping tip; no manual cleanup first. Verify stale residue is deferred rather than fatal, then persistent Temporary Chat/login + Ctrl+Space/clipboard/focus still pass.
+WINDOWS-ONLY STALE-BOOTSTRAP RECOVERY SMOKE — repair aa44c9a844eb5927565e1911e96155dfb0f68207 passed Workspace #3065 / Semantic #365 / Operator #638. The previous smoke already proved verified-dead workdir residue can be deferred and fresh runtime startup succeeds, but the persistent Firefox profile restored the exact legacy simulator URL http://127.0.0.1:8765/fake-worker.html plus one blank tab. aa44c9a… narrowly repairs only that exact legacy bootstrap residue to https://chatgpt.com/?temporary-chat=true and removes the one stale blank tab in the exact two-tab residue shape; arbitrary localhost/unmanaged tabs remain untouched. NEXT ACTION: run wop smoke on the current bookkeeping tip with no manual Firefox cleanup. Require no Troubleshoot Mode prompt, Temporary Chat startup, retained auth or at most one login, no stray blank/duplicate worker tab, one Ctrl+Space on that same Temporary Chat, clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1, and managed Firefox foreground. Do not create or infer live Stage-12 authority from this local smoke.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ WINDOWS-ONLY RESIDUE-DEFER RECOVERY SMOKE — source b7494178… passed Workspac
 ## Blockers / gates
 
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
-- Real-account Stage-12 retry is paused until the Windows-only fast smoke proves global Ctrl+Space registration, clipboard replacement, Firefox focus, and native foreground behavior. No new live retry authority exists.
+- Real-account Stage-12 retry remains paused. Repair aa44c9a… is 3/3 validated, but the operator must rerun the Windows-only fast smoke and prove the persistent Firefox profile now lands on Personalized Temporary Chat with no stale fake-worker/blank duplicate, then prove Ctrl+Space clipboard replacement and native foreground. No new live retry authority exists.
 
 ## Fresh-chat initialization
 
