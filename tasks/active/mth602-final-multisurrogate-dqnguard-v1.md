@@ -800,3 +800,20 @@ Workflow-run IDs are not yet durably observed; do not infer admission until GitH
 The scientific firewall remains strict: these target-open results may only apply the predeclared H1 exploratory investment gate. They must **never** influence PA2-PA3 replay acceptance, checkpoint choice, HPO settings, or retry decisions.
 
 Frozen baseline Unknown-F1 values for the investment comparison are PA2<-PA8 `0.801033`, PA8<-PA2 `0.757011`, PA3<-PA8 `0.054209`, and PA8<-PA3 `0.424513`. The gate remains mean two-direction ΔUnknown-F1 >= `+0.05`, neither direction regresses by more than `-0.02`, and the known-reject budget remains satisfied.
+
+
+### H1 OSR overlap compatibility repair + corrected admissions
+
+The first two PR #38 GPU1 attempts reached the evaluator but failed deterministically **before DQN fitting and before any OSR result metrics** because the finalist-derived target-quarantine config had `open_val_frac=0` and PR #38 had omitted the already-proven Track-A surrogate-calibration adapter.
+
+PR #38 was repaired by restoring the exact accepted `experiments/l2o_directional_contract.py` blob `6c3218cc068e4e994209408560888064d1796f19` from successful evaluator head `b141020bf7b171571879abdf18a836132e80d1d5`. The adapter keeps the true target quarantined while deriving surrogate calibration with `open_val_frac=0.15`, balanced/required surrogate `val_open` semantics. New exact PR #38 head: `d7ba2c754d7d281651f4119ba79544ec6f6e89f6`.
+
+Focused candidate validation receipt `job-145dc8ac-fc63-4566-8b1d-17c6a9704ab6`: **26 passed**.
+
+Corrected GPU1 runs:
+- PA2 <- PA8: `44939698874 / 136953961053`
+- PA8 <- PA2: `44939701110 / 136953968815`
+- PA3 <- PA8: `44939702954 / 136953974301`
+- PA8 <- PA3: `44939705618 / 136953982458`
+
+Obsolete pre-repair runs `44937283229` and `44937285567` are deterministic pre-DQN compatibility failures and must not count as scientific evidence. Old-head queued runs `44937287676` and `44937290780` are stale-head non-evidence. PR #37 remains frozen at `ab87931408651b0b3516d910b13474822fb2a93d`.
