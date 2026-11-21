@@ -112,6 +112,19 @@ PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT = (
     / "workflow-refresh"
     / "active.json"
 )
+
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_BLOB = (
+    "bca2eabe3afe70ec3115391e5a6c24daefd1498b"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_PAD_MAIN = (
+    "34e150ae4fe349889a054aa2c12d33393cf64f66"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "workflow-refresh-v2"
+    / "active.json"
+)
 PADATASET_SCIENTIFIC_OVERRIDE_DESTINATIONS = {
     str(V3_CONFIG_ROOT / "root-policy.json"),
     str(V3_CONFIG_ROOT / "executor-actions.json"),
@@ -572,6 +585,60 @@ def _padataset_scientific_workflow_refresh(
         if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
             raise ReconcileError(
                 f"PADataset scientific workflow refresh {key} invalid"
+            )
+    return refresh
+
+
+def _padataset_scientific_workflow_refresh_v2(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset scientific workflow refresh v2 requires v1 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT,
+        "active PADataset scientific workflow refresh v2",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh v2 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset scientific workflow refresh v2",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh v2 {key} invalid"
             )
     return refresh
 
@@ -1857,6 +1924,18 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_override is not None
         else None
     )
+    scientific_workflow_refresh_v2 = (
+        _padataset_scientific_workflow_refresh_v2(
+            scientific_workflow_refresh
+        )
+        if scientific_override is not None
+        else None
+    )
+    scientific_workflow_effective_refresh = (
+        scientific_workflow_refresh_v2
+        if scientific_workflow_refresh_v2 is not None
+        else scientific_workflow_refresh
+    )
     scientific_dual_lane = (
         _padataset_scientific_dual_lane_override(
             scientific_override,
@@ -2200,14 +2279,14 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_dual_lane is not None:
             _verify_padataset_scientific_dual_lane_effective_state(
                 scientific_override,
-                scientific_workflow_refresh,
+                scientific_workflow_effective_refresh,
                 scientific_dual_lane,
                 scientific_dual_effective_refresh,
             )
         else:
             _verify_padataset_scientific_effective_state(
                 scientific_override,
-                scientific_workflow_refresh,
+                scientific_workflow_effective_refresh,
             )
 
 
