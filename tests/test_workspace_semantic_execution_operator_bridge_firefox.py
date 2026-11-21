@@ -65,6 +65,20 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         self.assertIn("WORKSPACE_OPERATOR_FIREFOX_SHUTDOWN=GRACEFUL", text)
         self.assertIn("WORKSPACE_OPERATOR_FIREFOX_SHUTDOWN=FORCED_FALLBACK", text)
 
+    def test_dev_runtime_owns_exact_process_tree_before_workdir_removal(self):
+        text = DEV_RUNTIME.read_text(encoding="utf-8")
+        self.assertIn("function Get-RuntimeOwnedProcesses", text)
+        self.assertIn("function Stop-RuntimeOwnedProcesses", text)
+        self.assertIn("ParentProcessId", text)
+        self.assertIn("State.work_dir", text)
+        self.assertIn("State.helper_path", text)
+        self.assertIn("WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS", text)
+        self.assertIn("DEV_RUNTIME_PROCESS_CLEANUP_FAILED", text)
+        self.assertLess(
+            text.index("Stop-RuntimeOwnedProcesses $state"),
+            text.index("Remove-TreeWithRetry ([string]$state.work_dir)"),
+        )
+
     def test_sessions_metadata_key_is_private_and_content_free(self):
         source = CORE.read_text(encoding="utf-8")
         self.assertIn("sessions.setTabValue", source)
