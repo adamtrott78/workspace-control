@@ -24,24 +24,24 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: bfa6e5dd658e6d91e8699e396e888058913e20d0
+- Remote checkpoint: e1e4778ad3583c817e25d0836964181b88cdd62a
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY HUMAN-ENTER HANDOFF SMOKE — bfa6e5dd658e6d91e8699e396e888058913e20d0 passed Workspace #3074 / Semantic #374 / Operator #647. Existing visual loop is already confirmed working: clean blank startup, first Ctrl+Space creates/focuses fresh Personalized Temporary Chat, closes startup blank and loads clipboard. NEW GATE: after preparation, do not advance/minimize until a plain Enter keypress is observed while the captured worker Firefox window is foreground. A premature second Ctrl+Space must refocus Firefox and show the no-Enter-confirmation alert; it must not dispatch or minimize. After the human pastes the prompt and presses plain Enter, the next Ctrl+Space may resume normal dispatch; with no remaining smoke action it should minimize and report nothing needs service. This confirms only the human Enter event, not ChatGPT execution/output. No automatic typing/paste/Enter/Send and no live Stage-12 authority.
+FUNCTIONAL WINDOWS FRONT END IS ACCEPTED. Do not redo local fast-loop/browser repairs. The operator directly confirmed the final e1e4778a… sequence: clean startup; first Ctrl+Space opens/focuses fresh Personalized Temporary Chat, closes startup blank and stages clipboard; premature repeat Ctrl+Space before Enter alerts/refocuses without advance/minimize; plain Enter in foreground prepared worker unlocks the next press; with no work, the following press minimizes the dedicated Firefox window. No live Stage-12 authority exists. Decision gate: either add optional lifecycle aliases (wop-up/down/reset/status/self-test) or, if the operator chooses system proving, freeze a fresh exact D4 Stage-12 review/procedure against current validated source and request new one-shot authority. Do not launch D4 automatically.
 
 ## Remaining work
 
-- live transport gate: after Workspace Shell semantic authority exists, prove exact-host Tailscale fake-worker transport before real-account use.
-- impl_12: bounded real-account calibration with no DOM/content automation, no added browser permissions and no security workaround.
-- impl_09: authoritative target-machine UX-09 performance/resource benchmark after real-account calibration.
-- impl_13: explicit PROMOTE_V0/HOLD/REVISE production-readiness review.
+- Optional non-blocking convenience aliases: wop-up / wop-down / wop-reset / wop-status / wop-self-test.
+- If selected by the operator, prepare a fresh bounded real-account Stage-12 review/procedure against current validated front-end state; validate 3/3 and obtain explicit one-shot authority before execution.
+- After D4 passes, participate in the integrated E1–E3 live research-iterate + forced-loss + resource/soak proving sequence.
+- Preserve no-auto-typing/paste/Enter/Send, no DOM/page-content scraping, no credential automation, no authority widening.
 
 ## Blockers / gates
 
-- The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
-- Real-account Stage-12 retry remains paused. Human-Enter gate bfa6e5dd… is 3/3 validated, but operator must run the Windows-only smoke and empirically prove: first Ctrl+Space prepares the worker; second Ctrl+Space before plain Enter alerts/refocuses without minimize/advance; plain Enter while prepared worker Firefox is foreground then unlocks the next Ctrl+Space. No new live retry authority exists.
+- LIVE STAGE-12 AUTHORITY: functional Windows front end is accepted, but no reusable real-account Stage-12 authority exists. Any D4 run requires a fresh exact review/procedure, 3/3 validation and explicit operator approval.
+- OPTIONAL UX POLISH is not a blocker: convenience alias commands remain unimplemented.
 
 ## Fresh-chat initialization
 
