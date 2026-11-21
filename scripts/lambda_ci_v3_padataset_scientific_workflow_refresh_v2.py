@@ -526,8 +526,24 @@ def main() -> int:
                 int(str(rec_entry.get("mode")), 8),
             )
             subprocess.run(["systemctl", "start", TARGET_UNIT], check=False)
+            rollback_state = base.systemd(TARGET_UNIT)
+            if (
+                rollback_state.get("ActiveState") != "active"
+                or rollback_state.get("SubState") != "running"
+                or rollback_state.get("UnitFileState") != "enabled"
+            ):
+                raise WorkflowRefreshV2Error(
+                    "rollback lane-A controller did not return active/running/enabled"
+                )
+            candidate.verify_installed(BASE_MANIFEST)
+            require_roots()
+            require_target_quiescent()
+            rollback_others = controller_snapshots()
+            require_snapshot_same(others_before, rollback_others)
             tx["phase"] = "ROLLED_BACK_TO_WORKFLOW_REFRESH_V1"
             tx["rollback_completed"] = True
+            tx["rollback_target_controller_after"] = rollback_state
+            tx["rollback_existing_controller_snapshot_after"] = rollback_others
         except BaseException as rollback_exc:
             tx["phase"] = "ROLLBACK_INCOMPLETE"
             tx["rollback_completed"] = False
