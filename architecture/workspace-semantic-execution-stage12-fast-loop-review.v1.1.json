@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "RUNTIME_RESIDUE_DEFER_VALIDATED_AWAITING_WINDOWS_SMOKE",
+  "status": "FRONTEND_FAST_LOOP_ACCEPTED_AWAITING_NEXT_DECISION",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -320,5 +320,33 @@
       },
       "live_retry_authorized": false
     }
+  },
+  "final_windows_acceptance": {
+    "observed_at": "2026-11-21",
+    "durable_head": "e1e4778ad3583c817e25d0836964181b88cdd62a",
+    "validation": {
+      "workspace_control_run": 3075,
+      "semantic_execution_run": 375,
+      "operator_bridge_run": 648,
+      "result": "SUCCESS"
+    },
+    "operator_observation": [
+      "Old owned Firefox/runtime closes and the dedicated profile starts clean without obsolete fake-worker/session restoration.",
+      "First Ctrl+Space visibly creates/focuses a fresh https://chatgpt.com/?temporary-chat=true tab and closes the startup blank.",
+      "Clipboard becomes WORKSPACE_OPERATOR_SMOKE_PACKET_V1.",
+      "Second Ctrl+Space before plain Enter alerts/refocuses and does not advance or minimize.",
+      "Plain Enter while the prepared worker Firefox window is foreground unlocks the handoff.",
+      "Next Ctrl+Space with no remaining smoke action minimizes the dedicated Firefox window and reports no work."
+    ],
+    "boundaries": [
+      "No automatic typing, paste, Enter, Send or mouse input.",
+      "No DOM/page-content/output scraping.",
+      "No credential automation or browser-permission widening.",
+      "Human Enter observation is local confirmation only; it is not proof of model execution/output.",
+      "No live Stage-12 authority was created or consumed by this local acceptance."
+    ],
+    "functional_frontend_complete": true,
+    "optional_convenience_aliases_complete": false,
+    "d4_real_account_calibration_complete": false
   }
 }

@@ -2,14 +2,15 @@
 
 **Parent task:** `workspace-semantic-execution-migration-v1`  
 **Branch:** `workspace-semantic-execution-migration-v1`  
-**Validated execution base before this handoff documentation:** `41d320100a0c2ee3890c900ed5295a94b08213af`  
-**Validated workflows on that base:** Workspace Control #2849 PASS; Semantic Execution #178 PASS; Operator Bridge #437 PASS.  
+**Current durable integration head:** `e1e4778ad3583c817e25d0836964181b88cdd62a`  
+**Exact-head validation:** Workspace Control #3075 PASS; Semantic Execution #375 PASS; Operator Bridge #648 PASS.  
 **Deadline:** 2026-11-30.  
 **Definition of done:** every mandatory requirement in `architecture/workspace-semantic-execution-november-2026-acceptance.v0.1.json` is PASS and the integrated review records explicit `PROMOTE_V0`.  
-**Current machine-readable acceptance matrix:** 10 PASS / 12 PARTIAL / 1 BLOCKED / 9 PENDING. This matrix still requires a formal reconciliation pass for the newly accepted live-host/evaluator evidence; do not infer additional PASS statuses until that reconciliation is committed.
-**Current live semantic-host status:** Workspace Shell multirepo activation ACCEPTED at runtime `54ac65cbcd4211554710b8f8f4231c6c9554e3cc`; semantic execution `7c20097c5f177f23c16a765b95ce94d7161f0d29` independently verified; evaluator isolation ACCEPTED. Owning acceptance authority `05c7be116320ea8640b38870d622cf2b0023292e` passed Workspace #2945. Umbrella live-acceptance head `92325102e5730199a7735f09b17b8730a50d3185` passed Workspace #2946 / Semantic #241 / Operator #519.
-**Current next hard gate:** execute the single explicitly authorized Stage-12 real-Instant calibration attempt under `architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.1.json`. Authority persistence commit `8e701073484118344ee4f06816d3542ac0f0f7f7` passed Workspace #2978 / Semantic #278 / Operator #551. No Stage-12 live attempt has executed.
-**Current validated Stage-10 implementation checkpoint for this handoff:** `866e2805def9d7bb1e5640715a72c72efc895480` — Workspace #2885 PASS; Semantic #214 PASS; Operator Bridge #491 PASS; off-foreground UT-12 acceptance run #492 completed on the same exact head.
+**Current machine-readable acceptance matrix:** 10 PASS / 12 PARTIAL / 1 BLOCKED / 9 PENDING. Do not silently promote matrix rows from checklist evidence; a formal E7 reconciliation is still required. The front-end-related rows INST-02, INST-03, INST-04 and INST-05 are already PASS; INST-06 remains PENDING because no bounded real-account Stage-12 calibration has completed.
+**Current live semantic-host status:** Workspace Shell multirepo activation ACCEPTED at runtime `54ac65cbcd4211554710b8f8f4231c6c9554e3cc`; semantic execution `7c20097c5f177f23c16a765b95ce94d7161f0d29` independently verified; evaluator isolation ACCEPTED; exact fake-worker private-route round trip accepted with restoration of the preexisting Jupyter Serve state.
+**Current Windows Operator front-end status:** **FUNCTIONALLY ACCEPTED.** On the validated `e1e4778a…` line the operator directly confirmed the complete manual loop: clean dedicated Firefox startup, Ctrl+Space opens/focuses a fresh Personalized Temporary Chat and closes the startup blank, clipboard staging works, a premature second Ctrl+Space alerts/refocuses and does not advance/minimize, plain Enter in the foreground prepared worker unlocks the loop, and the following no-work Ctrl+Space minimizes the dedicated Firefox window. Literal raw `@github` invocation in Personalized Temporary Chat is also empirically accepted. No automatic paste, typing, Enter, Send, DOM/page-content scraping, or credential automation was introduced.
+**Current next hard gate:** **decision gate before D4.** Functional front-end work no longer blocks system proving. No reusable Stage-12 live authority exists. If the operator chooses to proceed, freeze an updated bounded real-account Stage-12 review/procedure against the current validated front-end head, validate it 3/3, obtain fresh explicit one-shot authority, then execute D4. After D4, E1–E3 are the first true whole-system proving run: live mixed `research-iterate`, mixed executors, and forced worker/session/process-loss recovery.
+**Optional non-blocking front-end polish:** convenient aliases/shims `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` remain unimplemented. The existing `wop` dev lifecycle is sufficient for current smoke/proving work, so these aliases are not a D4/E1 blocker.
 **Stage-10 human status:** COMPLETE. UT-05, UT-06, UT-07, UT-08, UT-12, UT-11 and UT-09 ACCEPTED; final hotkey disposition is **RETAIN Ctrl+Space**.
 
 ## Fresh-chat recovery protocol
@@ -76,7 +77,14 @@
   - [x] Bridge-OFF UT-11 accepted from direct operator observation on validated head `b84f69cf…`: repeated Ctrl+Space produced no bridge reaction with Firefox focused or unfocused. Run #494 reached UT-11 ready state but was intentionally canceled; no completed OBJECTIVE_PASS is claimed from the canceled job.
   - [x] UT-09 representative-work collision gate accepted from accumulated real use: zero required native shortcut collisions remain for the operator's actual workflow, no meaningful interference is reported, and the identified VS Code Ctrl+Space function is not required by the operator.
   - [x] Final physical binding decision: **RETAIN Ctrl+Space**.
-- [x] Preserve accepted behavior: Ctrl+Space -> Ctrl+V -> Enter; no tab search; repeated scheduler presses refocus/block pending action; READY=0 extra press minimizes only WorkspaceWorkers Firefox.
+- [x] Preserve accepted behavior: Ctrl+Space -> Ctrl+V -> Enter -> Ctrl+Space; no tab search; while a prepared worker is awaiting human Enter, repeated scheduler presses refocus/alert and cannot advance; after Enter confirmation, normal dispatch resumes and READY=0 minimizes only WorkspaceWorkers Firefox.
+- [x] **A6 — Close the functional production Windows front end / fast loop.**
+  - [x] Dedicated persistent non-default Firefox profile retains ChatGPT authentication while sessionstore-only cleanup prevents obsolete worker-tab resurrection.
+  - [x] Idle worker window starts on a clean blank/new-tab surface; first Ctrl+Space visibly opens/focuses a fresh Personalized Temporary Chat, closes only the exact startup blank, and stages the clipboard packet.
+  - [x] Literal raw `@github` invocation works in Personalized Temporary Chat without Tab/click/autocomplete selection.
+  - [x] Passive human-submit confirmation is fail-closed: before plain Enter is observed in the captured foreground worker Firefox window, another Ctrl+Space alerts/refocuses and cannot advance/minimize; after Enter, the next press resumes normal dispatch.
+  - [x] Final durable implementation/bookkeeping head `e1e4778ad3583c817e25d0836964181b88cdd62a` passed Workspace #3075 / Semantic #375 / Operator #648, and the operator directly confirmed the complete sequence works.
+- [ ] **A7 — Optional convenience aliases only:** add `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` if desired. This is polish, not a blocker for D4 or E1–E3.
 
 ### B. Reasoning Economy — parallel, repository-safe lane
 
@@ -101,7 +109,7 @@
 - [ ] **C5 — Prove `account.type=chatgpt`, `planType=plus`, `OPENAI_API_KEY` absent, no API fallback, programmatic usage/rate-limit reads, zero model inference during bootstrap.
 - [ ] **C6 — Run controlled isolated Codex/Instant calibration actions bracketed by official snapshots; only then feed real allowance observations into the governor.**
 
-### D. Live semantic/Instant host — activation complete; private-route authority is the current gate
+### D. Live semantic/Instant host — activation and functional Windows front end complete; D4 live calibration is the next gated test
 
 - [x] **D1 — Promote Workspace Shell semantic/evaluator runtime live and prove hostile-worker isolation.**
   - [x] Transactional activation completed with `LOCAL_CANDIDATE_MATERIALIZER_READY=PASS`, `LOCAL_SEMANTIC_TASK_RECEIPT=PASS`, `LOCAL_SEMANTIC_TASK_AUTHORITY=PASS`, `LOCAL_EVALUATOR_WORKER_DENIAL_RECEIPT=PASS`, `LOCAL_EVALUATOR_ISOLATION=PASS`, `EVALUATOR_ISOLATION_ACCEPTANCE=PASS`, and `WORKSPACE_SHELL_MULTIREPO_UPGRADE=PASS`.
@@ -116,14 +124,17 @@
   - [x] Transport design is already selected and validated: outbound-only HTTPS over authenticated tailnet; backend listens only on localhost; Tailscale Serve injects authenticated identity; no helper credential store; no public endpoint/Funnel.
   - [x] Production server composition and Windows HTTPS client are already repository-validated.
   - [x] Host-specific transaction candidate `8116662727003e9fe0904fa88ff7836608aeac00` / blob `765c846e7b6c1297f4a0a8871c2fdd34b453b5c2` freezes exact localhost port, runtime-only identity, isolated Postgres source, rollback, and fake-worker-only scope.\n  - [x] Tailnet `tailca6171.ts.net`, Linux `gokhan-lambda-vector`, Windows `desktop-ub9p70p`, MagicDNS ON, HTTPS certificates ON.
-  - [ ] Do **not** bypass with generic shell, manual sidecar, arbitrary Tailscale commands, network-enabled Workspace Shell profile, or helper/root-policy widening. Current helper registry is empty and frozen Workspace Shell profiles deny network.
+  - [x] Boundary preserved: do **not** bypass with generic shell, manual sidecar, arbitrary Tailscale commands, network-enabled Workspace Shell profile, or helper/root-policy widening. Current helper registry is empty and frozen Workspace Shell profiles deny network.
 - [x] **D3 — Prove one exact-host fake-worker action/status/result round trip through the reviewed private route before touching a real ChatGPT account.**\n  - [x] Attempt 01 materialized exact authorized transaction `81166627…` and passed host/peer/login binding, then failed closed on `PREEXISTING_SERVE_CONFIG:TCP` before PostgreSQL, Serve mutation, or fake-worker execution. Existing Serve state preserved.\n  - [x] Read-only diagnostic proved HTTPS 443 root `/` -> `http://127.0.0.1:8888`, Funnel disabled; existing configuration remained unchanged.\n  - [x] Coexistence-safe v2 review candidate `429362c93314fa2e17809ea78b04c69d8c9c4e83` passed Workspace #2965 / Semantic #265 / Operator #538.\n  - [x] Operator explicitly approved v2 transaction `2a6f65de5681f000a4b69913979db21953ab36a6` / blob `beef1ade487e117e519b4cec1e9e4d43a36ead57`; fresh narrow Attempt-02 authority is recorded in `architecture/workspace-semantic-execution-private-route-activation-authority.v0.2.json`.
   - [x] Account-free/model-free/browser-free/GPU-free harness is frozen at `7c20097c…` and repository-green (#2904/#226/#504).
   - [x] Attempt 02 passed the real reviewed private route: status ready -> exact claim -> revalidate -> local-prepared -> immutable fake candidate -> independent validator -> process COMPLETED -> action COMPLETED -> session READY -> final ready=0/sent=0; exact preexisting Jupyter Serve state restored.
 - [ ] **D4 — Run bounded Stage-12 real-account calibration with no widened browser permissions, DOM/content automation, credential workaround, or synthetic account interaction.**\n  - [x] Exact Stage-12 review candidate `646d6b09e029823f27f7764d5085da2b7d4af7b8` passed Workspace #2975 / Semantic #275 / Operator #548.\n  - [x] Final approval-gate head `93b9ba76e860c6d3e06dd7bb8d7a54193705470e` passed Workspace #2977 / Semantic #277 / Operator #550.\n  - [x] Candidate-result branch `worker-result-candidates-v1` is isolated from source/authority state and was verified at baseline `0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de`.\n  - [x] Operator explicitly approved exactly one live attempt; authority persistence `8e701073…` passed #2978/#278/#551.\n  - [x] **Attempt 01 FAILED CLOSED and consumed that authority.** Linux passed exact preflight, activated the reviewed private route, preserved Jupyter/Funnel invariants and reached `STAGE12_Q1_READY`; Windows had never started the pinned launcher because PowerShell remained at the multiline continuation prompt, so no isolated Firefox/managed worker existed and Q1 could not be serviced.\n  - [x] No Q1 candidate was published; `worker-result-candidates-v1` remained exactly at `0bc1bc0e…`.\n  - [x] Post-failure cleanup restored the host to tailnet-only `/ -> http://127.0.0.1:8888`; `/operator-bridge/v1` is absent and Funnel is disabled. Failure evidence is frozen in `architecture/workspace-semantic-execution-stage12-real-instant-attempt-01.v0.1.json`.\n  - [x] The original authority artifact is marked `CONSUMED_FAILED_STAGE12_ATTEMPT_01`; it authorizes no retry.\n  - [x] Fresh retry candidate/procedure v0.2 is frozen: executable source `b0466c03acb9d6b863df421e2c116c84bff312f6`, Linux v2 blob `962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca`, procedure commit `7a99f4518d8f3ac97d8ee638ee36c1edef952ca2`. It requires the exact observed Windows-ready marker before `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`, rechecks candidate baseline, and verifies exact cleanup restoration.\n  - [x] Retry review candidate exact head `cae09bc6c97eb4dd689e10f320176a567afda194` passed Workspace #2989 / Semantic #289 / Operator #562 and is marked `VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY`.\n  - [x] Fresh operator approval received for retry v0.2; exact single-attempt authority is recorded in `architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.2.json`.\n  - [x] Authority v0.2 persistence head `449acef0…` passed Workspace #2992 / Semantic #292 / Operator #565.\n  - [x] Pre-live Windows setup then failed non-consumingly: local PowerShell execution policy rejected the exact pinned `.ps1` before launcher execution; Firefox did not start, Linux did not run, and candidate branch remained baseline.\n  - [x] Retry procedure/review v0.3 validated at exact head `6021af35944cf052c760c2645d53a89f276c2533`: Workspace #2994 / Semantic #294 / Operator #567 SUCCESS. Procedure blob `62d98d601b451621fd17a869149ed295f1f9ca9a`; executable bytes unchanged.\n  - [x] v0.3 authority was approved/validated but its pre-live dotnet PATH blocker occurred before live consumption.\n  - [x] v0.4 bounded .NET 10 repair validated at `752e0f81…` (#2998/#298/#571), with final validated review state `4e1beced…` (#2999/#299/#572).\n  - [x] Fresh operator approval received for v0.4.\n  - [x] v0.5 Windows pre-live setup failed non-consumingly after successful .NET build because `npm.cmd` was not resolvable.\n  - [x] v0.6 Node 24 repair validated at `91875eea…` (#3006/#306/#579) and final state `fba38cb2…` passed #3007/#307/#580.\n  - [x] Operator explicitly approved v0.6, but pre-authority exact-procedure inspection found malformed PowerShell; no v0.6 authority was created or consumed.
   - [x] v0.7 review-only command-construction repair validated at `215287bb…`: Workspace #3010 / Semantic #310 / Operator #583, including exact PowerShell parse on Windows.
   - [x] v0.7 final lifecycle-corrected state `8bc74726…` passed Workspace #3012 / Semantic #312 / Operator #585; no executable bytes changed.
-  - [x] Approval-gate freeze `73f1c57a…` passed Workspace #3013 / Semantic #313 / Operator #586.\n  - [x] Fresh explicit operator approval received for exactly one v0.7 attempt; authority is bound to procedure blob `620e78f0…`.\n  - [x] v0.7 authority persistence `ac1ad67d…` passed Workspace #3014 / Semantic #314 / Operator #587.\n  - [x] v0.7 authority was invalidated unconsumed before execution after exact-byte audit found two literal backslashes before `${env:ProgramFiles(x86)}`.\n  - [x] v0.8 two-backslash repair `f0051fb3…` passed Workspace #3016 / Semantic #316 / Operator #589.\n  - [x] Final v0.8 review-state `fc292181…` passed Workspace #3017 / Semantic #317 / Operator #590.\n  - [x] Fresh explicit operator approval received for exactly one v0.8 attempt bound to procedure blob `58c714ba…`.\n  - [x] v0.8 authority persistence `26ca22ae…` passed Workspace #3018 / Semantic #318 / Operator #591.\n  - [ ] **CURRENT GATE:** execute Windows v0.8 first; require `STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS` before Linux.
+  - [x] Approval-gate freeze `73f1c57a…` passed Workspace #3013 / Semantic #313 / Operator #586.\n  - [x] Fresh explicit operator approval received for exactly one v0.7 attempt; authority is bound to procedure blob `620e78f0…`.\n  - [x] v0.7 authority persistence `ac1ad67d…` passed Workspace #3014 / Semantic #314 / Operator #587.\n  - [x] v0.7 authority was invalidated unconsumed before execution after exact-byte audit found two literal backslashes before `${env:ProgramFiles(x86)}`.\n  - [x] v0.8 two-backslash repair `f0051fb3…` passed Workspace #3016 / Semantic #316 / Operator #589.\n  - [x] Final v0.8 review-state `fc292181…` passed Workspace #3017 / Semantic #317 / Operator #590.\n  - [x] Fresh explicit operator approval received for exactly one v0.8 attempt bound to procedure blob `58c714ba…`.\n  - [x] v0.8 authority persistence `26ca22ae…` passed Workspace #3018 / Semantic #318 / Operator #591.\n  - [x] The historical v0.8/v0.9/v1.0 retry chain is superseded by the validated v1.1 Windows fast-loop program; no historical unchecked retry step remains current.
+  - [x] Functional Windows front-end prerequisite accepted on `e1e4778a…`: dedicated profile/session cleanup, fresh Temporary Chat creation/focus, startup-blank closure, clipboard staging, raw `@github`, human Enter gate, and no-work minimize all passed direct operator observation.
+  - [x] Front-end safety boundary preserved: no automatic typing/paste/Enter/Send, no DOM/page-content/output scraping, no credential automation, no public/Funnel exposure, no browser-permission widening.
+  - [ ] **CURRENT D4 GATE:** no reusable live Stage-12 authority exists. If selected, freeze a fresh review/procedure bound to the current validated front-end head, exact route/candidate baseline and cleanup invariants; validate 3/3; obtain explicit single-attempt operator approval; then run one bounded real-account calibration.
 
 ### E. Integrated live proving + final November acceptance
 
@@ -173,133 +184,31 @@
 - `299557f7…`: owning Workspace Shell handoff records the rollback-safe evaluator-denial `TARGET_PROFILE_DENIED` failure and pins the exact defect to `src/core.js::assertTargetProfile`; no activation success is claimed.
 
 
-## 2026-11-16 live-host promotion closeout
+## 2026-11-21 front-end closeout and current decision gate
 
-- [x] Nine distinct rollback-safe activation defects were repaired without widening authority; the tenth activation passed end to end.
-- [x] Materializer readiness, semantic exact-SHA execution, exact receipt binding, evaluator worker denial, sealed-store isolation, and transactional promotion all passed on the real host.
-- [x] Post-activation independent receipts confirm the promoted runtime and frozen semantic execution remain exact and clean.
-- [x] Private-route authority audit completed at `ab6b82df2e5886663f32b289a68939eed6be86f4`; Workspace #2947 / Semantic #242 / Operator #520 all PASS.
-- [x] Exact v2 fake-worker transaction passed and restored `/` -> `8888` plus all preexisting relevant Serve/Funnel state.\n- [x] Operator explicitly approved validated Stage-12 candidate after final head `93b9ba76…` passed #2977/#277/#550; authority is single-attempt and exact.\n- [x] Authority persistence `8e701073…` passed #2978/#278/#551.\n- [x] Stage-12 Attempt 01 failed closed after Linux reached Q1 without a launched Windows managed worker; the one-shot authority is consumed, no candidate was published, and exact Jupyter/Funnel state was restored.\n- [x] Retry candidate/procedure v0.2 repaired and exact-head validated at `cae09bc6…` (#2989/#289/#562).\n- [x] Fresh explicit operator approval granted for retry v0.2 and narrow single-attempt authority artifact created.\n- [x] Authority v0.2 head `449acef0…` validated #2992/#292/#565; its first Windows pre-live setup failed before launcher execution and did not consume the attempt.\n- [x] v0.3 process-scoped execution-policy repair validated at `6021af35…` (#2994/#294/#567).\n- [x] Fresh explicit operator approval received for validated v0.3; single-attempt authority is recorded in `architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.3.json`. v0.2 authority is superseded unconsumed/non-reusable.\n- [x] v0.3 authority persistence `6427c304…` passed Workspace #2996 / Semantic #296 / Operator #569.\n- [x] Windows v0.3 pre-live setup 02 failed non-consumingly after launcher start: `dotnet` was not resolvable from child PowerShell PATH; Firefox did not start and Linux did not run.\n- [x] v0.4 bounded .NET 10 discovery + temporary process-environment repair validated at `752e0f81…`: Workspace #2998 / Semantic #298 / Operator #571. Procedure blob `1d33484a…`.\n- [x] Fresh explicit operator approval received for validated v0.4; exact single-attempt authority is recorded in `architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.4.json`. v0.3 is superseded unconsumed/non-reusable.\n- [x] v0.4 authority persistence `b7f65497…` passed Workspace #3000 / Semantic #300 / Operator #573.\n- [x] Windows v0.4 pre-live setup 03 failed non-consumingly with `DOTNET10_NOT_FOUND_IN_REVIEWED_LOCATIONS`; the reviewed list omitted the known working `%USERPROFILE%\.dotnet\dotnet.exe`.\n- [x] v0.5 user-profile .NET discovery repair validated at `c149c1aa…`: Workspace #3002 / Semantic #302 / Operator #575. Procedure blob `40049b88…`.\n- [x] Fresh explicit operator approval received for validated v0.5; exact single-attempt authority is recorded in `architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.5.json`. v0.4 is superseded unconsumed/non-reusable.\n- [x] v0.5 authority persistence `f84195c5…` passed Workspace #3004 / Semantic #304 / Operator #577.\n- [x] Windows v0.5 pre-live setup 04 failed non-consumingly after successful .NET build because `npm.cmd` was not resolvable from the child PowerShell environment.\n- [x] v0.6 Node 24 runner-tool-cache repair validated at `91875eea…`: Workspace #3006 / Semantic #306 / Operator #579. Procedure blob `dd995d97…`.\n- [x] Operator explicitly approved v0.6 with `DO IT`, but exact pre-authority inspection invalidated procedure blob `dd995d97…`; no v0.6 authority artifact was created and no live action ran.
-- [x] v0.7 review-only repair validated at `215287bb…` (#3010/#310/#583); exact fenced PowerShell parses successfully on the Windows Operator validator.
-- [x] Final lifecycle-corrected v0.7 state `8bc74726…` passed Workspace #3012 / Semantic #312 / Operator #585.
-- [x] Approval-gate freeze `73f1c57a…` passed Workspace #3013 / Semantic #313 / Operator #586.\n- [x] Fresh explicit v0.7 approval received; exact one-shot authority is being persisted and v0.5 is superseded unconsumed/non-reusable.\n- [x] v0.7 authority persistence `ac1ad67d…` passed Workspace #3014 / Semantic #314 / Operator #587.\n- [x] v0.7 invalidated unconsumed before any Windows/Linux execution; live marker not reached.\n- [x] v0.8 review-only repair `f0051fb3…` passed Workspace #3016 / Semantic #316 / Operator #589.\n- [x] Final v0.8 review-state `fc292181…` passed Workspace #3017 / Semantic #317 / Operator #590.\n- [x] Fresh explicit v0.8 approval received; exact one-shot authority is being persisted.\n- [x] v0.8 authority persistence `26ca22ae…` passed Workspace #3018 / Semantic #318 / Operator #591.\n- [x] Windows v0.8 pre-live run reached `STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS`, then cleaned up before Linux; `STAGE12_WINDOWS_CLEANUP=PASS` confirms a non-consuming pre-live abort.\n- [ ] **CURRENT GATE:** restart the exact unchanged Windows v0.8 procedure; after manual auth + Instant press Enter once, then leave the final cleanup prompt waiting while Linux runs.
+The prior retry-by-retry Stage-12 chronology is intentionally collapsed here because its old unchecked `CURRENT GATE` entries were superseded and had become misleading. Exact historical evidence remains authoritative in the Stage-12 authority/review/attempt artifacts, the two task capsules, Git history, and CI runs.
 
-- [x] 2026-11-18 v0.8 pre-live cleanup abort 01: no Linux live marker, candidate branch stayed `0bc1bc0e…`, authority remains unconsumed.
+- [x] Live semantic host/evaluator activation and hostile-worker isolation accepted.
+- [x] Reviewed private Tailscale Serve route and exact fake-worker action/status/result round trip accepted; preexisting Jupyter Serve/Funnel state restored after the proof.
+- [x] Earlier real-account Stage-12 attempts failed closed at bounded setup/foreground/startup gates; consumed authorities are non-reusable and no candidate result was silently accepted.
+- [x] Windows-only fast-loop redesign isolated browser/operator defects from Linux/Tailscale/PostgreSQL and repaired them without widening authority.
+- [x] Persistent dedicated Firefox profile accepted; default/daily Firefox profile remains untouched.
+- [x] Verified-dead dev-runtime filesystem residue may be journaled/deferred only after exact process-tree cleanup passes; stale residue is not authoritative runtime state.
+- [x] Firefox sessionstore-only cleanup prevents obsolete fake-worker/duplicate-tab restoration while retaining login cookies/profile state.
+- [x] Visual hotkey lifecycle accepted: idle blank -> Ctrl+Space opens/focuses fresh Personalized Temporary Chat -> startup blank closes -> clipboard packet staged.
+- [x] Literal raw `@github` invocation accepted in Personalized Temporary Chat without plugin UI selection.
+- [x] Human-submit gate accepted: premature repeat Ctrl+Space before plain Enter alerts/refocuses and cannot advance/minimize; plain Enter while captured worker Firefox is foreground unlocks the next press; no-work then minimizes only the dedicated Firefox window.
+- [x] Final functional front-end state is durable at `e1e4778ad3583c817e25d0836964181b88cdd62a` with Workspace #3075 / Semantic #375 / Operator #648 PASS and direct operator acceptance.
+- [ ] Optional polish only: add `wop-up` / `wop-down` / `wop-reset` / `wop-status` / `wop-self-test` aliases if the operator wants them. Existing `wop` lifecycle commands are sufficient for current proving work.
+- [ ] **NEXT CRITICAL TEST IF CHOSEN — D4:** prepare a fresh, exact, single-attempt Stage-12 real-account calibration review/authority against the current front-end state; do not inherit or revive any consumed historical authority.
+- [ ] **THEN E1–E3:** run the live mixed Research Engine `research-iterate` workflow, deliberately inject one worker/session/process loss, recover from durable state without manual reconstruction, and capture live resource/soak evidence.
+- [ ] E4 economics remains dependent on calibrated allowance evidence; B4/Codex gates remain independent and must not be bypassed.
+- [ ] E5–E8 remain final acceptance work: target UX-09 benchmark, provenance/authority/rollback audit, formal matrix reconciliation, and explicit `PROMOTE_V0` / `HOLD` / `REVISE`.
 
-- [x] 2026-11-18 v0.8 restart cleanup 02: Firefox-open guard failed closed; after manual Firefox close, stale `%TEMP%\workspace-control-stage12-retry-v7` blocked rerun. No Linux/live marker; authority remains unconsumed.
-- [ ] Remove only the exact stale temp staging directory under fail-closed cleanup authority, then rerun the exact unchanged Windows v0.8 command with Firefox closed.
+### Decision status
 
-- [x] 2026-11-18 v0.8 Windows ready gate re-established: `STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS`; PowerShell held at final cleanup prompt; e6e24ee0… passed #3021/#321/#594; candidate baseline unchanged.
-- [ ] Run exact Linux v2 transaction from source `b0466c03…`, verify blob `962cf39d…`, then type the exact Windows-ready marker at the Linux gate. Live authority is consumed only when Linux prints `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`.
-
-- [x] 2026-11-18 v0.8 Linux pre-live failed non-consumingly: exact v2 blob `962cf39d…` hit `REPO_URL: unbound variable` before the live marker; exact audit found three literal `\\n` sequences joining four declarations.
-- [x] v0.8 authority invalidated unconsumed/non-reusable; changed Linux bytes cannot inherit it.
-- [ ] v0.9 review-only Linux v3 candidate `3eb352f4…` changes only those three literal newline sequences to real LF bytes; validate 3/3, persist final review state, then obtain fresh explicit approval.
-
-- [x] v0.9 Linux declaration repair exact candidate `efaf5170…` passed Workspace #3024 / Semantic #324 / Operator #597.
-- [ ] **CURRENT GATE:** validate final v0.9 review-state persistence 3/3, then request fresh explicit v0.9 approval; v0.8 authority is not reusable.
-
-- [x] Fresh explicit v0.9 approval received: `pls go yes authorize fuck`; binds final review head `a84eb08e…`, review `de0139b…`, procedure `5113b2e7…`, Linux v3 `3eb352f4…`, unchanged harness/launcher, candidate baseline `0bc1bc0e…`.
-- [ ] Validate v0.9 authority-persistence head 3/3 before any Windows/Linux execution.
-
-- [x] v0.9 authority persistence `b3798222…` passed Workspace #3026 / Semantic #326 / Operator #599; authority blob `f08bdab3…` is validated for exactly one live attempt.
-- [ ] Re-establish fresh Windows v0.9 pre-live runtime; if old v0.8 cleanup prompt is still open, clean it first. Leave the new final cleanup prompt waiting after the Windows-ready marker.
-
-- [x] 2026-11-18 v0.9 Windows pre-live cleanup abort 02: final cleanup prompt was submitted before Linux; launcher cleanup PASS, outer temp deletion raced on `SharedContracts.dll`; no live consumption marker; authority remains unconsumed.
-- [ ] Bounded stale-stage cleanup, then rerun exact unchanged v0.9 Windows command. At final cleanup prompt, do **not** press Enter until Linux reports Stage-12 result.
-
-- [x] Stage-12 v0.9 live authority consumed at `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`; Q1 exposed Windows foreground activation defect. No Q1 candidate accepted; v0.9 non-reusable.
-- [ ] Validate bounded foreground-fallback repair candidate: LocalPrepared hotkey path must invoke existing Win32 `ForegroundPreparedWorkerWindow()` before `RecordPreparedWorkerWindow()`.
-- [ ] After candidate validation, freeze fresh retry review/procedure and obtain new explicit operator approval before any live retry.
-
-- [x] Foreground repair code candidate `1ecc094a…` passed Workspace #3030 / Semantic #330 / Operator #603.
-- [x] Freeze v1.0 review/procedure: foreground fallback blob `2e0d2248…`, procedure `9a43ba28…`, review `680596a3…`; no live authority.
-- [ ] Exact-head validate v1.0 review-state persistence 3/3.
-- [ ] Verify consumed v0.9 Linux route restoration + Windows/stale-stage cleanup before requesting v1.0 live approval.
-
-- [x] v1.0 review-state `ecdc71c8…` passed Workspace #3031 / Semantic #331 / Operator #604; review remains non-authoritative.
-- [ ] Exact-head validate v1.0 validation-state persistence 3/3.
-- [ ] Verify v0.9 Linux route restoration + Windows/stale-stage cleanup before requesting v1.0 approval.
-
-- [x] v1.0 validation-state persistence `bd366f93…` passed Workspace #3032 / Semantic #332 / Operator #605; review remains non-authoritative.
-- [ ] Verify consumed v0.9 predecessor cleanup: exact Linux Tailscale restoration + temporary Postgres stop, Windows helper/Firefox cleanup, and stale Stage-12 temp directory removal.
-- [ ] Only after cleanup evidence: request fresh explicit v1.0 approval.
-
-- [x] FINAL HANDOFF BASIS: `7b5b7bc2…` passed Workspace #3033 / Semantic #333 / Operator #606; v1.0 review remains validated non-authority.
-- [x] PREDECESSOR CLEANUP GATE: exact `STAGE12_V09_LINUX_CLEANUP_VERIFIED=PASS` and `STAGE12_V09_WINDOWS_CLEANUP_VERIFIED=PASS` observed from bounded operator cleanup on 2026-11-19.
-- [x] CLEANUP-CLOSURE VALIDATION GATE: `a0a4db44…` passed Workspace #3035 / Semantic #335 / Operator #608.\n- [x] Fresh explicit v1.0 approval received: `christ ofc i approve it GO`; binds procedure `9a43ba28…`, review `e525b37d…`, foreground source `1ecc094a…` / blob `2e0d2248…`, Linux v3 `3eb352f4…`, harness `7b1feb8f…`, launcher `d9d474ca…`, candidate baseline `0bc1bc0e…`.\n- [ ] AUTHORITY-PERSISTENCE GATE: exact-head validate v1.0 authority state with Workspace/Semantic/Operator 3/3 before any Windows/Linux execution.\n- [ ] After authority persistence is 3/3 green, run exact Windows-first v1.0 pre-live setup and leave its final cleanup prompt untouched while Linux runs.
-
-
-- [x] Stage-12 v1.0 authority persistence `b8189516…` passed Workspace #3036 / Semantic #336 / Operator #609.
-- [x] Stage-12 v1.0 live authority consumed at `STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS`; Q1 failed before dispatch because bridge startup remained OFF and Ctrl+Space was not globally registered. Candidate branch remained `0bc1bc0e…`.
-- [x] Root cause audit: `BridgeController.SetEnabled(true)` is only reached by the manual tray toggle in current runtime; Program/Stage-12 launcher do not enable it. Clipboard/focus/native-foreground paths were not exercised.
-- [x] Freeze v1.1 fast-loop review/procedure: explicit start-enabled mode, Windows-only synthetic local smoke, one-command start/stop/reset/status/smoke dev lifecycle, production bounded supervisor direction.
-- [x] v1.1 diagnosis/review `f0a8313b…` passed Workspace #3037 / Semantic #337 / Operator #610; owner task `workspace-operator-bridge-implementation-v1` already authorizes `operator-bridge/**` mutation.
-- [x] v1.1 fast-loop source candidate `380d2919…` adds `--bridge-start-enabled`, deterministic `--local-smoke`, and `workspace-operator-dev.ps1` lifecycle controls.
-- [x] First synchronized v1.1 implementation head `21cefb25…` passed Workspace #3039 / Semantic #339 but Operator #612 failed at compile before runtime (CS0019 concrete-type coalescing).
-- [x] Minimal compile repair `093f8503…` changes only action-port selection to an explicit `IOperatorActionPort` conditional.
-- [ ] CURRENT GATE: exact-head validate the repaired synchronized v1.1 implementation state 3/3.
-- [ ] After validation is green, run the Windows-only synthetic smoke before creating any new Stage-12 live authority.
-
-
-- [x] Final hardened fast-loop head `eac272f9…` passed Workspace #3045 / Semantic #345 / Operator #618.
-- [x] First Windows-only smoke built successfully but stopped before runtime on `DEV_SMOKE_REQUIRES_EXISTING_FIREFOX_CLOSED`; hotkey/clipboard/foreground were not exercised.
-- [x] Exact script audit found the intended runtime hardening had not landed; candidate `97410a1c…` removes Firefox exclusivity, fixes reserved `$PID` parameter use, and adds source-tree build caching.
-- [ ] CURRENT GATE: exact-head validate `97410a1c…` synchronized runtime-guard repair 3/3.
-- [ ] After green validation, rerun only Windows synthetic smoke; expected one Ctrl+Space -> clipboard smoke packet + dedicated Firefox foreground.
-
-
-- [x] Runtime-guard/build-cache executable source `a69bb92d…` passed Workspace #3048 / Semantic #348 / Operator #621.
-- [ ] CURRENT GATE: Windows-only smoke on exact `a69bb92d…`: run `wop smoke a69bb92d99bffc4e6df05ed59809cbdddff61f0a`, press Ctrl+Space once, verify clipboard `WORKSPACE_OPERATOR_SMOKE_PACKET_V1` and dedicated Firefox foreground.
-- [ ] Only after local smoke passes: review whether any additional foreground/clipboard fix is needed; do not create a real-account Stage-12 authority before that evidence.
-
-
-- [x] Windows-only smoke proved global Ctrl+Space capture and adapter connection; diagnostics showed browser preparation succeeded, then `CLIPBOARD_FAILED InvalidOperationException`; clipboard and foreground were therefore not reached.
-- [x] Clipboard source `05389919…` self-marshals non-STA writes onto STA and adds bounded clipboard-busy retry.
-- [x] Clipboard fix `05389919…` passed Workspace #3050 / Semantic #350 / Operator #623.
-- [ ] CURRENT GATE: rerun Windows-only smoke with clipboard-fixed source; one Ctrl+Space must set clipboard exactly `WORKSPACE_OPERATOR_SMOKE_PACKET_V1` and foreground the dedicated Firefox window.
-- [ ] If clipboard passes but foreground fails, isolate only the final focus/native-foreground layer; do not return to Linux/full Stage-12 setup.
-
-
-- [x] WINDOWS-ONLY FAST SMOKE PASS: Ctrl+Space foregrounded managed Firefox and clipboard became `WORKSPACE_OPERATOR_SMOKE_PACKET_V1`; screenshot shows packet in ChatGPT composer.
-- [x] Local dispatch chain is proven end-to-end: hotkey -> browser prepare -> clipboard -> browser focus -> native foreground.
-- [x] Remaining repeated-login issue identified as web-ext temporary-profile lifecycle, separate from dispatch correctness.
-- [ ] CURRENT GATE: validate dedicated persistent non-default Firefox profile candidate (`--firefox-profile` + `--profile-create-if-missing` + `--keep-profile-changes`) 3/3.
-- [ ] After validation: first reset may require one login; second reset must preserve the ChatGPT session without touching the user's normal Firefox profile.
-
-
-- [x] Dedicated persistent Firefox profile source `7639a744…` passed Workspace #3052 / Semantic #352 / Operator #625.
-- [ ] CURRENT GATE: launch persistent Workspace Operator profile, login once if needed, run `wop reset`, and verify ChatGPT remains authenticated after relaunch.
-- [ ] PASS closes repeated-login UX defect; normal/default Firefox profile remains untouched.
-
-
-- [x] Temporary Chat/no-duplicate-bootstrap-tab source `d08172db…` passed Workspace #3057 / Semantic #357 / Operator #630.
-- [x] Worker start URL fixed to `https://chatgpt.com/?temporary-chat=true`; dev + Stage-12 launchers use the dedicated persistent profile at that route.
-- [x] Adapter reuses exactly one active unmanaged bootstrap tab only when it exactly matches the fixed Temporary Chat URL; arbitrary unmanaged ChatGPT tabs remain non-adoptable.
-- [ ] CURRENT GATE: Windows-only UI check — launch current tip, confirm Temporary Chat opens directly, press Ctrl+Space once, confirm the same tab is serviced and no stray bootstrap tab remains.
-- [ ] PLUGIN PROBE: in a Personalized Temporary Chat, send a literal raw `@github` probe without Tab/click/autocomplete acceptance; determine empirically whether structured GitHub plugin invocation occurs.
-- [ ] If raw `@github` does not invoke the plugin, test plain-language explicit plugin request before considering any UI-selection requirement. Preserve no-auto-typing/no-auto-selection boundary.
-- [ ] After UI/plugin evidence, add convenient per-user Workspace Operator lifecycle shims analogous to Heartbeat: up/down/reset/status/self-test.
-
-
-- [x] RAW PLUGIN PROBE PASS: Personalized Temporary Chat accepted literal `@github` without Tab/click/autocomplete selection and returned exact branch SHA `ec26aa7d…`.
-- [x] Persistent Firefox lifecycle repair source `fd7ede42…` passed Workspace #3059 / Semantic #359 / Operator #632.
-- [x] Fast-loop shutdown now requests graceful Firefox window close first; force-kill is bounded fallback only.
-- [x] Temporary Chat startup navigation moved out of web-ext `--start-url` and into the least-privilege Firefox adapter for exactly one active blank bootstrap tab.
-- [ ] CURRENT GATE: Windows-only smoke — no Troubleshoot Mode prompt; persistent ChatGPT login retained; Firefox lands at `https://chatgpt.com/?temporary-chat=true`; Ctrl+Space services the same tab and stages the smoke packet.
-- [ ] After Windows smoke PASS: add per-user lifecycle commands/shortcuts analogous to Heartbeat (`wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test`) before returning to the real Stage-12 calibration.
-
-
-- [x] Locked-workdir failure captured: `wop smoke 7d000c5…` stopped pre-start on `DEV_RUNTIME_CLEANUP_FAILED` for `run-ee58…`.
-- [x] Exact process-tree cleanup source `5ce678ea…` passed Workspace #3061 / Semantic #361 / Operator #634.
-- [x] Teardown ownership now includes recorded PIDs + exact helper path + exact GUID workdir command-line matches + recursive descendants; Firefox remains graceful-first.
-- [ ] CURRENT GATE: run Windows-only smoke on current bookkeeping tip. It must first clean the already-stuck `run-ee58…` runtime, then launch persistent Temporary Chat with no Troubleshoot prompt and preserve the proven Ctrl+Space/clipboard/focus path.
-
-
-- [x] Second stale-runtime recovery attempt on `d9e3bee1…` proved `WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS` but still hit `DEV_RUNTIME_CLEANUP_FAILED` deleting the old `run-ee58…` directory; no new runtime started.
-- [x] This narrows the remaining failure to filesystem residue after exact owned-process shutdown, not a live Workspace Operator process.
-- [x] Residue-defer source `b7494178…` journals an undeletable verified-dead workdir to `cleanup-residue.jsonl`, clears old registry/state, and allows fresh GUID runtime startup.
-- [x] Residue-defer source `b7494178…` passed Workspace #3063 / Semantic #363 / Operator #636.
-- [ ] CURRENT GATE: run Windows-only smoke on current bookkeeping tip with no manual cleanup. Expected teardown may include `WORKSPACE_OPERATOR_RUNTIME_RESIDUE=DEFERRED:...run-ee58...` and `WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=DEFERRED`, but must continue through `WORKSPACE_OPERATOR_DEV_OFFLINE=PASS` and fresh runtime startup.
-- [ ] After startup, verify no Troubleshoot Mode prompt, persistent auth, direct Personalized Temporary Chat, same-tab Ctrl+Space foreground, and clipboard `WORKSPACE_OPERATOR_SMOKE_PACKET_V1`.
-- [ ] After Windows smoke PASS: add `wop-up` / `wop-down` / `wop-reset` / `wop-status` / `wop-self-test`, then return to real Instant-worker calibration.
+**Functional front end: DONE.**  
+**Convenience aliases: OPTIONAL / NOT DONE.**  
+**Whole-system real-account proof: NOT DONE.**  
+**No live Stage-12 authority currently exists.**  
+**Do not start D4/E1 automatically; operator requested this checklist reconciliation first and will choose the next step afterward.**
