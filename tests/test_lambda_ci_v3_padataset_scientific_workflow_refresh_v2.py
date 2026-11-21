@@ -48,6 +48,31 @@ class PADatasetScientificWorkflowRefreshV2Tests(unittest.TestCase):
         self.assertNotIn("api.github.com", LAUNCHER)
         self.assertNotIn("GH_TOKEN", LAUNCHER)
 
+    def test_effective_v2_digest_is_used_for_lane_a_managed_addition(self):
+        block = REC[
+            REC.index("for destination, binding in scientific_additions.items():"):
+            REC.index("for destination, binding in dual_additions.items():")
+        ]
+        self.assertIn("scientific_workflow_effective_refresh is not None", block)
+        self.assertIn(
+            'expected_addition_sha = scientific_workflow_effective_refresh[',
+            block,
+        )
+        self.assertNotIn(
+            'expected_addition_sha = scientific_workflow_refresh[',
+            block,
+        )
+
+    def test_rollback_is_postverified_before_marking_complete(self):
+        for marker in (
+            "rollback lane-A controller did not return active/running/enabled",
+            "candidate.verify_installed(BASE_MANIFEST)",
+            "require_snapshot_same(others_before, rollback_others)",
+            '"rollback_target_controller_after"',
+            '"rollback_existing_controller_snapshot_after"',
+        ):
+            self.assertIn(marker, HELPER)
+
     def test_exact_v1_to_v2_transition_is_frozen(self):
         for marker in (
             '"4cf390ec334b0569dbfc2399ff86c2d892f97586"',
