@@ -2718,13 +2718,13 @@
     }
   },
   "h1_finalist_osr_overlap": {
-    "status": "CORRECTED_GPU1_JOBS_ADMITTED",
+    "status": "ALL_THREE_FROZEN_PA2PA3_REBOUND_PENDING_VALIDATION",
     "scientific_role": "pair-specific H1 post-freeze standard-DQNGuard directional OSR investment gate",
     "pr37_frozen_head": "ab87931408651b0b3516d910b13474822fb2a93d",
     "pr37_head_advanced": false,
     "overlap_pr": 38,
     "overlap_branch": "mth602-h1-finalist-osr-overlap-v1",
-    "overlap_head": "d7ba2c754d7d281651f4119ba79544ec6f6e89f6",
+    "overlap_head": "9cc3179217b009db14d89a5a3f36f461ccce770e",
     "overlap_diff_scope": [
       "manifests/l2o_canonical_backbone_matrix_v1.json",
       "manifests/configs/l2o_directional_eval_v1/PA2-PA8__targetPA2__surPA8.json",
