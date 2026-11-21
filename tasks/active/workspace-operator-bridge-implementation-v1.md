@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 5ce678ead71f28edd653a26adcacc328398f0a13
+- Remote checkpoint: b749417849914c395bef5ac267b3c385edbdff04
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY RECOVERY SMOKE — exact runtime process-tree cleanup source 5ce678ea… passed Workspace #3061 / Semantic #361 / Operator #634. The prior attempt stopped before startup because old DevRuntime workdir run-ee58… remained locked after wrapper-only teardown. New cleanup discovers exact runtime-owned processes from recorded PIDs, helper executable path, saved run-<GUID> workdir command lines, and descendants; closes owned Firefox gracefully, terminates remaining owned descendants, waits for exit, then removes workdir. NEXT ACTION: run wop smoke on current bookkeeping tip; it must first recover the existing stuck runtime, then launch the persistent Temporary Chat flow. No Linux/live authority.
+WINDOWS-ONLY RESIDUE-DEFER RECOVERY SMOKE — source b7494178… passed Workspace #3063 / Semantic #363 / Operator #636. The retry on bookkeeping tip d9e3bee1… proved runtime-owned process cleanup with WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS, but the old run-ee58… directory still could not be deleted and teardown stopped at DEV_RUNTIME_CLEANUP_FAILED. This proves the remaining blocker is filesystem residue after owned processes are dead. b7494178… journals an undeletable verified-dead workdir to cleanup-residue.jsonl, clears old state/registry binding, emits WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=DEFERRED, and continues startup with a fresh GUID runtime. NEXT ACTION: run wop smoke on the current bookkeeping tip; no manual cleanup first. Verify stale residue is deferred rather than fatal, then persistent Temporary Chat/login + Ctrl+Space/clipboard/focus still pass.
 
 ## Remaining work
 

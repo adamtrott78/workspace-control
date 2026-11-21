@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "DEV_RUNTIME_CLEANUP_VALIDATED_AWAITING_WINDOWS_RECOVERY_SMOKE",
+  "status": "RUNTIME_RESIDUE_DEFER_VALIDATED_AWAITING_WINDOWS_SMOKE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -289,6 +289,33 @@
         "workspace_control_run": 3061,
         "semantic_execution_run": 361,
         "operator_bridge_run": 634,
+        "result": "SUCCESS"
+      },
+      "live_retry_authorized": false
+    },
+    "dev_runtime_second_cleanup_failure": {
+      "attempted_tip": "d9e3bee1c9cfae2a59d424d74d8ef505e9af0db2",
+      "process_cleanup_marker": "WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS",
+      "workdir_cleanup_result": "DEV_RUNTIME_CLEANUP_FAILED",
+      "stuck_workdir": "%LOCALAPPDATA%\\WorkspaceControl\\OperatorBridge\\DevRuntime\\run-ee58cb56c57f43418fbc15b16256306e",
+      "new_runtime_started": false,
+      "implication": "No detected runtime-owned process remained; deletion failure is filesystem residue and must not retain authoritative runtime state."
+    },
+    "dev_runtime_residue_defer_fix": {
+      "source_head": "b749417849914c395bef5ac267b3c385edbdff04",
+      "script_blob": "b8e1365917975e0fd3bb0ae96e88513a7605f39b",
+      "test_blob": "9decb0a76c5119785ab9172aaa4b4a9c1e7a8b42",
+      "behavior": [
+        "Process-tree cleanup remains fail-closed and must pass first.",
+        "Workdir deletion is retried boundedly.",
+        "If deletion still fails after process cleanup PASS, residue is journaled to cleanup-residue.jsonl and reported as DEFERRED.",
+        "Old native-host registry binding and runtime.json are cleared.",
+        "Fresh runtime startup uses a new GUID workdir; deferred residue is not treated as current runtime."
+      ],
+      "validation": {
+        "workspace_control_run": 3063,
+        "semantic_execution_run": 363,
+        "operator_bridge_run": 636,
         "result": "SUCCESS"
       },
       "live_retry_authorized": false

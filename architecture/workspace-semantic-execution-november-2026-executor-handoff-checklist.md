@@ -294,3 +294,12 @@
 - [x] Exact process-tree cleanup source `5ce678ea…` passed Workspace #3061 / Semantic #361 / Operator #634.
 - [x] Teardown ownership now includes recorded PIDs + exact helper path + exact GUID workdir command-line matches + recursive descendants; Firefox remains graceful-first.
 - [ ] CURRENT GATE: run Windows-only smoke on current bookkeeping tip. It must first clean the already-stuck `run-ee58…` runtime, then launch persistent Temporary Chat with no Troubleshoot prompt and preserve the proven Ctrl+Space/clipboard/focus path.
+
+
+- [x] Second stale-runtime recovery attempt on `d9e3bee1…` proved `WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS` but still hit `DEV_RUNTIME_CLEANUP_FAILED` deleting the old `run-ee58…` directory; no new runtime started.
+- [x] This narrows the remaining failure to filesystem residue after exact owned-process shutdown, not a live Workspace Operator process.
+- [x] Residue-defer source `b7494178…` journals an undeletable verified-dead workdir to `cleanup-residue.jsonl`, clears old registry/state, and allows fresh GUID runtime startup.
+- [x] Residue-defer source `b7494178…` passed Workspace #3063 / Semantic #363 / Operator #636.
+- [ ] CURRENT GATE: run Windows-only smoke on current bookkeeping tip with no manual cleanup. Expected teardown may include `WORKSPACE_OPERATOR_RUNTIME_RESIDUE=DEFERRED:...run-ee58...` and `WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=DEFERRED`, but must continue through `WORKSPACE_OPERATOR_DEV_OFFLINE=PASS` and fresh runtime startup.
+- [ ] After startup, verify no Troubleshoot Mode prompt, persistent auth, direct Personalized Temporary Chat, same-tab Ctrl+Space foreground, and clipboard `WORKSPACE_OPERATOR_SMOKE_PACKET_V1`.
+- [ ] After Windows smoke PASS: add `wop-up` / `wop-down` / `wop-reset` / `wop-status` / `wop-self-test`, then return to real Instant-worker calibration.

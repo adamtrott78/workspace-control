@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 5ce678ead71f28edd653a26adcacc328398f0a13
+- Remote checkpoint: b749417849914c395bef5ac267b3c385edbdff04
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 WINDOWS FAST-LOOP RECOVERY GATE — runtime process-tree cleanup 5ce678ea… is exact-source 3/3 green (#3061/#361/#634). Prior 7d000c5… smoke stopped pre-start on a locked DevRuntime run-ee58… directory. NEXT ACTION: Windows-only wop smoke on current bookkeeping tip; PASS first requires recovery/cleanup of the existing stale runtime, then no Troubleshoot prompt, persistent auth, direct Personalized Temporary Chat, and same-tab Ctrl+Space service. Raw @github invocation is already proven. Do not return to Linux/full Stage-12 until this passes.
+STAGE-12 V1.1 WINDOWS FAST-LOOP RESIDUE-DEFER GATE — source b7494178… is 3/3 green (#3063/#363/#636). Second recovery smoke proved exact runtime process cleanup PASS but old run-ee58… deletion still failed, so the remaining failure is non-authoritative filesystem residue after owned processes are dead. New harness journals/defer-cleans that residue, clears old state, and continues with a fresh GUID runtime. NEXT ACTION: Windows-only wop smoke on current bookkeeping tip with no manual cleanup; verify deferred residue markers, successful persistent Temporary Chat launch, retained auth, same-tab Ctrl+Space, clipboard packet, and foreground. Raw @github invocation is already proven. No new live Stage-12 authority exists.
 
 ## Remaining work
 
