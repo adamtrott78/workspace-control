@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: ee3a21eef100539f36e7a0546f6d61e5f3bc3281
+- Remote checkpoint: bfa6e5dd658e6d91e8699e396e888058913e20d0
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY SESSIONSTORE-RESET SMOKE — ee3a21eef100539f36e7a0546f6d61e5f3bc3281 passed Workspace #3072 / Semantic #372 / Operator #645. Previous smoke showed the old runtime closing correctly but Firefox sessionstore resurrecting the obsolete fake-worker URL; clipboard packet still loaded and the subsequent no-action alert was correct. ee3a21ee… clears only dedicated-profile tab/session restore artifacts before launch while retaining login/cookies. NEXT ACTION: run wop smoke on the current bookkeeping tip with no manual Firefox/tab cleanup. Before Ctrl+Space require exactly one blank/new-tab surface and no fake-worker page. Press Ctrl+Space once: require a fresh active https://chatgpt.com/?temporary-chat=true tab, Firefox foreground, startup blank closed, and clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1. Do not press a second time unless testing no-action behavior. No live Stage-12 authority exists.
+WINDOWS-ONLY HUMAN-ENTER HANDOFF SMOKE — bfa6e5dd658e6d91e8699e396e888058913e20d0 passed Workspace #3074 / Semantic #374 / Operator #647. Existing visual loop is already confirmed working: clean blank startup, first Ctrl+Space creates/focuses fresh Personalized Temporary Chat, closes startup blank and loads clipboard. NEW GATE: after preparation, do not advance/minimize until a plain Enter keypress is observed while the captured worker Firefox window is foreground. A premature second Ctrl+Space must refocus Firefox and show the no-Enter-confirmation alert; it must not dispatch or minimize. After the human pastes the prompt and presses plain Enter, the next Ctrl+Space may resume normal dispatch; with no remaining smoke action it should minimize and report nothing needs service. This confirms only the human Enter event, not ChatGPT execution/output. No automatic typing/paste/Enter/Send and no live Stage-12 authority.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ WINDOWS-ONLY SESSIONSTORE-RESET SMOKE — ee3a21eef100539f36e7a0546f6d61e5f3bc32
 ## Blockers / gates
 
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
-- Real-account Stage-12 retry remains paused. Sessionstore reset ee3a21ee… is 3/3 validated, but operator must rerun Windows smoke and prove clean idle blank -> one Ctrl+Space fresh Personalized Temporary Chat/focus -> blank closed, with exact clipboard packet. No new live retry authority exists.
+- Real-account Stage-12 retry remains paused. Human-Enter gate bfa6e5dd… is 3/3 validated, but operator must run the Windows-only smoke and empirically prove: first Ctrl+Space prepares the worker; second Ctrl+Space before plain Enter alerts/refocuses without minimize/advance; plain Enter while prepared worker Firefox is foreground then unlocks the next Ctrl+Space. No new live retry authority exists.
 
 ## Fresh-chat initialization
 

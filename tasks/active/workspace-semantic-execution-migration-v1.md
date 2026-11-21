@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: ee3a21eef100539f36e7a0546f6d61e5f3bc3281
+- Remote checkpoint: bfa6e5dd658e6d91e8699e396e888058913e20d0
 - Remote verified: true
 
 ### PADataset
@@ -70,14 +70,14 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 WINDOWS SESSIONSTORE-RESET GATE — ee3a21eef100539f36e7a0546f6d61e5f3bc3281 is exact-head 3/3 green (#3072/#372/#645). Prior smoke proved runtime cleanup and clipboard behavior but Firefox resurrected the obsolete fake-worker URL from persistent sessionstore. ee3a21ee… deletes only dedicated-profile sessionstore.jsonlz4, sessionCheckpoints.json and sessionstore-backups before launch, preserving cookies/login. NEXT ACTION: Windows-only wop smoke on current bookkeeping tip with no manual Firefox/tab cleanup; before Ctrl+Space require one blank/new-tab surface and no fake-worker. After one Ctrl+Space require one Personalized Temporary Chat, Firefox foreground, blank removed and clipboard WORKSPACE_OPERATOR_SMOKE_PACKET_V1. No new live Stage-12 authority exists.
+STAGE-12 V1.1 WINDOWS HUMAN-ENTER GATE — bfa6e5dd658e6d91e8699e396e888058913e20d0 is exact-head 3/3 green (#3074/#374/#647). Existing blank-startup -> first Ctrl+Space fresh Temporary Chat/focus -> blank closure -> clipboard behavior is operator-confirmed. NEW TEST: without pressing Enter, press Ctrl+Space again; require alert/refocus and absolutely no advance/minimize. Then paste the smoke packet, press plain Enter while the prepared worker Firefox window is foreground, and press Ctrl+Space; the confirmation is consumed and normal dispatch resumes, so the single-action smoke should minimize with no-work. This is human-input confirmation only, not DOM/output execution verification. No new live Stage-12 authority exists.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: v1.0 is consumed/non-reusable. The v1.1 local path now includes deterministic dedicated-Firefox sessionstore reset at ee3a21ee… in addition to the operator-requested hotkey visual lifecycle. Complete Windows smoke before any further real-account Stage-12 attempt.
-- REAL-ACCOUNT CALIBRATION: blocked until Windows smoke proves no obsolete fake-worker/session restore, then idle blank -> Ctrl+Space fresh Temporary Chat creation/focus -> blank closure and exact clipboard packet. Do not spend live authority on local Windows debugging.
+- LIVE INSTANT: v1.0 is consumed/non-reusable. The v1.1 local path now includes the validated human-Enter-before-advance gate at bfa6e5dd… in addition to clean session startup and visual worker creation. Complete Windows smoke before any further real-account Stage-12 attempt.
+- REAL-ACCOUNT CALIBRATION: blocked until Windows smoke proves first Ctrl+Space prepare, premature repeat press alert/refocus without advance, plain Enter confirmation in foreground worker Firefox, then next Ctrl+Space advance/minimize. Do not spend live authority on local Windows interaction debugging.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
 - PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
@@ -90,7 +90,7 @@ STAGE-12 V1.1 WINDOWS SESSIONSTORE-RESET GATE — ee3a21eef100539f36e7a0546f6d61
 - v1.0 validation-state persistence bd366f93… is 3/3 validated (#3032/#332/#605).
 - Final bookkeeping head 7b5b7bc2… is 3/3 validated (#3033/#333/#606).
 - Stage-12 v1.0 authority is consumed/non-reusable after Q1 BRIDGE_DISABLED_HOTKEY_UNREGISTERED failure; no candidate was published and candidate branch remained at 0bc1bc0e….
-- No new live Stage-12 authority exists. Sessionstore reset ee3a21ee… is exact-head 3/3 validated, but Windows smoke must prove no fake-worker resurrection: idle one blank, then one Ctrl+Space fresh Personalized Temporary Chat/focus, blank closure, exact clipboard packet.
+- No new live Stage-12 authority exists. Human-Enter gate bfa6e5dd… is exact-head 3/3 validated, but Windows smoke must prove repeat Ctrl+Space is blocked before human Enter and unlocked only after an unmodified Enter while prepared worker Firefox is foreground.
 
 ## Fresh-chat initialization
 
