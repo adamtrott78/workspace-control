@@ -67,6 +67,18 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         self.assertIn("tab.url === LEGACY_DEV_WORKER_URL", source)
         self.assertNotIn("startsWith(\"http://127.0.0.1:8765", source)
 
+    def test_dedicated_firefox_launchers_suppress_session_restore(self):
+        dev = DEV_RUNTIME.read_text(encoding="utf-8")
+        stage12 = STAGE12.read_text(encoding="utf-8")
+        for source in (dev, stage12):
+            self.assertIn("--pref=browser.startup.page=0", source)
+            self.assertIn(
+                "--pref=browser.sessionstore.resume_from_crash=false",
+                source,
+            )
+            self.assertIn("--keep-profile-changes", source)
+            self.assertNotIn("--start-url", source)
+
     def test_dev_runtime_prefers_graceful_managed_firefox_shutdown(self):
         text = DEV_RUNTIME.read_text(encoding="utf-8")
         self.assertIn("function Stop-ManagedFirefox", text)

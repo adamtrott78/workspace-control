@@ -151,7 +151,7 @@ try {
   $launcher = Join-Path $work "run-web-ext.cmd"
   @"
 @echo off
-call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --no-reload --no-input --arg=-no-remote
+call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --no-reload --no-input --pref=browser.startup.page=0 --pref=browser.sessionstore.resume_from_crash=false --arg=-no-remote
 "@ | Set-Content -LiteralPath $launcher -Encoding ASCII
 
   $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @(
