@@ -2913,7 +2913,9 @@
         "ci-padataset=>GPU0",
         "ci-padataset-2=>GPU1"
       ],
-      "persistent_cache": "~/.cache/workspace-control/experiment-dashboards/mth602-h1-dual-osr.json"
+      "persistent_cache": "~/.cache/workspace-control/experiment-dashboards/mth602-h1-dual-osr.json",
+      "validation_receipt": "job-9e3a0c1e-ca9a-44bc-a9e7-a5a4e19e2c1d",
+      "validation_result": "1 passed"
     },
     "target_eval_adapter": {
       "reason": "finalist configs correctly quarantine target during training with open_val_frac=0; post-freeze evaluator must reconstruct the frozen Track-A 15% target-open partition to materialize val_open/test_open",
