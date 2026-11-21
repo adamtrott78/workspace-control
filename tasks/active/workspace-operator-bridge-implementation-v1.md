@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 7fcc1d4dc994d316b26316bdb9374295431aa36d
+- Remote checkpoint: dc3dff5ea00bc9a41be71bb79950115817fc364c
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY SINGLE-TAB STARTUP SMOKE — repair 7fcc1d4dc994d316b26316bdb9374295431aa36d passed Workspace #3067 / Semantic #367 / Operator #640. The prior smoke reached the correct Personalized Temporary Chat but still restored a second ChatGPT tab from persistent Firefox session state, so the no-stray/duplicate gate failed before Ctrl+Space. 7fcc1d4d… keeps the dedicated persistent profile/login but forces browser.startup.page=0 and browser.sessionstore.resume_from_crash=false on both dev and real Stage-12 launches; the adapter then navigates the single blank startup tab to the fixed Temporary Chat URL. NEXT ACTION: run wop smoke on the current bookkeeping tip with no manual Firefox/tab cleanup. Require exactly one ChatGPT Temporary Chat tab, no Troubleshoot Mode prompt, retained auth or at most one login, then press Ctrl+Space once and verify clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1 plus managed Firefox foreground. Do not create or infer live Stage-12 authority from this local smoke.
+WINDOWS-ONLY HOTKEY VISUAL-CREATE SMOKE — implementation dc3dff5ea00bc9a41be71bb79950115817fc364c passed Workspace #3070 / Semantic #370 / Operator #643. Intended UX: after launch the dedicated Firefox profile remains visibly idle on exactly one about:blank/about:newtab; do NOT navigate that startup tab to ChatGPT. On one Ctrl+Space create/service press, create a fresh active https://chatgpt.com/?temporary-chat=true tab, request Firefox OS focus, then close only the exact unmanaged startup blank captured before creation; clipboard behavior remains the already-proven WORKSPACE_OPERATOR_SMOKE_PACKET_V1 write. NEXT ACTION: run wop smoke on the current bookkeeping tip with no manual Firefox/tab cleanup. Before Ctrl+Space require one blank tab. After Ctrl+Space require one Personalized Temporary Chat tab, no blank duplicate, managed Firefox foreground, and clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1. No automatic paste/typing/Enter/Send. Do not infer live Stage-12 authority from this local smoke.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ WINDOWS-ONLY SINGLE-TAB STARTUP SMOKE — repair 7fcc1d4dc994d316b26316bdb937429
 ## Blockers / gates
 
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
-- Real-account Stage-12 retry remains paused. Single-tab startup-policy repair 7fcc1d4d… is 3/3 validated, but the operator must rerun the Windows-only fast smoke and prove exactly one Personalized Temporary Chat tab before Ctrl+Space, then prove clipboard replacement and native foreground. No new live retry authority exists.
+- Real-account Stage-12 retry remains paused. Hotkey visual-create repair dc3dff5e… is 3/3 validated, but the operator must rerun the Windows-only smoke and empirically confirm idle blank -> Ctrl+Space fresh Temporary Chat open/focus -> startup blank closed, with exact clipboard packet. No new live retry authority exists.
 
 ## Fresh-chat initialization
 

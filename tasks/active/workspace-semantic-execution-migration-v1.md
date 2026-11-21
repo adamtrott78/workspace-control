@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 7fcc1d4dc994d316b26316bdb9374295431aa36d
+- Remote checkpoint: dc3dff5ea00bc9a41be71bb79950115817fc364c
 - Remote verified: true
 
 ### PADataset
@@ -70,14 +70,14 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 WINDOWS SINGLE-TAB GATE — repair 7fcc1d4dc994d316b26316bdb9374295431aa36d is exact-head 3/3 green (#3067/#367/#640). The prior smoke after aa44c9a… reached the correct Personalized Temporary Chat but restored a second ChatGPT tab from persistent Firefox session state, so the no-duplicate gate failed before Ctrl+Space. 7fcc1d4d… keeps the dedicated persistent profile/authentication while forcing blank startup and crash-session restore off in both dev and real Stage-12 launchers; adapter-owned navigation still targets https://chatgpt.com/?temporary-chat=true. NEXT ACTION: Windows-only wop smoke on the current bookkeeping tip with no manual Firefox/tab cleanup; require exactly one Temporary Chat tab, retained auth or at most one login, then one Ctrl+Space, exact smoke clipboard packet and native foreground. Raw @github invocation is already proven. No new live Stage-12 authority exists.
+STAGE-12 V1.1 WINDOWS HOTKEY VISUAL-CREATE GATE — dc3dff5ea00bc9a41be71bb79950115817fc364c is exact-head 3/3 green (#3070/#370/#643). Operator explicitly wants the dedicated Firefox profile to idle visibly on about:blank; Ctrl+Space create/service then opens a fresh active Personalized Temporary Chat, requests Firefox focus, closes only that exact unmanaged startup blank, and preserves the already-working smoke clipboard write. NEXT ACTION: Windows-only wop smoke on the current bookkeeping tip with no manual Firefox/tab cleanup. Before Ctrl+Space require exactly one blank tab. After one Ctrl+Space require exactly one Temporary Chat tab, no blank duplicate, Firefox foreground and clipboard WORKSPACE_OPERATOR_SMOKE_PACKET_V1. Raw @github invocation is already proven. No new live Stage-12 authority exists.
 
 ## Remaining work
 
 - REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
 - CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
-- LIVE INSTANT: v1.0 is consumed/non-reusable. The v1.1 local path now has verified-dead residue recovery, exact legacy fake-worker bootstrap recovery, and validated single-tab startup/session-restore suppression at 7fcc1d4d…. Complete the Windows-only smoke gate before any further real-account Stage-12 attempt.
-- REAL-ACCOUNT CALIBRATION: blocked until the rerun Windows-only smoke proves exactly one Personalized Temporary Chat tab from the persistent profile, then proves Ctrl+Space packet write, Firefox focus and native foreground. Do not spend another live Stage-12 attempt on local Windows interaction debugging.
+- LIVE INSTANT: v1.0 is consumed/non-reusable. The v1.1 local path now implements the operator-requested blank-idle -> fresh Temporary Chat on Ctrl+Space visual lifecycle at dc3dff5e…, with exact-head 3/3 validation. Complete the Windows smoke gate before any further real-account Stage-12 attempt.
+- REAL-ACCOUNT CALIBRATION: blocked until Windows smoke proves idle one-blank startup, Ctrl+Space fresh Temporary Chat creation/focus, startup blank closure and exact clipboard packet. Do not spend another live Stage-12 attempt on local Windows interaction debugging.
 - LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
 - ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
 - PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
@@ -90,7 +90,7 @@ STAGE-12 V1.1 WINDOWS SINGLE-TAB GATE — repair 7fcc1d4dc994d316b26316bdb937429
 - v1.0 validation-state persistence bd366f93… is 3/3 validated (#3032/#332/#605).
 - Final bookkeeping head 7b5b7bc2… is 3/3 validated (#3033/#333/#606).
 - Stage-12 v1.0 authority is consumed/non-reusable after Q1 BRIDGE_DISABLED_HOTKEY_UNREGISTERED failure; no candidate was published and candidate branch remained at 0bc1bc0e….
-- No new live Stage-12 authority exists. Single-tab startup-policy repair 7fcc1d4d… is exact-head 3/3 validated, but the Windows-only smoke must now prove exactly one Personalized Temporary Chat tab before Ctrl+Space and still pass clipboard + foreground.
+- No new live Stage-12 authority exists. Hotkey visual-create repair dc3dff5e… is exact-head 3/3 validated, but Windows smoke must prove one idle blank before Ctrl+Space, then fresh Personalized Temporary Chat open/focus, blank closure, and exact clipboard packet.
 
 ## Fresh-chat initialization
 
