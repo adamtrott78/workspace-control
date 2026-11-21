@@ -51,6 +51,8 @@ RUNS = [
     ("PA8<-PA3", "PA8", "PA3", 1, 44939705618, 0.424513),
 ]
 RUN_IDS = {str(x[4]) for x in RUNS}
+FINALIST_RUN_NAME = "l2o_hpo_v2_PA2_PA3_t005_finalist"
+FINALIST_RUN_ID = 44924828921
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -68,6 +70,119 @@ def read_json(path: Path):
         return json.loads(path.read_text())
     except Exception:
         return None
+
+def finalist_process():
+    try:
+        out = subprocess.check_output(
+            ["ps", "-eo", "pid=,etimes=,args="],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return None
+    for raw in out.splitlines():
+        if "pa_train_one.py" not in raw or "--cfg" not in raw:
+            continue
+        parts = raw.strip().split(None, 2)
+        if len(parts) < 3:
+            continue
+        try:
+            pid = int(parts[0])
+            elapsed = int(parts[1])
+            argv = shlex.split(parts[2])
+            pos = argv.index("--cfg")
+            cfg_path = Path(argv[pos + 1])
+            cfg = read_json(cfg_path)
+            if not cfg or cfg.get("run_name") != FINALIST_RUN_NAME:
+                continue
+            save_root = Path(cfg.get("save_root", ""))
+            run_dir = save_root / FINALIST_RUN_NAME if str(save_root) else None
+            return {"pid": pid, "elapsed": elapsed, "run_dir": run_dir}
+        except Exception:
+            continue
+    return None
+
+
+def finalist_candidate_dirs(proc):
+    seen = set()
+    out = []
+    if proc and proc.get("run_dir"):
+        q = Path(proc["run_dir"])
+        if q not in seen:
+            seen.add(q)
+            out.append(q)
+    for pattern in [
+        f"/srv/workspace-ci/padataset/jobs/*/runner/_work/_temp/scientific-results/backbone/{FINALIST_RUN_NAME}",
+        f"/srv/workspace-ci/padataset/jobs/*/runner*/_work/_temp/scientific-results/backbone/{FINALIST_RUN_NAME}",
+    ]:
+        for item in glob.glob(pattern):
+            q = Path(item)
+            if q not in seen:
+                seen.add(q)
+                out.append(q)
+    return out
+
+
+def finalist_progress(proc):
+    best = None
+    best_mtime = -1.0
+    terminal = None
+    terminal_mtime = -1.0
+    for rd in finalist_candidate_dirs(proc):
+        p = rd / "train_progress.json"
+        d = read_json(p)
+        if d:
+            try:
+                mt = p.stat().st_mtime
+            except Exception:
+                mt = 0.0
+            if mt >= best_mtime:
+                best = d
+                best_mtime = mt
+        c = rd / "train_complete.json"
+        d = read_json(c)
+        if d:
+            try:
+                mt = c.stat().st_mtime
+            except Exception:
+                mt = 0.0
+            if mt >= terminal_mtime:
+                terminal = {"status": "SUCCESS", "total": d.get("elapsed_sec")}
+                terminal_mtime = mt
+        e = rd / "train_error.json"
+        d = read_json(e)
+        if d:
+            try:
+                mt = e.stat().st_mtime
+            except Exception:
+                mt = 0.0
+            if mt >= terminal_mtime:
+                terminal = {"status": "ERROR", "total": d.get("elapsed_sec")}
+                terminal_mtime = mt
+    return terminal, best
+
+
+def finalist_fields(progress, elapsed):
+    if not progress:
+        return "-", None, None
+    try:
+        epoch = int(progress.get("epoch", 0) or 0)
+        epochs = int(progress.get("epochs", 0) or 0)
+        step = int(progress.get("step", 0) or 0)
+        steps = int(progress.get("steps", 0) or 0)
+        ep = f"{epoch}/{epochs}" if epoch and epochs else "-"
+        overall = None
+        if epoch > 0 and epochs > 0 and steps > 0:
+            overall = ((epoch - 1) + step / max(steps, 1)) / epochs
+            overall = max(0.0, min(1.0, overall))
+        pct = overall * 100.0 if overall is not None else float(progress.get("pct", 0.0) or 0.0)
+        eta = None
+        if elapsed and overall and overall > 0.01:
+            eta = elapsed * (1.0 - overall) / overall
+        return ep, pct, eta
+    except Exception:
+        return "-", None, None
+
 
 
 def fmt(sec):
@@ -371,6 +486,26 @@ def render():
         while True:
             active_runs, evals = proc_snapshot()
             exact_dirs = exact_head_temp_dirs() if OBSERVER_ELEVATED else {}
+            finalist_proc = finalist_process()
+            finalist_terminal, finalist_prog = finalist_progress(finalist_proc)
+            finalist_cache = cache["runs"].get(str(FINALIST_RUN_ID), {})
+            if finalist_terminal:
+                finalist_cache.update(finalist_terminal)
+                cache["runs"][str(FINALIST_RUN_ID)] = finalist_cache
+            if finalist_proc:
+                finalist_status = "RUNNING"
+                finalist_elapsed = finalist_proc.get("elapsed")
+                finalist_total = None
+            elif finalist_cache.get("status"):
+                finalist_status = finalist_cache.get("status")
+                finalist_elapsed = None
+                finalist_total = finalist_cache.get("total")
+            else:
+                finalist_status = "WAITING" if OBSERVER_ELEVATED else "HIDDEN"
+                finalist_elapsed = None
+                finalist_total = None
+            finalist_epoch, finalist_pct, finalist_eta = finalist_fields(finalist_prog, finalist_elapsed)
+
             counts = {}
             rows = []
 
@@ -434,6 +569,23 @@ def render():
                 )
             frame.append(gpu_line())
             frame.append("")
+            frame.append(BOLD + "GPU0 FINALIST TRAINING" + RESET)
+            frame.append(
+                BOLD
+                + f"{'EXPERIMENT':<19} {'GPU':<4} {'STATUS':<10} {'EPOCH':>7} {'PROG':>7} "
+                  f"{'ELAPSED':>10} {'ETA LEFT':>10} {'TOTAL':>10} {'RUN ID':>12}"
+                + RESET
+            )
+            frame.append("-" * 105)
+            fpct = f"{finalist_pct:5.1f}%" if finalist_pct is not None else "-"
+            frame.append(
+                f"{'PA2-PA3 t005':<19} G0  {color_status(finalist_status)} "
+                f"{finalist_epoch:>7} {fpct:>7} {fmt(finalist_elapsed):>10} "
+                f"{('~' + fmt(finalist_eta)) if finalist_eta is not None else '-':>10} "
+                f"{fmt(finalist_total):>10} {FINALIST_RUN_ID:>12}"
+            )
+            frame.append("")
+            frame.append(BOLD + "GPU1 FROZEN-PAIR DIRECTIONAL OSR" + RESET)
             frame.append(
                 BOLD
                 + f"{'DIRECTION':<12} {'GPU':<4} {'STATUS':<10} {'STAGE':<10} "
@@ -459,7 +611,8 @@ def render():
             frame.append("")
             frame.append(DIM + "UNK-F1 = final target-open Unknown-F1. DELTA = change vs repaired Track-A directional baseline." + RESET)
             frame.append(DIM + "K-REJ = final known reject rate. Target-open metrics are diagnostic only and cannot feed back into HPO." + RESET)
-            frame.append(DIM + "RUNNING elapsed = host-local process/workflow age; TOTAL = evaluator elapsed_sec from osr_summary.csv." + RESET)
+            frame.append(DIM + "GPU0 finalist progress/ETA uses host-local train_progress.json exactly like the original finalist dashboard." + RESET)
+            frame.append(DIM + "OSR RUNNING elapsed = host-local process/workflow age; TOTAL = evaluator elapsed_sec from osr_summary.csv." + RESET)
             frame.append(DIM + "WAITING means admitted but not visible on this host; it does not claim provider queue state." + RESET)
             frame.append("Ctrl+B then D = detach tmux | Ctrl+C = stop dashboard")
 
