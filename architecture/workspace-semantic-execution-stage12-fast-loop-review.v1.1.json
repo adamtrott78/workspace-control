@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "CONVENIENCE_COMMAND_SHIMS_VALIDATED_AWAITING_WINDOWS_INSTALL",
+  "status": "CONVENIENCE_SHIM_TRANSPORT_HARDENED_AWAITING_WINDOWS_INSTALL",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -350,19 +350,21 @@
     "d4_real_account_calibration_complete": false
   },
   "convenience_commands": {
-    "source_head": "ca8b59837391405fd693b4a4e95b1e14a1441e96",
+    "source_head": "5839870b067af9c416099e096d29c614c5b8402b",
     "validation": {
-      "workspace_control_run": 3080,
-      "semantic_execution_run": 380,
-      "operator_bridge_run": 653,
+      "workspace_control_run": 3082,
+      "semantic_execution_run": 382,
+      "operator_bridge_run": 655,
       "result": "SUCCESS"
     },
     "supersedes_profile_source": "3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da",
+    "supersedes_shim_source": "ca8b59837391405fd693b4a4e95b1e14a1441e96",
     "failure_evidence": [
-      "invalid PowerShell variable-colon interpolation in generated profile block",
-      "local execution policy blocks PowerShell profile loading"
+      "profile installer parse bug and blocked PowerShell profile loading",
+      "legacy session-level wop could resolve intermediate commit object but checkout failed because local tree object was unavailable"
     ],
     "persistence": "owned .cmd shims in existing %LOCALAPPDATA%\\Microsoft\\WindowsApps PATH directory",
+    "transport": "current-branch shallow fetch + FETCH_HEAD checkout; exact SHA fetch only when required; explicit tree verification",
     "commands": [
       "wop",
       "wop-up",

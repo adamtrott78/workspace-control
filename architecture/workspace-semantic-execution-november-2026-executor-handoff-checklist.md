@@ -10,7 +10,7 @@
 **Current live semantic-host status:** Workspace Shell multirepo activation ACCEPTED at runtime `54ac65cbcd4211554710b8f8f4231c6c9554e3cc`; semantic execution `7c20097c5f177f23c16a765b95ce94d7161f0d29` independently verified; evaluator isolation ACCEPTED; exact fake-worker private-route round trip accepted with restoration of the preexisting Jupyter Serve state.
 **Current Windows Operator front-end status:** **FUNCTIONALLY ACCEPTED.** On the validated `e1e4778a…` line the operator directly confirmed the complete manual loop: clean dedicated Firefox startup, Ctrl+Space opens/focuses a fresh Personalized Temporary Chat and closes the startup blank, clipboard staging works, a premature second Ctrl+Space alerts/refocuses and does not advance/minimize, plain Enter in the foreground prepared worker unlocks the loop, and the following no-work Ctrl+Space minimizes the dedicated Firefox window. Literal raw `@github` invocation in Personalized Temporary Chat is also empirically accepted. No automatic paste, typing, Enter, Send, DOM/page-content scraping, or credential automation was introduced.
 **Current next hard gate:** **decision gate before D4.** Functional front-end work no longer blocks system proving. No reusable Stage-12 live authority exists. If the operator chooses to proceed, freeze an updated bounded real-account Stage-12 review/procedure against the current validated front-end head, validate it 3/3, obtain fresh explicit one-shot authority, then execute D4. After D4, E1–E3 are the first true whole-system proving run: live mixed `research-iterate`, mixed executors, and forced worker/session/process-loss recovery.
-**Required operator convenience layer:** source for persistent current-user commands `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` is validated at `ca8b59837391405fd693b4a4e95b1e14a1441e96` (Workspace #3080 / Semantic #380 / Operator #653 PASS). Adam explicitly classified these commands as necessary before proceeding. One bounded Windows profile install/verification remains; it does not create live Stage-12 authority.
+**Required operator convenience layer:** source for persistent current-user commands `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` is validated at `5839870b067af9c416099e096d29c614c5b8402b` (Workspace #3082 / Semantic #382 / Operator #655 PASS). Adam explicitly classified these commands as necessary before proceeding. One bounded Windows profile install/verification remains; it does not create live Stage-12 authority.
 **Stage-10 human status:** COMPLETE. UT-05, UT-06, UT-07, UT-08, UT-12, UT-11 and UT-09 ACCEPTED; final hotkey disposition is **RETAIN Ctrl+Space**.
 
 ## Fresh-chat recovery protocol
@@ -85,10 +85,10 @@
   - [x] Passive human-submit confirmation is fail-closed: before plain Enter is observed in the captured foreground worker Firefox window, another Ctrl+Space alerts/refocuses and cannot advance/minimize; after Enter, the next press resumes normal dispatch.
   - [x] Final durable implementation/bookkeeping head `e1e4778ad3583c817e25d0836964181b88cdd62a` passed Workspace #3075 / Semantic #375 / Operator #648, and the operator directly confirmed the complete sequence works.
 - [ ] **A7 — Install and accept persistent per-user convenience commands before D4.**
-  - [x] Source `ca8b59837391405fd693b4a4e95b1e14a1441e96` installs current-user executable shims for the existing `wop` wrapper plus `wop-up`, `wop-down`, `wop-reset`, `wop-status`, and `wop-self-test`.
+  - [x] Source `5839870b067af9c416099e096d29c614c5b8402b` installs current-user executable shims for the existing `wop` wrapper plus `wop-up`, `wop-down`, `wop-reset`, `wop-status`, and `wop-self-test`.
   - [x] `wop-self-test` is read-only: repository SHA, .NET 10, Node 24, Firefox availability, and runtime health only; it does not launch Firefox or mutate bridge state.
   - [x] Installer does not depend on PowerShell profile execution. It removes only the obsolete owned v1 profile block if present, then installs owned `.cmd` shims in `%LOCALAPPDATA%\Microsoft\WindowsApps` only when that exact directory already exists and is already on PATH. No PATH mutation, persistent execution-policy mutation, admin rights, service, scheduled task, credential store, browser-profile mutation, or authority widening.
-  - [x] Exact-head validation: Workspace #3080 PASS; Semantic #380 PASS; Operator #653 PASS, including Windows PowerShell parse of the installer and the full Operator regression suite.
+  - [x] Exact-head validation: Workspace #3082 PASS; Semantic #382 PASS; Operator #655 PASS, including Windows PowerShell parse of the installer and the full Operator regression suite.
   - [ ] **CURRENT GATE:** install the validated shim set once on Adam's Windows machine, then require `wop-self-test` PASS and `wop-status` to execute from the same shell without sourcing a PowerShell profile.
 
 ### B. Reasoning Economy — parallel, repository-safe lane
@@ -225,3 +225,12 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 - [x] No policy weakening was accepted. The profile-based persistence design is superseded.
 - [x] Replacement `ca8b5983…` removes only the obsolete owned profile block, installs owned command shims in an already-existing current-user WindowsApps PATH directory, and invokes the reviewed driver with `-NoProfile` and per-process `-ExecutionPolicy Bypass`; it never changes persistent execution policy or PATH.
 - [ ] Windows install/acceptance remains the only A7 gate.
+
+
+### 2026-11-21 exact-SHA transport hardening
+
+- [x] Real Windows bootstrap exposed a local object-materialization defect: the legacy session-level `wop` wrapper fetched the branch and could resolve ancestor commit `ca8b5983…`, but checkout failed with `fatal: unable to read tree`, leaving the DevCheckout on the old broken installer.
+- [x] Do not bootstrap A7 by asking the legacy wrapper to jump to an intermediate ancestor.
+- [x] Source `5839870b067af9c416099e096d29c614c5b8402b` hardens the installed shim driver: shallow-fetch current branch head, use `FETCH_HEAD` when it matches the requested SHA, fetch the exact SHA only when needed, checkout `FETCH_HEAD`, and explicitly verify the commit tree exists.
+- [x] Exact-head validation: Workspace #3082 PASS; Semantic #382 PASS; Operator #655 PASS.
+- [ ] Current operator bootstrap should materialize the current branch head directly, install the shims, then verify `wop-self-test` and `wop-status`. No D4 authority is created by this bootstrap.

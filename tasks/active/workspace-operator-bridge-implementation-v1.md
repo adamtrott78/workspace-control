@@ -24,23 +24,24 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: ca8b59837391405fd693b4a4e95b1e14a1441e96
+- Remote checkpoint: 5839870b067af9c416099e096d29c614c5b8402b
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS OPERATOR-ONLY COMMAND SHIM INSTALL GATE. Profile-based alias persistence is superseded by validated replacement ca8b59837391405fd693b4a4e95b1e14a1441e96 (#3080/#380/#653). Use existing session wop only to check out this exact SHA and stop the stale degraded smoke runtime, then invoke operator-bridge/tools/install-wop-commands.ps1 directly with -NoProfile/-ExecutionPolicy Bypass. Do NOT source $PROFILE. Installer removes only the obsolete owned profile block and installs owned .cmd shims in the already-present current-user WindowsApps PATH directory without changing PATH or persistent execution policy. Require WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS, then wop-self-test must PASS from an offline runtime and wop-status must execute. No live Stage-12 authority exists.
+WINDOWS OPERATOR-ONLY A7 BOOTSTRAP — exact-SHA transport hardening 5839870b067af9c416099e096d29c614c5b8402b passed Workspace #3082 / Semantic #382 / Operator #655. The legacy session-level wop wrapper cannot be trusted to materialize intermediate ancestor trees in the existing DevCheckout; do not use it to target ca8b5983…. Materialize the current branch head directly in DevCheckout using Git, verify HEAD equals 5839870b…, stop/clean the stale degraded runtime with the checked-out workspace-operator-dev.ps1, invoke install-wop-commands.ps1 with -NoProfile and per-process ExecutionPolicy Bypass, then require WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS, WORKSPACE_OPERATOR_SELF_TEST=PASS and wop-status execution. Do not source $PROFILE. No live Stage-12 authority exists.
 
 ## Remaining work
 
-- Install and accept validated shim commands ca8b5983… on Adam's Windows machine.
+- Materialize current branch head 5839870b… directly in the Windows DevCheckout and install/accept the validated shim commands.
 - After A7 acceptance, freeze a fresh D4 real-account Stage-12 review/procedure, validate 3/3, and obtain explicit one-shot authority.
 - After D4 passes, run E1–E3 on Research Engine research-iterate with mixed executors, forced loss, durable recovery and resource/soak evidence.
 
 ## Blockers / gates
 
-- WINDOWS USER SHIM INSTALL: connected tools cannot write Adam's local current-user WindowsApps directory. One bounded operator command is required.
-- LIVE STAGE-12 AUTHORITY: no reusable real-account Stage-12 authority exists; alias installation does not create authority.
+- WINDOWS USER SHIM INSTALL: connected tools cannot write Adam's local current-user WindowsApps directory. One bounded operator bootstrap remains.
+- LEGACY WOP BOOTSTRAP LIMIT: do not use the old session-level wrapper to target intermediate ancestor SHAs; materialize the current branch head directly before installing the hardened shims.
+- LIVE STAGE-12 AUTHORITY: no reusable real-account Stage-12 authority exists; A7 installation does not create authority.
 
 ## Fresh-chat initialization
 

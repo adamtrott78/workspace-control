@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: ca8b59837391405fd693b4a4e95b1e14a1441e96
+- Remote checkpoint: 5839870b067af9c416099e096d29c614c5b8402b
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-A7 WINDOWS SHIM INSTALL GATE BEFORE D4. Profile-based persistence failed on real Windows and is superseded. Replacement ca8b59837391405fd693b4a4e95b1e14a1441e96 is exact-head 3/3 green (#3080/#380/#653): it removes only the obsolete owned profile block and installs current-user .cmd shims in an already-present WindowsApps PATH directory without changing PATH or persistent execution policy. Adam must install/verify locally because connected tools cannot mutate that directory. Do not source $PROFILE. After A7 acceptance, D4 remains the next real-account calibration gate; Research Engine research-iterate remains the agreed E1–E3 whole-system workload.
+A7 WINDOWS CURRENT-HEAD BOOTSTRAP BEFORE D4. Real Windows evidence showed the legacy session-level wop wrapper could resolve an intermediate commit object while lacking its tree, so ancestor checkout failed and left the old installer active. Source 5839870b067af9c416099e096d29c614c5b8402b is exact-head 3/3 green (#3082/#382/#655) and hardens future shim exact-SHA transport. Adam must directly materialize the current branch head in DevCheckout, stop the stale degraded runtime, run the profile-independent shim installer, and verify wop-self-test + wop-status. Do not source $PROFILE. D4 remains blocked until A7 acceptance and still requires fresh explicit authority.
 
 ## Remaining work
 
@@ -84,7 +84,7 @@ A7 WINDOWS SHIM INSTALL GATE BEFORE D4. Profile-based persistence failed on real
 
 ## Blockers / gates
 
-- WINDOWS CONVENIENCE SHIM ACCEPTANCE: replacement ca8b5983… is validated, but Adam must locally install and verify the current-user WindowsApps shims before D4.
+- WINDOWS CONVENIENCE SHIM ACCEPTANCE: current-head transport hardening 5839870b… is validated, but Adam must directly materialize that current branch head and locally install/verify the shims before D4.
 - v0.9 authority is consumed/non-reusable.
 - v1.0 foreground repair source 1ecc094a… is 3/3 validated (#3030/#330/#603).
 - v1.0 review-state ecdc71c8… is 3/3 validated (#3031/#331/#604).
