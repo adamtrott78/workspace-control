@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "CONVENIENCE_COMMANDS_VALIDATED_AWAITING_WINDOWS_INSTALL",
+  "status": "CONVENIENCE_COMMAND_SHIMS_VALIDATED_AWAITING_WINDOWS_INSTALL",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -350,14 +350,19 @@
     "d4_real_account_calibration_complete": false
   },
   "convenience_commands": {
-    "source_head": "3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da",
+    "source_head": "ca8b59837391405fd693b4a4e95b1e14a1441e96",
     "validation": {
-      "workspace_control_run": 3078,
-      "semantic_execution_run": 378,
-      "operator_bridge_run": 651,
+      "workspace_control_run": 3080,
+      "semantic_execution_run": 380,
+      "operator_bridge_run": 653,
       "result": "SUCCESS"
     },
-    "profile_scope": "$PROFILE.CurrentUserAllHosts",
+    "supersedes_profile_source": "3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da",
+    "failure_evidence": [
+      "invalid PowerShell variable-colon interpolation in generated profile block",
+      "local execution policy blocks PowerShell profile loading"
+    ],
+    "persistence": "owned .cmd shims in existing %LOCALAPPDATA%\\Microsoft\\WindowsApps PATH directory",
     "commands": [
       "wop",
       "wop-up",
@@ -366,8 +371,8 @@
       "wop-status",
       "wop-self-test"
     ],
-    "self_test": "read-only prerequisite/runtime health check",
-    "installer_path": "operator-bridge/tools/install-wop-commands.ps1",
+    "path_mutation": false,
+    "persistent_execution_policy_mutation": false,
     "windows_install_accepted": false,
     "live_authority_created": false
   }

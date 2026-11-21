@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da
+- Remote checkpoint: ca8b59837391405fd693b4a4e95b1e14a1441e96
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-A7 WINDOWS COMMAND INSTALL GATE BEFORE D4. Source 3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da for persistent wop-up/down/reset/status/self-test is exact-head 3/3 green (#3078/#378/#651). Adam explicitly requires these aliases before proceeding. One operator-only Windows profile install/verification remains because connected tools cannot mutate his local PowerShell profile. After A7 acceptance, explain/freeze D4 only if Adam chooses: fresh exact Stage-12 review/procedure, 3/3 validation, explicit single-attempt authority, then bounded real-account calibration. Research Engine research-iterate remains the agreed E1–E3 whole-system proving workload after D4.
+A7 WINDOWS SHIM INSTALL GATE BEFORE D4. Profile-based persistence failed on real Windows and is superseded. Replacement ca8b59837391405fd693b4a4e95b1e14a1441e96 is exact-head 3/3 green (#3080/#380/#653): it removes only the obsolete owned profile block and installs current-user .cmd shims in an already-present WindowsApps PATH directory without changing PATH or persistent execution policy. Adam must install/verify locally because connected tools cannot mutate that directory. Do not source $PROFILE. After A7 acceptance, D4 remains the next real-account calibration gate; Research Engine research-iterate remains the agreed E1–E3 whole-system workload.
 
 ## Remaining work
 
@@ -84,7 +84,7 @@ A7 WINDOWS COMMAND INSTALL GATE BEFORE D4. Source 3c606ac150bdf87dd9bfd38e7a2791
 
 ## Blockers / gates
 
-- WINDOWS CONVENIENCE COMMAND ACCEPTANCE: validated source exists, but Adam's local current-user PowerShell profile must be updated and wop-self-test/wop-status observed before proceeding because he explicitly requires these aliases.
+- WINDOWS CONVENIENCE SHIM ACCEPTANCE: replacement ca8b5983… is validated, but Adam must locally install and verify the current-user WindowsApps shims before D4.
 - v0.9 authority is consumed/non-reusable.
 - v1.0 foreground repair source 1ecc094a… is 3/3 validated (#3030/#330/#603).
 - v1.0 review-state ecdc71c8… is 3/3 validated (#3031/#331/#604).

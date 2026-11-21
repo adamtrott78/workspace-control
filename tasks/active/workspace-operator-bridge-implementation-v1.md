@@ -24,22 +24,22 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da
+- Remote checkpoint: ca8b59837391405fd693b4a4e95b1e14a1441e96
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS OPERATOR-ONLY COMMAND INSTALL GATE. Convenience-command source 3c606ac150bdf87dd9bfd38e7a2791aa6b2ca3da is exact-head 3/3 green (#3078/#378/#651), and Adam requires it before D4. Use the existing session wop wrapper only to check out that exact SHA, then invoke operator-bridge/tools/install-wop-commands.ps1 directly in the current PowerShell so the global commands are available immediately and persist through $PROFILE.CurrentUserAllHosts. Verify WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS, then wop-self-test must print WORKSPACE_OPERATOR_SELF_TEST=PASS and wop-status must execute. No live Stage-12 authority exists and no D4 run is authorized by this install.
+WINDOWS OPERATOR-ONLY COMMAND SHIM INSTALL GATE. Profile-based alias persistence is superseded by validated replacement ca8b59837391405fd693b4a4e95b1e14a1441e96 (#3080/#380/#653). Use existing session wop only to check out this exact SHA and stop the stale degraded smoke runtime, then invoke operator-bridge/tools/install-wop-commands.ps1 directly with -NoProfile/-ExecutionPolicy Bypass. Do NOT source $PROFILE. Installer removes only the obsolete owned profile block and installs owned .cmd shims in the already-present current-user WindowsApps PATH directory without changing PATH or persistent execution policy. Require WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS, then wop-self-test must PASS from an offline runtime and wop-status must execute. No live Stage-12 authority exists.
 
 ## Remaining work
 
-- Install/accept the validated current-user convenience commands on Adam's Windows machine: wop-up, wop-down, wop-reset, wop-status, wop-self-test.
-- After alias acceptance, if Adam chooses D4, freeze a fresh bounded real-account Stage-12 review/procedure against the current validated front-end/command state, validate 3/3, and obtain explicit one-shot authority before execution.
-- After D4 passes, participate in E1–E3 using Research Engine research-iterate: live mixed executors, forced worker/session/process loss, durable recovery, and resource/soak evidence.
+- Install and accept validated shim commands ca8b5983… on Adam's Windows machine.
+- After A7 acceptance, freeze a fresh D4 real-account Stage-12 review/procedure, validate 3/3, and obtain explicit one-shot authority.
+- After D4 passes, run E1–E3 on Research Engine research-iterate with mixed executors, forced loss, durable recovery and resource/soak evidence.
 
 ## Blockers / gates
 
-- WINDOWS USER-PROFILE INSTALL: connected repository/Linux tools cannot mutate Adam's local PowerShell profile. One explicit operator command is required to install and immediately load the validated convenience block.
+- WINDOWS USER SHIM INSTALL: connected tools cannot write Adam's local current-user WindowsApps directory. One bounded operator command is required.
 - LIVE STAGE-12 AUTHORITY: no reusable real-account Stage-12 authority exists; alias installation does not create authority.
 
 ## Fresh-chat initialization
