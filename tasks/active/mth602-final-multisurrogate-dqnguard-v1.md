@@ -706,3 +706,64 @@ Each workflow is now `run_attempt=2`.
 7. Promote the best refined candidate per pair to a 60-epoch finalist.
 8. Freeze only a terminal finalist clearing validation macro-F1 >=0.95 and min-class F1 >=0.90.
 9. Only after freeze, run the two standard-DQNGuard directional OSR cells and apply the H1 investment gate.
+
+
+## Fresh-chat checkpoint — H1 60-epoch finalists launched (2026-11-21)
+
+This section supersedes earlier HPO execution snapshots. The authoritative source remains the JSON capsule.
+
+### Exact bindings
+
+- Workspace Control PR #640 handoff branch: `mth602-final-multisurrogate-dqnguard-resume-20261116-v1`
+- PADataset PR #37: **OPEN / DRAFT / UNMERGED**
+- exact finalist head: `ab87931408651b0b3516d910b13474822fb2a93d`
+- finalist validation receipt: `job-17bc8ee0-68f1-4b7d-9853-7b0c30285bee` — **16 passed**
+- selection evidence remains **known-validation only**
+- target/test/OSR evidence used for HPO/finalist selection: **false**
+- no merge authority is implied
+
+### Three frozen pair winners
+
+| Pair | Winner | Scheduler | Refine known-val macro-F1 | Min-class val F1 |
+| --- | --- | --- | ---: | ---: |
+| PA2-PA3 | t005 | cosine, frozen T_max=60 | 0.9661089632 | 0.9473315427 |
+| PA2-PA8 | t007 | plateau | 0.9876063835 | 0.9811405985 |
+| PA3-PA8 | t001 | plateau | 0.9749894729 | 0.9619534355 |
+
+### Live finalist runs
+
+- **GPU0 / IN_PROGRESS** — PA2-PA8 t007 — run `44924427484` / job `136907282120`
+- **GPU1 / IN_PROGRESS** — PA3-PA8 t001 — run `44924431170` / job `136907293141`
+- **GPU0 / QUEUED** — PA2-PA3 t005 deterministic replay — run `44924828921` / job `136908531021`
+  - admission comment `7065682477`
+  - explicit user authority granted 2026-11-21
+  - frozen cosine `scheduler_t_max_epochs=60`
+  - replay starts from epoch 0; **do not claim exact 24->60 resume**
+  - prefix reference: repair run `44635259724`, artifact `14593806373`
+  - first 24 epochs must reproduce the frozen repaired trajectory closely enough for deterministic replay acceptance before finalist evidence is accepted
+
+### Why PA2-PA3 t005 is a replay
+
+The epoch-24 repair state saved model/center-loss/optimizer/scheduler/global RNG/history, but it omitted the dedicated training DataLoader shuffle generator and persistent-worker RNG state. Exact epoch-25 continuation therefore cannot be proven. The user explicitly authorized the scientifically clean fallback: deterministic epoch-0 replay under the identical frozen T_max=60 protocol, with first-24-epoch prefix verification.
+
+### Dashboard
+
+Canonical local observer:
+`scripts/mth602_finalists_local_dashboard.py`
+
+Expected tmux session:
+`mth602-finalists`
+
+The dashboard is read-only, refreshes every second, uses root-local runner/process/result telemetry, and makes **zero GitHub API calls** in the refresh loop.
+
+### Immediate next action
+
+1. Read the JSON capsule first.
+2. Re-read the three exact workflow runs; do not trust this snapshot if GitHub has advanced.
+3. Do not duplicate any finalist admission.
+4. Do not advance PADataset PR #37 head while any finalist is queued/running.
+5. Strict-extract terminal finalist evidence using known-validation only.
+6. For PA2-PA3 t005, verify the replay's first 24 epochs against run `44635259724` before accepting its finalist evidence.
+7. Pair freeze requires validation macro-F1 >=0.95 and minimum known-class validation F1 >=0.90.
+8. Only after a pair freezes may its two standard-DQNGuard directional OSR evaluations run.
+9. Target-open results are exploratory H1 investment evidence only; they must never retroactively choose HPO settings.
