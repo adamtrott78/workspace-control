@@ -33,9 +33,9 @@ CELLS = [
     ("PA2<-PA3", "PA2", "PA3", 0.027741, 44944515567, "G1"),
     ("PA3<-PA2", "PA3", "PA2", 0.001426, 44944517585, "G1"),
     ("PA2<-PA8", "PA2", "PA8", 0.801033, 44944519746, "G1"),
-    ("PA8<-PA2", "PA8", "PA2", 0.757011, 44947116845, "G0"),
+    ("PA8<-PA2", "PA8", "PA2", 0.757011, 0, "G0"),
     ("PA3<-PA8", "PA3", "PA8", 0.054209, 44947121549, "G1"),
-    ("PA8<-PA3", "PA8", "PA3", 0.424513, 44947124205, "G0"),
+    ("PA8<-PA3", "PA8", "PA3", 0.424513, 0, "G0"),
 ]
 
 COMPLETED_SEED = {
@@ -230,6 +230,7 @@ def status_color(s):
     if s=="RUNNING": return YELLOW+f"{s:<9}"+RESET
     if s=="WAITING": return CYAN+f"{s:<9}"+RESET
     if s=="IDLE": return GRAY+f"{s:<9}"+RESET
+    if s=="ACTIVATE": return MAGENTA+f"{s:<9}"+RESET
     return MAGENTA+f"{s:<9}"+RESET
 
 
@@ -266,7 +267,10 @@ def render():
                     uf=cached.get("unknown_f1"); lane=cached.get("lane",default_lane)
                     rows.append((label,lane,"SUCCESS","DONE",None,cached.get("total"),uf,cached.get("known_reject_rate"),cached.get("run_id",default_run),cached.get("sha")))
                 else:
-                    rows.append((label,default_lane,"WAITING","-",None,None,None,None,default_run,None))
+                    if default_lane == "G0" and not default_run:
+                        rows.append((label,default_lane,"ACTIVATE","TRUST",None,None,None,None,"-",None))
+                    else:
+                        rows.append((label,default_lane,"WAITING","-",None,None,None,None,default_run,None))
 
             try: save_cache(cache)
             except Exception: pass
@@ -288,6 +292,8 @@ def render():
                     st="RUNNING"; detail=active_label
                 elif waiting_by_lane[lane]:
                     st="WAITING"; detail=f"{waiting_by_lane[lane]} exact-head job(s) queued; no local runner visible"
+                elif lane == "G0" and any(r[1]=="G0" and r[2]=="ACTIVATE" for r in rows):
+                    st="ACTIVATE"; detail="lane-A L2O trust activation required before re-admission"
                 else:
                     st="IDLE"; detail="no local evaluator visible"
                 frame.append(f"{lane}  {status_color(st)}  {detail}")
