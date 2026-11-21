@@ -1,7 +1,7 @@
 # Windows-only fast-loop harness: content-free smoke actions remain operator-triggered.
 [CmdletBinding()]
 param(
-  [ValidateSet("smoke","reset","restart","start","online","stop","offline","status")]
+  [ValidateSet("smoke","reset","restart","start","online","stop","offline","status","self-test")]
   [string]$Action = "status",
   [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path,
   [string]$SchedulerHotkey = "Ctrl+Space",
@@ -491,6 +491,45 @@ call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-prof
   }
 }
 
+function Invoke-SelfTest {
+  if (-not (Test-Path -LiteralPath $repo -PathType Container)) {
+    throw "WOP_REPOSITORY_ROOT_MISSING:$repo"
+  }
+  if (-not (Test-Path -LiteralPath $firefox -PathType Leaf)) {
+    throw "FIREFOX_NOT_FOUND:$firefox"
+  }
+
+  $sourceSha = (git -C $repo rev-parse HEAD).Trim().ToLowerInvariant()
+  if ($LASTEXITCODE -ne 0 -or $sourceSha -notmatch "^[0-9a-f]{40}$") {
+    throw "SOURCE_SHA_UNAVAILABLE"
+  }
+
+  $dotnet = Get-Dotnet10
+  $nodeDir = Get-Node24Directory
+
+  $runtimeState = "OFFLINE"
+  $state = Read-State
+  if ($null -ne $state) {
+    if ([string]$state.source_sha -notmatch "^[0-9a-f]{40}$") {
+      throw "DEV_RUNTIME_STATE_SOURCE_SHA_INVALID"
+    }
+
+    $helperAlive = Test-Pid ([int]$state.helper_pid)
+    $webAlive = Test-Pid ([int]$state.web_ext_pid)
+    if (-not ($helperAlive -and $webAlive)) {
+      throw "DEV_RUNTIME_DEGRADED"
+    }
+    $runtimeState = "ONLINE"
+  }
+
+  Write-Host "WORKSPACE_OPERATOR_SELF_TEST=PASS"
+  Write-Host ("SOURCE_SHA=" + $sourceSha)
+  Write-Host ("DOTNET10=" + (& $dotnet --version).Trim())
+  Write-Host ("NODE24=" + (& (Join-Path $nodeDir "node.exe") --version).Trim())
+  Write-Host ("FIREFOX_PATH=" + $firefox)
+  Write-Host ("RUNTIME_STATE=" + $runtimeState)
+}
+
 function Show-Status {
   $state = Read-State
   if ($null -eq $state) {
@@ -514,6 +553,7 @@ switch ($Action) {
   "stop" { Stop-DevRuntime }
   "offline" { Stop-DevRuntime }
   "status" { Show-Status }
+  "self-test" { Invoke-SelfTest }
   "smoke" { Stop-DevRuntime; Start-DevRuntime $true }
   "reset" { Stop-DevRuntime; Start-DevRuntime $true }
   "restart" { Stop-DevRuntime; Start-DevRuntime $true }

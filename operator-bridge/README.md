@@ -32,3 +32,28 @@ python -m unittest discover -s tests -p "test_workspace_semantic_execution_opera
 
 The dedicated GitHub Actions workflow performs the same checks on
 `windows-latest` and requires no account credentials.
+
+
+## Per-user convenience commands
+
+The Windows development/operator lifecycle can be installed into the current
+user's PowerShell all-hosts profile without administrator rights:
+
+```powershell
+& .\operator-bridge\tools\install-wop-commands.ps1
+```
+
+The managed profile block defines:
+
+- `wop-up [sha]` — start the existing Workspace Operator dev lifecycle.
+- `wop-down` — stop only the recorded runtime-owned helper/Firefox tree.
+- `wop-reset [sha]` — reset into the existing local smoke lifecycle.
+- `wop-status` — report current content-free runtime status.
+- `wop-self-test [sha]` — read-only verification of repository SHA, .NET 10,
+  Node 24, Firefox availability, and current runtime health.
+
+The installer also persists the existing `wop <action> [sha]` wrapper. It edits
+only `$PROFILE.CurrentUserAllHosts` between an owned marker pair, does not
+change execution policy, PATH, services, scheduled tasks, machine-wide registry,
+browser profiles, credentials, or execution authority, and can be removed with
+`install-wop-commands.ps1 -Remove`.

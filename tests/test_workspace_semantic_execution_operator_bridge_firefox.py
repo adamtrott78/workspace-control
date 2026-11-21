@@ -9,6 +9,7 @@ MANIFEST = FIREFOX / "manifest.json"
 CORE = FIREFOX / "adapter_core.js"
 BACKGROUND = FIREFOX / "background.js"
 DEV_RUNTIME = ROOT / "operator-bridge/tools/workspace-operator-dev.ps1"
+COMMAND_INSTALLER = ROOT / "operator-bridge/tools/install-wop-commands.ps1"
 STAGE12 = ROOT / "operator-bridge/tools/run-stage12-real-instant.ps1"
 
 
@@ -77,6 +78,31 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
             self.assertNotIn('"cookies.sqlite"', source)
             self.assertNotIn('"logins.json"', source)
             self.assertNotIn('"key4.db"', source)
+
+    def test_dev_runtime_exposes_read_only_self_test(self):
+        text = DEV_RUNTIME.read_text(encoding="utf-8")
+        self.assertIn('"self-test"', text)
+        self.assertIn("function Invoke-SelfTest", text)
+        self.assertIn("WORKSPACE_OPERATOR_SELF_TEST=PASS", text)
+        self.assertIn('"self-test" { Invoke-SelfTest }', text)
+
+    def test_convenience_commands_are_current_user_profile_scoped(self):
+        text = COMMAND_INSTALLER.read_text(encoding="utf-8")
+        self.assertIn("$PROFILE.CurrentUserAllHosts", text)
+        self.assertIn("# BEGIN WORKSPACE OPERATOR COMMANDS V1", text)
+        self.assertIn("function global:wop-up", text)
+        self.assertIn("function global:wop-down", text)
+        self.assertIn("function global:wop-reset", text)
+        self.assertIn("function global:wop-status", text)
+        self.assertIn("function global:wop-self-test", text)
+        self.assertIn("DevCheckout", text)
+        self.assertIn("workspace-operator-dev.ps1", text)
+        self.assertIn("WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS", text)
+        self.assertNotIn("Set-ExecutionPolicy", text)
+        self.assertNotIn("HKLM:", text)
+        self.assertNotIn("Start-Service", text)
+        self.assertNotIn("Register-ScheduledTask", text)
+        self.assertNotIn("[Environment]::SetEnvironmentVariable", text)
 
     def test_dedicated_firefox_launchers_suppress_session_restore(self):
         dev = DEV_RUNTIME.read_text(encoding="utf-8")
