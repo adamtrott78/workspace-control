@@ -2113,7 +2113,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             )
         expected_addition_sha = binding["sha256"]
         if (
-            scientific_workflow_refresh is not None
+            scientific_workflow_effective_refresh is not None
             and destination
             == str(
                 V3_CONFIG_ROOT
@@ -2121,7 +2121,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
                 / f"{PADATASET_SCIENTIFIC_TARGET_CLASS}.json"
             )
         ):
-            expected_addition_sha = scientific_workflow_refresh[
+            expected_addition_sha = scientific_workflow_effective_refresh[
                 "controller_policy_file_sha256"
             ]
         if _sha256(path.read_bytes()) != expected_addition_sha:
