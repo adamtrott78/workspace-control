@@ -311,6 +311,26 @@ function Ensure-WebExt([string]$NodeDir) {
   return $webExt
 }
 
+function Reset-DedicatedFirefoxSessionState([string]$ProfilePath) {
+  if (-not (Test-Path -LiteralPath $ProfilePath -PathType Container)) {
+    Write-Host "WORKSPACE_OPERATOR_FIREFOX_SESSION_STATE_RESET=PASS"
+    return
+  }
+
+  foreach ($relative in @(
+    "sessionstore.jsonlz4",
+    "sessionCheckpoints.json",
+    "sessionstore-backups"
+  )) {
+    $target = Join-Path $ProfilePath $relative
+    if (Test-Path -LiteralPath $target) {
+      Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction Stop
+    }
+  }
+
+  Write-Host "WORKSPACE_OPERATOR_FIREFOX_SESSION_STATE_RESET=PASS"
+}
+
 function Start-DevRuntime([bool]$LocalSmoke) {
   if (Read-State) { throw "DEV_RUNTIME_ALREADY_EXISTS: use reset or stop" }
   if (-not (Test-Path -LiteralPath $firefox -PathType Leaf)) { throw "FIREFOX_NOT_FOUND:$firefox" }
@@ -406,6 +426,7 @@ function Start-DevRuntime([bool]$LocalSmoke) {
 call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --no-reload --no-input --pref=browser.startup.page=0 --pref=browser.sessionstore.resume_from_crash=false --arg=-no-remote
 "@ | Set-Content -LiteralPath $launcher -Encoding ASCII
 
+    Reset-DedicatedFirefoxSessionState $firefoxProfile
     $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d","/c",$launcher) -RedirectStandardOutput $webOut -RedirectStandardError $webErr -PassThru
     Start-Sleep -Seconds 4
     if ($webExtProcess.HasExited) {

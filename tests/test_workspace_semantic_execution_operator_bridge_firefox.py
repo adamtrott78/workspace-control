@@ -61,6 +61,23 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         self.assertNotIn("--start-url", dev)
         self.assertNotIn("--start-url", stage12)
 
+    def test_dedicated_firefox_launchers_clear_only_session_restore_artifacts(self):
+        dev = DEV_RUNTIME.read_text(encoding="utf-8")
+        stage12 = STAGE12.read_text(encoding="utf-8")
+        for source in (dev, stage12):
+            self.assertIn("function Reset-DedicatedFirefoxSessionState", source)
+            self.assertIn('"sessionstore.jsonlz4"', source)
+            self.assertIn('"sessionCheckpoints.json"', source)
+            self.assertIn('"sessionstore-backups"', source)
+            self.assertIn(
+                "WORKSPACE_OPERATOR_FIREFOX_SESSION_STATE_RESET=PASS",
+                source,
+            )
+            self.assertIn("Reset-DedicatedFirefoxSessionState $firefoxProfile", source)
+            self.assertNotIn('"cookies.sqlite"', source)
+            self.assertNotIn('"logins.json"', source)
+            self.assertNotIn('"key4.db"', source)
+
     def test_dedicated_firefox_launchers_suppress_session_restore(self):
         dev = DEV_RUNTIME.read_text(encoding="utf-8")
         stage12 = STAGE12.read_text(encoding="utf-8")

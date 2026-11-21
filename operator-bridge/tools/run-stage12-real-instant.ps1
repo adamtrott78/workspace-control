@@ -56,6 +56,26 @@ if (-not (Test-Path -LiteralPath $helper -PathType Leaf)) {
 }
 
 $cacheRoot = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\Stage12"
+function Reset-DedicatedFirefoxSessionState([string]$ProfilePath) {
+  if (-not (Test-Path -LiteralPath $ProfilePath -PathType Container)) {
+    Write-Host "WORKSPACE_OPERATOR_FIREFOX_SESSION_STATE_RESET=PASS"
+    return
+  }
+
+  foreach ($relative in @(
+    "sessionstore.jsonlz4",
+    "sessionCheckpoints.json",
+    "sessionstore-backups"
+  )) {
+    $target = Join-Path $ProfilePath $relative
+    if (Test-Path -LiteralPath $target) {
+      Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction Stop
+    }
+  }
+
+  Write-Host "WORKSPACE_OPERATOR_FIREFOX_SESSION_STATE_RESET=PASS"
+}
+
 $webExtRoot = Join-Path $cacheRoot "web-ext-10.8.0"
 $webExt = Join-Path $webExtRoot "node_modules\.bin\web-ext.cmd"
 $webExtPackage = Join-Path $webExtRoot "node_modules\web-ext\package.json"
@@ -154,6 +174,7 @@ try {
 call "$webExt" run --source-dir "$extensionStage" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --no-reload --no-input --pref=browser.startup.page=0 --pref=browser.sessionstore.resume_from_crash=false --arg=-no-remote
 "@ | Set-Content -LiteralPath $launcher -Encoding ASCII
 
+  Reset-DedicatedFirefoxSessionState $firefoxProfile
   $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @(
     "/d", "/c", $launcher
   ) -RedirectStandardOutput $webExtOut -RedirectStandardError $webExtErr -PassThru
