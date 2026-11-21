@@ -2967,6 +2967,21 @@
         "job_id": 136968464791,
         "status": "STALE_HEAD_QUEUED_NON_EVIDENCE"
       }
-    ]
+    ],
+    "lane_a_l2o_trust_candidate": {
+      "status": "CANDIDATE_PENDING_VALIDATION",
+      "purpose": "Use now-idle GPU0 for the same frozen standard-DQNGuard directional OSR cells concurrently with lane B.",
+      "branch": "mth602-lanea-l2o-directional-eval-v1",
+      "exact_head": "0502ff43a5779f22abbb569ce319ead1009d8987",
+      "base_main": "af4b221f6e6014ce2047e41d9c4e91f511d9fe84",
+      "changed_files": [
+        ".github/workflows/lambda-ci-scientific.yml",
+        "tests/test_l2o_eval_lane_a_trusted_workflow.py"
+      ],
+      "authority_delta": "Adds only bounded l2o_directional_eval request grammar/artifact transport to existing lane A; no Architecture-B route, no generic shell, no GPU selector, no write permissions.",
+      "live_status": "NOT_LIVE",
+      "merge_authority": false,
+      "root_refresh_authority": false
+    }
   }
 }
