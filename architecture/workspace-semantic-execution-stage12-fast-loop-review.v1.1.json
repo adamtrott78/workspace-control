@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "TEMPORARY_CHAT_SOURCE_VALIDATED_AWAITING_UI_AND_PLUGIN_PROBE",
+  "status": "LIFECYCLE_SOURCE_VALIDATED_AWAITING_WINDOWS_SMOKE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -244,12 +244,26 @@
       "live_retry_authorized": false
     },
     "plugin_probe": {
-      "documentation_facts": [
-        "Temporary Chat supports plugins only when Personalized; Unpersonalized Temporary Chat does not use plugins.",
-        "Installed plugins may be invoked with @ mentions, but official docs do not specify whether unaccepted raw text @github is equivalent to selecting the mention."
-      ],
-      "empirical_question": "Does sending literal raw @github without Tab/click/autocomplete acceptance invoke the installed GitHub plugin in a Personalized Temporary Chat?",
-      "automatic_typing_or_selection_authorized": false
+      "result": "PASS",
+      "context": "Personalized Temporary Chat",
+      "literal_invocation": "@github",
+      "autocomplete_selection_used": false,
+      "exact_branch_sha_returned": true,
+      "observed_branch_sha": "ec26aa7dd2cfc121cdc7f09099892b3333b43e84",
+      "implication": "Worker prompts may include literal @github without requiring Tab/click/autocomplete acceptance."
+    },
+    "persistent_firefox_lifecycle": {
+      "source_head": "fd7ede4252b457092a8bf521b0ca6ddaab621bb5",
+      "graceful_shutdown": "CloseMainWindow first; wait up to bounded deadline; force only remaining managed processes",
+      "bootstrap_navigation": "adapter-owned exact one active about:newtab/about:blank -> fixed Temporary Chat URL",
+      "web_ext_start_url": false,
+      "validation": {
+        "workspace_control_run": 3059,
+        "semantic_execution_run": 359,
+        "operator_bridge_run": 632,
+        "result": "SUCCESS"
+      },
+      "live_retry_authorized": false
     }
   }
 }

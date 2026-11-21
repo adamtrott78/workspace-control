@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: d08172db8e1b1d3efd7ecda9053fc9a72d7962e6
+- Remote checkpoint: fd7ede4252b457092a8bf521b0ca6ddaab621bb5
 - Remote verified: true
 
 ## Next safe action
 
-TEMPORARY-CHAT / NO-DUPLICATE-TAB UI GATE — exact source d08172db… passed Workspace #3057 / Semantic #357 / Operator #630. Fast dev and Stage-12 launch the dedicated persistent Firefox profile at https://chatgpt.com/?temporary-chat=true. The adapter reuses exactly one active unmanaged bootstrap tab only when its URL exactly equals the fixed Temporary Chat URL; arbitrary unmanaged ChatGPT tabs remain non-adoptable. NEXT ACTION: operator runs the current bookkeeping-tip smoke, verifies Firefox opens directly into Temporary Chat and Ctrl+Space services that same tab without leaving a stray tab. Then perform the one-time raw @github plugin invocation probe without Tab/click selection.
+WINDOWS-ONLY PERSISTENT-FIREFOX SMOKE — exact lifecycle source fd7ede42… passed Workspace #3059 / Semantic #359 / Operator #632. Raw literal @github invocation in a Personalized Temporary Chat is empirically proven without autocomplete selection. NEXT ACTION: run wop smoke on the bookkeeping tip, verify (1) no Firefox Troubleshoot Mode prompt, (2) dedicated profile lands at https://chatgpt.com/?temporary-chat=true, (3) prior ChatGPT authentication is preserved, and (4) one Ctrl+Space services that same tab with clipboard packet + foreground. No Linux or real Stage-12 live authority.
 
 ## Remaining work
 

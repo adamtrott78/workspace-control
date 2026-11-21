@@ -280,3 +280,11 @@
 - [ ] PLUGIN PROBE: in a Personalized Temporary Chat, send a literal raw `@github` probe without Tab/click/autocomplete acceptance; determine empirically whether structured GitHub plugin invocation occurs.
 - [ ] If raw `@github` does not invoke the plugin, test plain-language explicit plugin request before considering any UI-selection requirement. Preserve no-auto-typing/no-auto-selection boundary.
 - [ ] After UI/plugin evidence, add convenient per-user Workspace Operator lifecycle shims analogous to Heartbeat: up/down/reset/status/self-test.
+
+
+- [x] RAW PLUGIN PROBE PASS: Personalized Temporary Chat accepted literal `@github` without Tab/click/autocomplete selection and returned exact branch SHA `ec26aa7d…`.
+- [x] Persistent Firefox lifecycle repair source `fd7ede42…` passed Workspace #3059 / Semantic #359 / Operator #632.
+- [x] Fast-loop shutdown now requests graceful Firefox window close first; force-kill is bounded fallback only.
+- [x] Temporary Chat startup navigation moved out of web-ext `--start-url` and into the least-privilege Firefox adapter for exactly one active blank bootstrap tab.
+- [ ] CURRENT GATE: Windows-only smoke — no Troubleshoot Mode prompt; persistent ChatGPT login retained; Firefox lands at `https://chatgpt.com/?temporary-chat=true`; Ctrl+Space services the same tab and stages the smoke packet.
+- [ ] After Windows smoke PASS: add per-user lifecycle commands/shortcuts analogous to Heartbeat (`wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test`) before returning to the real Stage-12 calibration.

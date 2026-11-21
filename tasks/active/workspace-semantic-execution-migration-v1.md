@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: d08172db8e1b1d3efd7ecda9053fc9a72d7962e6
+- Remote checkpoint: fd7ede4252b457092a8bf521b0ca6ddaab621bb5
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 TEMPORARY-CHAT UI + PLUGIN PROBE GATE — local interaction path and persistent login are already proven. Exact Temporary Chat/no-duplicate-tab source d08172db… is 3/3 green (#3057/#357/#630). NEXT ACTION: Windows-only smoke on the current bookkeeping tip: verify launch at https://chatgpt.com/?temporary-chat=true and no extra tab after Ctrl+Space; then empirically test whether literal raw `@github` in a Personalized Temporary Chat invokes the installed GitHub plugin without autocomplete acceptance. No real-account Stage-12 authority exists.
+STAGE-12 V1.1 WINDOWS FAST-LOOP GATE — lifecycle repair fd7ede42… is exact-head 3/3 green (#3059/#359/#632), and raw @github plugin invocation is proven in Personalized Temporary Chat without UI selection. NEXT ACTION: Windows-only smoke to verify no Troubleshoot Mode prompt, persistent auth, direct Temporary Chat bootstrap, and same-tab Ctrl+Space service. Do not return to Linux/full Stage-12 until this passes.
 
 ## Remaining work
 
