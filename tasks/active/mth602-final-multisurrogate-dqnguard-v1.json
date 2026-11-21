@@ -2852,6 +2852,29 @@
         "job_id": 136953982458,
         "status": "QUEUED"
       }
-    ]
+    ],
+    "dashboard": {
+      "script": "scripts/mth602_h1_osr_local_dashboard.py",
+      "tmux_session": "mth602-h1-osr",
+      "mode": "host-root-observer",
+      "refresh_seconds": 1,
+      "github_api_calls_per_refresh": 0,
+      "exact_candidate_sha": "d7ba2c754d7d281651f4119ba79544ec6f6e89f6",
+      "immutable_run_ids": [
+        44939698874,
+        44939701110,
+        44939702954,
+        44939705618
+      ],
+      "telemetry": [
+        "local ci-padataset-2 process environment",
+        "exact-head RUNNER_TEMP l2o artifacts",
+        "osr_summary.csv",
+        "result_record.json",
+        "scientific-receipt.json",
+        "nvidia-smi",
+        "persistent operator-owned cache"
+      ]
+    }
   }
 }
