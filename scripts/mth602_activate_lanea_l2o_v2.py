@@ -25,8 +25,8 @@ EXPECTED_PAD_MAIN = "34e150ae4fe349889a054aa2c12d33393cf64f66"
 EXPECTED_WORKFLOW_BLOB = "bca2eabe3afe70ec3115391e5a6c24daefd1498b"
 EXPECTED_CONFIRM = "MERGE_PR39_AND_ACTIVATE_GPU0_L2O"
 REPOSITORY = "adamtrott78/PADataset"
-WORKFLOW_NAME = "PADataset Lambda Scientific Single GPU"
 SCALE_SET_ID = 5
+EXPECTED_PROVIDER_CONFIRM = "PROVIDER_LANEA_QUEUE_ZERO_VERIFIED"
 
 
 class OperatorGateError(RuntimeError):
@@ -39,19 +39,6 @@ def canonical(value):
 
 def sha(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
-
-
-def gh_json(path: str):
-    proc = subprocess.run(
-        ["gh", "api", path],
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-    )
-    if proc.returncode:
-        raise OperatorGateError(f"gh api failed: {path}: {proc.stderr.strip()[:800]}")
-    return json.loads(proc.stdout)
 
 
 def root_private_json(path: pathlib.Path, value: dict) -> bytes:
@@ -80,36 +67,36 @@ def exact_repo(repo_root: pathlib.Path, expected_head: str) -> pathlib.Path:
     return root
 
 
-def github_preflight():
-    ref = gh_json(f"repos/{REPOSITORY}/git/ref/heads/main")
-    main_sha = ref["object"]["sha"]
-    if main_sha != EXPECTED_PAD_MAIN:
-        raise OperatorGateError(f"PADataset main drift: {main_sha}")
-
-    wf = gh_json(
-        f"repos/{REPOSITORY}/contents/.github/workflows/lambda-ci-scientific.yml?ref={main_sha}"
-    )
-    if wf.get("sha") != EXPECTED_WORKFLOW_BLOB:
-        raise OperatorGateError(f"lane-A workflow blob drift: {wf.get('sha')}")
-
-    runs = gh_json(f"repos/{REPOSITORY}/actions/runs?event=issue_comment&per_page=100")
-    active = [
-        x for x in runs.get("workflow_runs", [])
-        if x.get("name") == WORKFLOW_NAME
-        and x.get("status") in {"requested", "queued", "pending", "waiting", "in_progress"}
-    ]
-    if active:
+def local_padataset_preflight(padataset_root: pathlib.Path) -> pathlib.Path:
+    root = padataset_root.resolve()
+    fetched = subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "FETCH_HEAD"],
+        text=True,
+    ).strip()
+    if fetched != EXPECTED_PAD_MAIN:
         raise OperatorGateError(
-            "lane-A has active workflow runs: "
-            + ",".join(str(x.get("id")) for x in active)
+            f"PADataset FETCH_HEAD drift: {fetched} != {EXPECTED_PAD_MAIN}"
         )
-    return main_sha
+    blob = subprocess.check_output(
+        [
+            "git", "-C", str(root), "rev-parse",
+            f"{EXPECTED_PAD_MAIN}:.github/workflows/lambda-ci-scientific.yml",
+        ],
+        text=True,
+    ).strip()
+    if blob != EXPECTED_WORKFLOW_BLOB:
+        raise OperatorGateError(
+            f"lane-A workflow blob drift: {blob} != {EXPECTED_WORKFLOW_BLOB}"
+        )
+    return root
 
 
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--repo-root", type=pathlib.Path, required=True)
+    p.add_argument("--padataset-root", type=pathlib.Path, required=True)
     p.add_argument("--expected-head", required=True)
+    p.add_argument("--provider-queue-confirm", required=True)
     p.add_argument("--operator-confirm", required=True)
     args = p.parse_args()
 
@@ -117,15 +104,16 @@ def main() -> int:
         raise OperatorGateError("operator launcher requires root")
     if args.operator_confirm != EXPECTED_CONFIRM:
         raise OperatorGateError("operator confirmation marker mismatch")
-    if not os.environ.get("GH_TOKEN"):
-        raise OperatorGateError("GH_TOKEN is required for fresh GitHub preflight")
+    if args.provider_queue_confirm != EXPECTED_PROVIDER_CONFIRM:
+        raise OperatorGateError("provider queue confirmation marker mismatch")
 
     if len(args.expected_head) != 40 or any(c not in "0123456789abcdef" for c in args.expected_head):
         raise OperatorGateError("expected-head must be a lowercase 40-hex SHA")
     repo = exact_repo(args.repo_root, args.expected_head)
-    github_preflight()
+    local_padataset_preflight(args.padataset_root)
 
-    # Fail closed on any live-state drift before creating authority.
+    # Provider lane-A queue was independently verified empty before this root
+    # action. Re-prove all host-local quiescence before creating authority.
     candidate.verify_installed(refresh.BASE_MANIFEST)
     refresh.require_roots()
     refresh.require_target_quiescent()
@@ -196,28 +184,26 @@ def main() -> int:
     }
     root_private_json(authority_path, authority)
 
-    rc = refresh.main_from_operator(
-        repo_root=repo,
-        expected_head=EXPECTED_SOURCE_HEAD,
-        preflight_confirmation=preflight_path,
-        authorization_receipt=authority_path,
-    ) if hasattr(refresh, "main_from_operator") else None
-
-    if rc is None:
-        cmd = [
-            "/usr/bin/python3",
-            str(repo / "scripts/lambda_ci_v3_padataset_scientific_workflow_refresh_v2.py"),
-            "--repo-root", str(repo),
-            "--expected-head", args.expected_head,
-            "--preflight-confirmation", str(preflight_path),
-            "--authorization-receipt", str(authority_path),
-        ]
-        proc = subprocess.run(cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
-        print(proc.stdout, end="")
-        if proc.returncode:
-            if proc.stderr:
-                print(proc.stderr, end="", file=__import__("sys").stderr)
-            raise OperatorGateError(f"refresh helper failed rc={proc.returncode}")
+    cmd = [
+        "/usr/bin/python3",
+        str(repo / "scripts/lambda_ci_v3_padataset_scientific_workflow_refresh_v2.py"),
+        "--repo-root", str(repo),
+        "--expected-head", args.expected_head,
+        "--preflight-confirmation", str(preflight_path),
+        "--authorization-receipt", str(authority_path),
+    ]
+    proc = subprocess.run(
+        cmd,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    print(proc.stdout, end="")
+    if proc.returncode:
+        if proc.stderr:
+            print(proc.stderr, end="", file=__import__("sys").stderr)
+        raise OperatorGateError(f"refresh helper failed rc={proc.returncode}")
 
     candidate.verify_installed(refresh.BASE_MANIFEST)
     installed = json.loads(refresh.TARGET_POLICY.read_text())
