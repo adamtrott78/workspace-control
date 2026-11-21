@@ -161,6 +161,40 @@ test("unmanaged non-bootstrap ChatGPT tab is never adopted", async () => {
   });
 });
 
+test("initialize navigates exactly one active blank startup tab to temporary chat", async () => {
+  const browser = new MockBrowser([
+    { id: 20, url: "about:newtab", active: true }
+  ]);
+  const adapter = new FirefoxAdapterCore(browser);
+
+  await adapter.initialize();
+
+  assert.equal(browser.tabsById.get(20).url, WORKER_START_URL);
+  assert.deepEqual(
+    browser.calls.find(call =>
+      call[0] === "tabs.update" &&
+      call[1] === 20 &&
+      call[2]?.url === WORKER_START_URL),
+    ["tabs.update", 20, { url: WORKER_START_URL }]
+  );
+  assert.equal(browser.tabValues.get(20), undefined);
+});
+
+test("initialize does not navigate arbitrary unmanaged tabs", async () => {
+  const browser = new MockBrowser([
+    { id: 21, url: "https://example.com/", active: true }
+  ]);
+  const adapter = new FirefoxAdapterCore(browser);
+
+  await adapter.initialize();
+
+  assert.equal(browser.tabsById.get(21).url, "https://example.com/");
+  assert.equal(
+    browser.calls.filter(call => call[0] === "tabs.update").length,
+    0
+  );
+});
+
 test("exact active temporary-chat bootstrap tab is adopted instead of duplicated", async () => {
   const browser = new MockBrowser([
     { id: 2, url: WORKER_START_URL, active: true }

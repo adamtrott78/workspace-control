@@ -8,6 +8,8 @@ FIREFOX = ROOT / "operator-bridge/src/FirefoxAdapter"
 MANIFEST = FIREFOX / "manifest.json"
 CORE = FIREFOX / "adapter_core.js"
 BACKGROUND = FIREFOX / "background.js"
+DEV_RUNTIME = ROOT / "operator-bridge/tools/workspace-operator-dev.ps1"
+STAGE12 = ROOT / "operator-bridge/tools/run-stage12-real-instant.ps1"
 
 
 class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
@@ -44,6 +46,24 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
             source,
             re.compile(r"url\s*:\s*payload\.", re.IGNORECASE),
         )
+
+    def test_bootstrap_navigation_is_adapter_owned_and_launchers_do_not_use_start_url(self):
+        source = CORE.read_text(encoding="utf-8")
+        dev = DEV_RUNTIME.read_text(encoding="utf-8")
+        stage12 = STAGE12.read_text(encoding="utf-8")
+        self.assertIn("await this.prepareBootstrapSurface()", source)
+        self.assertIn('tab.url === "about:newtab"', source)
+        self.assertIn('tab.url === "about:blank"', source)
+        self.assertIn("url: this.workerStartUrl", source)
+        self.assertNotIn("--start-url", dev)
+        self.assertNotIn("--start-url", stage12)
+
+    def test_dev_runtime_prefers_graceful_managed_firefox_shutdown(self):
+        text = DEV_RUNTIME.read_text(encoding="utf-8")
+        self.assertIn("function Stop-ManagedFirefox", text)
+        self.assertIn(".CloseMainWindow()", text)
+        self.assertIn("WORKSPACE_OPERATOR_FIREFOX_SHUTDOWN=GRACEFUL", text)
+        self.assertIn("WORKSPACE_OPERATOR_FIREFOX_SHUTDOWN=FORCED_FALLBACK", text)
 
     def test_sessions_metadata_key_is_private_and_content_free(self):
         source = CORE.read_text(encoding="utf-8")

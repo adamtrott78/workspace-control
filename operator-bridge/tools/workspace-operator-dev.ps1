@@ -17,7 +17,6 @@ $statePath = Join-Path $runtimeRoot "runtime.json"
 $registryPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\com.workspacecontrol.operator_bridge"
 $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
 $firefoxProfile = Join-Path $runtimeRoot "firefox-profile"
-$temporaryChatUrl = "https://chatgpt.com/?temporary-chat=true"
 
 function Get-Dotnet10 {
   $candidates = @()
@@ -81,6 +80,41 @@ function Remove-TreeWithRetry([string]$Path) {
   throw "DEV_RUNTIME_CLEANUP_FAILED:$Path"
 }
 
+function Stop-ManagedFirefox([object[]]$ProcessIds) {
+  $ids = @($ProcessIds | Where-Object { $_ } | ForEach-Object { [int]$_ } | Select-Object -Unique)
+  if ($ids.Count -eq 0) { return }
+
+  $closeRequested = $false
+  foreach ($pidValue in $ids) {
+    $process = Get-Process -Id $pidValue -ErrorAction SilentlyContinue
+    if ($process -and $process.MainWindowHandle -ne 0) {
+      try {
+        if ($process.CloseMainWindow()) { $closeRequested = $true }
+      } catch {}
+    }
+  }
+
+  if ($closeRequested) {
+    $deadline = (Get-Date).AddSeconds(5)
+    while ((Get-Date) -lt $deadline) {
+      $alive = @($ids | Where-Object { Test-Pid $_ })
+      if ($alive.Count -eq 0) {
+        Write-Host "WORKSPACE_OPERATOR_FIREFOX_SHUTDOWN=GRACEFUL"
+        return
+      }
+      Start-Sleep -Milliseconds 100
+    }
+  }
+
+  $remaining = @($ids | Where-Object { Test-Pid $_ })
+  foreach ($pidValue in $remaining) {
+    Stop-Process -Id $pidValue -Force -ErrorAction SilentlyContinue
+  }
+  if ($remaining.Count -gt 0) {
+    Write-Host "WORKSPACE_OPERATOR_FIREFOX_SHUTDOWN=FORCED_FALLBACK"
+  }
+}
+
 function Stop-DevRuntime {
   $state = Read-State
   if ($null -eq $state) {
@@ -88,9 +122,10 @@ function Stop-DevRuntime {
     return
   }
 
+  Stop-ManagedFirefox @($state.firefox_pids)
+
   $pids = @()
   if ($state.web_ext_pid) { $pids += [int]$state.web_ext_pid }
-  foreach ($pidValue in @($state.firefox_pids)) { if ($pidValue) { $pids += [int]$pidValue } }
   foreach ($pidValue in @($state.workspace_operator_pids)) { if ($pidValue) { $pids += [int]$pidValue } }
 
   foreach ($pidValue in ($pids | Select-Object -Unique)) {
@@ -240,7 +275,7 @@ function Start-DevRuntime([bool]$LocalSmoke) {
     $launcher = Join-Path $work "run-web-ext.cmd"
     @"
 @echo off
-call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --start-url "$temporaryChatUrl" --no-reload --no-input --arg=-no-remote
+call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-profile "$firefoxProfile" --profile-create-if-missing --keep-profile-changes --no-reload --no-input --arg=-no-remote
 "@ | Set-Content -LiteralPath $launcher -Encoding ASCII
 
     $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d","/c",$launcher) -RedirectStandardOutput $webOut -RedirectStandardError $webErr -PassThru

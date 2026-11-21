@@ -93,6 +93,7 @@
 
     async initialize() {
       await this.inventoryManagedBindings();
+      await this.prepareBootstrapSurface();
     }
 
     async handleCommand(message) {
@@ -412,6 +413,47 @@
       }
 
       return match;
+    }
+
+    async prepareBootstrapSurface() {
+      const managed = await this.collectManagedTabs();
+      if (managed.length > 0) {
+        return false;
+      }
+
+      const tabs = await this.browser.tabs.query({});
+      const candidates = tabs.filter(tab =>
+        Number.isInteger(tab.id) &&
+        tab.active === true &&
+        tab.discarded !== true &&
+        (tab.url === "about:newtab" || tab.url === "about:blank")
+      );
+
+      if (candidates.length !== 1) {
+        return false;
+      }
+
+      let stored;
+      try {
+        stored = await this.browser.sessions.getTabValue(
+          candidates[0].id,
+          MANAGED_TAB_VALUE);
+      } catch {
+        return false;
+      }
+
+      if (sanitizedMetadata(stored)) {
+        return false;
+      }
+
+      try {
+        await this.browser.tabs.update(candidates[0].id, {
+          url: this.workerStartUrl
+        });
+        return true;
+      } catch {
+        return false;
+      }
     }
 
     async findReusableBootstrapTab() {
