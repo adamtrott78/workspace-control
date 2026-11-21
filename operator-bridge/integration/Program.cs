@@ -156,6 +156,9 @@ internal static class Program
             var restoreSeed = await ipc.CreateTargetAsync(
                 new BrowserTarget("slot-restore", 0),
                 CancellationToken.None);
+            var switchAwayFromRestore = await ipc.FocusTargetAsync(
+                new BrowserTarget("slot-create", 0),
+                CancellationToken.None);
             var discard = await ipc.DiscardTargetAsync(
                 new BrowserTarget("slot-restore", 0),
                 CancellationToken.None);
@@ -171,6 +174,7 @@ internal static class Program
             var restoreSubmit = world.HumanSubmit(restore);
             predicates["SIM-003_restore_discarded"] =
                 restoreSeed.IsApplied &&
+                switchAwayFromRestore.IsApplied &&
                 discard.IsApplied &&
                 restoreDispatch.Outcome == DispatchOutcome.LocalPrepared &&
                 restoreSubmit &&
@@ -180,6 +184,7 @@ internal static class Program
             details["SIM-003_restore_discarded"] = new
             {
                 seed = restoreSeed.Outcome.ToString(),
+                switch_away = switchAwayFromRestore.Outcome.ToString(),
                 discard = discard.Outcome.ToString(),
                 discard_error = discard.NormalizedError,
                 dispatch = restoreDispatch.Outcome.ToString(),
