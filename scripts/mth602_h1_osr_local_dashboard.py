@@ -28,7 +28,7 @@ from pathlib import Path
 
 TITLE = "MTH602 H1 — FROZEN-PAIR DQNGUARD OSR OVERLAP DASHBOARD"
 REFRESH_SEC = 1.0
-EXPECTED_SHA = "d7ba2c754d7d281651f4119ba79544ec6f6e89f6"
+EXPECTED_SHA = "573be0e7281f18c42c5f0ec326e4090a52f80d93"
 
 OBSERVER_ELEVATED = os.geteuid() == 0
 if OBSERVER_ELEVATED and os.environ.get("SUDO_USER"):
@@ -45,10 +45,12 @@ CACHE = OPERATOR_HOME / ".cache/workspace-control/experiment-dashboards/mth602-h
 
 # direction label, target, surrogate, lane, corrected workflow run ID, repaired baseline Unknown-F1
 RUNS = [
-    ("PA2<-PA8", "PA2", "PA8", 1, 44939698874, 0.801033),
-    ("PA8<-PA2", "PA8", "PA2", 1, 44939701110, 0.757011),
-    ("PA3<-PA8", "PA3", "PA8", 1, 44939702954, 0.054209),
-    ("PA8<-PA3", "PA8", "PA3", 1, 44939705618, 0.424513),
+    ("PA2<-PA3", "PA2", "PA3", 1, 44944515567, 0.027741),
+    ("PA3<-PA2", "PA3", "PA2", 1, 44944517585, 0.001426),
+    ("PA2<-PA8", "PA2", "PA8", 1, 44944519746, 0.801033),
+    ("PA8<-PA2", "PA8", "PA2", 1, 44944523065, 0.757011),
+    ("PA3<-PA8", "PA3", "PA8", 1, 44944525269, 0.054209),
+    ("PA8<-PA3", "PA8", "PA3", 1, 44944528254, 0.424513),
 ]
 RUN_IDS = {str(x[4]) for x in RUNS}
 FINALIST_RUN_NAME = "l2o_hpo_v2_PA2_PA3_t005_finalist"
