@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: dc3dff5ea00bc9a41be71bb79950115817fc364c
+- Remote checkpoint: ee3a21eef100539f36e7a0546f6d61e5f3bc3281
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY HOTKEY VISUAL-CREATE SMOKE — implementation dc3dff5ea00bc9a41be71bb79950115817fc364c passed Workspace #3070 / Semantic #370 / Operator #643. Intended UX: after launch the dedicated Firefox profile remains visibly idle on exactly one about:blank/about:newtab; do NOT navigate that startup tab to ChatGPT. On one Ctrl+Space create/service press, create a fresh active https://chatgpt.com/?temporary-chat=true tab, request Firefox OS focus, then close only the exact unmanaged startup blank captured before creation; clipboard behavior remains the already-proven WORKSPACE_OPERATOR_SMOKE_PACKET_V1 write. NEXT ACTION: run wop smoke on the current bookkeeping tip with no manual Firefox/tab cleanup. Before Ctrl+Space require one blank tab. After Ctrl+Space require one Personalized Temporary Chat tab, no blank duplicate, managed Firefox foreground, and clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1. No automatic paste/typing/Enter/Send. Do not infer live Stage-12 authority from this local smoke.
+WINDOWS-ONLY SESSIONSTORE-RESET SMOKE — ee3a21eef100539f36e7a0546f6d61e5f3bc3281 passed Workspace #3072 / Semantic #372 / Operator #645. Previous smoke showed the old runtime closing correctly but Firefox sessionstore resurrecting the obsolete fake-worker URL; clipboard packet still loaded and the subsequent no-action alert was correct. ee3a21ee… clears only dedicated-profile tab/session restore artifacts before launch while retaining login/cookies. NEXT ACTION: run wop smoke on the current bookkeeping tip with no manual Firefox/tab cleanup. Before Ctrl+Space require exactly one blank/new-tab surface and no fake-worker page. Press Ctrl+Space once: require a fresh active https://chatgpt.com/?temporary-chat=true tab, Firefox foreground, startup blank closed, and clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1. Do not press a second time unless testing no-action behavior. No live Stage-12 authority exists.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ WINDOWS-ONLY HOTKEY VISUAL-CREATE SMOKE — implementation dc3dff5ea00bc9a41be71
 ## Blockers / gates
 
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
-- Real-account Stage-12 retry remains paused. Hotkey visual-create repair dc3dff5e… is 3/3 validated, but the operator must rerun the Windows-only smoke and empirically confirm idle blank -> Ctrl+Space fresh Temporary Chat open/focus -> startup blank closed, with exact clipboard packet. No new live retry authority exists.
+- Real-account Stage-12 retry remains paused. Sessionstore reset ee3a21ee… is 3/3 validated, but operator must rerun Windows smoke and prove clean idle blank -> one Ctrl+Space fresh Personalized Temporary Chat/focus -> blank closed, with exact clipboard packet. No new live retry authority exists.
 
 ## Fresh-chat initialization
 
