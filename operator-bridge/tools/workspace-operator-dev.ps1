@@ -80,6 +80,128 @@ function Remove-TreeWithRetry([string]$Path) {
   throw "DEV_RUNTIME_CLEANUP_FAILED:$Path"
 }
 
+function Get-RuntimeOwnedProcesses([object]$State) {
+  $snapshot = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)
+  if ($snapshot.Count -eq 0) { return @() }
+
+  $owned = [System.Collections.Generic.HashSet[int]]::new()
+  $workDir = [string]$State.work_dir
+  $helperPath = [string]$State.helper_path
+
+  foreach ($process in $snapshot) {
+    $pidValue = [int]$process.ProcessId
+    $name = [string]$process.Name
+    $commandLine = [string]$process.CommandLine
+    $executablePath = [string]$process.ExecutablePath
+
+    if (
+      $State.web_ext_pid -and
+      $pidValue -eq [int]$State.web_ext_pid -and
+      $name -ieq "cmd.exe"
+    ) {
+      [void]$owned.Add($pidValue)
+    }
+
+    if (
+      $State.helper_pid -and
+      $pidValue -eq [int]$State.helper_pid -and
+      $name -ieq "WorkspaceOperator.exe"
+    ) {
+      [void]$owned.Add($pidValue)
+    }
+
+    if (
+      @($State.firefox_pids) -contains $pidValue -and
+      $name -ieq "firefox.exe"
+    ) {
+      [void]$owned.Add($pidValue)
+    }
+
+    if (
+      @($State.workspace_operator_pids) -contains $pidValue -and
+      $name -ieq "WorkspaceOperator.exe"
+    ) {
+      [void]$owned.Add($pidValue)
+    }
+
+    if (
+      -not [string]::IsNullOrWhiteSpace($workDir) -and
+      -not [string]::IsNullOrWhiteSpace($commandLine) -and
+      $commandLine.IndexOf(
+        $workDir,
+        [System.StringComparison]::OrdinalIgnoreCase) -ge 0
+    ) {
+      [void]$owned.Add($pidValue)
+    }
+
+    if (
+      $name -ieq "WorkspaceOperator.exe" -and
+      -not [string]::IsNullOrWhiteSpace($helperPath) -and
+      [string]::Equals(
+        $executablePath,
+        $helperPath,
+        [System.StringComparison]::OrdinalIgnoreCase)
+    ) {
+      [void]$owned.Add($pidValue)
+    }
+  }
+
+  $changed = $true
+  while ($changed) {
+    $changed = $false
+    foreach ($process in $snapshot) {
+      $pidValue = [int]$process.ProcessId
+      $parentPid = [int]$process.ParentProcessId
+      if ($owned.Contains($parentPid) -and $owned.Add($pidValue)) {
+        $changed = $true
+      }
+    }
+  }
+
+  return @($snapshot | Where-Object {
+    $owned.Contains([int]$_.ProcessId)
+  })
+}
+
+function Stop-RuntimeOwnedProcesses([object]$State) {
+  $owned = @(Get-RuntimeOwnedProcesses $State)
+  $firefoxIds = @(
+    $owned |
+      Where-Object { [string]$_.Name -ieq "firefox.exe" } |
+      ForEach-Object { [int]$_.ProcessId }
+  )
+  Stop-ManagedFirefox $firefoxIds
+
+  $owned = @(Get-RuntimeOwnedProcesses $State)
+  foreach ($process in $owned) {
+    if ([string]$process.Name -ieq "firefox.exe") { continue }
+    Stop-Process -Id ([int]$process.ProcessId) -Force -ErrorAction SilentlyContinue
+  }
+
+  $deadline = (Get-Date).AddSeconds(5)
+  do {
+    $remaining = @(Get-RuntimeOwnedProcesses $State)
+    if ($remaining.Count -eq 0) {
+      Write-Host "WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS"
+      return
+    }
+    Start-Sleep -Milliseconds 100
+  } while ((Get-Date) -lt $deadline)
+
+  foreach ($process in $remaining) {
+    Stop-Process -Id ([int]$process.ProcessId) -Force -ErrorAction SilentlyContinue
+  }
+  Start-Sleep -Milliseconds 500
+
+  $remaining = @(Get-RuntimeOwnedProcesses $State)
+  if ($remaining.Count -gt 0) {
+    $ids = @($remaining | ForEach-Object { [string]$_.ProcessId }) -join ","
+    throw "DEV_RUNTIME_PROCESS_CLEANUP_FAILED:$ids"
+  }
+
+  Write-Host "WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS"
+}
+
 function Stop-ManagedFirefox([object[]]$ProcessIds) {
   $ids = @($ProcessIds | Where-Object { $_ } | ForEach-Object { [int]$_ } | Select-Object -Unique)
   if ($ids.Count -eq 0) { return }
@@ -122,21 +244,7 @@ function Stop-DevRuntime {
     return
   }
 
-  Stop-ManagedFirefox @($state.firefox_pids)
-
-  $pids = @()
-  if ($state.web_ext_pid) { $pids += [int]$state.web_ext_pid }
-  foreach ($pidValue in @($state.workspace_operator_pids)) { if ($pidValue) { $pids += [int]$pidValue } }
-
-  foreach ($pidValue in ($pids | Select-Object -Unique)) {
-    Stop-Process -Id $pidValue -Force -ErrorAction SilentlyContinue
-  }
-  if ($state.helper_path) {
-    @(Get-CimInstance Win32_Process -Filter "Name='WorkspaceOperator.exe'" -ErrorAction SilentlyContinue |
-      Where-Object { [string]$_.ExecutablePath -eq [string]$state.helper_path }) |
-      ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-  }
-  Start-Sleep -Milliseconds 500
+  Stop-RuntimeOwnedProcesses $state
 
   if (Test-Path -LiteralPath $registryPath) {
     $current = (Get-Item -LiteralPath $registryPath).GetValue("")
