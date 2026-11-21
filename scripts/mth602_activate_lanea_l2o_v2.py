@@ -21,7 +21,6 @@ import lambda_ci_v3_reconciler as candidate
 import lambda_ci_v3_padataset_scientific_workflow_refresh_v1 as base
 import lambda_ci_v3_padataset_scientific_workflow_refresh_v2 as refresh
 
-EXPECTED_SOURCE_HEAD = "613c0cc8295a521396e794af9f221ff7665e3275"
 EXPECTED_PAD_MAIN = "34e150ae4fe349889a054aa2c12d33393cf64f66"
 EXPECTED_WORKFLOW_BLOB = "bca2eabe3afe70ec3115391e5a6c24daefd1498b"
 EXPECTED_CONFIRM = "MERGE_PR39_AND_ACTIVATE_GPU0_L2O"
@@ -67,11 +66,11 @@ def root_private_json(path: pathlib.Path, value: dict) -> bytes:
     return raw
 
 
-def exact_repo(repo_root: pathlib.Path) -> pathlib.Path:
+def exact_repo(repo_root: pathlib.Path, expected_head: str) -> pathlib.Path:
     root = repo_root.resolve()
     head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
-    if head != EXPECTED_SOURCE_HEAD:
-        raise OperatorGateError(f"candidate head mismatch: {head}")
+    if head != expected_head:
+        raise OperatorGateError(f"candidate head mismatch: {head} != {expected_head}")
     dirty = subprocess.check_output(
         ["git", "-C", str(root), "status", "--porcelain=v1", "--untracked-files=normal"],
         text=True,
@@ -110,6 +109,7 @@ def github_preflight():
 def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--repo-root", type=pathlib.Path, required=True)
+    p.add_argument("--expected-head", required=True)
     p.add_argument("--operator-confirm", required=True)
     args = p.parse_args()
 
@@ -120,7 +120,9 @@ def main() -> int:
     if not os.environ.get("GH_TOKEN"):
         raise OperatorGateError("GH_TOKEN is required for fresh GitHub preflight")
 
-    repo = exact_repo(args.repo_root)
+    if len(args.expected_head) != 40 or any(c not in "0123456789abcdef" for c in args.expected_head):
+        raise OperatorGateError("expected-head must be a lowercase 40-hex SHA")
+    repo = exact_repo(args.repo_root, args.expected_head)
     github_preflight()
 
     # Fail closed on any live-state drift before creating authority.
@@ -181,7 +183,7 @@ def main() -> int:
         "authorization_id": str(uuid.uuid4()),
         "issued_at": now.isoformat(),
         "expires_at": (now + timedelta(minutes=10)).isoformat(),
-        "source_head": EXPECTED_SOURCE_HEAD,
+        "source_head": args.expected_head,
         "dual_active_receipt_sha256": sha(dual_raw),
         "prior_refresh_receipt_sha256": sha(prior_raw),
         "preflight_confirmation_sha256": sha(preflight_raw),
@@ -206,7 +208,7 @@ def main() -> int:
             "/usr/bin/python3",
             str(repo / "scripts/lambda_ci_v3_padataset_scientific_workflow_refresh_v2.py"),
             "--repo-root", str(repo),
-            "--expected-head", EXPECTED_SOURCE_HEAD,
+            "--expected-head", args.expected_head,
             "--preflight-confirmation", str(preflight_path),
             "--authorization-receipt", str(authority_path),
         ]
