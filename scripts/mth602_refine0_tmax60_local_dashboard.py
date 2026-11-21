@@ -10,6 +10,8 @@ No GitHub API calls. Telemetry sources:
 - persistent local dashboard cache
 
 The immutable admission/run-ID mapping is retained only as identity metadata.
+Authoritative terminal successes are seeded so a dashboard launched after runner-temp
+cleanup does not regress completed runs to WAITING.
 """
 
 from __future__ import annotations
@@ -50,7 +52,12 @@ RUNS = [
     ("PA3-PA8", "t005", 0, 44635272660),
 ]
 
-SEED = {}
+SEED = {
+    "l2o_hpo_v2_PA2_PA3_t003_refine_tmax60": {"status": "SUCCESS", "total": 3043.6054792404175},
+    "l2o_hpo_v2_PA2_PA3_t005_refine_tmax60": {"status": "SUCCESS", "total": 5671.353595256805},
+    "l2o_hpo_v2_PA2_PA8_t003_refine_tmax60": {"status": "SUCCESS", "total": 3317.3965129852295},
+    "l2o_hpo_v2_PA3_PA8_t005_refine_tmax60": {"status": "SUCCESS", "total": 2577.0847306251526},
+}
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
