@@ -6,6 +6,9 @@ REC = (ROOT / "scripts/lambda_ci_v3_reconciler.py").read_text()
 HELPER = (
     ROOT / "scripts/lambda_ci_v3_padataset_scientific_workflow_refresh_v2.py"
 ).read_text()
+LAUNCHER = (
+    ROOT / "scripts/mth602_activate_lanea_l2o_v2.py"
+).read_text()
 
 
 class PADatasetScientificWorkflowRefreshV2Tests(unittest.TestCase):
@@ -16,6 +19,24 @@ class PADatasetScientificWorkflowRefreshV2Tests(unittest.TestCase):
             "lambda_ci_v3_padataset_scientific_workflow_refresh_v2.py",
             "exec",
         )
+        compile(LAUNCHER, "mth602_activate_lanea_l2o_v2.py", "exec")
+
+    def test_operator_launcher_is_exact_and_non_generic(self):
+        for marker in (
+            'EXPECTED_SOURCE_HEAD = "613c0cc8295a521396e794af9f221ff7665e3275"',
+            'EXPECTED_PAD_MAIN = "34e150ae4fe349889a054aa2c12d33393cf64f66"',
+            'EXPECTED_WORKFLOW_BLOB = "bca2eabe3afe70ec3115391e5a6c24daefd1498b"',
+            'EXPECTED_CONFIRM = "MERGE_PR39_AND_ACTIVATE_GPU0_L2O"',
+            '"active_workflow_runs": 0',
+            '"assigned_jobs": 0',
+            '"running_jobs": 0',
+            "candidate.verify_installed",
+            "refresh.require_target_quiescent",
+            "MTH602_LANEA_L2O_REFRESH_V2_POSTVERIFY=PASS",
+        ):
+            self.assertIn(marker, LAUNCHER)
+        self.assertNotIn("shell=True", LAUNCHER)
+        self.assertNotIn("os.system(", LAUNCHER)
 
     def test_exact_v1_to_v2_transition_is_frozen(self):
         for marker in (
