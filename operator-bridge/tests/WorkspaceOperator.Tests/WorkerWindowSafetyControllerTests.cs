@@ -19,6 +19,7 @@ public sealed class WorkerWindowSafetyControllerTests
 
         Assert.IsTrue(controller.RecordPreparedWorkerWindow());
         Assert.IsTrue(controller.ForegroundPreparedWorkerWindow());
+        Assert.IsTrue(controller.IsPreparedWorkerWindowForeground());
         Assert.IsTrue(controller.MinimizeAfterNoAction());
         Assert.AreEqual(1, port.CaptureCalls);
         Assert.AreEqual(1, port.ForegroundCalls);
@@ -44,6 +45,7 @@ public sealed class WorkerWindowSafetyControllerTests
         public bool CaptureResult { get; set; }
         public bool ForegroundResult { get; set; }
         public bool MinimizeResult { get; set; }
+        public bool IsForegroundResult { get; set; } = true;
         public int CaptureCalls { get; private set; }
         public int ForegroundCalls { get; private set; }
         public int MinimizeCalls { get; private set; }
@@ -59,6 +61,9 @@ public sealed class WorkerWindowSafetyControllerTests
             ForegroundCalls++;
             return ForegroundResult;
         }
+
+        public bool IsCapturedWorkerWindowForeground() =>
+            IsForegroundResult;
 
         public bool MinimizeCapturedWorkerWindow()
         {

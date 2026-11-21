@@ -82,6 +82,26 @@ class OperatorBridgeStageTenUsabilityTests(unittest.TestCase):
         self.assertNotIn("KeyboardEvent", harness)
         self.assertNotIn("MouseEvent", harness)
 
+        production_context = (
+            ROOT / "operator-bridge" / "src" / "WorkspaceOperator" /
+            "Windows" / "TrayApplicationContext.cs"
+        ).read_text(encoding="utf-8")
+        enter_gate = (
+            ROOT / "operator-bridge" / "src" / "WorkspaceOperator" /
+            "Windows" / "Hotkey" / "HumanSubmitConfirmationGate.cs"
+        ).read_text(encoding="utf-8")
+        self.assertIn("HumanSubmitConfirmationGate", production_context)
+        self.assertIn("IsAwaitingConfirmation", production_context)
+        self.assertIn("TryConsumeConfirmed", production_context)
+        self.assertIn("No Enter confirmation recorded", production_context)
+        self.assertIn("WhKeyboardLl = 13", enter_gate)
+        self.assertIn("VkReturn = 0x0D", enter_gate)
+        self.assertIn("CallNextHookEx", enter_gate)
+        self.assertIn("GetAsyncKeyState", enter_gate)
+        self.assertNotIn("SendInput", enter_gate)
+        self.assertNotIn("keybd_event", enter_gate)
+        self.assertNotIn("SendKeys", enter_gate)
+
     def test_workflow_has_opt_in_interactive_stage10_trials(self):
         workflow = (
             ROOT / ".github" / "workflows" / "operator-bridge-validation.yml"

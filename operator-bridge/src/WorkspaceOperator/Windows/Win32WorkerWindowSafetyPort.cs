@@ -55,6 +55,15 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
         return false;
     }
 
+    public bool IsCapturedWorkerWindowForeground()
+    {
+        var window = _capturedWindow;
+        return window != 0 &&
+            IsWindow(window) &&
+            IsFirefoxWindow(window) &&
+            GetForegroundWindow() == window;
+    }
+
     public bool MinimizeCapturedWorkerWindow()
     {
         var window = _capturedWindow;

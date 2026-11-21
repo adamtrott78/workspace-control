@@ -6,6 +6,8 @@ public interface IWorkerWindowSafetyPort
 
     bool ForegroundPreparedWorkerWindow();
 
+    bool IsCapturedWorkerWindowForeground();
+
     bool MinimizeCapturedWorkerWindow();
 }
 
@@ -23,6 +25,9 @@ public sealed class WorkerWindowSafetyController
 
     public bool ForegroundPreparedWorkerWindow() =>
         _port.ForegroundPreparedWorkerWindow();
+
+    public bool IsPreparedWorkerWindowForeground() =>
+        _port.IsCapturedWorkerWindowForeground();
 
     public bool MinimizeAfterNoAction() =>
         _port.MinimizeCapturedWorkerWindow();

@@ -24,6 +24,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly Func<WorkloadStatusSnapshot> _workloadStatusProvider;
     private readonly string _configuredHotkey;
     private readonly WorkerWindowSafetyController _workerWindowSafety;
+    private readonly HumanSubmitConfirmationGate _humanSubmitConfirmation;
     private readonly IDisposable? _operatorActionLifetime;
     private Icon? _statusIcon;
     private readonly CancellationTokenSource _ipcCancellation = new();
@@ -50,6 +51,8 @@ public sealed class TrayApplicationContext : ApplicationContext
         _operatorActionLifetime = operatorActionLifetime;
         _workerWindowSafety = new WorkerWindowSafetyController(
             new Win32WorkerWindowSafetyPort());
+        _humanSubmitConfirmation = new HumanSubmitConfirmationGate(
+            _workerWindowSafety.IsPreparedWorkerWindowForeground);
         var hotkey = new WindowsHotkeyRegistrar(
             _hotkeyWindow.Handle,
             binding);
@@ -169,11 +172,34 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         try
         {
+            if (_humanSubmitConfirmation.IsAwaitingConfirmation &&
+                !_humanSubmitConfirmation.TryConsumeConfirmed())
+            {
+                _workerWindowSafety.ForegroundPreparedWorkerWindow();
+                _notifyIcon.ShowBalloonTip(
+                    2500,
+                    "Workspace Worker Bridge",
+                    "No Enter confirmation recorded. Press Enter in the prepared worker Firefox tab after pasting the prompt, then press Ctrl+Space again.",
+                    ToolTipIcon.None);
+                return;
+            }
+
             var result = await _dispatch.DispatchAsync();
             if (result.Outcome == DispatchOutcome.LocalPrepared)
             {
                 _workerWindowSafety.ForegroundPreparedWorkerWindow();
-                _workerWindowSafety.RecordPreparedWorkerWindow();
+                var captured =
+                    _workerWindowSafety.RecordPreparedWorkerWindow();
+                var armed =
+                    captured && _humanSubmitConfirmation.Arm();
+                if (!armed)
+                {
+                    _notifyIcon.ShowBalloonTip(
+                        3000,
+                        "Workspace Worker Bridge",
+                        "Enter confirmation monitor unavailable; this worker will remain blocked rather than advance.",
+                        ToolTipIcon.Warning);
+                }
             }
             else if (result.Outcome == DispatchOutcome.NoAction)
             {
@@ -237,6 +263,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
 
         _hotkeyWindow.HotkeyPressed -= HotkeyPressed;
+        _humanSubmitConfirmation.Dispose();
         _idleProbeTimer?.Dispose();
         _statusTimer.Stop();
         _statusTimer.Dispose();
