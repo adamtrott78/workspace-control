@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: aa44c9a844eb5927565e1911e96155dfb0f68207
+- Remote checkpoint: 7fcc1d4dc994d316b26316bdb9374295431aa36d
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY STALE-BOOTSTRAP RECOVERY SMOKE — repair aa44c9a844eb5927565e1911e96155dfb0f68207 passed Workspace #3065 / Semantic #365 / Operator #638. The previous smoke already proved verified-dead workdir residue can be deferred and fresh runtime startup succeeds, but the persistent Firefox profile restored the exact legacy simulator URL http://127.0.0.1:8765/fake-worker.html plus one blank tab. aa44c9a… narrowly repairs only that exact legacy bootstrap residue to https://chatgpt.com/?temporary-chat=true and removes the one stale blank tab in the exact two-tab residue shape; arbitrary localhost/unmanaged tabs remain untouched. NEXT ACTION: run wop smoke on the current bookkeeping tip with no manual Firefox cleanup. Require no Troubleshoot Mode prompt, Temporary Chat startup, retained auth or at most one login, no stray blank/duplicate worker tab, one Ctrl+Space on that same Temporary Chat, clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1, and managed Firefox foreground. Do not create or infer live Stage-12 authority from this local smoke.
+WINDOWS-ONLY SINGLE-TAB STARTUP SMOKE — repair 7fcc1d4dc994d316b26316bdb9374295431aa36d passed Workspace #3067 / Semantic #367 / Operator #640. The prior smoke reached the correct Personalized Temporary Chat but still restored a second ChatGPT tab from persistent Firefox session state, so the no-stray/duplicate gate failed before Ctrl+Space. 7fcc1d4d… keeps the dedicated persistent profile/login but forces browser.startup.page=0 and browser.sessionstore.resume_from_crash=false on both dev and real Stage-12 launches; the adapter then navigates the single blank startup tab to the fixed Temporary Chat URL. NEXT ACTION: run wop smoke on the current bookkeeping tip with no manual Firefox/tab cleanup. Require exactly one ChatGPT Temporary Chat tab, no Troubleshoot Mode prompt, retained auth or at most one login, then press Ctrl+Space once and verify clipboard exactly WORKSPACE_OPERATOR_SMOKE_PACKET_V1 plus managed Firefox foreground. Do not create or infer live Stage-12 authority from this local smoke.
 
 ## Remaining work
 
@@ -41,7 +41,7 @@ WINDOWS-ONLY STALE-BOOTSTRAP RECOVERY SMOKE — repair aa44c9a844eb5927565e1911e
 ## Blockers / gates
 
 - The authoritative long-form UX-09 target benchmark remains intentionally SUSPENDED as an intermediate gate. It remains mandatory before impl_13 production readiness can pass.
-- Real-account Stage-12 retry remains paused. Repair aa44c9a… is 3/3 validated, but the operator must rerun the Windows-only fast smoke and prove the persistent Firefox profile now lands on Personalized Temporary Chat with no stale fake-worker/blank duplicate, then prove Ctrl+Space clipboard replacement and native foreground. No new live retry authority exists.
+- Real-account Stage-12 retry remains paused. Single-tab startup-policy repair 7fcc1d4d… is 3/3 validated, but the operator must rerun the Windows-only fast smoke and prove exactly one Personalized Temporary Chat tab before Ctrl+Space, then prove clipboard replacement and native foreground. No new live retry authority exists.
 
 ## Fresh-chat initialization
 
