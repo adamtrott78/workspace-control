@@ -42,7 +42,7 @@ class PADatasetScientificWorkflowRefreshV2Tests(unittest.TestCase):
     def test_dual_lane_predecessor_still_binds_immutable_lane_a_v1_receipt(self):
         block = REC[
             REC.index("def _padataset_scientific_dual_lane_override"):
-            REC.index("def _padataset_scientific_dual_lane_workflow_refresh"),
+            REC.index("def _padataset_scientific_dual_lane_workflow_refresh")
         ]
         self.assertIn(
             "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT.read_bytes()",
@@ -122,7 +122,7 @@ class PADatasetScientificWorkflowRefreshV2Tests(unittest.TestCase):
     def test_v2_is_effective_for_lane_a_without_rebinding_dual_predecessor(self):
         block = REC[
             REC.index("scientific_workflow_refresh_v2 ="):
-            REC.index("scientific_dual_workflow_refresh ="),
+            REC.index("scientific_dual_workflow_refresh =")
         ]
         self.assertIn(
             "scientific_workflow_refresh_v2\n"
