@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "LIFECYCLE_SOURCE_VALIDATED_AWAITING_WINDOWS_SMOKE",
+  "status": "DEV_RUNTIME_CLEANUP_VALIDATED_AWAITING_WINDOWS_RECOVERY_SMOKE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -261,6 +261,34 @@
         "workspace_control_run": 3059,
         "semantic_execution_run": 359,
         "operator_bridge_run": 632,
+        "result": "SUCCESS"
+      },
+      "live_retry_authorized": false
+    },
+    "dev_runtime_cleanup_failure": {
+      "attempted_tip": "7d000c5c3ae3c7cb3016bc2c53ef5f97d93f551d",
+      "failure_marker": "DEV_RUNTIME_CLEANUP_FAILED",
+      "stuck_workdir": "%LOCALAPPDATA%\\WorkspaceControl\\OperatorBridge\\DevRuntime\\run-ee58cb56c57f43418fbc15b16256306e",
+      "new_runtime_started": false
+    },
+    "dev_runtime_process_tree_fix": {
+      "source_head": "5ce678ead71f28edd653a26adcacc328398f0a13",
+      "ownership_inputs": [
+        "recorded runtime PIDs",
+        "exact WorkspaceOperator helper path",
+        "exact saved GUID workdir in process command line",
+        "recursive ParentProcessId descendants"
+      ],
+      "shutdown_order": [
+        "graceful owned Firefox close",
+        "terminate remaining runtime-owned descendants",
+        "wait/verify exit",
+        "remove exact workdir"
+      ],
+      "validation": {
+        "workspace_control_run": 3061,
+        "semantic_execution_run": 361,
+        "operator_bridge_run": 634,
         "result": "SUCCESS"
       },
       "live_retry_authorized": false

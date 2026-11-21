@@ -288,3 +288,9 @@
 - [x] Temporary Chat startup navigation moved out of web-ext `--start-url` and into the least-privilege Firefox adapter for exactly one active blank bootstrap tab.
 - [ ] CURRENT GATE: Windows-only smoke — no Troubleshoot Mode prompt; persistent ChatGPT login retained; Firefox lands at `https://chatgpt.com/?temporary-chat=true`; Ctrl+Space services the same tab and stages the smoke packet.
 - [ ] After Windows smoke PASS: add per-user lifecycle commands/shortcuts analogous to Heartbeat (`wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test`) before returning to the real Stage-12 calibration.
+
+
+- [x] Locked-workdir failure captured: `wop smoke 7d000c5…` stopped pre-start on `DEV_RUNTIME_CLEANUP_FAILED` for `run-ee58…`.
+- [x] Exact process-tree cleanup source `5ce678ea…` passed Workspace #3061 / Semantic #361 / Operator #634.
+- [x] Teardown ownership now includes recorded PIDs + exact helper path + exact GUID workdir command-line matches + recursive descendants; Firefox remains graceful-first.
+- [ ] CURRENT GATE: run Windows-only smoke on current bookkeeping tip. It must first clean the already-stuck `run-ee58…` runtime, then launch persistent Temporary Chat with no Troubleshoot prompt and preserve the proven Ctrl+Space/clipboard/focus path.

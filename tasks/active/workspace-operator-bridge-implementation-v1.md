@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: fd7ede4252b457092a8bf521b0ca6ddaab621bb5
+- Remote checkpoint: 5ce678ead71f28edd653a26adcacc328398f0a13
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS-ONLY PERSISTENT-FIREFOX SMOKE — exact lifecycle source fd7ede42… passed Workspace #3059 / Semantic #359 / Operator #632. Raw literal @github invocation in a Personalized Temporary Chat is empirically proven without autocomplete selection. NEXT ACTION: run wop smoke on the bookkeeping tip, verify (1) no Firefox Troubleshoot Mode prompt, (2) dedicated profile lands at https://chatgpt.com/?temporary-chat=true, (3) prior ChatGPT authentication is preserved, and (4) one Ctrl+Space services that same tab with clipboard packet + foreground. No Linux or real Stage-12 live authority.
+WINDOWS-ONLY RECOVERY SMOKE — exact runtime process-tree cleanup source 5ce678ea… passed Workspace #3061 / Semantic #361 / Operator #634. The prior attempt stopped before startup because old DevRuntime workdir run-ee58… remained locked after wrapper-only teardown. New cleanup discovers exact runtime-owned processes from recorded PIDs, helper executable path, saved run-<GUID> workdir command lines, and descendants; closes owned Firefox gracefully, terminates remaining owned descendants, waits for exit, then removes workdir. NEXT ACTION: run wop smoke on current bookkeeping tip; it must first recover the existing stuck runtime, then launch the persistent Temporary Chat flow. No Linux/live authority.
 
 ## Remaining work
 

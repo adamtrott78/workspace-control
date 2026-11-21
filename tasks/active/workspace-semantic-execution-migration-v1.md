@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: fd7ede4252b457092a8bf521b0ca6ddaab621bb5
+- Remote checkpoint: 5ce678ead71f28edd653a26adcacc328398f0a13
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-STAGE-12 V1.1 WINDOWS FAST-LOOP GATE — lifecycle repair fd7ede42… is exact-head 3/3 green (#3059/#359/#632), and raw @github plugin invocation is proven in Personalized Temporary Chat without UI selection. NEXT ACTION: Windows-only smoke to verify no Troubleshoot Mode prompt, persistent auth, direct Temporary Chat bootstrap, and same-tab Ctrl+Space service. Do not return to Linux/full Stage-12 until this passes.
+STAGE-12 V1.1 WINDOWS FAST-LOOP RECOVERY GATE — runtime process-tree cleanup 5ce678ea… is exact-source 3/3 green (#3061/#361/#634). Prior 7d000c5… smoke stopped pre-start on a locked DevRuntime run-ee58… directory. NEXT ACTION: Windows-only wop smoke on current bookkeeping tip; PASS first requires recovery/cleanup of the existing stale runtime, then no Troubleshoot prompt, persistent auth, direct Personalized Temporary Chat, and same-tab Ctrl+Space service. Raw @github invocation is already proven. Do not return to Linux/full Stage-12 until this passes.
 
 ## Remaining work
 
