@@ -29,6 +29,10 @@ class PADatasetScientificWorkflowRefreshV2Tests(unittest.TestCase):
             'EXPECTED_PAD_MAIN = "34e150ae4fe349889a054aa2c12d33393cf64f66"',
             'EXPECTED_WORKFLOW_BLOB = "bca2eabe3afe70ec3115391e5a6c24daefd1498b"',
             'EXPECTED_CONFIRM = "MERGE_PR39_AND_ACTIVATE_GPU0_L2O"',
+            'EXPECTED_PROVIDER_CONFIRM = "PROVIDER_LANEA_QUEUE_ZERO_VERIFIED"',
+            'p.add_argument("--padataset-root", type=pathlib.Path, required=True)',
+            'p.add_argument("--provider-queue-confirm", required=True)',
+            'local_padataset_preflight(args.padataset_root)',
             '"active_workflow_runs": 0',
             '"assigned_jobs": 0',
             '"running_jobs": 0',
@@ -39,6 +43,10 @@ class PADatasetScientificWorkflowRefreshV2Tests(unittest.TestCase):
             self.assertIn(marker, LAUNCHER)
         self.assertNotIn("shell=True", LAUNCHER)
         self.assertNotIn("os.system(", LAUNCHER)
+        self.assertNotIn("gh api", LAUNCHER)
+        self.assertNotIn('["gh"', LAUNCHER)
+        self.assertNotIn("api.github.com", LAUNCHER)
+        self.assertNotIn("GH_TOKEN", LAUNCHER)
 
     def test_exact_v1_to_v2_transition_is_frozen(self):
         for marker in (
