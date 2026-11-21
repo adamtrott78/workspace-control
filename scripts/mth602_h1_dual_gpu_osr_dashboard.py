@@ -33,10 +33,28 @@ CELLS = [
     ("PA2<-PA3", "PA2", "PA3", 0.027741, 44944515567, "G1"),
     ("PA3<-PA2", "PA3", "PA2", 0.001426, 44944517585, "G1"),
     ("PA2<-PA8", "PA2", "PA8", 0.801033, 44944519746, "G1"),
-    ("PA8<-PA2", "PA8", "PA2", 0.757011, 44944523065, "G1"),
-    ("PA3<-PA8", "PA3", "PA8", 0.054209, 44944525269, "G1"),
-    ("PA8<-PA3", "PA8", "PA3", 0.424513, 44944528254, "G1"),
+    ("PA8<-PA2", "PA8", "PA2", 0.757011, 44947116845, "G0"),
+    ("PA3<-PA8", "PA3", "PA8", 0.054209, 44947121549, "G1"),
+    ("PA8<-PA3", "PA8", "PA3", 0.424513, 44947124205, "G0"),
 ]
+
+COMPLETED_SEED = {
+    "PA2<-PA3": {
+        "run_id": 44944515567, "lane": "G1", "unknown_f1": 0.1502975148757437,
+        "known_reject_rate": 0.0718522912650155, "total": 337.47395634651184,
+        "sha": "573be0e7281f18c42c5f0ec326e4090a52f80d93",
+    },
+    "PA3<-PA2": {
+        "run_id": 44944517585, "lane": "G1", "unknown_f1": 0.3841282467035825,
+        "known_reject_rate": 0.067403232982352, "total": 343.37676215171814,
+        "sha": "573be0e7281f18c42c5f0ec326e4090a52f80d93",
+    },
+    "PA2<-PA8": {
+        "run_id": 44944519746, "lane": "G1", "unknown_f1": 0.984758990646242,
+        "known_reject_rate": 0.0562064363043155, "total": 344.2536709308624,
+        "sha": "573be0e7281f18c42c5f0ec326e4090a52f80d93",
+    },
+}
 
 RESET="\033[0m"; BOLD="\033[1m"; DIM="\033[2m"
 GREEN="\033[32m"; RED="\033[31m"; YELLOW="\033[33m"
@@ -66,7 +84,14 @@ def fmt(sec):
 
 def load_cache():
     d=read_json(CACHE) if CACHE.exists() else None
-    return d if isinstance(d,dict) else {"cells":{}}
+    if not isinstance(d,dict):
+        d={"cells":{}}
+    d.setdefault("cells", {})
+    for key, value in COMPLETED_SEED.items():
+        current=d["cells"].get(key, {})
+        if current.get("unknown_f1") is None:
+            d["cells"][key]=dict(value)
+    return d
 
 
 def save_cache(d):
@@ -253,10 +278,18 @@ def render():
             frame.append(f"GPU0 mem {g0.get('used','-')}/{g0.get('total','-')} MiB util {g0.get('util','-')}%   GPU1 mem {g1.get('used','-')}/{g1.get('total','-')} MiB util {g1.get('util','-')}%")
             frame.append("")
             frame.append(BOLD+"LIVE LANES"+RESET)
+            waiting_by_lane={"G0":0,"G1":0}
+            for row in rows:
+                if row[2] == "WAITING" and row[1] in waiting_by_lane:
+                    waiting_by_lane[row[1]] += 1
             for lane,gidx in (("G0",0),("G1",1)):
                 active_label=lane_active.get(lane)
-                st="RUNNING" if active_label else "IDLE"
-                detail=active_label or ("ready for bounded L2O admission" if lane=="G0" else "no local evaluator visible")
+                if active_label:
+                    st="RUNNING"; detail=active_label
+                elif waiting_by_lane[lane]:
+                    st="WAITING"; detail=f"{waiting_by_lane[lane]} exact-head job(s) queued; no local runner visible"
+                else:
+                    st="IDLE"; detail="no local evaluator visible"
                 frame.append(f"{lane}  {status_color(st)}  {detail}")
             frame.append("")
             frame.append(BOLD+f"{'DIRECTION':<12} {'LANE':<5} {'STATUS':<9} {'STAGE':<10} {'ELAPSED':>9} {'TOTAL':>9} {'UNK-F1':>8} {'DELTA':>8} {'K-REJ':>8} {'RUN ID':>12}"+RESET)
