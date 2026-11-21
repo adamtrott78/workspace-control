@@ -3429,9 +3429,10 @@
     },
     "launch_observation": {
       "gpu0_first_run": 44954696289,
-      "gpu0_status": "IN_PROGRESS",
-      "gpu1_status": "QUEUED_AT_FIRST_OBSERVATION",
-      "duplicate_execution": false
+      "gpu0_status": "IN_PROGRESS_EXECUTE_BOUNDED_SCIENTIFIC_REQUEST",
+      "gpu1_status": "IN_PROGRESS_EXECUTE_BOUNDED_SCIENTIFIC_REQUEST",
+      "duplicate_execution": false,
+      "gpu1_first_run": 44954722186
     }
   }
 }
