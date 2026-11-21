@@ -133,18 +133,31 @@ try {
       throw "WOP_SHA_INVALID:$Sha"
     }
 
-    git -C $W fetch origin workspace-semantic-execution-migration-v1
-    if ($LASTEXITCODE -ne 0) { throw "WOP_FETCH_FAILED" }
+    git -C $W fetch --force --depth=1 origin workspace-semantic-execution-migration-v1
+    if ($LASTEXITCODE -ne 0) { throw "WOP_BRANCH_FETCH_FAILED" }
 
-    git -C $W cat-file -e ($Sha + "^{commit}")
-    if ($LASTEXITCODE -ne 0) { throw "WOP_SHA_NOT_FOUND:$Sha" }
+    $branchHead = (git -C $W rev-parse FETCH_HEAD).Trim().ToLowerInvariant()
+    if ($LASTEXITCODE -ne 0 -or $branchHead -notmatch "^[0-9a-f]{40}$") {
+      throw "WOP_BRANCH_HEAD_UNAVAILABLE"
+    }
 
-    git -C $W checkout --detach $Sha
+    if ($branchHead -eq $Sha.ToLowerInvariant()) {
+      git -C $W checkout --detach FETCH_HEAD
+    } else {
+      git -C $W fetch --force --depth=1 origin $Sha
+      if ($LASTEXITCODE -ne 0) { throw "WOP_EXACT_FETCH_FAILED:$Sha" }
+      git -C $W checkout --detach FETCH_HEAD
+    }
     if ($LASTEXITCODE -ne 0) { throw "WOP_CHECKOUT_FAILED:$Sha" }
 
     $actual = (git -C $W rev-parse HEAD).Trim().ToLowerInvariant()
     if ($LASTEXITCODE -ne 0 -or $actual -ne $Sha.ToLowerInvariant()) {
       throw "WOP_CHECKOUT_MISMATCH:$actual"
+    }
+
+    git -C $W cat-file -e ($actual + "^{tree}")
+    if ($LASTEXITCODE -ne 0) {
+      throw "WOP_CHECKOUT_TREE_UNAVAILABLE:$actual"
     }
   }
 

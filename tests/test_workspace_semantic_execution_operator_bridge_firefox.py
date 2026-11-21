@@ -113,6 +113,9 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         self.assertNotIn("Start-Service", text)
         self.assertNotIn("Register-ScheduledTask", text)
         self.assertNotIn("Invoke-Expression", text)
+        self.assertIn("fetch --force --depth=1 origin workspace-semantic-execution-migration-v1", text)
+        self.assertIn("WOP_EXACT_FETCH_FAILED", text)
+        self.assertIn("WOP_CHECKOUT_TREE_UNAVAILABLE", text)
 
     def test_dedicated_firefox_launchers_suppress_session_restore(self):
         dev = DEV_RUNTIME.read_text(encoding="utf-8")
