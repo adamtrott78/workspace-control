@@ -65,7 +65,7 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         self.assertIn("WORKSPACE_OPERATOR_FIREFOX_SHUTDOWN=GRACEFUL", text)
         self.assertIn("WORKSPACE_OPERATOR_FIREFOX_SHUTDOWN=FORCED_FALLBACK", text)
 
-    def test_dev_runtime_owns_exact_process_tree_before_workdir_removal(self):
+    def test_dev_runtime_owns_exact_process_tree_before_workdir_cleanup(self):
         text = DEV_RUNTIME.read_text(encoding="utf-8")
         self.assertIn("function Get-RuntimeOwnedProcesses", text)
         self.assertIn("function Stop-RuntimeOwnedProcesses", text)
@@ -76,7 +76,20 @@ class FirefoxAdapterStageFourStaticTests(unittest.TestCase):
         self.assertIn("DEV_RUNTIME_PROCESS_CLEANUP_FAILED", text)
         self.assertLess(
             text.index("Stop-RuntimeOwnedProcesses $state"),
-            text.index("Remove-TreeWithRetry ([string]$state.work_dir)"),
+            text.index("Try-RemoveTreeWithRetry ([string]$state.work_dir)"),
+        )
+
+    def test_verified_dead_runtime_can_defer_locked_workdir_residue(self):
+        text = DEV_RUNTIME.read_text(encoding="utf-8")
+        self.assertIn("function Try-RemoveTreeWithRetry", text)
+        self.assertIn("cleanup-residue.jsonl", text)
+        self.assertIn("WORKSPACE_OPERATOR_RUNTIME_RESIDUE=DEFERRED", text)
+        self.assertIn("WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=DEFERRED", text)
+        self.assertIn("WORKSPACE_OPERATOR_DEV_OFFLINE=PASS", text)
+        self.assertNotIn("DEV_RUNTIME_CLEANUP_FAILED:", text)
+        self.assertLess(
+            text.index("Try-RemoveTreeWithRetry ([string]$state.work_dir)"),
+            text.index("Remove-Item -LiteralPath $statePath"),
         )
 
     def test_sessions_metadata_key_is_private_and_content_free(self):

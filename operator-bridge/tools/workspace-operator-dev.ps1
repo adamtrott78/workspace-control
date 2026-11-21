@@ -14,6 +14,7 @@ $repo = [System.IO.Path]::GetFullPath($RepositoryRoot)
 $bridgeRoot = Join-Path $repo "operator-bridge"
 $runtimeRoot = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\DevRuntime"
 $statePath = Join-Path $runtimeRoot "runtime.json"
+$cleanupResiduePath = Join-Path $runtimeRoot "cleanup-residue.jsonl"
 $registryPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\com.workspacecontrol.operator_bridge"
 $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
 $firefoxProfile = Join-Path $runtimeRoot "firefox-profile"
@@ -67,17 +68,29 @@ function Test-Pid([int]$ProcessId) {
   return $null -ne (Get-Process -Id $ProcessId -ErrorAction SilentlyContinue)
 }
 
-function Remove-TreeWithRetry([string]$Path) {
-  if (-not (Test-Path -LiteralPath $Path)) { return }
+function Try-RemoveTreeWithRetry([string]$Path) {
+  if (-not (Test-Path -LiteralPath $Path)) { return $true }
+
+  $lastError = ""
   for ($i = 0; $i -lt 20; $i++) {
     try {
       Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction Stop
-      return
+      return $true
     } catch {
+      $lastError = $_.Exception.Message
       Start-Sleep -Milliseconds 250
     }
   }
-  throw "DEV_RUNTIME_CLEANUP_FAILED:$Path"
+
+  [ordered]@{
+    schema_version = 1
+    observed_at = [DateTimeOffset]::UtcNow.ToString("O")
+    path = $Path
+    error = $lastError
+  } | ConvertTo-Json -Compress | Add-Content -LiteralPath $cleanupResiduePath -Encoding UTF8
+
+  Write-Host ("WORKSPACE_OPERATOR_RUNTIME_RESIDUE=DEFERRED:" + $Path)
+  return $false
 }
 
 function Get-RuntimeOwnedProcesses([object]$State) {
@@ -257,8 +270,15 @@ function Stop-DevRuntime {
     }
   }
 
-  Remove-TreeWithRetry ([string]$state.work_dir)
+  $workdirRemoved = Try-RemoveTreeWithRetry ([string]$state.work_dir)
   Remove-Item -LiteralPath $statePath -Force -ErrorAction SilentlyContinue
+
+  if ($workdirRemoved) {
+    Write-Host "WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=PASS"
+  } else {
+    Write-Host "WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=DEFERRED"
+  }
+
   Write-Host "WORKSPACE_OPERATOR_DEV_OFFLINE=PASS"
 }
 
@@ -441,7 +461,7 @@ call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-prof
       }
     }
     if ($work) {
-      try { Remove-TreeWithRetry $work } catch {}
+      [void](Try-RemoveTreeWithRetry $work)
     }
     throw
   } finally {
