@@ -7,6 +7,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+STAGE12_LAUNCHER = ROOT / "operator-bridge/tools/run-stage12-real-instant.ps1"
 PROCEDURE_V7 = (
     ROOT
     / "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.7.md"
@@ -18,6 +19,17 @@ PROCEDURE_V8 = (
 
 
 class Stage12ProcedurePowerShellParseTests(unittest.TestCase):
+    def test_current_stage12_launcher_uses_blank_auth_handoff_before_live_hotkey(self) -> None:
+        text = STAGE12_LAUNCHER.read_text(encoding="utf-8")
+        self.assertIn("one clean blank startup tab", text)
+        self.assertIn("navigate that same tab back to about:blank", text)
+        self.assertIn("first live Ctrl+Space will visibly create/focus", text)
+        self.assertIn("exactly one about:blank tab remains", text)
+        self.assertNotIn(
+            "Firefox adapter navigates the single startup tab to https://chatgpt.com/?temporary-chat=true",
+            text,
+        )
+
     def test_v07_exact_one_line_command_parses_without_execution(self) -> None:
         engine = shutil.which("powershell.exe") or shutil.which("pwsh")
         if engine is None:
