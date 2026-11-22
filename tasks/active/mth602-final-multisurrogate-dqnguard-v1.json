@@ -3904,50 +3904,38 @@
       ]
     },
     "pa1_pa2_osr_evaluation": {
-      "status": "BLOCKED_ON_JOB_UUID_LOCAL_RECOVERY_ONLY",
-      "required": [
-        "workflow_run_id",
-        "workflow_job_id",
-        "artifact_id",
-        "artifact_digest"
-      ],
-      "local_completion_observed": true,
-      "standard_evaluator": "l2o_directional_eval",
+      "status": "CANDIDATE_OVERLAY_PREPARED_PENDING_VALIDATION",
+      "training_run": {
+        "workflow_run_id": 45047242656,
+        "workflow_job_id": 137284402449,
+        "conclusion": "success",
+        "artifact_id": 14765881457,
+        "artifact_digest": "sha256:7c439dc693c96777ec04ded9e76b69a7dc9b8d774cf4192bd502f880cda77f79",
+        "training_candidate_sha": "85bc8cb667a000d3fc544b33f8e96a6775074561",
+        "best_model_sha256": "82effeb4d9f669cfdcc16dca2539149c3d6f5ec5a79901153108d509175b48ee",
+        "config_sha256": "f61293f6877e8d95663003faea3230b736700b1574d63c9f94f7cbbbef39ebb6",
+        "best_epoch": 2,
+        "best_val_macro_f1": 1,
+        "best_val_acc": 1,
+        "test_known_macro_f1": 0.9999259259250115,
+        "test_known_acc": 0.9999259259259259,
+        "test_known_n_samples": 13500,
+        "target_test_consumed": false,
+        "target_quarantine_status": "PRESERVED_FOR_FINAL_FROZEN_EVALUATOR"
+      },
+      "overlay": {
+        "padataset_pr": 42,
+        "branch": "mth602-t007-pa1-pa2-osr-v1",
+        "exact_head": "761deab35e728fba99177ae3f09192caf512fbde",
+        "base_branch": "mth602-t007-fullmatrix-osr-v1",
+        "status": "CANDIDATE_PENDING_VALIDATION"
+      },
       "intended_directions": [
         "PA1<-PA2",
         "PA2<-PA1"
       ],
       "selection_role": "POST_FREEZE_DIAGNOSTIC_ONLY_NO_RECIPE_FEEDBACK",
-      "blocker": "Authenticated gh REST quota is exhausted; the prior one-shot resolver failed on its first request with HTTP 403 and set -e closed the SSH session. Do not retry gh/API polling.",
-      "smallest_operator_action": "Refresh the local t007 wave observer to the current reviewed script so still-running jobs cache GITHUB_RUN_ID, then run the v2 exact-job-UUID resolver with sudo. No gh/API calls.",
-      "zero_provider_recovery": {
-        "script": "scripts/mth602_recover_pa1_pa2_runid_local.py",
-        "commit": "6dbd2892fdc3f5079f94fa69609190a289c15099",
-        "test": "tests/test_mth602_recover_pa1_pa2_runid_local.py",
-        "validation_receipt": "job-79547bf7-321c-4574-92ea-16bd33c2f416",
-        "validation_result": "2 passed",
-        "network_calls": 0,
-        "exits_nonzero_on_unresolved": false,
-        "notes": "Designed not to terminate the operator SSH session on unresolved evidence. Exact PA1-PA2 run_name/comment binding only."
-      },
-      "last_local_recovery": {
-        "status": "UNRESOLVED",
-        "cache_run_dir": "/srv/workspace-ci/padataset/jobs/p5-a5b5e2fb-53d6-5862-878a-153556b6aca6/runner/_work/_temp/scientific-results/backbone/l2o_t007_fullmatrix_PA1_PA2",
-        "job_uuid": "p5-a5b5e2fb-53d6-5862-878a-153556b6aca6",
-        "result_dir_candidate_count": 0,
-        "runner_root_count": 0,
-        "conclusion": "Runner temp tree already garbage-collected; exact job UUID preserved in dashboard cache."
-      },
-      "zero_provider_recovery_v2": {
-        "script": "scripts/mth602_recover_pa1_pa2_runid_local_v2.py",
-        "exact_job_uuid": "p5-a5b5e2fb-53d6-5862-878a-153556b6aca6",
-        "commit": "75622b40eac469ef64b62f13fdfa16845a986f22",
-        "validation_receipt": "job-6ecec7a9-b42a-403c-9233-49045d78fb1e",
-        "validation_result": "4 passed including dashboard contract",
-        "network_calls": 0,
-        "scope": "Exact job root, recent small workspace-ci text files, and bounded local journal context only.",
-        "failure_behavior": "Exit 0 with UNRESOLVED/AMBIGUOUS; never close operator shell."
-      }
+      "live_training_head_unchanged": "85bc8cb667a000d3fc544b33f8e96a6775074561"
     }
   }
 }
