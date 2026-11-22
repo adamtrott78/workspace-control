@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.4",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "APPROVAL_SIGNAL_OBSERVED_UNCONSUMED_PRELIVE_STALE_SESSION_SHADOW_RECOVERY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "version": "v1.3",
@@ -34,7 +34,9 @@
     "policy_blob_sha": "cfede468d3004d1267fc4bd9656107368e6b58d0",
     "exact_command": "wop d4",
     "separate_chat_approval_required": false,
-    "observed": false
+    "observed": true,
+    "observed_command": "wop d4",
+    "observed_result": "PRELIVE_PARAMETER_BINDING_FAILURE_IN_STALE_IN_MEMORY_WOP_FUNCTION"
   },
   "attempt_contract": {
     "attempts_after_approval_signal": 1,
@@ -62,5 +64,25 @@
     "public_listener": false,
     "paid_api_fallback": false
   },
-  "postcondition": "One D4 v1.4 live attempt is conditionally staged. Executing exact `wop d4` is the operator approval signal. The attempt is not consumed unless the Linux transaction prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS."
+  "postcondition": "Operator approval signal is observed. The attempt remains unconsumed because the stale in-memory PowerShell function rejected `d4` before repaired WOP execution. One pre-live recovery is authorized via exact command `wop-d4`, which is installer-proven equivalent to driver action `d4`. No new approval is required.",
+  "prelive_failure": {
+    "classification": "CURRENT_POWERSHELL_SESSION_COMMAND_SHADOW",
+    "observed_error": "The argument \"d4\" does not belong to the set \"smoke,reset,restart,start,online,stop,offline,status\".",
+    "repaired_runtime_started": false,
+    "linux_transaction_started": false,
+    "live_consumption_marker_observed": false,
+    "attempt_consumed": false
+  },
+  "prelive_recovery": {
+    "authorized": true,
+    "requires_new_approval": false,
+    "exact_recovery_command": "wop-d4",
+    "equivalence_evidence": {
+      "installer_path": "operator-bridge/tools/install-wop-commands.ps1",
+      "installer_blob_sha": "0c469fb2bc0d9ca5027bda7c77869bba8dd1e76a",
+      "mapping": "\"wop-d4\" = \"d4\"",
+      "semantics": "wop-d4 invokes the same installed wop-driver.ps1 with action d4 and bypasses only PowerShell function-name precedence in the current stale session."
+    },
+    "long_term_behavior": "A fresh PowerShell session has no legacy profile block and should resolve `wop` to the installed shim, so `wop d4` remains the steady-state command."
+  }
 }
