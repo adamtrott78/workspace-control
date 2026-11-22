@@ -1,1 +1,101 @@
-<!-- workspace-control:derived-task-handoff -->\n# Workspace Control Task Handoff\n\nDerived human-readable view.\n\nAuthoritative capsule: tasks/active/workspace-semantic-execution-migration-v1.json\n\nIf this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.\n\n## Task\n\n- ID: workspace-semantic-execution-migration-v1\n- Title: Workspace Semantic Execution Migration v1\n- Status: IN_PROGRESS\n- Capsule schema: v2\n\n## Goal\n\nDesign, benchmark, and incrementally migrate Workspace Control to an open-world semantic execution architecture that preserves current research, engineering, tutoring, publication, presentation, document, data-science, and operations workflows while minimizing scarce frontier-model allowance through deterministic execution, resumable Instant/local reasoning, bounded context, capability-aware routing, and explicit escalation—without weakening project-local truth, provenance, authority, GitRunner/Workspace Shell security, or rollback.\n\n## Workflow\n\n- Repository: workspace-control\n- Path: workflows/evidence-first-solution-research.v1.json\n- Checkpoint: d47a7922aa8d47d3a22b55c19ce4d6af7309a964\n\n## Repositories\n\n### workspace-control\n\n- Intent: mutate\n- Remote branch: workspace-semantic-execution-migration-v1\n- Remote checkpoint: 2f32513f97834da76287d2f948891b758d5194f5\n- Remote verified: true\n\n### PADataset\n\n- Intent: read\n- Remote branch: main\n- Remote checkpoint: a8f952c7cf964730a01b2dc5c6cd75850912f94f\n- Remote verified: true\n\n### research-engine\n\n- Intent: read\n- Remote branch: main\n- Remote checkpoint: 1031861c03b2af8cff5cf72939bbbc83a95e65a4\n- Remote verified: true\n\n### MTH602-AdamTrott\n\n- Intent: read\n- Remote branch: hw3-exam1-prep\n- Remote checkpoint: 747e49fb9219b949e0b0e9d15860a766fbcb1f23\n- Remote verified: true\n\n### EAS501-AdamTrott\n\n- Intent: read\n- Remote branch: eas501-tutor-bootstrap\n- Remote checkpoint: b2b390d042d539165f140821a3080dc4e5a82001\n- Remote verified: true\n\n### CIS560-AdamTrott\n\n- Intent: read\n- Remote branch: tutor-framework\n- Remote checkpoint: aba8c2e87dd4bb50ba414206270f592e8ca841a4\n- Remote verified: true\n\n## Next safe action\n\nD4 V1.1 REVIEW VALIDATION — fresh review/procedure artifacts are frozen against exact validated source 2f32513f…, current candidate baseline 0bc1bc0e…, unchanged Linux v3/harness bytes, and the accepted blank-startup/human-Enter frontend. Validate the review commit exact-head 3/3. If and only if it passes, persist validated-review state and stop for Adam's explicit one-shot approval. Do not create live authority or execute Windows/Linux live steps yet.\n\n## Remaining work\n\n- REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.\n- CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.\n- LIVE INSTANT: functional Windows front end is now operator-accepted at e1e4778a…. Remaining Instant gate is bounded real-account Stage-12 calibration under fresh exact authority; no historical consumed authority is reusable.\n- REAL-ACCOUNT CALIBRATION: frontend prerequisite is closed. If selected, freeze/validate a fresh D4 review/procedure against e1e4778a… and obtain explicit one-shot authority before any live execution.\n- LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.\n- ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.\n- PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.\n\n## Blockers / gates\n\n- D4 V1.1 AUTHORITY: review candidate must first pass exact-head 3/3 validation; after that, fresh explicit one-shot operator approval is required. Existing v1.0 authority is consumed/non-reusable.\n\n## Fresh-chat initialization\n\n@GitHub\n\nhttps://github.com/adamtrott78/workspace-control\n\nContinue the durable workspace-control task defined by:\nTask capsule: tasks/active/workspace-semantic-execution-migration-v1.json\n\nStart from the normal workspace-control root route.\nTreat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.\nDo not rely on previous conversation state.\nFollow the capsule's next_safe_action.\n
+<!-- workspace-control:derived-task-handoff -->
+# Workspace Control Task Handoff
+
+Derived human-readable view.
+
+Authoritative capsule: tasks/active/workspace-semantic-execution-migration-v1.json
+
+If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
+
+## Task
+
+- ID: workspace-semantic-execution-migration-v1
+- Title: Workspace Semantic Execution Migration v1
+- Status: IN_PROGRESS
+- Capsule schema: v2
+
+## Goal
+
+Design, benchmark, and incrementally migrate Workspace Control to an open-world semantic execution architecture that preserves current research, engineering, tutoring, publication, presentation, document, data-science, and operations workflows while minimizing scarce frontier-model allowance through deterministic execution, resumable Instant/local reasoning, bounded context, capability-aware routing, and explicit escalation—without weakening project-local truth, provenance, authority, GitRunner/Workspace Shell security, or rollback.
+
+## Workflow
+
+- Repository: workspace-control
+- Path: workflows/evidence-first-solution-research.v1.json
+- Checkpoint: d47a7922aa8d47d3a22b55c19ce4d6af7309a964
+
+## Repositories
+
+### workspace-control
+
+- Intent: mutate
+- Remote branch: workspace-semantic-execution-migration-v1
+- Remote checkpoint: 2f32513f97834da76287d2f948891b758d5194f5
+- Remote verified: true
+
+### PADataset
+
+- Intent: read
+- Remote branch: main
+- Remote checkpoint: a8f952c7cf964730a01b2dc5c6cd75850912f94f
+- Remote verified: true
+
+### research-engine
+
+- Intent: read
+- Remote branch: main
+- Remote checkpoint: 1031861c03b2af8cff5cf72939bbbc83a95e65a4
+- Remote verified: true
+
+### MTH602-AdamTrott
+
+- Intent: read
+- Remote branch: hw3-exam1-prep
+- Remote checkpoint: 747e49fb9219b949e0b0e9d15860a766fbcb1f23
+- Remote verified: true
+
+### EAS501-AdamTrott
+
+- Intent: read
+- Remote branch: eas501-tutor-bootstrap
+- Remote checkpoint: b2b390d042d539165f140821a3080dc4e5a82001
+- Remote verified: true
+
+### CIS560-AdamTrott
+
+- Intent: read
+- Remote branch: tutor-framework
+- Remote checkpoint: aba8c2e87dd4bb50ba414206270f592e8ca841a4
+- Remote verified: true
+
+## Next safe action
+
+D4 V1.1 REVIEW VALIDATION — fresh review/procedure artifacts are frozen against exact validated source 2f32513f…, current candidate baseline 0bc1bc0e…, unchanged Linux v3/harness bytes, and the accepted blank-startup/human-Enter frontend. Validate the review commit exact-head 3/3. If and only if it passes, persist validated-review state and stop for Adam's explicit one-shot approval. Do not create live authority or execute Windows/Linux live steps yet.
+
+## Remaining work
+
+- REASONING ECONOMY: protocol screening is COMPLETE, exact 54-run plan is frozen, and live evaluator isolation acceptance is now PASS; do not launch/materialize scored runs until the reviewed live executor transport is active and calibrated comparable allowance telemetry exists.
+- CODEX: wait for PR #627/#630 lineage authority; then zero-inference Workspace Control bootstrap, ChatGPT Plus auth proof, account/rate-limit telemetry proof, and controlled Codex/Instant allowance calibration. Never use API billing/credits.
+- LIVE INSTANT: functional Windows front end is now operator-accepted at e1e4778a…. Remaining Instant gate is bounded real-account Stage-12 calibration under fresh exact authority; no historical consumed authority is reusable.
+- REAL-ACCOUNT CALIBRATION: frontend prerequisite is closed. If selected, freeze/validate a fresh D4 review/procedure against e1e4778a… and obtain explicit one-shot authority before any live execution.
+- LIVE RESEARCH PROVING: run the mixed Research Engine research-iterate workflow using deterministic exact-source + persistent Instant and inject one session/process loss; require durable recovery with no manual state reconstruction.
+- ECONOMICS FINAL: feed calibrated live traces into the weekly governor, run matched holdout promotion, and compare validated progress per scarce allowance against all-strong/frontier control.
+- PRODUCTION FINAL: authoritative UX-09 target performance, live resource/soak/provenance/rollback checks, all mandatory acceptance requirements PASS, then explicit PROMOTE_V0/HOLD/REVISE by 2026-11-30.
+
+## Blockers / gates
+
+- D4 V1.1 AUTHORITY: review candidate must first pass exact-head 3/3 validation; after that, fresh explicit one-shot operator approval is required. Existing v1.0 authority is consumed/non-reusable.
+
+## Fresh-chat initialization
+
+@GitHub
+
+https://github.com/adamtrott78/workspace-control
+
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-semantic-execution-migration-v1.json
+
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
