@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 5839870b067af9c416099e096d29c614c5b8402b
+- Remote checkpoint: 1dbf252f65c85cc6a0c7a6ec9240f3c9636b44dd
 - Remote verified: true
 
 ### PADataset
@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-A7 WINDOWS CURRENT-HEAD BOOTSTRAP BEFORE D4. Real Windows evidence showed the legacy session-level wop wrapper could resolve an intermediate commit object while lacking its tree, so ancestor checkout failed and left the old installer active. Source 5839870b067af9c416099e096d29c614c5b8402b is exact-head 3/3 green (#3082/#382/#655) and hardens future shim exact-SHA transport. Adam must directly materialize the current branch head in DevCheckout, stop the stale degraded runtime, run the profile-independent shim installer, and verify wop-self-test + wop-status. Do not source $PROFILE. D4 remains blocked until A7 acceptance and still requires fresh explicit authority.
+A7 COMPLETE / D4 PREPARATION GATE. Windows convenience shims are directly accepted on current durable head 1dbf252f… with cleanup OFFLINE, legacy profile block removed, install PASS, wop-self-test PASS and wop-status OFFLINE. Frontend and operator convenience prerequisites are closed. Next action: freeze a fresh bounded D4 Stage-12 real-account review/procedure against the current validated frontend and exact worker-result-candidates baseline, validate 3/3, then require fresh explicit single-attempt operator approval. Do not execute the live attempt or infer authority from this acceptance.
 
 ## Remaining work
 
@@ -84,14 +84,13 @@ A7 WINDOWS CURRENT-HEAD BOOTSTRAP BEFORE D4. Real Windows evidence showed the le
 
 ## Blockers / gates
 
-- WINDOWS CONVENIENCE SHIM ACCEPTANCE: current-head transport hardening 5839870b… is validated, but Adam must directly materialize that current branch head and locally install/verify the shims before D4.
+- No reusable live Stage-12 authority exists. D4 requires a fresh exact review/procedure, 3/3 validation and explicit one-shot approval.
 - v0.9 authority is consumed/non-reusable.
 - v1.0 foreground repair source 1ecc094a… is 3/3 validated (#3030/#330/#603).
 - v1.0 review-state ecdc71c8… is 3/3 validated (#3031/#331/#604).
 - v1.0 validation-state persistence bd366f93… is 3/3 validated (#3032/#332/#605).
 - Final bookkeeping head 7b5b7bc2… is 3/3 validated (#3033/#333/#606).
 - Stage-12 v1.0 authority is consumed/non-reusable after Q1 BRIDGE_DISABLED_HOTKEY_UNREGISTERED failure; no candidate was published and candidate branch remained at 0bc1bc0e….
-- No reusable live Stage-12 authority exists. D4 still requires a fresh exact review/procedure, 3/3 validation and explicit one-shot approval after A7.
 
 ## Fresh-chat initialization
 

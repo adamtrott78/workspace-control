@@ -24,24 +24,22 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 5839870b067af9c416099e096d29c614c5b8402b
+- Remote checkpoint: 1dbf252f65c85cc6a0c7a6ec9240f3c9636b44dd
 - Remote verified: true
 
 ## Next safe action
 
-WINDOWS OPERATOR-ONLY A7 BOOTSTRAP — exact-SHA transport hardening 5839870b067af9c416099e096d29c614c5b8402b passed Workspace #3082 / Semantic #382 / Operator #655. The legacy session-level wop wrapper cannot be trusted to materialize intermediate ancestor trees in the existing DevCheckout; do not use it to target ca8b5983…. Materialize the current branch head directly in DevCheckout using Git, verify HEAD equals 5839870b…, stop/clean the stale degraded runtime with the checked-out workspace-operator-dev.ps1, invoke install-wop-commands.ps1 with -NoProfile and per-process ExecutionPolicy Bypass, then require WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS, WORKSPACE_OPERATOR_SELF_TEST=PASS and wop-status execution. Do not source $PROFILE. No live Stage-12 authority exists.
+A7 COMPLETE. Functional Windows Operator front end and required persistent convenience shims are accepted. Do not redo frontend/alias repair. Next gate is D4 PREPARATION ONLY: freeze a fresh Stage-12 real-account calibration review/procedure against the current validated frontend and current candidate-result baseline, validate exact head 3/3, then stop for fresh explicit one-shot operator approval. No live Stage-12 authority currently exists.
 
 ## Remaining work
 
-- Materialize current branch head 5839870b… directly in the Windows DevCheckout and install/accept the validated shim commands.
-- After A7 acceptance, freeze a fresh D4 real-account Stage-12 review/procedure, validate 3/3, and obtain explicit one-shot authority.
+- Prepare/freeze the fresh D4 real-account Stage-12 review/procedure against the current accepted Windows frontend and exact candidate baseline.
+- After exact-head validation, stop at explicit one-shot operator approval before any live Instant attempt.
 - After D4 passes, run E1–E3 on Research Engine research-iterate with mixed executors, forced loss, durable recovery and resource/soak evidence.
 
 ## Blockers / gates
 
-- WINDOWS USER SHIM INSTALL: connected tools cannot write Adam's local current-user WindowsApps directory. One bounded operator bootstrap remains.
-- LEGACY WOP BOOTSTRAP LIMIT: do not use the old session-level wrapper to target intermediate ancestor SHAs; materialize the current branch head directly before installing the hardened shims.
-- LIVE STAGE-12 AUTHORITY: no reusable real-account Stage-12 authority exists; A7 installation does not create authority.
+- LIVE STAGE-12 AUTHORITY: no reusable real-account Stage-12 authority exists. D4 requires a fresh exact review/procedure, 3/3 validation and explicit one-shot operator approval.
 
 ## Fresh-chat initialization
 

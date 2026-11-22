@@ -84,12 +84,12 @@
   - [x] Literal raw `@github` invocation works in Personalized Temporary Chat without Tab/click/autocomplete selection.
   - [x] Passive human-submit confirmation is fail-closed: before plain Enter is observed in the captured foreground worker Firefox window, another Ctrl+Space alerts/refocuses and cannot advance/minimize; after Enter, the next press resumes normal dispatch.
   - [x] Final durable implementation/bookkeeping head `e1e4778ad3583c817e25d0836964181b88cdd62a` passed Workspace #3075 / Semantic #375 / Operator #648, and the operator directly confirmed the complete sequence works.
-- [ ] **A7 — Install and accept persistent per-user convenience commands before D4.**
+- [x] **A7 — Install and accept persistent per-user convenience commands before D4.**
   - [x] Source `5839870b067af9c416099e096d29c614c5b8402b` installs current-user executable shims for the existing `wop` wrapper plus `wop-up`, `wop-down`, `wop-reset`, `wop-status`, and `wop-self-test`.
   - [x] `wop-self-test` is read-only: repository SHA, .NET 10, Node 24, Firefox availability, and runtime health only; it does not launch Firefox or mutate bridge state.
   - [x] Installer does not depend on PowerShell profile execution. It removes only the obsolete owned v1 profile block if present, then installs owned `.cmd` shims in `%LOCALAPPDATA%\Microsoft\WindowsApps` only when that exact directory already exists and is already on PATH. No PATH mutation, persistent execution-policy mutation, admin rights, service, scheduled task, credential store, browser-profile mutation, or authority widening.
   - [x] Exact-head validation: Workspace #3082 PASS; Semantic #382 PASS; Operator #655 PASS, including Windows PowerShell parse of the installer and the full Operator regression suite.
-  - [ ] **CURRENT GATE:** install the validated shim set once on Adam's Windows machine, then require `wop-self-test` PASS and `wop-status` to execute from the same shell without sourcing a PowerShell profile.
+  - [x] **ACCEPTED ON WINDOWS:** current head `1dbf252f65c85cc6a0c7a6ec9240f3c9636b44dd` materialized directly; stale runtime cleanup PASS; legacy profile block REMOVED; command path/install PASS; persistent `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` resolve as applications; `wop-self-test` PASS with .NET 10.0.404 / Node v24.22.2 / Firefox discovered / runtime OFFLINE; `wop-status` reports OFFLINE.
 
 ### B. Reasoning Economy — parallel, repository-safe lane
 
@@ -204,7 +204,7 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 - [x] Literal raw `@github` invocation accepted in Personalized Temporary Chat without plugin UI selection.
 - [x] Human-submit gate accepted: premature repeat Ctrl+Space before plain Enter alerts/refocuses and cannot advance/minimize; plain Enter while captured worker Firefox is foreground unlocks the next press; no-work then minimizes only the dedicated Firefox window.
 - [x] Final functional front-end state is durable at `e1e4778ad3583c817e25d0836964181b88cdd62a` with Workspace #3075 / Semantic #375 / Operator #648 PASS and direct operator acceptance.
-- [ ] Required operator UX gate: install the validated `3c606ac1…` current-user command block and verify `wop-self-test` + `wop-status`; Adam explicitly requires these aliases before D4.
+- [x] Required operator UX gate complete: persistent current-user shims installed and accepted on Windows; `wop-self-test` and `wop-status` PASS.
 - [ ] **NEXT CRITICAL TEST IF CHOSEN — D4:** prepare a fresh, exact, single-attempt Stage-12 real-account calibration review/authority against the current front-end state; do not inherit or revive any consumed historical authority.
 - [ ] **THEN E1–E3:** run the live mixed Research Engine `research-iterate` workflow, deliberately inject one worker/session/process loss, recover from durable state without manual reconstruction, and capture live resource/soak evidence.
 - [ ] E4 economics remains dependent on calibrated allowance evidence; B4/Codex gates remain independent and must not be bypassed.
@@ -213,7 +213,7 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 ### Decision status
 
 **Functional front end: DONE.**  
-**Convenience aliases: SOURCE VALIDATED / WINDOWS INSTALL + ACCEPTANCE PENDING.**  
+**Convenience aliases: DONE / WINDOWS ACCEPTED.**  
 **Whole-system real-account proof: NOT DONE.**  
 **No live Stage-12 authority currently exists.**  
 **Do not start D4/E1 automatically; operator requested this checklist reconciliation first and will choose the next step afterward.**
@@ -224,7 +224,7 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 - [x] First profile-based alias installer at `3c606ac1…` was rejected by real Windows evidence despite CI source validation: its generated block contained an invalid PowerShell variable-colon interpolation, and Adam's machine policy blocks profile script loading.
 - [x] No policy weakening was accepted. The profile-based persistence design is superseded.
 - [x] Replacement `ca8b5983…` removes only the obsolete owned profile block, installs owned command shims in an already-existing current-user WindowsApps PATH directory, and invokes the reviewed driver with `-NoProfile` and per-process `-ExecutionPolicy Bypass`; it never changes persistent execution policy or PATH.
-- [ ] Windows install/acceptance remains the only A7 gate.
+- [x] Windows install/acceptance complete on current durable head.
 
 
 ### 2026-11-21 exact-SHA transport hardening
@@ -233,4 +233,4 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 - [x] Do not bootstrap A7 by asking the legacy wrapper to jump to an intermediate ancestor.
 - [x] Source `5839870b067af9c416099e096d29c614c5b8402b` hardens the installed shim driver: shallow-fetch current branch head, use `FETCH_HEAD` when it matches the requested SHA, fetch the exact SHA only when needed, checkout `FETCH_HEAD`, and explicitly verify the commit tree exists.
 - [x] Exact-head validation: Workspace #3082 PASS; Semantic #382 PASS; Operator #655 PASS.
-- [ ] Current operator bootstrap should materialize the current branch head directly, install the shims, then verify `wop-self-test` and `wop-status`. No D4 authority is created by this bootstrap.
+- [x] Current-head bootstrap, shim installation, self-test and status verification completed successfully. No D4 authority was created.

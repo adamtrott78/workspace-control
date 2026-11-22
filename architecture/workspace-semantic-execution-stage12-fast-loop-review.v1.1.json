@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-fast-loop-review-v1.1",
-  "status": "CONVENIENCE_SHIM_TRANSPORT_HARDENED_AWAITING_WINDOWS_INSTALL",
+  "status": "FRONTEND_AND_CONVENIENCE_ACCEPTED_READY_FOR_D4_REVIEW",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
@@ -375,7 +375,17 @@
     ],
     "path_mutation": false,
     "persistent_execution_policy_mutation": false,
-    "windows_install_accepted": false,
-    "live_authority_created": false
+    "windows_install_accepted": true,
+    "live_authority_created": false,
+    "acceptance_head": "1dbf252f65c85cc6a0c7a6ec9240f3c9636b44dd",
+    "acceptance_evidence": [
+      "Adam directly materialized current durable head 1dbf252f65c85cc6a0c7a6ec9240f3c9636b44dd in the Windows DevCheckout and verified the commit tree.",
+      "workspace-operator-dev.ps1 stop returned WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS, WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=PASS and WORKSPACE_OPERATOR_DEV_OFFLINE=PASS.",
+      "install-wop-commands.ps1 returned WORKSPACE_OPERATOR_LEGACY_PROFILE_BLOCK=REMOVED, WORKSPACE_OPERATOR_COMMAND_PATH=PASS and WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS.",
+      "Persistent convenience applications wop-up.cmd, wop-down.cmd, wop-reset.cmd, wop-status.cmd and wop-self-test.cmd resolved from %LOCALAPPDATA%\\Microsoft\\WindowsApps. The old session-level `wop` function still shadows wop.cmd in that current shell only; this does not affect the five required convenience commands or persistence in new shells.",
+      "wop-self-test returned WORKSPACE_OPERATOR_SELF_TEST=PASS with SOURCE_SHA=1dbf252f…, DOTNET10=10.0.404, NODE24=v24.22.2, Firefox path found and RUNTIME_STATE=OFFLINE.",
+      "wop-status returned WORKSPACE_OPERATOR_DEV_STATUS=OFFLINE.",
+      "A7 convenience-command acceptance is therefore complete. This local acceptance created no Stage-12 live authority."
+    ]
   }
 }
