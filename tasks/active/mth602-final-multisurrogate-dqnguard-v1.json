@@ -3963,6 +3963,29 @@
         }
       ],
       "queue_note": "Admissions are newer than the already-submitted t007 backbone training requests and do not mutate or replace those training requests. Execution begins when the respective trusted GPU lane reaches the evaluator job."
+    },
+    "cpu_osr_lane_v1": {
+      "status": "VALIDATED_PENDING_MAIN_ACTIVATION",
+      "user_authority": "User explicitly directed 'DO IT' after being told the CPU-only evaluator path would be created so OSR could run without waiting for GPU training.",
+      "purpose": "Run post-freeze PA1-PA2 standard-DQNGuard diagnostics on CPU while preserving both GPUs for t007 backbone training.",
+      "padataset_pr": 43,
+      "branch": "mth602-cpu-osr-workflow-v1",
+      "exact_head": "040fc5f47245892e2f555cd8a08a0f312419d033",
+      "base": "main",
+      "validation": {
+        "receipt": "job-c77239eb-530e-4e72-85cd-e2523dfa5edf",
+        "result": "3 passed",
+        "test": "tests/test_l2o_cpu_eval_workflow.py"
+      },
+      "invariants": [
+        "No training operation is exposed on the CPU lane.",
+        "No NVIDIA device may be visible to the CPU evaluator.",
+        "Frozen Track-A request/matrix/policy/artifact transport and target-quarantine semantics are preserved.",
+        "Only evaluator execution device changes from cuda to cpu.",
+        "CPU result is labeled PENDING_SAME_BACKBONE_CUDA_REFERENCE and is diagnostic until same-backbone CUDA equivalence is confirmed.",
+        "Both live t007 GPU training lanes remain untouched."
+      ],
+      "activation_requirement": "Issue-comment workflows activate only from PADataset default branch main; merge PR #43 exact validated head before admission."
     }
   }
 }
