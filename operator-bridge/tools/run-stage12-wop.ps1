@@ -19,7 +19,6 @@ $tempRoot = Join-Path $env:TEMP ("workspace-control-d4-" + [guid]::NewGuid().ToS
 $frontendReady = Join-Path $tempRoot "frontend-ready.txt"
 $frontendLog = Join-Path $tempRoot "frontend.log"
 $sshBatch = Join-Path $tempRoot "run-ssh.cmd"
-$frontendJob = $null
 $sshProcess = $null
 
 if (-not (Test-Path -LiteralPath $dev -PathType Leaf)) { throw "D4_WOP_DEV_SCRIPT_MISSING:$dev" }
@@ -46,28 +45,6 @@ Write-Host ("D4_WOP_LINUX_BLOB=" + $linuxBlob)
 if ($LASTEXITCODE -ne 0) { throw "D4_WOP_PRESTOP_FAILED:$LASTEXITCODE" }
 
 try {
-  $frontendJob = Start-Job -ScriptBlock {
-    param($Engine,$Dev,$Repo,$Url,$Hotkey,$ReadyPath,$LogPath)
-    $ErrorActionPreference = "Stop"
-    $statusUrl = $Url.TrimEnd("/") + "/operator-bridge/v1/status"
-    $deadline = (Get-Date).AddMinutes(10)
-    $ready = $false
-    do {
-      try {
-        $response = Invoke-WebRequest -UseBasicParsing -Uri $statusUrl -TimeoutSec 2
-        if ($response.StatusCode -eq 200) {
-          $payload = $response.Content | ConvertFrom-Json
-          if ([int]$payload.readyManualCycles -ge 1) { $ready = $true; break }
-        }
-      } catch { }
-      Start-Sleep -Milliseconds 250
-    } while ((Get-Date) -lt $deadline)
-    if (-not $ready) { throw "D4_BACKEND_READY_ACTION_TIMEOUT" }
-    & $Engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $Dev online -RepositoryRoot $Repo -SchedulerHotkey $Hotkey -OperatorBridgeUrl $Url *>&1 | Tee-Object -FilePath $LogPath
-    if ($LASTEXITCODE -ne 0) { throw "D4_ACCEPTED_FRONTEND_START_FAILED:$LASTEXITCODE" }
-    Set-Content -LiteralPath $ReadyPath -Value "D4_ACCEPTED_FRONTEND_READY=PASS" -Encoding ASCII
-  } -ArgumentList $engine,$dev,$repo,$OperatorBridgeUrl,$SchedulerHotkey,$frontendReady,$frontendLog
-
   $token = [guid]::NewGuid().ToString("N")
   $remoteText = [System.IO.File]::ReadAllText($remoteBootstrapPath)
   $remoteText = $remoteText.Replace("`r`n","`n").Replace("`r","`n")
@@ -88,22 +65,46 @@ exit /b %ERRORLEVEL%
   Write-Host "When Firefox opens: authenticate normally if needed, select ChatGPT Instant, then use Ctrl+Space -> Ctrl+V -> Enter."
 
   $sshProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d","/c",$sshBatch) -NoNewWindow -PassThru
-  $frontendAnnounced = $false
+
+  $statusUrl = $OperatorBridgeUrl.TrimEnd("/") + "/operator-bridge/v1/status"
+  $deadline = (Get-Date).AddMinutes(10)
+  $ready = $false
+  do {
+    if ($sshProcess.HasExited) {
+      $sshProcess.WaitForExit()
+      $sshProcess.Refresh()
+      throw "D4_REMOTE_EXIT_BEFORE_BACKEND_READY:$($sshProcess.ExitCode)"
+    }
+    try {
+      $response = Invoke-WebRequest -UseBasicParsing -Uri $statusUrl -TimeoutSec 2
+      if ($response.StatusCode -eq 200) {
+        $payload = $response.Content | ConvertFrom-Json
+        if ([int]$payload.readyManualCycles -ge 1) { $ready = $true; break }
+      }
+    } catch { }
+    Start-Sleep -Milliseconds 250
+    $sshProcess.Refresh()
+  } while ((Get-Date) -lt $deadline)
+
+  if (-not $ready) {
+    Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue
+    throw "D4_BACKEND_READY_ACTION_TIMEOUT"
+  }
+
+  # Critical A7 invariant: launch the accepted frontend from this interactive
+  # PowerShell session, exactly as the validated operator UX was exercised.
+  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev online -RepositoryRoot $repo -SchedulerHotkey $SchedulerHotkey -OperatorBridgeUrl $OperatorBridgeUrl
+  if ($LASTEXITCODE -ne 0) {
+    Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue
+    throw "D4_ACCEPTED_FRONTEND_START_FAILED:$LASTEXITCODE"
+  }
+  Write-Host "D4_ACCEPTED_FRONTEND_READY=PASS"
+  Write-Host "D4_OPERATOR_LOOP=Ctrl+Space -> Ctrl+V -> Enter"
+
   while (-not $sshProcess.HasExited) {
-    if ($frontendJob.State -eq "Failed") {
-      Receive-Job -Job $frontendJob -Keep | Out-Host
-      Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue
-      throw "D4_FRONTEND_JOB_FAILED"
-    }
-    if (-not $frontendAnnounced -and (Test-Path -LiteralPath $frontendReady -PathType Leaf)) {
-      Get-Content -LiteralPath $frontendReady | Write-Host
-      Write-Host "D4_OPERATOR_LOOP=Ctrl+Space -> Ctrl+V -> Enter"
-      $frontendAnnounced = $true
-    }
     Start-Sleep -Milliseconds 250
     $sshProcess.Refresh()
   }
-  if ($frontendJob.State -eq "Failed") { Receive-Job -Job $frontendJob -Keep | Out-Host; throw "D4_FRONTEND_JOB_FAILED" }
   $sshProcess.WaitForExit()
   $sshProcess.Refresh()
   $sshExitCode = $sshProcess.ExitCode
@@ -111,11 +112,6 @@ exit /b %ERRORLEVEL%
   Write-Host "STAGE12_WOP_REMOTE_CALIBRATION=PASS"
 }
 finally {
-  if ($frontendJob) {
-    Stop-Job -Job $frontendJob -ErrorAction SilentlyContinue
-    Receive-Job -Job $frontendJob -ErrorAction SilentlyContinue | Out-Host
-    Remove-Job -Job $frontendJob -Force -ErrorAction SilentlyContinue
-  }
   if ($sshProcess -and -not $sshProcess.HasExited) { Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue }
   & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev stop -RepositoryRoot $repo
   if ($LASTEXITCODE -eq 0) { Write-Host "STAGE12_WOP_WINDOWS_CLEANUP=PASS" } else { Write-Warning ("STAGE12_WOP_WINDOWS_CLEANUP=FAIL:" + $LASTEXITCODE) }

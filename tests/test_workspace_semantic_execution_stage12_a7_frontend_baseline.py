@@ -27,6 +27,9 @@ class D4AcceptedFrontendBaselineTests(unittest.TestCase):
         self.assertIn("D4_FRONTEND_TREE_NOT_ACCEPTED_A7", text)
         self.assertIn('Replace("`r`n","`n").Replace("`r","`n")', text)
         self.assertIn("D4_REMOTE_BOOTSTRAP_CR_BYTE_REMAINS", text)
+        self.assertNotIn("Start-Job", text)
+        self.assertIn("-File $dev online", text)
+        self.assertIn("D4_ACCEPTED_FRONTEND_READY=PASS", text)
 
     def test_remote_bootstrap_expands_bash_variables(self) -> None:
         text = BOOT.read_text(encoding="utf-8")

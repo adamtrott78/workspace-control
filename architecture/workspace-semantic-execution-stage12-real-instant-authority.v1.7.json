@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.7",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "CONSUMED_FAILED_Q1_FRONTEND_LAUNCH_CONTEXT_NONREUSABLE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
   "purpose": "One-shot D4 authority using the exact accepted A7 frontend with LF-normalized remote bootstrap transport.",
@@ -41,11 +41,12 @@
     "policy_blob_sha": "cfede468d3004d1267fc4bd9656107368e6b58d0",
     "exact_command": "wop d4",
     "separate_chat_approval_required": false,
-    "observed": false
+    "observed": true,
+    "observed_command": "wop d4"
   },
   "attempt_contract": {
     "attempts_after_approval_signal": 1,
-    "consumed": false,
+    "consumed": true,
     "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "no_silent_retry": true
   },
@@ -75,5 +76,20 @@
     "rule": "The exact live execution tip is the commit containing this authority. It must be 3/3 validated and branch-stable before operator execution.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "One v1.7 attempt is conditionally staged. `wop d4` supplies approval. Consumption occurs only at the live consumption marker."
+  "postcondition": "v1.7 is consumed and failed at Q1 due D4 launch context. No retry. Fresh review must keep exact A7 frontend bytes and launch the accepted dev harness from the interactive parent PowerShell session after backend readiness.",
+  "live_failure": {
+    "reached_backend_ready": true,
+    "reached_consumption_marker": true,
+    "reached_q1_ready": true,
+    "observed_user_symptoms": [
+      "Ctrl+Space had no effect.",
+      "Clipboard was not staged.",
+      "Firefox was not focused by the operator loop.",
+      "No Temporary Chat navigation occurred."
+    ],
+    "diagnosis": "Accepted A7 frontend bytes were correct, but D4 launched workspace-operator-dev.ps1 from Start-Job. The accepted UX was validated from the interactive Windows session; the background-job launch context invalidated the operator loop.",
+    "frontend_bytes_modified": false,
+    "attempt_reusable": false,
+    "retry_authorized": false
+  }
 }

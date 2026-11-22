@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.8",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "frontend_task": "workspace-operator-bridge-implementation-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.7.json",
+    "result": "CONSUMED_FAILED_Q1_FRONTEND_LAUNCH_CONTEXT"
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "exact_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "exact_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed_in_v18": false
+  },
+  "diagnosis": {
+    "defect": "D4 wrapper launched accepted A7 frontend through Start-Job, rather than the interactive Windows session used by the accepted Stage-10/A7 workflow.",
+    "evidence": "Firefox opened, but Ctrl+Space, clipboard staging, focus, and Temporary Chat actions were absent.",
+    "backend_and_transport": "PASS through STAGE12_Q1_READY"
+  },
+  "repair": {
+    "scope": "D4 outer orchestration only",
+    "remove_start_job": true,
+    "backend_first": true,
+    "poll_backend_ready_in_interactive_parent": true,
+    "launch_exact_a7_dev_harness_directly_from_interactive_parent": true,
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "frontend_redesign": false
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_validation_required": true
+  }
+}
