@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.7",
-  "status": "CONSUMED_FAILED_Q1_FRONTEND_LAUNCH_CONTEXT_NONREUSABLE",
+  "status": "CONSUMED_FAILED_Q1_CLEANED_WINDOWS_NONREUSABLE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
   "purpose": "One-shot D4 authority using the exact accepted A7 frontend with LF-normalized remote bootstrap transport.",
@@ -76,7 +76,7 @@
     "rule": "The exact live execution tip is the commit containing this authority. It must be 3/3 validated and branch-stable before operator execution.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "v1.7 is consumed and failed at Q1 due D4 launch context. No retry. Fresh review must keep exact A7 frontend bytes and launch the accepted dev harness from the interactive parent PowerShell session after backend readiness.",
+  "postcondition": "v1.7 is consumed, failed at Q1, Windows-cleaned and non-reusable. Linux route cleanup is trap-protected but was not directly observed; next attempt must fail closed if route state is not restored.",
   "live_failure": {
     "reached_backend_ready": true,
     "reached_consumption_marker": true,
@@ -91,5 +91,19 @@
     "frontend_bytes_modified": false,
     "attempt_reusable": false,
     "retry_authorized": false
+  },
+  "cleanup_evidence": {
+    "windows": {
+      "operator_command": "wop-down; wop-status",
+      "process_cleanup": "PASS",
+      "workdir_cleanup": "PASS",
+      "dev_offline": "PASS",
+      "status": "OFFLINE"
+    },
+    "linux": {
+      "mechanism": "EXIT trap plus next-attempt fail-closed route-absence preflight",
+      "direct_postmortem_proof": "NOT_OBSERVED",
+      "note": "Parent PowerShell was closed; Linux SSH/session loss is trap-protected but no direct cleanup marker was captured."
+    }
   }
 }
