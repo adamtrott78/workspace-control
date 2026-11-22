@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.1",
-  "status": "AUTHORIZED_UNCONSUMED",
+  "status": "ABORTED_PRECONSUMPTION_WINDOWS_TOOL_DISCOVERY_DEFECT_UNCONSUMED",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Fresh exact authority for exactly one D4 v1.1 real-account Stage-12 calibration against the accepted Windows Operator frontend, validated v1.1 review/procedure, unchanged Linux v3 transaction/harness, and isolated immutable worker-result candidate path.",
   "approval_basis": {
@@ -164,5 +164,19 @@
     "source_or_authority_branch_result_writes": false
   },
   "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, any success or failure consumes the one attempt. No silent retry. Any retry after consumption requires fresh diagnosis, review, exact-head validation, and fresh operator approval.",
-  "postcondition": "Exactly one D4 v1.1 live attempt is authorized but not yet consumed. This artifact grants no authority outside the exact reviewed bindings and retained safety boundaries."
+  "postcondition": "The authorized D4 v1.1 attempt aborted before the Windows launcher started because the frozen preparation command required Get-Command dotnet even though the accepted Windows tooling deliberately supports bounded .NET 10 discovery outside PATH. No STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS marker could have occurred; the attempt is unconsumed. This exact v1.1 authority is non-reusable because its reviewed preparation command is defective.",
+  "preconsumption_abort": {
+    "observed_on": "2026-11-22",
+    "operator_evidence": "wop-status=OFFLINE; exact reviewed Windows command failed at Get-Command dotnet with CommandNotFoundException before git init, launcher startup, Firefox startup, Linux transaction, or any live-consumption marker.",
+    "live_consumption_marker_observed": false,
+    "live_attempt_consumed": false,
+    "launcher_started": false,
+    "linux_transaction_started": false,
+    "tailscale_mutated": false,
+    "candidate_authority_consumed": false,
+    "root_cause": "V1.1_PRELIVE_COMMAND_REGRESSION_PATH_ONLY_DOTNET_DISCOVERY",
+    "additional_review_defect_found": "The v1.1 command also fetched the moving branch tip with --depth=1 and required FETCH_HEAD to equal the older frozen source SHA, which becomes impossible after review/authority commits advance the branch.",
+    "reusable": false,
+    "next_required_state": "Fresh repaired review/procedure exact-head validation and fresh explicit operator approval."
+  }
 }
