@@ -127,6 +127,50 @@ The preferred dashboard runs in a persistent named tmux session.
 
 Do not substitute an empty persistent shell when the operator asks for the experiment dashboard.
 
+### Zero-provider tmux launch pattern
+
+The tmux session itself must execute only the reviewed host-local dashboard. Do **not** put `gh run view`, `gh api`, `curl api.github.com`, GitHub GraphQL, or any provider-status command inside `watch`, a shell loop, a Python refresh loop, or tmux status hooks.
+
+Preferred reusable launcher shape:
+
+```bash
+SESSION=experiment-dashboard
+DASH=/absolute/path/to/reviewed_local_dashboard.py
+
+tmux kill-session -t "$SESSION" 2>/dev/null || true
+tmux new-session -d -s "$SESSION" "sudo -E python3 '$DASH'"
+tmux attach -t "$SESSION"
+```
+
+The elevated process is a **read-only host observer**. It may read `ps`, `nvidia-smi`, and the isolated runner's local result tree, and may write only the operator-owned persistent dashboard cache. It must not mutate the scientific runner or provider state.
+
+A one-time `git fetch` used to obtain the reviewed dashboard source is outside the dashboard refresh loop and does not consume GitHub REST API quota. Once the dashboard starts, its network/provider request count must remain zero.
+
+For a dedicated dashboard, prefer a checked-in tmux launcher beside the renderer so the operator does not need to reconstruct the command manually.
+
+#### Current PA3-PA8/t007 identical-rerun observer
+
+Renderer:
+
+```text
+scripts/mth602_t007_rerun_local_dashboard.py
+```
+
+Launcher:
+
+```text
+scripts/mth602_t007_rerun_tmux.sh
+```
+
+From a current Workspace Control checkout:
+
+```bash
+chmod +x scripts/mth602_t007_rerun_tmux.sh
+./scripts/mth602_t007_rerun_tmux.sh
+```
+
+This observer displays local epoch/batch progress, overall completion percentage, process elapsed time, extrapolated ETA, projected local finish time, validation metrics when locally available, GPU utilization/memory, and immutable run/job identifiers. It performs **zero `gh` calls and zero GitHub/provider API calls**.
+
 ## Current MTH602 implementation
 
 Reference script:
