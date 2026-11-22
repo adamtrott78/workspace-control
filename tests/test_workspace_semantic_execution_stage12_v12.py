@@ -30,7 +30,7 @@ class Stage12V12ReviewTests(unittest.TestCase):
 
     def test_procedure_repairs_bounded_tool_discovery_and_moving_head_bug(self) -> None:
         text = PROCEDURE.read_text(encoding="utf-8")
-        self.assertIn("%ProgramFiles%", text)
+        self.assertIn("$env:ProgramFiles", text)
         self.assertIn("Microsoft\\dotnet\\dotnet.exe", text)
         self.assertIn(".dotnet\\dotnet.exe", text)
         self.assertIn("RUNNER_TOOL_CACHE", text)
@@ -48,7 +48,7 @@ class Stage12V12ReviewTests(unittest.TestCase):
         for forbidden in ("winget install", "choco install", "set-executionpolicy", "invoke-webrequest"):
             self.assertNotIn(forbidden, text)
         self.assertIn("persistent path edit", text)
-        self.assertIn("restores them in `finally`", text)
+        self.assertIn("restores them in `finally`".replace("\\", ""), text)
 
     def test_exact_windows_command_parses_without_execution(self) -> None:
         engine = shutil.which("powershell.exe") or shutil.which("pwsh")

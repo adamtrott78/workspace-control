@@ -72,7 +72,7 @@
     },
     "operator_procedure": {
       "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.2.md",
-      "blob_sha": "b46af6244fe8bc6f283331fe1748e3a4e9e5931f"
+      "blob_sha": "9aedf7fd38d97696d8ae922de44fec45893ed3a7"
     },
     "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
     "candidate_result_branch": {
