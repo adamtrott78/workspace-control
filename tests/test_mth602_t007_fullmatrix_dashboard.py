@@ -1,0 +1,43 @@
+from pathlib import Path
+import importlib.util
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "mth602_t007_fullmatrix_local_dashboard.py"
+
+
+def _module():
+    spec = importlib.util.spec_from_file_location("t007_wave_dashboard", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec and spec.loader
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_t007_wave_contains_all_ten_canonical_pairs_once():
+    mod = _module()
+    pairs = [row[0] for row in mod.RUNS]
+    assert len(pairs) == 10
+    assert len(set(pairs)) == 10
+    assert sorted(pairs) == sorted([
+        "PA1-PA2", "PA1-PA3", "PA1-PA4", "PA1-PA8",
+        "PA2-PA3", "PA2-PA4", "PA2-PA8",
+        "PA3-PA4", "PA3-PA8", "PA4-PA8",
+    ])
+    assert set(mod.SEED) == {
+        "l2o_hpo_tight60_PA2_PA3_t007",
+        "l2o_hpo_v2_PA2_PA8_t007_finalist",
+    }
+
+
+def test_t007_wave_is_host_local_only():
+    src = SCRIPT.read_text()
+    forbidden = [
+        "api.github.com",
+        "requests.get(",
+        "urllib.request",
+        "gh api",
+        "gh run",
+        "curl ",
+    ]
+    for token in forbidden:
+        assert token not in src
