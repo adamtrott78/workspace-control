@@ -21,23 +21,20 @@ class Stage12V13WopRepairTests(unittest.TestCase):
         self.assertIn('"wop-d4" = "d4"', installer)
         self.assertIn("wop d4", procedure)
 
-    def test_bootstrap_works_with_old_driver_online_action(self) -> None:
-        text = DEV.read_text(encoding="utf-8")
-        self.assertIn('"online" {', text)
-        self.assertIn("install-wop-commands.ps1", text)
-        self.assertIn("run-stage12-wop.ps1", text)
-
-    def test_dev_runtime_requires_actual_bridge_enabled_receipt(self) -> None:
-        text = DEV.read_text(encoding="utf-8")
-        self.assertIn("WORKSPACE_OPERATOR_BRIDGE_ENABLED=PASS", text)
-        self.assertIn("DEV_HOTKEY_REGISTRATION_NOT_CONFIRMED", text)
-        self.assertIn("Select-String", text)
-
-    def test_hotkey_dispatch_failures_are_visible(self) -> None:
-        text = TRAY.read_text(encoding="utf-8")
-        self.assertIn("Dispatch failed closed:", text)
-        self.assertIn("ToolTipIcon.Warning", text)
-        self.assertIn("DispatchOutcome.Failed", text)
+    def test_v13_frontend_edits_are_superseded_by_accepted_a7_baseline(self) -> None:
+        dev_blob = subprocess.check_output(
+            ["git","rev-parse","HEAD:operator-bridge/tools/workspace-operator-dev.ps1"],
+            cwd=ROOT,
+            text=True,
+        ).strip()
+        tray_blob = subprocess.check_output(
+            ["git","rev-parse","HEAD:operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"],
+            cwd=ROOT,
+            text=True,
+        ).strip()
+        self.assertEqual(dev_blob, "ac035d2fc898274c32cad43954ce44c15b198207")
+        self.assertEqual(tray_blob, "b86e04065b354b8aa54ee2a9ca3e71ab555cde7c")
+        self.assertNotIn("Dispatch failed closed:", TRAY.read_text(encoding="utf-8"))
 
     def test_wop_runs_linux_half_over_existing_ssh_path(self) -> None:
         text = WOP.read_text(encoding="utf-8")
