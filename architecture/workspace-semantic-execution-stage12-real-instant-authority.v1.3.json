@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.3",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "APPROVAL_SIGNAL_OBSERVED_UNCONSUMED_PRELIVE_BOOTSTRAP_RECOVERY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "operator_task": "workspace-operator-bridge-implementation-v1",
   "purpose": "Conditional one-shot D4 v1.3 authority for the repaired one-line WOP live path. The artifact itself grants no live execution approval; the operator's execution of the exact reviewed WOP command is the fresh approval signal under the standing WOP policy.",
@@ -39,8 +39,11 @@
     "bootstrap_command": "wop online 1e9ad4cc431050a5cc79a3cc57218dd71006f716",
     "steady_state_command": "wop d4",
     "current_attempt_command": "wop online 1e9ad4cc431050a5cc79a3cc57218dd71006f716",
-    "approval_not_yet_observed": true,
-    "no_separate_chat_approval_required": true
+    "approval_not_yet_observed": false,
+    "no_separate_chat_approval_required": true,
+    "approval_observed": true,
+    "observed_evidence": "Operator executed the exact reviewed bootstrap command: wop online 1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "observed_result": "PRELIVE_BOOTSTRAP_FAILED_BEFORE_REPAIRED_RUNTIME_LAUNCH"
   },
   "exact_execution_bindings": {
     "source_head": "1e9ad4cc431050a5cc79a3cc57218dd71006f716",
@@ -73,7 +76,7 @@
   },
   "attempt_contract": {
     "attempts_available_after_approval_signal": 1,
-    "approval_signal_observed": false,
+    "approval_signal_observed": true,
     "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "consumed": false,
     "no_silent_retry": true,
@@ -99,5 +102,30 @@
     "gpu_or_padataset_mutation": false,
     "generic_workspace_shell_widening": false
   },
-  "postcondition": "A single D4 v1.3 attempt is conditionally staged. No live approval or consumption has occurred. After predecessor cleanup, execution of the exact current_attempt_command supplies the operator approval signal; the attempt is consumed only if the Linux transaction later prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS."
+  "postcondition": "Operator approval signal is observed. The D4 v1.3 live attempt remains unconsumed because the old installed WOP driver failed before repaired runtime launch. One explicit pre-live bootstrap recovery is authorized without new approval, using the exact current branch tip hosting this state and unchanged validated executable blobs.",
+  "prelive_bootstrap_failure": {
+    "observed": true,
+    "failure_class": "OLD_INSTALLED_WOP_DRIVER_SHALLOW_EXACT_SHA_TREE_MATERIALIZATION_FAILURE",
+    "observed_error": "fatal: unable to read tree (1e9ad4cc431050a5cc79a3cc57218dd71006f716); WOP_CHECKOUT_FAILED",
+    "live_runtime_launched": false,
+    "live_consumption_marker_observed": false,
+    "attempt_consumed": false,
+    "approval_signal_remains_valid": true
+  },
+  "prelive_recovery": {
+    "authorized": true,
+    "requires_new_operator_approval": false,
+    "reason": "The exact reviewed WOP execution already supplied approval, and failure occurred before repaired runtime launch and before the live consumption marker.",
+    "transport_rule": "Retry the old installed WOP driver against the exact current branch tip that hosts this recovery authority state. The old driver can checkout FETCH_HEAD when requested SHA equals the fetched branch tip.",
+    "code_identity_rule": "All executable WOP/D4 blobs at the recovery tip must equal the already validated v1.3 bindings.",
+    "expected_executable_blobs": {
+      "operator-bridge/tools/run-stage12-wop.ps1": "0f388e8a6f959977276f22efb58357c97710aa1b",
+      "operator-bridge/tools/workspace-operator-dev.ps1": "6b9c2c0e10804c563e344618360bb4ef27849b23",
+      "operator-bridge/tools/install-wop-commands.ps1": "0c469fb2bc0d9ca5027bda7c77869bba8dd1e76a",
+      "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs": "95d5bb956e4ad776c0c82812a48a40b2aadeeff8",
+      "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "367fea22f867e30defe17afb8abe7fc68680de69"
+    },
+    "no_code_delta_from_validated_v13": true,
+    "no_live_retry_after_consumption": true
+  }
 }
