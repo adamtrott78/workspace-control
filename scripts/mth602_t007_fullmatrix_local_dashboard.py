@@ -21,6 +21,7 @@ import glob
 import json
 import os
 import pwd
+import re
 import shlex
 import signal
 import statistics
@@ -121,11 +122,40 @@ def metric(x):
         return "-"
 
 
+ANSI_CSI_RE = re.compile(r"\\x1b\\[[0-?]*[ -/]*[@-~]")
+
+
 def terminal_width():
+    """Return the real pane width; never pretend a narrow tmux pane is wider."""
     try:
-        return max(104, min(150, os.get_terminal_size().columns))
+        cols = os.get_terminal_size(sys.stdout.fileno()).columns
     except Exception:
-        return 124
+        try:
+            cols = os.get_terminal_size().columns
+        except Exception:
+            cols = 124
+    return max(20, min(150, int(cols)))
+
+
+def fit_ansi_line(text, width):
+    """Truncate by visible terminal columns while preserving ANSI control codes."""
+    width = max(1, int(width))
+    out = []
+    visible = 0
+    i = 0
+    while i < len(text) and visible < width:
+        if text[i] == "\\x1b":
+            match = ANSI_CSI_RE.match(text, i)
+            if match:
+                out.append(match.group(0))
+                i = match.end()
+                continue
+        out.append(text[i])
+        visible += 1
+        i += 1
+    # Always terminate style state even if truncation removed a trailing RESET.
+    out.append(RESET)
+    return "".join(out)
 
 
 def progress_bar(frac, width=58):
@@ -601,7 +631,10 @@ def render():
                 finish = (now + timedelta(seconds=wave_eta)).strftime("%I:%M %p %Z").lstrip("0")
 
             width = terminal_width()
-            rule = "─" * min(width, 136)
+            # Reserve one physical column so the terminal never enters its
+            # pending-autowrap state at the right edge.
+            safe_width = max(1, width - 1)
+            rule = "─" * min(safe_width, 136)
             source = (
                 "HOST ROOT OBSERVER — local process/result/GPU telemetry + persistent cache — provider API calls: 0"
                 if OBSERVER_ELEVATED
@@ -609,10 +642,10 @@ def render():
             )
 
             frame = []
-            frame.append(BOLD + CYAN + "╔" + "═" * min(width - 2, 134) + "╗" + RESET)
+            frame.append(BOLD + CYAN + "╔" + "═" * max(1, min(safe_width - 2, 134)) + "╗" + RESET)
             frame.append(BOLD + f"  {TITLE}" + RESET)
             frame.append(DIM + f"  {SUBTITLE} | refresh {REFRESH_SEC:g}s" + RESET)
-            frame.append(BOLD + CYAN + "╚" + "═" * min(width - 2, 134) + "╝" + RESET)
+            frame.append(BOLD + CYAN + "╚" + "═" * max(1, min(safe_width - 2, 134)) + "╝" + RESET)
             frame.append(DIM + f"Source: {source}" + RESET)
             frame.append(DIM + f"Local time: {now.strftime('%Y-%m-%d %I:%M:%S %p %Z')}" + RESET)
             frame.append("")
@@ -685,7 +718,11 @@ def render():
             frame.append(BOLD + "Ctrl+C" + RESET + " detach + keep dashboard alive  |  "
                          + BOLD + "tmux attach -t mth602-t007-wave" + RESET + " return")
 
-            sys.stdout.write("\033[H" + "\n".join(frame) + "\033[J")
+            # Full-clear each frame instead of relying on cursor-up/logical-row
+            # arithmetic. Every line is width-bounded so tmux/terminal autowrap
+            # cannot create extra physical rows and corrupt later redraws.
+            fitted = [fit_ansi_line(line, safe_width) for line in frame]
+            sys.stdout.write("\033[2J\033[H" + "\n".join(fitted))
             sys.stdout.flush()
             time.sleep(REFRESH_SEC)
     finally:
