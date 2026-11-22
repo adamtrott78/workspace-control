@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.2",
-  "status": "AUTHORIZED_UNCONSUMED",
+  "status": "CONSUMED_IN_PROGRESS",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Fresh exact authority for exactly one D4 v1.2 real-account Stage-12 calibration using the validated v1.2 repaired Windows preparation command, accepted Windows Operator source, unchanged Linux v3 transaction/harness, and isolated immutable worker-result candidate path.",
   "approval_basis": {
@@ -101,7 +101,26 @@
     "consumed_only_when_marker_prints": true,
     "abort_before_marker_does_not_consume_live_attempt": true,
     "consumed_on_success_or_failure_after_marker": true,
-    "retry_after_consumption_requires_fresh_review_validation_and_operator_approval_signal": true
+    "retry_after_consumption_requires_fresh_review_validation_and_operator_approval_signal": true,
+    "observed_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "observed_on": "2026-11-22",
+    "consumed": true,
+    "live_attempt_state": "Q1_READY",
+    "observed_runtime_evidence": [
+      "STAGE12_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_HOST_BINDING=PASS",
+      "TAILSCALE_OPERATOR_PEER_BINDING=PASS",
+      "TAILSCALE_LOGIN_BINDING=PASS",
+      "TAILSCALE_EXISTING_JUPYTER_ROOT_BINDING=PASS",
+      "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
+      "TAILSCALE_FUNNEL_DISABLED=PASS",
+      "STAGE12_WINDOWS_READY_GATE=PASS",
+      "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+      "PSYCOPG_DEPENDENCY_PIN=PASS",
+      "TAILSCALE_JUPYTER_ROOT_PRESERVED=PASS",
+      "TAILSCALE_STAGE12_ROUTE_EXACT_BINDING=PASS",
+      "STAGE12_Q1_READY"
+    ]
   },
   "retained_prohibitions": {
     "credential_automation": false,
@@ -126,5 +145,5 @@
     "source_or_authority_branch_result_writes": false
   },
   "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, success or failure consumes the one attempt. No silent retry.",
-  "postcondition": "Exactly one D4 v1.2 live attempt is authorized but not yet consumed. Authority must be exact-head validated before Windows/Linux execution."
+  "postcondition": "Exactly one D4 v1.2 live attempt has been consumed and is currently in progress at Q1_READY. No retry is authorized by this artifact. Continue only the frozen Q1/Q2/Q3 sequence and cleanup; any post-marker failure requires a fresh diagnosis/review/validation/operator approval cycle."
 }
