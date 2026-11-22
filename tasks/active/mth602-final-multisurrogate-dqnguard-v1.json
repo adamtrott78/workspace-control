@@ -3904,7 +3904,7 @@
       ]
     },
     "pa1_pa2_osr_evaluation": {
-      "status": "BLOCKED_ON_PROVIDER_ARTIFACT_BINDING_ONLY",
+      "status": "BLOCKED_ON_LOCAL_RUN_ID_RECOVERY_ONLY",
       "required": [
         "workflow_run_id",
         "workflow_job_id",
@@ -3918,8 +3918,18 @@
         "PA2<-PA1"
       ],
       "selection_role": "POST_FREEZE_DIAGNOSTIC_ONLY_NO_RECIPE_FEEDBACK",
-      "blocker": "Connected GitHub surface exposes fetch-by-run-id jobs/artifacts but not a repository issue_comment workflow-run listing endpoint; PA1-PA2 completed before the local observer began persisting GITHUB_RUN_ID.",
-      "smallest_operator_action": "One bounded one-shot gh resolver (three REST requests total, no polling) to recover the PA1-PA2 workflow run/job/artifact binding. Future active jobs will be captured locally by the updated observer."
+      "blocker": "Authenticated gh REST quota is exhausted; the prior one-shot resolver failed on its first request with HTTP 403 and set -e closed the SSH session. Do not retry gh/API polling.",
+      "smallest_operator_action": "Run the reviewed zero-provider local resolver scripts/mth602_recover_pa1_pa2_runid_local.py with sudo. It recovers only the workflow run ID from dashboard cache / bounded runner diagnostics / bounded journal evidence. Then connected GitHub can resolve job/artifact by exact run ID.",
+      "zero_provider_recovery": {
+        "script": "scripts/mth602_recover_pa1_pa2_runid_local.py",
+        "commit": "6dbd2892fdc3f5079f94fa69609190a289c15099",
+        "test": "tests/test_mth602_recover_pa1_pa2_runid_local.py",
+        "validation_receipt": "job-79547bf7-321c-4574-92ea-16bd33c2f416",
+        "validation_result": "2 passed",
+        "network_calls": 0,
+        "exits_nonzero_on_unresolved": false,
+        "notes": "Designed not to terminate the operator SSH session on unresolved evidence. Exact PA1-PA2 run_name/comment binding only."
+      }
     }
   }
 }
