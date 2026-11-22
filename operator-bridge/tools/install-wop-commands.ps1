@@ -16,6 +16,7 @@ $driverPath = Join-Path $commandRoot "wop-driver.ps1"
 $legacyProfilePath = $PROFILE.CurrentUserAllHosts
 $commandNames = @(
   "wop",
+  "wop-d4",
   "wop-up",
   "wop-down",
   "wop-reset",
@@ -115,7 +116,7 @@ $driver = @'
 # workspace-control-owned:wop-driver-v2
 [CmdletBinding()]
 param(
-  [ValidateSet("smoke","reset","restart","start","online","stop","offline","status","self-test")]
+  [ValidateSet("smoke","reset","restart","start","online","d4","stop","offline","status","self-test")]
   [string]$Action = "status",
   [string]$Sha = ""
 )
@@ -126,6 +127,16 @@ try {
   $W = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\DevCheckout"
   if (-not (Test-Path -LiteralPath (Join-Path $W ".git") -PathType Container)) {
     throw "WOP_DEV_CHECKOUT_MISSING:$W"
+  }
+
+  if ([string]::Equals($Action, "d4", [System.StringComparison]::OrdinalIgnoreCase) -and
+      [string]::IsNullOrWhiteSpace($Sha)) {
+    git -C $W fetch --force --depth=1 origin workspace-semantic-execution-migration-v1
+    if ($LASTEXITCODE -ne 0) { throw "WOP_D4_BRANCH_FETCH_FAILED" }
+    $Sha = (git -C $W rev-parse FETCH_HEAD).Trim().ToLowerInvariant()
+    if ($LASTEXITCODE -ne 0 -or $Sha -notmatch "^[0-9a-f]{40}$") {
+      throw "WOP_D4_BRANCH_HEAD_UNAVAILABLE"
+    }
   }
 
   if (-not [string]::IsNullOrWhiteSpace($Sha)) {
@@ -161,17 +172,24 @@ try {
     }
   }
 
-  $script = Join-Path $W "operator-bridge\tools\workspace-operator-dev.ps1"
-  if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
-    throw "WOP_SCRIPT_MISSING:$script"
-  }
-
   $engine = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
   if (-not (Test-Path -LiteralPath $engine -PathType Leaf)) {
     throw "WOP_POWERSHELL_ENGINE_MISSING:$engine"
   }
 
-  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script $Action -RepositoryRoot $W
+  if ([string]::Equals($Action, "d4", [System.StringComparison]::OrdinalIgnoreCase)) {
+    $script = Join-Path $W "operator-bridge\tools\run-stage12-wop.ps1"
+    if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
+      throw "WOP_D4_SCRIPT_MISSING:$script"
+    }
+    & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script -RepositoryRoot $W
+  } else {
+    $script = Join-Path $W "operator-bridge\tools\workspace-operator-dev.ps1"
+    if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
+      throw "WOP_SCRIPT_MISSING:$script"
+    }
+    & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script $Action -RepositoryRoot $W
+  }
   $exitCode = $LASTEXITCODE
   if ($exitCode -ne 0) {
     throw "WOP_ACTION_FAILED:${Action}:${exitCode}"
@@ -192,6 +210,7 @@ Move-Item -LiteralPath $driverTemp -Destination $driverPath -Force
 
 $shimActions = [ordered]@{
   "wop" = ""
+  "wop-d4" = "d4"
   "wop-up" = "start"
   "wop-down" = "stop"
   "wop-reset" = "reset"
@@ -221,4 +240,4 @@ exit /b %ERRORLEVEL%
 Write-Host "WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS"
 Write-Host ("COMMAND_DIRECTORY=" + $commandDirectory)
 Write-Host ("DRIVER_PATH=" + $driverPath)
-Write-Host "COMMANDS=wop,wop-up,wop-down,wop-reset,wop-status,wop-self-test"
+Write-Host "COMMANDS=wop,wop-d4,wop-up,wop-down,wop-reset,wop-status,wop-self-test"

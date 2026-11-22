@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.3",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "operator_task": "workspace-operator-bridge-implementation-v1",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.2.json",
+    "status": "CONSUMED_FAILED_STAGE12_Q1_HOTKEY_NO_EFFECT_WOP_UX_REGRESSION",
+    "consumed": true,
+    "reusable": false
+  },
+  "diagnosis": {
+    "regression": "D4 v1.2 bypassed the already-validated persistent WOP lifecycle and reintroduced a duplicate Stage-12 launcher plus a separate Linux terminal workflow.",
+    "user_visible_failure": "At STAGE12_Q1_READY, Ctrl+Space produced no observable worker action.",
+    "evidence_preserved": [
+      "Stage-10 Ctrl+Space UT-10 passed 20/20 actions with exactly 20 hotkey presses and zero dispatch failures.",
+      "Persistent WOP commands and the DevRuntime lifecycle already existed before D4 v1.2."
+    ]
+  },
+  "repair": {
+    "preferred_operator_command": "wop d4",
+    "bootstrap_compatibility_command": "wop online <validated-sha>",
+    "one_line_windows_launch": true,
+    "reuses_workspace_operator_dev_runtime": true,
+    "auto_syncs_wop_shims_on_bootstrap": true,
+    "launches_linux_half_over_existing_tailscale_ssh": true,
+    "requires_separate_linux_copy_paste": false,
+    "preserves_manual_chatgpt_input_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "startup_receipt_required": "WORKSPACE_OPERATOR_BRIDGE_ENABLED=PASS",
+    "silent_dispatch_failure_replaced_with_warning_balloon": true,
+    "linux_ready_evidence_transport": "exact environment marker supplied by reviewed WOP wrapper",
+    "no_credential_automation": true,
+    "no_automatic_paste_or_enter": true,
+    "no_browser_permission_widening": true,
+    "no_funnel_or_public_listener": true
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "next_attempt_requires_exact_head_validation": true,
+    "standing_wop_execution_policy_may_supply_operator_approval_signal_after_validation": true
+  }
+}
