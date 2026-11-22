@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.3",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "operator_task": "workspace-operator-bridge-implementation-v1",
   "predecessor": {
@@ -38,6 +38,46 @@
   "authority_gate": {
     "live_retry_authorized": false,
     "next_attempt_requires_exact_head_validation": true,
-    "standing_wop_execution_policy_may_supply_operator_approval_signal_after_validation": true
-  }
+    "standing_wop_execution_policy_may_supply_operator_approval_signal_after_validation": true,
+    "conditional_authority_may_be_created_after_this_validated_review": true,
+    "operator_approval_signal": "Execution of the exact reviewed WOP command under the durable WOP approval policy."
+  },
+  "validation": {
+    "candidate_head": "1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "workspace_control_run": 3099,
+    "semantic_execution_run": 399,
+    "operator_bridge_run": 672,
+    "result": "SUCCESS",
+    "exact_head": true
+  },
+  "exact_candidate_bindings": {
+    "source_head": "1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.3.md",
+      "blob_sha": "0121d0fec1df0eff27347ec6bb843b0bd99a8be5"
+    },
+    "one_line_wop_launcher": {
+      "path": "operator-bridge/tools/run-stage12-wop.ps1",
+      "blob_sha": "0f388e8a6f959977276f22efb58357c97710aa1b"
+    },
+    "persistent_dev_runtime": {
+      "path": "operator-bridge/tools/workspace-operator-dev.ps1",
+      "blob_sha": "6b9c2c0e10804c563e344618360bb4ef27849b23"
+    },
+    "wop_installer": {
+      "path": "operator-bridge/tools/install-wop-commands.ps1",
+      "blob_sha": "0c469fb2bc0d9ca5027bda7c77869bba8dd1e76a"
+    },
+    "tray_context": {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+      "blob_sha": "95d5bb956e4ad776c0c82812a48a40b2aadeeff8"
+    },
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh",
+      "blob_sha": "367fea22f867e30defe17afb8abe7fc68680de69"
+    },
+    "bootstrap_command": "wop online 1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "steady_state_command": "wop d4"
+  },
+  "postcondition": "Exact v1.3 repair candidate is 3/3 validated. Review grants zero live authority by itself. Next safe state is a conditional one-shot authority that becomes operator-approved only when the exact reviewed WOP command is executed."
 }
