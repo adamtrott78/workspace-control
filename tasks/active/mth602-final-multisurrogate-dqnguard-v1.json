@@ -4152,6 +4152,21 @@
         "full-screen clear and home before every frame"
       ],
       "scientific_execution_unchanged": true
+    },
+    "pa3_pa8_timeout_failure_v1": {
+      "status": "TERMINAL_PROVIDER_TIMEOUT",
+      "workflow_run_id": 44954748830,
+      "workflow_job_id": 137275754026,
+      "lane": "GPU1 / lambda-padataset-scientific-single-gpu-2",
+      "started_utc": "2026-11-22T16:33:26Z",
+      "shutdown_utc": "2026-11-22T20:33:23Z",
+      "configured_timeout_minutes": 240,
+      "observed_failure": "The runner has received a shutdown signal; operation canceled.",
+      "training_position": "epoch 59/60 at ~63% of epoch step when terminated",
+      "artifact_uploaded": false,
+      "likely_local_job_root": "/srv/workspace-ci/padataset/jobs/p5-9c83f4b2-c123-5859-a620-888f1a09ac16",
+      "dashboard_effect": "Local-only dashboard loses provider terminal state after runner disappearance and currently falls back to ADMITTED.",
+      "next_policy": "Do not rerun from scratch blindly. Recover latest local training_state/checkpoint from the timed-out runner root first if still present; independently restore lane-B consumption for remaining immutable G1 admissions."
     }
   }
 }
