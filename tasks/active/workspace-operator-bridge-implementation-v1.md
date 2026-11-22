@@ -24,22 +24,23 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 95a6b56aef026eabae2c2d25e241c517d06d805b
+- Remote checkpoint: 35cb0df242ca47f218fba5dd556e1147924b82c0
 - Remote verified: true
 
 ## Next safe action
 
-D4 V1.1 EXPLICIT APPROVAL GATE — the fresh bounded real-account review/procedure at 95a6b56aef026eabae2c2d25e241c517d06d805b is exact-head 3/3 validated (#3088/#388/#661) and grants zero authority. Stop until Adam explicitly approves exactly one live D4 attempt bound to this validated review. After approval, create a fresh v1.1 authority artifact binding the exact validated review/procedure/source/candidate baseline, validate authority persistence, then execute Windows-first pre-live and the Linux transaction. No silent retry.
+D4 V1.1 EXPLICIT ONE-SHOT APPROVAL GATE — final approval-gate head 35cb0df242ca47f218fba5dd556e1147924b82c0 is exact-head 3/3 green (Workspace #3090 / Semantic #390 / Operator #663). The validated review artifact architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.1.json (blob e49590b6ca949605c612958a5523670a3d78008d) and procedure architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.1.md (blob 153c32db36cf4d8d594c9dae2913ea583c8f63ec) grant ZERO live authority. Stop until Adam explicitly approves exactly one live D4 attempt. After approval only, create a fresh v1.1 authority artifact binding the exact validated review/procedure/source 2f32513f…/candidate baseline 0bc1bc0e…, validate authority persistence, then execute Windows-first pre-live and the reviewed Linux v3 transaction. No silent retry.
 
 ## Remaining work
 
-- Prepare/freeze the fresh D4 real-account Stage-12 review/procedure against the current accepted Windows frontend and exact candidate baseline.
-- After exact-head validation, stop at explicit one-shot operator approval before any live Instant attempt.
-- After D4 passes, run E1–E3 on Research Engine research-iterate with mixed executors, forced loss, durable recovery and resource/soak evidence.
+- WAIT FOR OPERATOR DECISION: Adam must explicitly approve exactly one live D4 v1.1 attempt. Do not infer approval from this handoff or from model reasoning.
+- AFTER APPROVAL ONLY: create a fresh v1.1 authority artifact bound to review blob e49590b6…, procedure blob 153c32db…, source 2f32513f…, and candidate baseline 0bc1bc0e…; validate authority persistence before any live action.
+- EXECUTE ONE BOUNDED D4 ATTEMPT: Windows-first pre-live preparation, then reviewed Linux v3 transaction. The attempt is not consumed until STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS; after consumption, success or failure consumes it and any retry requires a fresh diagnosis/review/approval cycle.
+- AFTER D4 PASS: run E1–E3 on Research Engine research-iterate with mixed executors, forced worker/session/process loss, durable recovery, and resource/soak evidence.
 
 ## Blockers / gates
 
-- D4 V1.1 LIVE AUTHORITY: fresh explicit operator approval for exactly one attempt is required. The validated review itself authorizes zero live execution.
+- D4 V1.1 LIVE AUTHORITY: Adam's fresh explicit approval for exactly one live attempt is required. The validated review/procedure and final 35cb0df2… approval-gate state authorize zero execution.
 
 ## Fresh-chat initialization
 

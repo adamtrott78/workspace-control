@@ -2,15 +2,15 @@
 
 **Parent task:** `workspace-semantic-execution-migration-v1`  
 **Branch:** `workspace-semantic-execution-migration-v1`  
-**Current durable integration head:** `e1e4778ad3583c817e25d0836964181b88cdd62a`  
-**Exact-head validation:** Workspace Control #3075 PASS; Semantic Execution #375 PASS; Operator Bridge #648 PASS.  
+**Current durable integration head:** `35cb0df242ca47f218fba5dd556e1147924b82c0`  
+**Exact-head validation:** Workspace Control #3090 PASS; Semantic Execution #390 PASS; Operator Bridge #663 PASS.  
 **Deadline:** 2026-11-30.  
 **Definition of done:** every mandatory requirement in `architecture/workspace-semantic-execution-november-2026-acceptance.v0.1.json` is PASS and the integrated review records explicit `PROMOTE_V0`.  
 **Current machine-readable acceptance matrix:** 10 PASS / 12 PARTIAL / 1 BLOCKED / 9 PENDING. Do not silently promote matrix rows from checklist evidence; a formal E7 reconciliation is still required. The front-end-related rows INST-02, INST-03, INST-04 and INST-05 are already PASS; INST-06 remains PENDING because no bounded real-account Stage-12 calibration has completed.
 **Current live semantic-host status:** Workspace Shell multirepo activation ACCEPTED at runtime `54ac65cbcd4211554710b8f8f4231c6c9554e3cc`; semantic execution `7c20097c5f177f23c16a765b95ce94d7161f0d29` independently verified; evaluator isolation ACCEPTED; exact fake-worker private-route round trip accepted with restoration of the preexisting Jupyter Serve state.
 **Current Windows Operator front-end status:** **FUNCTIONALLY ACCEPTED.** On the validated `e1e4778a…` line the operator directly confirmed the complete manual loop: clean dedicated Firefox startup, Ctrl+Space opens/focuses a fresh Personalized Temporary Chat and closes the startup blank, clipboard staging works, a premature second Ctrl+Space alerts/refocuses and does not advance/minimize, plain Enter in the foreground prepared worker unlocks the loop, and the following no-work Ctrl+Space minimizes the dedicated Firefox window. Literal raw `@github` invocation in Personalized Temporary Chat is also empirically accepted. No automatic paste, typing, Enter, Send, DOM/page-content scraping, or credential automation was introduced.
-**Current next hard gate:** **decision gate before D4.** Functional front-end work no longer blocks system proving. No reusable Stage-12 live authority exists. If the operator chooses to proceed, freeze an updated bounded real-account Stage-12 review/procedure against the current validated front-end head, validate it 3/3, obtain fresh explicit one-shot authority, then execute D4. After D4, E1–E3 are the first true whole-system proving run: live mixed `research-iterate`, mixed executors, and forced worker/session/process-loss recovery.
-**Required operator convenience layer:** source for persistent current-user commands `wop-up`, `wop-down`, `wop-reset`, `wop-status`, `wop-self-test` is validated at `5839870b067af9c416099e096d29c614c5b8402b` (Workspace #3082 / Semantic #382 / Operator #655 PASS). Adam explicitly classified these commands as necessary before proceeding. One bounded Windows profile install/verification remains; it does not create live Stage-12 authority.
+**Current next hard gate:** **D4 v1.1 explicit one-shot approval.** The fresh bounded real-account review/procedure is frozen, exact-head validated, and grants zero live authority. Adam must explicitly approve exactly one attempt before a fresh authority artifact can be created and validated. After a D4 PASS, E1–E3 are the agreed Research Engine `research-iterate` whole-system proving run with mixed executors, forced loss/recovery, and resource/soak evidence.
+**Required operator convenience layer:** **COMPLETE.** A7 Windows acceptance passed: stale runtime cleanup/offline PASS, obsolete owned profile block removed, persistent `wop-up/down/reset/status/self-test` shims installed in the existing current-user WindowsApps PATH surface, `wop-self-test` PASS, and `wop-status` OFFLINE. No D4 live authority was created.
 **Stage-10 human status:** COMPLETE. UT-05, UT-06, UT-07, UT-08, UT-12, UT-11 and UT-09 ACCEPTED; final hotkey disposition is **RETAIN Ctrl+Space**.
 
 ## Fresh-chat recovery protocol
@@ -139,7 +139,7 @@
   - [x] Approval-gate freeze `73f1c57a…` passed Workspace #3013 / Semantic #313 / Operator #586.\n  - [x] Fresh explicit operator approval received for exactly one v0.7 attempt; authority is bound to procedure blob `620e78f0…`.\n  - [x] v0.7 authority persistence `ac1ad67d…` passed Workspace #3014 / Semantic #314 / Operator #587.\n  - [x] v0.7 authority was invalidated unconsumed before execution after exact-byte audit found two literal backslashes before `${env:ProgramFiles(x86)}`.\n  - [x] v0.8 two-backslash repair `f0051fb3…` passed Workspace #3016 / Semantic #316 / Operator #589.\n  - [x] Final v0.8 review-state `fc292181…` passed Workspace #3017 / Semantic #317 / Operator #590.\n  - [x] Fresh explicit operator approval received for exactly one v0.8 attempt bound to procedure blob `58c714ba…`.\n  - [x] v0.8 authority persistence `26ca22ae…` passed Workspace #3018 / Semantic #318 / Operator #591.\n  - [x] The historical v0.8/v0.9/v1.0 retry chain is superseded by the validated v1.1 Windows fast-loop program; no historical unchecked retry step remains current.
   - [x] Functional Windows front-end prerequisite accepted on `e1e4778a…`: dedicated profile/session cleanup, fresh Temporary Chat creation/focus, startup-blank closure, clipboard staging, raw `@github`, human Enter gate, and no-work minimize all passed direct operator observation.
   - [x] Front-end safety boundary preserved: no automatic typing/paste/Enter/Send, no DOM/page-content/output scraping, no credential automation, no public/Funnel exposure, no browser-permission widening.
-  - [ ] **CURRENT D4 GATE — EXPLICIT APPROVAL:** v1.1 review/procedure exact head `95a6b56aef026eabae2c2d25e241c517d06d805b` passed Workspace #3088 / Semantic #388 / Operator #661. It binds source `2f32513f…`, launcher `a4619bcc…`, unchanged Linux v3/harness bytes, and candidate baseline `0bc1bc0e…`. The review grants zero authority. Adam must explicitly approve exactly one live D4 attempt before a fresh v1.1 authority artifact may be created.
+  - [ ] **CURRENT D4 GATE — EXPLICIT ONE-SHOT APPROVAL:** final approval-gate head `35cb0df242ca47f218fba5dd556e1147924b82c0` passed Workspace #3090 / Semantic #390 / Operator #663. The validated v1.1 review blob `e49590b6ca949605c612958a5523670a3d78008d` and procedure blob `153c32db36cf4d8d594c9dae2913ea583c8f63ec` bind source `2f32513f…`, Linux v3/harness bytes, and candidate baseline `0bc1bc0e…`. They grant zero authority. Adam must explicitly approve exactly one live D4 attempt before a fresh v1.1 authority artifact may be created and validated.
 
 ### E. Integrated live proving + final November acceptance
 
@@ -157,7 +157,7 @@
 - **Workspace Shell semantic/evaluator activation:** COMPLETE and independently verified. Do not redo the activation sequence unless a real regression appears.
 - **Private Operator Bridge route:** D3 COMPLETE. Attempt 02 passed full fake-worker transport and exact restoration of `/` -> `8888`; fake-worker authority is consumed.
 - **Codex:** suspended until PR #627/#630 lineage is trusted/promoted; subscription-only, no API billing, no credits/API-key fallback.
-- **Operator real account:** v0.8 one-shot authority is validated at `26ca22ae…` (#3018/#318/#591), bound to procedure blob `58c714ba…`. Windows is now the authorized next action. Linux remains blocked until `STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS`; live consumption remains at the reviewed Linux marker.
+- **Operator real account:** v1.1 D4 review/procedure is the sole current path. Historical v0.x/v1.0 authorities are consumed, invalidated, or superseded and are non-reusable. No live v1.1 authority exists; next gate is Adam's explicit one-shot approval against final validated head `35cb0df2…`.
 - **Reasoning Economy claim-bearing runs:** evaluator isolation gate is now satisfied live; launches still require reviewed live executor transport plus calibrated comparable weekly allowance telemetry. Do not manually grind the frozen 54-run matrix.
 - **Frontier-equivalence / routing-promotion claims:** remain blocked until claim-bearing replicated scoring + matched holdout + calibrated allowance evidence exist.
 - **GitRunner modernization:** deferred; do not rewrite/widen GitRunner authority from this task.
@@ -205,7 +205,7 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 - [x] Human-submit gate accepted: premature repeat Ctrl+Space before plain Enter alerts/refocuses and cannot advance/minimize; plain Enter while captured worker Firefox is foreground unlocks the next press; no-work then minimizes only the dedicated Firefox window.
 - [x] Final functional front-end state is durable at `e1e4778ad3583c817e25d0836964181b88cdd62a` with Workspace #3075 / Semantic #375 / Operator #648 PASS and direct operator acceptance.
 - [x] Required operator UX gate complete: persistent current-user shims installed and accepted on Windows; `wop-self-test` and `wop-status` PASS.
-- [ ] **NEXT CRITICAL TEST IF CHOSEN — D4:** prepare a fresh, exact, single-attempt Stage-12 real-account calibration review/authority against the current front-end state; do not inherit or revive any consumed historical authority.
+- [ ] **NEXT CRITICAL TEST — D4:** review/procedure preparation is COMPLETE and validated. Await Adam's explicit one-shot approval; then persist/validate fresh authority and run exactly one bounded real-account calibration.
 - [ ] **THEN E1–E3:** run the live mixed Research Engine `research-iterate` workflow, deliberately inject one worker/session/process loss, recover from durable state without manual reconstruction, and capture live resource/soak evidence.
 - [ ] E4 economics remains dependent on calibrated allowance evidence; B4/Codex gates remain independent and must not be bypassed.
 - [ ] E5–E8 remain final acceptance work: target UX-09 benchmark, provenance/authority/rollback audit, formal matrix reconciliation, and explicit `PROMOTE_V0` / `HOLD` / `REVISE`.
@@ -215,8 +215,8 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 **Functional front end: DONE.**  
 **Convenience aliases: DONE / WINDOWS ACCEPTED.**  
 **Whole-system real-account proof: NOT DONE.**  
-**No live Stage-12 authority currently exists.**  
-**Do not start D4/E1 automatically; operator requested this checklist reconciliation first and will choose the next step afterward.**
+**No live Stage-12 authority currently exists; D4 v1.1 is waiting at explicit one-shot approval.**  
+**Do not start D4 automatically. The next action is a genuine operator-only approval decision. E1–E3 remain blocked on a D4 PASS.**
 
 
 ### 2026-11-21 alias-install repair note
