@@ -6,7 +6,7 @@
   "goal": "Execute a rigorous MTH602-to-journal research program centered on backbone competence (H1), then resolve whether surrogate transfer remains intrinsically target-dependent or becomes target-blind-selectable (H2/H4), test multi-surrogate DQNGuard if needed (H5), and treat STFT representation as a bounded lower-priority ablation (H3). Preserve true-target quarantine, standard-DQNGuard controls, exact provenance, explicit seed separation, and a deadline-triggered pivot to complete MTH602 deliverables before December or the course due date.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "hpo_tight60_t007_checkpoint_recovery_operator_action",
+  "current_stage": "hpo_tight60_t007_identical_rerun_in_progress",
   "acceptance_criteria": [
     "Track A remains a control repair: original leave-two-out target/surrogate taxonomy and original DQNGuard evaluator are preserved while backbones are retrained to genuine convergence under known-only selection.",
     "Track B compares Architecture A (pooled DQN), Architecture B (surrogate-specific DQNs with cross-surrogate selection), and Architecture C (hybrid pooled DQN + deterministic guard) on the same competent target-withheld four-known backbone/evidence partitions.",
@@ -3276,7 +3276,7 @@
     ]
   },
   "hpo_tight60_completion_v1": {
-    "status": "TERMINAL_11_SUCCESS_1_INFRA_FAILURE",
+    "status": "IDENTICAL_T007_RERUN_IN_PROGRESS_AFTER_UNRECOVERABLE_LOCAL_CHECKPOINT",
     "user_authority": "Awesome let’s get it running right now on both gpus",
     "source_pr37_head": "ab87931408651b0b3516d910b13474822fb2a93d",
     "padataset_pr": 40,
@@ -3601,7 +3601,7 @@
       }
     ],
     "t007_checkpoint_recovery": {
-      "status": "OPERATOR_RECOVERY_RETRY_REQUIRED",
+      "status": "UNRECOVERABLE_IDENTICAL_RERUN_ADMITTED",
       "failed_run_id": 44954748830,
       "failed_job_id": 137000252399,
       "runner_job_root": "/srv/workspace-ci/padataset/jobs/p5-e1067c12-ee3a-57fc-b6fc-830b2453b655",
@@ -3632,7 +3632,26 @@
         "computes SHA-256",
         "derives per-class validation F1 from saved confusion matrix",
         "does not retrain or touch target/test/OSR evidence"
-      ]
+      ],
+      "operator_recovery_result": {
+        "expected_path_present": false,
+        "bounded_recovery_candidate_count": 0,
+        "marker": "T007_RECOVERY_NOT_FOUND=1",
+        "mutation_or_recovery_occurred": false,
+        "conclusion": "Local runner-temp recovery exhausted; identical rerun authorized by existing recovery policy."
+      },
+      "identical_rerun": {
+        "original_workflow_run_id": 44954748830,
+        "original_failed_job_id": 137000252399,
+        "rerun_job_id": 137275754026,
+        "status": "QUEUED",
+        "candidate_pr": 40,
+        "candidate_head": "da521eaee997c56012290c9c261ee1831432ebbc",
+        "lane": "/lambda-scientific-2",
+        "manifest": "manifests/configs/l2o_hpo_tight60_v1/l2o_hpo_tight60_PA3_PA8_t007.json",
+        "hyperparameter_changes": false,
+        "target_test_or_osr_evidence_used": false
+      }
     }
   },
   "handoff": {
