@@ -3678,7 +3678,9 @@
           "github_api_calls_per_refresh": 0,
           "provider_network_calls_per_refresh": 0,
           "timing": "elapsed from local process age; ETA from overall local training fraction; projected finish from local wall clock",
-          "elevated_observer": "sudo read-only host observation because runner isolation may hide process/result telemetry"
+          "elevated_observer": "sudo read-only host observation because runner isolation may hide process/result telemetry",
+          "ctrl_c_behavior": "Inside tmux, SIGINT detaches the current client and keeps the dashboard/session alive; outside tmux, Ctrl+C exits normally.",
+          "reattach_command": "tmux attach -t mth602-t007"
         }
       }
     }
