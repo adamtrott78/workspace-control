@@ -122,7 +122,7 @@ def metric(x):
         return "-"
 
 
-ANSI_CSI_RE = re.compile(r"\\x1b\\[[0-?]*[ -/]*[@-~]")
+ANSI_CSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
 
 
 def terminal_width():
