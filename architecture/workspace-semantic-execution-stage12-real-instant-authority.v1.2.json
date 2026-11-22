@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.2",
-  "status": "CONSUMED_IN_PROGRESS",
+  "status": "CONSUMED_FAILED_STAGE12_Q1_HOTKEY_NO_EFFECT_WOP_UX_REGRESSION",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Fresh exact authority for exactly one D4 v1.2 real-account Stage-12 calibration using the validated v1.2 repaired Windows preparation command, accepted Windows Operator source, unchanged Linux v3 transaction/harness, and isolated immutable worker-result candidate path.",
   "approval_basis": {
@@ -105,7 +105,7 @@
     "observed_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "observed_on": "2026-11-22",
     "consumed": true,
-    "live_attempt_state": "Q1_READY",
+    "live_attempt_state": "FAILED_Q1",
     "observed_runtime_evidence": [
       "STAGE12_CANDIDATE_BASELINE=PASS",
       "TAILSCALE_HOST_BINDING=PASS",
@@ -120,7 +120,14 @@
       "TAILSCALE_JUPYTER_ROOT_PRESERVED=PASS",
       "TAILSCALE_STAGE12_ROUTE_EXACT_BINDING=PASS",
       "STAGE12_Q1_READY"
-    ]
+    ],
+    "failure_evidence": {
+      "marker_before_failure": "STAGE12_Q1_READY",
+      "operator_observation": "Ctrl+Space produced no observable worker action.",
+      "classification": "POST_CONSUMPTION_FAILURE",
+      "retry_authorized": false,
+      "cleanup_state": "OPERATOR_CLEANUP_REQUESTED_NOT_YET_OBSERVED"
+    }
   },
   "retained_prohibitions": {
     "credential_automation": false,
@@ -145,5 +152,13 @@
     "source_or_authority_branch_result_writes": false
   },
   "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, success or failure consumes the one attempt. No silent retry.",
-  "postcondition": "Exactly one D4 v1.2 live attempt has been consumed and is currently in progress at Q1_READY. No retry is authorized by this artifact. Continue only the frozen Q1/Q2/Q3 sequence and cleanup; any post-marker failure requires a fresh diagnosis/review/validation/operator approval cycle."
+  "postcondition": "D4 v1.2 is consumed and failed at Q1. No retry is authorized. Repair must restore the validated WOP operator lifecycle, validate the repair, and establish fresh one-shot authority before another live attempt.",
+  "failure_diagnosis": {
+    "primary_process_regression": "D4 v1.2 bypassed the previously validated persistent WOP lifecycle and instead used a duplicate Stage-12-specific Windows launcher plus separate Linux activation path.",
+    "required_repair": "Restore D4 to the validated WOP lifecycle, make launch one-line, and make hotkey/remote-dispatch failures visible rather than silent.",
+    "preserved_evidence": [
+      "Stage-10 Ctrl+Space UT-10 objective pass: 20/20 actions, exactly 20 presses, zero dispatch failures.",
+      "Persistent WOP commands and dev runtime were implemented and validated before D4 v1.2."
+    ]
+  }
 }
