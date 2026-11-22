@@ -4055,6 +4055,46 @@
       "early_stopping_patience": 10,
       "note": "Finished-row EPOCH display is best checkpoint epoch, not last epoch run. PA1-PA2 ran 12 epochs and best was 2; PA1-PA4 ran 20 epochs and best was 10.",
       "ui_followup": "Change finished-row display to distinguish BEST from RAN/MAX to avoid ambiguity."
+    },
+    "checkpoint_depth_sensitivity_v1": {
+      "status": "REQUIRED_POST_FREEZE_DIAGNOSTIC",
+      "scientific_question": "Does the known-validation-best checkpoint underperform a later/final checkpoint on OSR despite equal or slightly better closed-set validation performance?",
+      "primary_checkpoint_policy": "best_model remains the frozen primary checkpoint selected from known validation only; OSR/test evidence must not retroactively change the primary checkpoint for this experiment.",
+      "diagnostic_checkpoints": [
+        "best_model",
+        "final_model"
+      ],
+      "persistence_semantics": {
+        "best_model": "strict known-validation improvement checkpoint",
+        "final_model": "model state at the last completed epoch, including the early-stopping epoch",
+        "training_state_latest": "exact post-epoch model/optimizer/scheduler/RNG state saved after every epoch"
+      },
+      "verified_examples": {
+        "PA1-PA2": {
+          "best_epoch": 2,
+          "final_epoch": 12,
+          "best_model_sha256": "82effeb4d9f669cfdcc16dca2539149c3d6f5ec5a79901153108d509175b48ee",
+          "final_model_sha256": "692f9f0afbbd4f40254c7f3b19c124fec448b601454cdc794f5ba9b2a22929e3"
+        },
+        "PA1-PA4": {
+          "best_epoch": 10,
+          "final_epoch": 20,
+          "best_model_sha256": "b6a45e669799940ec595954badb4ff4afda2b4262b5941a999eba6dd669e8613",
+          "final_model_sha256": "b97109b1ed62513af956a03082a71d8809777788d1333e170e2ec37ee0e005fc"
+        }
+      },
+      "cpu_cache_plan": "For each unordered pair and checkpoint, run expensive backbone inference once, cache exact split outputs, and reuse them for both OSR directions.",
+      "outputs_to_track": [
+        "best_epoch",
+        "final_epoch",
+        "best known-validation macro-F1",
+        "final known-validation macro-F1",
+        "best-checkpoint directional OSR metrics",
+        "final-checkpoint directional OSR metrics",
+        "best-minus-final OSR deltas",
+        "epoch-gap"
+      ],
+      "interpretation_guardrail": "Treat best-vs-final OSR as checkpoint-depth sensitivity evidence only. Any future change to checkpoint-selection/training-horizon policy must be defined in a new experiment before consuming its target/test evidence."
     }
   }
 }
