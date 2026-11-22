@@ -103,15 +103,15 @@ class PADatasetScientificDualWorkflowRefreshV7Tests(unittest.TestCase):
 
     def test_v7_is_effective_preference_over_v6(self):
         block = REC[
-            REC.index("scientific_dual_workflow_refresh_v7 ="):
+            REC.index("scientific_dual_effective_refresh ="):
             REC.index("scientific_overrides =")
         ]
-        self.assertIn(
-            "scientific_dual_workflow_refresh_v7\n"
-            "        if scientific_dual_workflow_refresh_v7 is not None",
-            block,
-        )
+        self.assertIn("scientific_dual_workflow_refresh_v7", block)
         self.assertIn("scientific_dual_workflow_refresh_v6", block)
+        self.assertLess(
+            block.index("scientific_dual_workflow_refresh_v7"),
+            block.index("scientific_dual_workflow_refresh_v6"),
+        )
 
 
 if __name__ == "__main__":
