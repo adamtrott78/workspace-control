@@ -3829,6 +3829,47 @@
         "config": "manifests/configs/l2o_t007_fullmatrix_v1/l2o_t007_fullmatrix_PA4_PA8.json"
       }
     ],
-    "scheduling_note": "Seven remaining t007 trainings were pre-admitted to maximize throughput from known-validation evidence only. OSR is diagnostic and cannot retroactively select, cancel, modify, or prioritize the t007 recipe. PR #41 head is now locked until these exact-head-bound jobs are terminal."
+    "scheduling_note": "Seven remaining t007 trainings were pre-admitted to maximize throughput from known-validation evidence only. OSR is diagnostic and cannot retroactively select, cancel, modify, or prioritize the t007 recipe. PR #41 head is now locked until these exact-head-bound jobs are terminal.",
+    "operator_observer": {
+      "mode": "UNIFIED_10_PAIR_HOST_LOCAL_ZERO_PROVIDER_API",
+      "renderer": "scripts/mth602_t007_fullmatrix_local_dashboard.py",
+      "tmux_launcher": "scripts/mth602_t007_fullmatrix_tmux.sh",
+      "tmux_session": "mth602-t007-wave",
+      "validation_receipt": "job-3a07dfe4-d086-4a6c-acd5-3663dc24c3c2",
+      "validation_result": "2 passed",
+      "rows": 10,
+      "seeded_terminal_pairs": [
+        "PA2-PA3",
+        "PA2-PA8"
+      ],
+      "live_and_admitted_pairs": [
+        "PA1-PA2",
+        "PA1-PA3",
+        "PA1-PA4",
+        "PA1-PA8",
+        "PA2-PA4",
+        "PA3-PA4",
+        "PA3-PA8",
+        "PA4-PA8"
+      ],
+      "telemetry": [
+        "local pa_train_one.py process age",
+        "local runner temp scientific-results/backbone",
+        "train_progress.json",
+        "history.json",
+        "summary.json",
+        "train_complete.json",
+        "train_error.json",
+        "nvidia-smi",
+        "persistent operator-owned cache"
+      ],
+      "wave_progress": "equal pair-weighted completion across all 10 canonical pairs",
+      "wave_eta": "lane-backlog estimate from median observed t007 pair duration; excludes provider/OSR queue overhead",
+      "github_cli_calls_per_refresh": 0,
+      "github_api_calls_per_refresh": 0,
+      "provider_network_calls_per_refresh": 0,
+      "ctrl_c_behavior": "Inside tmux, detach current client and leave dashboard/session alive.",
+      "reattach_command": "tmux attach -t mth602-t007-wave"
+    }
   }
 }
