@@ -1,3 +1,29 @@
+<!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22-LANEB-V8-LIVE -->
+## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22 — lane-B v8 LIVE
+
+Lane-B refresh-v8 is live and postverified from PR #648 exact head `41fd6764031b3abbaacae8b553ec1885b5f15b7c`.
+
+- activation: `PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8=PASS`
+- transaction: `/var/lib/workspace-ci/v3/padataset-scientific/dual-lane/workflow-refresh-v8/transactions/refresh-3d74bfd1-1971-4621-b1ad-a3415ecea295/receipt.json`
+- postverify: `MTH602_LANEB_REFRESH_V8_POSTVERIFY=PASS`
+- controller policy: `243af9fa2806e889f64cad6ed5e9cd0b607f79fbd8fc4c6f07c20ef7c07c9499`
+- trusted lane-B workflow blob: `8375dd0a0733b01de38f677dee58a373d3adcb48`
+- required zero-work smoke: run `45084110941`, job `137398652973` — **SUCCESS**
+
+Exactly three frozen t007 lane-B trainings were then re-admitted once:
+
+- PA1–PA3: comment `7087710626`, run `45084249815`, job `137399088294`
+- PA1–PA8: comment `7087710958`, run `45084251371`, job `137399093935`
+- PA3–PA4: comment `7087711284`, run `45084252927`, job `137399098702`
+
+No PA3–PA8 rerun and no GPU OSR admission occurred. The frozen training head remains `85bc8cb667a000d3fc544b33f8e96a6775074561`.
+
+### Immediate next action
+
+Monitor only these three exact runs. Do not duplicate admissions. Validate terminal artifacts/provenance and known-validation metrics as each completes. Keep PA3–PA8 separate.
+
+---
+
 <!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22-LANEB-V8-VERIFIER-REPAIR -->
 ## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22 — lane-B v8 verifier repair
 
