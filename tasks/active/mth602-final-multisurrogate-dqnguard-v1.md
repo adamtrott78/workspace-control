@@ -1,3 +1,20 @@
+<!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22-LANEB-V8-VERIFIER-REPAIR -->
+## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22 — lane-B v8 verifier repair
+
+**Authoritative source:** PR #640 current JSON remains authoritative.
+
+The lane-B v8 activation failure at PR #648 head `b3914a7d9caf6ba4e6d8086d50a01e2c63d0b0b8` is diagnosed as a **false-positive managed-addition digest drift**. The live lane-A controller policy is legitimately owned by already-active lane-A workflow-refresh-v2 from PR #647 / repaired activation head `2c3374eac8421dbca1d7eb07ad593ee9e2a5dcea`. PR #648 had regressed to v1-only lane-A verification.
+
+PR #648 successor `41fd6764031b3abbaacae8b553ec1885b5f15b7c` restores the proven lane-A effective-v2 verifier lineage while preserving the immutable lane-A v1 dual-lane predecessor and all lane-B v8 bindings. Validation receipts: `job-4e4b1911-41e1-4989-a939-e150acad93e8` = **20 passed**; `job-c0627706-fbda-4cc3-b3a0-c11dc9c7ea04` = **55 passed**. Diff from failed head: exactly two commits, only reconciler + v8 regression test.
+
+Provider recheck: PADataset main `51073327c688d243961a0caabbb5358cc065ced1`; lane-B workflow blob `8375dd0a0733b01de38f677dee58a373d3adcb48`; queued lane-B runs **0**; in-progress lane-B runs **0**.
+
+### Immediate next action
+
+A genuine root-only operator gate remains: execute the validated PR #648 successor launcher on Lambda with sudo. Then verify live lane-B v8 trust, run zero-work smoke, require PASS, and only then re-admit PA1–PA3, PA1–PA8, PA3–PA4 exactly once. Keep PA3–PA8 separate.
+
+---
+
 <!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22 -->
 ## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22
 
