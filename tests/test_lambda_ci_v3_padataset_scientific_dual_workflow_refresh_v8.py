@@ -114,5 +114,42 @@ class PADatasetScientificDualWorkflowRefreshV8Tests(unittest.TestCase):
         self.assertIn("scientific_dual_workflow_refresh_v7", block)
 
 
+    def test_live_lane_a_v2_is_effective_without_rebinding_dual_predecessor(self):
+        for marker in (
+            "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT",
+            "_padataset_scientific_workflow_refresh_v2",
+            "scientific_workflow_effective_refresh",
+        ):
+            self.assertIn(marker, REC)
+
+        addition_block = REC[
+            REC.index("for destination, binding in scientific_additions.items():"):
+            REC.index("for destination, binding in dual_additions.items():")
+        ]
+        self.assertIn("scientific_workflow_effective_refresh is not None", addition_block)
+        self.assertIn(
+            'expected_addition_sha = scientific_workflow_effective_refresh[',
+            addition_block,
+        )
+        self.assertNotIn(
+            'expected_addition_sha = scientific_workflow_refresh[',
+            addition_block,
+        )
+
+        dual_block = REC[
+            REC.index("def _padataset_scientific_dual_lane_override"):
+            REC.index("def _padataset_scientific_dual_lane_workflow_refresh")
+        ]
+        self.assertIn(
+            "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT.read_bytes()",
+            dual_block,
+        )
+        self.assertNotIn(
+            "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT.read_bytes()",
+            dual_block,
+        )
+
+
+
 if __name__ == "__main__":
     unittest.main()
