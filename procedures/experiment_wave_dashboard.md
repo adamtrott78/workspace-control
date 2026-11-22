@@ -169,6 +169,29 @@ chmod +x scripts/mth602_t007_rerun_tmux.sh
 ./scripts/mth602_t007_rerun_tmux.sh
 ```
 
+If the execution host does not already have a convenient current checkout, materialize only the reviewed observer files with ordinary Git transport. This is a one-time source sync, not dashboard polling and not GitHub REST:
+
+```bash
+set -u
+BRANCH=mth602-final-multisurrogate-dqnguard-resume-20261116-v1
+SRC="$HOME/.cache/workspace-control/t007-observer-source"
+OBS="$HOME/.cache/workspace-control/t007-observer"
+
+mkdir -p "$SRC" "$OBS"
+if [ ! -d "$SRC/.git" ]; then
+  git init -q "$SRC"
+  git -C "$SRC" remote add origin https://github.com/adamtrott78/workspace-control.git
+fi
+
+git -C "$SRC" fetch --force --depth=1 origin "$BRANCH"
+git -C "$SRC" show FETCH_HEAD:scripts/mth602_t007_rerun_local_dashboard.py > "$OBS/mth602_t007_rerun_local_dashboard.py"
+git -C "$SRC" show FETCH_HEAD:scripts/mth602_t007_rerun_tmux.sh > "$OBS/mth602_t007_rerun_tmux.sh"
+chmod +x "$OBS/mth602_t007_rerun_tmux.sh"
+"$OBS/mth602_t007_rerun_tmux.sh"
+```
+
+After the one-time `git fetch`, the tmux dashboard refresh loop is entirely host-local.
+
 This observer displays local epoch/batch progress, overall completion percentage, process elapsed time, extrapolated ETA, projected local finish time, validation metrics when locally available, GPU utilization/memory, and immutable run/job identifiers. It performs **zero `gh` calls and zero GitHub/provider API calls**.
 
 ## Current MTH602 implementation
