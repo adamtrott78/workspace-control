@@ -1,3 +1,20 @@
+<!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22-LANEA-V3-GPU0 -->
+## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22 — lane-A timeout360 v3 operator gate
+
+GPU1 lane-B v8 remains live: PA1–PA3 is active and PA1–PA8 / PA3–PA4 are queued. GPU0 is idle because lane-A still trusts the pre-timeout workflow.
+
+A narrow lane-A refresh-v3 is frozen on WC PR #649 at `f68c9318fd17bfeb7b09b2bb7fc11b1b50f61a17`:
+- predecessor blob `bca2eabe3afe70ec3115391e5a6c24daefd1498b`
+- target timeout360 blob `ea5d844c494013eb2322686d7345b5a1b15443c4`
+- PADataset main `51073327c688d243961a0caabbb5358cc065ced1`
+- validation: 29/29 and 64/64 PASS
+- lane-A provider precheck: zero queued, zero in-progress
+- host mutation: none yet
+
+Next: operator runs `scripts/mth602_activate_lanea_refresh_v3.py` at exact PR #649 head. After postverify PASS, run one fresh lane-A smoke. Only after smoke SUCCESS, admit PA3–PA8 once on `/lambda-scientific` at frozen PR #41 head `85bc8cb667a000d3fc544b33f8e96a6775074561`. Do not alter lane-B jobs or GPU OSR.
+
+---
+
 <!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22-LANEB-V8-LIVE -->
 ## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22 — lane-B v8 LIVE
 
