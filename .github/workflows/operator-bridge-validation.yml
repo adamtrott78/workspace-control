@@ -83,7 +83,8 @@ jobs:
             "operator-bridge/tools/run-stage09-target-matrix.ps1",
             "operator-bridge/tools/run-stage10-usability.ps1",
             "operator-bridge/tools/workspace-operator-dev.ps1",
-            "operator-bridge/tools/install-wop-commands.ps1"
+            "operator-bridge/tools/install-wop-commands.ps1",
+            "operator-bridge/tools/run-stage12-wop.ps1"
           )
           foreach ($target in $targets) {
             $tokens = $null
