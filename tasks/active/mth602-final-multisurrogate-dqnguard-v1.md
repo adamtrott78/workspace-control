@@ -1,7 +1,7 @@
 <!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22 -->
 ## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22
 
-**Authoritative source:** `tasks/active/mth602-final-multisurrogate-dqnguard-v1.json` at Workspace Control PR #640 head `67389ca0114f561f8b21001db5b338d650782d08`. Treat JSON as authoritative over older sections below.
+**Authoritative source:** re-read Workspace Control PR #640 current head, then `tasks/active/mth602-final-multisurrogate-dqnguard-v1.json`. Treat JSON as authoritative over older sections below. The current recovery state was last written in the JSON after the runner-temp path correction.
 
 ### Current scientific stage
 
@@ -33,7 +33,7 @@ Do **not** use the stale repository-relative path under `results_pa_ota_l2o_hpo_
 
 ### Immediate next action
 
-Operator runs the corrected bounded recovery probe supplied in chat. It:
+Operator runs the durable recovery script `scripts/mth602_recover_t007_checkpoint.sh` (or the equivalent corrected bounded probe supplied in chat). It:
 
 1. checks the exact expected runner-temp directory;
 2. if absent, searches only inside the one known failed runner job;
