@@ -69,7 +69,11 @@ try {
   } -ArgumentList $engine,$dev,$repo,$OperatorBridgeUrl,$SchedulerHotkey,$frontendReady,$frontendLog
 
   $token = [guid]::NewGuid().ToString("N")
-  $remoteBytes = [System.IO.File]::ReadAllBytes($remoteBootstrapPath)
+  $remoteText = [System.IO.File]::ReadAllText($remoteBootstrapPath)
+  $remoteText = $remoteText.Replace("`r`n","`n").Replace("`r","`n")
+  $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+  $remoteBytes = $utf8NoBom.GetBytes($remoteText)
+  if ([Array]::IndexOf($remoteBytes, [byte]13) -ge 0) { throw "D4_REMOTE_BOOTSTRAP_CR_BYTE_REMAINS" }
   $remoteB64 = [Convert]::ToBase64String($remoteBytes)
   $remoteCommand = "echo '$remoteB64' | base64 -d | bash -s -- '$sourceSha' '$linuxRel' '$linuxBlob' '$token'"
   $sshBatchText = @"
@@ -100,7 +104,10 @@ exit /b %ERRORLEVEL%
     $sshProcess.Refresh()
   }
   if ($frontendJob.State -eq "Failed") { Receive-Job -Job $frontendJob -Keep | Out-Host; throw "D4_FRONTEND_JOB_FAILED" }
-  if ($sshProcess.ExitCode -ne 0) { throw "D4_WOP_REMOTE_EXIT:$($sshProcess.ExitCode)" }
+  $sshProcess.WaitForExit()
+  $sshProcess.Refresh()
+  $sshExitCode = $sshProcess.ExitCode
+  if ($sshExitCode -ne 0) { throw "D4_WOP_REMOTE_EXIT:$sshExitCode" }
   Write-Host "STAGE12_WOP_REMOTE_CALIBRATION=PASS"
 }
 finally {

@@ -42,7 +42,8 @@ class Stage12V13WopRepairTests(unittest.TestCase):
         self.assertIn("atrott@gokhan-lambda-vector.tailca6171.ts.net", text)
         self.assertIn("ssh.exe", text)
         self.assertIn("run-stage12-remote-bootstrap.sh", text)
-        self.assertIn("[System.IO.File]::ReadAllBytes", text)
+        self.assertIn("[System.IO.File]::ReadAllText", text)
+        self.assertIn('Replace("`r`n","`n").Replace("`r","`n")', text)
         self.assertNotIn("$remoteTemplate", text)
         self.assertIn("D4_WOP_REMOTE_EXACT_BINDINGS=PASS", remote)
         self.assertIn("STAGE12_WINDOWS_READY_CONFIRMATION", remote)
@@ -100,7 +101,7 @@ class Stage12V15ParserSafeTransportTests(unittest.TestCase):
         text = WOP.read_text(encoding="utf-8")
         self.assertNotIn("$remoteTemplate", text)
         self.assertIn("run-stage12-remote-bootstrap.sh", text)
-        self.assertIn("[System.IO.File]::ReadAllBytes", text)
+        self.assertIn("[System.IO.File]::ReadAllText", text)
 
     def test_operator_validation_parses_stage12_wop_in_windows_powershell(self) -> None:
         workflow = (ROOT / ".github/workflows/operator-bridge-validation.yml").read_text(encoding="utf-8")

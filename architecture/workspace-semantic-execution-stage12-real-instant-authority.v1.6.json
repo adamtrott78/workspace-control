@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.6",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "APPROVAL_SIGNAL_OBSERVED_PRELIVE_UNCONSUMED_CLEANED_NONREUSABLE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
   "purpose": "One-shot D4 live authority using the exact accepted A7 Workspace Operator Bridge frontend, with D4 orchestration behind a backend-ready gate.",
@@ -43,7 +43,8 @@
     "policy_blob_sha": "cfede468d3004d1267fc4bd9656107368e6b58d0",
     "exact_command": "wop d4",
     "separate_chat_approval_required": false,
-    "observed": false
+    "observed": true,
+    "observed_command": "wop d4"
   },
   "attempt_contract": {
     "attempts_after_approval_signal": 1,
@@ -85,5 +86,15 @@
     "rule": "The exact live WOP execution tip is the Git commit containing this authority artifact. That exact tip must pass Workspace, Semantic, and Operator validation before operator execution, and the branch must not move afterward.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "One D4 v1.6 attempt is conditionally staged. Executing exact `wop d4` supplies operator approval. Consumption occurs only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS."
+  "postcondition": "v1.6 is pre-live, unconsumed, cleaned, and non-reusable. A fresh review/validation cycle is required. The accepted A7 frontend remains authoritative and must not be changed.",
+  "prelive_failure": {
+    "classification": "WINDOWS_CRLF_BOOTSTRAP_TRANSPORT_TO_BASH",
+    "observed_output": ": invalid option namepefail",
+    "inferred_exact_failure": "Bash received CRLF and rejected set -Eeuo pipefail with a trailing carriage return.",
+    "backend_ready_reached": false,
+    "accepted_frontend_launched": false,
+    "live_consumption_marker_observed": false,
+    "windows_cleanup": "PASS",
+    "attempt_consumed": false
+  }
 }
