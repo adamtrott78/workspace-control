@@ -4007,6 +4007,40 @@
         "Both live t007 GPU training lanes remain untouched."
       ],
       "activation_requirement": "Issue-comment workflows activate only from PADataset default branch main; merge PR #43 exact validated head before admission."
+    },
+    "pa1_pa4_osr_evaluation": {
+      "status": "OVERLAY_VALIDATED_CPU_DIRECT_PATH_NEXT",
+      "training_run": {
+        "workflow_run_id": 45047248043,
+        "workflow_job_id": 137284419157,
+        "conclusion": "success",
+        "artifact_id": 14769480157,
+        "artifact_digest": "sha256:f59f2acff9cf6a1ba865edd59de25dcadae2a6cb9885e898d106e61cf3143fac",
+        "training_candidate_sha": "85bc8cb667a000d3fc544b33f8e96a6775074561",
+        "best_model_sha256": "b6a45e669799940ec595954badb4ff4afda2b4262b5941a999eba6dd669e8613",
+        "config_sha256": "ff285f8369d739da1213c5fca1bce772f8e56ee33d22cf124f2ac685436f8b27",
+        "best_epoch": 10,
+        "best_val_macro_f1": 0.9997034066668679,
+        "best_val_acc": 0.9997035060410644,
+        "test_known_macro_f1": 0.9997034726279979,
+        "test_known_acc": 0.9997035499888831,
+        "test_known_n_samples": 13493,
+        "target_test_consumed": false,
+        "target_quarantine_status": "PRESERVED_FOR_FINAL_FROZEN_EVALUATOR"
+      },
+      "overlay": {
+        "padataset_pr": 51,
+        "branch": "mth602-t007-pa1-pa4-osr-v1",
+        "exact_head": "012d9ca42dad8208641b99b4329c8503e8e9e81a",
+        "validation_receipt": "job-5ee7a11a-0bc0-41d0-979e-609a58c54868",
+        "validation_result": "20 passed"
+      },
+      "intended_directions": [
+        "PA1<-PA4",
+        "PA4<-PA1"
+      ],
+      "selection_role": "POST_FREEZE_DIAGNOSTIC_ONLY_NO_RECIPE_FEEDBACK",
+      "live_training_head_unchanged": "85bc8cb667a000d3fc544b33f8e96a6775074561"
     }
   }
 }
