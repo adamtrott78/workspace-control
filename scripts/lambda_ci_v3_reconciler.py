@@ -1993,27 +1993,27 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             scientific_dual_workflow_refresh_v7
             if scientific_dual_workflow_refresh_v7 is not None
             else (
-            scientific_dual_workflow_refresh_v6
-            if scientific_dual_workflow_refresh_v6 is not None
-            else (
-                scientific_dual_workflow_refresh_v5
-                if scientific_dual_workflow_refresh_v5 is not None
+                scientific_dual_workflow_refresh_v6
+                if scientific_dual_workflow_refresh_v6 is not None
                 else (
-                    scientific_dual_workflow_refresh_v4
-                    if scientific_dual_workflow_refresh_v4 is not None
+                    scientific_dual_workflow_refresh_v5
+                    if scientific_dual_workflow_refresh_v5 is not None
                     else (
-                        scientific_dual_workflow_refresh_v3
-                        if scientific_dual_workflow_refresh_v3 is not None
+                        scientific_dual_workflow_refresh_v4
+                        if scientific_dual_workflow_refresh_v4 is not None
                         else (
-                            scientific_dual_workflow_refresh_v2
-                            if scientific_dual_workflow_refresh_v2 is not None
-                            else scientific_dual_workflow_refresh
+                            scientific_dual_workflow_refresh_v3
+                            if scientific_dual_workflow_refresh_v3 is not None
+                            else (
+                                scientific_dual_workflow_refresh_v2
+                                if scientific_dual_workflow_refresh_v2 is not None
+                                else scientific_dual_workflow_refresh
+                            )
                         )
                     )
                 )
             )
         )
-    )
     )
     scientific_overrides = (
         scientific_override["managed_artifact_overrides"]
