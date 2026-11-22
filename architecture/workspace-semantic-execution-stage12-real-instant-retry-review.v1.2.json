@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.2",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Repair the D4 v1.1 pre-consumption Windows preparation regression without changing the accepted Windows Operator source, launcher, Linux v3 transaction, real-Instant harness, candidate baseline, manual-input boundary, browser/network boundary, or live-consumption semantics. v1.2 restores bounded .NET 10/Node 24 discovery already accepted by the dev tooling and checks out the frozen source SHA instead of requiring the moving branch tip to equal it.",
   "predecessor_authority": {
@@ -173,7 +173,12 @@
     "exact_head": true
   },
   "review_state_validation": {
-    "status": "PENDING_EXACT_HEAD_VALIDATION"
+    "head": "866a11d69028d308afd278e6ac1b57b78e26e9f8",
+    "workspace_control_run": 3094,
+    "semantic_execution_run": 394,
+    "operator_bridge_run": 667,
+    "result": "SUCCESS",
+    "exact_head": true
   },
-  "postcondition": "D4 v1.2 repair candidate grants zero live authority. Exact-head validation is required. After validation, Adam must explicitly approve exactly one fresh live D4 v1.2 attempt before a new authority artifact may be created."
+  "postcondition": "D4 v1.2 repair review/procedure is exact-head validated and grants zero live authority. The v1.1 authority remains aborted pre-consumption and non-reusable. Stop until Adam explicitly approves exactly one fresh live D4 v1.2 attempt. Only after that approval may a new v1.2 authority artifact be created and itself exact-head validated before any Windows/Linux execution."
 }
