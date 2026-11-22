@@ -41,12 +41,14 @@ class Stage12V13WopRepairTests(unittest.TestCase):
 
     def test_wop_runs_linux_half_over_existing_ssh_path(self) -> None:
         text = WOP.read_text(encoding="utf-8")
+        remote = (ROOT / "operator-bridge/tools/run-stage12-remote-bootstrap.sh").read_text(encoding="utf-8")
         self.assertIn("atrott@gokhan-lambda-vector.tailca6171.ts.net", text)
         self.assertIn("ssh.exe", text)
-        self.assertIn("D4_WOP_REMOTE_EXACT_BINDINGS=PASS", text)
-        self.assertIn("STAGE12_WINDOWS_READY_CONFIRMATION", text)
-        self.assertIn(r'"${SOURCE_SHA}:$LINUX_REL"', text)
-        self.assertNotIn(r'"$SOURCE_SHA:$LINUX_REL"', text)
+        self.assertIn("run-stage12-remote-bootstrap.sh", text)
+        self.assertIn("[System.IO.File]::ReadAllBytes", text)
+        self.assertNotIn("$remoteTemplate", text)
+        self.assertIn("D4_WOP_REMOTE_EXACT_BINDINGS=PASS", remote)
+        self.assertIn("STAGE12_WINDOWS_READY_CONFIRMATION", remote)
         self.assertNotIn("SendKeys", text)
 
     def test_wop_powershell_parses_when_parser_available(self) -> None:
