@@ -63,6 +63,19 @@ Use the 10-pair host-local dashboard when the operator wants to view the full t0
 - `Ctrl+C`: detach client, keep dashboard alive
 - reattach: `tmux attach -t mth602-t007-wave`
 
+### PA1–PA2/t007 newly terminal — OSR provenance gate
+
+Host-local observer at 2026-11-22 13:27 EST shows PA1–PA2/t007 **SUCCESS** (best epoch 2, displayed val macro-F1 1.0000, total 48:38).
+
+Standard-DQNGuard OSR is prepared conceptually for both directions:
+
+- PA1<-PA2
+- PA2<-PA1
+
+Do **not** admit them until the exact provider binding is known: workflow run ID, workflow job ID, artifact ID, and artifact digest. The connected GitHub surface can fetch jobs/artifacts by run ID but does not expose issue_comment run listing. PA1–PA2 finished before the local observer persisted run IDs.
+
+Observer repair `e8b3b084ca13563dba32f8953ec343bc54b54101` now captures `GITHUB_RUN_ID` locally for active/future t007 trainings with zero provider polling; validation `job-68404c7e-1eac-45aa-b958-a92f76270dea` passed 2/2.
+
 ### Immediate next action
 
 Monitor only PR #41 exact head and the existing PA3–PA8/t007 rerun. Do not duplicate any OSR or training admission.
