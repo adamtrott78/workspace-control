@@ -18,6 +18,10 @@ if [ ! -f "$DASH" ]; then
   exit 2
 fi
 
+# Authenticate sudo in the foreground so an SSH operator sees the prompt here,
+# rather than discovering a hidden password prompt inside a detached pane.
+sudo -v || exit $?
+
 # Replace only this observer session. This does not touch the scientific runner.
 tmux kill-session -t "$SESSION" 2>/dev/null || true
 
