@@ -6,7 +6,7 @@
   "goal": "Execute a rigorous MTH602-to-journal research program centered on backbone competence (H1), then resolve whether surrogate transfer remains intrinsically target-dependent or becomes target-blind-selectable (H2/H4), test multi-surrogate DQNGuard if needed (H5), and treat STFT representation as a bounded lower-priority ablation (H3). Preserve true-target quarantine, standard-DQNGuard controls, exact provenance, explicit seed separation, and a deadline-triggered pivot to complete MTH602 deliverables before December or the course due date.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "laneb_v8_live_zero_work_smoke_pending",
+  "current_stage": "laneb_v8_live_three_trainings_readmitted",
   "acceptance_criteria": [
     "Track A remains a control repair: original leave-two-out target/surrogate taxonomy and original DQNGuard evaluator are preserved while backbones are retrained to genuine convergence under known-only selection.",
     "Track B compares Architecture A (pooled DQN), Architecture B (surrogate-specific DQNs with cross-surrogate selection), and Architecture C (hybrid pooled DQN + deterministic guard) on the same competent target-withheld four-known backbone/evidence partitions.",
@@ -1451,7 +1451,7 @@
     "Strict-extract known-validation macro-F1 and minimum known-class validation F1 for each t007 full-matrix backbone; target/test/OSR evidence remains forbidden for recipe/checkpoint/retry/pair-freeze decisions.",
     "After all ten canonical pairs have provenance-valid t007 backbones, build the competent full directional OSR matrix under the unchanged standard-DQNGuard policy."
   ],
-  "next_safe_action": "Wait for lane-B smoke run 45084110941 / job 137398652973 to reach terminal SUCCESS under live refresh-v8. Do not admit training while smoke is queued/in-progress. On smoke PASS, re-admit exactly once PA1-PA3, PA1-PA8, PA3-PA4 at frozen PADataset PR #41 head 85bc8cb667a000d3fc544b33f8e96a6775074561. Keep PA3-PA8 separate.",
+  "next_safe_action": "Monitor exactly the three re-admitted lane-B t007 trainings at frozen PADataset PR #41 head 85bc8cb667a000d3fc544b33f8e96a6775074561: PA1-PA3 run 45084249815/job 137399088294, PA1-PA8 run 45084251371/job 137399093935, PA3-PA4 run 45084252927/job 137399098702. Do not duplicate them. Keep PA3-PA8 separate; do not re-admit GPU OSR. On each terminal training, validate artifact/provenance and known-validation metrics before any further action.",
   "last_executor": "instant-worker",
   "last_surface": "github+workspace-shell+heartbeat",
   "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged. Workspace Shell mountpoint repair is live at runtime f3f999ff0200e2450d83e93887b2450f1ee83e2f with authority snapshot 29ba42ffde725c16f5cfc70b3c47ecfd76d2511d. Architecture-B PR #23 is candidate-validated at 82790f9c07d5eb9ea48b37be026672c0a1f7fad8, including a repair that physically delays target-open materialization until after winner freeze. Draft PADataset PR #33 stages the bounded GPU2 archb_cross_surrogate opcode but is not live. PADataset PR #33 was explicitly authorized and merged at 6a3c17c27a401f059f9ded1287d274d766f61283; default-branch GPU2 workflow blob is now 650a529aeee51b53234a84b3afea8743cc527688. Workspace Control draft PR #643 stages chained refresh-v4 at ef43b5352cf4c3e799a09ff917878b6e32ef1882; 37 dual-lane/refresh regression tests pass. Live trust remains refresh-v3 until root/operator v4 activation. PADataset PR #34 was explicitly authorized and merged at b0cbf6c1436e18cb5b793596dd790560bd2cec08; default-branch GPU2 workflow blob is now ba549b4d1560b18a9e40ef531387bc1accc90d43. Workspace Control draft PR #644 stages chained refresh-v5 at d6e2e7303c0e128f5847178253ab792ff1187d6a; 45 dual-lane/refresh regression tests pass. Live trust remains refresh-v4 until root/operator v5 activation. Fresh-chat checkpoint 2026-11-17: B0 run #97 PASS, B1 #98 PASS, B2 #99 PASS; B2 triggered bounded B3 from pseudo-open complementary value only. B3 trust PR #36 merged; refresh-v7 live PASS; B3 run #100 / 44176896203 / job 134370560805 admitted exactly once and currently IN_PROGRESS. The next worker must validate run #100 artifact at terminal completion and must not duplicate B3. Heartbeat writer may still belong to the prior conversation; durable Git/task state is authoritative. Architecture-B B3 is now terminal PASS: initial run #100 failed only at a deterministic result-record candidate-id lookup; repaired PR #23 head 0ea0d2aa655a943e921918500f72b987e79922c3 passed 27 tests; exactly one retry run #101 / 44180560029 succeeded with artifact 14372803489 digest sha256:c72fe383cdfd03ffb96eb3dda632ff1f27325066e109542e9a2209ff383423ea. Frozen winner PA3|gap_variance_equal|scale=2 was selected from off-diagonal pseudo-open evidence only; PA2 metrics remain descriptive. Current focus returns to the separate STFT lane, still gated on repaired PA1 provenance preflight; preserve the first 120 overlay records. STFT live repaired PA1 provenance preflight is now confirmed as a local/operator-only gate: connected candidate execution cannot access the required raw OTA/legacy-cache environment, and candidate-pytest lacks h5py. PR #21 remains exact head fd15238aa369118e61b21ab714900861dbb99d2c, draft/unmerged; CPU canary 43788103594 is already PASS. Preserve the first 120 overlays and run the exact-SHA persistent local bootstrap before any resume. STFT exact-checkout import shadowing was repaired after the first local preflight attempt: fd15238 failed before any cache/GPU work because stdin Python imported experiments from the canonical repo cwd ahead of PYTHONPATH. PR #21 head 5146d718006e38c6d9110e158c80dfa43b86e882 now cd's to exact ROOT before preflight imports; candidate contract 2/2 PASS and CPU canary run 44190444960 SUCCESS. The live PA1 provenance probe must now be retried locally at this exact head; first 120 overlays remain preserved. STFT record-121 provenance failure was observed after the 5146d718 local retry passed environment/raw OTA, PA1 probe, GPU-vs-CPU transform, and trajectory/provenance tests and skipped records 1-120. The failing source ota_pa1_run01__shard_001__PA1.mat exposed historical caches without protocol_name metadata. PR #21 head 122f5d21e648498b4afaa6b857b69f39dbb18222 adds a fail-closed unique-basename fallback plus an all-375-source preflight. Static contract 3/3 PASS and CPU canary 44235462841 SUCCESS. First 120 overlays remain preserved. STFT source-universe forensic corrected the prior basename-fallback hypothesis: generic discovery found 375 files, but historical unified-core production scripts define exactly 360 canonical sources (3 protocols x 20 shards x PA1 part1/part2 + PA2/PA3/PA4/PA8). The 15 ota_pa1_run01 artifacts are noncanonical extras in the core directories. PR #21 head a5cbd0d2a9e8e287d0288498735e5a4221ed3683 now freezes the canonical 360-source universe, restores strict provenance matching, passes static contract 3/3 and CPU canary 44236003500. First 120 overlays remain preserved. Live STFT cache build is now active at exact PR #21 head a5cbd0d2a9e8e287d0288498735e5a4221ed3683. Canonical/provenance preflight is fully green (360/360), first 120 overlays were skipped intact, records 121-122 completed, and record 123 entered GPU batch processing. Do not relaunch or force rebuild while this process remains active.",
@@ -4428,7 +4428,7 @@
       "blocker": "Root activation requires operator sudo authority; Workspace Shell task authority cannot mint or widen privileged helper approval."
     },
     "lane_b_v8_live_v1": {
-      "status": "LIVE_SMOKE_PENDING",
+      "status": "LIVE_SMOKE_PASS_THREE_TRAININGS_READMITTED",
       "workspace_control_pr": 648,
       "activation_head": "41fd6764031b3abbaacae8b553ec1885b5f15b7c",
       "activation_marker": "PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8=PASS",
@@ -4443,9 +4443,47 @@
         "run_id": 45084110941,
         "job_id": 137398652973,
         "request": "/lambda-scientific-2 85bc8cb667a000d3fc544b33f8e96a6775074561 smoke",
-        "status": "queued"
+        "status": "completed_success",
+        "conclusion": "success"
       },
-      "training_readmission": "BLOCKED_UNTIL_SMOKE_SUCCESS",
+      "training_readmission": {
+        "status": "ADMITTED_EXACTLY_ONCE_AFTER_SMOKE_PASS",
+        "frozen_training_head": "85bc8cb667a000d3fc544b33f8e96a6775074561",
+        "precondition": {
+          "smoke_run_id": 45084110941,
+          "smoke_job_id": 137398652973,
+          "smoke_conclusion": "success",
+          "active_lane_b_runs_after_smoke_before_readmission": 0
+        },
+        "admissions": [
+          {
+            "pair": "PA1-PA3",
+            "comment_id": 7087710626,
+            "run_id": 45084249815,
+            "job_id": 137399088294,
+            "status": "queued"
+          },
+          {
+            "pair": "PA1-PA8",
+            "comment_id": 7087710958,
+            "run_id": 45084251371,
+            "job_id": 137399093935,
+            "status": "queued"
+          },
+          {
+            "pair": "PA3-PA4",
+            "comment_id": 7087711284,
+            "run_id": 45084252927,
+            "job_id": 137399098702,
+            "status": "queued"
+          }
+        ],
+        "invariants": [
+          "No PA3-PA8 admission.",
+          "No GPU OSR admission.",
+          "No change to frozen PR #41 training head."
+        ]
+      },
       "pa3_pa8": "SEPARATE_NOT_ADMITTED"
     }
   }
