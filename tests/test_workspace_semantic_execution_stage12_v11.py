@@ -66,7 +66,7 @@ class Stage12V11ReviewTests(unittest.TestCase):
         self.assertIn(LAUNCHER_BLOB, text)
         self.assertIn(CANDIDATE_BASELINE, text)
         self.assertIn("exactly one blank tab", text)
-        self.assertIn("same tab back to `about:blank`", text)
+        self.assertIn("navigate the **same tab** back to `about:blank`", text)
         self.assertIn("STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS", text)
         self.assertIn("STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS", text)
         self.assertIn("Ctrl+Space -> Ctrl+V -> Enter", text)
