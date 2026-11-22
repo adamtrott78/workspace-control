@@ -4134,6 +4134,24 @@
         "epoch-gap"
       ],
       "interpretation_guardrail": "Treat best-vs-final OSR as checkpoint-depth sensitivity evidence only. Any future change to checkpoint-selection/training-horizon policy must be defined in a new experiment before consuming its target/test evidence."
+    },
+    "dashboard_redraw_fix_v1": {
+      "status": "VALIDATED",
+      "exact_head": "9ff5407501a8f6dda3ae1a92af8821e302fd0e4c",
+      "validation_receipt": "job-66b6156f-7c30-43c0-bf7a-2dc697289dcf",
+      "validation_result": "3 passed",
+      "cause": [
+        "terminal_width previously forced a minimum of 104 columns even for narrower tmux panes",
+        "frame lines could occupy the terminal's exact last column and trigger autowrap",
+        "redraw used cursor-home plus clear-from-final-cursor, allowing wrapped physical-row remnants to accumulate"
+      ],
+      "fix": [
+        "use real tmux pane width",
+        "reserve one physical terminal column",
+        "ANSI-safe truncate every rendered line to safe width",
+        "full-screen clear and home before every frame"
+      ],
+      "scientific_execution_unchanged": true
     }
   }
 }
