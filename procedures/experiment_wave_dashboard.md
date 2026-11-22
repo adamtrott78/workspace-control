@@ -121,9 +121,10 @@ The preferred dashboard runs in a persistent named tmux session.
 - renderer: use the terminal alternate screen and cursor-home redraws so each refresh overwrites one fixed frame instead of appending to tmux scrollback;
 - when runner isolation hides exact state, invoke the reviewed dashboard with `sudo -E python3 <dashboard>` rather than adding provider polling or weakening isolation;
 - GitHub/provider API calls in refresh loop: **0**;
-- detach: `Ctrl+B`, then `D`;
+- preferred quick exit: `Ctrl+C` detaches the current tmux client while keeping the dashboard/session alive;
+- standard tmux detach remains `Ctrl+B`, then `D`;
 - reattach: `tmux attach -t <session>`;
-- stop dashboard only: `Ctrl+C`.
+- when a dedicated dashboard implements the `Ctrl+C` detach convention, stopping the renderer requires explicitly killing that observer session or process rather than pressing `Ctrl+C`.
 
 Do not substitute an empty persistent shell when the operator asks for the experiment dashboard.
 
@@ -193,6 +194,8 @@ chmod +x "$OBS/mth602_t007_rerun_tmux.sh"
 After the one-time `git fetch`, the tmux dashboard refresh loop is entirely host-local.
 
 This observer displays local epoch/batch progress, overall completion percentage, process elapsed time, extrapolated ETA, projected local finish time, validation metrics when locally available, GPU utilization/memory, and immutable run/job identifiers. It performs **zero `gh` calls and zero GitHub/provider API calls**.
+
+For this dedicated observer, `Ctrl+C` is intentionally rebound inside the renderer to detach the current tmux client without terminating the dashboard. Re-enter with `tmux attach -t mth602-t007`. Outside tmux, `Ctrl+C` retains normal process-interrupt behavior.
 
 ## Current MTH602 implementation
 
