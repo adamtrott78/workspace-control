@@ -72,11 +72,12 @@ try {
   $remoteBytes = [System.IO.File]::ReadAllBytes($remoteBootstrapPath)
   $remoteB64 = [Convert]::ToBase64String($remoteBytes)
   $remoteCommand = "echo '$remoteB64' | base64 -d | bash -s -- '$sourceSha' '$linuxRel' '$linuxBlob' '$token'"
-  @("
+  $sshBatchText = @"
 @echo off
 "$ssh" -tt "$SshTarget" "$remoteCommand"
 exit /b %ERRORLEVEL%
-") | Set-Content -LiteralPath $sshBatch -Encoding ASCII
+"@
+  Set-Content -LiteralPath $sshBatch -Value $sshBatchText -Encoding ASCII
 
   Write-Host "D4_BACKEND_STARTING=PASS"
   Write-Host "The accepted Workspace Operator Bridge frontend will open automatically only after Q1 is actually ready."
