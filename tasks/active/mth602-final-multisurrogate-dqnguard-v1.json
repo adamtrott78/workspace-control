@@ -3621,7 +3621,26 @@
       "expected_best_val_macro_f1": 0.99377,
       "recovery_first": true,
       "rerun_only_if_unrecoverable": true,
-      "target_test_or_osr_evidence_allowed": false
+      "target_test_or_osr_evidence_allowed": false,
+      "recovery_script": "scripts/mth602_recover_t007_checkpoint.sh",
+      "recovery_script_commit": "1c989556e6d3481328070ae366900e322037356f",
+      "script_design": [
+        "no set -e",
+        "exact expected runner-temp path first",
+        "bounded fallback find only under known failed runner job",
+        "copies checkpoint/state/config/history/progress only",
+        "computes SHA-256",
+        "derives per-class validation F1 from saved confusion matrix",
+        "does not retrain or touch target/test/OSR evidence"
+      ]
     }
+  },
+  "handoff": {
+    "fresh_chat_repository": "adamtrott78/workspace-control",
+    "fresh_chat_pr": 640,
+    "authoritative_json": "tasks/active/mth602-final-multisurrogate-dqnguard-v1.json",
+    "derived_handoff": "tasks/active/mth602-final-multisurrogate-dqnguard-v1.md",
+    "recovery_script": "scripts/mth602_recover_t007_checkpoint.sh",
+    "instruction": "Re-read PR #640 current head and authoritative JSON first; do not rely on chat prose."
   }
 }
