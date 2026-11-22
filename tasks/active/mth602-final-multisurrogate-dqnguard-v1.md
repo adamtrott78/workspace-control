@@ -43,6 +43,7 @@ For live operator monitoring, use the zero-provider host-local observer:
 - procedure: `procedures/experiment_wave_dashboard.md`
 - refresh loop: **0 `gh` calls, 0 GitHub/provider API calls**
 - timing: local process elapsed + local-progress ETA + projected finish time
+- tmux UX: `Ctrl+C` detaches the client while leaving the dashboard/session alive; reattach with `tmux attach -t mth602-t007`
 
 Monitor the exact rerun to terminal state. On SUCCESS, validate the uploaded artifact and use only known-validation evidence to finalize the 6-recipe × 3-pair tight60 ranking. The provisional leader remains t007 pending this clean artifact.
 
