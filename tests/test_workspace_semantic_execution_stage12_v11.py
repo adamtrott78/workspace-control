@@ -20,7 +20,7 @@ CANDIDATE_BASELINE = "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
 class Stage12V11ReviewTests(unittest.TestCase):
     def test_review_is_not_authority_and_binds_exact_current_candidate(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
-        self.assertEqual(review["status"], "REVIEW_CANDIDATE_NOT_AUTHORITY")
+        self.assertEqual(review["status"], "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY")
         self.assertFalse(review["authority_gate"]["live_retry_authorized"])
         self.assertTrue(
             review["authority_gate"][
