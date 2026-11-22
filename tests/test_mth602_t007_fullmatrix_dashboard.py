@@ -41,3 +41,17 @@ def test_t007_wave_is_host_local_only():
     ]
     for token in forbidden:
         assert token not in src
+
+
+def test_t007_wave_redraw_is_width_safe():
+    mod = _module()
+    src = SCRIPT.read_text()
+
+    styled = mod.BOLD + ("X" * 200) + mod.RESET
+    fitted = mod.fit_ansi_line(styled, 37)
+    visible = mod.ANSI_CSI_RE.sub("", fitted)
+    assert len(visible) <= 37
+
+    assert "max(104" not in src
+    assert "safe_width = max(1, width - 1)" in src
+    assert 'sys.stdout.write("\\033[2J\\033[H"' in src
