@@ -904,3 +904,51 @@ Corrected GPU1 runs:
 - PA8 <- PA3: `44939705618 / 136953982458`
 
 Obsolete pre-repair runs `44937283229` and `44937285567` are deterministic pre-DQN compatibility failures and must not count as scientific evidence. Old-head queued runs `44937287676` and `44937290780` are stale-head non-evidence. PR #37 remains frozen at `ab87931408651b0b3516d910b13474822fb2a93d`.
+
+## Fresh-chat handoff — lane-B v8 activation blocked by installed-state digest drift
+
+Authoritative JSON remains `tasks/active/mth602-final-multisurrogate-dqnguard-v1.json`.
+
+Current durable handoff head: `71fba4a3d72479c68ec68503f1a1ff0f26362b02`.
+
+### Confirmed live state
+
+- PADataset PR #53 was merged; PADataset `main` is `51073327c688d243961a0caabbb5358cc065ced1`.
+- Both scientific GPU workflows on PADataset `main` now use `timeout-minutes: 360`.
+- Lane-B new workflow blob: `8375dd0a0733b01de38f677dee58a373d3adcb48`.
+- Lane-B predecessor v7 blob: `85dc8f289a972dddbb1a838d5596def6d872118b`.
+- Workspace Control PR #648 is the v7→v8 trusted-workflow refresh lineage.
+- Exact validated activation/launcher head attempted: `b3914a7d9caf6ba4e6d8086d50a01e2c63d0b0b8`.
+- Zero-work smoke run `45074031090` is terminal cancelled.
+- Lane-B currently has zero queued/in-progress workflow runs.
+
+### Activation attempt and exact blocker
+
+Operator launcher reached:
+
+```
+LANEB_PROVIDER_ZERO_WORK=PASS
+PAD_MAIN=51073327c688d243961a0caabbb5358cc065ced1
+LANEB_WORKFLOW_BLOB=8375dd0a0733b01de38f677dee58a373d3adcb48
+```
+
+Then failed inside `candidate.verify_installed(BASE_MANIFEST)` with:
+
+```
+lambda_ci_v3_reconciler.ReconcileError:
+PADataset scientific managed addition digest drift:
+/etc/workspace-ci/v3/controllers/padataset-scientific-single-gpu-v1.json
+```
+
+Manifest: `/etc/workspace-ci/v3/install-manifest.json`.
+
+The failure occurs before `consume_authority()`, before lane-B controller stop, before v8 receipt write, and before controller-policy mutation. Therefore the v8 activation did **not** mutate live lane-B state.
+
+### Required next action
+
+Diagnose the managed-addition digest drift through the existing authorized install/reconciler lineage. Compare the current root-owned file and the digest recorded in `install-manifest.json`; determine whether the drift came from a later authorized repair or is unintended. Preserve current state and fail closed.
+
+Do **not** hand-edit the controller file, bypass `verify_installed()`, widen root/Workspace Shell authority, re-admit the three training jobs, or rerun PA3-PA8 yet.
+
+After the drift is reconciled: revalidate the v8 candidate, activate v8, verify lane-B trusts blob `8375dd0a0733b01de38f677dee58a373d3adcb48`, run a zero-work smoke, then re-admit exactly PA1-PA3, PA1-PA8, and PA3-PA4 once.
+
