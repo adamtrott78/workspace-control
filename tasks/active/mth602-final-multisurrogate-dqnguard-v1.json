@@ -4041,6 +4041,20 @@
       ],
       "selection_role": "POST_FREEZE_DIAGNOSTIC_ONLY_NO_RECIPE_FEEDBACK",
       "live_training_head_unchanged": "85bc8cb667a000d3fc544b33f8e96a6775074561"
+    },
+    "cpu_osr_pair_cache_v1": {
+      "status": "REQUIRED_FOR_REMAINING_CPU_OSR",
+      "user_direction": "Cache backbone split outputs once per unordered PA pair and reuse them for both directional OSR evaluations.",
+      "reason": "CPU backbone inference is the dominant cost; current evaluator recomputes val_known/test_known/test_open/surrogate-open features separately for each direction.",
+      "invariant": "Cached outputs must be bound to exact backbone checkpoint hash, exact dataset profile/split config, exact pair, and exact source SHA; no target/open evidence may feed back into training or recipe selection.",
+      "intended_effect": "One expensive backbone inference bundle per unordered pair, then two cheap directional DQNGuard evaluations from cached outputs."
+    },
+    "dashboard_epoch_semantics": {
+      "finished_rows_show": "best_epoch",
+      "configured_epochs": 60,
+      "early_stopping_patience": 10,
+      "note": "Finished-row EPOCH display is best checkpoint epoch, not last epoch run. PA1-PA2 ran 12 epochs and best was 2; PA1-PA4 ran 20 epochs and best was 10.",
+      "ui_followup": "Change finished-row display to distinguish BEST from RAN/MAX to avoid ambiguity."
     }
   }
 }
