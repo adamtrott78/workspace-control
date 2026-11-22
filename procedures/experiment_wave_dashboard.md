@@ -259,3 +259,41 @@ PA3-PA8 t006   G0   RUNNING   1/8   11.8%   03:42   ~27:44
 At the same instant, host-local GPU telemetry showed both GPUs actively utilized, confirming the root observer could see both isolated scientific lanes correctly.
 
 This implementation is the reusable default for future experiment-wave dashboards unless a future execution backend provides an equally local, read-only telemetry surface with stronger provenance.
+
+
+## Unified t007 full-matrix observer — 2026-11-22
+
+When the t007 program expanded from the three-pair pilot to all ten canonical PA pairs, the operator requested a single wave view "as if scheduled all at once."
+
+Renderer:
+
+```text
+scripts/mth602_t007_fullmatrix_local_dashboard.py
+```
+
+Launcher:
+
+```text
+scripts/mth602_t007_fullmatrix_tmux.sh
+```
+
+Session:
+
+```text
+mth602-t007-wave
+```
+
+The view contains all ten canonical pairs in one immutable table. Completed pilot pairs are seeded from provenance-valid terminal evidence; active and newly admitted pairs transition using host-local process/result evidence only.
+
+Additional unified-wave semantics:
+
+- pair-weighted wave completion treats each canonical pair as one equal work unit;
+- per-run ETA uses local process age and local epoch/batch fraction;
+- approximate whole-wave ETA uses the median observed t007 pair duration and the known lane assignment to estimate remaining lane backlogs;
+- the whole-wave ETA explicitly excludes provider queue overhead and unrelated OSR/evaluator work;
+- an admitted row with no local process/result evidence is labeled `ADMITTED`, not `QUEUED`, because provider queue position is not locally observable;
+- terminal rows are retained in the persistent local cache after ephemeral runner cleanup;
+- `Ctrl+C` detaches the tmux client and leaves the dashboard alive;
+- provider/network calls per refresh: **0**.
+
+Bootstrap from any host checkout follows the same ordinary-Git-transport pattern as the dedicated t007 observer: fetch the reviewed branch once, materialize the renderer and launcher, then run the launcher. The live refresh loop remains entirely host-local.
