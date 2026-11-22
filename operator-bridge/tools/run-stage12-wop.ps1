@@ -21,6 +21,50 @@ $frontendLog = Join-Path $tempRoot "frontend.log"
 $sshBatch = Join-Path $tempRoot "run-ssh.cmd"
 $sshProcess = $null
 
+function Get-D4BackendStatus {
+  param(
+    [Parameter(Mandatory=$true)]
+    [string]$StatusUrl,
+    [int]$TimeoutSec = 2
+  )
+
+  try {
+    $response = Invoke-WebRequest -UseBasicParsing -Uri $StatusUrl -TimeoutSec $TimeoutSec
+  } catch {
+    throw ("D4_BACKEND_STATUS_REQUEST_FAILED:" + $_.Exception.GetType().Name)
+  }
+
+  if ($response.StatusCode -ne 200) {
+    throw ("D4_BACKEND_STATUS_HTTP_" + [int]$response.StatusCode)
+  }
+
+  try {
+    $payload = $response.Content | ConvertFrom-Json
+  } catch {
+    throw "D4_BACKEND_STATUS_NOT_JSON"
+  }
+
+  if ($null -eq $payload.readyManualCycles -or $null -eq $payload.sentUnconfirmed) {
+    throw "D4_BACKEND_STATUS_SHAPE_INVALID"
+  }
+
+  try {
+    $readyManualCycles = [int]$payload.readyManualCycles
+    $sentUnconfirmed = [int]$payload.sentUnconfirmed
+  } catch {
+    throw "D4_BACKEND_STATUS_VALUES_INVALID"
+  }
+
+  if ($readyManualCycles -lt 0 -or $sentUnconfirmed -lt 0) {
+    throw "D4_BACKEND_STATUS_VALUES_INVALID"
+  }
+
+  [pscustomobject]@{
+    ReadyManualCycles = $readyManualCycles
+    SentUnconfirmed = $sentUnconfirmed
+  }
+}
+
 if (-not (Test-Path -LiteralPath $dev -PathType Leaf)) { throw "D4_WOP_DEV_SCRIPT_MISSING:$dev" }
 if (-not (Test-Path -LiteralPath $remoteBootstrapPath -PathType Leaf)) { throw "D4_WOP_REMOTE_BOOTSTRAP_MISSING:$remoteBootstrapPath" }
 
@@ -76,11 +120,8 @@ exit /b %ERRORLEVEL%
       throw "D4_REMOTE_EXIT_BEFORE_BACKEND_READY:$($sshProcess.ExitCode)"
     }
     try {
-      $response = Invoke-WebRequest -UseBasicParsing -Uri $statusUrl -TimeoutSec 2
-      if ($response.StatusCode -eq 200) {
-        $payload = $response.Content | ConvertFrom-Json
-        if ([int]$payload.readyManualCycles -ge 1) { $ready = $true; break }
-      }
+      $status = Get-D4BackendStatus -StatusUrl $statusUrl -TimeoutSec 2
+      if ($status.ReadyManualCycles -ge 1) { $ready = $true; break }
     } catch { }
     Start-Sleep -Milliseconds 250
     $sshProcess.Refresh()
@@ -98,12 +139,44 @@ exit /b %ERRORLEVEL%
     Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue
     throw "D4_ACCEPTED_FRONTEND_START_FAILED:$LASTEXITCODE"
   }
+
+  # A7 startup takes several seconds. Re-prove that the remote D4 process and
+  # private Operator Bridge route survived that startup window before telling
+  # the human that Ctrl+Space can be serviced.
+  $sshProcess.Refresh()
+  if ($sshProcess.HasExited) {
+    $sshProcess.WaitForExit()
+    $sshProcess.Refresh()
+    throw "D4_BACKEND_EXITED_DURING_FRONTEND_START:$($sshProcess.ExitCode)"
+  }
+
+  try {
+    $postFrontendStatus = Get-D4BackendStatus -StatusUrl $statusUrl -TimeoutSec 2
+  } catch {
+    throw ("D4_BACKEND_LOST_AFTER_FRONTEND_START:" + $_.Exception.Message)
+  }
+
+  if ($postFrontendStatus.ReadyManualCycles -lt 1) {
+    throw "D4_Q1_NOT_CLAIMABLE_AFTER_FRONTEND_START"
+  }
+
+  Write-Host "D4_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS"
   Write-Host "D4_ACCEPTED_FRONTEND_READY=PASS"
   Write-Host "D4_OPERATOR_LOOP=Ctrl+Space -> Ctrl+V -> Enter"
 
+  $nextBackendHealthCheck = (Get-Date).AddSeconds(2)
   while (-not $sshProcess.HasExited) {
     Start-Sleep -Milliseconds 250
     $sshProcess.Refresh()
+
+    if ((Get-Date) -ge $nextBackendHealthCheck -and -not $sshProcess.HasExited) {
+      try {
+        $null = Get-D4BackendStatus -StatusUrl $statusUrl -TimeoutSec 2
+      } catch {
+        throw ("D4_OPERATOR_BACKEND_ROUTE_LOST:" + $_.Exception.Message)
+      }
+      $nextBackendHealthCheck = (Get-Date).AddSeconds(2)
+    }
   }
   $sshProcess.WaitForExit()
   $sshProcess.Refresh()

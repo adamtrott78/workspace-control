@@ -29,7 +29,17 @@ class D4AcceptedFrontendBaselineTests(unittest.TestCase):
         self.assertIn("D4_REMOTE_BOOTSTRAP_CR_BYTE_REMAINS", text)
         self.assertNotIn("Start-Job", text)
         self.assertIn("-File $dev online", text)
+        self.assertIn("Get-D4BackendStatus", text)
+        self.assertIn("D4_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS", text)
+        self.assertIn("D4_BACKEND_EXITED_DURING_FRONTEND_START", text)
+        self.assertIn("D4_BACKEND_LOST_AFTER_FRONTEND_START", text)
+        self.assertIn("D4_Q1_NOT_CLAIMABLE_AFTER_FRONTEND_START", text)
+        self.assertIn("D4_OPERATOR_BACKEND_ROUTE_LOST", text)
         self.assertIn("D4_ACCEPTED_FRONTEND_READY=PASS", text)
+        self.assertLess(
+            text.index("D4_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS"),
+            text.index("D4_ACCEPTED_FRONTEND_READY=PASS"),
+        )
 
     def test_remote_bootstrap_expands_bash_variables(self) -> None:
         text = BOOT.read_text(encoding="utf-8")
