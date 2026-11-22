@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.5",
-  "status": "OPERATOR_REJECTED_CURRENT_LIVE_INTEGRATION_FRONTEND_BASELINE_VIOLATION_CLEANUP_REQUIRED",
+  "status": "OPERATOR_REJECTED_PRELIVE_UNCONSUMED_CLEANED_NONREUSABLE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Conditional one-shot D4 v1.5 authority for the parser-safe one-line WOP path.",
   "predecessor": {
@@ -76,12 +76,22 @@
     "paid_api_fallback": false,
     "gpu_or_padataset_mutation": false
   },
-  "postcondition": "Current v1.5 live attempt is operator-rejected and non-reusable regardless of consumption state. Cleanup is required. Any next attempt must pin the accepted a9532ca8 frontend exactly and place D4 orchestration behind it.",
+  "postcondition": "v1.5 is rejected, cleaned, unconsumed, non-reusable. A fresh reviewed/validated v1.6 attempt is required.",
   "operator_rejection": {
     "observed": true,
-    "reason": "D4 must use the already accepted Workspace Operator Bridge / Stage-12 Windows fast-loop frontend checkpoint a9532ca8b86b7839822939a970e16af1d4a41864 rather than altering or substituting its operator UX.",
-    "screenshot_evidence": "Ctrl+Space reached a modified D4 frontend path and displayed Dispatch failed closed: HttpRequestException.",
-    "consumption_state": "UNKNOWN_UNTIL_CURRENT_RUNTIME_CLEANUP_EVIDENCE",
+    "reason": "D4 v1.5 exposed the accepted frontend before the semantic backend was ready, producing HttpRequestException on Ctrl+Space.",
+    "operator_console_evidence": [
+      "STAGE12_WOP_WINDOWS_RUNTIME_READY=PASS",
+      "Read-Host remained at: When that profile is ready for the live worker loop, press Enter here:",
+      "Ctrl+C cleanup emitted STAGE12_WOP_WINDOWS_CLEANUP=PASS",
+      "No STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS was emitted",
+      "No STAGE12_WOP_REMOTE_START marker was emitted",
+      "No STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS was emitted"
+    ],
+    "linux_transaction_started": false,
+    "live_consumption_marker_observed": false,
+    "attempt_consumed": false,
+    "windows_cleanup": "PASS",
     "retry_authorized": false
   }
 }
