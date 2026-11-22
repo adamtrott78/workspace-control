@@ -36,6 +36,14 @@ At admission the rerun job was **QUEUED**.
 
 Do **not** launch another PA3–PA8/t007 request while job `137275754026` is queued or running.
 
+For live operator monitoring, use the zero-provider host-local observer:
+
+- renderer: `scripts/mth602_t007_rerun_local_dashboard.py`
+- tmux launcher: `scripts/mth602_t007_rerun_tmux.sh`
+- procedure: `procedures/experiment_wave_dashboard.md`
+- refresh loop: **0 `gh` calls, 0 GitHub/provider API calls**
+- timing: local process elapsed + local-progress ETA + projected finish time
+
 Monitor the exact rerun to terminal state. On SUCCESS, validate the uploaded artifact and use only known-validation evidence to finalize the 6-recipe × 3-pair tight60 ranking. The provisional leader remains t007 pending this clean artifact.
 
 ### Provisional tight60 recipe picture
