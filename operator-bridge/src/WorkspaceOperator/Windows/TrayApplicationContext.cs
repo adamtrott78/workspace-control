@@ -212,23 +212,6 @@ public sealed class TrayApplicationContext : ApplicationContext
                         : "Nothing needs service",
                     ToolTipIcon.None);
             }
-            else if (
-                result.Outcome == DispatchOutcome.BrowserPrepareFailed ||
-                result.Outcome == DispatchOutcome.BrowserMaintenanceFailed ||
-                result.Outcome == DispatchOutcome.Stale ||
-                result.Outcome == DispatchOutcome.ClipboardFailed ||
-                result.Outcome == DispatchOutcome.BrowserFocusFailed ||
-                result.Outcome == DispatchOutcome.Failed)
-            {
-                var detail = string.IsNullOrWhiteSpace(result.NormalizedError)
-                    ? result.Outcome.ToString()
-                    : result.NormalizedError;
-                _notifyIcon.ShowBalloonTip(
-                    4000,
-                    "Workspace Worker Bridge",
-                    $"Dispatch failed closed: {detail}",
-                    ToolTipIcon.Warning);
-            }
 
             RefreshPresentation();
         }

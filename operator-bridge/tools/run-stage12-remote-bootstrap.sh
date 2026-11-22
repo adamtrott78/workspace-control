@@ -11,11 +11,9 @@ LINUX_REL="$2"
 LINUX_BLOB="$3"
 TOKEN="$4"
 REPO_URL="https://github.com/adamtrott78/workspace-control.git"
-D="/tmp/workspace-stage12-wop-\${TOKEN}"
+D="/tmp/workspace-stage12-wop-${TOKEN}"
 
-cleanup_outer() {
-  rm -rf -- "$D" >/dev/null 2>&1 || true
-}
+cleanup_outer() { rm -rf -- "$D" >/dev/null 2>&1 || true; }
 trap cleanup_outer EXIT
 
 [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "D4_WOP_REMOTE_SOURCE_SHA_INVALID=$SOURCE_SHA" >&2; exit 64; }
@@ -32,11 +30,9 @@ if ! git -C "$D" cat-file -e "$SOURCE_SHA^{commit}" 2>/dev/null; then
 fi
 git -C "$D" cat-file -e "$SOURCE_SHA^{commit}"
 git -C "$D" checkout --detach "$SOURCE_SHA" >/dev/null
-
 ACTUAL="$(git -C "$D" rev-parse HEAD)"
 [[ "$ACTUAL" == "$SOURCE_SHA" ]] || { echo "D4_WOP_REMOTE_SOURCE_MISMATCH=$ACTUAL" >&2; exit 70; }
-
-ACTUAL_BLOB="$(git -C "$D" rev-parse "\${SOURCE_SHA}:\${LINUX_REL}")"
+ACTUAL_BLOB="$(git -C "$D" rev-parse "${SOURCE_SHA}:${LINUX_REL}")"
 [[ "$ACTUAL_BLOB" == "$LINUX_BLOB" ]] || { echo "D4_WOP_REMOTE_LINUX_BLOB_MISMATCH=$ACTUAL_BLOB" >&2; exit 70; }
 
 echo "D4_WOP_REMOTE_EXACT_BINDINGS=PASS"

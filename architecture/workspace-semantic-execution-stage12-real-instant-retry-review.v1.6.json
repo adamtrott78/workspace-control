@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.6",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "frontend_task": "workspace-operator-bridge-implementation-v1",
+  "diagnosis": {
+    "regression": "D4 made the accepted frontend interactive before the semantic backend had a ready action and later modified accepted frontend/runtime files.",
+    "authoritative_frontend": "a9532ca8b86b7839822939a970e16af1d4a41864"
+  },
+  "repair": {
+    "exact_operator_bridge_src_tree_restored": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "exact_workspace_operator_dev_blob_restored": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "d4_orchestration_outside_frontend": true,
+    "backend_ready_gate": "GET /operator-bridge/v1/status must return readyManualCycles >= 1 before the accepted frontend is launched.",
+    "one_line_operator_entry": "wop d4",
+    "frontend_redesign_authorized": false,
+    "live_retry_authorized": false
+  }
+}

@@ -1,4 +1,4 @@
-# One-line D4 launcher: reuse the validated persistent WOP runtime and run the Linux calibration over the user's existing Tailscale SSH path.
+# D4 orchestrator. The accepted A7 frontend remains byte-pinned and is launched only after the semantic backend reports a ready manual cycle.
 [CmdletBinding()]
 param(
   [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path,
@@ -8,71 +8,108 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-
 $repo = [System.IO.Path]::GetFullPath($RepositoryRoot)
 $dev = Join-Path $repo "operator-bridge\tools\workspace-operator-dev.ps1"
 $linuxRel = "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh"
-$linuxPath = Join-Path $repo ($linuxRel -replace "/", "\")
 $remoteBootstrapRel = "operator-bridge/tools/run-stage12-remote-bootstrap.sh"
 $remoteBootstrapPath = Join-Path $repo ($remoteBootstrapRel -replace "/", "\")
 $engine = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
-$ssh = Get-Command ssh.exe -ErrorAction Stop
-$statePath = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\DevRuntime\runtime.json"
+$ssh = (Get-Command ssh.exe -ErrorAction Stop).Source
+$tempRoot = Join-Path $env:TEMP ("workspace-control-d4-" + [guid]::NewGuid().ToString("N"))
+$frontendReady = Join-Path $tempRoot "frontend-ready.txt"
+$frontendLog = Join-Path $tempRoot "frontend.log"
+$sshBatch = Join-Path $tempRoot "run-ssh.cmd"
+$frontendJob = $null
+$sshProcess = $null
 
 if (-not (Test-Path -LiteralPath $dev -PathType Leaf)) { throw "D4_WOP_DEV_SCRIPT_MISSING:$dev" }
-if (-not (Test-Path -LiteralPath $linuxPath -PathType Leaf)) { throw "D4_WOP_LINUX_SCRIPT_MISSING:$linuxPath" }
 if (-not (Test-Path -LiteralPath $remoteBootstrapPath -PathType Leaf)) { throw "D4_WOP_REMOTE_BOOTSTRAP_MISSING:$remoteBootstrapPath" }
 
 $sourceSha = (git -C $repo rev-parse HEAD).Trim().ToLowerInvariant()
 if ($LASTEXITCODE -ne 0 -or $sourceSha -notmatch "^[0-9a-f]{40}$") { throw "D4_WOP_SOURCE_SHA_UNAVAILABLE" }
-
+$frontendTree = (git -C $repo rev-parse ($sourceSha + ":operator-bridge/src")).Trim().ToLowerInvariant()
+if ($LASTEXITCODE -ne 0 -or $frontendTree -ne "51480cc44f62d661421e975e67af127ecd0b0417") { throw "D4_FRONTEND_TREE_NOT_ACCEPTED_A7:$frontendTree" }
+$devBlob = (git -C $repo rev-parse ($sourceSha + ":operator-bridge/tools/workspace-operator-dev.ps1")).Trim().ToLowerInvariant()
+if ($LASTEXITCODE -ne 0 -or $devBlob -ne "ac035d2fc898274c32cad43954ce44c15b198207") { throw "D4_FRONTEND_DEV_HARNESS_NOT_ACCEPTED_A7:$devBlob" }
 $linuxBlob = (git -C $repo rev-parse ("{0}:{1}" -f $sourceSha,$linuxRel)).Trim().ToLowerInvariant()
 if ($LASTEXITCODE -ne 0 -or $linuxBlob -notmatch "^[0-9a-f]{40}$") { throw "D4_WOP_LINUX_BLOB_UNAVAILABLE" }
 
-$remoteBootstrapBlob = (git -C $repo rev-parse ("{0}:{1}" -f $sourceSha,$remoteBootstrapRel)).Trim().ToLowerInvariant()
-if ($LASTEXITCODE -ne 0 -or $remoteBootstrapBlob -notmatch "^[0-9a-f]{40}$") { throw "D4_WOP_REMOTE_BOOTSTRAP_BLOB_UNAVAILABLE" }
-
-Write-Host "=== D4 REAL INSTANT - WOP ONE-LINE LAUNCH ==="
+New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
+Write-Host "=== D4 REAL INSTANT - ACCEPTED A7 FRONTEND ==="
 Write-Host ("D4_WOP_SOURCE_SHA=" + $sourceSha)
+Write-Host "D4_FRONTEND_BASELINE_SHA=a9532ca8b86b7839822939a970e16af1d4a41864"
+Write-Host ("D4_FRONTEND_SRC_TREE=" + $frontendTree)
+Write-Host ("D4_FRONTEND_DEV_BLOB=" + $devBlob)
 Write-Host ("D4_WOP_LINUX_BLOB=" + $linuxBlob)
-Write-Host ("D4_WOP_REMOTE_BOOTSTRAP_BLOB=" + $remoteBootstrapBlob)
 
 & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev stop -RepositoryRoot $repo
 if ($LASTEXITCODE -ne 0) { throw "D4_WOP_PRESTOP_FAILED:$LASTEXITCODE" }
 
 try {
-  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev online -RepositoryRoot $repo -SchedulerHotkey $SchedulerHotkey -OperatorBridgeUrl $OperatorBridgeUrl
-  if ($LASTEXITCODE -ne 0) { throw "D4_WOP_WINDOWS_START_FAILED:$LASTEXITCODE" }
-
-  if (-not (Test-Path -LiteralPath $statePath -PathType Leaf)) { throw "D4_WOP_RUNTIME_STATE_MISSING" }
-  $state = Get-Content -LiteralPath $statePath -Raw | ConvertFrom-Json
-  if ([string]$state.mode -ne "online") { throw "D4_WOP_RUNTIME_NOT_ONLINE" }
-  if (-not (Get-Process -Id ([int]$state.helper_pid) -ErrorAction SilentlyContinue)) { throw "D4_WOP_HELPER_NOT_ALIVE" }
-  if (-not (Get-Process -Id ([int]$state.web_ext_pid) -ErrorAction SilentlyContinue)) { throw "D4_WOP_WEB_EXT_NOT_ALIVE" }
-
-  Write-Host "STAGE12_WOP_WINDOWS_RUNTIME_READY=PASS"
-  Write-Host "The persistent WorkspaceWorkers Firefox profile is open."
-  Write-Host "If authentication is needed, use that profile normally and ensure ChatGPT Instant is selected."
-  [void](Read-Host "When that profile is ready for the live worker loop, press Enter here")
-  Write-Host "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS"
+  $frontendJob = Start-Job -ScriptBlock {
+    param($Engine,$Dev,$Repo,$Url,$Hotkey,$ReadyPath,$LogPath)
+    $ErrorActionPreference = "Stop"
+    $statusUrl = $Url.TrimEnd("/") + "/operator-bridge/v1/status"
+    $deadline = (Get-Date).AddMinutes(10)
+    $ready = $false
+    do {
+      try {
+        $response = Invoke-WebRequest -UseBasicParsing -Uri $statusUrl -TimeoutSec 2
+        if ($response.StatusCode -eq 200) {
+          $payload = $response.Content | ConvertFrom-Json
+          if ([int]$payload.readyManualCycles -ge 1) { $ready = $true; break }
+        }
+      } catch { }
+      Start-Sleep -Milliseconds 250
+    } while ((Get-Date) -lt $deadline)
+    if (-not $ready) { throw "D4_BACKEND_READY_ACTION_TIMEOUT" }
+    & $Engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $Dev online -RepositoryRoot $Repo -SchedulerHotkey $Hotkey -OperatorBridgeUrl $Url *>&1 | Tee-Object -FilePath $LogPath
+    if ($LASTEXITCODE -ne 0) { throw "D4_ACCEPTED_FRONTEND_START_FAILED:$LASTEXITCODE" }
+    Set-Content -LiteralPath $ReadyPath -Value "D4_ACCEPTED_FRONTEND_READY=PASS" -Encoding ASCII
+  } -ArgumentList $engine,$dev,$repo,$OperatorBridgeUrl,$SchedulerHotkey,$frontendReady,$frontendLog
 
   $token = [guid]::NewGuid().ToString("N")
   $remoteBytes = [System.IO.File]::ReadAllBytes($remoteBootstrapPath)
   $remoteB64 = [Convert]::ToBase64String($remoteBytes)
-  $remoteCommand = "printf '%s' '$remoteB64' | base64 -d | bash -s -- '$sourceSha' '$linuxRel' '$linuxBlob' '$token'"
+  $remoteCommand = "echo '$remoteB64' | base64 -d | bash -s -- '$sourceSha' '$linuxRel' '$linuxBlob' '$token'"
+  @("
+@echo off
+"$ssh" -tt "$SshTarget" "$remoteCommand"
+exit /b %ERRORLEVEL%
+") | Set-Content -LiteralPath $sshBatch -Encoding ASCII
 
-  Write-Host ("STAGE12_WOP_REMOTE_START=" + $SshTarget)
-  & $ssh.Source -tt $SshTarget $remoteCommand
-  $sshExit = $LASTEXITCODE
-  if ($sshExit -ne 0) { throw "D4_WOP_REMOTE_EXIT:$sshExit" }
+  Write-Host "D4_BACKEND_STARTING=PASS"
+  Write-Host "The accepted Workspace Operator Bridge frontend will open automatically only after Q1 is actually ready."
+  Write-Host "When Firefox opens: authenticate normally if needed, select ChatGPT Instant, then use Ctrl+Space -> Ctrl+V -> Enter."
 
+  $sshProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d","/c",$sshBatch) -NoNewWindow -PassThru
+  $frontendAnnounced = $false
+  while (-not $sshProcess.HasExited) {
+    if ($frontendJob.State -eq "Failed") {
+      Receive-Job -Job $frontendJob -Keep | Out-Host
+      Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue
+      throw "D4_FRONTEND_JOB_FAILED"
+    }
+    if (-not $frontendAnnounced -and (Test-Path -LiteralPath $frontendReady -PathType Leaf)) {
+      Get-Content -LiteralPath $frontendReady | Write-Host
+      Write-Host "D4_OPERATOR_LOOP=Ctrl+Space -> Ctrl+V -> Enter"
+      $frontendAnnounced = $true
+    }
+    Start-Sleep -Milliseconds 250
+    $sshProcess.Refresh()
+  }
+  if ($frontendJob.State -eq "Failed") { Receive-Job -Job $frontendJob -Keep | Out-Host; throw "D4_FRONTEND_JOB_FAILED" }
+  if ($sshProcess.ExitCode -ne 0) { throw "D4_WOP_REMOTE_EXIT:$($sshProcess.ExitCode)" }
   Write-Host "STAGE12_WOP_REMOTE_CALIBRATION=PASS"
 }
 finally {
-  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev stop -RepositoryRoot $repo
-  if ($LASTEXITCODE -eq 0) {
-    Write-Host "STAGE12_WOP_WINDOWS_CLEANUP=PASS"
-  } else {
-    Write-Warning ("STAGE12_WOP_WINDOWS_CLEANUP=FAIL:" + $LASTEXITCODE)
+  if ($frontendJob) {
+    Stop-Job -Job $frontendJob -ErrorAction SilentlyContinue
+    Receive-Job -Job $frontendJob -ErrorAction SilentlyContinue | Out-Host
+    Remove-Job -Job $frontendJob -Force -ErrorAction SilentlyContinue
   }
+  if ($sshProcess -and -not $sshProcess.HasExited) { Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue }
+  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev stop -RepositoryRoot $repo
+  if ($LASTEXITCODE -eq 0) { Write-Host "STAGE12_WOP_WINDOWS_CLEANUP=PASS" } else { Write-Warning ("STAGE12_WOP_WINDOWS_CLEANUP=FAIL:" + $LASTEXITCODE) }
+  Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
 }

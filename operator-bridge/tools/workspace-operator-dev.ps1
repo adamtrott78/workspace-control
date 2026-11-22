@@ -1,7 +1,7 @@
 # Windows-only fast-loop harness: content-free smoke actions remain operator-triggered.
 [CmdletBinding()]
 param(
-  [ValidateSet("smoke","reset","restart","start","online","d4","stop","offline","status","self-test")]
+  [ValidateSet("smoke","reset","restart","start","online","stop","offline","status","self-test")]
   [string]$Action = "status",
   [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path,
   [string]$SchedulerHotkey = "Ctrl+Space",
@@ -413,24 +413,11 @@ function Start-DevRuntime([bool]$LocalSmoke) {
     }
 
     $helperProcess = Start-Process -FilePath $helper -ArgumentList $helperArgs -RedirectStandardOutput $helperOut -RedirectStandardError $helperErr -PassThru
-    $startupDeadline = (Get-Date).AddSeconds(5)
-    $bridgeEnabledReceipt = $false
-    do {
-      Start-Sleep -Milliseconds 100
-      if ($helperProcess.HasExited) {
-        if (Test-Path $helperOut) { Get-Content $helperOut }
-        if (Test-Path $helperErr) { Get-Content $helperErr }
-        throw "DEV_HELPER_START_FAILED"
-      }
-      if (Test-Path -LiteralPath $helperOut -PathType Leaf) {
-        $bridgeEnabledReceipt = Select-String -LiteralPath $helperOut -SimpleMatch "WORKSPACE_OPERATOR_BRIDGE_ENABLED=PASS" -Quiet
-      }
-    } while (-not $bridgeEnabledReceipt -and (Get-Date) -lt $startupDeadline)
-
-    if (-not $bridgeEnabledReceipt) {
+    Start-Sleep -Milliseconds 750
+    if ($helperProcess.HasExited) {
       if (Test-Path $helperOut) { Get-Content $helperOut }
       if (Test-Path $helperErr) { Get-Content $helperErr }
-      throw "DEV_HOTKEY_REGISTRATION_NOT_CONFIRMED"
+      throw "DEV_HELPER_START_FAILED"
     }
 
     $launcher = Join-Path $work "run-web-ext.cmd"
@@ -571,22 +558,5 @@ switch ($Action) {
   "reset" { Stop-DevRuntime; Start-DevRuntime $true }
   "restart" { Stop-DevRuntime; Start-DevRuntime $true }
   "start" { Stop-DevRuntime; Start-DevRuntime ([string]::IsNullOrWhiteSpace($OperatorBridgeUrl)) }
-  "online" {
-    if ([string]::IsNullOrWhiteSpace($OperatorBridgeUrl)) {
-      $installer = Join-Path $bridgeRoot "tools\install-wop-commands.ps1"
-      $d4 = Join-Path $bridgeRoot "tools\run-stage12-wop.ps1"
-      & (Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe") -NoLogo -NoProfile -ExecutionPolicy Bypass -File $installer
-      if ($LASTEXITCODE -ne 0) { throw "WOP_COMMAND_SYNC_FAILED:$LASTEXITCODE" }
-      & (Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe") -NoLogo -NoProfile -ExecutionPolicy Bypass -File $d4 -RepositoryRoot $repo -SchedulerHotkey $SchedulerHotkey
-      if ($LASTEXITCODE -ne 0) { throw "D4_WOP_LAUNCH_FAILED:$LASTEXITCODE" }
-    } else {
-      Stop-DevRuntime
-      Start-DevRuntime $false
-    }
-  }
-  "d4" {
-    $d4 = Join-Path $bridgeRoot "tools\run-stage12-wop.ps1"
-    & (Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe") -NoLogo -NoProfile -ExecutionPolicy Bypass -File $d4 -RepositoryRoot $repo -SchedulerHotkey $SchedulerHotkey
-    if ($LASTEXITCODE -ne 0) { throw "D4_WOP_LAUNCH_FAILED:$LASTEXITCODE" }
-  }
+  "online" { Stop-DevRuntime; Start-DevRuntime ([string]::IsNullOrWhiteSpace($OperatorBridgeUrl)) }
 }
