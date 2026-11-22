@@ -1,3 +1,69 @@
+<!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22 -->
+## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22
+
+**Authoritative source:** `tasks/active/mth602-final-multisurrogate-dqnguard-v1.json` at Workspace Control PR #640 head `67389ca0114f561f8b21001db5b338d650782d08`. Treat JSON as authoritative over older sections below.
+
+### Current scientific stage
+
+`hpo_tight60_t007_checkpoint_recovery_operator_action`
+
+The 6-recipe × 3-pair tight60 known-validation-only HPO matrix is terminal except for one infrastructure-failed artifact export:
+
+- 11 newly required tight60 cells: **SUCCESS**
+- PA3–PA8 / t007 run `44954748830`, job `137000252399`: runner shutdown during epoch 60; **scientific training through epoch 59 completed**
+- epoch 59 known-validation macro-F1: **0.99377**
+- trainer wrote `best_model.pt` on every validation improvement and wrote `training_state_latest.pt` after each completed epoch
+- no GitHub artifact was uploaded because the workflow was cancelled before result packaging
+- target/test/OSR evidence is forbidden for HPO recovery/ranking
+
+### Recovery-path correction
+
+The prior operator recovery command used the wrong output directory and therefore failed at its first `sudo test -d`. Because it also used `set -e`, the interactive SSH shell terminated immediately after that nonzero test.
+
+The job log proves:
+
+- runner job root: `/srv/workspace-ci/padataset/jobs/p5-e1067c12-ee3a-57fc-b6fc-830b2453b655`
+- checkout: `.../runner/_work/PADataset/PADataset`
+- trusted workflow rewrites `cfg["save_root"]` to `$RUNNER_TEMP/scientific-results/backbone`
+- therefore the correct expected run directory is:
+
+`/srv/workspace-ci/padataset/jobs/p5-e1067c12-ee3a-57fc-b6fc-830b2453b655/runner/_work/_temp/scientific-results/backbone/l2o_hpo_tight60_PA3_PA8_t007`
+
+Do **not** use the stale repository-relative path under `results_pa_ota_l2o_hpo_tight60_v1`.
+
+### Immediate next action
+
+Operator runs the corrected bounded recovery probe supplied in chat. It:
+
+1. checks the exact expected runner-temp directory;
+2. if absent, searches only inside the one known failed runner job;
+3. copies recoverable checkpoint/state/config/history/progress files to
+   `$HOME/adamArchives/recovered/mth602-tight60-PA3-PA8-t007-run44954748830`;
+4. computes SHA-256;
+5. validates `best_model.pt` epoch/known-validation metrics and per-class F1;
+6. validates `training_state_latest.pt` completed epoch.
+
+Expected recovery evidence:
+- `BEST_CHECKPOINT_EPOCH = 59`
+- `BEST_VAL_MACRO_F1 ≈ 0.99377`
+- `TRAINING_STATE_EPOCH = 59`
+- exact known-class per-class F1 derived from the saved confusion matrix
+
+If local checkpoint recovery is impossible, rerun **only the identical PA3–PA8/t007 tight60 cell**. Do not change hyperparameters. Do not use target/test/OSR evidence.
+
+### Provisional tight60 recipe picture
+
+- t007: provisional leader; PA2–PA3 macro `0.9935446`, PA2–PA8 `0.9876064`, PA3–PA8 epoch-59 log `0.99377`; clean recovered artifact still required for formal ranking.
+- t001: strong, 3/3 competency passes.
+- t002: strong, 3/3 competency passes.
+- t005: mixed, 2/3.
+- t000: 0/3.
+- t003: 0/3.
+
+Formal ranking remains **known-validation only**.
+
+---
+
 <!-- workspace-control:derived-task-handoff -->
 # Workspace Control Task Handoff
 
