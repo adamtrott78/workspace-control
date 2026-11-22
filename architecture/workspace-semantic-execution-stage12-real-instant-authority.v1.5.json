@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.5",
+  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Conditional one-shot D4 v1.5 authority for the parser-safe one-line WOP path.",
+  "predecessor": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.4.json",
+    "status": "APPROVAL_SIGNAL_OBSERVED_UNCONSUMED_PRELIVE_POWERSHELL_HERE_STRING_PARSE_FAILURE",
+    "consumed": false,
+    "reusable": false
+  },
+  "exact_review": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.5.json",
+    "blob_sha": "02b9f9e06359661670e4e261a018007eef08f97c",
+    "candidate_head": "d1b95d8e5a7aab2337e4993c316120ab25e4230a",
+    "candidate_validation": {
+      "workspace_control_run": 3109,
+      "semantic_execution_run": 409,
+      "operator_bridge_run": 682,
+      "result": "SUCCESS",
+      "windows_powershell_5_1_d4_parse_gate": "PASS"
+    },
+    "validated_review_head": "1e0be1f8def67600eaa6572bcaa5b1e914e7ec5f",
+    "validated_review_state": {
+      "workspace_control_run": 3110,
+      "semantic_execution_run": 410,
+      "operator_bridge_run": 683,
+      "result": "SUCCESS"
+    },
+    "procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.5.md",
+    "procedure_blob_sha": "01b0bc3cf2e6a483e0c484847d7cf5794b1440c6"
+  },
+  "approval_signal": {
+    "policy_path": "architecture/workspace-semantic-execution-operator-wop-approval-policy.v0.1.json",
+    "policy_blob_sha": "cfede468d3004d1267fc4bd9656107368e6b58d0",
+    "exact_command": "wop d4",
+    "separate_chat_approval_required": false,
+    "observed": false
+  },
+  "attempt_contract": {
+    "attempts_after_approval_signal": 1,
+    "consumed": false,
+    "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "no_silent_retry": true,
+    "post_marker_failure_requires_new_review_cycle": true
+  },
+  "exact_execution_bindings": {
+    "source_head": "d1b95d8e5a7aab2337e4993c316120ab25e4230a",
+    "operator-bridge/tools/run-stage12-wop.ps1": "00060d137666ef428920cd053309dd0a9ae51898",
+    "operator-bridge/tools/run-stage12-remote-bootstrap.sh": "b87bba3054eb283aa01f2602e795c7a7670324da",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "6b9c2c0e10804c563e344618360bb4ef27849b23",
+    "operator-bridge/tools/install-wop-commands.ps1": "0c469fb2bc0d9ca5027bda7c77869bba8dd1e76a",
+    "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs": "95d5bb956e4ad776c0c82812a48a40b2aadeeff8",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "367fea22f867e30defe17afb8abe7fc68680de69",
+    ".github/workflows/operator-bridge-validation.yml": "9dbcbaf3296287c5d3cf0bcffb1e8ae35eb8b57b",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.5.md": "01b0bc3cf2e6a483e0c484847d7cf5794b1440c6"
+  },
+  "execution_tip_contract": {
+    "rule": "The exact live WOP execution tip is the Git commit containing this authority artifact. Before operator execution, that branch tip must remain unchanged and all three validations for that exact tip must be SUCCESS.",
+    "branch": "workspace-semantic-execution-migration-v1",
+    "no_branch_mutation_after_final_validation_before_wop": true,
+    "executable_blobs_must_equal_review_bindings": true
+  },
+  "safety": {
+    "manual_auth_only": true,
+    "manual_worker_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_enter": false,
+    "dom_scraping": false,
+    "credential_automation": false,
+    "browser_permission_widening": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "paid_api_fallback": false,
+    "gpu_or_padataset_mutation": false
+  },
+  "postcondition": "One D4 v1.5 attempt is conditionally staged. Executing exact `wop d4` supplies operator approval. The attempt is consumed only after STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS. The branch must not move between exact-tip validation and WOP execution."
+}
