@@ -5,58 +5,57 @@
 
 ### Current scientific stage
 
-`hpo_tight60_t007_identical_rerun_in_progress`
+`t007_fullmatrix_expansion_admitted_osr_diagnostics_pending`
 
-The bounded host-local checkpoint recovery is exhausted:
+The t007 program has moved from a 3-pair pilot into uniform full-matrix execution.
 
-- expected runner-temp path present: **NO**
-- bounded recovery candidate count: **0**
-- operator marker: `T007_RECOVERY_NOT_FOUND=1`
-- no checkpoint was recovered and no scientific mutation occurred
+### Existing t007 evidence
 
-This satisfies the existing recovery policy's rerun condition.
+- PA2–PA3: COMPLETE, known-validation macro-F1 `0.9935446126501883`, min-class F1 `0.99026518966096`.
+- PA2–PA8: COMPLETE, known-validation macro-F1 `0.9876063834565111`, min-class F1 `0.9811405985319028`.
+- PA3–PA8: identical clean rerun still active under workflow run `44954748830`, rerun job `137275754026`.
 
-### Exact identical rerun
+PA2–PA8/t007 already has terminal standard-DQNGuard OSR on both directions:
 
-GitHub Actions re-ran the original failed job directly, preserving the same scientific inputs:
+- PA2<-PA8 Unknown-F1 `0.984758990646242`, delta vs repaired Track-A `+0.18372599064624195`.
+- PA8<-PA2 Unknown-F1 `0.9792627621225628`, delta `+0.2222517621225628`.
+- frozen H1 investment gate: **PASS**.
 
-- workflow run: `44954748830`
-- original failed job: `137000252399`
-- rerun job: `137275754026`
-- PADataset draft PR: `#40`
-- exact candidate head: `da521eaee997c56012290c9c261ee1831432ebbc`
-- lane: `/lambda-scientific-2`
-- manifest: `manifests/configs/l2o_hpo_tight60_v1/l2o_hpo_tight60_PA3_PA8_t007.json`
-- hyperparameter changes: **NONE**
-- target/test/OSR evidence used for recovery/retry selection: **NO**
+These OSR values are diagnostic only and cannot select the t007 recipe, checkpoint, retry, or pair freeze.
 
-At admission the rerun job was **QUEUED**.
+### PADataset PR #41 — exact locked execution head
+
+Draft PR: `#41`  
+Branch: `mth602-t007-fullmatrix-osr-v1`  
+Exact head: `85bc8cb667a000d3fc544b33f8e96a6775074561`  
+Validation: `job-ff6313ff-d592-4d64-b883-30760a3beb2e` — **22 passed**
+
+Do not advance this head while exact-head-bound jobs are queued/running.
+
+### New PA2–PA3/t007 OSR diagnostics
+
+Exactly two standard-DQNGuard requests were admitted:
+
+- PA2<-PA3 — comment `7082531548`
+- PA3<-PA2 — comment `7082531870`
+
+Both use the clean PA2–PA3/t007 artifact `14736363148`, digest `sha256:3419dd982709fccdfccce0a044260542a904ce9c86e1c4ef4e8e8bcb76c96b4d`.
+
+### Seven remaining t007 backbone admissions
+
+All seven missing canonical pairs were pre-admitted with the exact frozen t007 optimizer/training recipe and 60-epoch budget:
+
+- GPU lane A: PA1–PA2, PA1–PA4, PA2–PA4, PA4–PA8.
+- GPU lane B: PA1–PA3, PA1–PA8, PA3–PA4.
+
+This is intentional speculative parallelism based only on the known-validation t007 lead. OSR results cannot retroactively select, cancel, modify, or prioritize these jobs.
 
 ### Immediate next action
 
-Do **not** launch another PA3–PA8/t007 request while job `137275754026` is queued or running.
+Monitor only PR #41 exact head and the existing PA3–PA8/t007 rerun. Do not duplicate any OSR or training admission.
 
-For live operator monitoring, use the zero-provider host-local observer:
+When PA2–PA3/t007 OSR becomes terminal, ingest it descriptively against the frozen H1 gate. As each new t007 backbone completes, strict-extract known-validation macro-F1 and min-class F1. Once all ten canonical t007 backbones are provenance-valid, construct the complete standard-DQNGuard directional OSR matrix.
 
-- renderer: `scripts/mth602_t007_rerun_local_dashboard.py`
-- tmux launcher: `scripts/mth602_t007_rerun_tmux.sh`
-- procedure: `procedures/experiment_wave_dashboard.md`
-- refresh loop: **0 `gh` calls, 0 GitHub/provider API calls**
-- timing: local process elapsed + local-progress ETA + projected finish time
-- tmux UX: `Ctrl+C` detaches the client while leaving the dashboard/session alive; reattach with `tmux attach -t mth602-t007`
-
-Monitor the exact rerun to terminal state. On SUCCESS, validate the uploaded artifact and use only known-validation evidence to finalize the 6-recipe × 3-pair tight60 ranking. The provisional leader remains t007 pending this clean artifact.
-
-### Provisional tight60 recipe picture
-
-- t007: provisional leader; PA2–PA3 macro `0.9935446`, PA2–PA8 `0.9876064`, prior PA3–PA8 epoch-59 log `0.99377`.
-- t001: strong, 3/3 competency passes.
-- t002: strong, 3/3 competency passes.
-- t005: mixed, 2/3.
-- t000: 0/3.
-- t003: 0/3.
-
-Formal ranking remains **known-validation only**.
 
 ---
 
