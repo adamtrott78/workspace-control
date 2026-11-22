@@ -3276,7 +3276,7 @@
     ]
   },
   "hpo_tight60_completion_v1": {
-    "status": "IDENTICAL_T007_RERUN_IN_PROGRESS_AFTER_UNRECOVERABLE_LOCAL_CHECKPOINT",
+    "status": "IDENTICAL_T007_RERUN_IN_PROGRESS",
     "user_authority": "Awesome let’s get it running right now on both gpus",
     "source_pr37_head": "ab87931408651b0b3516d910b13474822fb2a93d",
     "padataset_pr": 40,
@@ -3601,7 +3601,7 @@
       }
     ],
     "t007_checkpoint_recovery": {
-      "status": "UNRECOVERABLE_IDENTICAL_RERUN_ADMITTED",
+      "status": "UNRECOVERABLE_IDENTICAL_RERUN_IN_PROGRESS",
       "failed_run_id": 44954748830,
       "failed_job_id": 137000252399,
       "runner_job_root": "/srv/workspace-ci/padataset/jobs/p5-e1067c12-ee3a-57fc-b6fc-830b2453b655",
@@ -3644,13 +3644,20 @@
         "original_workflow_run_id": 44954748830,
         "original_failed_job_id": 137000252399,
         "rerun_job_id": 137275754026,
-        "status": "QUEUED",
+        "status": "IN_PROGRESS",
         "candidate_pr": 40,
         "candidate_head": "da521eaee997c56012290c9c261ee1831432ebbc",
         "lane": "/lambda-scientific-2",
         "manifest": "manifests/configs/l2o_hpo_tight60_v1/l2o_hpo_tight60_PA3_PA8_t007.json",
         "hyperparameter_changes": false,
-        "target_test_or_osr_evidence_used": false
+        "target_test_or_osr_evidence_used": false,
+        "current_step": "Execute bounded scientific request",
+        "preflight_steps": {
+          "verify_exact_pr_head": "PASS",
+          "prove_bounded_scientific_runner": "PASS",
+          "checkout_exact_candidate_sha": "PASS",
+          "validate_bounded_scientific_request": "PASS"
+        }
       }
     }
   },
@@ -3661,8 +3668,8 @@
     "derived_handoff": "tasks/active/mth602-final-multisurrogate-dqnguard-v1.md",
     "recovery_script": "scripts/mth602_recover_t007_checkpoint.sh",
     "instruction": "Re-read PR #640 current head and authoritative JSON first; do not rely on chat prose.",
-    "derived_handoff_commit": "2c9e764321fc69572c686b66c4580d732b184405",
+    "derived_handoff_commit": "da74468dcc7b5d901450188fbe7ac54a7839da4a",
     "recovery_script_commit": "1c989556e6d3481328070ae366900e322037356f",
-    "prepared_reason": "Fresh-chat recovery after prior conversation length limit; correct stale checkpoint path and preserve recovery-first policy."
+    "prepared_reason": "Checkpoint recovery exhausted with T007_RECOVERY_NOT_FOUND=1; exact unchanged PA3-PA8/t007 rerun admitted and now executing."
   }
 }
