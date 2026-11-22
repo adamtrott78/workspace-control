@@ -208,6 +208,27 @@ def gpu_rows():
     return rows
 
 
+def proc_env(pid):
+    """Read a small provenance subset from /proc without any network calls."""
+    try:
+        raw = Path(f"/proc/{pid}/environ").read_bytes().split(b"\0")
+    except Exception:
+        return {}
+    env = {}
+    wanted = {"GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT", "GITHUB_WORKFLOW", "GITHUB_REPOSITORY"}
+    for item in raw:
+        if b"=" not in item:
+            continue
+        k, v = item.split(b"=", 1)
+        try:
+            key = k.decode()
+        except Exception:
+            continue
+        if key in wanted:
+            env[key] = v.decode(errors="replace")
+    return env
+
+
 def process_rows():
     found = {}
     try:
@@ -240,11 +261,15 @@ def process_rows():
                 continue
             save_root = Path(str(cfg.get("save_root", "")))
             run_dir = save_root / rn if str(save_root) else None
+            pe = proc_env(pid)
             found[rn] = {
                 "pid": pid,
                 "elapsed": elapsed,
                 "cfg_path": str(cfg_path),
                 "run_dir": str(run_dir) if run_dir else None,
+                "github_run_id": pe.get("GITHUB_RUN_ID"),
+                "github_run_attempt": pe.get("GITHUB_RUN_ATTEMPT"),
+                "github_workflow": pe.get("GITHUB_WORKFLOW"),
             }
         except Exception:
             continue
@@ -489,6 +514,11 @@ def render():
                     status = "RUNNING"
                     elapsed = active.get("elapsed")
                     total = None
+                    if active.get("github_run_id"):
+                        cached["github_run_id"] = active.get("github_run_id")
+                        cached["github_run_attempt"] = active.get("github_run_attempt")
+                        cached["github_workflow"] = active.get("github_workflow")
+                        cache["runs"][rn] = cached
                     if elapsed and frac and frac > 0.01:
                         nominal_samples.append(elapsed / frac)
                 elif cached.get("status") in {"SUCCESS", "INFRA-OOM", "ERROR"}:
@@ -537,6 +567,7 @@ def render():
                     "val_macro": val_macro,
                     "val_min": val_min,
                     "run_dir": str(run_dir) if run_dir else None,
+                    "github_run_id": active.get("github_run_id") if active else cached.get("github_run_id"),
                 })
 
             cache["updated_at_epoch"] = time.time()
@@ -633,7 +664,9 @@ def render():
                 frame.append(
                     f"{r['pair']:<9} {r['lane']:<5} {color_status(r['status'])} "
                     f"{ep:>7} {prog:>7} {fmt_seconds(r['elapsed']):>9} {eta:>9} "
-                    f"{fmt_seconds(r['total']):>9} {metric(r['val_macro']):>8} {metric(r['val_min']):>8}  {r['identity']}"
+                    f"{fmt_seconds(r['total']):>9} {metric(r['val_macro']):>8} {metric(r['val_min']):>8}  "
+                    + ((f"run {r['github_run_id']} | ") if r.get("github_run_id") else "")
+                    + f"{r['identity']}"
                 )
 
             frame.append(rule)
