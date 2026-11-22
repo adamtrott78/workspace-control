@@ -69,7 +69,7 @@ git -C "$D" cat-file -e "$SOURCE_SHA^{commit}"
 git -C "$D" checkout --detach "$SOURCE_SHA" >/dev/null
 ACTUAL="$(git -C "$D" rev-parse HEAD)"
 [[ "$ACTUAL" == "$SOURCE_SHA" ]] || { echo "D4_WOP_REMOTE_SOURCE_MISMATCH=$ACTUAL" >&2; exit 70; }
-ACTUAL_BLOB="$(git -C "$D" rev-parse "$SOURCE_SHA:$LINUX_REL")"
+ACTUAL_BLOB="$(git -C "$D" rev-parse "${SOURCE_SHA}:$LINUX_REL")"
 [[ "$ACTUAL_BLOB" == "$LINUX_BLOB" ]] || { echo "D4_WOP_REMOTE_LINUX_BLOB_MISMATCH=$ACTUAL_BLOB" >&2; exit 70; }
 echo "D4_WOP_REMOTE_EXACT_BINDINGS=PASS"
 export STAGE12_WINDOWS_READY_CONFIRMATION='STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS'

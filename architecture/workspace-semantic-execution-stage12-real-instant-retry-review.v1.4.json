@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.4",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "version": "v1.3",
+    "status": "PRELIVE_BOOTSTRAP_FAILED_POWERSHELL_PARSE",
+    "consumed": false,
+    "reusable": false,
+    "observed_error": "PowerShell parser rejected $SOURCE_SHA:$LINUX_REL in the D4 wrapper before runtime launch."
+  },
+  "delta": {
+    "scope": "one Bash variable-delimiting repair inside the PowerShell single-quoted remote-template plus parser regression coverage",
+    "before": "\"$SOURCE_SHA:$LINUX_REL\"",
+    "after": "\"${SOURCE_SHA}:$LINUX_REL\"",
+    "semantic_intent": "Preserve exact Bash git revision syntax while making the containing PowerShell source parse unambiguously.",
+    "live_runtime_semantics_changed": false,
+    "security_boundary_changed": false
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "separate_chat_approval_required": false,
+    "approval_signal": "execution of exact reviewed `wop d4` after validation"
+  }
+}

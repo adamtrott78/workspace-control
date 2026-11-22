@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import subprocess
 from pathlib import Path
 import unittest
@@ -44,7 +45,32 @@ class Stage12V13WopRepairTests(unittest.TestCase):
         self.assertIn("ssh.exe", text)
         self.assertIn("D4_WOP_REMOTE_EXACT_BINDINGS=PASS", text)
         self.assertIn("STAGE12_WINDOWS_READY_CONFIRMATION", text)
+        self.assertIn(r'"${SOURCE_SHA}:$LINUX_REL"', text)
+        self.assertNotIn(r'"$SOURCE_SHA:$LINUX_REL"', text)
         self.assertNotIn("SendKeys", text)
+
+    def test_wop_powershell_parses_when_parser_available(self) -> None:
+        engine = shutil.which("powershell.exe") or shutil.which("pwsh")
+        if engine is None:
+            self.skipTest("PowerShell parser unavailable on this runner")
+        script = WOP.read_text(encoding="utf-8")
+        parser = (
+            "$text=[Console]::In.ReadToEnd(); "
+            "$tokens=$null; $errors=$null; "
+            "[System.Management.Automation.Language.Parser]::ParseInput("
+            "$text,[ref]$tokens,[ref]$errors) | Out-Null; "
+            "if($errors.Count -gt 0){"
+            "$errors | ForEach-Object { [Console]::Error.WriteLine($_.Message) }; "
+            "exit 1}; exit 0"
+        )
+        proc = subprocess.run(
+            [engine, "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", parser],
+            input=script,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
 
     def test_linux_v4_is_noninteractive_for_windows_marker_only(self) -> None:
         text = LINUX.read_text(encoding="utf-8")
