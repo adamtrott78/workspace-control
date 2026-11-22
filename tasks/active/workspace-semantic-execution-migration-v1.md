@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 3986cbcb547e71c99c008cc22aad463df8165954
+- Remote checkpoint: 254ef913f5be0799cb2fb6fe2722961552049851
 - Remote verified: true
 
 ### PADataset
@@ -70,19 +70,19 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-D4 V1.9 REVIEW / CLEANUP GATE. v1.8 is consumed and non-reusable after a real Q1 remote-dispatch failure; do not rerun it. v1.9 orchestration candidate 3986cbcb547e71c99c008cc22aad463df8165954 is 3/3 green (#3125/#425/#698) and preserves the frozen A7 frontend exactly. Immediate operator-only action is `wop-down` then `wop-status` to clean the degraded v1.8 Windows runtime and require OFFLINE. This v1.9 review grants zero live authority. After cleanup evidence, freeze/validate the v1.9 review state and request fresh explicit one-shot approval before any live retry.
+D4 V1.9 WINDOWS CLEANUP THEN EXPLICIT APPROVAL GATE. v1.9 review/procedure is frozen and exact-head 3/3 validated at 254ef913f5be0799cb2fb6fe2722961552049851 (Workspace #3127 / Semantic #427 / Operator #700), preserving accepted A7 bytes exactly and granting ZERO live authority. Adam must run `wop-down` then `wop-status` and provide OFFLINE evidence for the degraded v1.8 Windows runtime. After that cleanup is durably recorded, stop for Adam's fresh explicit approval of exactly one v1.9 D4 attempt; only then create and validate a fresh one-shot authority. Do not rerun v1.8 and do not silently retry.
 
 ## Remaining work
 
-- Record Windows v1.8 cleanup PASS/OFFLINE evidence.
-- Validate/freeze D4 v1.9 review/procedure exact head with A7 bytes unchanged.
-- Only after explicit approval, create and validate a fresh one-shot v1.9 authority.
-- After D4 PASS, continue to Research Engine research-iterate E1–E3 proving.
+- Obtain and durably record Windows v1.8 cleanup evidence: wop-down PASS and wop-status OFFLINE.
+- After cleanup, request fresh explicit operator approval for exactly one v1.9 D4 attempt.
+- Only after approval, create and exact-head validate a fresh one-shot v1.9 authority artifact.
+- After D4 PASS, proceed to Research Engine research-iterate E1–E3 proving.
 
 ## Blockers / gates
 
-- WINDOWS CLEANUP: current v1.8 helper runtime was observed DEGRADED (helper alive, web-ext/Firefox absent) and must be cleaned with accepted wop-down, then wop-status OFFLINE.
-- LIVE AUTHORITY: v1.8 is consumed/non-reusable. v1.9 review candidate grants zero live authority; fresh exact-head validation and explicit one-shot approval are required.
+- WINDOWS CLEANUP: degraded v1.8 runtime must be stopped and verified OFFLINE.
+- LIVE AUTHORITY: v1.9 review is validated but grants zero authority; fresh explicit one-shot approval is required after cleanup.
 
 ## Fresh-chat initialization
 
