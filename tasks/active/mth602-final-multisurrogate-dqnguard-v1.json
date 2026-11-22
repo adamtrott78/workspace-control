@@ -3641,6 +3641,9 @@
     "authoritative_json": "tasks/active/mth602-final-multisurrogate-dqnguard-v1.json",
     "derived_handoff": "tasks/active/mth602-final-multisurrogate-dqnguard-v1.md",
     "recovery_script": "scripts/mth602_recover_t007_checkpoint.sh",
-    "instruction": "Re-read PR #640 current head and authoritative JSON first; do not rely on chat prose."
+    "instruction": "Re-read PR #640 current head and authoritative JSON first; do not rely on chat prose.",
+    "derived_handoff_commit": "2c9e764321fc69572c686b66c4580d732b184405",
+    "recovery_script_commit": "1c989556e6d3481328070ae366900e322037356f",
+    "prepared_reason": "Fresh-chat recovery after prior conversation length limit; correct stale checkpoint path and preserve recovery-first policy."
   }
 }
