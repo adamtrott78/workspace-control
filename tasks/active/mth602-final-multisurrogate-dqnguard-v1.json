@@ -3869,7 +3869,57 @@
       "github_api_calls_per_refresh": 0,
       "provider_network_calls_per_refresh": 0,
       "ctrl_c_behavior": "Inside tmux, detach current client and leave dashboard/session alive.",
-      "reattach_command": "tmux attach -t mth602-t007-wave"
+      "reattach_command": "tmux attach -t mth602-t007-wave",
+      "workflow_run_id_capture": {
+        "status": "IMPLEMENTED_VALIDATED",
+        "commit": "e8b3b084ca13563dba32f8953ec343bc54b54101",
+        "validation_receipt": "job-68404c7e-1eac-45aa-b958-a92f76270dea",
+        "validation_result": "2 passed",
+        "behavior": "Elevated host observer reads only GITHUB_RUN_ID/GITHUB_RUN_ATTEMPT/GITHUB_WORKFLOW from /proc/<training_pid>/environ and persists them in the operator-owned local cache; no network/provider calls.",
+        "purpose": "Allow future completed t007 rows to retain exact workflow run identity after the training process exits so connected GitHub can resolve job/artifact provenance without provider run-list polling."
+      }
+    },
+    "local_terminal_observation_20261122_1327_est": {
+      "source": "operator-pasted host-local zero-provider dashboard",
+      "new_terminal_pairs": [
+        "PA1-PA2"
+      ],
+      "pa1_pa2": {
+        "status": "LOCAL_SUCCESS_PENDING_PROVIDER_ARTIFACT_BINDING",
+        "best_epoch": 2,
+        "displayed_val_macro_f1": 1,
+        "displayed_total": "48:38",
+        "note": "Local terminal evidence is sufficient to identify completion, but standard bounded directional evaluation requires exact workflow run/job plus uploaded artifact ID/digest before admission."
+      },
+      "still_running": [
+        "PA1-PA4",
+        "PA3-PA8"
+      ],
+      "admitted_not_local": [
+        "PA1-PA3",
+        "PA1-PA8",
+        "PA2-PA4",
+        "PA3-PA4",
+        "PA4-PA8"
+      ]
+    },
+    "pa1_pa2_osr_evaluation": {
+      "status": "BLOCKED_ON_PROVIDER_ARTIFACT_BINDING_ONLY",
+      "required": [
+        "workflow_run_id",
+        "workflow_job_id",
+        "artifact_id",
+        "artifact_digest"
+      ],
+      "local_completion_observed": true,
+      "standard_evaluator": "l2o_directional_eval",
+      "intended_directions": [
+        "PA1<-PA2",
+        "PA2<-PA1"
+      ],
+      "selection_role": "POST_FREEZE_DIAGNOSTIC_ONLY_NO_RECIPE_FEEDBACK",
+      "blocker": "Connected GitHub surface exposes fetch-by-run-id jobs/artifacts but not a repository issue_comment workflow-run listing endpoint; PA1-PA2 completed before the local observer began persisting GITHUB_RUN_ID.",
+      "smallest_operator_action": "One bounded one-shot gh resolver (three REST requests total, no polling) to recover the PA1-PA2 workflow run/job/artifact binding. Future active jobs will be captured locally by the updated observer."
     }
   }
 }
