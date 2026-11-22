@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.4",
+  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "version": "v1.3",
+    "result": "PRELIVE_POWERSHELL_PARSE_FAILURE",
+    "consumed": false,
+    "reusable": false
+  },
+  "exact_review": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.4.json",
+    "blob_sha": "de0ca4d0d0cd127c7286f3ed261239025da419e1",
+    "candidate_head": "ec34271925fe096522dc7676bf0b45682e2a9579",
+    "candidate_validation": {
+      "workspace_control_run": 3103,
+      "semantic_execution_run": 403,
+      "operator_bridge_run": 676,
+      "result": "SUCCESS"
+    },
+    "validated_review_head": "fda2b1c80d3dce81b0b6aa4053988e7f62800ea5",
+    "validated_review_state": {
+      "workspace_control_run": 3104,
+      "semantic_execution_run": 404,
+      "operator_bridge_run": 677,
+      "result": "SUCCESS"
+    },
+    "procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.4.md",
+    "procedure_blob_sha": "3306fdac7ed0120c83662da9a84748bc10756eba"
+  },
+  "approval_signal": {
+    "policy_path": "architecture/workspace-semantic-execution-operator-wop-approval-policy.v0.1.json",
+    "policy_blob_sha": "cfede468d3004d1267fc4bd9656107368e6b58d0",
+    "exact_command": "wop d4",
+    "separate_chat_approval_required": false,
+    "observed": false
+  },
+  "attempt_contract": {
+    "attempts_after_approval_signal": 1,
+    "consumed": false,
+    "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "no_silent_retry": true
+  },
+  "exact_execution_bindings": {
+    "source_head": "ec34271925fe096522dc7676bf0b45682e2a9579",
+    "operator-bridge/tools/run-stage12-wop.ps1": "d06079b61f68ad26502e759a520fbd8dca03445c",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "6b9c2c0e10804c563e344618360bb4ef27849b23",
+    "operator-bridge/tools/install-wop-commands.ps1": "0c469fb2bc0d9ca5027bda7c77869bba8dd1e76a",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "367fea22f867e30defe17afb8abe7fc68680de69",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.4.md": "3306fdac7ed0120c83662da9a84748bc10756eba"
+  },
+  "safety": {
+    "manual_auth_only": true,
+    "manual_worker_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_enter": false,
+    "dom_scraping": false,
+    "credential_automation": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "paid_api_fallback": false
+  },
+  "postcondition": "One D4 v1.4 live attempt is conditionally staged. Executing exact `wop d4` is the operator approval signal. The attempt is not consumed unless the Linux transaction prints STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS."
+}
