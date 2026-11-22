@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.8",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "CONSUMED_FAILED_Q1_REMOTE_DISPATCH_NONREUSABLE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
   "purpose": "One-shot D4 authority using the exact accepted A7 frontend launched from the interactive parent PowerShell after backend Q1 readiness.",
@@ -41,13 +41,14 @@
     "policy_blob_sha": "cfede468d3004d1267fc4bd9656107368e6b58d0",
     "exact_command": "wop d4",
     "separate_chat_approval_required": false,
-    "observed": false
+    "observed": true
   },
   "attempt_contract": {
     "attempts_after_approval_signal": 1,
-    "consumed": false,
+    "consumed": true,
     "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
-    "no_silent_retry": true
+    "no_silent_retry": true,
+    "reusable": false
   },
   "exact_execution_bindings": {
     "source_head": "ba2a34cd452fe7c0f284765b20cb33358a86aa6f",
@@ -71,12 +72,31 @@
   },
   "cleanup_contract": {
     "predecessor_windows_cleanup": "PASS",
-    "next_attempt_route_absence_preflight": true
+    "next_attempt_route_absence_preflight": true,
+    "current_attempt_linux_route_restored": "PASS_OBSERVED_BY_JUPYTER_404",
+    "current_attempt_windows_cleanup": "PENDING_OPERATOR_WOP_DOWN"
   },
   "execution_tip_contract": {
     "branch": "workspace-semantic-execution-migration-v1",
     "rule": "The exact live execution tip is the commit containing this authority. It must be 3/3 validated and branch-stable before operator execution.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "One v1.8 attempt is conditionally staged. `wop d4` supplies approval. Consumption occurs only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS."
+  "postcondition": "v1.8 was consumed and failed at Q1 remote dispatch. It is non-reusable. No silent retry is authorized.",
+  "failure": {
+    "phase": "Q1_REAL_INSTANT_OPERATOR_SERVICE",
+    "classification": "REMOTE_DISPATCH_TRANSPORT_OR_ROUTE_FAILURE",
+    "exact_frontend_evidence": [
+      "Frozen A7 WorkspaceOperator helper was alive and responsive in the same interactive Windows session as the operator shell.",
+      "Bridge startup completed enabled and Firefox adapter connected.",
+      "Physical Ctrl+Space produced dispatch events; each dispatch failed with HttpRequestException before an actionId was returned.",
+      "No browser prepare, clipboard, or focus action occurred because failure was before claim completion."
+    ],
+    "exact_backend_evidence": [
+      "Later read-only Windows GET probes with both Invoke-WebRequest and .NET HttpClient reached the same Tailscale hostname and received Jupyter 404, proving the temporary /operator-bridge/v1 route had been removed and the original Jupyter root restored by diagnosis time.",
+      "The historical dispatch log does not preserve the HTTP status code, so the exact Q1-time distinction between route loss and a claim-specific HTTP 4xx/5xx is not proven."
+    ],
+    "frozen_a7_regression": false,
+    "root_cause_status": "ORCHESTRATION_BACKEND_LIFETIME_OR_REMOTE_CLAIM_PATH_UNRESOLVED",
+    "retry_attempted": false
+  }
 }
