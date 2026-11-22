@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.5",
+  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "version": "v1.4",
+    "result": "PRELIVE_POWERSHELL_HERE_STRING_PARSE_FAILURE",
+    "consumed": false,
+    "reusable": false,
+    "observed_error": "Windows PowerShell 5.1 reported \"The string is missing the terminator\" before runtime launch."
+  },
+  "diagnosis": {
+    "root_cause": "The D4 PowerShell wrapper embedded Bash in a here-string, but the mandatory Windows PowerShell parse gate did not include run-stage12-wop.ps1.",
+    "live_runtime_started": false,
+    "linux_transaction_started": false,
+    "live_attempt_consumed": false
+  },
+  "repair": {
+    "embedded_bash_removed": true,
+    "checked_in_remote_bootstrap": "operator-bridge/tools/run-stage12-remote-bootstrap.sh",
+    "exact_transport": "PowerShell reads the checked-in bootstrap bytes, base64-encodes them, and sends them over the existing Tailscale SSH path.",
+    "windows_powershell_5_1_parse_gate_added": true,
+    "parser_gate_workflow": ".github/workflows/operator-bridge-validation.yml",
+    "steady_state_command": "wop d4",
+    "manual_worker_sequence_unchanged": "Ctrl+Space -> Ctrl+V -> Enter",
+    "security_boundary_changed": false
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_validation_required": true,
+    "separate_chat_approval_required": false,
+    "future_approval_signal": "execution of exact reviewed wop d4"
+  }
+}

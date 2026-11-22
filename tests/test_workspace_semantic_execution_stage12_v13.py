@@ -83,5 +83,30 @@ class Stage12V13WopRepairTests(unittest.TestCase):
         proc = subprocess.run(["bash","-n",str(LINUX)],cwd=ROOT,text=True,capture_output=True,check=False)
         self.assertEqual(proc.returncode,0,proc.stderr)
 
+
+class Stage12V15ParserSafeTransportTests(unittest.TestCase):
+    def test_remote_bootstrap_is_checked_in_and_bash_valid(self) -> None:
+        bootstrap = ROOT / "operator-bridge/tools/run-stage12-remote-bootstrap.sh"
+        self.assertTrue(bootstrap.is_file())
+        proc = subprocess.run(
+            ["bash", "-n", str(bootstrap)],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
+    def test_wop_has_no_embedded_bash_here_string(self) -> None:
+        text = WOP.read_text(encoding="utf-8")
+        self.assertNotIn("$remoteTemplate", text)
+        self.assertIn("run-stage12-remote-bootstrap.sh", text)
+        self.assertIn("[System.IO.File]::ReadAllBytes", text)
+
+    def test_operator_validation_parses_stage12_wop_in_windows_powershell(self) -> None:
+        workflow = (ROOT / ".github/workflows/operator-bridge-validation.yml").read_text(encoding="utf-8")
+        self.assertIn('"operator-bridge/tools/run-stage12-wop.ps1"', workflow)
+
+
 if __name__ == "__main__":
     unittest.main()
