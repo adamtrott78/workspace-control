@@ -19,6 +19,7 @@ import json
 import os
 import pwd
 import shlex
+import signal
 import subprocess
 import sys
 import time
@@ -384,6 +385,24 @@ def status_color(status):
     return mapping.get(status, GRAY) + status + RESET
 
 
+def handle_sigint(_signum, _frame):
+    """Ctrl+C detaches the tmux client without terminating this dashboard."""
+    if os.environ.get("TMUX"):
+        try:
+            subprocess.run(
+                ["tmux", "detach-client"],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return
+        except Exception:
+            pass
+
+    # Outside tmux, preserve conventional Ctrl+C behavior.
+    raise KeyboardInterrupt
+
+
 def render():
     cache = load_cache()
     sys.stdout.write("\033[?1049h\033[?25l\033[H")
@@ -520,7 +539,7 @@ def render():
                     + RESET
                 )
             frame.append(DIM + "ETA = local process age × remaining/observed overall training fraction; it will move as epoch speed changes." + RESET)
-            frame.append(BOLD + "Ctrl+B then D" + RESET + " detach tmux  |  " + BOLD + "Ctrl+C" + RESET + " stop dashboard")
+            frame.append(BOLD + "Ctrl+C" + RESET + " detach + keep dashboard alive  |  " + BOLD + "Ctrl+B then D" + RESET + " also detaches")
 
             sys.stdout.write("\033[H" + "\n".join(frame) + "\033[J")
             sys.stdout.flush()
@@ -531,6 +550,7 @@ def render():
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGINT, handle_sigint)
     try:
         render()
     except KeyboardInterrupt:
