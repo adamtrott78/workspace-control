@@ -56,10 +56,11 @@
   "authority_gate": {
     "live_retry_authorized": false,
     "exact_head_validation_required": true,
-    "windows_cleanup_required": true,
-    "fresh_operator_approval_required": true
+    "windows_cleanup_required": false,
+    "fresh_operator_approval_required": true,
+    "windows_cleanup_accepted": true
   },
-  "postcondition": "v1.9 orchestration review is frozen and exact-head 3/3 validated, with A7 bytes unchanged. It grants zero live authority. Remaining gates are Windows v1.8 runtime cleanup and fresh explicit one-shot operator approval before a v1.9 authority artifact may be created.",
+  "postcondition": "v1.9 orchestration review is frozen and exact-head 3/3 validated, A7 bytes are unchanged, and v1.8 Windows cleanup is accepted OFFLINE. This review grants zero live authority. The sole next gate is fresh explicit operator approval for exactly one v1.9 D4 attempt before a new authority artifact may be created and validated.",
   "frozen_review_head": "254ef913f5be0799cb2fb6fe2722961552049851",
   "frozen_review_validation": {
     "workspace_control_run": 3127,

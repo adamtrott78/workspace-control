@@ -24,24 +24,23 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 254ef913f5be0799cb2fb6fe2722961552049851
+- Remote checkpoint: 922d5f92ecbc203471138e2529b68eb1a45684d1
 - Remote verified: true
 
 ## Next safe action
 
-D4 V1.9 WINDOWS CLEANUP THEN EXPLICIT APPROVAL GATE. v1.9 review/procedure is frozen and exact-head 3/3 validated at 254ef913f5be0799cb2fb6fe2722961552049851 (Workspace #3127 / Semantic #427 / Operator #700), preserving accepted A7 bytes exactly and granting ZERO live authority. Adam must run `wop-down` then `wop-status` and provide OFFLINE evidence for the degraded v1.8 Windows runtime. After that cleanup is durably recorded, stop for Adam's fresh explicit approval of exactly one v1.9 D4 attempt; only then create and validate a fresh one-shot authority. Do not rerun v1.8 and do not silently retry.
+D4 V1.9 EXPLICIT ONE-SHOT APPROVAL GATE. v1.8 is consumed, cleaned, OFFLINE, and non-reusable. v1.9 review/procedure is frozen and exact-head 3/3 validated at 922d5f92ecbc203471138e2529b68eb1a45684d1 (Workspace #3128 / Semantic #428 / Operator #701), with accepted A7 bytes unchanged and ZERO live authority. Stop until Adam explicitly approves exactly one v1.9 D4 attempt. After approval only, create a fresh v1.9 authority artifact bound to the validated review/procedure/source, exact-head validate that authority, and then execute one bounded live attempt. No silent retry.
 
 ## Remaining work
 
-- Obtain and durably record Windows v1.8 cleanup evidence: wop-down PASS and wop-status OFFLINE.
-- After cleanup, request fresh explicit operator approval for exactly one v1.9 D4 attempt.
-- Only after approval, create and exact-head validate a fresh one-shot v1.9 authority artifact.
+- Wait for Adam's fresh explicit approval of exactly one v1.9 D4 attempt.
+- After approval only, create and exact-head validate a fresh one-shot v1.9 authority artifact.
+- Execute exactly one bounded v1.9 D4 attempt with post-A7 backend revalidation and route-health monitoring.
 - After D4 PASS, proceed to Research Engine research-iterate E1–E3 proving.
 
 ## Blockers / gates
 
-- WINDOWS CLEANUP: degraded v1.8 runtime must be stopped and verified OFFLINE.
-- LIVE AUTHORITY: v1.9 review is validated but grants zero authority; fresh explicit one-shot approval is required after cleanup.
+- LIVE AUTHORITY: v1.9 review is validated and Windows cleanup is accepted, but it grants zero live authority. Fresh explicit approval for exactly one v1.9 D4 attempt is required.
 
 ## Fresh-chat initialization
 

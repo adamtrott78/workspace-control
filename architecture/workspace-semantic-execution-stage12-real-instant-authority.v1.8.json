@@ -74,7 +74,13 @@
     "predecessor_windows_cleanup": "PASS",
     "next_attempt_route_absence_preflight": true,
     "current_attempt_linux_route_restored": "PASS_OBSERVED_BY_JUPYTER_404",
-    "current_attempt_windows_cleanup": "PENDING_OPERATOR_WOP_DOWN"
+    "current_attempt_windows_cleanup": "PASS",
+    "current_attempt_windows_cleanup_evidence": [
+      "WORKSPACE_OPERATOR_RUNTIME_PROCESS_CLEANUP=PASS",
+      "WORKSPACE_OPERATOR_RUNTIME_WORKDIR_CLEANUP=PASS",
+      "WORKSPACE_OPERATOR_DEV_OFFLINE=PASS",
+      "WORKSPACE_OPERATOR_DEV_STATUS=OFFLINE"
+    ]
   },
   "execution_tip_contract": {
     "branch": "workspace-semantic-execution-migration-v1",

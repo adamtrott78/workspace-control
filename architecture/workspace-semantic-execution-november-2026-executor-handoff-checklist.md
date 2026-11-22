@@ -234,3 +234,13 @@ The prior retry-by-retry Stage-12 chronology is intentionally collapsed here bec
 - [x] Source `5839870b067af9c416099e096d29c614c5b8402b` hardens the installed shim driver: shallow-fetch current branch head, use `FETCH_HEAD` when it matches the requested SHA, fetch the exact SHA only when needed, checkout `FETCH_HEAD`, and explicitly verify the commit tree exists.
 - [x] Exact-head validation: Workspace #3082 PASS; Semantic #382 PASS; Operator #655 PASS.
 - [x] Current-head bootstrap, shim installation, self-test and status verification completed successfully. No D4 authority was created.
+
+
+### 2026-11-22 D4 v1.8 failure closeout / v1.9 approval gate
+
+- [x] v1.8 Q1 failure diagnosed without changing accepted A7 frontend bytes: helper was alive in the interactive session, bridge enabled, adapter connected, Ctrl+Space produced dispatch attempts, and each failed before action claim with HttpRequestException.
+- [x] v1.8 authority is consumed and non-reusable.
+- [x] v1.9 D4 outer-orchestration repair preserves A7 source tree `51480cc44f62d661421e975e67af127ecd0b0417` and dev harness `ac035d2fc898274c32cad43954ce44c15b198207`; source candidate `3986cbcb…` passed Workspace #3125 / Semantic #425 / Operator #698.
+- [x] v1.9 frozen review/procedure head `922d5f92ecbc203471138e2529b68eb1a45684d1` passed Workspace #3128 / Semantic #428 / Operator #701.
+- [x] v1.8 Windows cleanup accepted: runtime process cleanup PASS, workdir cleanup PASS, DEV_OFFLINE PASS, and `wop-status` OFFLINE.
+- [ ] **CURRENT GATE:** fresh explicit approval for exactly one v1.9 D4 attempt. The validated review grants zero live authority. After approval only, create/validate a fresh authority artifact; no silent retry.
