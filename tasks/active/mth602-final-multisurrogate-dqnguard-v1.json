@@ -3657,6 +3657,28 @@
           "prove_bounded_scientific_runner": "PASS",
           "checkout_exact_candidate_sha": "PASS",
           "validate_bounded_scientific_request": "PASS"
+        },
+        "operator_observer": {
+          "mode": "HOST_LOCAL_ZERO_PROVIDER_API",
+          "renderer": "scripts/mth602_t007_rerun_local_dashboard.py",
+          "tmux_launcher": "scripts/mth602_t007_rerun_tmux.sh",
+          "procedure": "procedures/experiment_wave_dashboard.md",
+          "telemetry": [
+            "local pa_train_one.py process age",
+            "local RUNNER_TEMP scientific-results/backbone",
+            "train_progress.json",
+            "history.json",
+            "train_complete.json",
+            "train_error.json",
+            "nvidia-smi",
+            "persistent operator-owned cache"
+          ],
+          "refresh_seconds": 1,
+          "github_cli_calls_per_refresh": 0,
+          "github_api_calls_per_refresh": 0,
+          "provider_network_calls_per_refresh": 0,
+          "timing": "elapsed from local process age; ETA from overall local training fraction; projected finish from local wall clock",
+          "elevated_observer": "sudo read-only host observation because runner isolation may hide process/result telemetry"
         }
       }
     }
