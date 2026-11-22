@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.4",
-  "status": "APPROVAL_SIGNAL_OBSERVED_UNCONSUMED_PRELIVE_STALE_SESSION_SHADOW_RECOVERY",
+  "status": "APPROVAL_SIGNAL_OBSERVED_UNCONSUMED_PRELIVE_POWERSHELL_HERE_STRING_PARSE_FAILURE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "version": "v1.3",
@@ -64,10 +64,10 @@
     "public_listener": false,
     "paid_api_fallback": false
   },
-  "postcondition": "Operator approval signal is observed. The attempt remains unconsumed because the stale in-memory PowerShell function rejected `d4` before repaired WOP execution. One pre-live recovery is authorized via exact command `wop-d4`, which is installer-proven equivalent to driver action `d4`. No new approval is required.",
+  "postcondition": "v1.4 remains unconsumed but is non-reusable. Fresh PowerShell reached the installed WOP driver, then run-stage12-wop.ps1 failed to parse before Windows runtime launch. v1.5 replaces the embedded Bash here-string and requires a Windows PowerShell 5.1 parser gate.",
   "prelive_failure": {
-    "classification": "CURRENT_POWERSHELL_SESSION_COMMAND_SHADOW",
-    "observed_error": "The argument \"d4\" does not belong to the set \"smoke,reset,restart,start,online,stop,offline,status\".",
+    "classification": "POWERSHELL_HERE_STRING_PARSE_FAILURE",
+    "observed_error": "Windows PowerShell 5.1: The string is missing the terminator: \".",
     "repaired_runtime_started": false,
     "linux_transaction_started": false,
     "live_consumption_marker_observed": false,
