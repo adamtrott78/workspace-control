@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.1",
-  "status": "REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Freeze a fresh D4 real-account Stage-12 calibration against the fully accepted Windows Operator frontend and convenience layer, with current blank-startup/manual-auth handoff and unchanged Linux v3/harness/candidate-result isolation.",
   "predecessor_authority": {
@@ -148,6 +148,13 @@
     "result": "SUCCESS",
     "exact_head": true
   },
-  "review_state_validation": null,
-  "postcondition": "This artifact and its bound procedure grant zero live authority. After exact-head review validation, stop for Adam's explicit one-shot approval before creating any v1.1 authority or executing Windows/Linux live steps."
+  "review_state_validation": {
+    "head": "95a6b56aef026eabae2c2d25e241c517d06d805b",
+    "workspace_control_run": 3088,
+    "semantic_execution_run": 388,
+    "operator_bridge_run": 661,
+    "result": "SUCCESS",
+    "exact_head": true
+  },
+  "postcondition": "D4 v1.1 review/procedure is exact-head validated and still grants zero live authority. Stop here until Adam explicitly approves exactly one live attempt. Only after that approval may a fresh v1.1 authority artifact be created and validated before Windows/Linux execution."
 }

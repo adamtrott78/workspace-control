@@ -24,12 +24,12 @@ Implement the UX-13-frozen human-operated Chat Instant bridge as a staged, test-
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 2f32513f97834da76287d2f948891b758d5194f5
+- Remote checkpoint: 95a6b56aef026eabae2c2d25e241c517d06d805b
 - Remote verified: true
 
 ## Next safe action
 
-D4 V1.1 REVIEW VALIDATION — fresh review/procedure artifacts are frozen against exact validated source 2f32513f…, current candidate baseline 0bc1bc0e…, unchanged Linux v3/harness bytes, and the accepted blank-startup/human-Enter frontend. Validate the review commit exact-head 3/3. If and only if it passes, persist validated-review state and stop for Adam's explicit one-shot approval. Do not create live authority or execute Windows/Linux live steps yet.
+D4 V1.1 EXPLICIT APPROVAL GATE — the fresh bounded real-account review/procedure at 95a6b56aef026eabae2c2d25e241c517d06d805b is exact-head 3/3 validated (#3088/#388/#661) and grants zero authority. Stop until Adam explicitly approves exactly one live D4 attempt bound to this validated review. After approval, create a fresh v1.1 authority artifact binding the exact validated review/procedure/source/candidate baseline, validate authority persistence, then execute Windows-first pre-live and the Linux transaction. No silent retry.
 
 ## Remaining work
 
@@ -39,7 +39,7 @@ D4 V1.1 REVIEW VALIDATION — fresh review/procedure artifacts are frozen agains
 
 ## Blockers / gates
 
-- D4 V1.1 AUTHORITY: review candidate must first pass exact-head 3/3 validation; after that, fresh explicit one-shot operator approval is required. Existing v1.0 authority is consumed/non-reusable.
+- D4 V1.1 LIVE AUTHORITY: fresh explicit operator approval for exactly one attempt is required. The validated review itself authorizes zero live execution.
 
 ## Fresh-chat initialization
 
