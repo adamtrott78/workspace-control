@@ -50,6 +50,19 @@ All seven missing canonical pairs were pre-admitted with the exact frozen t007 o
 
 This is intentional speculative parallelism based only on the known-validation t007 lead. OSR results cannot retroactively select, cancel, modify, or prioritize these jobs.
 
+### Unified t007 wave observer
+
+Use the 10-pair host-local dashboard when the operator wants to view the full t007 expansion as one wave:
+
+- renderer: `scripts/mth602_t007_fullmatrix_local_dashboard.py`
+- launcher: `scripts/mth602_t007_fullmatrix_tmux.sh`
+- session: `mth602-t007-wave`
+- validation: `job-3a07dfe4-d086-4a6c-acd5-3663dc24c3c2` — **2 passed**
+- refresh loop: **0 gh calls, 0 GitHub/provider API calls**
+- view: all 10 canonical pairs, pair-weighted overall completion, per-run ETA, approximate two-lane wave ETA, GPU telemetry
+- `Ctrl+C`: detach client, keep dashboard alive
+- reattach: `tmux attach -t mth602-t007-wave`
+
 ### Immediate next action
 
 Monitor only PR #41 exact head and the existing PA3–PA8/t007 rerun. Do not duplicate any OSR or training admission.
