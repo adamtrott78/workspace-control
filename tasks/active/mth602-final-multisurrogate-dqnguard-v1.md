@@ -1,59 +1,46 @@
 <!-- CURRENT-FRESH-CHAT-CHECKPOINT-2026-11-22 -->
 ## CURRENT FRESH-CHAT CHECKPOINT — 2026-11-22
 
-**Authoritative source:** re-read Workspace Control PR #640 current head, then `tasks/active/mth602-final-multisurrogate-dqnguard-v1.json`. Treat JSON as authoritative over older sections below. The current recovery state was last written in the JSON after the runner-temp path correction.
+**Authoritative source:** re-read Workspace Control PR #640 current head, then `tasks/active/mth602-final-multisurrogate-dqnguard-v1.json`. Treat JSON as authoritative over older sections below.
 
 ### Current scientific stage
 
-`hpo_tight60_t007_checkpoint_recovery_operator_action`
+`hpo_tight60_t007_identical_rerun_in_progress`
 
-The 6-recipe × 3-pair tight60 known-validation-only HPO matrix is terminal except for one infrastructure-failed artifact export:
+The bounded host-local checkpoint recovery is exhausted:
 
-- 11 newly required tight60 cells: **SUCCESS**
-- PA3–PA8 / t007 run `44954748830`, job `137000252399`: runner shutdown during epoch 60; **scientific training through epoch 59 completed**
-- epoch 59 known-validation macro-F1: **0.99377**
-- trainer wrote `best_model.pt` on every validation improvement and wrote `training_state_latest.pt` after each completed epoch
-- no GitHub artifact was uploaded because the workflow was cancelled before result packaging
-- target/test/OSR evidence is forbidden for HPO recovery/ranking
+- expected runner-temp path present: **NO**
+- bounded recovery candidate count: **0**
+- operator marker: `T007_RECOVERY_NOT_FOUND=1`
+- no checkpoint was recovered and no scientific mutation occurred
 
-### Recovery-path correction
+This satisfies the existing recovery policy's rerun condition.
 
-The prior operator recovery command used the wrong output directory and therefore failed at its first `sudo test -d`. Because it also used `set -e`, the interactive SSH shell terminated immediately after that nonzero test.
+### Exact identical rerun
 
-The job log proves:
+GitHub Actions re-ran the original failed job directly, preserving the same scientific inputs:
 
-- runner job root: `/srv/workspace-ci/padataset/jobs/p5-e1067c12-ee3a-57fc-b6fc-830b2453b655`
-- checkout: `.../runner/_work/PADataset/PADataset`
-- trusted workflow rewrites `cfg["save_root"]` to `$RUNNER_TEMP/scientific-results/backbone`
-- therefore the correct expected run directory is:
+- workflow run: `44954748830`
+- original failed job: `137000252399`
+- rerun job: `137275754026`
+- PADataset draft PR: `#40`
+- exact candidate head: `da521eaee997c56012290c9c261ee1831432ebbc`
+- lane: `/lambda-scientific-2`
+- manifest: `manifests/configs/l2o_hpo_tight60_v1/l2o_hpo_tight60_PA3_PA8_t007.json`
+- hyperparameter changes: **NONE**
+- target/test/OSR evidence used for recovery/retry selection: **NO**
 
-`/srv/workspace-ci/padataset/jobs/p5-e1067c12-ee3a-57fc-b6fc-830b2453b655/runner/_work/_temp/scientific-results/backbone/l2o_hpo_tight60_PA3_PA8_t007`
-
-Do **not** use the stale repository-relative path under `results_pa_ota_l2o_hpo_tight60_v1`.
+At admission the rerun job was **QUEUED**.
 
 ### Immediate next action
 
-Operator runs the durable recovery script `scripts/mth602_recover_t007_checkpoint.sh` (or the equivalent corrected bounded probe supplied in chat). It:
+Do **not** launch another PA3–PA8/t007 request while job `137275754026` is queued or running.
 
-1. checks the exact expected runner-temp directory;
-2. if absent, searches only inside the one known failed runner job;
-3. copies recoverable checkpoint/state/config/history/progress files to
-   `$HOME/adamArchives/recovered/mth602-tight60-PA3-PA8-t007-run44954748830`;
-4. computes SHA-256;
-5. validates `best_model.pt` epoch/known-validation metrics and per-class F1;
-6. validates `training_state_latest.pt` completed epoch.
-
-Expected recovery evidence:
-- `BEST_CHECKPOINT_EPOCH = 59`
-- `BEST_VAL_MACRO_F1 ≈ 0.99377`
-- `TRAINING_STATE_EPOCH = 59`
-- exact known-class per-class F1 derived from the saved confusion matrix
-
-If local checkpoint recovery is impossible, rerun **only the identical PA3–PA8/t007 tight60 cell**. Do not change hyperparameters. Do not use target/test/OSR evidence.
+Monitor the exact rerun to terminal state. On SUCCESS, validate the uploaded artifact and use only known-validation evidence to finalize the 6-recipe × 3-pair tight60 ranking. The provisional leader remains t007 pending this clean artifact.
 
 ### Provisional tight60 recipe picture
 
-- t007: provisional leader; PA2–PA3 macro `0.9935446`, PA2–PA8 `0.9876064`, PA3–PA8 epoch-59 log `0.99377`; clean recovered artifact still required for formal ranking.
+- t007: provisional leader; PA2–PA3 macro `0.9935446`, PA2–PA8 `0.9876064`, prior PA3–PA8 epoch-59 log `0.99377`.
 - t001: strong, 3/3 competency passes.
 - t002: strong, 3/3 competency passes.
 - t005: mixed, 2/3.
