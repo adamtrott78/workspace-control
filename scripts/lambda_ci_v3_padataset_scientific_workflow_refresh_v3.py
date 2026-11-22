@@ -493,7 +493,7 @@ def main() -> int:
 
         tx.update(
             {
-                "phase": "COMMITTED_ACTIVE_WORKFLOW_REFRESH_V2",
+                "phase": "COMMITTED_ACTIVE_WORKFLOW_REFRESH_V3",
                 "refresh_receipt_sha256": base.sha(REFRESH_ACTIVE.read_bytes()),
                 "controller_policy_file_sha256": base.sha(TARGET_POLICY.read_bytes()),
                 "reconciler_sha256": base.sha(INSTALLED_RECONCILER.read_bytes()),
@@ -503,7 +503,7 @@ def main() -> int:
             }
         )
         base.atomic_json(tx_path, tx)
-        print("PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2=PASS")
+        print("PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3=PASS")
         print(f"TRANSACTION_RECEIPT={tx_path}")
         return 0
     except BaseException as exc:
