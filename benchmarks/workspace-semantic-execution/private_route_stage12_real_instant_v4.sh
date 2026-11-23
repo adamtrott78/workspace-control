@@ -2,7 +2,8 @@
 set -Eeuo pipefail
 umask 077
 
-SEMANTIC_SHA="7c20097c5f177f23c16a765b95ce94d7161f0d29"
+SEMANTIC_SHA="020d35156d90e8268fb560a10e67098a146880de"
+EXPECTED_OPERATOR_HTTP_BLOB="3b6893c157c9f567c837aa70c110012eb96ee18c"
 BASE_URL="https://gokhan-lambda-vector.tailca6171.ts.net"
 ROUTE_PATH="/operator-bridge/v1"
 BACKEND_PORT="8765"
@@ -107,9 +108,6 @@ REMOTE_CANDIDATE="$(git ls-remote "$REPO_URL" refs/heads/worker-result-candidate
 echo "STAGE12_CANDIDATE_BASELINE=PASS"
 [[ "$("$PG_PREFIX/bin/postgres" --version)" == "postgres (PostgreSQL) 14.24" ]]   || fail "POSTGRES_RUNTIME_VERSION_MISMATCH"
 
-ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || fail "NOT_IN_GIT_CHECKOUT"
-git -C "$ROOT" cat-file -e "$SEMANTIC_SHA^{commit}" 2>/dev/null   || fail "SEMANTIC_SHA_NOT_AVAILABLE_LOCALLY"
-[[ -f "$ROOT/$HARNESS_REL" ]] || fail "STAGE12_HARNESS_MISSING"
 [[ ! -e "$RUNTIME_ROOT" ]] || fail "RUNTIME_ROOT_ALREADY_EXISTS"
 mkdir -m 0700 "$RUNTIME_ROOT" "$PGDATA" "$PGSOCKET" "$SRCROOT"
 
@@ -201,6 +199,15 @@ print("TAILSCALE_EXISTING_JUPYTER_ROOT_BINDING=PASS")
 print("TAILSCALE_STAGE12_ROUTE_ABSENT=PASS")
 print("TAILSCALE_FUNNEL_DISABLED=PASS")
 PY
+
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || fail "NOT_IN_GIT_CHECKOUT"
+git -C "$ROOT" cat-file -e "$SEMANTIC_SHA^{commit}" 2>/dev/null \
+  || fail "SEMANTIC_SHA_NOT_AVAILABLE_LOCALLY"
+LIVE_OPERATOR_HTTP_BLOB="$(git -C "$ROOT" rev-parse "$SEMANTIC_SHA:semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py")"
+[[ "$LIVE_OPERATOR_HTTP_BLOB" == "$EXPECTED_OPERATOR_HTTP_BLOB" ]] \
+  || fail "LIVE_SEMANTIC_OPERATOR_HTTP_BLOB_MISMATCH:$LIVE_OPERATOR_HTTP_BLOB"
+[[ -f "$ROOT/$HARNESS_REL" ]] || fail "STAGE12_HARNESS_MISSING"
+echo "STAGE12_SEMANTIC_LIVE_BINDING=PASS"
 
 echo "STAGE12_PRELIVE_WINDOWS_CONFIRMATION_REQUIRED=$WINDOWS_READY_MARKER"
 WINDOWS_READY="${STAGE12_WINDOWS_READY_CONFIRMATION:-}"

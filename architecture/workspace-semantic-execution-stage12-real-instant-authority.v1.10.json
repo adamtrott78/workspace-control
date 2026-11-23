@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.10",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "CONSUMED_FAILED_Q1_LIVE_SEMANTIC_BINDING_STALE_NONREUSABLE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "backend_task": "workspace-semantic-execution-backend-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
@@ -84,8 +84,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "consumed_on_success_or_failure_after_marker": true,
     "abort_before_marker_does_not_consume_live_attempt": true,
@@ -136,5 +136,29 @@
     "rule": "The exact authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "Exactly one v1.10 D4 attempt is authorized after exact-head 3/3 validation of this authority persistence. Consumption occurs only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS; any post-consumption success or failure consumes the attempt and requires a fresh cycle for retry."
+  "postcondition": "v1.10 was consumed and failed because D4 live execution used stale semantic source 7c20097c… rather than the validated repair source. This authority is non-reusable.",
+  "failure_record": {
+    "consumed_marker_observed": true,
+    "q1_ready_observed": true,
+    "frontend_online_observed": true,
+    "post_a7_backend_revalidated": true,
+    "operator_observation": "Firefox opened; repeated Ctrl+Space presses produced no visible browser/clipboard effect.",
+    "diagnostics": {
+      "adapter_connected": true,
+      "repeated_dispatches_observed": true,
+      "dispatch_outcome": "FAILED",
+      "action_id_returned": false,
+      "normalized_error": "HttpRequestException"
+    },
+    "diagnosis": {
+      "defect_class": "LIVE_SEMANTIC_SOURCE_BINDING_STALE",
+      "authorized_backend_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+      "live_script_semantic_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
+      "live_script_backend_blob": "89023ddae31ad95f718a75c4734d3837554b693c",
+      "consequence": "The v1.10 authority and CI validated the chunked-body backend repair, but the live D4 shell transaction archived semantic-execution from the stale frozen semantic SHA, so the live backend did not contain the repair.",
+      "prior_chunked_root_cause_assessment": "The chunked incompatibility remains a valid defect in the old backend, but v1.10 did not actually deploy its repair live; therefore v1.10 could not test whether that repair resolves Q1."
+    },
+    "reusable": false,
+    "retry_requires_fresh_review_validation_and_operator_approval": true
+  }
 }
