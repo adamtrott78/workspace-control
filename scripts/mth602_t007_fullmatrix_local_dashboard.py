@@ -265,7 +265,10 @@ def load_cache():
         rows.setdefault(rn, dict(seed))
     osr = data.setdefault("osr", {})
     for direction, seed in OSR_SEED.items():
-        osr.setdefault(direction, dict(seed))
+        row = osr.setdefault(direction, {})
+        for key, value in seed.items():
+            if row.get(key) is None and value is not None:
+                row[key] = value
     return data
 
 
