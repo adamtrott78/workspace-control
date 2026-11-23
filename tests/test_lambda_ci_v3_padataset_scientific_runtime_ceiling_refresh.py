@@ -1,11 +1,15 @@
 import copy
 import pathlib
+import sys
 import unittest
 
-import scripts.lambda_ci_policy_compiler as compiler
-import scripts.lambda_ci_v3_padataset_scientific_runtime_ceiling_refresh_v1 as refresh
-
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+SCRIPTS = ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+import lambda_ci_policy_compiler as compiler
+import lambda_ci_v3_padataset_scientific_runtime_ceiling_refresh_v1 as refresh
 
 
 class PADatasetScientificRuntimeCeilingRefreshTests(unittest.TestCase):
