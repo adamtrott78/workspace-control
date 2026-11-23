@@ -9,7 +9,7 @@ import sys
 from threading import Thread
 import unittest
 from urllib.error import HTTPError
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
