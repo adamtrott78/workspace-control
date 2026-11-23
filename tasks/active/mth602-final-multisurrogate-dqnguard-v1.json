@@ -4812,9 +4812,9 @@
         "osr_can_change_pair_freeze": false
       },
       "dashboard": {
-        "workspace_control_head": "dacf471126140f1d1b40548b742392a6bae777b8",
+        "workspace_control_head": "cae0eb91df92bb426235b2b9040d977d3e5de166",
         "script": "scripts/mth602_t007_fullmatrix_local_dashboard.py",
-        "validation_receipt": "job-3232fc9b-2dca-4119-9156-39731c1f01bc",
+        "validation_receipt": "job-16b8992d-e2d0-4ed5-a5d5-3f5f4076f225",
         "validation_result": "1 passed",
         "provider_calls_per_refresh": 0,
         "features": [
@@ -4822,7 +4822,8 @@
           "artifact-bound result_record cache",
           "18-direction OSR table",
           "exact queued run IDs",
-          "seeded PA2-PA8 completed OSR"
+          "seeded PA2-PA8 completed OSR",
+          "correct live backbone GPU0/GPU1 lane identities"
         ]
       }
     }
