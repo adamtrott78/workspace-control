@@ -269,6 +269,22 @@ PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_ACTIVE_RECEIPT = (
     / "workflow-refresh-v8"
     / "active.json"
 )
+PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "runtime-ceiling-refresh-v1"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_RUNTIME_CEILING_OVERRIDE_DESTINATIONS = {
+    str(V3_CONFIG_ROOT / "root-policy.json"),
+    str(V3_CONFIG_ROOT / "executor-actions.json"),
+    str(V3_CONFIG_ROOT / "compatibility-matrix.json"),
+    str(V3_CONFIG_ROOT / "deployment-overlay.json"),
+}
+PADATASET_SCIENTIFIC_PREVIOUS_RUNTIME_SECONDS = 4 * 60 * 60
+PADATASET_SCIENTIFIC_RUNTIME_SECONDS = 390 * 60
+PADATASET_SCIENTIFIC_PREVIOUS_SYSTEMD_RUNTIME = "4h"
+PADATASET_SCIENTIFIC_SYSTEMD_RUNTIME = "390min"
 PADATASET_SCIENTIFIC_DUAL_GPU0 = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
 PADATASET_SCIENTIFIC_DUAL_GPU1 = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
 PADATASET_SCIENTIFIC_DUAL_OVERRIDE_DESTINATIONS = set(
@@ -1270,6 +1286,117 @@ def _padataset_scientific_dual_lane_workflow_refresh_v8(
 
 
 
+def _padataset_scientific_runtime_ceiling_refresh(
+    dual_active: dict[str, Any],
+    lane_a_refresh: dict[str, Any] | None,
+    lane_b_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT
+    ):
+        return None
+    if lane_a_refresh is None or lane_b_refresh is None:
+        raise ReconcileError(
+            "PADataset scientific runtime ceiling refresh requires both timeout360 workflow refresh predecessors"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT,
+        "active PADataset scientific runtime ceiling refresh",
+    )
+    dual_raw = PADATASET_SCIENTIFIC_DUAL_ACTIVE_RECEIPT.read_bytes()
+    lane_a_raw = PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT.read_bytes()
+    lane_b_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH",
+        "phase": "ACTIVE",
+        "dual_active_receipt_sha256": _sha256(dual_raw),
+        "lane_a_workflow_refresh_receipt_sha256": _sha256(lane_a_raw),
+        "lane_b_workflow_refresh_receipt_sha256": _sha256(lane_b_raw),
+        "lane_a_class_id": PADATASET_SCIENTIFIC_TARGET_CLASS,
+        "lane_b_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "previous_root_policy_sha256": dual_active["root_policy_sha256"],
+        "previous_runtime_max_seconds": PADATASET_SCIENTIFIC_PREVIOUS_RUNTIME_SECONDS,
+        "runtime_max_seconds": PADATASET_SCIENTIFIC_RUNTIME_SECONDS,
+        "previous_systemd_runtime": PADATASET_SCIENTIFIC_PREVIOUS_SYSTEMD_RUNTIME,
+        "systemd_runtime": PADATASET_SCIENTIFIC_SYSTEMD_RUNTIME,
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset scientific runtime ceiling refresh binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset scientific runtime ceiling refresh",
+    )
+    for key in ("catalog_generation_sha256", "root_policy_sha256"):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset scientific runtime ceiling refresh {key} invalid"
+            )
+
+    previous = refresh.get("previous_root_envelope_sha256")
+    current = refresh.get("root_envelope_sha256")
+    if not isinstance(previous, dict) or not isinstance(current, dict):
+        raise ReconcileError("scientific runtime ceiling root envelope maps missing")
+    if set(previous) != set(current):
+        raise ReconcileError("scientific runtime ceiling class set drift")
+    changed = {
+        class_id
+        for class_id in previous
+        if previous[class_id] != current[class_id]
+    }
+    expected_changed = {
+        PADATASET_SCIENTIFIC_TARGET_CLASS,
+        PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+    }
+    if changed != expected_changed:
+        raise ReconcileError(
+            "scientific runtime ceiling refresh changed unexpected root envelopes"
+        )
+    for mapping in (previous, current):
+        for class_id, digest in mapping.items():
+            if (
+                not isinstance(class_id, str)
+                or not isinstance(digest, str)
+                or re.fullmatch(r"[0-9a-f]{64}", digest) is None
+            ):
+                raise ReconcileError("scientific runtime ceiling root envelope binding invalid")
+
+    overrides = refresh.get("managed_artifact_overrides")
+    if (
+        not isinstance(overrides, dict)
+        or set(overrides)
+        != PADATASET_SCIENTIFIC_RUNTIME_CEILING_OVERRIDE_DESTINATIONS
+    ):
+        raise ReconcileError("scientific runtime ceiling override destination set invalid")
+    predecessor = dual_active["managed_artifact_overrides"]
+    for destination, binding in overrides.items():
+        if not isinstance(binding, dict) or set(binding) != {
+            "prior_sha256", "sha256", "mode"
+        }:
+            raise ReconcileError(
+                f"scientific runtime ceiling override binding invalid: {destination}"
+            )
+        if binding.get("prior_sha256") != predecessor[destination]["sha256"]:
+            raise ReconcileError(
+                f"scientific runtime ceiling prior digest mismatch: {destination}"
+            )
+        if binding.get("mode") != predecessor[destination]["mode"]:
+            raise ReconcileError(
+                f"scientific runtime ceiling override mode mismatch: {destination}"
+            )
+        if re.fullmatch(r"[0-9a-f]{64}", str(binding.get("sha256", ""))) is None:
+            raise ReconcileError(
+                f"scientific runtime ceiling override digest invalid: {destination}"
+            )
+    return refresh
+
+
+
 def _verify_padataset_scientific_effective_state(
     active: dict[str, Any],
     workflow_refresh: dict[str, Any] | None = None,
@@ -2170,6 +2297,32 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             )
         )
     )
+    scientific_runtime_ceiling_refresh = (
+        _padataset_scientific_runtime_ceiling_refresh(
+            scientific_dual_lane,
+            scientific_workflow_effective_refresh,
+            scientific_dual_effective_refresh,
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_effective_state = scientific_dual_lane
+    if scientific_runtime_ceiling_refresh is not None:
+        scientific_dual_effective_state = dict(scientific_dual_lane)
+        scientific_dual_effective_state["catalog_generation_sha256"] = (
+            scientific_runtime_ceiling_refresh["catalog_generation_sha256"]
+        )
+        scientific_dual_effective_state["root_policy_sha256"] = (
+            scientific_runtime_ceiling_refresh["root_policy_sha256"]
+        )
+        scientific_dual_effective_state["root_envelope_sha256"] = (
+            scientific_runtime_ceiling_refresh["root_envelope_sha256"]
+        )
+    runtime_ceiling_overrides = (
+        scientific_runtime_ceiling_refresh["managed_artifact_overrides"]
+        if scientific_runtime_ceiling_refresh is not None
+        else {}
+    )
     scientific_overrides = (
         scientific_override["managed_artifact_overrides"]
         if scientific_override is not None
@@ -2193,6 +2346,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
     production_overrides_seen: set[str] = set()
     scientific_overrides_seen: set[str] = set()
     dual_overrides_seen: set[str] = set()
+    runtime_ceiling_overrides_seen: set[str] = set()
 
     for entry in manifest.get("entries", []):
         if not isinstance(entry, dict):
@@ -2214,8 +2368,21 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         actual_sha = _sha256(path.read_bytes())
         scientific_binding = scientific_overrides.get(destination)
         dual_binding = dual_overrides.get(destination)
+        runtime_ceiling_binding = runtime_ceiling_overrides.get(destination)
         production_digest = production_overrides.get(destination)
-        if dual_binding is not None:
+        if runtime_ceiling_binding is not None:
+            if actual_sha != runtime_ceiling_binding["sha256"]:
+                raise ReconcileError(
+                    f"PADataset scientific runtime ceiling managed artifact digest drift: {path}"
+                )
+            runtime_ceiling_overrides_seen.add(destination)
+            if dual_binding is not None:
+                dual_overrides_seen.add(destination)
+            if scientific_binding is not None:
+                scientific_overrides_seen.add(destination)
+            if production_digest is not None:
+                production_overrides_seen.add(destination)
+        elif dual_binding is not None:
             if actual_sha != dual_binding["sha256"]:
                 raise ReconcileError(
                     f"PADataset scientific dual-lane managed artifact digest drift: {path}"
@@ -2254,6 +2421,13 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         missing = sorted(set(dual_overrides) - dual_overrides_seen)
         raise ReconcileError(
             f"PADataset scientific dual-lane override artifacts were not observed: {missing}"
+        )
+    if runtime_ceiling_overrides_seen != set(runtime_ceiling_overrides):
+        missing = sorted(
+            set(runtime_ceiling_overrides) - runtime_ceiling_overrides_seen
+        )
+        raise ReconcileError(
+            f"PADataset scientific runtime ceiling override artifacts were not observed: {missing}"
         )
     for destination, binding in scientific_additions.items():
         path = pathlib.Path(destination)
@@ -2434,7 +2608,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             _verify_padataset_scientific_dual_lane_effective_state(
                 scientific_override,
                 scientific_workflow_effective_refresh,
-                scientific_dual_lane,
+                scientific_dual_effective_state,
                 scientific_dual_effective_refresh,
             )
         else:
