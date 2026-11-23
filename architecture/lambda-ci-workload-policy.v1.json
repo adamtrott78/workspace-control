@@ -272,7 +272,7 @@
     },
     "scientific_gpu_single_v1": {
       "execution_profile": "gpu-scientific-single",
-      "max_runtime_seconds": 14400,
+      "max_runtime_seconds": 23400,
       "scratch_max_bytes": 68719476736,
       "staging_max_bytes": 0,
       "gpu_count": 1,
@@ -282,7 +282,7 @@
     },
     "scientific_gpu_single_2_v1": {
       "execution_profile": "gpu-scientific-single-2",
-      "max_runtime_seconds": 14400,
+      "max_runtime_seconds": 23400,
       "scratch_max_bytes": 68719476736,
       "staging_max_bytes": 0,
       "gpu_count": 1,
