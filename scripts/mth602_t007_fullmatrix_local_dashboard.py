@@ -82,6 +82,51 @@ SEED = {
     },
 }
 
+
+# Post-freeze t007 directional OSR wave. GPU1 executes these through the
+# already-reviewed /lambda-l2o-eval-2 workflow while GPU0 may continue backbone
+# training. The dashboard remains provider-API-free: local process/result
+# telemetry plus persistent cache only.
+OSR_OVERLAY = "PADataset PR54 db35a153"
+OSR_DIRECTIONS = [
+    ("PA1<-PA2", 14765881457),
+    ("PA2<-PA1", 14765881457),
+    ("PA1<-PA3", 14783316485),
+    ("PA3<-PA1", 14783316485),
+    ("PA1<-PA4", 14769480157),
+    ("PA4<-PA1", 14769480157),
+    ("PA1<-PA8", 14785061977),
+    ("PA8<-PA1", 14785061977),
+    ("PA2<-PA3", 14736363148),
+    ("PA3<-PA2", 14736363148),
+    ("PA2<-PA4", 14770958092),
+    ("PA4<-PA2", 14770958092),
+    ("PA2<-PA8", 14719755202),
+    ("PA8<-PA2", 14719755202),
+    ("PA3<-PA4", 14784971329),
+    ("PA4<-PA3", 14784971329),
+    ("PA4<-PA8", 14773056923),
+    ("PA8<-PA4", 14773056923),
+]
+OSR_SEED = {
+    "PA2<-PA8": {
+        "status": "SUCCESS",
+        "artifact_id": 14719755202,
+        "unknown_f1": 0.984758990646242,
+        "unknown_auroc": 0.9950973911571004,
+        "known_reject_rate": None,
+        "github_run_id": 44944519746,
+    },
+    "PA8<-PA2": {
+        "status": "SUCCESS",
+        "artifact_id": 14719755202,
+        "unknown_f1": 0.9792627621225628,
+        "unknown_auroc": 0.9882538493077788,
+        "known_reject_rate": None,
+        "github_run_id": 44949531116,
+    },
+}
+
 RESET = "\033[0m"
 BOLD = "\033[1m"
 DIM = "\033[2m"
@@ -197,6 +242,9 @@ def load_cache():
     rows = data.setdefault("runs", {})
     for rn, seed in SEED.items():
         rows.setdefault(rn, dict(seed))
+    osr = data.setdefault("osr", {})
+    for direction, seed in OSR_SEED.items():
+        osr.setdefault(direction, dict(seed))
     return data
 
 
@@ -471,6 +519,125 @@ def find_metric(progress, history, summary, names):
     return None
 
 
+
+def osr_process_rows():
+    """Observe live frozen directional evaluators without provider calls."""
+    found = {}
+    tracked = {direction for direction, _artifact_id in OSR_DIRECTIONS}
+    try:
+        out = subprocess.check_output(
+            ["ps", "-eo", "pid=,etimes=,args="],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return found
+
+    for raw in out.splitlines():
+        if "pa_eval_dqn_guard_surrogate_open.py" not in raw:
+            continue
+        parts = raw.strip().split(None, 2)
+        if len(parts) < 3:
+            continue
+        try:
+            pid = int(parts[0])
+            elapsed = int(parts[1])
+            argv = shlex.split(parts[2])
+            ti = argv.index("--target-open-pa")
+            si = argv.index("--surrogate-open-pa")
+            direction = f"{argv[ti + 1]}<-{argv[si + 1]}"
+            if direction not in tracked:
+                continue
+            pe = proc_env(pid)
+            found[direction] = {
+                "pid": pid,
+                "elapsed": elapsed,
+                "github_run_id": pe.get("GITHUB_RUN_ID"),
+                "github_run_attempt": pe.get("GITHUB_RUN_ATTEMPT"),
+            }
+        except Exception:
+            continue
+    return found
+
+
+def scan_osr_results():
+    """Return newest result record for each expected t007 direction/artifact."""
+    expected = dict(OSR_DIRECTIONS)
+    found = {}
+    patterns = [
+        "/srv/workspace-ci/padataset/jobs/*/runner/_work/_temp/l2o-directional-results/eval/result_record.json",
+        "/srv/workspace-ci/padataset/jobs/*/runner*/_work/_temp/l2o-directional-results/eval/result_record.json",
+    ]
+    for pattern in patterns:
+        for raw in glob.glob(pattern):
+            p = Path(raw)
+            d = read_json(p)
+            if not isinstance(d, dict) or d.get("status") != "COMPLETE":
+                continue
+            direction = f"{d.get('evaluation_target')}<-{d.get('evaluation_surrogate')}"
+            if direction not in expected:
+                continue
+            artifact = d.get("artifact") or {}
+            try:
+                artifact_id = int(artifact.get("id", 0))
+            except Exception:
+                continue
+            if artifact_id != int(expected[direction]):
+                continue
+            try:
+                mt = p.stat().st_mtime
+            except Exception:
+                mt = 0.0
+            prior = found.get(direction)
+            if prior is not None and prior.get("_mtime", -1.0) > mt:
+                continue
+            metrics = d.get("metrics") or {}
+            found[direction] = {
+                "_mtime": mt,
+                "status": "SUCCESS",
+                "artifact_id": artifact_id,
+                "unknown_f1": metrics.get("unknown_f1"),
+                "unknown_auroc": metrics.get("unknown_auroc"),
+                "known_reject_rate": metrics.get("known_reject_rate"),
+                "result_path": str(p),
+            }
+    return found
+
+
+def build_osr_rows(cache, active, results):
+    rows = []
+    store = cache.setdefault("osr", {})
+    for direction, artifact_id in OSR_DIRECTIONS:
+        cached = store.setdefault(direction, {})
+        result = results.get(direction)
+        if result:
+            cached.update({k: v for k, v in result.items() if not k.startswith("_")})
+        proc = active.get(direction)
+        if proc:
+            cached["status"] = "RUNNING"
+            if proc.get("github_run_id"):
+                cached["github_run_id"] = proc.get("github_run_id")
+            store[direction] = cached
+            status = "RUNNING"
+            elapsed = proc.get("elapsed")
+        elif cached.get("status") == "SUCCESS":
+            status = "SUCCESS"
+            elapsed = None
+        else:
+            status = "ADMITTED"
+            elapsed = None
+        rows.append({
+            "direction": direction,
+            "artifact_id": artifact_id,
+            "status": status,
+            "elapsed": elapsed,
+            "unknown_f1": cached.get("unknown_f1"),
+            "unknown_auroc": cached.get("unknown_auroc"),
+            "known_reject_rate": cached.get("known_reject_rate"),
+            "github_run_id": cached.get("github_run_id"),
+        })
+    return rows
+
 def color_status(status):
     colors = {
         "SUCCESS": GREEN,
@@ -509,6 +676,9 @@ def render():
             now = datetime.now().astimezone()
             proc = process_rows()
             dirs = scan_run_dirs(proc)
+            osr_active = osr_process_rows()
+            osr_results = scan_osr_results()
+            osr_rows = build_osr_rows(cache, osr_active, osr_results)
             rows = []
             counts = {}
             nominal_samples = []
@@ -711,6 +881,46 @@ def render():
             frame.append(
                 DIM
                 + "Per-run ETA = local process age extrapolated from local epoch/batch progress. Completed rows are retained from durable seed/cache."
+                + RESET
+            )
+
+            frame.append("")
+            osr_counts = {}
+            for r in osr_rows:
+                osr_counts[r["status"]] = osr_counts.get(r["status"], 0) + 1
+            osr_summary = "   ".join(
+                f"{k} {osr_counts.get(k,0):2d}"
+                for k in ("SUCCESS", "RUNNING", "ADMITTED", "ERROR")
+                if osr_counts.get(k, 0)
+            )
+            frame.append(
+                BOLD + "GPU1 T007 OSR  " + RESET
+                + (osr_summary or "-")
+                + DIM + f"   | 18 directions | {OSR_OVERLAY}" + RESET
+            )
+            frame.append(
+                BOLD
+                + f"{'DIRECTION':<12} {'STATUS':<10} {'ELAPSED':>9} "
+                  f"{'U-F1':>8} {'AUROC':>8} {'K-REJ':>8}  IDENTITY"
+                + RESET
+            )
+            frame.append(rule)
+            for r in osr_rows:
+                identity = (
+                    f"run {r['github_run_id']}"
+                    if r.get("github_run_id")
+                    else f"artifact {r['artifact_id']}"
+                )
+                frame.append(
+                    f"{r['direction']:<12} {color_status(r['status'])} "
+                    f"{fmt_seconds(r['elapsed']):>9} "
+                    f"{metric(r['unknown_f1']):>8} {metric(r['unknown_auroc']):>8} "
+                    f"{metric(r['known_reject_rate']):>8}  {identity}"
+                )
+            frame.append(rule)
+            frame.append(
+                DIM
+                + "OSR is post-freeze diagnostic only: target/test/OSR evidence cannot alter recipe, checkpoint, retry, or pair freeze."
                 + RESET
             )
             if not OBSERVER_ELEVATED:
