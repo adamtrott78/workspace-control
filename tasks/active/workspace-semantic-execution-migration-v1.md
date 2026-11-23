@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 48c5fcfa5b0a7312b6d944819c559858cb41a3a0
+- Remote checkpoint: 038b97c5ca617c7b8d2c6625e837f1f8e2e0ed3e
 - Remote verified: true
 
 ### PADataset
@@ -70,18 +70,19 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-D4 V1.10 EXPLICIT ONE-SHOT APPROVAL GATE. v1.9 is consumed and non-reusable. Root cause is validated and repaired backend-only: .NET PostAsJsonAsync chunked request bodies versus the former Content-Length-only backend reader. Repair 020d35156d90e8268fb560a10e67098a146880de passed Workspace #3132 / Semantic #434 / Operator #705; frozen v1.10 review 0d74dc4b7562faef60e9e8c1b9748691ec596963 passed #3133/#435/#706; cleanup-gate bookkeeping 48c5fcfa5b0a7312b6d944819c559858cb41a3a0 passed #3134/#436/#707. Windows cleanup is accepted because wop-down emitted WORKSPACE_OPERATOR_DEV_OFFLINE=PASS and wop-status emitted WORKSPACE_OPERATOR_DEV_STATUS=OFFLINE, and the harness explicitly emits only DEV_OFFLINE when runtime.json is already absent. Accepted A7 bytes remain unchanged. ZERO live authority exists. Stop until Adam freshly and explicitly approves exactly one v1.10 D4 attempt. After approval only, create a fresh v1.10 one-shot authority bound to the validated repair/review/source, exact-head validate it, then execute one bounded live attempt. No silent retry.
+D4 V1.11 WINDOWS CLEANUP GATE. v1.10 is consumed/non-reusable. The decisive defect was validated/live semantic source drift: v1.10 authority/CI bound repaired operator HTTP blob 3b6893c1… but live D4 still archived semantic source 7c20097c… carrying old blob 89023dda…. Repair candidate 9d19a40a891a3c3489df60563f432fb0ae9a8bd3 binds live SEMANTIC_SHA=020d35156… and proves exact blob 3b6893c1… BEFORE STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS; candidate validation #3137/#439/#710 SUCCESS. Frozen v1.11 review head 038b97c5ca617c7b8d2c6625e837f1f8e2e0ed3e validated #3138/#440/#711 SUCCESS. A7 remains unchanged. ZERO v1.11 live authority exists. Next prove consumed v1.10 Windows runtime clean/OFFLINE with wop-down + wop-status. After cleanup only, fresh explicit approval is required for exactly one v1.11 attempt.
 
 ## Remaining work
 
-- Wait for Adam's fresh explicit approval of exactly one v1.10 D4 attempt.
-- After approval only, create and exact-head validate a fresh one-shot v1.10 authority bound to the validated chunked-POST backend repair and unchanged A7 frontend.
-- Execute exactly one bounded v1.10 D4 attempt.
+- Prove consumed v1.10 Windows cleanup using the accepted wop-down + wop-status path.
+- After cleanup, obtain fresh explicit approval for exactly one v1.11 D4 attempt.
+- After approval only, create and exact-head validate a fresh one-shot v1.11 authority bound to live semantic SHA 020d35156… / backend blob 3b6893c1… and unchanged A7.
+- Execute exactly one bounded v1.11 D4 attempt; the pre-consumption STAGE12_SEMANTIC_LIVE_BINDING=PASS must be observed.
 - After D4 PASS, proceed to Research Engine research-iterate E1–E3 proving.
 
 ## Blockers / gates
 
-- LIVE AUTHORITY: v1.10 repair/review and Windows cleanup are accepted, but the review grants zero live authority. Fresh explicit approval for exactly one v1.10 D4 attempt is required.
+- V1.10 WINDOWS CLEANUP: formal wop-down/wop-status OFFLINE proof is required before any v1.11 approval or live authority.
 
 ## Fresh-chat initialization
 
