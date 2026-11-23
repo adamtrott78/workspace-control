@@ -87,7 +87,7 @@ SEED = {
 # already-reviewed /lambda-l2o-eval-2 workflow while GPU0 may continue backbone
 # training. The dashboard remains provider-API-free: local process/result
 # telemetry plus persistent cache only.
-OSR_OVERLAY = "PADataset PR54 58538b45"
+OSR_OVERLAY = "PADataset PR54 a711f448"
 OSR_DIRECTIONS = [
     ("PA1<-PA2", 14765881457),
     ("PA2<-PA1", 14765881457),
@@ -109,6 +109,30 @@ OSR_DIRECTIONS = [
     ("PA8<-PA4", 14773056923),
 ]
 OSR_SEED = {
+    "PA8<-PA4": {
+        "status": "SUCCESS",
+        "artifact_id": 14773056923,
+        "unknown_f1": 0.9738869278623944,
+        "unknown_auroc": 0.9919103878364166,
+        "known_reject_rate": 0.0599450997848505,
+        "github_run_id": 45103759430,
+    },
+    "PA1<-PA3": {
+        "status": "SUCCESS",
+        "artifact_id": 14783316485,
+        "unknown_f1": 0.6839824658638585,
+        "unknown_auroc": 0.7693216452705036,
+        "known_reject_rate": 0.0519528644482324,
+        "github_run_id": 45103688755,
+    },
+    "PA2<-PA1": {
+        "status": "SUCCESS",
+        "artifact_id": 14765881457,
+        "unknown_f1": 0.4724354297388005,
+        "unknown_auroc": 0.6182526984043838,
+        "known_reject_rate": 0.0531111111111111,
+        "github_run_id": 45248661475,
+    },
     "PA1<-PA2": {
         "status": "SUCCESS",
         "artifact_id": 14765881457,
@@ -224,8 +248,8 @@ OSR_RUN_IDS = {
     "PA4<-PA1": 45103704995,
     "PA1<-PA8": 45103712515,
     "PA8<-PA1": 45103716788,
-    "PA2<-PA3": 45248669694,
-    "PA3<-PA2": 45248672815,
+    "PA2<-PA3": 45260874906,
+    "PA3<-PA2": 45260877368,
     "PA2<-PA4": 45103731655,
     "PA4<-PA2": 45103737289,
     "PA2<-PA8": 44944519746,
