@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.9",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "CONSUMED_FAILED_Q1_CHUNKED_POST_BODY_UNSUPPORTED_NONREUSABLE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
   "purpose": "Fresh one-shot D4 v1.9 authority for the validated post-A7 backend revalidation repair, with the accepted A7 frontend bytes unchanged.",
@@ -81,8 +81,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "consumed_on_success_or_failure_after_marker": true,
     "abort_before_marker_does_not_consume_live_attempt": true,
@@ -130,5 +130,29 @@
     "rule": "The exact authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "Exactly one v1.9 D4 attempt is authorized after exact-head 3/3 validation of this authority persistence. Consumption occurs only at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS; any post-consumption success or failure consumes the attempt and requires a fresh cycle for retry."
+  "postcondition": "v1.9 was consumed at STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS and failed at Q1 before actionId because the .NET helper's chunked JSON POST /operator-bridge/v1/actions/claim was incompatible with the backend's Content-Length-only request-body reader. A7 hotkey dispatch and adapter connection were proven; this authority is non-reusable.",
+  "failure_record": {
+    "consumed_marker_observed": true,
+    "q1_ready_observed": true,
+    "frontend_online_observed": true,
+    "post_a7_backend_revalidated": true,
+    "operator_observation": "Firefox opened but Ctrl+Space produced no visible browser/clipboard effect.",
+    "diagnostics": {
+      "bridge_enabled": true,
+      "adapter_connected": true,
+      "repeated_dispatches_observed": true,
+      "dispatch_outcome": "FAILED",
+      "action_id_returned": false,
+      "normalized_error": "HttpRequestException"
+    },
+    "diagnosis": {
+      "defect_class": "HTTP_REQUEST_BODY_FRAMING_MISMATCH",
+      "helper_behavior": ".NET PostAsJsonAsync uses JsonContent whose length is not precomputed and therefore uses HTTP/1.1 chunked transfer encoding.",
+      "backend_behavior": "OperatorBridgeRequestHandler._read_json read only Content-Length and treated a missing Content-Length as an empty JSON object.",
+      "consequence": "POST /operator-bridge/v1/actions/claim was rejected before helperInstanceId/claimId could be parsed; HttpClient EnsureSuccessStatusCode surfaced HttpRequestException before actionId.",
+      "status_get_explanation": "GET /operator-bridge/v1/status has no request body, so v1.9 backend liveness checks could pass while POST claim failed."
+    },
+    "reusable": false,
+    "retry_requires_fresh_review_validation_and_operator_approval": true
+  }
 }

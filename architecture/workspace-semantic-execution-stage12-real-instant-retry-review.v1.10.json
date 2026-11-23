@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.10",
+  "status": "REPAIR_CANDIDATE_VALIDATED_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "backend_task": "workspace-semantic-execution-backend-v1",
+  "frontend_task": "workspace-operator-bridge-implementation-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.9.json",
+    "result": "CONSUMED_FAILED_Q1_CHUNKED_POST_BODY_UNSUPPORTED_NONREUSABLE"
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "exact_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "exact_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed_in_v110": false
+  },
+  "diagnosis": {
+    "proven": [
+      "v1.9 reached STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, STAGE12_Q1_READY, WORKSPACE_OPERATOR_DEV_ONLINE=PASS, adapter_connected, and D4_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS.",
+      "Physical Ctrl+Space presses produced repeated native_helper dispatch attempts, proving the hotkey path was active.",
+      "Every observed v1.9 dispatch failed with HttpRequestException before actionId, so browser creation, clipboard staging, and foregrounding were never reached.",
+      ".NET PostAsJsonAsync JsonContent uses chunked transfer encoding when content length is not precomputed.",
+      "The production Python Operator Bridge server accepted only Content-Length framing and otherwise read an empty JSON object.",
+      "A new regression using a real HTTP/1.1 chunked JSON claim request passes with the repair."
+    ],
+    "defect_class": "DOTNET_CHUNKED_POST_VS_CONTENT_LENGTH_ONLY_BACKEND",
+    "why_v19_status_revalidation_missed_it": "GET /status carries no request body; successful GET liveness does not validate POST request-body framing."
+  },
+  "repair": {
+    "scope": "semantic-execution backend HTTP adapter only",
+    "source_head": "020d35156d90e8268fb560a10e67098a146880de",
+    "source_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "test_blob": "6ae3d2812809680cedb7570ee230fa0eebb81e53",
+    "behavior": [
+      "Accept either Content-Length framing or exactly one Transfer-Encoding: chunked coding, never both.",
+      "Decode chunked bodies with the existing max_body_bytes bound.",
+      "Reject chunk extensions, trailers, malformed sizes, incomplete chunks, conflicting framing, and unsupported transfer codings.",
+      "Preserve loopback binding, Tailscale identity authentication, body-size limits, and existing HTTP status semantics."
+    ],
+    "frontend_redesign": false,
+    "a7_bytes_changed": false
+  },
+  "candidate_validation": {
+    "workspace_control_run": 3132,
+    "semantic_execution_run": 434,
+    "operator_bridge_run": 705,
+    "result": "SUCCESS"
+  },
+  "exact_candidate_bindings": {
+    "source_head": "020d35156d90e8268fb560a10e67098a146880de",
+    "semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "tests/test_workspace_semantic_execution_backend_operator_http.py": "6ae3d2812809680cedb7570ee230fa0eebb81e53",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/tools/run-stage12-wop.ps1": "87e2b22d010adcefde075089156ec4c8d3974964"
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_review_validation_required": true,
+    "windows_cleanup_required": true,
+    "fresh_operator_approval_required": true
+  },
+  "postcondition": "v1.10 backend transport repair is candidate-validated 3/3 and preserves A7 exactly. This review grants zero live authority. Freeze/validate the review and prove v1.9 Windows cleanup before any fresh one-shot authority."
+}
