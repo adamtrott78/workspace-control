@@ -114,7 +114,7 @@ OSR_SEED = {
         "artifact_id": 14719755202,
         "unknown_f1": 0.984758990646242,
         "unknown_auroc": 0.9950973911571004,
-        "known_reject_rate": None,
+        "known_reject_rate": 0.0562064363043155,
         "github_run_id": 44944519746,
     },
     "PA8<-PA2": {
@@ -122,7 +122,7 @@ OSR_SEED = {
         "artifact_id": 14719755202,
         "unknown_f1": 0.9792627621225628,
         "unknown_auroc": 0.9882538493077788,
-        "known_reject_rate": None,
+        "known_reject_rate": 0.0618419101290226,
         "github_run_id": 44949531116,
     },
 }
