@@ -3877,6 +3877,26 @@
         "validation_result": "2 passed",
         "behavior": "Elevated host observer reads only GITHUB_RUN_ID/GITHUB_RUN_ATTEMPT/GITHUB_WORKFLOW from /proc/<training_pid>/environ and persists them in the operator-owned local cache; no network/provider calls.",
         "purpose": "Allow future completed t007 rows to retain exact workflow run identity after the training process exits so connected GitHub can resolve job/artifact provenance without provider run-list polling."
+      },
+      "osr_terminal_persistence_repair_20261123": {
+        "status": "VALIDATED_READY_FOR_LIVE_DASHBOARD_REFRESH",
+        "diagnosis": [
+          "scan_osr_results watched the legacy l2o-directional-results/eval path but current bounded scientific OSR writes _temp/scientific-results/l2o_eval/result_record.json",
+          "build_osr_rows persisted RUNNING after a terminal result was observed, overwriting durable SUCCESS until the ephemeral runner disappeared"
+        ],
+        "repaired_source_head": "e5c048e9942609ff05bb5df525d3dc950604916f",
+        "validation_receipt": "job-80a18448-cfb5-4d55-a562-7d69c5cb47d8",
+        "validation_result": "5 passed",
+        "changes": [
+          "scan current and legacy result_record paths",
+          "terminal SUCCESS dominates live-process telemetry",
+          "RUNNING is display-only and is never persisted over terminal cache",
+          "13 already-proven terminal PR54 OSR directions seeded with exact metrics",
+          "migrated GPU0 run IDs corrected for PA2<-PA1, PA2<-PA3, PA3<-PA2",
+          "header renamed DUAL-GPU T007 OSR and PR54 display head updated"
+        ],
+        "live_tmux_requires_refresh": true,
+        "scientific_jobs_modified": false
       }
     },
     "local_terminal_observation_20261122_1327_est": {
