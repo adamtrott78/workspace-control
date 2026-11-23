@@ -23,15 +23,19 @@ class Stage12V111ReviewTests(unittest.TestCase):
     def test_review_binds_live_semantic_repair_and_unchanged_a7(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
         bindings = review["exact_candidate_bindings"]
+        source_head = bindings["source_head"]
         self.assertEqual(
-            self.git("HEAD:benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh"),
+            self.git(f"{source_head}:benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh"),
             bindings["benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh"],
         )
         self.assertEqual(
             self.git(f'{bindings["live_semantic_sha"]}:semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py'),
             bindings["live_operator_http_blob"],
         )
-        self.assertEqual(self.git("HEAD:operator-bridge/src"), bindings["operator-bridge/src_tree"])
+        self.assertEqual(
+            self.git(f"{source_head}:operator-bridge/src"),
+            bindings["operator-bridge/src_tree"],
+        )
         self.assertFalse(review["accepted_frontend"]["changed_in_v111"])
 
     def test_review_grants_zero_live_authority_after_cleanup(self) -> None:
