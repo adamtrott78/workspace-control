@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import sys
 import unittest
 
@@ -33,6 +34,9 @@ from workspace_semantic_execution.domain import (  # noqa: E402
     DomainKernel,
     ExecutorSessionState,
     OperatorActionState,
+    OperatorActionType,
+    OperatorHumanRequirement,
+    OperatorPostLocalSuccess,
 )
 
 
@@ -267,6 +271,91 @@ class DurableOperatorPacketTests(unittest.TestCase):
         self.assertEqual(
             source.unresolved_questions[0].question_id,
             "Q1",
+        )
+
+    def test_github_candidate_packet_prepends_explicit_plugin_call(self):
+        coordinator = runtime()
+        planned = planner(coordinator).plan_service_existing(
+            task_id="task:research-iterate",
+            action_id="action:github-publication",
+            action_generation=0,
+            process_id=PROCESS_ID,
+            process_generation=0,
+            worker_slot_id=SLOT_ID,
+            session_generation=0,
+            executor_id=PROFILE.executor_id,
+            packet_input=packet_input(),
+            priority_rank=10,
+            queue_sequence=1,
+            created_at="T0",
+            result_publication_target_ref=(
+                "github-candidate://adamtrott78/workspace-control/"
+                "ref/refs%2Fheads%2Fworker-result-candidates-v1/"
+                "path/worker-results%2Fcandidates%2Fresult.json"
+            ),
+        )
+
+        payload = json.loads(planned.packet.canonical_payload_json)
+        self.assertEqual(payload["plugin_calls"], ["@github"])
+        self.assertTrue(planned.packet.text.startswith("@github\n"))
+
+        materialized = DurableOperatorPacketMaterializer(
+            runtime=coordinator,
+            registry=REGISTRY,
+        ).materialize(planned.action)
+        self.assertEqual(materialized.text, planned.packet.text)
+
+    def test_retire_session_is_durable_and_completes_as_local_action(self):
+        coordinator = runtime()
+        retire = planner(coordinator).plan_retire_session(
+            task_id="task:research-iterate",
+            action_id="action:retire-session",
+            action_generation=0,
+            worker_slot_id=SLOT_ID,
+            session_generation=0,
+            executor_id=PROFILE.executor_id,
+            priority_rank=1,
+            queue_sequence=99,
+            created_at="T-retire",
+            reason="task_complete",
+        )
+
+        graph = coordinator.snapshot().graph
+        self.assertEqual(
+            graph.executor_sessions[SLOT_ID].state,
+            ExecutorSessionState.RETIRED,
+        )
+        self.assertEqual(retire.action_type, OperatorActionType.RETIRE_SESSION)
+        self.assertEqual(
+            retire.human_requirement,
+            OperatorHumanRequirement.NONE,
+        )
+        self.assertEqual(
+            retire.post_local_success,
+            OperatorPostLocalSuccess.COMPLETE_AND_REQUERY,
+        )
+        self.assertEqual(retire.status, OperatorActionState.QUEUED)
+
+        claimed = coordinator.claim_next_operator_action(
+            helper_instance_id="helper",
+            claim_id="claim:retire",
+            claimed_at="T1",
+            expires_at="T2",
+        )
+        self.assertEqual(
+            claimed.graph.operator_actions[retire.action_id].status,
+            OperatorActionState.CLAIMED_LOCAL,
+        )
+        completed = coordinator.record_operator_action_local_prepared(
+            action_id=retire.action_id,
+            generation=0,
+            worker_slot_id=SLOT_ID,
+            session_generation=0,
+            observed_at="T3",
+        )
+        self.assertEqual(
+            completed.graph.operator_actions[retire.action_id].status,
+            OperatorActionState.COMPLETED,
         )
 
     def test_changed_packet_input_cannot_reuse_bound_session(self):
