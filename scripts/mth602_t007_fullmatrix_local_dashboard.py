@@ -128,24 +128,24 @@ OSR_SEED = {
 }
 
 OSR_RUN_IDS = {
-    "PA1<-PA2": 45102051232,
-    "PA2<-PA1": 45102053615,
-    "PA1<-PA3": 45102058238,
-    "PA3<-PA1": 45102060140,
-    "PA1<-PA4": 45102062857,
-    "PA4<-PA1": 45102067059,
-    "PA1<-PA8": 45102069338,
-    "PA8<-PA1": 45102072243,
-    "PA2<-PA3": 45102074619,
-    "PA3<-PA2": 45102077778,
-    "PA2<-PA4": 45102082224,
-    "PA4<-PA2": 45102085345,
+    "PA1<-PA2": 45103679764,
+    "PA2<-PA1": 45103683522,
+    "PA1<-PA3": 45103688755,
+    "PA3<-PA1": 45103692451,
+    "PA1<-PA4": 45103700060,
+    "PA4<-PA1": 45103704995,
+    "PA1<-PA8": 45103712515,
+    "PA8<-PA1": 45103716788,
+    "PA2<-PA3": 45103721782,
+    "PA3<-PA2": 45103728056,
+    "PA2<-PA4": 45103731655,
+    "PA4<-PA2": 45103737289,
     "PA2<-PA8": 44944519746,
     "PA8<-PA2": 44949531116,
-    "PA3<-PA4": 45102088341,
-    "PA4<-PA3": 45102090059,
-    "PA4<-PA8": 45102093066,
-    "PA8<-PA4": 45102097294,
+    "PA3<-PA4": 45103742974,
+    "PA4<-PA3": 45103748465,
+    "PA4<-PA8": 45103752504,
+    "PA8<-PA4": 45103759430,
 }
 
 RESET = "\033[0m"
@@ -633,7 +633,7 @@ def build_osr_rows(cache, active, results):
     store = cache.setdefault("osr", {})
     for direction, artifact_id in OSR_DIRECTIONS:
         cached = store.setdefault(direction, {})
-        if not cached.get("github_run_id") and direction in OSR_RUN_IDS:
+        if direction in OSR_RUN_IDS:
             cached["github_run_id"] = OSR_RUN_IDS[direction]
         result = results.get(direction)
         if result:
