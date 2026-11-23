@@ -1,6 +1,6 @@
 # D4 Real-Instant Retry Procedure v1.13 — exact stale Tailscale route normalization
 
-Status: **REPAIR CANDIDATE — NOT LIVE AUTHORITY**
+Status: **FROZEN REVIEW — NOT LIVE AUTHORITY**
 
 v1.12 passed the reviewed candidate-baseline gate but aborted before semantic live binding and before authority consumption. The Lambda Tailscale Serve state contained the preserved Jupyter root plus the exact Stage12 Operator Bridge route.
 
@@ -17,3 +17,11 @@ v1.13 normalizes only the exact known stale Stage12 route:
 Candidate baseline `7bab6ff…`, repaired semantic backend `020d35156… / 3b6893c1…`, and accepted A7 frontend remain unchanged.
 
 This review grants zero live authority. Exact-head validation and fresh explicit one-shot approval are required before another D4 execution.
+
+## Candidate validation
+
+- Workspace Control #3148 — SUCCESS
+- Semantic Execution #450 — SUCCESS
+- Operator Bridge #721 — SUCCESS
+
+Frozen candidate head: `534ff64254643346551a9d17a402f8cc4ff84b07`
