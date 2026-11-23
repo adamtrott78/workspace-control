@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.14",
-  "status": "REPAIR_CANDIDATE_NOT_AUTHORITY",
+  "status": "VALIDATED_REPAIR_NOT_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.13.json",
@@ -49,8 +49,17 @@
   },
   "authority_gate": {
     "live_retry_authorized": false,
-    "exact_head_validation_required": true,
-    "fresh_one_shot_approval_required": true
+    "old_live_attempt_cleanup_required": true,
+    "explicit_retry_intent_observed": true,
+    "explicit_retry_intent_text_summary": "Adam asked the executor to fix the stall and have him run wop d4 again, then carry the result into the new chat.",
+    "fresh_authority_required_after_cleanup": true
   },
-  "postcondition": "v1.14 is a repair candidate only. It grants zero live execution authority."
+  "postcondition": "v1.14 repair is exact-head 3/3 validated. Zero v1.14 live authority exists. The consumed/stuck v1.13 runtime must be terminated and Windows/backend cleanup evidenced before a fresh one-shot v1.14 authority is staged.",
+  "repair_head": "70f8c21185dad6dc0be8c84a21fe8fd841a557b6",
+  "validation": {
+    "workspace_control_run": 3153,
+    "semantic_execution_run": 455,
+    "operator_bridge_run": 726,
+    "result": "SUCCESS"
+  }
 }

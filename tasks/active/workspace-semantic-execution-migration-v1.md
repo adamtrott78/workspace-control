@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 9f21d300efc9a82db358bd636b53f51e73a47946
+- Remote checkpoint: 70f8c21185dad6dc0be8c84a21fe8fd841a557b6
 - Remote verified: true
 
 ### PADataset
@@ -70,18 +70,21 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-D4 V1.13 EXPLICIT ONE-SHOT APPROVAL GATE. v1.12 aborted pre-consumption after STAGE12_CANDIDATE_BASELINE=PASS because an exact stale Stage12 Tailscale route was still present; semantic live binding and the live consumption marker were never reached, so v1.12 is superseded/non-reusable but unconsumed. v1.13 fixes the preflight ordering and normalizes only the exact /operator-bridge/v1 -> 127.0.0.1:8765/operator-bridge/v1 route, and only after proving port 8765 has no listener; arbitrary Serve/Funnel drift still fails closed. Candidate head 534ff64254643346551a9d17a402f8cc4ff84b07 passed Workspace #3148 / Semantic #450 / Operator #721. Frozen v1.13 review head 9f21d300efc9a82db358bd636b53f51e73a47946 passed Workspace #3149 / Semantic #451 / Operator #722. Candidate baseline 7bab6ff5…, semantic repair 020d35156… / backend blob 3b6893c1…, and A7 remain unchanged. ZERO v1.13 live authority exists. Stop until Adam freshly and explicitly approves exactly one v1.13 D4 attempt. After approval only, create and exact-head validate one fresh authority; require candidate baseline PASS, exact stale-route normalization/clean root state, and STAGE12_SEMANTIC_LIVE_BINDING=PASS before consumption.
+D4 V1.14 CLEANUP-THEN-AUTHORITY GATE. v1.13 was consumed and failed after successful Q1 publication. Q1 candidate commit daa18627982a1d406eb88d44145113f0e99561e0 is valid, parent 7bab6ff…, and changed only worker-results/stage12/d85e6ca0d9484b4a98e8694e787d3505/q1.json. Live Operator Bridge diagnostic after Q1 was exactly readyManualCycles=0,sentUnconfirmed=1 for ~10 minutes: Q1 remained AWAITING_DURABLE_ACK and Q2 was never planned. A6 already proved literal raw @github works in Personalized Temporary Chat with autocomplete_selection_used=false and no Tab/click/autocomplete selection; A7 is the accepted frontend/convenience-command layer and must not be redesigned. v1.14 repair head 70f8c21185dad6dc0be8c84a21fe8fd841a557b6 passed Workspace #3153 / Semantic #455 / Operator #726. It restores literal @github in generated Stage12 packet objectives, changes CandidateWatcher to independently observe the candidate branch via git ls-remote then verify fetched visibility, emits STAGE12_Q1_CANDIDATE_OBSERVED=<sha> and STAGE12_Q1_DURABLE_INGEST=PASS, and advances candidate baseline to daa1862… without rewriting history. ZERO v1.14 live authority exists. First terminate/clean the still-running consumed v1.13 D4 runtime and prove Windows operator OFFLINE. After cleanup, create and exact-head validate exactly one fresh v1.14 authority; Adam already explicitly requested this repaired rerun in the handoff-preparation turn, so do not ask him to restate the same approval if the cleanup evidence is clean.
 
 ## Remaining work
 
-- Wait for Adam's fresh explicit approval of exactly one v1.13 D4 attempt.
-- After approval only, create and exact-head validate a fresh one-shot v1.13 authority bound to the exact stale-route normalization, candidate baseline 7bab6ff5…, semantic repair 020d35156… / backend blob 3b6893c1…, and unchanged A7.
-- Execute exactly one bounded v1.13 D4 attempt. STAGE12_CANDIDATE_BASELINE=PASS, any required TAILSCALE_STALE_STAGE12_ROUTE_CLEARED=PASS, TAILSCALE_STAGE12_ROUTE_ABSENT=PASS, and STAGE12_SEMANTIC_LIVE_BINDING=PASS must occur before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS.
-- After D4 PASS, proceed to Research Engine research-iterate E1–E3 proving.
+- Terminate the consumed/stuck v1.13 D4 process and allow the remote transaction trap to restore Tailscale/PostgreSQL/runtime state.
+- Run wop-down and verify wop-status reports WORKSPACE_OPERATOR_DEV_STATUS=OFFLINE.
+- After cleanup evidence, stage and exact-head validate exactly one v1.14 authority bound to repair head 70f8c211…, candidate baseline daa1862…, repaired semantic backend, stale-route normalization, and unchanged A7.
+- Run wop d4. Q1 packet must already contain literal @github; no manual edit and no Tab/click/autocomplete selection.
+- Require STAGE12_Q1_CANDIDATE_OBSERVED=<new sha> then STAGE12_Q1_DURABLE_INGEST=PASS before STAGE12_Q2_REUSE_READY. If observation fails, the new fail-closed marker identifies remote/fetch visibility; if durable ingest fails, diagnosis is intake/state transition rather than browser/plugin UX.
+- Complete Q2 same-chat continuity and Q3 replacement-session fencing. After D4 PASS, proceed to Research Engine research-iterate E1-E3.
 
 ## Blockers / gates
 
-- LIVE AUTHORITY: v1.13 repair and frozen review are exact-head validated, but zero live authority exists. Fresh explicit approval for exactly one v1.13 D4 attempt is required.
+- CURRENT LIVE RUNTIME: consumed v1.13 is stuck after Q1 with readyManualCycles=0,sentUnconfirmed=1 and must be terminated/cleaned before another attempt.
+- LIVE AUTHORITY: zero v1.14 authority exists until cleanup is proven and a fresh one-shot authority is created/validated.
 
 ## Fresh-chat initialization
 

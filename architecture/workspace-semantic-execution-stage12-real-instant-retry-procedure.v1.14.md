@@ -1,6 +1,6 @@
 # D4 Real-Instant Retry Procedure v1.14 — Q1 durable-intake observability + A6 plugin invariant
 
-Status: **REPAIR CANDIDATE — NOT LIVE AUTHORITY**
+Status: **FROZEN VALIDATED REVIEW — NOT LIVE AUTHORITY**
 
 ## Consumed v1.13 result
 
@@ -43,3 +43,20 @@ A7 remains the accepted frontend/convenience-command packaging checkpoint.
 7. Retain semantic backend repair, stale-route normalization, A7 frontend bytes, security boundaries, and append-only candidate semantics.
 
 This review grants zero live authority.
+
+
+## Exact-head validation
+
+Frozen repair head: `70f8c21185dad6dc0be8c84a21fe8fd841a557b6`
+
+- Workspace Control #3153 — SUCCESS
+- Semantic Execution #455 — SUCCESS
+- Operator Bridge #726 — SUCCESS
+
+## Current operational gate
+
+The v1.13 attempt is consumed and is still the source of the live/stuck runtime that reported:
+
+`{"readyManualCycles":0,"sentUnconfirmed":1}`
+
+Do not silently reuse v1.13. Stop/clean that runtime first. After cleanup evidence, stage exactly one fresh v1.14 authority; Adam already explicitly requested a repaired rerun in the handoff-preparation turn, but the authority artifact itself must still be newly created and exact-head validated.
