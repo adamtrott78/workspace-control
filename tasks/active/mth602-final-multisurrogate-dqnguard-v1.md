@@ -1012,3 +1012,21 @@ Do **not** hand-edit the controller file, bypass `verify_installed()`, widen roo
 
 After the drift is reconciled: revalidate the v8 candidate, activate v8, verify lane-B trusts blob `8375dd0a0733b01de38f677dee58a373d3adcb48`, run a zero-work smoke, then re-admit exactly PA1-PA3, PA1-PA8, and PA3-PA4 once.
 
+
+## Live reconciliation — 2026-11-23 13:29 EST
+
+The t007 full-matrix OSR wave is **partially complete**, not terminal. Seven of twenty directional Unknown-F1 cells have provenance-valid results. Ten original repaired PR #54 directions remain queued, and the transient pre-evaluation failure for PA4 <- PA1 has been retried exactly once on workflow run `45103704995` (latest job `137920375284`).
+
+Current Unknown-F1 matrix (target rows / surrogate columns):
+
+| Target \\ Surrogate | PA1 | PA2 | PA3 | PA4 | PA8 |
+|---|---:|---:|---:|---:|---:|
+| PA1 | — | 0.018495 | queued | 0.800083 | 0.300953 |
+| PA2 | queued | — | queued | queued | 0.984759 |
+| PA3 | 0.986556 | queued | — | queued | blocked |
+| PA4 | retry queued | queued | queued | — | queued |
+| PA8 | 0.553929 | 0.979263 | blocked | queued | — |
+
+The two blocked cells are PA3 <- PA8 and PA8 <- PA3. Their shared PA3-PA8 t007 backbone is **not frozen**. Exact PR #40 run `45100307460` / job `137449393048` completed epoch 59 with known-validation macro-F1 `0.99377`, then the ephemeral runner received a shutdown signal during epoch 60 at approximately 38%. No GitHub artifact was uploaded, so logs alone cannot establish a provenance-valid checkpoint or finalist acceptance.
+
+Do not admit PA3-PA8 OSR until a terminal known-validation artifact/checkpoint is recovered or produced. Do not duplicate any currently queued repaired PR #54 OSR admission.
