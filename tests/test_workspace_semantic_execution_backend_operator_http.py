@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+import http.client
 import json
 from pathlib import Path
 import sys
@@ -183,6 +184,38 @@ def request_json(
         )
 
 
+def request_chunked_json(
+    base_url,
+    path,
+    payload,
+):
+    body = json.dumps(payload).encode("utf-8")
+    parsed = urlparse(base_url)
+    connection = http.client.HTTPConnection(
+        parsed.hostname,
+        parsed.port,
+        timeout=2,
+    )
+    try:
+        connection.request(
+            "POST",
+            path,
+            body=(part for part in (body[:7], body[7:])),
+            headers={
+                IDENTITY_HEADER: IDENTITY,
+                "Content-Type": "application/json",
+            },
+            encode_chunked=True,
+        )
+        response = connection.getresponse()
+        raw = response.read()
+        return response.status, (
+            None if not raw else json.loads(raw.decode("utf-8"))
+        )
+    finally:
+        connection.close()
+
+
 class OperatorBridgeHttpTests(unittest.TestCase):
     def test_server_rejects_non_loopback_binding(self):
         service, *_ = service_and_runtime()
@@ -275,6 +308,39 @@ class OperatorBridgeHttpTests(unittest.TestCase):
                 status_body,
                 {"readyManualCycles": 0, "sentUnconfirmed": 1},
             )
+
+    def test_chunked_json_claim_round_trip(self):
+        service, _runtime, _broker, packet = service_and_runtime()
+        with running_server(service) as base:
+            status, claimed = request_chunked_json(
+                base,
+                "/operator-bridge/v1/actions/claim",
+                {
+                    "helperInstanceId": "windows-helper",
+                    "claimId": "claim-chunked-1",
+                    "claimedAt": "T1",
+                    "expiresAt": "T2",
+                },
+            )
+            self.assertEqual(status, 200)
+            self.assertEqual(claimed["actionId"], "action:http/leaf")
+            self.assertEqual(claimed["packetText"], packet.text)
+
+    def test_chunked_json_body_limit_is_enforced(self):
+        service, *_ = service_and_runtime()
+        with running_server(service) as base:
+            status, body = request_chunked_json(
+                base,
+                "/operator-bridge/v1/actions/claim",
+                {
+                    "helperInstanceId": "x" * 20_000,
+                    "claimId": "claim-chunked-too-large",
+                    "claimedAt": "T1",
+                    "expiresAt": "T2",
+                },
+            )
+            self.assertEqual(status, 413)
+            self.assertEqual(body, {"error": "request_too_large"})
 
     def test_claim_no_work_returns_204(self):
         service, *_ = service_and_runtime()

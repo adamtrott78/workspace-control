@@ -93,17 +93,7 @@ class OperatorBridgeRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def _read_json(self) -> dict[str, Any]:
-        raw_length = self.headers.get("Content-Length", "0")
-        try:
-            length = int(raw_length)
-        except ValueError as exc:
-            raise ValueError("invalid_content_length") from exc
-        if length < 0:
-            raise ValueError("invalid_content_length")
-        limit = self.server.operator_bridge_config.max_body_bytes
-        if length > limit:
-            raise OverflowError("request_body_too_large")
-        raw = self.rfile.read(length) if length else b"{}"
+        raw = self._read_request_body()
         try:
             payload = json.loads(raw.decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -111,6 +101,72 @@ class OperatorBridgeRequestHandler(BaseHTTPRequestHandler):
         if not isinstance(payload, dict):
             raise ValueError("json_object_required")
         return payload
+
+    def _read_request_body(self) -> bytes:
+        raw_length = self.headers.get("Content-Length")
+        raw_transfer = self.headers.get("Transfer-Encoding")
+        limit = self.server.operator_bridge_config.max_body_bytes
+
+        if raw_length is not None and raw_transfer is not None:
+            raise ValueError("ambiguous_request_body_framing")
+
+        if raw_transfer is not None:
+            codings = [
+                item.strip().lower()
+                for item in raw_transfer.split(",")
+                if item.strip()
+            ]
+            if codings != ["chunked"]:
+                raise ValueError("unsupported_transfer_encoding")
+            return self._read_chunked_body(limit)
+
+        if raw_length is None:
+            return b"{}"
+
+        try:
+            length = int(raw_length)
+        except ValueError as exc:
+            raise ValueError("invalid_content_length") from exc
+        if length < 0:
+            raise ValueError("invalid_content_length")
+        if length > limit:
+            raise OverflowError("request_body_too_large")
+        return self.rfile.read(length) if length else b"{}"
+
+    def _read_chunked_body(self, limit: int) -> bytes:
+        body = bytearray()
+        while True:
+            size_line = self.rfile.readline(128)
+            if (
+                not size_line
+                or len(size_line) >= 128
+                or not size_line.endswith(b"\r\n")
+            ):
+                raise ValueError("invalid_chunk_size_line")
+
+            raw_size = size_line[:-2]
+            if b";" in raw_size:
+                raise ValueError("chunk_extensions_not_supported")
+            try:
+                chunk_size = int(raw_size, 16)
+            except ValueError as exc:
+                raise ValueError("invalid_chunk_size") from exc
+
+            if chunk_size == 0:
+                trailer_end = self.rfile.readline(128)
+                if trailer_end != b"\r\n":
+                    raise ValueError("chunk_trailers_not_supported")
+                return bytes(body)
+
+            if len(body) + chunk_size > limit:
+                raise OverflowError("request_body_too_large")
+
+            chunk = self.rfile.read(chunk_size)
+            if len(chunk) != chunk_size:
+                raise ValueError("incomplete_chunk")
+            if self.rfile.read(2) != b"\r\n":
+                raise ValueError("invalid_chunk_terminator")
+            body.extend(chunk)
 
     @staticmethod
     def _required_str(payload: dict[str, Any], name: str) -> str:
