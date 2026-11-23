@@ -1030,3 +1030,17 @@ Current Unknown-F1 matrix (target rows / surrogate columns):
 The two blocked cells are PA3 <- PA8 and PA8 <- PA3. Their shared PA3-PA8 t007 backbone is **not frozen**. Exact PR #40 run `45100307460` / job `137449393048` completed epoch 59 with known-validation macro-F1 `0.99377`, then the ephemeral runner received a shutdown signal during epoch 60 at approximately 38%. No GitHub artifact was uploaded, so logs alone cannot establish a provenance-valid checkpoint or finalist acceptance.
 
 Do not admit PA3-PA8 OSR until a terminal known-validation artifact/checkpoint is recovered or produced. Do not duplicate any currently queued repaired PR #54 OSR admission.
+
+
+## Scientific runner timeout390 repair — 2026-11-23
+
+The repeated PA3-PA8 t007 termination is now traced to the **root scientific runtime ceiling**, not the GitHub workflow timeout. Run `45100307460` / job `137449393048` completed epoch 59 with known-validation macro-F1 `0.99377`, entered epoch 60, and was terminated by a runner shutdown at the inherited 4-hour root limit. No terminal artifact was uploaded.
+
+Repository repair is frozen and exact-head validated:
+
+- **PR #651** policy head `326b5408d81d9908e7f7433c70c6f5f928875aa7`: raises both scientific systemd profiles from `4h` to `390min` and both scientific resource ceilings from `14400` to `23400` seconds. Authoritative validation run `45241167357` / job `137925881743`: **SUCCESS**.
+- **PR #652** live transaction head `a419a3caacec4c3c79091bc8dd2bf9f5d5c8ea12`: adds a root-attested, quiescent, rollback-safe live ceiling refresh layered after the existing lane-A v3 and lane-B v8 timeout360 workflow receipts. Candidate receipts: `job-a6a10e88-9ed7-43ab-8d81-08902320d295` **5 passed**; `job-b70376f9-78d3-469e-b2a3-147840250b7f` **85 passed**. Authoritative validation run `45242628027` / job `137931009571`: **SUCCESS**.
+
+Intended timeout hierarchy is now `360min workflow < 390min root/systemd < 392min root-wrapper watchdog`.
+
+No live host mutation has occurred yet. The task is at a genuine operator/root gate because the connected Workspace Shell has no reviewed root-helper approval for this new transaction and repository code cannot mint `workspace-control-operator` authority. Do not merge either PR and do not re-admit PA3-PA8 until the root transaction reports `PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH=PASS` and verifies both scientific lanes at `23400s / 390min`.
