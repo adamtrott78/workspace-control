@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.10",
-  "status": "REPAIR_CANDIDATE_VALIDATED_NOT_AUTHORITY",
+  "status": "CLEANUP_ACCEPTED_AWAITING_EXPLICIT_ONE_SHOT_APPROVAL",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "backend_task": "workspace-semantic-execution-backend-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
@@ -58,8 +58,24 @@
   "authority_gate": {
     "live_retry_authorized": false,
     "exact_head_review_validation_required": true,
-    "windows_cleanup_required": true,
-    "fresh_operator_approval_required": true
+    "windows_cleanup_required": false,
+    "fresh_operator_approval_required": true,
+    "cleanup_accepted": true
   },
-  "postcondition": "v1.10 backend transport repair is candidate-validated 3/3 and preserves A7 exactly. This review grants zero live authority. Freeze/validate the review and prove v1.9 Windows cleanup before any fresh one-shot authority."
+  "postcondition": "v1.10 backend transport repair and review are exact-head validated 3/3, A7 remains unchanged, and consumed-v1.9 Windows cleanup is accepted under the harness's already-absent runtime semantics. This review grants zero live authority. Next gate is fresh explicit operator approval for exactly one v1.10 attempt.",
+  "cleanup_closure": {
+    "observed_after_consumed_v19": true,
+    "wop_down_output": [
+      "WORKSPACE_OPERATOR_DEV_OFFLINE=PASS"
+    ],
+    "wop_status_output": [
+      "WORKSPACE_OPERATOR_DEV_STATUS=OFFLINE"
+    ],
+    "runtime_state_semantics": {
+      "state_file_absent_path": "$env:LOCALAPPDATA\\WorkspaceControl\\OperatorBridge\\DevRuntime\\runtime.json",
+      "stop_dev_runtime_behavior": "If runtime.json is absent, Stop-DevRuntime prints WORKSPACE_OPERATOR_DEV_OFFLINE=PASS and returns without process/workdir markers.",
+      "interpretation": "already_torn_down_runtime_cleanup_accepted"
+    },
+    "accepted": true
+  }
 }
