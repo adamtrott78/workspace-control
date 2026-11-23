@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.11",
+  "status": "VALIDATED_REPAIR_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "backend_task": "workspace-semantic-execution-backend-v1",
+  "frontend_task": "workspace-operator-bridge-implementation-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.10.json",
+    "result": "CONSUMED_FAILED_Q1_LIVE_SEMANTIC_BINDING_STALE_NONREUSABLE"
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "exact_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "exact_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed_in_v111": false
+  },
+  "diagnosis": {
+    "proven": [
+      "v1.10 reached live consumption, Q1 readiness, A7 online, adapter_connected, and post-A7 backend status revalidation.",
+      "Every observed v1.10 Ctrl+Space dispatch failed before ActionId with HttpRequestException.",
+      "The v1.10 authority bound backend blob 3b6893c157c9f567c837aa70c110012eb96ee18c, but the live Linux Stage12 transaction still hard-coded SEMANTIC_SHA=7c20097c5f177f23c16a765b95ce94d7161f0d29.",
+      "At semantic SHA 7c20097c…, operator_bridge_http.py blob is 89023ddae31ad95f718a75c4734d3837554b693c and has no chunked-body decoder.",
+      "At validated repair SHA 020d35156…, operator_bridge_http.py blob is 3b6893c157c9f567c837aa70c110012eb96ee18c and contains the chunked-body decoder.",
+      "Therefore v1.10 CI/authority validated the repair but live D4 did not deploy it."
+    ],
+    "defect_class": "VALIDATED_LIVE_SEMANTIC_SOURCE_DRIFT"
+  },
+  "repair": {
+    "candidate_head": "9d19a40a891a3c3489df60563f432fb0ae9a8bd3",
+    "linux_transaction_path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh",
+    "linux_transaction_blob": "9954db2cd5fbeb5c122e448f7cb64c33acdcacae",
+    "semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "expected_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "regression_path": "tests/test_workspace_semantic_execution_stage12_v111.py",
+    "regression_blob": "aeab5290e8e5098277e857382ec8fb257ee4eedc",
+    "behavior": [
+      "Live D4 archives semantic-execution from the validated repair SHA rather than stale 7c20097c…",
+      "Before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, D4 resolves the live semantic operator_bridge_http.py blob and requires exact equality with the validated repair blob.",
+      "A static regression resolves the semantic commit:path blob through Git and proves binding/ordering/syntax.",
+      "Accepted A7 frontend bytes remain unchanged."
+    ]
+  },
+  "candidate_validation": {
+    "workspace_control_run": 3137,
+    "semantic_execution_run": 439,
+    "operator_bridge_run": 710,
+    "result": "SUCCESS"
+  },
+  "exact_candidate_bindings": {
+    "source_head": "9d19a40a891a3c3489df60563f432fb0ae9a8bd3",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "9954db2cd5fbeb5c122e448f7cb64c33acdcacae",
+    "tests/test_workspace_semantic_execution_stage12_v111.py": "aeab5290e8e5098277e857382ec8fb257ee4eedc",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/tools/run-stage12-wop.ps1": "87e2b22d010adcefde075089156ec4c8d3974964",
+    "operator-bridge/tools/run-stage12-remote-bootstrap.sh": "905d1f8e21c45c78fd244f1192a420ff457f221c"
+  },
+  "cleanup_evidence_observed": {
+    "runtime_state_absent": true,
+    "adapter_disconnected_after_v110": true,
+    "formal_wop_down_status_closure_required_before_authority": true
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_review_validation_required": true,
+    "formal_windows_cleanup_required": true,
+    "fresh_operator_approval_required": true
+  },
+  "postcondition": "v1.11 live-source binding repair is candidate-validated and grants zero live authority. Freeze and exact-head validate this review; then accept formal Windows cleanup; then require fresh explicit approval for exactly one v1.11 attempt."
+}
