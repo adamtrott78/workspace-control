@@ -55,3 +55,39 @@ def test_t007_wave_redraw_is_width_safe():
     assert "max(104" not in src
     assert "safe_width = max(1, width - 1)" in src
     assert 'sys.stdout.write("\\033[2J\\033[H"' in src
+
+
+def test_osr_terminal_result_dominates_live_process_and_stale_cache():
+    mod = _module()
+    direction = "PA1<-PA2"
+    cache = {
+        "osr": {
+            direction: {
+                "status": "RUNNING",
+                "github_run_id": 999,
+            }
+        }
+    }
+    active = {
+        direction: {
+            "elapsed": 123,
+            "github_run_id": "45103679764",
+        }
+    }
+    results = {
+        direction: {
+            "status": "SUCCESS",
+            "artifact_id": 14765881457,
+            "unknown_f1": 0.0184953572105362,
+            "unknown_auroc": 0.0439551294941176,
+            "known_reject_rate": 0.0535555555555555,
+        }
+    }
+
+    rows = mod.build_osr_rows(cache, active, results)
+    row = next(r for r in rows if r["direction"] == direction)
+
+    assert row["status"] == "SUCCESS"
+    assert row["elapsed"] is None
+    assert row["unknown_f1"] == 0.0184953572105362
+    assert cache["osr"][direction]["status"] == "SUCCESS"
