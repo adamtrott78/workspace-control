@@ -7,7 +7,7 @@ DASH = (ROOT / "scripts/mth602_t007_fullmatrix_local_dashboard.py").read_text()
 def test_dashboard_compiles_and_osr_overlay_is_local_only():
     compile(DASH, "mth602_t007_fullmatrix_local_dashboard.py", "exec")
     for marker in (
-        'OSR_OVERLAY = "PADataset PR54 58538b45"',
+        'OSR_OVERLAY = "PADataset PR54 a711f448"',
         '("PA1<-PA2", 14765881457)',
         '("PA8<-PA2", 14719755202)',
         'def osr_process_rows():',
