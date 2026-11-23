@@ -113,7 +113,30 @@ class CandidateWatcher:
         )
         return completed.stdout
 
+    def _remote_head(self) -> str:
+        raw = str(
+            self._run(
+                "ls-remote",
+                "--heads",
+                "origin",
+                f"refs/heads/{self._branch}",
+            )
+        ).strip()
+        parts = raw.split()
+        if len(parts) != 2 or parts[1] != f"refs/heads/{self._branch}":
+            raise RuntimeError(
+                "candidate_branch_remote_head_invalid:"
+                f"{self._branch}:{raw!r}"
+            )
+        head = parts[0]
+        if len(head) != 40 or any(ch not in "0123456789abcdef" for ch in head):
+            raise RuntimeError(
+                f"candidate_branch_remote_sha_invalid:{head!r}"
+            )
+        return head
+
     def refresh(self) -> str:
+        observed = self._remote_head()
         self._run(
             "fetch",
             "--quiet",
@@ -123,12 +146,18 @@ class CandidateWatcher:
             f"refs/heads/{self._branch}:"
             f"refs/remotes/origin/{self._branch}",
         )
-        return str(
+        fetched = str(
             self._run(
                 "rev-parse",
                 f"refs/remotes/origin/{self._branch}",
             )
         ).strip()
+        if fetched != observed:
+            raise RuntimeError(
+                "candidate_branch_fetch_visibility_mismatch:"
+                f"observed={observed}:fetched={fetched}"
+            )
+        return observed
 
     def wait_for_exact_candidate(
         self,
@@ -275,7 +304,7 @@ def _packet_input(
     return PacketCompilationInput(
         process_id=process_id,
         source_checkpoint=source_checkpoint,
-        objective=objective,
+        objective="@github\n\n" + objective,
         findings=_result_instructions(
             path=path,
             payload_ref=payload_ref,
@@ -517,6 +546,7 @@ def run_calibration(
             path=q1_path,
             timeout_seconds=candidate_timeout_seconds,
         )
+        print(f"STAGE12_Q1_CANDIDATE_OBSERVED={q1_commit}", flush=True)
         _ingest_candidate(
             runtime=runtime,
             validator=validator,
@@ -524,6 +554,7 @@ def run_calibration(
             immutable_revision=q1_commit,
             raw_bytes=q1_raw,
         )
+        print("STAGE12_Q1_DURABLE_INGEST=PASS", flush=True)
         candidate_commits["q1"] = q1_commit
         if store.load().graph.executor_sessions[slot_id].state != ExecutorSessionState.READY:
             raise RuntimeError("q1_session_not_ready")

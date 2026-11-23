@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.14",
+  "status": "REPAIR_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.13.json",
+    "status": "CONSUMED_FAILED_Q1_DURABLE_ACK_STALL_SUPERSEDED",
+    "consumed": true,
+    "q1_candidate_commit": "daa18627982a1d406eb88d44145113f0e99561e0",
+    "live_status": {
+      "readyManualCycles": 0,
+      "sentUnconfirmed": 1
+    }
+  },
+  "established_frontend_invariants": {
+    "a6_plugin_probe": "Literal raw @github is accepted in Personalized Temporary Chat with autocomplete_selection_used=false; no Tab/click/autocomplete selection required.",
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "a7_frontend_checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "a7_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "redesign_allowed": false
+  },
+  "diagnosis": {
+    "q1_candidate_valid": true,
+    "q1_candidate_parent": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "q1_candidate_commit": "daa18627982a1d406eb88d44145113f0e99561e0",
+    "observed_operator_status": {
+      "readyManualCycles": 0,
+      "sentUnconfirmed": 1
+    },
+    "conclusion": "The live operator action reached AWAITING_DURABLE_ACK, but the harness did not observe+ingest the already-published candidate and therefore never planned Q2. Separately, Stage12 packet generation omitted the accepted literal @github convention and required a manual insertion."
+  },
+  "repair": {
+    "candidate_baseline": "daa18627982a1d406eb88d44145113f0e99561e0",
+    "changes": [
+      "CandidateWatcher now resolves the authoritative remote branch head with git ls-remote before each fetch.",
+      "After fetch, CandidateWatcher verifies the fetched remote-tracking ref equals the independently observed remote head and fails closed on visibility mismatch.",
+      "Q1 prints STAGE12_Q1_CANDIDATE_OBSERVED=<sha> immediately after observation and STAGE12_Q1_DURABLE_INGEST=PASS immediately after successful durable intake.",
+      "Stage12 packet objectives begin with literal raw @github, preserving the accepted A6 plugin invocation invariant with no Tab/click/autocomplete selection.",
+      "Stage12 preflight candidate baseline advances to the successful immutable Q1 commit daa1862… so history is preserved rather than reset."
+    ],
+    "retained": [
+      "repaired semantic backend 020d35156… / 3b6893c1…",
+      "exact stale Tailscale route normalization",
+      "accepted A7 frontend bytes unchanged",
+      "no automatic typing/paste/Enter/mouse/DOM scraping",
+      "candidate branch append-only single-commit quantum contract"
+    ]
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_validation_required": true,
+    "fresh_one_shot_approval_required": true
+  },
+  "postcondition": "v1.14 is a repair candidate only. It grants zero live execution authority."
+}

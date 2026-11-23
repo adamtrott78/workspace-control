@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.13",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "CONSUMED_FAILED_Q1_DURABLE_ACK_STALL_SUPERSEDED",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "backend_task": "workspace-semantic-execution-backend-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
@@ -100,8 +100,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "candidate_baseline_required_marker": "STAGE12_CANDIDATE_BASELINE=PASS",
     "stale_route_clear_marker_optional": "TAILSCALE_STALE_STAGE12_ROUTE_CLEARED=PASS",
     "clean_route_required_marker": "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
@@ -170,5 +170,19 @@
     "rule": "The exact authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "Exactly one v1.13 D4 attempt is authorized. Any abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS does not consume the live attempt; any success or failure after that marker consumes it and requires a fresh diagnosis/review/validation/authority cycle for retry."
+  "postcondition": "v1.13 was consumed and failed after Q1 publication because durable candidate intake/ack did not advance to Q2. It is non-reusable and superseded by the reviewed v1.14 repair cycle.",
+  "live_outcome": {
+    "consumed_marker_reached": true,
+    "q1_ready_reached": true,
+    "q1_candidate_commit": "daa18627982a1d406eb88d44145113f0e99561e0",
+    "q1_candidate_path": "worker-results/stage12/d85e6ca0d9484b4a98e8694e787d3505/q1.json",
+    "q1_candidate_publication_status": "SUCCESS",
+    "q1_candidate_structural_validation": "PASS",
+    "operator_status_after_q1": {
+      "readyManualCycles": 0,
+      "sentUnconfirmed": 1
+    },
+    "diagnosis": "Q1 reached AWAITING_DURABLE_ACK and published a structurally valid immutable candidate, but the calibration harness never advanced to Q2. The durable status remained readyManualCycles=0,sentUnconfirmed=1 for ~10 minutes. v1.14 makes remote candidate-head observation explicit via git ls-remote, verifies fetched visibility, emits candidate-observed and durable-ingest markers, restores the already-proven literal @github packet invariant, and advances the reviewed candidate baseline to the successful Q1 commit.",
+    "a6_a7_invariant": "Literal raw @github invocation in the managed Personalized Temporary Chat was already accepted without Tab/click/autocomplete selection; D4 must preserve this in packet text. A7 is convenience-command/front-end packaging and must not regress the accepted operator UX."
+  }
 }
