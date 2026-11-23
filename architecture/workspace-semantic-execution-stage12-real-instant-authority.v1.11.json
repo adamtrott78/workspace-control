@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.11",
+  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "backend_task": "workspace-semantic-execution-backend-v1",
+  "frontend_task": "workspace-operator-bridge-implementation-v1",
+  "purpose": "Fresh one-shot D4 v1.11 authority that deploys the validated chunked-POST backend repair live and proves the exact semantic backend blob before authority consumption, while preserving the accepted A7 frontend bytes unchanged.",
+  "approval_basis": {
+    "authority_owner": "operator",
+    "approval_date": "2026-11-22",
+    "approval_form": "EXPLICIT_CHAT_APPROVAL_AFTER_V111_REPAIR_REVIEW_CLEANUP_AND_EXACT_HEAD_VALIDATION_PRESENTED",
+    "approval_utterance": "GOOOOO FFS GO",
+    "approved_scope": "EXACTLY_ONE_V1_11_D4_ATTEMPT",
+    "standing_or_future_authority_inferred": false,
+    "approved_gate_head": "95bd1179e675820e25175217020d789924514b7b",
+    "approved_review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.11.json",
+    "approved_review_blob_sha": "c7c1310e34e5669b9c22a926e94c94b3d85989ce",
+    "approved_procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.11.md",
+    "approved_procedure_blob_sha": "b7cd18d1c6d1862bc1bb9154e1d2c92fbb21c31d",
+    "approval_gate_validation": {
+      "workspace_control_run": 3141,
+      "semantic_execution_run": 443,
+      "operator_bridge_run": 714,
+      "result": "SUCCESS"
+    },
+    "approval_scope_exact": true
+  },
+  "predecessor": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.10.json",
+    "status": "CONSUMED_FAILED_Q1_LIVE_SEMANTIC_BINDING_STALE_NONREUSABLE",
+    "consumed": true,
+    "windows_cleaned": true,
+    "reusable": false
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "exact_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "exact_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed_in_v111": false,
+    "invariant": "v1.11 changes only the live semantic backend source binding and pre-consumption verification; accepted A7 frontend bytes remain frozen."
+  },
+  "validated_backend_repair": {
+    "semantic_source_head": "020d35156d90e8268fb560a10e67098a146880de",
+    "backend_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "transport_regression_blob": "6ae3d2812809680cedb7570ee230fa0eebb81e53",
+    "validation": {
+      "workspace_control_run": 3132,
+      "semantic_execution_run": 434,
+      "operator_bridge_run": 705,
+      "result": "SUCCESS"
+    },
+    "behavior": "Accept bounded HTTP/1.1 chunked JSON request bodies for Operator Bridge POSTs while preserving framing ambiguity rejection, size bounds, identity auth, and existing fail-closed semantics."
+  },
+  "validated_live_binding_repair": {
+    "candidate_head": "9d19a40a891a3c3489df60563f432fb0ae9a8bd3",
+    "linux_transaction_blob": "9954db2cd5fbeb5c122e448f7cb64c33acdcacae",
+    "regression_blob": "aeab5290e8e5098277e857382ec8fb257ee4eedc",
+    "validation": {
+      "workspace_control_run": 3137,
+      "semantic_execution_run": 439,
+      "operator_bridge_run": 710,
+      "result": "SUCCESS"
+    },
+    "frozen_review_head": "038b97c5ca617c7b8d2c6625e837f1f8e2e0ed3e",
+    "frozen_review_validation": {
+      "workspace_control_run": 3138,
+      "semantic_execution_run": 440,
+      "operator_bridge_run": 711,
+      "result": "SUCCESS"
+    },
+    "cleanup_gate_head": "f48f4dffd4b5e70494d3b596b5fa0627df860fe3",
+    "cleanup_gate_validation": {
+      "workspace_control_run": 3139,
+      "semantic_execution_run": 441,
+      "operator_bridge_run": 712,
+      "result": "SUCCESS"
+    },
+    "cleanup_acceptance_head": "95bd1179e675820e25175217020d789924514b7b",
+    "cleanup_acceptance_validation": {
+      "workspace_control_run": 3141,
+      "semantic_execution_run": 443,
+      "operator_bridge_run": 714,
+      "result": "SUCCESS"
+    }
+  },
+  "cleanup_gate": {
+    "windows_evidence": [
+      "WORKSPACE_OPERATOR_DEV_OFFLINE=PASS",
+      "WORKSPACE_OPERATOR_DEV_STATUS=OFFLINE"
+    ],
+    "already_absent_runtime_semantics_accepted": true,
+    "cleanup_accepted": true
+  },
+  "execution_start": {
+    "exact_command": "wop d4",
+    "separate_chat_approval_required": false,
+    "approval_already_observed": true
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": false,
+    "reusable": true,
+    "pre_consumption_required_marker": "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+    "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "consumed_on_success_or_failure_after_marker": true,
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "no_silent_retry": true
+  },
+  "exact_execution_bindings": {
+    "authority_parent_head": "95bd1179e675820e25175217020d789924514b7b",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "9954db2cd5fbeb5c122e448f7cb64c33acdcacae",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "tests/test_workspace_semantic_execution_stage12_v111.py": "aeab5290e8e5098277e857382ec8fb257ee4eedc",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/tools/run-stage12-wop.ps1": "87e2b22d010adcefde075089156ec4c8d3974964",
+    "operator-bridge/tools/run-stage12-remote-bootstrap.sh": "905d1f8e21c45c78fd244f1192a420ff457f221c"
+  },
+  "launch_contract": {
+    "backend_first": true,
+    "frontend_launch_context": "interactive parent PowerShell",
+    "start_job_for_frontend": false,
+    "pre_consumption_live_semantic_binding_required": true,
+    "required_pre_consumption_marker": "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+    "required_live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "required_live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "post_a7_backend_revalidation_required": true,
+    "required_post_a7_marker": "D4_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS",
+    "backend_route_loss_marker": "D4_OPERATOR_BACKEND_ROUTE_LOST",
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "q1_claim_transport_requirement": "POST /operator-bridge/v1/actions/claim executes against the validated chunked-body backend repair, proven live before authority consumption."
+  },
+  "retained_prohibitions": {
+    "credential_automation": false,
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_submission": false,
+    "mouse_automation": false,
+    "dom_or_page_content_scraping": false,
+    "browser_permission_widening": false,
+    "api_key_or_paid_api_fallback": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "production_postgres_mutation": false,
+    "gpu_use": false,
+    "padataset_mutation": false,
+    "workspace_shell_authority_widening": false,
+    "stale_generation_result_acceptance": false
+  },
+  "execution_tip_contract": {
+    "branch": "workspace-semantic-execution-migration-v1",
+    "rule": "The exact authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
+    "no_branch_mutation_after_final_validation_before_wop": true
+  },
+  "postcondition": "Exactly one v1.11 D4 attempt is authorized after exact-head 3/3 validation of this authority persistence. STAGE12_SEMANTIC_LIVE_BINDING=PASS must precede the live consumption marker. Any post-consumption success or failure consumes the attempt and requires a fresh cycle for retry."
+}
