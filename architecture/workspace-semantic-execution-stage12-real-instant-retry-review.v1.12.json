@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.12",
+  "status": "REPAIR_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.11.json",
+    "result": "ABORTED_PRECONSUMPTION_CANDIDATE_BASELINE_STALE_SUPERSEDED",
+    "consumed": false
+  },
+  "diagnosis": {
+    "defect_class": "STALE_REVIEWED_CANDIDATE_BASELINE",
+    "expected_by_v111": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "actual_candidate_head": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "actual_candidate_commit": "candidate(stage12): publish q1 real Instant calibration result",
+    "actual_candidate_change": "worker-results/stage12/5dda87c416484e45ae5a22f0bccf97f4/q1.json",
+    "conclusion": "The candidate branch advanced legitimately by one immutable Q1 RESULT commit. Resetting it would violate the candidate-history contract; the live preflight must instead bind the reviewed current head."
+  },
+  "repair": {
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "initial_namespace": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "behavior": [
+      "Stage12 activation requires the remote worker-result-candidates-v1 branch to equal the reviewed current head before starting.",
+      "The existing CandidateWatcher continues to capture the live baseline for each quantum and accepts only one-commit advances with exactly the expected path.",
+      "No candidate history is reset, force-pushed, deleted, or rewritten.",
+      "The v1.11 repaired semantic backend binding and unchanged A7 frontend are retained."
+    ]
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_validation_required": true,
+    "fresh_operator_approval_required": true
+  },
+  "postcondition": "v1.12 is a repair review only and grants zero live authority."
+}

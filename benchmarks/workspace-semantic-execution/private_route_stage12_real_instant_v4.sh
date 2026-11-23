@@ -18,7 +18,7 @@ SERVE_BEFORE="$RUNTIME_ROOT/serve-before.json"
 FUNNEL_BEFORE="$RUNTIME_ROOT/funnel-before.json"
 HARNESS_REL="benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py"
 REPO_URL="https://github.com/adamtrott78/workspace-control.git"
-CANDIDATE_BASELINE="0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+CANDIDATE_BASELINE="7bab6ff51202b3d0c3190d1351e8578d22c4f2f1"
 WINDOWS_READY_MARKER="STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS"
 
 ROUTE_ATTEMPTED=0
