@@ -34,10 +34,12 @@ class Stage12V111ReviewTests(unittest.TestCase):
         self.assertEqual(self.git("HEAD:operator-bridge/src"), bindings["operator-bridge/src_tree"])
         self.assertFalse(review["accepted_frontend"]["changed_in_v111"])
 
-    def test_review_grants_zero_live_authority(self) -> None:
+    def test_review_grants_zero_live_authority_after_cleanup(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
         self.assertFalse(review["authority_gate"]["live_retry_authorized"])
-        self.assertTrue(review["authority_gate"]["formal_windows_cleanup_required"])
+        self.assertFalse(review["authority_gate"]["formal_windows_cleanup_required"])
+        self.assertTrue(review["authority_gate"]["cleanup_accepted"])
+        self.assertTrue(review["cleanup_closure"]["accepted"])
         self.assertTrue(review["authority_gate"]["fresh_operator_approval_required"])
 
 
