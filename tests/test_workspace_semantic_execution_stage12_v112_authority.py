@@ -6,15 +6,24 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-AUTH = ROOT / "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.12.json"
+AUTHORITY_HEAD = "741414f8ddc09470087092615fb2d57a247eb89b"
+AUTHORITY_PATH = "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.12.json"
 
 
 class Stage12V112AuthorityTests(unittest.TestCase):
     def git(self, spec: str) -> str:
         return subprocess.check_output(["git", "rev-parse", spec], cwd=ROOT, text=True).strip()
 
+    def authority(self) -> dict:
+        raw = subprocess.check_output(
+            ["git", "show", f"{AUTHORITY_HEAD}:{AUTHORITY_PATH}"],
+            cwd=ROOT,
+            text=True,
+        )
+        return json.loads(raw)
+
     def test_authority_is_exactly_one_pending_attempt(self) -> None:
-        a = json.loads(AUTH.read_text(encoding="utf-8"))
+        a = self.authority()
         self.assertEqual(a["status"], "PENDING_OPERATOR_WOP_EXECUTION")
         self.assertEqual(a["approval_basis"]["approved_scope"], "EXACTLY_ONE_V1_12_D4_ATTEMPT")
         self.assertEqual(a["attempt_contract"]["attempts_authorized"], 1)
@@ -23,7 +32,7 @@ class Stage12V112AuthorityTests(unittest.TestCase):
         self.assertTrue(a["attempt_contract"]["no_silent_retry"])
 
     def test_authority_binds_reviewed_candidate_and_semantic_backend(self) -> None:
-        a = json.loads(AUTH.read_text(encoding="utf-8"))
+        a = self.authority()
         b = a["exact_execution_bindings"]
         source = b["authority_parent_head"]
         self.assertEqual(
@@ -40,7 +49,7 @@ class Stage12V112AuthorityTests(unittest.TestCase):
         )
 
     def test_authority_preserves_a7_and_marker_order(self) -> None:
-        a = json.loads(AUTH.read_text(encoding="utf-8"))
+        a = self.authority()
         b = a["exact_execution_bindings"]
         source = b["authority_parent_head"]
         self.assertEqual(

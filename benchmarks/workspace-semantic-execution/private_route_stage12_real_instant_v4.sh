@@ -14,6 +14,8 @@ PGDATA="$RUNTIME_ROOT/postgres"
 PGSOCKET="$RUNTIME_ROOT/socket"
 SRCROOT="$RUNTIME_ROOT/source"
 VENV="$RUNTIME_ROOT/venv"
+SERVE_OBSERVED="$RUNTIME_ROOT/serve-observed.json"
+FUNNEL_OBSERVED="$RUNTIME_ROOT/funnel-observed.json"
 SERVE_BEFORE="$RUNTIME_ROOT/serve-before.json"
 FUNNEL_BEFORE="$RUNTIME_ROOT/funnel-before.json"
 HARNESS_REL="benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py"
@@ -97,7 +99,7 @@ trap 'exit 130' INT TERM
 [[ "$(id -u)" -ne 0 ]] || fail "RUN_AS_OPERATOR_NOT_ROOT"
 [[ "$(id -un)" == "atrott" ]] || fail "EXPECTED_OPERATOR_USER_ATROTT"
 
-for cmd in git python3 tar sudo tailscale; do
+for cmd in git python3 tar sudo tailscale ss; do
   command -v "$cmd" >/dev/null 2>&1 || fail "MISSING_COMMAND:$cmd"
 done
 for cmd in postgres initdb pg_ctl createdb; do
@@ -153,6 +155,79 @@ echo "TAILSCALE_HOST_BINDING=PASS"
 echo "TAILSCALE_OPERATOR_PEER_BINDING=PASS"
 echo "TAILSCALE_LOGIN_BINDING=PASS"
 
+sudo tailscale serve status --json >"$SERVE_OBSERVED"
+sudo tailscale funnel status --json >"$FUNNEL_OBSERVED"
+STALE_ROUTE_STATE="$(python3 - "$SERVE_OBSERVED" "$FUNNEL_OBSERVED" <<'PY'
+import json, sys
+HOST="gokhan-lambda-vector.tailca6171.ts.net:443"
+ROOT_PROXY="http://127.0.0.1:8888"
+ROUTE="/operator-bridge/v1"
+ROUTE_PROXY="http://127.0.0.1:8765/operator-bridge/v1"
+
+def load(path, label):
+    d=json.load(open(path, encoding="utf-8")) or {}
+    if not isinstance(d, dict):
+        raise SystemExit(f"{label}_STATUS_JSON_NOT_OBJECT")
+    return d
+
+def relevant(d):
+    return {
+        "TCP": d.get("TCP") or {},
+        "Web": d.get("Web") or {},
+        "AllowFunnel": d.get("AllowFunnel") or {},
+        "Services": d.get("Services") or {},
+    }
+
+def classify(label, d):
+    if d.get("AllowFunnel"):
+        raise SystemExit(f"{label}_FUNNEL_EXPOSURE_DETECTED")
+    if d.get("Services"):
+        raise SystemExit(f"{label}_UNEXPECTED_SERVICE_CONFIG")
+    tcp=d.get("TCP") or {}
+    if set(tcp) != {"443"} or not (tcp.get("443") or {}).get("HTTPS"):
+        raise SystemExit(f"{label}_HTTPS_443_SHAPE_MISMATCH:{tcp!r}")
+    web=d.get("Web") or {}
+    if set(web) != {HOST}:
+        raise SystemExit(f"{label}_WEB_HOST_SHAPE_MISMATCH:{sorted(web)!r}")
+    handlers=(web[HOST] or {}).get("Handlers") or {}
+    root=(handlers.get("/") or {}).get("Proxy")
+    if root != ROOT_PROXY:
+        raise SystemExit(f"{label}_JUPYTER_ROOT_MAPPING_MISMATCH:{handlers!r}")
+    route_keys=[k for k in (ROUTE, ROUTE + "/") if k in handlers]
+    allowed={"/", *route_keys}
+    if set(handlers) != allowed:
+        raise SystemExit(f"{label}_UNEXPECTED_HANDLER_SET:{handlers!r}")
+    if len(route_keys) > 1:
+        raise SystemExit(f"{label}_AMBIGUOUS_STAGE12_ROUTE:{handlers!r}")
+    if not route_keys:
+        return "CLEAN"
+    route_proxy=(handlers[route_keys[0]] or {}).get("Proxy")
+    if route_proxy != ROUTE_PROXY:
+        raise SystemExit(f"{label}_STAGE12_ROUTE_PROXY_MISMATCH:{route_proxy!r}")
+    return "EXACT_STALE_ROUTE"
+
+serve=load(sys.argv[1], "SERVE")
+funnel=load(sys.argv[2], "FUNNEL")
+serve_state=classify("SERVE", serve)
+funnel_state=classify("FUNNEL", funnel)
+if relevant(serve) != relevant(funnel):
+    raise SystemExit("SERVE_FUNNEL_STATUS_VIEW_MISMATCH")
+if serve_state != funnel_state:
+    raise SystemExit(f"SERVE_FUNNEL_ROUTE_STATE_MISMATCH:{serve_state}:{funnel_state}")
+print(serve_state, end="")
+PY
+)"
+
+if [[ "$STALE_ROUTE_STATE" == "EXACT_STALE_ROUTE" ]]; then
+  if sudo ss -H -ltn | awk -v p=":$BACKEND_PORT" '$4 ~ (p "$") { found=1 } END { exit(found ? 0 : 1) }'; then
+    fail "STALE_STAGE12_ROUTE_BACKEND_LISTENER_PRESENT"
+  fi
+  remove_route_only || fail "STALE_STAGE12_ROUTE_CLEAR_FAILED"
+  echo "TAILSCALE_STALE_STAGE12_ROUTE_CLEARED=PASS"
+elif [[ "$STALE_ROUTE_STATE" != "CLEAN" ]]; then
+  fail "STALE_STAGE12_ROUTE_CLASSIFICATION_INVALID:$STALE_ROUTE_STATE"
+fi
+
 sudo tailscale serve status --json >"$SERVE_BEFORE"
 sudo tailscale funnel status --json >"$FUNNEL_BEFORE"
 python3 - "$SERVE_BEFORE" "$FUNNEL_BEFORE" <<'PY'
@@ -190,9 +265,9 @@ for label,d in (("SERVE",serve),("FUNNEL",funnel)):
         raise SystemExit(f"{label}_WEB_HOST_SHAPE_MISMATCH:{sorted(web)!r}")
     handlers=(web[HOST] or {}).get("Handlers") or {}
     if handlers != {"/":{"Proxy":ROOT_PROXY}}:
-        raise SystemExit(f"{label}_EXISTING_ROOT_MAPPING_MISMATCH:{handlers!r}")
+        raise SystemExit(f"{label}_CLEAN_ROOT_MAPPING_MISMATCH:{handlers!r}")
     if ROUTE in handlers or ROUTE + "/" in handlers:
-        raise SystemExit(f"{label}_STAGE12_ROUTE_ALREADY_PRESENT")
+        raise SystemExit(f"{label}_STAGE12_ROUTE_STILL_PRESENT")
 if relevant(serve) != relevant(funnel):
     raise SystemExit("SERVE_FUNNEL_STATUS_VIEW_MISMATCH")
 print("TAILSCALE_EXISTING_JUPYTER_ROOT_BINDING=PASS")

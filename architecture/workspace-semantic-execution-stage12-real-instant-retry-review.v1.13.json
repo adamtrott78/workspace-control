@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.13",
+  "status": "REPAIR_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.12.json",
+    "result": "ABORTED_PRECONSUMPTION_STALE_TAILSCALE_ROUTE_SUPERSEDED",
+    "consumed": false
+  },
+  "diagnosis": {
+    "defect_class": "STALE_STAGE12_TAILSCALE_ROUTE_PREFLIGHT_ORDERING",
+    "observed_handlers": {
+      "/": {
+        "Proxy": "http://127.0.0.1:8888"
+      },
+      "/operator-bridge/v1": {
+        "Proxy": "http://127.0.0.1:8765/operator-bridge/v1"
+      }
+    },
+    "conclusion": "The existing extra handler is the exact Stage12 route/proxy. The preflight incorrectly compared the whole handler map to root-only before classifying that route. A dead exact Stage12-owned route can be safely normalized only after proving no backend listener remains; arbitrary route drift must still fail closed."
+  },
+  "repair": {
+    "behavior": [
+      "Capture observed Serve/Funnel state before the clean baseline snapshot.",
+      "Permit only root Jupyter plus zero or one exact /operator-bridge/v1 handler with the expected proxy.",
+      "If the exact Stage12 route is present, prove TCP port 8765 has no listener before removing that route.",
+      "Reject any unexpected handler, ambiguous route, wrong route proxy, listener on 8765, Funnel exposure, service config, host-shape drift, or Serve/Funnel mismatch.",
+      "After optional stale-route normalization, recapture the clean root-only Serve/Funnel snapshot used by the existing exact rollback verifier.",
+      "Retain candidate baseline 7bab6ff…, semantic repair 020d35156… / 3b6893c1…, and unchanged A7."
+    ],
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c"
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_validation_required": true,
+    "fresh_operator_approval_required": true
+  },
+  "postcondition": "v1.13 is a repair review candidate only and grants zero live authority."
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.12",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "ABORTED_PRECONSUMPTION_STALE_TAILSCALE_ROUTE_SUPERSEDED",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "backend_task": "workspace-semantic-execution-backend-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
@@ -101,7 +101,7 @@
   "attempt_contract": {
     "attempts_authorized": 1,
     "consumed": false,
-    "reusable": true,
+    "reusable": false,
     "candidate_baseline_required_marker": "STAGE12_CANDIDATE_BASELINE=PASS",
     "pre_consumption_required_marker": "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
     "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
@@ -169,5 +169,25 @@
     "rule": "The exact authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "Exactly one v1.12 D4 attempt is authorized. Pre-consumption aborts remain fail-closed and do not consume the one live attempt; any success or failure after STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS consumes it and requires a fresh diagnosis/review/validation/authority cycle for any retry."
+  "postcondition": "v1.12 aborted before semantic live binding and before authority consumption. It is intentionally non-reusable/superseded because the Tailscale Serve preflight requires reviewed stale-route normalization.",
+  "preconsumption_abort": {
+    "marker_reached": false,
+    "passed_markers": [
+      "STAGE12_CANDIDATE_BASELINE=PASS"
+    ],
+    "not_reached_markers": [
+      "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+      "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+    ],
+    "failure": "SERVE_EXISTING_ROOT_MAPPING_MISMATCH",
+    "observed_handlers": {
+      "/": {
+        "Proxy": "http://127.0.0.1:8888"
+      },
+      "/operator-bridge/v1": {
+        "Proxy": "http://127.0.0.1:8765/operator-bridge/v1"
+      }
+    },
+    "diagnosis": "The preflight required root-only handlers before checking the Stage12 route, so an exact stale Stage12-owned route was misclassified as a root mapping mismatch. v1.13 normalizes only that exact stale route, only when port 8765 has no listener, then snapshots and verifies the clean root-only baseline before authority consumption."
+  }
 }
