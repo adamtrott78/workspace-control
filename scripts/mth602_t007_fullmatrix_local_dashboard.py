@@ -51,16 +51,16 @@ CACHE = OPERATOR_HOME / ".cache/workspace-control/experiment-dashboards/mth602-t
 
 # pair, lane, run_name, immutable display identity
 RUNS = [
-    ("PA1-PA2", "G0", "l2o_t007_fullmatrix_PA1_PA2", "comment 7082541725"),
-    ("PA1-PA3", "G1", "l2o_t007_fullmatrix_PA1_PA3", "comment 7082542060"),
-    ("PA1-PA4", "G0", "l2o_t007_fullmatrix_PA1_PA4", "comment 7082542513"),
-    ("PA1-PA8", "G1", "l2o_t007_fullmatrix_PA1_PA8", "comment 7082542827"),
+    ("PA1-PA2", "G0", "l2o_t007_fullmatrix_PA1_PA2", "run 45047242656"),
+    ("PA1-PA3", "G1", "l2o_t007_fullmatrix_PA1_PA3", "run 45084249815"),
+    ("PA1-PA4", "G0", "l2o_t007_fullmatrix_PA1_PA4", "run 45047248043"),
+    ("PA1-PA8", "G1", "l2o_t007_fullmatrix_PA1_PA8", "run 45084251371"),
     ("PA2-PA3", "G1", "l2o_hpo_tight60_PA2_PA3_t007", "run 44954728466"),
-    ("PA2-PA4", "G0", "l2o_t007_fullmatrix_PA2_PA4", "comment 7082543180"),
-    ("PA2-PA8", "G0", "l2o_hpo_v2_PA2_PA8_t007_finalist", "artifact 14719755202"),
-    ("PA3-PA4", "G1", "l2o_t007_fullmatrix_PA3_PA4", "comment 7082543540"),
-    ("PA3-PA8", "G1", "l2o_hpo_tight60_PA3_PA8_t007", "rerun job 137275754026"),
-    ("PA4-PA8", "G0", "l2o_t007_fullmatrix_PA4_PA8", "comment 7082543821"),
+    ("PA2-PA4", "G0", "l2o_t007_fullmatrix_PA2_PA4", "run 45047254352"),
+    ("PA2-PA8", "G0", "l2o_hpo_v2_PA2_PA8_t007_finalist", "run 44924427484"),
+    ("PA3-PA4", "G0", "l2o_t007_fullmatrix_PA3_PA4", "run 45085768587"),
+    ("PA3-PA8", "G0", "l2o_hpo_tight60_PA3_PA8_t007", "run 45100307460"),
+    ("PA4-PA8", "G0", "l2o_t007_fullmatrix_PA4_PA8", "run 45047260602"),
 ]
 
 # Durable terminal seeds let the unified wave start at 2/10 complete even if
