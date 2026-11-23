@@ -127,6 +127,27 @@ OSR_SEED = {
     },
 }
 
+OSR_RUN_IDS = {
+    "PA1<-PA2": 45101303302,
+    "PA2<-PA1": 45101305224,
+    "PA1<-PA3": 45101308323,
+    "PA3<-PA1": 45101310182,
+    "PA1<-PA4": 45101314203,
+    "PA4<-PA1": 45101317622,
+    "PA1<-PA8": 45101323757,
+    "PA8<-PA1": 45101323281,
+    "PA2<-PA3": 45101325905,
+    "PA3<-PA2": 45101331057,
+    "PA2<-PA4": 45101332517,
+    "PA4<-PA2": 45101334896,
+    "PA2<-PA8": 44944519746,
+    "PA8<-PA2": 44949531116,
+    "PA3<-PA4": 45101337152,
+    "PA4<-PA3": 45101340158,
+    "PA4<-PA8": 45101342508,
+    "PA8<-PA4": 45101346197,
+}
+
 RESET = "\033[0m"
 BOLD = "\033[1m"
 DIM = "\033[2m"
@@ -609,6 +630,8 @@ def build_osr_rows(cache, active, results):
     store = cache.setdefault("osr", {})
     for direction, artifact_id in OSR_DIRECTIONS:
         cached = store.setdefault(direction, {})
+        if not cached.get("github_run_id") and direction in OSR_RUN_IDS:
+            cached["github_run_id"] = OSR_RUN_IDS[direction]
         result = results.get(direction)
         if result:
             cached.update({k: v for k, v in result.items() if not k.startswith("_")})
