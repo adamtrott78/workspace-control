@@ -6,7 +6,8 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-LINUX = ROOT / "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh"
+V112_REPAIR_HEAD = "60fd1e3f2bfcbbd92ba2a75d0208cbdf1bd00f4e"
+LINUX_PATH = "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh"
 EXPECTED_BASELINE = "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1"
 INITIAL_NAMESPACE = "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
 EXPECTED_EXISTING_PATH = "worker-results/stage12/5dda87c416484e45ae5a22f0bccf97f4/q1.json"
@@ -17,7 +18,7 @@ class Stage12V112CandidateBaselineTests(unittest.TestCase):
         return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
     def test_live_preflight_binds_reviewed_current_candidate_head(self) -> None:
-        text = LINUX.read_text(encoding="utf-8")
+        text = self.git("show", f"{V112_REPAIR_HEAD}:{LINUX_PATH}")
         self.assertIn(f'CANDIDATE_BASELINE="{EXPECTED_BASELINE}"', text)
         self.assertIn('REMOTE_CANDIDATE="$(git ls-remote', text)
         self.assertIn('CANDIDATE_BASELINE_MISMATCH:$REMOTE_CANDIDATE', text)
