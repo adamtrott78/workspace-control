@@ -97,7 +97,7 @@ class V3LaunchSpecTests(unittest.TestCase):
     def test_scientific_class_binds_exact_padataset_runtime(self):
         _, spec = self.build("padataset-scientific-single-gpu-v1")
         self.assertEqual(spec["execution_contract"]["resource_class"], "scientific_gpu_single_v1")
-        self.assertEqual(spec["resources"]["runtime_max_seconds"], 14400)
+        self.assertEqual(spec["resources"]["runtime_max_seconds"], 23400)
         self.assertEqual(spec["runtime_binding"]["runtime_id"], "padataset-dnns-v1")
         self.assertEqual(
             spec["runtime_binding"]["promotion_method"],

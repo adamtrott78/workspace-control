@@ -114,7 +114,7 @@ class PADatasetScientificActivationTests(unittest.TestCase):
             target["execution_contract"]["execution_profile"],
             "gpu-scientific-single",
         )
-        self.assertEqual(target["systemd_profile"]["RuntimeMaxSec"], "4h")
+        self.assertEqual(target["systemd_profile"]["RuntimeMaxSec"], "390min")
         existing = self.compiled["root_projection"]["runner_classes"][
             "padataset-gpu-single-public-v1"
         ]

@@ -535,7 +535,7 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         spec = provisioner.build_launch_spec(validated, manifest, PROFILES, PINS)
         self.assertEqual(spec["profile"], "gpu-scientific-single")
         self.assertEqual(spec["runtime_binding"], admission["runtime"])
-        self.assertEqual(spec["resources"]["runtime_max_seconds"], 14400)
+        self.assertEqual(spec["resources"]["runtime_max_seconds"], 23400)
         self.assertEqual(
             spec["resources"]["gpu_uuids"],
             ["GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"],
@@ -566,9 +566,9 @@ class MultiRepoGenericAdmissionTests(unittest.TestCase):
         self.assertEqual(resource["execution_profile"], "gpu-scientific-single")
         self.assertEqual(
             PROFILES["profiles"]["gpu-scientific-single"]["RuntimeMaxSec"],
-            "4h",
+            "390min",
         )
-        self.assertEqual(resource["max_runtime_seconds"], 14400)
+        self.assertEqual(resource["max_runtime_seconds"], 23400)
         self.assertEqual(resource["gpu_count"], 1)
         self.assertEqual(
             resource["gpu_uuids"],

@@ -42,6 +42,8 @@ class PadatasetScientificDualLaneTests(unittest.TestCase):
         self.assertFalse(any(GPU1 in row for row in a['DeviceAllow_candidate']))
         self.assertTrue(any(GPU1 in row for row in b['DeviceAllow_candidate']))
         self.assertFalse(any(GPU0 in row for row in b['DeviceAllow_candidate']))
+        self.assertEqual(a['RuntimeMaxSec'], '390min')
+        self.assertEqual(b['RuntimeMaxSec'], '390min')
 
     def test_lane_b_is_independent_and_fail_closed_in_overlay(self):
         catalog = load('architecture/lambda-ci-runner-class-catalog.v1.json')
