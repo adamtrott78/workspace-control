@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.13",
+  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "backend_task": "workspace-semantic-execution-backend-v1",
+  "frontend_task": "workspace-operator-bridge-implementation-v1",
+  "purpose": "Fresh one-shot D4 v1.13 authority binding the exact stale Stage12 Tailscale-route normalization, reviewed candidate baseline, repaired semantic backend, and unchanged accepted A7 frontend.",
+  "approval_basis": {
+    "authority_owner": "operator",
+    "approval_date": "2026-11-23",
+    "approval_form": "EXPLICIT_CHAT_APPROVAL_AFTER_V113_FROZEN_REVIEW_AND_APPROVAL_GATE_EXACT_HEAD_VALIDATION_PRESENTED",
+    "approval_utterance": "GO",
+    "approved_scope": "EXACTLY_ONE_V1_13_D4_ATTEMPT",
+    "standing_or_future_authority_inferred": false,
+    "approved_gate_head": "d973976738c6cb0a9ef0f71cbf6316495e1e479a",
+    "approved_review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.13.json",
+    "approved_review_blob_sha": "8c69a745d6e62a37f201844d882b207b5fa9f78f",
+    "approved_procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.13.md",
+    "approved_procedure_blob_sha": "f524a396a1462168278443ebb14d3616ee4b1af8",
+    "frozen_review_head": "9f21d300efc9a82db358bd636b53f51e73a47946",
+    "frozen_review_validation": {
+      "workspace_control_run": 3149,
+      "semantic_execution_run": 451,
+      "operator_bridge_run": 722,
+      "result": "SUCCESS"
+    },
+    "approval_gate_validation": {
+      "workspace_control_run": 3150,
+      "semantic_execution_run": 452,
+      "operator_bridge_run": 723,
+      "result": "SUCCESS"
+    },
+    "approval_scope_exact": true
+  },
+  "predecessor": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.12.json",
+    "status": "ABORTED_PRECONSUMPTION_STALE_TAILSCALE_ROUTE_SUPERSEDED",
+    "consumed": false,
+    "windows_cleaned": true,
+    "reusable": false
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "exact_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "exact_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed_in_v113": false
+  },
+  "validated_backend_repair": {
+    "semantic_source_head": "020d35156d90e8268fb560a10e67098a146880de",
+    "backend_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "transport_regression_blob": "6ae3d2812809680cedb7570ee230fa0eebb81e53",
+    "validation": {
+      "workspace_control_run": 3132,
+      "semantic_execution_run": 434,
+      "operator_bridge_run": 705,
+      "result": "SUCCESS"
+    }
+  },
+  "validated_v113_repair": {
+    "repair_head": "534ff64254643346551a9d17a402f8cc4ff84b07",
+    "linux_transaction_blob": "18291bd808788ffb26ab34d29a90246861a0baac",
+    "regression_blob": "d2c87001fc5561d7d41995e1ebbdfe36d50c8e1d",
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "repair_validation": {
+      "workspace_control_run": 3148,
+      "semantic_execution_run": 450,
+      "operator_bridge_run": 721,
+      "result": "SUCCESS"
+    },
+    "frozen_review_head": "9f21d300efc9a82db358bd636b53f51e73a47946",
+    "frozen_review_validation": {
+      "workspace_control_run": 3149,
+      "semantic_execution_run": 451,
+      "operator_bridge_run": 722,
+      "result": "SUCCESS"
+    },
+    "approval_gate_head": "d973976738c6cb0a9ef0f71cbf6316495e1e479a",
+    "approval_gate_validation": {
+      "workspace_control_run": 3150,
+      "semantic_execution_run": 452,
+      "operator_bridge_run": 723,
+      "result": "SUCCESS"
+    }
+  },
+  "stale_route_normalization_contract": {
+    "optional_existing_route": "/operator-bridge/v1",
+    "exact_expected_proxy": "http://127.0.0.1:8765/operator-bridge/v1",
+    "backend_port": 8765,
+    "remove_only_if_no_listener": true,
+    "preserve_jupyter_root": "http://127.0.0.1:8888",
+    "arbitrary_handler_drift_allowed": false,
+    "funnel_allowed": false,
+    "post_normalization_clean_root_snapshot_required": true
+  },
+  "execution_start": {
+    "exact_command": "wop d4",
+    "separate_chat_approval_required": false,
+    "approval_already_observed": true
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": false,
+    "reusable": true,
+    "candidate_baseline_required_marker": "STAGE12_CANDIDATE_BASELINE=PASS",
+    "stale_route_clear_marker_optional": "TAILSCALE_STALE_STAGE12_ROUTE_CLEARED=PASS",
+    "clean_route_required_marker": "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
+    "pre_consumption_required_marker": "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+    "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "required_marker_order": [
+      "STAGE12_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
+      "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+      "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+    ],
+    "consumed_on_success_or_failure_after_marker": true,
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "no_silent_retry": true
+  },
+  "exact_execution_bindings": {
+    "authority_parent_head": "d973976738c6cb0a9ef0f71cbf6316495e1e479a",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "18291bd808788ffb26ab34d29a90246861a0baac",
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "tests/test_workspace_semantic_execution_stage12_v113.py": "d2c87001fc5561d7d41995e1ebbdfe36d50c8e1d",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.13.json": "8c69a745d6e62a37f201844d882b207b5fa9f78f",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.13.md": "f524a396a1462168278443ebb14d3616ee4b1af8",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/tools/run-stage12-wop.ps1": "87e2b22d010adcefde075089156ec4c8d3974964",
+    "operator-bridge/tools/run-stage12-remote-bootstrap.sh": "905d1f8e21c45c78fd244f1192a420ff457f221c"
+  },
+  "launch_contract": {
+    "backend_first": true,
+    "frontend_launch_context": "interactive parent PowerShell",
+    "start_job_for_frontend": false,
+    "candidate_baseline_preflight_required": true,
+    "exact_stale_route_normalization_allowed": true,
+    "exact_stale_route_backend_listener_must_be_absent": true,
+    "clean_route_pre_consumption_required": true,
+    "pre_consumption_live_semantic_binding_required": true,
+    "post_a7_backend_revalidation_required": true,
+    "required_post_a7_marker": "D4_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS",
+    "backend_route_loss_marker": "D4_OPERATOR_BACKEND_ROUTE_LOST",
+    "backend_ready_predicate": "GET /operator-bridge/v1/status returns HTTP 200 valid Operator Bridge JSON with readyManualCycles >= 1",
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter"
+  },
+  "retained_prohibitions": {
+    "credential_automation": false,
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_submission": false,
+    "mouse_automation": false,
+    "dom_or_page_content_scraping": false,
+    "browser_permission_widening": false,
+    "api_key_or_paid_api_fallback": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "production_postgres_mutation": false,
+    "gpu_use": false,
+    "padataset_mutation": false,
+    "workspace_shell_authority_widening": false,
+    "stale_generation_result_acceptance": false,
+    "candidate_history_rewrite": false,
+    "arbitrary_tailscale_handler_mutation": false
+  },
+  "execution_tip_contract": {
+    "branch": "workspace-semantic-execution-migration-v1",
+    "rule": "The exact authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
+    "no_branch_mutation_after_final_validation_before_wop": true
+  },
+  "postcondition": "Exactly one v1.13 D4 attempt is authorized. Any abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS does not consume the live attempt; any success or failure after that marker consumes it and requires a fresh diagnosis/review/validation/authority cycle for retry."
+}
