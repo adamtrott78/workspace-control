@@ -5629,5 +5629,38 @@
       "gpu1_assignment_note": "Lane-B durable ledger currently marks PA1<-PA3 job 137460033958 as scheduler STARTED/PREPARING while GitHub still reports that job queued; the actual in-progress GPU1 workflow is PA4<-PA1 job 137920375284. This is consistent with the controller's documented possibility that a created JIT runner may receive an older compatible job from the same scale set. Do not hand-edit; allow REST/scheduler recovery semantics to reconcile it.",
       "conclusion": "Prior stale-capacity hypothesis is disproven by direct root/controller evidence. Both scientific lanes are actively servicing OSR work."
     }
+  },
+  "t007_osr_pa2_pa3_binding_repair_20261123": {
+    "status": "REPAIRED_AND_READMITTED",
+    "failure": {
+      "old_lane_a_run_id": 45248669694,
+      "old_lane_a_job_id": 137952128692,
+      "old_lane_b_run_id": 45248672815,
+      "old_lane_b_job_id": 137952140766,
+      "error": "receipt/manifest SHA mismatch for backbone/l2o_hpo_tight60_PA2_PA3_t007/config.json"
+    },
+    "root_cause": {
+      "artifact_id": 14736363148,
+      "artifact_digest": "sha256:3419dd982709fccdfccce0a044260542a904ce9c86e1c4ef4e8e8bcb76c96b4d",
+      "receipt_config_sha256": "2886a7c76591b362c98e7956071a5fff57b455314a1a239ac1524f869ac46926",
+      "matrix_typo_sha256": "2886a7c76591d362c98e7956071a5fff57b455314a1a239ac1524f869ac46926",
+      "diagnosis": "single-character b-to-d typo in canonical matrix config_sha256; downloaded artifact and signed receipt independently match the corrected b362 digest"
+    },
+    "repaired_padataset_head": "a711f448e38c27be3884f242d0a3bbecdcb393ce",
+    "validation_receipt": "job-da10ef39-3805-4afc-a122-12ed6f4c2b06",
+    "validation_result": "1 passed",
+    "readmissions": {
+      "PA2<-PA3": {
+        "lane": "GPU0",
+        "run_id": 45260874906,
+        "job_id": 137994969707
+      },
+      "PA3<-PA2": {
+        "lane": "GPU1",
+        "run_id": 45260877368,
+        "job_id": 137994977632
+      }
+    },
+    "target_test_osr_selection_feedback": false
   }
 }
