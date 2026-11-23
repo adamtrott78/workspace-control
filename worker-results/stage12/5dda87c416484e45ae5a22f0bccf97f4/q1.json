@@ -1,0 +1,18 @@
+{
+  "publication_id": "worker-result:action:stage12:q1:5dda87c416484e45ae5a22f0bccf97f4:pg0:sg0:0",
+  "action_id": "action:stage12:q1:5dda87c416484e45ae5a22f0bccf97f4:pg0:sg0",
+  "action_generation": 0,
+  "process_id": "stage12-q1:5dda87c416484e45ae5a22f0bccf97f4",
+  "process_generation": 0,
+  "executor_id": "openai-chat-instant-current",
+  "worker_slot_id": "stage12-instant-slot:5dda87c416484e45ae5a22f0bccf97f4",
+  "session_generation": 0,
+  "packet_sha256": "0b711efcf0d1d5256b3067625094a6fb199f39ee1bece87de74eadcaaf944a9f",
+  "kind": "RESULT",
+  "observed_at": "2026-11-23T02:37:20.466Z",
+  "result_payload_ref": "stage12://5dda87c416484e45ae5a22f0bccf97f4/q1/result",
+  "result_payload_sha256": "49072f10650873ef1d9a2b1333dec3b8a6dbb1988abe17a54fc1e1574dc242a4",
+  "evidence_refs": [
+    "stage12:q1:5dda87c41648"
+  ]
+}
