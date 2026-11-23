@@ -87,7 +87,7 @@ SEED = {
 # already-reviewed /lambda-l2o-eval-2 workflow while GPU0 may continue backbone
 # training. The dashboard remains provider-API-free: local process/result
 # telemetry plus persistent cache only.
-OSR_OVERLAY = "PADataset PR54 db35a153"
+OSR_OVERLAY = "PADataset PR54 58538b45"
 OSR_DIRECTIONS = [
     ("PA1<-PA2", 14765881457),
     ("PA2<-PA1", 14765881457),
@@ -109,6 +109,70 @@ OSR_DIRECTIONS = [
     ("PA8<-PA4", 14773056923),
 ]
 OSR_SEED = {
+    "PA1<-PA2": {
+        "status": "SUCCESS",
+        "artifact_id": 14765881457,
+        "unknown_f1": 0.0184953572105362,
+        "unknown_auroc": 0.0439551294941176,
+        "known_reject_rate": 0.0535555555555555,
+        "github_run_id": 45103679764,
+    },
+    "PA3<-PA1": {
+        "status": "SUCCESS",
+        "artifact_id": 14783316485,
+        "unknown_f1": 0.986555759744656,
+        "unknown_auroc": 0.9998252863140364,
+        "known_reject_rate": 0.0515081894315571,
+        "github_run_id": 45103692451,
+    },
+    "PA1<-PA4": {
+        "status": "SUCCESS",
+        "artifact_id": 14769480157,
+        "unknown_f1": 0.8000830009452885,
+        "unknown_auroc": 0.903258872359697,
+        "known_reject_rate": 0.0447639516786481,
+        "github_run_id": 45103700060,
+    },
+    "PA4<-PA1": {
+        "status": "SUCCESS",
+        "artifact_id": 14769480157,
+        "unknown_f1": 0.5237947122861586,
+        "unknown_auroc": 0.7933482837142861,
+        "known_reject_rate": 0.0446898391758689,
+        "github_run_id": 45103704995,
+    },
+    "PA1<-PA8": {
+        "status": "SUCCESS",
+        "artifact_id": 14785061977,
+        "unknown_f1": 0.3009529962849297,
+        "unknown_auroc": 0.7735897504245578,
+        "known_reject_rate": 0.0651448899429333,
+        "github_run_id": 45103712515,
+    },
+    "PA8<-PA1": {
+        "status": "SUCCESS",
+        "artifact_id": 14785061977,
+        "unknown_f1": 0.5539290575261798,
+        "unknown_auroc": 0.7522149189921281,
+        "known_reject_rate": 0.0392796264729859,
+        "github_run_id": 45103716788,
+    },
+    "PA2<-PA4": {
+        "status": "SUCCESS",
+        "artifact_id": 14770958092,
+        "unknown_f1": 0.1383737517831669,
+        "unknown_auroc": 0.1731240226646199,
+        "known_reject_rate": 0.0479015275100103,
+        "github_run_id": 45103731655,
+    },
+    "PA4<-PA2": {
+        "status": "SUCCESS",
+        "artifact_id": 14770958092,
+        "unknown_f1": 0.3513759452759735,
+        "unknown_auroc": 0.7527765918468825,
+        "known_reject_rate": 0.0570962479608482,
+        "github_run_id": 45103737289,
+    },
     "PA2<-PA8": {
         "status": "SUCCESS",
         "artifact_id": 14719755202,
@@ -125,19 +189,43 @@ OSR_SEED = {
         "known_reject_rate": 0.0618419101290226,
         "github_run_id": 44949531116,
     },
+    "PA3<-PA4": {
+        "status": "SUCCESS",
+        "artifact_id": 14784971329,
+        "unknown_f1": 0.7887343500497559,
+        "unknown_auroc": 0.7857809737441976,
+        "known_reject_rate": 0.0497069515542696,
+        "github_run_id": 45103742974,
+    },
+    "PA4<-PA3": {
+        "status": "SUCCESS",
+        "artifact_id": 14784971329,
+        "unknown_f1": 0.4978006713740016,
+        "unknown_auroc": 0.8725346952194334,
+        "known_reject_rate": 0.0337562133689442,
+        "github_run_id": 45103748465,
+    },
+    "PA4<-PA8": {
+        "status": "SUCCESS",
+        "artifact_id": 14773056923,
+        "unknown_f1": 0.4716707302914199,
+        "unknown_auroc": 0.8143054715468798,
+        "known_reject_rate": 0.0613546999035536,
+        "github_run_id": 45103752504,
+    },
 }
 
 OSR_RUN_IDS = {
     "PA1<-PA2": 45103679764,
-    "PA2<-PA1": 45103683522,
+    "PA2<-PA1": 45248661475,
     "PA1<-PA3": 45103688755,
     "PA3<-PA1": 45103692451,
     "PA1<-PA4": 45103700060,
     "PA4<-PA1": 45103704995,
     "PA1<-PA8": 45103712515,
     "PA8<-PA1": 45103716788,
-    "PA2<-PA3": 45103721782,
-    "PA3<-PA2": 45103728056,
+    "PA2<-PA3": 45248669694,
+    "PA3<-PA2": 45248672815,
     "PA2<-PA4": 45103731655,
     "PA4<-PA2": 45103737289,
     "PA2<-PA8": 44944519746,
@@ -266,9 +354,9 @@ def load_cache():
     osr = data.setdefault("osr", {})
     for direction, seed in OSR_SEED.items():
         row = osr.setdefault(direction, {})
-        for key, value in seed.items():
-            if row.get(key) is None and value is not None:
-                row[key] = value
+        # Terminal seeds are authoritative durable evidence.  Override stale
+        # transient RUNNING/ADMITTED cache state left by an ephemeral runner.
+        row.update({key: value for key, value in seed.items() if value is not None})
     return data
 
 
@@ -589,6 +677,10 @@ def scan_osr_results():
     expected = dict(OSR_DIRECTIONS)
     found = {}
     patterns = [
+        # Current bounded scientific workflow writes the evaluator output here.
+        "/srv/workspace-ci/padataset/jobs/*/runner/_work/_temp/scientific-results/l2o_eval/result_record.json",
+        "/srv/workspace-ci/padataset/jobs/*/runner*/_work/_temp/scientific-results/l2o_eval/result_record.json",
+        # Retain the older directional-workflow layout for historical runs.
         "/srv/workspace-ci/padataset/jobs/*/runner/_work/_temp/l2o-directional-results/eval/result_record.json",
         "/srv/workspace-ci/padataset/jobs/*/runner*/_work/_temp/l2o-directional-results/eval/result_record.json",
     ]
@@ -639,16 +731,18 @@ def build_osr_rows(cache, active, results):
         if result:
             cached.update({k: v for k, v in result.items() if not k.startswith("_")})
         proc = active.get(direction)
-        if proc:
-            cached["status"] = "RUNNING"
+        # A terminal result is stronger evidence than a still-exiting local
+        # evaluator process.  Never overwrite durable SUCCESS with RUNNING.
+        if cached.get("status") == "SUCCESS":
+            status = "SUCCESS"
+            elapsed = None
+        elif proc:
             if proc.get("github_run_id"):
                 cached["github_run_id"] = proc.get("github_run_id")
+            # RUNNING is transient display state only; do not persist it.
             store[direction] = cached
             status = "RUNNING"
             elapsed = proc.get("elapsed")
-        elif cached.get("status") == "SUCCESS":
-            status = "SUCCESS"
-            elapsed = None
         else:
             status = "ADMITTED"
             elapsed = None
@@ -920,7 +1014,7 @@ def render():
                 if osr_counts.get(k, 0)
             )
             frame.append(
-                BOLD + "GPU1 T007 OSR  " + RESET
+                BOLD + "DUAL-GPU T007 OSR  " + RESET
                 + (osr_summary or "-")
                 + DIM + f"   | 18 directions | {OSR_OVERLAY}" + RESET
             )
