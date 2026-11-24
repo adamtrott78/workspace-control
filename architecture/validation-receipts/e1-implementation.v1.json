@@ -15,6 +15,12 @@
       "run_id": 45488382135,
       "run_number": 749,
       "conclusion": "success"
+    },
+    "workspace_control": {
+      "workflow_name": "Workspace Control Validation",
+      "run_id": 45488382143,
+      "run_number": 3176,
+      "conclusion": "success"
     }
   },
   "domains": {
@@ -45,6 +51,24 @@
         "scripts/validation_inheritance.py",
         "tests/test_validation_inheritance.py"
       ]
+    },
+    "workspace_control": {
+      "validation_run": "workspace_control",
+      "implementation_patterns": [
+        "scripts/**",
+        "controller/**",
+        "adapters/**",
+        ".agents/**",
+        "AGENTS.md",
+        "repos.json",
+        "policies/**",
+        "procedures/**",
+        "schemas/**",
+        "tests/**",
+        "tasks/**",
+        ".github/workflows/workspace-control-validation.yml",
+        "scripts/validation_inheritance.py"
+      ]
     }
   },
   "security": {
@@ -57,6 +81,7 @@
   },
   "proof": {
     "full_validation_completed_at_head": "783b8fe4c105c2ce761f63f901e5ac2001322d27",
-    "next_metadata_only_commit_expected_to_inherit": true
+    "next_metadata_only_commit_expected_to_inherit": true,
+    "workspace_control_inheritance_added": true
   }
 }

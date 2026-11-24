@@ -22,6 +22,12 @@ class ValidationInheritanceTests(unittest.TestCase):
         self.assertTrue(module._match(".github/workflows/operator-bridge-validation.yml", patterns))
         self.assertFalse(module._match("architecture/review.json", patterns))
 
+    def test_workspace_domain_can_exclude_authority_metadata(self) -> None:
+        patterns = ["scripts/**", "tests/**", "tasks/**", ".github/workflows/workspace-control-validation.yml"]
+        self.assertFalse(module._match("architecture/e1-authority.json", patterns))
+        self.assertTrue(module._match("tests/test_authority.py", patterns))
+        self.assertTrue(module._match("scripts/workspace_control.py", patterns))
+
     def test_run_verification_requires_exact_successful_head_and_name(self) -> None:
         payload = b'{"head_sha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","conclusion":"success","name":"Operator Bridge Validation"}'
         response = mock.MagicMock()
