@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
+  "status": "VALIDATED_IMPLEMENTATION_ALL_DOMAINS_INHERITABLE",
+  "validated_head": "483ea625242ae6dcc5cb92bed11e234ca994ec6a",
+  "validation_runs": {
+    "semantic_execution": {
+      "workflow_name": "Semantic Execution Validation",
+      "run_id": 45489127632,
+      "run_number": 480,
+      "conclusion": "success"
+    },
+    "operator_bridge": {
+      "workflow_name": "Operator Bridge Validation",
+      "run_id": 45489127436,
+      "run_number": 751,
+      "conclusion": "success"
+    },
+    "workspace_control": {
+      "workflow_name": "Workspace Control Validation",
+      "run_id": 45489127622,
+      "run_number": 3178,
+      "conclusion": "success"
+    }
+  },
+  "domains": {
+    "semantic_execution": {
+      "validation_run": "semantic_execution",
+      "implementation_patterns": [
+        "semantic-execution/**",
+        "tests/test_workspace_semantic_execution_backend_*.py",
+        "benchmarks/workspace-semantic-execution/backend/**",
+        "benchmarks/workspace-semantic-execution/research_engine_kernel_canary_v1.json",
+        ".github/workflows/semantic-execution-validation.yml",
+        "scripts/validation_inheritance.py",
+        "tests/test_validation_inheritance.py"
+      ]
+    },
+    "operator_bridge": {
+      "validation_run": "operator_bridge",
+      "implementation_patterns": [
+        "operator-bridge/**",
+        "tests/test_workspace_semantic_execution_operator_bridge*.py",
+        "benchmarks/workspace-semantic-execution/operator_bridge/**",
+        "tasks/active/workspace-operator-bridge-implementation-v1.json",
+        "tasks/active/workspace-operator-bridge-implementation-v1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json",
+        "architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json",
+        ".github/workflows/operator-bridge-validation.yml",
+        "scripts/validation_inheritance.py",
+        "tests/test_validation_inheritance.py"
+      ]
+    },
+    "workspace_control": {
+      "validation_run": "workspace_control",
+      "implementation_patterns": [
+        "scripts/**",
+        "controller/**",
+        "adapters/**",
+        ".agents/**",
+        "AGENTS.md",
+        "repos.json",
+        "policies/**",
+        "procedures/**",
+        "schemas/**",
+        "tests/**",
+        "tasks/**",
+        ".github/workflows/workspace-control-validation.yml",
+        "scripts/validation_inheritance.py"
+      ]
+    }
+  },
+  "security": {
+    "validated_run_must_match_exact_head": true,
+    "validated_run_must_be_success": true,
+    "validated_head_must_be_ancestor": true,
+    "implementation_path_change_forces_full_validation": true,
+    "api_lookup_failure_falls_back_to_full_validation": true,
+    "receipt_or_script_parse_failure_falls_back_to_full_validation": true
+  },
+  "proof": {
+    "full_validation_completed_at_head": "483ea625242ae6dcc5cb92bed11e234ca994ec6a",
+    "all_three_domains_bound": true,
+    "next_metadata_only_commit_expected_to_inherit": true
+  }
+}

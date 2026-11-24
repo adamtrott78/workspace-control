@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e1-authority-v0.1",
-  "status": "PENDING_OPERATOR_WOP_E1_EXECUTION",
+  "status": "CONSUMED_FAILED_E1_V01_HARNESS_PREFIX_ASSERTION",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Authorize exactly one production-like integrated Research-Iterate E1 live attempt using the accepted A7 human loop, deterministic exact-source routing, Instant reasoning, a strictly read-only connected Workspace Shell runtime_inventory probe, fan-in, synthesis, and Supervisor S1 durable projection.",
   "approval_basis": {
@@ -71,8 +71,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "no_silent_retry": true,
     "consumed_on_success_or_failure_after_marker": true,
     "abort_before_marker_does_not_consume_live_attempt": true,
@@ -130,5 +130,49 @@
     "candidate_history_rewrite": false,
     "stale_generation_acceptance": false
   },
-  "postcondition": "One E1 live attempt only. A failure after E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS consumes this authority; no retry without a fresh diagnosis/review/validation/authority cycle."
+  "postcondition": "One E1 live attempt only. A failure after E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS consumes this authority; no retry without a fresh diagnosis/review/validation/authority cycle.",
+  "live_closeout": {
+    "observed_date": "2026-11-24",
+    "result": "FAILED_AFTER_AUTHORITY_CONSUMPTION",
+    "consumption_marker": "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "successful_markers": [
+      "E1_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_E1_ROUTE_ABSENT=PASS",
+      "E1_SEMANTIC_LIVE_BINDING=PASS",
+      "E1_WINDOWS_READY_GATE=PASS",
+      "E1_ROOT_DECOMPOSE=PASS",
+      "E1_SUPERVISOR_S1_REHYDRATION=PASS",
+      "E1_CHILD_CONTRACT_INHERITANCE=PASS",
+      "E1_EXACT_SOURCE=PASS",
+      "E1_ANALYSIS=PASS"
+    ],
+    "candidate_chain": {
+      "baseline": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+      "root_decomposition": "f065ec8c274575b6b86e296e2784c1e126c69bdc",
+      "analysis": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+      "append_only": true
+    },
+    "failure": {
+      "exception": "RuntimeError: e1_shell_literal_plugin_prefix_mismatch",
+      "causal_stage": "before Workspace Shell action became serviceable",
+      "workspace_shell_worker_serviced": false,
+      "workspace_shell_tool_invoked": false,
+      "root_cause": "SemanticPacketCompiler rendered its WORKSPACE_REASONING_PACKET_V1 envelope before the objective. The E1 harness correctly required raw @Workspace Shell and @github clipboard prefix lines, but no compiler path could satisfy that assertion.",
+      "classification": "HARNESS_COMPILER_ENVELOPE_MISMATCH"
+    },
+    "cleanup": {
+      "tailscale_existing_config_exactly_restored": true,
+      "jupyter_root_rollback_preserved": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true
+    },
+    "ux_observation": {
+      "managed_firefox_not_brought_to_foreground": true,
+      "enter_confirmation_monitor_unavailable_alert_observed": true,
+      "causal_to_harness_failure": false,
+      "disposition": "TRACK_SEPARATELY_FROM_PREFIX_REPAIR"
+    },
+    "retry_policy": "NO_RETRY_UNDER_THIS_AUTHORITY"
+  }
 }

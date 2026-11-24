@@ -129,6 +129,25 @@ class SemanticPacketCompiler:
             ):
                 raise ValueError("invalid_result_publication_contract")
 
+    @staticmethod
+    def _surface_prefix(objective: str) -> str:
+        """Lift leading @-mention directives into raw clipboard lines.
+
+        The prefix is derived only from the hashed objective stored in durable
+        packet state, so materialization remains deterministic and no
+        unauthenticated text is introduced outside the canonical payload.
+        """
+        mentions: list[str] = []
+        for line in objective.splitlines():
+            if not line:
+                break
+            if not line.startswith("@") or line != line.strip():
+                break
+            mentions.append(line)
+        if not mentions:
+            return ""
+        return "\n".join(mentions) + "\n\n"
+
     def compile(
         self,
         source: PacketCompilationInput,
@@ -220,8 +239,10 @@ class SemanticPacketCompiler:
             indent=2,
             ensure_ascii=False,
         )
+        surface_prefix = self._surface_prefix(source.objective)
         text = (
-            f"{self.VERSION}\n"
+            surface_prefix
+            + f"{self.VERSION}\n"
             f"packet_sha256={digest}\n"
             f"executor_id={executor.executor_id}\n"
             f"invocation_mode={executor.invocation_mode.value}\n"

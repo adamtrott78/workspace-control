@@ -24,14 +24,39 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: semantic-execution-validation-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  dbos-postgres-spike:
-    name: dbos-postgres-spike
+  inheritance:
+    name: inheritance
+    runs-on: ubuntu-latest
+    outputs:
+      inherited: ${{ steps.inherit.outputs.inherited }}
+      reason: ${{ steps.inherit.outputs.reason }}
+    steps:
+      - name: Checkout tested tree
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Check validated implementation inheritance
+        id: inherit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/validation_inheritance.py \
+            --receipt architecture/validation-receipts/e1-implementation.v1.json \
+            --domain semantic_execution \
+            --current-sha "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --repository "${{ github.repository }}"
+
+  full-db-spike:
+    name: full-db-spike
+    needs: inheritance
+    if: needs.inheritance.outputs.inherited != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -114,3 +139,23 @@ jobs:
       - name: Run PostgreSQL and DBOS integration spike
         run: |
           python tests/test_workspace_semantic_execution_backend_dbos_postgres.py -v
+
+  dbos-postgres-spike:
+    name: dbos-postgres-spike
+    needs: [inheritance, full-db-spike]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Accept inherited or full validation
+        env:
+          INHERITED: ${{ needs.inheritance.outputs.inherited }}
+          INHERIT_REASON: ${{ needs.inheritance.outputs.reason }}
+          FULL_RESULT: ${{ needs.full-db-spike.result }}
+        run: |
+          set -euo pipefail
+          if [[ "$INHERITED" == "true" ]]; then
+            echo "SEMANTIC_VALIDATION_INHERITED=PASS reason=$INHERIT_REASON"
+            exit 0
+          fi
+          test "$FULL_RESULT" = "success"
+          echo "SEMANTIC_FULL_VALIDATION=PASS"

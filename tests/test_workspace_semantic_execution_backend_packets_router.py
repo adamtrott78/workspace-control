@@ -98,6 +98,43 @@ class PacketCompilerTests(unittest.TestCase):
         self.assertIn("BEGIN_PAYLOAD\n", first.text)
         self.assertTrue(first.text.endswith("END_PAYLOAD\n"))
 
+    def test_leading_plugin_mentions_are_raw_deterministic_clipboard_prefix(self):
+        compiler = SemanticPacketCompiler()
+        source = packet_input()
+        source = PacketCompilationInput(
+            **{
+                **source.__dict__,
+                "objective": (
+                    "@Workspace Shell\n"
+                    "@github\n\n"
+                    "Perform the bounded read-only capability probe."
+                ),
+            }
+        )
+
+        packet = compiler.compile(
+            source,
+            executor=openai_chat_instant_current_profile(),
+        )
+
+        self.assertTrue(
+            packet.text.startswith(
+                "@Workspace Shell\n@github\n\n"
+                "WORKSPACE_REASONING_PACKET_V1\n"
+            )
+        )
+        payload = json.loads(packet.canonical_payload_json)
+        self.assertEqual(
+            payload["process"]["objective"],
+            source.objective,
+        )
+        self.assertEqual(
+            packet.packet_sha256,
+            hashlib.sha256(
+                packet.canonical_payload_json.encode("utf-8")
+            ).hexdigest(),
+        )
+
     def test_packet_is_compiled_from_typed_state_not_chat_transcript(self):
         packet = SemanticPacketCompiler().compile(
             packet_input(),
