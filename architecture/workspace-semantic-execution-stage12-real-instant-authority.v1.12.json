@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.12",
+  "status": "ABORTED_PRECONSUMPTION_STALE_TAILSCALE_ROUTE_SUPERSEDED",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "backend_task": "workspace-semantic-execution-backend-v1",
+  "frontend_task": "workspace-operator-bridge-implementation-v1",
+  "purpose": "Fresh one-shot D4 v1.12 authority that preserves the legitimate immutable candidate history at 7bab6ff…, deploys the validated live semantic backend repair, proves both candidate-baseline and exact semantic backend bindings before authority consumption, and preserves the accepted A7 frontend bytes unchanged.",
+  "approval_basis": {
+    "authority_owner": "operator",
+    "approval_date": "2026-11-23",
+    "approval_form": "EXPLICIT_CHAT_APPROVAL_AFTER_V112_FROZEN_REVIEW_AND_APPROVAL_GATE_EXACT_HEAD_VALIDATION_PRESENTED",
+    "approval_utterance": "GOOOOO",
+    "approved_scope": "EXACTLY_ONE_V1_12_D4_ATTEMPT",
+    "standing_or_future_authority_inferred": false,
+    "approved_gate_head": "c7a465efcc84d0db1e9188c992b72ba51eb854c2",
+    "approved_review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.12.json",
+    "approved_review_blob_sha": "aec091baa889f437fbd16b254833d345389f00ff",
+    "approved_procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.12.md",
+    "approved_procedure_blob_sha": "11b1b41aa849f47ce56639f5d82a3848fff4a808",
+    "frozen_review_head": "5bcd6dada98c2e55d2c310e2a9f8caae74ca7ad2",
+    "frozen_review_validation": {
+      "workspace_control_run": 3145,
+      "semantic_execution_run": 447,
+      "operator_bridge_run": 718,
+      "result": "SUCCESS"
+    },
+    "approval_gate_validation": {
+      "workspace_control_run": 3146,
+      "semantic_execution_run": 448,
+      "operator_bridge_run": 719,
+      "result": "SUCCESS"
+    },
+    "approval_scope_exact": true
+  },
+  "predecessor": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.11.json",
+    "status": "ABORTED_PRECONSUMPTION_CANDIDATE_BASELINE_STALE_SUPERSEDED",
+    "consumed": false,
+    "windows_cleaned": true,
+    "reusable": false
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "exact_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "exact_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed_in_v112": false,
+    "invariant": "v1.12 changes only the Stage12 reviewed candidate baseline relative to v1.11; accepted A7 frontend bytes remain frozen."
+  },
+  "validated_backend_repair": {
+    "semantic_source_head": "020d35156d90e8268fb560a10e67098a146880de",
+    "backend_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "transport_regression_blob": "6ae3d2812809680cedb7570ee230fa0eebb81e53",
+    "validation": {
+      "workspace_control_run": 3132,
+      "semantic_execution_run": 434,
+      "operator_bridge_run": 705,
+      "result": "SUCCESS"
+    },
+    "behavior": "Accept bounded HTTP/1.1 chunked JSON request bodies for Operator Bridge POSTs while preserving framing ambiguity rejection, size bounds, identity auth, and fail-closed semantics."
+  },
+  "validated_v112_repair": {
+    "repair_head": "60fd1e3f2bfcbbd92ba2a75d0208cbdf1bd00f4e",
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "initial_candidate_namespace": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "linux_transaction_blob": "51b9a475497568422fb526ba41d7379a3ab5761e",
+    "regression_blob": "c0359bd5552594a456ffa50b31e9d08295a47778",
+    "repair_validation": {
+      "workspace_control_run": 3144,
+      "semantic_execution_run": 446,
+      "operator_bridge_run": 717,
+      "result": "SUCCESS"
+    },
+    "frozen_review_head": "5bcd6dada98c2e55d2c310e2a9f8caae74ca7ad2",
+    "frozen_review_validation": {
+      "workspace_control_run": 3145,
+      "semantic_execution_run": 447,
+      "operator_bridge_run": 718,
+      "result": "SUCCESS"
+    },
+    "approval_gate_head": "c7a465efcc84d0db1e9188c992b72ba51eb854c2",
+    "approval_gate_validation": {
+      "workspace_control_run": 3146,
+      "semantic_execution_run": 448,
+      "operator_bridge_run": 719,
+      "result": "SUCCESS"
+    }
+  },
+  "candidate_history_contract": {
+    "reviewed_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "reviewed_baseline_parent": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "reviewed_existing_path": "worker-results/stage12/5dda87c416484e45ae5a22f0bccf97f4/q1.json",
+    "reset_force_push_or_delete_allowed": false,
+    "quantum_advance_contract": "Each Q1/Q2/Q3 candidate must advance the current observed branch baseline by exactly one commit whose parent equals that baseline and whose only changed path equals the expected immutable result path."
+  },
+  "execution_start": {
+    "exact_command": "wop d4",
+    "separate_chat_approval_required": false,
+    "approval_already_observed": true
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": false,
+    "reusable": false,
+    "candidate_baseline_required_marker": "STAGE12_CANDIDATE_BASELINE=PASS",
+    "pre_consumption_required_marker": "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+    "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "required_marker_order": [
+      "STAGE12_CANDIDATE_BASELINE=PASS",
+      "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+      "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+    ],
+    "consumed_on_success_or_failure_after_marker": true,
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "no_silent_retry": true
+  },
+  "exact_execution_bindings": {
+    "authority_parent_head": "c7a465efcc84d0db1e9188c992b72ba51eb854c2",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "51b9a475497568422fb526ba41d7379a3ab5761e",
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "tests/test_workspace_semantic_execution_stage12_v112.py": "c0359bd5552594a456ffa50b31e9d08295a47778",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.12.json": "aec091baa889f437fbd16b254833d345389f00ff",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.12.md": "11b1b41aa849f47ce56639f5d82a3848fff4a808",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/tools/run-stage12-wop.ps1": "87e2b22d010adcefde075089156ec4c8d3974964",
+    "operator-bridge/tools/run-stage12-remote-bootstrap.sh": "905d1f8e21c45c78fd244f1192a420ff457f221c"
+  },
+  "launch_contract": {
+    "backend_first": true,
+    "frontend_launch_context": "interactive parent PowerShell",
+    "start_job_for_frontend": false,
+    "candidate_baseline_preflight_required": true,
+    "required_candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "required_candidate_marker": "STAGE12_CANDIDATE_BASELINE=PASS",
+    "pre_consumption_live_semantic_binding_required": true,
+    "required_pre_consumption_marker": "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+    "required_live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "required_live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "post_a7_backend_revalidation_required": true,
+    "required_post_a7_marker": "D4_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS",
+    "backend_route_loss_marker": "D4_OPERATOR_BACKEND_ROUTE_LOST",
+    "backend_ready_predicate": "GET /operator-bridge/v1/status returns HTTP 200 valid Operator Bridge JSON with readyManualCycles >= 1",
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "q1_claim_transport_requirement": "POST /operator-bridge/v1/actions/claim executes against the validated chunked-body backend repair, proven live before authority consumption."
+  },
+  "retained_prohibitions": {
+    "credential_automation": false,
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_submission": false,
+    "mouse_automation": false,
+    "dom_or_page_content_scraping": false,
+    "browser_permission_widening": false,
+    "api_key_or_paid_api_fallback": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "production_postgres_mutation": false,
+    "gpu_use": false,
+    "padataset_mutation": false,
+    "workspace_shell_authority_widening": false,
+    "stale_generation_result_acceptance": false,
+    "candidate_history_rewrite": false
+  },
+  "execution_tip_contract": {
+    "branch": "workspace-semantic-execution-migration-v1",
+    "rule": "The exact authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
+    "no_branch_mutation_after_final_validation_before_wop": true
+  },
+  "postcondition": "v1.12 aborted before semantic live binding and before authority consumption. It is intentionally non-reusable/superseded because the Tailscale Serve preflight requires reviewed stale-route normalization.",
+  "preconsumption_abort": {
+    "marker_reached": false,
+    "passed_markers": [
+      "STAGE12_CANDIDATE_BASELINE=PASS"
+    ],
+    "not_reached_markers": [
+      "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+      "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+    ],
+    "failure": "SERVE_EXISTING_ROOT_MAPPING_MISMATCH",
+    "observed_handlers": {
+      "/": {
+        "Proxy": "http://127.0.0.1:8888"
+      },
+      "/operator-bridge/v1": {
+        "Proxy": "http://127.0.0.1:8765/operator-bridge/v1"
+      }
+    },
+    "diagnosis": "The preflight required root-only handlers before checking the Stage12 route, so an exact stale Stage12-owned route was misclassified as a root mapping mismatch. v1.13 normalizes only that exact stale route, only when port 8765 has no listener, then snapshots and verifies the clean root-only baseline before authority consumption."
+  }
+}

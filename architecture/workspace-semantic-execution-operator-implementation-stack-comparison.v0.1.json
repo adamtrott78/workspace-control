@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-implementation-stack-comparison-v0.1",
+  "status": "UX_12_STACK_SELECTION_FROZEN",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "reviewed_on": "2026-11-09",
+  "decision_summary": {
+    "native_helper": ".NET 10 LTS / C# Windows Desktop",
+    "tray_ui": "System.Windows.Forms.NotifyIcon + small WinForms operator/recovery window",
+    "global_hotkey": "Win32 RegisterHotKey via P/Invoke",
+    "clipboard": "System.Windows.Forms.Clipboard write-only on STA UI thread",
+    "local_ipc": "System.IO.Pipes named pipe with PipeOptions.CurrentUserOnly",
+    "firefox_adapter": "Firefox Manifest V3 WebExtension, plain JavaScript, no content scripts",
+    "firefox_minimum": "Firefox ESR 153.0",
+    "firefox_native_bridge": "runtime.connectNative persistent Port to same installed helper executable in native-host proxy mode",
+    "custom_browser_candidate": ".NET 10 WinForms + Evergreen WebView2, conditional spike only",
+    "packaging": "per-user self-contained win-x64 single-file helper + signed unlisted Firefox XPI + deterministic install/uninstall PowerShell",
+    "auto_update": "none in v0; explicit reviewed release update",
+    "production_browser_baseline": "Firefox WorkspaceWorkers dedicated profile",
+    "custom_shell_adoption": "only after normal authentication succeeds without workaround and UX-09/UX-10 measurements materially beat baseline"
+  },
+  "candidate_scores": {
+    "scale": "1=poor, 5=excellent",
+    "native_helper": [
+      {
+        "candidate": ".NET 10 LTS / C#",
+        "windows_integration": 5,
+        "packaging": 4,
+        "startup_ram": 3,
+        "dependency_surface": 4,
+        "maintainability": 5,
+        "security_primitives": 5,
+        "notes": [
+          "Active LTS through 2028.",
+          "Direct WinForms tray/clipboard support and Win32 RegisterHotKey P/Invoke.",
+          "Self-contained single-file win-x64 publish supported.",
+          "Named pipes support CurrentUserOnly, including Windows account and elevation-level checks."
+        ],
+        "decision": "SELECTED"
+      },
+      {
+        "candidate": "Rust",
+        "windows_integration": 4,
+        "packaging": 5,
+        "startup_ram": 5,
+        "dependency_surface": 3,
+        "maintainability": 3,
+        "security_primitives": 5,
+        "notes": [
+          "Best likely idle footprint/startup ceiling.",
+          "More Windows/UI plumbing and crate-selection burden for tray/clipboard/native messaging.",
+          "No measured need yet justifies the implementation complexity."
+        ],
+        "decision": "DEFERRED_ALTERNATIVE_IF_DOTNET_FAILS_UX09_RESOURCE_BUDGET"
+      },
+      {
+        "candidate": "Python",
+        "windows_integration": 3,
+        "packaging": 2,
+        "startup_ram": 2,
+        "dependency_surface": 2,
+        "maintainability": 4,
+        "security_primitives": 3,
+        "notes": [
+          "Repository already contains substantial Python, but the operator helper is a Windows appliance rather than core orchestration code.",
+          "Reliable native-messaging launch and tray/hotkey packaging require interpreter/bundler and third-party packages.",
+          "Higher dependency/runtime variance than the selected .NET path."
+        ],
+        "decision": "REJECTED_FOR_V0_HELPER"
+      }
+    ],
+    "firefox_extension": [
+      {
+        "candidate": "Plain JavaScript MV3",
+        "build_complexity": 5,
+        "runtime_dependencies": 5,
+        "maintainability": 4,
+        "browser_fit": 5,
+        "notes": [
+          "Small adapter surface does not require a compiler/bundler.",
+          "Use JSON Schema contracts plus JSDoc for message shapes.",
+          "Firefox MV3 uses background.scripts/event page; Firefox does not support extension background service_worker."
+        ],
+        "decision": "SELECTED"
+      },
+      {
+        "candidate": "TypeScript + bundler",
+        "build_complexity": 3,
+        "runtime_dependencies": 4,
+        "maintainability": 5,
+        "browser_fit": 5,
+        "notes": [
+          "Useful if extension grows materially.",
+          "Adds build/pinning/supply-chain surface before justified by code size."
+        ],
+        "decision": "DEFER_UNLESS_EXTENSION_EXCEEDS_BOUNDED_ADAPTER_SCOPE"
+      }
+    ],
+    "browser_adapter": [
+      {
+        "candidate": "Dedicated Firefox profile + WebExtension",
+        "authentication_compatibility": 5,
+        "lifecycle_api_fit": 5,
+        "resource_potential": 3,
+        "maintenance": 5,
+        "security_boundary": 5,
+        "notes": [
+          "Required APIs are supported without host permissions or content scripts.",
+          "Signed extension deployment path is documented.",
+          "Normal browser authentication path is preserved."
+        ],
+        "decision": "SELECTED_PRODUCTION_BASELINE"
+      },
+      {
+        "candidate": "WebView2 custom worker shell",
+        "authentication_compatibility": 2,
+        "lifecycle_api_fit": 5,
+        "resource_potential": 4,
+        "maintenance": 4,
+        "security_boundary": 4,
+        "notes": [
+          "Evergreen runtime provides automatic browser-engine security updates.",
+          "Shared CoreWebView2Environment/user-data folder can reduce duplicated processes/memory.",
+          "Embedded OAuth providers can reject embedded user-agents; manual ChatGPT sign-in feasibility must be proven without cookie/token transfer or bypass."
+        ],
+        "decision": "SELECTED_FOR_BOUNDED_SPIKE_ONLY"
+      },
+      {
+        "candidate": "Electron/CEF custom shell",
+        "authentication_compatibility": 2,
+        "lifecycle_api_fit": 5,
+        "resource_potential": 2,
+        "maintenance": 2,
+        "security_boundary": 3,
+        "notes": [
+          "Adds bundled Chromium/runtime update responsibility or larger dependency surface.",
+          "No advantage to test before WebView2 proves the custom-shell concept."
+        ],
+        "decision": "REJECTED_UNLESS_WEBVIEW2_FAILS_FOR_NON_AUTH_REASON_AND_NEW_EVIDENCE_JUSTIFIES"
+      }
+    ]
+  },
+  "evidence": [
+    {
+      "url": "https://dotnet.microsoft.com/en-us/platform/support/policy",
+      "finding": ".NET 10 is active LTS through November 2028; selected instead of .NET 11 RC."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-registerhotkey",
+      "finding": "RegisterHotKey defines a system-wide hotkey and WM_HOTKEY delivery."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.notifyicon?view=net-10.0",
+      "finding": "WinForms NotifyIcon is available on Windows Desktop .NET 10."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/dotnet/api/system.io.pipes.pipeoptions?view=net-10.0",
+      "finding": "PipeOptions.CurrentUserOnly restricts pipe peers to the same user; on Windows it also verifies elevation level."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/dotnet/core/deploying/single-file/overview",
+      "finding": ".NET supports self-contained OS/architecture-specific single-file publishing."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Native_messaging",
+      "finding": "Firefox Native Messaging uses JSON over stdin/stdout, requires nativeMessaging, and exact allowed_extensions may be enforced by the host manifest."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background",
+      "finding": "Firefox MV3 does not support extension background service_worker and uses background.scripts/event page."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings",
+      "finding": "Signed MV3 Firefox extensions require an explicit ID; current AMO submissions also require data_collection_permissions declaration."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs",
+      "finding": "tabs permission permits URL metadata access without host permissions; content access still requires other APIs/permissions."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/sessions/setTabValue",
+      "finding": "sessions tab values provide extension-only non-authoritative binding metadata."
+    },
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/discard",
+      "finding": "inactive tabs can be discarded and later restored; active tabs cannot be discarded."
+    },
+    {
+      "url": "https://extensionworkshop.com/documentation/publish/signing-and-distribution-overview/",
+      "finding": "Release/Beta Firefox add-ons require Mozilla signing; unlisted self-distribution is supported."
+    },
+    {
+      "url": "https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/performance",
+      "finding": "Microsoft recommends Evergreen WebView2 and sharing one CoreWebView2Environment for memory efficiency."
+    },
+    {
+      "url": "https://developers.google.com/identity/protocols/oauth2/web-server",
+      "finding": "Google OAuth may return disallowed_useragent when authorization is shown in an embedded user-agent."
+    },
+    {
+      "url": "https://openai.com/policies/terms-of-use/",
+      "finding": "Current individual-service terms prohibit automatic/programmatic extraction of data or Output and circumvention of restrictions/protective measures; UX-08 boundary remains mandatory."
+    }
+  ]
+}

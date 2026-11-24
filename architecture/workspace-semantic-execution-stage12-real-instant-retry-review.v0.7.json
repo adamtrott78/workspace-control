@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.7",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Repair the pre-authority v0.6 PowerShell construction defects while preserving every pinned Stage-12 executable artifact and all authority/browser/network/result boundaries.",
+  "predecessor": {
+    "review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.6.json",
+    "review_status": "INVALIDATED_PREAUTH_PROCEDURE_DEFECT",
+    "operator_v06_approval_observed": true,
+    "v06_authority_artifact_created": false,
+    "v06_live_execution_started": false,
+    "v06_live_authority_consumed": false,
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "exact_candidate_bindings": {
+    "executable_source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh",
+      "blob_sha": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.7.md",
+      "blob_sha": "620e78f044189ab679019380a76d3f8c62711ca0"
+    },
+    "reviewed_node_binding_source": {
+      "path": ".github/workflows/operator-bridge-validation.yml",
+      "blob_sha": "1ea4135e0ff80454b5a8e5feac139d0177d3b764"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "procedure_delta": {
+    "scope": "OPERATOR_SIDE_PRELIVE_COMMAND_ONLY",
+    "exact_regex_repaired": true,
+    "dotnet_dir_assignment_restored": true,
+    "duplicated_try_block_removed": true,
+    "current_node_must_validate_node24_and_npm_before_acceptance": true,
+    "invalid_current_node_falls_back_to_bounded_tool_cache": true,
+    "required_node_major_version": 24,
+    "fallback_root": "%USERPROFILE%\\actions-runner\\_work\\_tool\\node",
+    "version_directory_pattern": "^24\\.\\d+\\.\\d+$",
+    "architecture_subdir": "x64",
+    "node_install_allowed": false,
+    "dotnet_install_allowed": false,
+    "package_manager_bootstrap": false,
+    "persistent_path_change": false,
+    "registry_mutation": false,
+    "child_environment_only": true,
+    "restore_original_path_and_dotnet_root": true
+  },
+  "retained_safety": {
+    "required_dotnet_major_version": 10,
+    "userprofile_dotnet_location": "%USERPROFILE%\\.dotnet\\dotnet.exe",
+    "process_scoped_execution_policy_bypass": true,
+    "group_policy_fail_closed": true,
+    "persistent_execution_policy_change": false,
+    "windows_first": true,
+    "required_windows_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+    "linux_live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_consumption_marker_is_non_consuming": true
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "v06_operator_approval_does_not_authorize_v07_procedure": true,
+    "explicit_fresh_operator_approval_required_after_validation": true,
+    "model_reasoning_is_not_authority": true
+  },
+  "validation": {
+    "candidate_head": "215287bb1bb49b90d5cf207fb4ebf368a57c7ec3",
+    "workspace_control_run": 3010,
+    "semantic_execution_run": 310,
+    "operator_bridge_run": 583,
+    "result": "SUCCESS",
+    "exact_head": true,
+    "powershell_parser_regression": "PASS_WINDOWS_OPERATOR_VALIDATION"
+  },
+  "postcondition": "v0.7 procedure is validated and remains non-authoritative. Approval-gate state is being frozen from exact green head 8bc74726…; the freeze commit itself must pass Workspace/Semantic/Operator validation before fresh operator approval may be accepted.",
+  "final_state_validation": {
+    "validated_head": "8bc74726d29e4f718e4b54bbb61cfcbc7ee87a09",
+    "workspace_control_run": 3012,
+    "semantic_execution_run": 312,
+    "operator_bridge_run": 585,
+    "result": "SUCCESS",
+    "note": "6d546836… initially failed only because the regression test still expected pre-validation review status; 8bc74726… changed only that lifecycle assertion and bound it to the already-validated v0.7 evidence. No executable or authority bytes changed."
+  }
+}

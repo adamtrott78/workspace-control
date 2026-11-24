@@ -1,0 +1,160 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.1",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Freeze a fresh D4 real-account Stage-12 calibration against the fully accepted Windows Operator frontend and convenience layer, with current blank-startup/manual-auth handoff and unchanged Linux v3/harness/candidate-result isolation.",
+  "predecessor_authority": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.0.json",
+    "prior_status": "CONSUMED_FAILED_STAGE12_Q1_BRIDGE_DISABLED_HOTKEY_UNREGISTERED",
+    "consumed": true,
+    "reusable": false,
+    "q1_candidate_published": false,
+    "candidate_branch_observed_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "retry_requires_fresh_review_validation_and_operator_approval": true
+  },
+  "accepted_prerequisites": {
+    "windows_frontend_closeout_head": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "windows_frontend_closeout_validation": {
+      "workspace_control_run": 3084,
+      "semantic_execution_run": 384,
+      "operator_bridge_run": 657,
+      "result": "SUCCESS"
+    },
+    "d4_launcher_alignment_head": "2f32513f97834da76287d2f948891b758d5194f5",
+    "d4_launcher_alignment_validation": {
+      "workspace_control_run": 3085,
+      "semantic_execution_run": 385,
+      "operator_bridge_run": 658,
+      "result": "SUCCESS",
+      "exact_head": true
+    },
+    "convenience_shims_windows_accepted": true,
+    "wop_self_test_pass": true,
+    "wop_status_offline": true,
+    "raw_github_invocation_accepted": true,
+    "human_enter_gate_accepted": true
+  },
+  "exact_candidate_bindings": {
+    "windows_executable_source_head": "2f32513f97834da76287d2f948891b758d5194f5",
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "a4619bcc8f4177878ddf0f40bec402e1b211aeb6"
+    },
+    "windows_tray_hotkey": {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+      "blob_sha": "b86e04065b354b8aa54ee2a9ca3e71ab555cde7c"
+    },
+    "human_submit_confirmation": {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/Hotkey/HumanSubmitConfirmationGate.cs",
+      "blob_sha": "8a4f8ac4ad5cbce10d71e4b59f24aaabaee382e3"
+    },
+    "firefox_adapter": {
+      "path": "operator-bridge/src/FirefoxAdapter/adapter_core.js",
+      "blob_sha": "ba67137e92844a9205a36241d6299ce1cfad80a7"
+    },
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v3.sh",
+      "blob_sha": "3eb352f456d84de565514e2a7046e847ea0d25ea"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.1.md",
+      "blob_sha": "153c32db36cf4d8d594c9dae2913ea583c8f63ec"
+    },
+    "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "d4_contract": {
+    "q1": "real ChatGPT Instant worker publishes one exact immutable candidate",
+    "q2": "same managed persistent conversation/session is reused",
+    "stale_generation": "old generation is fenced and late stale candidate is rejected",
+    "q3": "replacement generation/session publishes the exact replacement candidate",
+    "final": "all three processes completed, session ready, operator work empty, cleanup restored"
+  },
+  "windows_pre_live_contract": {
+    "firefox_closed_before_launcher": true,
+    "bridge_start_enabled": true,
+    "dedicated_persistent_profile": true,
+    "sessionstore_only_reset": true,
+    "startup_surface": "exactly one about:blank tab",
+    "manual_auth_if_needed": "navigate same tab to https://chatgpt.com/?temporary-chat=true, sign in/select Instant, then navigate same tab back to about:blank",
+    "required_ready_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+    "automatic_authentication": false,
+    "persistent_execution_policy_change": false
+  },
+  "manual_interaction": {
+    "worker_service_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "next_ctrl_space_only_after_next_linux_ready_marker": true,
+    "enter_confirmation_is_local_human_event_only": true,
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_enter": false,
+    "automatic_send": false,
+    "dom_or_page_content_scraping": false,
+    "manual_worker_result_relay": false
+  },
+  "retained_safety": {
+    "credential_automation": false,
+    "browser_permission_widening": false,
+    "host_permission_widening": false,
+    "api_key_or_paid_api_fallback": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "non_loopback_backend": false,
+    "production_postgres_mutation": false,
+    "gpu_use": false,
+    "padataset_mutation": false,
+    "workspace_shell_network_widening": false,
+    "workspace_shell_helper_widening": false,
+    "generic_shell_authority": false,
+    "source_or_authority_branch_result_writes": false,
+    "stale_generation_result_acceptance": false
+  },
+  "authority_consumption_contract": {
+    "attempts_requested_after_approval": 1,
+    "marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "consumed_only_when_marker_prints": true,
+    "marker_after_exact_windows_ready_gate": true,
+    "abort_before_marker_non_consuming": true,
+    "success_or_failure_after_marker_consumes_attempt": true,
+    "retry_requires_fresh_diagnosis_review_validation_and_operator_approval": true
+  },
+  "cleanup_contract": {
+    "linux_transaction_trap_must_restore_preexisting_serve_funnel": true,
+    "stage12_route_absent_after_cleanup": true,
+    "windows_launcher_cleanup_required": true,
+    "required_windows_cleanup_marker": "STAGE12_WINDOWS_CLEANUP=PASS"
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "explicit_fresh_operator_approval_required_after_review_validation": true,
+    "v10_authority_reusable": false,
+    "model_reasoning_is_not_authority": true
+  },
+  "candidate_source_validation": {
+    "workspace_control_run": 3085,
+    "semantic_execution_run": 385,
+    "operator_bridge_run": 658,
+    "result": "SUCCESS",
+    "exact_head": true
+  },
+  "review_state_validation": {
+    "head": "95a6b56aef026eabae2c2d25e241c517d06d805b",
+    "workspace_control_run": 3088,
+    "semantic_execution_run": 388,
+    "operator_bridge_run": 661,
+    "result": "SUCCESS",
+    "exact_head": true
+  },
+  "postcondition": "D4 v1.1 review/procedure is exact-head validated and still grants zero live authority. Stop here until Adam explicitly approves exactly one live attempt. Only after that approval may a fresh v1.1 authority artifact be created and validated before Windows/Linux execution."
+}

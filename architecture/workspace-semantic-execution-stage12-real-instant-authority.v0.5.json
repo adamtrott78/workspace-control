@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v0.5",
+  "status": "SUPERSEDED_UNCONSUMED_BY_STAGE12_V07_AUTHORITY",
+  "purpose": "Fresh exact authority for one Stage-12 retry using validated v0.5 Windows pre-live repair. v0.5 adds only the known existing user-profile .NET SDK location %USERPROFILE%\\.dotnet\\dotnet.exe to the bounded discovery list; pinned launcher/Linux/harness bytes and all browser/network/result boundaries remain unchanged.",
+  "approval_basis": {
+    "authority_owner": "operator",
+    "approval_date": "2026-11-17",
+    "approval_form": "EXPLICIT_CHAT_APPROVAL_AFTER_V05_BINDINGS_AND_VALIDATION_PRESENTED",
+    "approval_utterance": "gogogoggogo",
+    "approved_final_state_head": "b4123f957f5368100fe621bcd6b2c6876f792347",
+    "approved_review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.5.json",
+    "approved_review_blob_sha": "d6f2115d43644e450dd5ade5d266ba05cbb3a54d",
+    "approved_review_validated_head": "c149c1aa8499031afd3772b9a964681dffb10f2b",
+    "approved_procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.5.md",
+    "approved_procedure_blob_sha": "40049b88799b3bc4683931d0a56a50c07591fc61",
+    "candidate_validation": {
+      "workspace_control_run": 3002,
+      "semantic_execution_run": 302,
+      "operator_bridge_run": 575,
+      "result": "SUCCESS"
+    },
+    "final_state_validation": {
+      "workspace_control_run": 3003,
+      "semantic_execution_run": 303,
+      "operator_bridge_run": 576,
+      "result": "SUCCESS"
+    },
+    "approval_scope_exact": true
+  },
+  "superseded_authority": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.4.json",
+    "prior_status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+    "consumed": false,
+    "superseded": true,
+    "reusable": false
+  },
+  "exact_authorized_execution": {
+    "source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
+    "private_base_url": "https://gokhan-lambda-vector.tailca6171.ts.net",
+    "linux_host": "gokhan-lambda-vector",
+    "windows_operator_host": "desktop-ub9p70p",
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "linux_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh",
+      "blob_sha": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca"
+    },
+    "windows_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.5.md",
+      "blob_sha": "40049b88799b3bc4683931d0a56a50c07591fc61"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "authorized_windows_pre_live_setup": {
+    "windows_first": true,
+    "exact_single_line_operator_command": true,
+    "process_scoped_execution_policy_bypass": true,
+    "fail_closed_if_machine_policy_defined": true,
+    "fail_closed_if_user_policy_defined": true,
+    "persistent_execution_policy_change": false,
+    "dotnet_install_allowed": false,
+    "package_manager_use": false,
+    "persistent_path_change": false,
+    "registry_mutation": false,
+    "allowed_dotnet_discovery_locations": [
+      "Get-Command dotnet",
+      "%ProgramFiles%\\dotnet\\dotnet.exe",
+      "%ProgramFiles(x86)%\\dotnet\\dotnet.exe",
+      "%LOCALAPPDATA%\\Microsoft\\dotnet\\dotnet.exe",
+      "%USERPROFILE%\\.dotnet\\dotnet.exe"
+    ],
+    "required_dotnet_major_version": 10,
+    "known_working_userprofile_sdk": "C:\\Users\\ATrott\\.dotnet\\dotnet.exe",
+    "temporary_process_path_dotnet_root_only": true,
+    "restore_original_path_and_dotnet_root": true,
+    "pinned_launcher_bytes_unchanged": true,
+    "isolated_firefox_profile": true,
+    "normal_chatgpt_authentication": "MANUAL_ONLY",
+    "model_selection": "MANUAL_INSTANT_SELECTION",
+    "required_windows_ready_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS"
+  },
+  "authorized_linux_pre_live_setup": {
+    "candidate_baseline_recheck": true,
+    "exact_preexisting_serve_funnel_preflight": true,
+    "readiness_marker_transcription_only": true,
+    "required_windows_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+    "readiness_marker_is_model_result_relay": false,
+    "live_attempt_not_consumed_before_marker": true
+  },
+  "authorized_human_interaction": {
+    "worker_service_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "manual_actions_only_when_linux_prints_stage12_ready": true,
+    "q1_marker": "STAGE12_Q1_READY",
+    "q2_marker": "STAGE12_Q2_REUSE_READY",
+    "q3_marker": "STAGE12_Q3_REPLACEMENT_READY",
+    "final_windows_cleanup_confirmation": "MANUAL_ENTER",
+    "result_relay_by_human": false
+  },
+  "authority_consumption": {
+    "attempts_authorized": 1,
+    "live_authority_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "consumed_only_when_marker_prints": true,
+    "marker_occurs_after_exact_windows_ready_confirmation": true,
+    "consumed_on_success_or_failure_after_marker": true,
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "retry_after_consumption_requires_fresh_diagnosis_review_validation_and_operator_approval": true
+  },
+  "retained_prohibitions": {
+    "credential_automation": false,
+    "dom_or_page_content_scraping": false,
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "browser_permission_widening": false,
+    "host_permission_widening": false,
+    "api_key_or_paid_api_fallback": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "non_loopback_backend": false,
+    "production_postgres_mutation": false,
+    "gpu_use": false,
+    "padataset_mutation": false,
+    "workspace_shell_network_widening": false,
+    "helper_registry_widening": false,
+    "generic_shell_authority": false,
+    "manual_worker_result_relay": false,
+    "stale_generation_result_acceptance": false,
+    "source_or_authority_branch_result_writes": false
+  },
+  "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, any success or failure consumes the one attempt. Do not install .NET, persistently edit PATH, widen execution policy/browser/network/API/DB/GPU/Workspace Shell/result authority, or silently retry.",
+  "postcondition": "This v0.5 authority was never consumed, but it is superseded and non-reusable. It authorizes no further Windows or Linux Stage-12 action.",
+  "supersession_record": {
+    "superseded": true,
+    "superseded_date": "2026-11-18",
+    "consumed": false,
+    "reason": "v0.5 Windows pre-live setup failed before live consumption because npm.cmd was not resolvable. v0.6 approval was never persisted after its procedure was found malformed. Separately reviewed and validated v0.7 repairs only operator-side PowerShell/Node binding construction and now has fresh exact operator approval.",
+    "successor_authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.7.json",
+    "reusable": false
+  }
+}

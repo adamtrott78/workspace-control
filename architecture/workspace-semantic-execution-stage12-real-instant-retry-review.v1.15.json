@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.15",
+  "status": "REVIEW_CANDIDATE_NON_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Repair the invalid Q2 persistent-chat continuity fixture from consumed v1.14, advance the append-only candidate baseline, preserve accepted A7, and freeze one corrected D4 retry candidate.",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.14.json",
+    "status": "CONSUMED_PUBLICATION_PATH_PASS_Q2_CONTINUITY_CLAIM_INVALID",
+    "consumed": true,
+    "reusable": false,
+    "candidate_chain": {
+      "q1": "35d1e95be1ec544845cc2170dd57a6b36f86d0fa",
+      "q2": "71f72bd6acf2d5217f026e9139b5af0dd1714925",
+      "q3_replacement": "d9f636ef508245459b3dd0a35b8d5587f533bac6"
+    },
+    "preserved_results": [
+      "Q1 exact connected-GitHub publication path worked.",
+      "Q2 exact publication path worked but continuity claim is invalid because the token was worker-visible.",
+      "Generation-1 Q3 replacement publication path worked.",
+      "Candidate history remained append-only and source/authority branch remained isolated from worker candidate publication."
+    ]
+  },
+  "root_cause": {
+    "defect": "The v1.14 plan_quantum path used the validator evidence_refs tuple to construct the worker-visible candidate-result-values finding. For Q2, that tuple included q2_continuity, so the supposedly hidden continuity token was serialized into the packet.",
+    "consequence": "Q2 could publish the expected continuity ref without using preceding conversation memory; publication was valid, continuity proof was not.",
+    "classification": "TEST_FIXTURE_DISCLOSURE_NOT_WORKER_TRANSPORT_FAILURE"
+  },
+  "repair": {
+    "exact_head": "3058e98bc95087d3759631cd9b2c23065c8b1da4",
+    "candidate_baseline": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+    "blobs": {
+      "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py": "8b0f3a11e39e47417ea46487791e4b7e5cdb577a",
+      "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "a25ec2594fce96a20e3d8fdff8346c274f2056bb",
+      "tests/test_workspace_semantic_execution_stage12_real_instant.py": "fe53eb4d2016b44aa072a214570a60ae1fbca8ec",
+      "tests/test_workspace_semantic_execution_stage12_v114.py": "ea35516d7c73f5a22673c94a054f62120debcf45"
+    },
+    "exact_validation": {
+      "workspace_control": {
+        "run_number": 3158,
+        "result": "SUCCESS"
+      },
+      "semantic_execution": {
+        "run_number": 460,
+        "result": "SUCCESS"
+      },
+      "operator_bridge": {
+        "run_number": 731,
+        "result": "SUCCESS"
+      }
+    },
+    "changes": [
+      "Separate validator_evidence_refs from worker_evidence_ref_instruction.",
+      "Q2 worker packet receives no continuity token value.",
+      "Fail closed if the exact q2 continuity token appears anywhere in q2.packet.text.",
+      "Emit STAGE12_Q2_CONTINUITY_TOKEN_HIDDEN=PASS before Q2 becomes serviceable.",
+      "Advance candidate baseline to the append-only v1.14 Q3 replacement commit.",
+      "Parameterize literal connected-tool objective prefixes."
+    ]
+  },
+  "plugin_mentions": {
+    "github": {
+      "literal": "@github",
+      "empirical_status": "LIVE_PROVEN",
+      "autocomplete_selection_required": false,
+      "tab_required": false,
+      "click_required": false
+    },
+    "workspace_shell": {
+      "literal": "@Workspace Shell",
+      "implementation_status": "SUPPORTED_BY_PACKET_PREFIX_HELPER",
+      "empirical_status": "NOT_YET_LIVE_PROVEN",
+      "next_safe_probe": "Use one harmless read-only Workspace Shell leaf in the first integrated research-iterate system test after corrected D4 acceptance."
+    }
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed": false,
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter"
+  },
+  "reviewed_procedure": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.15.md",
+    "blob_sha": "e9dc74292e82e52098f03642e95cf361b22c24d7"
+  },
+  "supervisor_interface": {
+    "path": "architecture/workspace-semantic-execution-supervisor-chat.v0.1.md",
+    "blob_sha": "56ad6832ae6011e961e77b37e443f70221c167c6",
+    "status": "PROPOSED_NON_AUTHORITY"
+  },
+  "approval_context": {
+    "operator_intent": "User explicitly said 'let's do it' after the plan to repair Q2, add plugin prefixes, close corrected D4, proceed to integrated research-iterate testing, and define the Supervisor Chat.",
+    "grants_this_review_execution_authority": false,
+    "allows_fresh_one_shot_authority_to_be_proposed_after_exact_review_validation": true,
+    "standing_or_future_authority_inferred": false
+  },
+  "next_gate": "Persist this review/closeout/supervisor design and pass exact-head Workspace Control, Semantic Execution, and Operator Bridge validation. Only then may one exact v1.15 live authority be persisted and separately exact-head validated.",
+  "security_invariants": [
+    "No automatic typing, paste, Enter, mouse, credential automation, or ChatGPT DOM/output scraping.",
+    "No Tailscale Funnel/public exposure.",
+    "No candidate history rewrite.",
+    "No Workspace Shell authority widening.",
+    "No stale-generation acceptance.",
+    "No paid API fallback."
+  ]
+}

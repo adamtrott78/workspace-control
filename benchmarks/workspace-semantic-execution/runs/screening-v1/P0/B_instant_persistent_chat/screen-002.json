@@ -1,0 +1,507 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P0-B-002",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P0_easy_control",
+  "arm": "B_instant_persistent_chat",
+  "replicate_id": "screen-002",
+  "fixture_id": "research-iterate-timeout-control-p0-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "fc59d52d4591f271c03a31f0778f746728e9933f",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.json",
+    "fixture_blob_sha": "ee443a5f9d943c9a77568f70c91bd646f838cfd8",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_fixture_v1.taxonomy.json",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "INSTANT",
+    "identity_source": "user_attestation",
+    "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+  },
+  "started_at": "2026-11-03T01:18:00Z",
+  "completed_at": "2026-11-02T20:41:00-05:00",
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P0-B-002-q1",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+      },
+      "context_bytes": 1288,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-B-002-q2",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+      },
+      "context_bytes": 1753,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "external_result:E_restore_timeout#3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "fixture:research-iterate-timeout-control-p0-v1#E_double_cpu"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-B-002-q3",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+      },
+      "context_bytes": 1806,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "external_result:E_restore_timeout#3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external_result:E_double_cpu#cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-B-002-q4",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+      },
+      "context_bytes": 1072,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+        "external_result:E_restore_timeout#3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external_result:E_double_cpu#cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P0-B-002-q5",
+      "generation": 0,
+      "owner": "chatgpt-screening-v1-P0-B-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "Instant",
+        "surface": "ChatGPT chat",
+        "toolset": [
+          "GitHub"
+        ],
+        "memory_mode": "disabled_regular_chat",
+        "continuity": "persistent_chat",
+        "tier": "INSTANT",
+        "identity_source": "user_attestation",
+        "attestation_text": "I attest that this is a brand-new regular ChatGPT conversation, Memory was disabled before this conversation was opened, and GPT-5.6 Sol / Instant is selected."
+      },
+      "context_bytes": 1140,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+        "external_result:E_restore_timeout#3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+        "external_result:E_double_cpu#cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "fc59d52d4591f271c03a31f0778f746728e9933f",
+      "predecessor_run_id": "screening-v1-P0-B-001",
+      "predecessor_terminal_status": "CONTAMINATED_SESSION",
+      "predecessor_commit": "8c62b8b2dcbe13ca5c72e9a1e5a0a12aaca9862c",
+      "note": "Fresh slot created after predecessor correctly failed closed for contaminated session."
+    },
+    {
+      "kind": "PROTOCOL_CORRECTION_APPLIED",
+      "source_checkpoint_sha": "fc59d52d4591f271c03a31f0778f746728e9933f",
+      "correction": "Expected GPT-5.6 Instant executor identity now records GPT-5.6 Sol / Instant, matching the ChatGPT surface report."
+    },
+    {
+      "kind": "SESSION_ISOLATION_CONTRACT_CORRECTED",
+      "note": "Temporary Chat cannot satisfy the current plugin-backed screening transport: Unpersonalized disables plugins; Personalized may use existing memory. Clean workers now require a brand-new regular chat with Memory disabled and GitHub enabled."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-B-002"
+    },
+    {
+      "kind": "CLAIM_STATE_CORRECTED",
+      "generation": 0,
+      "note": "Initial claim write advanced generation before the immutable checkpoint bootstrap was read. Corrected to the harness claim contract before any experiment request; immutable public inputs were then read at source_checkpoint_sha."
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 2
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-B-002-exp-01",
+      "generation": 0,
+      "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_restore_timeout"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-B-002-exp-01",
+      "generation": 0,
+      "experiment_id": "E_restore_timeout",
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-B-002"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 3
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P0-B-002-exp-02",
+      "generation": 0,
+      "payload_ref": "fixture:research-iterate-timeout-control-p0-v1#E_double_cpu"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P0-B-002-exp-02",
+      "generation": 0,
+      "experiment_id": "E_double_cpu",
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-B-002"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_SUBMITTED",
+      "generation": 0,
+      "final_hypothesis": "H_timeout_config",
+      "observed_result_count": 2
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.2,
+      "violations": [
+        "observed_results_not_mapping",
+        "insufficient_experiment_cycles",
+        "missing_required_discriminating_experiment:E_restore_timeout",
+        "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
+      ],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-B-002"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_REPAIRED",
+      "generation": 0,
+      "repair_basis": [
+        "observed_results_not_mapping",
+        "insufficient_experiment_cycles",
+        "missing_required_discriminating_experiment:E_restore_timeout",
+        "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
+      ],
+      "repair": "observed_results converted to experiment-keyed mapping; no experiments repeated"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.6,
+      "violations": [
+        "fabricated_or_mismatched_result:E_restore_timeout",
+        "fabricated_or_mismatched_result:E_double_cpu"
+      ],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-screening-v1-P0-B-002"
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE_REPAIRED",
+      "generation": 0,
+      "repair_basis": [
+        "fabricated_or_mismatched_result:E_restore_timeout",
+        "fabricated_or_mismatched_result:E_double_cpu"
+      ],
+      "repair": "observed_results values replaced with exact published result hashes per bound public harness; no experiments repeated",
+      "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2"
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_restore_timeout": {
+      "request_id": "screening-v1-P0-B-002-exp-01",
+      "experiment_id": "E_restore_timeout",
+      "result": {
+        "p95_latency_ms": 5100,
+        "timeout_failure_rate": 0.01
+      },
+      "result_hash": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "publication_scope": "requested experiment only"
+    },
+    "E_double_cpu": {
+      "request_id": "screening-v1-P0-B-002-exp-02",
+      "experiment_id": "E_double_cpu",
+      "result": {
+        "p95_latency_ms": 5000,
+        "timeout_failure_rate": 0.39
+      },
+      "result_hash": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "F1",
+      "statement": "Failures cluster at the configured 5.0-second boundary while shorter requests complete normally.",
+      "evidence": [
+        "O1"
+      ]
+    },
+    {
+      "id": "F2",
+      "statement": "Observed CPU, queue occupancy, and packet loss are low, so starting observations do not support resource saturation or packet-loss explanations.",
+      "evidence": [
+        "O2"
+      ]
+    },
+    {
+      "id": "F3",
+      "statement": "Restoring the prior 12-second client timeout while holding load and infrastructure fixed reduces timeout failures to 1% at p95 latency 5.1 seconds, supporting H_timeout_config.",
+      "evidence": [
+        "E_restore_timeout",
+        "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368"
+      ]
+    },
+    {
+      "id": "F4",
+      "statement": "Doubling available CPU while retaining the 5-second timeout does not remove the regression: p95 remains 5.0 seconds and timeout failure rate remains 39%, rejecting CPU saturation as the primary mechanism.",
+      "evidence": [
+        "E_double_cpu",
+        "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_timeout_config",
+      "status": "selected_primary"
+    },
+    {
+      "id": "H_cpu",
+      "status": "rejected"
+    },
+    {
+      "id": "H_network",
+      "status": "not_selected"
+    }
+  ],
+  "unresolved_questions": [],
+  "evidence_refs": [
+    "fixture:research-iterate-timeout-control-p0-v1#O1",
+    "fixture:research-iterate-timeout-control-p0-v1#O2",
+    "external_result:E_restore_timeout#3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+    "external_result:E_double_cpu#cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+  ],
+  "candidate_actions": [],
+  "next_safe_action": "Screening run complete. Preserve this run as non-claim-bearing protocol/harness evidence; do not reinterpret it as scored capability evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_timeout_config",
+    "rejected_hypotheses": [
+      "H_cpu"
+    ],
+    "observed_results": {
+      "E_restore_timeout": "3fd8e7c66eae193a35ed4c61284b15c8e959adbf82548a6854590ff751cc5368",
+      "E_double_cpu": "cec4f9b58683824af34559061d463fa7301872b5c05530a3f6a7799a3b59e30e"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2"
+    ],
+    "rationale": "The failure cliff at 5.0 seconds tracks the configured client timeout. Restoring the prior 12-second timeout while holding load and infrastructure fixed reduces timeout failures to 1% even though p95 latency is 5.1 seconds, directly supporting a client-timeout mechanism. Doubling CPU while preserving the 5-second timeout leaves p95 pinned at 5.0 seconds with a 39% timeout failure rate, rejecting CPU saturation as the primary cause. Low baseline CPU, queue occupancy, and packet loss further weaken CPU and network alternatives."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.2,
+      "violations": [
+        "observed_results_not_mapping",
+        "insufficient_experiment_cycles",
+        "missing_required_discriminating_experiment:E_restore_timeout",
+        "missing_required_discriminating_experiment:E_double_cpu|E_network_bypass"
+      ],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": false,
+      "score": 0.6,
+      "violations": [
+        "fabricated_or_mismatched_result:E_restore_timeout",
+        "fabricated_or_mismatched_result:E_double_cpu"
+      ],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    },
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 5,
+    "experiment_requests": 2,
+    "retries": 2,
+    "decomposition_count": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "contaminated_predecessor_attempts": 1,
+    "deterministic_compute_operations": 5
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "cd084ea870a4abb08e1b2a36d5d6911d9a96d5c3ccbd9de5e11f5ed12a329999",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P0/B_instant_persistent_chat/screen-002.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "user_visible_requirement": "Use a brand-new regular ChatGPT chat with Memory disabled before opening the chat, keep GitHub enabled, and do not branch from or continue an existing benchmark/control conversation."
+  }
+}

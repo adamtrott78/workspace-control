@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.3",
+  "status": "APPROVAL_SIGNAL_OBSERVED_UNCONSUMED_PRELIVE_BOOTSTRAP_RECOVERY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "operator_task": "workspace-operator-bridge-implementation-v1",
+  "purpose": "Conditional one-shot D4 v1.3 authority for the repaired one-line WOP live path. The artifact itself grants no live execution approval; the operator's execution of the exact reviewed WOP command is the fresh approval signal under the standing WOP policy.",
+  "predecessor": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.2.json",
+    "status": "CONSUMED_FAILED_STAGE12_Q1_HOTKEY_NO_EFFECT_WOP_UX_REGRESSION",
+    "consumed": true,
+    "reusable": false
+  },
+  "review_binding": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.3.json",
+    "blob_sha": "893ad0a2794c2eb0da5f9f0d80a65bb073e0f2de",
+    "validated_review_head": "a3e20e9fa11dc9dc8e42113d33e1dea9ac3cd116",
+    "candidate_source_head": "1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "candidate_validation": {
+      "workspace_control_run": 3099,
+      "semantic_execution_run": 399,
+      "operator_bridge_run": 672,
+      "result": "SUCCESS"
+    },
+    "final_review_state_validation": {
+      "workspace_control_run": 3100,
+      "semantic_execution_run": 400,
+      "operator_bridge_run": 673,
+      "result": "SUCCESS",
+      "exact_head": true
+    },
+    "procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.3.md",
+    "procedure_blob_sha": "0121d0fec1df0eff27347ec6bb843b0bd99a8be5"
+  },
+  "operator_approval_signal": {
+    "policy_path": "architecture/workspace-semantic-execution-operator-wop-approval-policy.v0.1.json",
+    "policy_blob_sha": "cfede468d3004d1267fc4bd9656107368e6b58d0",
+    "signal": "ACTUAL_EXECUTION_OF_EXACT_REVIEWED_WOP_COMMAND",
+    "bootstrap_command": "wop online 1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "steady_state_command": "wop d4",
+    "current_attempt_command": "wop online 1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "approval_not_yet_observed": false,
+    "no_separate_chat_approval_required": true,
+    "approval_observed": true,
+    "observed_evidence": "Operator executed the exact reviewed bootstrap command: wop online 1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "observed_result": "PRELIVE_BOOTSTRAP_FAILED_BEFORE_REPAIRED_RUNTIME_LAUNCH"
+  },
+  "exact_execution_bindings": {
+    "source_head": "1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.3.md",
+      "blob_sha": "0121d0fec1df0eff27347ec6bb843b0bd99a8be5"
+    },
+    "one_line_wop_launcher": {
+      "path": "operator-bridge/tools/run-stage12-wop.ps1",
+      "blob_sha": "0f388e8a6f959977276f22efb58357c97710aa1b"
+    },
+    "persistent_dev_runtime": {
+      "path": "operator-bridge/tools/workspace-operator-dev.ps1",
+      "blob_sha": "6b9c2c0e10804c563e344618360bb4ef27849b23"
+    },
+    "wop_installer": {
+      "path": "operator-bridge/tools/install-wop-commands.ps1",
+      "blob_sha": "0c469fb2bc0d9ca5027bda7c77869bba8dd1e76a"
+    },
+    "tray_context": {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+      "blob_sha": "95d5bb956e4ad776c0c82812a48a40b2aadeeff8"
+    },
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh",
+      "blob_sha": "367fea22f867e30defe17afb8abe7fc68680de69"
+    },
+    "bootstrap_command": "wop online 1e9ad4cc431050a5cc79a3cc57218dd71006f716",
+    "steady_state_command": "wop d4"
+  },
+  "attempt_contract": {
+    "attempts_available_after_approval_signal": 1,
+    "approval_signal_observed": true,
+    "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "consumed": false,
+    "no_silent_retry": true,
+    "post_marker_failure_requires_new_review_cycle": true
+  },
+  "predecessor_cleanup_gate": {
+    "required": true,
+    "evidence_state": "NOT_YET_OBSERVED_IN_CHAT",
+    "requirement": "The consumed v1.2 Linux transaction and old Stage-12 Windows launcher must be cleaned before executing the v1.3 WOP command."
+  },
+  "retained_safety": {
+    "manual_chatgpt_auth_only": true,
+    "manual_worker_input_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_enter": false,
+    "dom_or_page_scraping": false,
+    "credential_automation": false,
+    "browser_permission_widening": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "paid_api_fallback": false,
+    "gpu_or_padataset_mutation": false,
+    "generic_workspace_shell_widening": false
+  },
+  "postcondition": "Operator approval signal is observed. The D4 v1.3 live attempt remains unconsumed because the old installed WOP driver failed before repaired runtime launch. One explicit pre-live bootstrap recovery is authorized without new approval, using the exact current branch tip hosting this state and unchanged validated executable blobs.",
+  "prelive_bootstrap_failure": {
+    "observed": true,
+    "failure_class": "OLD_INSTALLED_WOP_DRIVER_SHALLOW_EXACT_SHA_TREE_MATERIALIZATION_FAILURE",
+    "observed_error": "fatal: unable to read tree (1e9ad4cc431050a5cc79a3cc57218dd71006f716); WOP_CHECKOUT_FAILED",
+    "live_runtime_launched": false,
+    "live_consumption_marker_observed": false,
+    "attempt_consumed": false,
+    "approval_signal_remains_valid": true
+  },
+  "prelive_recovery": {
+    "authorized": true,
+    "requires_new_operator_approval": false,
+    "reason": "The exact reviewed WOP execution already supplied approval, and failure occurred before repaired runtime launch and before the live consumption marker.",
+    "transport_rule": "Retry the old installed WOP driver against the exact current branch tip that hosts this recovery authority state. The old driver can checkout FETCH_HEAD when requested SHA equals the fetched branch tip.",
+    "code_identity_rule": "All executable WOP/D4 blobs at the recovery tip must equal the already validated v1.3 bindings.",
+    "expected_executable_blobs": {
+      "operator-bridge/tools/run-stage12-wop.ps1": "0f388e8a6f959977276f22efb58357c97710aa1b",
+      "operator-bridge/tools/workspace-operator-dev.ps1": "6b9c2c0e10804c563e344618360bb4ef27849b23",
+      "operator-bridge/tools/install-wop-commands.ps1": "0c469fb2bc0d9ca5027bda7c77869bba8dd1e76a",
+      "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs": "95d5bb956e4ad776c0c82812a48a40b2aadeeff8",
+      "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "367fea22f867e30defe17afb8abe7fc68680de69"
+    },
+    "no_code_delta_from_validated_v13": true,
+    "no_live_retry_after_consumption": true
+  }
+}

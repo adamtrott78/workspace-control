@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v0.6",
+  "status": "INVALIDATED_PREAUTH_PROCEDURE_DEFECT",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Reuse the existing reviewed Stage-10 Windows Node 24 tool-cache binding to repair npm.cmd discovery while preserving all executable bytes and Stage-12 authority boundaries.",
+  "predecessor": {
+    "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.5.json",
+    "authority_status": "AUTHORIZED_STAGE12_REAL_INSTANT_RETRY_SINGLE_ATTEMPT",
+    "authority_consumed": false,
+    "prelive_failure": "v0.5 successfully resolved .NET 10 and completed the Stage-12 .NET build, then exact pinned launcher failed because npm.cmd was not recognized. Firefox/runtime readiness was not reached; Linux was not started.",
+    "candidate_branch_unchanged_at": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de"
+  },
+  "exact_candidate_bindings": {
+    "executable_source_head": "b0466c03acb9d6b863df421e2c116c84bff312f6",
+    "linux_private_route_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v2.sh",
+      "blob_sha": "962cf39d8e48d1aef2b4a8a7e099f3333ccc8eca"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "windows_operator_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "d9d474ca6870585c9e4767f551086e17b4525fbc"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.6.md",
+      "blob_sha": "dd995d976fb6c3d1f1427d194e58e5037f331573"
+    },
+    "reviewed_node_binding_source": {
+      "path": ".github/workflows/operator-bridge-validation.yml",
+      "blob_sha": "1ea4135e0ff80454b5a8e5feac139d0177d3b764"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "node_delta": {
+    "required_major_version": 24,
+    "current_command_resolution_allowed": true,
+    "runner_tool_cache_env_allowed": true,
+    "fallback_root": "%USERPROFILE%\\actions-runner\\_work\\_tool\\node",
+    "version_directory_pattern": "^24\\.\\d+\\.\\d+$",
+    "architecture_subdir": "x64",
+    "require_node_exe": true,
+    "require_npm_cmd": true,
+    "install_allowed": false,
+    "package_manager_bootstrap": false,
+    "persistent_path_change": false,
+    "registry_mutation": false,
+    "child_environment_only": true,
+    "restore_original_path": true
+  },
+  "retained_v05_safety": {
+    "required_dotnet_major_version": 10,
+    "userprofile_dotnet_location": "%USERPROFILE%\\.dotnet\\dotnet.exe",
+    "process_scoped_execution_policy_bypass": true,
+    "group_policy_fail_closed": true,
+    "persistent_execution_policy_change": false,
+    "windows_first": true,
+    "required_windows_marker": "STAGE12_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS",
+    "linux_live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_consumption_marker_is_non_consuming": true
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "existing_v05_authority_does_not_authorize_v06_procedure": true,
+    "explicit_fresh_operator_approval_required_after_validation": true,
+    "model_reasoning_is_not_authority": true
+  },
+  "validation": {
+    "validated_head": "91875eeaf85bd754c20715164fc1139a49c4c263",
+    "workspace_control_run": 3006,
+    "semantic_execution_run": 306,
+    "operator_bridge_run": 579,
+    "result": "SUCCESS",
+    "exact_head": true
+  },
+  "postcondition": "v0.6 is invalidated before authority persistence or live execution. The operator's v0.6 approval is not reusable for the changed v0.7 procedure.",
+  "invalidation": {
+    "discovered_date": "2026-11-18",
+    "discovered_at_handoff_head": "beb5662fd22026d0215c676515e7489210a88034",
+    "operator_approval_observed": true,
+    "approval_utterance": "DO IT",
+    "authority_artifact_created": false,
+    "windows_execution_started": false,
+    "linux_execution_started": false,
+    "live_authority_consumed": false,
+    "defects": [
+      "The exact v0.6 PowerShell command splices a duplicated Stage-12 try block into the Node 24 version-regex expression, making the one-line command non-executable.",
+      "The exact v0.6 command uses $DotnetDir without assigning it from the validated $DotnetPath.",
+      "The exact v0.6 command does not implement the reviewed fallback semantics when a currently resolved node.exe exists but is not a valid Node 24 + npm pair."
+    ],
+    "successor_review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.7.json",
+    "successor_procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v0.7.md"
+  }
+}

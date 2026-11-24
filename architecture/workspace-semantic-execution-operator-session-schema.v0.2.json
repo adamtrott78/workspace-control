@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-semantic-execution-operator-session-schema-v0.2",
+  "title": "Workspace Semantic Execution Logical Operator Session v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "worker_slot_id",
+    "generation",
+    "session_class",
+    "status",
+    "continuity_state",
+    "continuity_basis",
+    "lifecycle_intent",
+    "executor_requirement_ref",
+    "role",
+    "isolation_scope",
+    "usage_counters",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 2
+    },
+    "worker_slot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "session_class": {
+      "enum": [
+        "GENERAL_PERSISTENT",
+        "ROLE_ISOLATED_PERSISTENT",
+        "FRESH_PER_QUANTUM",
+        "EPHEMERAL_RECOVERY"
+      ]
+    },
+    "status": {
+      "enum": [
+        "UNALLOCATED",
+        "CREATING",
+        "ACTIVE",
+        "IDLE",
+        "DISCARDED",
+        "CONTINUITY_UNKNOWN",
+        "ROTATE_REQUIRED",
+        "RETIRE_REQUIRED",
+        "LOST",
+        "RETIRED"
+      ]
+    },
+    "continuity_state": {
+      "enum": [
+        "NOT_ESTABLISHED",
+        "TRUSTED",
+        "UNKNOWN",
+        "LOST"
+      ]
+    },
+    "continuity_basis": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "DURABLE_FIRST_ACK",
+          "DURABLE_ACK_SEQUENCE",
+          "LOCAL_BINDING_PROOF",
+          "OPERATOR_REPORTED_AUTH_REFRESH",
+          "LOCAL_TAB_MISSING",
+          "HELPER_RESTART",
+          "FIREFOX_RESTART",
+          "MODEL_OR_TOOLSET_CHANGE",
+          "POLICY_FRESH_REQUIRED"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "lifecycle_intent": {
+      "enum": [
+        "CREATE",
+        "REUSE",
+        "RESTORE",
+        "HOLD",
+        "DISCARD",
+        "ROTATE",
+        "RETIRE"
+      ]
+    },
+    "executor_requirement_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observed_executor_identity_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "isolation_scope": {
+      "enum": [
+        "NONE",
+        "ROLE",
+        "PROCESS",
+        "TASK",
+        "FRESH_QUANTUM"
+      ]
+    },
+    "task_affinity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "reasoning_process_affinity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "affinity_epoch": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0
+    },
+    "last_acknowledged_checkpoint_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "last_acknowledged_action_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "outstanding_action_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "default": []
+    },
+    "usage_counters": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reasoning_quanta",
+        "cumulative_packet_token_estimate",
+        "cumulative_durable_output_token_estimate",
+        "validator_repairs",
+        "consecutive_validator_repairs"
+      ],
+      "properties": {
+        "reasoning_quanta": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cumulative_packet_token_estimate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cumulative_durable_output_token_estimate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "validator_repairs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "consecutive_validator_repairs": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "context_budget_estimate": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "required": [
+        "pressure",
+        "quality"
+      ],
+      "properties": {
+        "pressure": {
+          "type": "number",
+          "minimum": 0
+        },
+        "quality": {
+          "enum": [
+            "UNKNOWN",
+            "HEURISTIC",
+            "CALIBRATED"
+          ]
+        },
+        "policy_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      }
+    },
+    "rotation_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "CONTEXT_LIMIT",
+        "ROLE_ISOLATION",
+        "CONTINUITY_LOST",
+        "MODEL_CHANGED",
+        "TOOLSET_CHANGED",
+        "VALIDATOR_FAILURE_LOOP",
+        "POLICY_REQUIRES_FRESH",
+        "USER_REQUESTED",
+        "AUTH_REFRESH_INVALIDATED",
+        "LOCAL_TAB_LOST",
+        "TASK_AFFINITY_CHANGE",
+        "PROCESS_AFFINITY_CHANGE"
+      ],
+      "default": null
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "continuity_state": {
+            "enum": [
+              "UNKNOWN",
+              "LOST"
+            ]
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "properties": {
+            "lifecycle_intent": {
+              "const": "REUSE"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "session_class": {
+            "const": "FRESH_PER_QUANTUM"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "isolation_scope": {
+            "const": "FRESH_QUANTUM"
+          }
+        }
+      }
+    }
+  ],
+  "description": "Durable logical session identity/policy. Firefox tab/window IDs remain intentionally excluded as non-authoritative local cache."
+}

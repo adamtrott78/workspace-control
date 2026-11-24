@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workspace-semantic-execution-operator-session-schema-v0.1",
+  "title": "Workspace Semantic Execution Logical Operator Session v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "worker_slot_id",
+    "generation",
+    "status",
+    "continuity_state",
+    "lifecycle_intent",
+    "executor_requirement_ref",
+    "role",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "worker_slot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generation": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "UNALLOCATED",
+        "CREATING",
+        "ACTIVE",
+        "IDLE",
+        "DISCARDED",
+        "CONTINUITY_UNKNOWN",
+        "ROTATE_REQUIRED",
+        "RETIRE_REQUIRED",
+        "LOST",
+        "RETIRED"
+      ]
+    },
+    "continuity_state": {
+      "enum": [
+        "NOT_ESTABLISHED",
+        "TRUSTED",
+        "UNKNOWN",
+        "LOST"
+      ]
+    },
+    "lifecycle_intent": {
+      "enum": [
+        "CREATE",
+        "REUSE",
+        "RESTORE",
+        "HOLD",
+        "DISCARD",
+        "ROTATE",
+        "RETIRE"
+      ]
+    },
+    "executor_requirement_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observed_executor_identity_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_affinity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "reasoning_process_affinity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "last_acknowledged_checkpoint_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "context_budget_estimate": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "default": null,
+      "additionalProperties": false,
+      "properties": {
+        "quanta_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "relative_load": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "quality": {
+          "enum": [
+            "UNKNOWN",
+            "ESTIMATED",
+            "MEASURED"
+          ]
+        }
+      }
+    },
+    "rotation_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        null,
+        "CONTEXT_LIMIT",
+        "ROLE_ISOLATION",
+        "CONTINUITY_LOST",
+        "MODEL_CHANGED",
+        "TOOLSET_CHANGED",
+        "VALIDATOR_FAILURE_LOOP",
+        "POLICY_REQUIRES_FRESH",
+        "USER_REQUESTED",
+        "AUTH_REFRESH_INVALIDATED",
+        "LOCAL_TAB_LOST"
+      ],
+      "default": null
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "description": "Durable logical session record. Firefox tab/window identifiers are intentionally excluded and remain non-authoritative local cache."
+}

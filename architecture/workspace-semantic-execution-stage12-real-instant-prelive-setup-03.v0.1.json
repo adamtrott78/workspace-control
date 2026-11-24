@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-prelive-setup-03-v0.1",
+  "status": "PRELIVE_SETUP_FAILED_NON_CONSUMING",
+  "date": "2026-11-17",
+  "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.4.json",
+  "authority_blob": "3ff5be8b6b7179e2f21907d2e98b7c3be0f138fe",
+  "authority_consumed": false,
+  "live_consumption_marker_observed": false,
+  "windows_launcher_started": false,
+  "isolated_firefox_started": false,
+  "failure": "v0.4 bounded dotnet discovery returned DOTNET10_NOT_FOUND_IN_REVIEWED_LOCATIONS before launcher execution; the known working SDK lives at %USERPROFILE%\\.dotnet\\dotnet.exe, which v0.4 omitted.",
+  "candidate_branch_head_after_failure": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+  "linux_transaction_started": false,
+  "repair_candidate_review": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.5.json"
+}

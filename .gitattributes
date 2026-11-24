@@ -1,0 +1,2 @@
+operator-bridge/tools/run-stage12-remote-bootstrap.sh text eol=lf
+benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh text eol=lf

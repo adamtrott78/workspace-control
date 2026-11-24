@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-state-store-contract-v0.1",
+  "status": "DESIGN_CANDIDATE_NOT_FROZEN",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "principles": [
+    "One authoritative owner per state class.",
+    "Derived projections are rebuildable.",
+    "Execution authority is never inferred from semantic projections.",
+    "Use the data structure best matched to consistency/query/recovery requirements.",
+    "Physical storage may evolve without changing logical ownership contracts.",
+    "Architecture is reviewed from real-workflow evidence, not preference."
+  ],
+  "state_classes": [
+    {
+      "id": "process_event_history",
+      "logical_structure": "APPEND_ONLY_EVENT_LOG",
+      "authoritative": true,
+      "purpose": [
+        "state transitions",
+        "claims",
+        "leases",
+        "wait/wake",
+        "dispatch",
+        "receipts",
+        "validation",
+        "recovery",
+        "supersession"
+      ],
+      "required_properties": [
+        "immutable_order",
+        "correlation_ids",
+        "executor_identity",
+        "source_checkpoint",
+        "replayable"
+      ]
+    },
+    {
+      "id": "current_orchestration_state",
+      "logical_structure": "RELATIONAL_STATE_MACHINE",
+      "authoritative": true,
+      "purpose": [
+        "current statuses",
+        "ready queues",
+        "lease ownership",
+        "generations",
+        "routing",
+        "retries",
+        "sessions",
+        "quota snapshots"
+      ],
+      "required_properties": [
+        "transactions",
+        "constraints",
+        "indexes",
+        "atomic_cas",
+        "fail_closed_unknown_transition"
+      ]
+    },
+    {
+      "id": "work_dependency_structure",
+      "logical_structure": "TYPED_DAG",
+      "authoritative": true,
+      "physical_default": "RELATIONAL_ADJACENCY_TABLES",
+      "purpose": [
+        "decomposition",
+        "dependencies",
+        "readiness",
+        "fanout",
+        "fanin",
+        "hierarchical_synthesis"
+      ],
+      "required_properties": [
+        "acyclic_work_edges_where_required",
+        "typed_edges",
+        "recursive_traversal",
+        "stable_node_ids"
+      ]
+    },
+    {
+      "id": "semantic_reasoning_projection",
+      "logical_structure": "SEMANTIC_ONTOLOGY_GRAPH",
+      "authoritative": false,
+      "rebuildable": true,
+      "purpose": [
+        "meaning",
+        "claims",
+        "questions",
+        "support",
+        "contradiction",
+        "provenance_explanation",
+        "context_assembly",
+        "cross_domain_queries"
+      ],
+      "prohibited": [
+        "grant_execution_authority",
+        "sole_owner_of_task_state",
+        "sole_owner_of_effect_state"
+      ]
+    },
+    {
+      "id": "decision_records",
+      "logical_structure": "TYPED_RECORDS_PLUS_GRAPH_PROJECTION",
+      "authoritative_for": "recorded_decision_history",
+      "authoritative_for_execution": false,
+      "purpose": [
+        "alternatives",
+        "evidence",
+        "rationale",
+        "chosen_conclusion",
+        "critic_refs",
+        "validator_refs",
+        "supersession"
+      ]
+    },
+    {
+      "id": "artifact_evidence",
+      "logical_structure": "IMMUTABLE_CONTENT_ADDRESSED_REFERENCES",
+      "authoritative": true,
+      "purpose": [
+        "git_commits",
+        "files",
+        "experiment_outputs",
+        "logs",
+        "rendered_artifacts",
+        "external_receipts"
+      ],
+      "required_properties": [
+        "immutable_identity",
+        "content_hash_or_version",
+        "provenance"
+      ]
+    },
+    {
+      "id": "retrieval_indexes",
+      "logical_structure": "DERIVED_SEARCH_INDEX",
+      "authoritative": false,
+      "rebuildable": true,
+      "purpose": [
+        "full_text_retrieval",
+        "embedding_retrieval",
+        "semantic_candidate_selection"
+      ]
+    },
+    {
+      "id": "session_browser_cache",
+      "logical_structure": "EPHEMERAL_LOCAL_CACHE",
+      "authoritative": false,
+      "purpose": [
+        "tab_mapping",
+        "window_mapping",
+        "focus",
+        "clipboard",
+        "transient_surface_health"
+      ]
+    }
+  ],
+  "trust_boundary": {
+    "from": "CandidateAction",
+    "to": "ActionSpec",
+    "rule": "No model-produced CandidateAction becomes executable until deterministic authority, target identity, precondition, capability, idempotency, and validator contracts are bound."
+  },
+  "execution_objects": [
+    "AuthorityDecision",
+    "ActionSpec",
+    "ActionClaim",
+    "Attempt",
+    "EffectReceipt",
+    "ValidationResult",
+    "Compensation",
+    "TerminalActionResult"
+  ],
+  "initial_physical_strategy": {
+    "existing_project_truth": "PRESERVE_CURRENT_OWNERS",
+    "hot_runtime_candidate": "PostgreSQL_or_equivalent_relational_engine_behind_port",
+    "task_dag": "relational_nodes_edges_initially",
+    "semantic_graph": "rebuildable_in_memory_json_or_relational_projection_initially",
+    "graph_database": "DEFER_UNTIL_MEASURED_BENEFIT",
+    "vector_database": "DEFER_UNTIL_MEASURED_BENEFIT"
+  },
+  "mandatory_review_triggers": [
+    "FIRST_END_TO_END_REASONING_PLUS_EXECUTION_WORKFLOW",
+    "THREE_REPRESENTATIVE_DOMAIN_WORKFLOWS",
+    "FIRST_MATERIAL_LEASE_OR_CONCURRENCY_INCIDENT",
+    "FIRST_REAL_COMPENSATION_OR_ROLLBACK",
+    "RECURRING_CONTEXT_OR_STATE_QUERY_PATTERN_EMERGES",
+    "BEFORE_NEW_GRAPH_VECTOR_OR_DURABLE_WORKFLOW_SUBSTRATE",
+    "BEFORE_PRODUCTION_PROMOTION"
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workspace Operator Stage 09 Target Evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "stage",
+    "evidence_class",
+    "source_sha",
+    "target_contract_complete",
+    "environment",
+    "measurement",
+    "repetitions",
+    "results",
+    "security",
+    "blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "stage": {
+      "const": "impl_09_performance_benchmark_execution"
+    },
+    "evidence_class": {
+      "const": "TARGET_WINDOWS_OPERATOR_WORKSTATION"
+    },
+    "source_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "target_contract_complete": {
+      "const": true
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "machine_fingerprint",
+        "os_build",
+        "power_mode",
+        "firefox_version",
+        "chrome_version",
+        "chrome_memory_saver_disabled",
+        "same_name_process_isolation_valid",
+        "background_noise_valid"
+      ],
+      "properties": {
+        "machine_fingerprint": {
+          "type": "string",
+          "minLength": 16
+        },
+        "os_build": {
+          "type": "string",
+          "minLength": 1
+        },
+        "power_mode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "firefox_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chrome_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "chrome_memory_saver_disabled": {
+          "const": true
+        },
+        "same_name_process_isolation_valid": {
+          "const": true
+        },
+        "background_noise_valid": {
+          "const": true
+        }
+      }
+    },
+    "measurement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "warmup_seconds",
+        "steady_state_seconds",
+        "sample_rate_hz",
+        "browser_order_alternated"
+      ],
+      "properties": {
+        "warmup_seconds": {
+          "const": 60
+        },
+        "steady_state_seconds": {
+          "const": 120
+        },
+        "sample_rate_hz": {
+          "const": 1
+        },
+        "browser_order_alternated": {
+          "const": true
+        }
+      }
+    },
+    "repetitions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "browser_resource",
+        "discard_restore",
+        "reuse",
+        "restore",
+        "create",
+        "cold_start",
+        "local_primitives"
+      ],
+      "properties": {
+        "browser_resource": {
+          "const": 3
+        },
+        "discard_restore": {
+          "const": 5
+        },
+        "reuse": {
+          "const": 50
+        },
+        "restore": {
+          "const": 30
+        },
+        "create": {
+          "const": 30
+        },
+        "cold_start": {
+          "const": 10
+        },
+        "local_primitives": {
+          "const": 100
+        }
+      }
+    },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "firefox",
+        "chrome",
+        "latency",
+        "budget_evaluation"
+      ],
+      "properties": {
+        "firefox": {
+          "type": "object"
+        },
+        "chrome": {
+          "type": "object"
+        },
+        "latency": {
+          "type": "object"
+        },
+        "budget_evaluation": {
+          "type": "object"
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dom_or_page_content_collected",
+        "raw_urls_collected",
+        "screenshots_collected",
+        "credentials_or_tokens_collected",
+        "synthetic_paste_enter_send_or_mouse"
+      ],
+      "properties": {
+        "dom_or_page_content_collected": {
+          "const": false
+        },
+        "raw_urls_collected": {
+          "const": false
+        },
+        "screenshots_collected": {
+          "const": false
+        },
+        "credentials_or_tokens_collected": {
+          "const": false
+        },
+        "synthetic_paste_enter_send_or_mouse": {
+          "const": false
+        }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "maxItems": 0
+    }
+  }
+}

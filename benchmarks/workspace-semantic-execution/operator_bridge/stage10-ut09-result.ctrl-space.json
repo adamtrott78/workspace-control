@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "stage": "impl_10_usability_trial_execution",
+  "trial_id": "UT-09",
+  "binding": "Ctrl+Space",
+  "result": "PASS",
+  "evidence_class": "ACCUMULATED_REPRESENTATIVE_USE_AND_OPERATOR_DECISION",
+  "validated_source": {
+    "source_sha": "aa3c3e39d1a1ce00cc67fa2bcbee726b03623a22",
+    "workspace_validation": "#2887 SUCCESS",
+    "semantic_validation": "#216 SUCCESS",
+    "operator_bridge_validation": "#495 SUCCESS"
+  },
+  "frozen_retention_gate": {
+    "unintended_scheduler_dispatches": "ZERO_OBSERVED_IN_ACCEPTED_CTRL_SPACE_TRIALS_AND_REPRESENTATIVE_USE",
+    "required_native_shortcut_collisions": 0,
+    "hotkey_interference": "NONE_REPORTED; QUALIFIES_AT_OR_BELOW_2_OF_7",
+    "exact_interference_numeral_separately_elicited": false,
+    "pass": true
+  },
+  "representative_use_evidence": [
+    "Ctrl+Space UT-10 produced 20/20 intended actions, 20/20 durable acknowledgments and exactly 20 hotkey presses with zero wrong-worker, wrong-packet, rejected-state or dispatch failures.",
+    "Operator rated Ctrl+Space UT-10 routine rhythm friction 1/7, worker-selection confidence 7/7 and physical comfort 7/7.",
+    "Across subsequent Stage-10 recovery, READY=0 minimize and Bridge-OFF work, the operator continued using Ctrl+Space and did not report an accidental scheduler invocation or a required native shortcut being lost.",
+    "A possible VS Code shortcut collision was reviewed with the operator. The operator stated they no longer meaningfully use VS Code and did not recognize Ctrl+Space as a function they rely on, so it is not a required native shortcut collision for their representative workflow."
+  ],
+  "retention_decision": "RETAIN_CTRL_SPACE",
+  "interpretation": "UT-09 passes without an artificial additional timer because the frozen decision is about actual required shortcut collisions and interference. Accumulated representative use plus the operator's explicit workflow decision establish zero required collision and no meaningful interference."
+}

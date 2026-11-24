@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.15",
+  "status": "CONSUMED_PASS_D4_V115_POSTSUCCESS_WRAPPER_FALSE_NEGATIVE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "backend_task": "workspace-semantic-execution-backend-v1",
+  "frontend_task": "workspace-operator-bridge-implementation-v1",
+  "purpose": "Exactly one corrected D4 real-Instant calibration attempt proving true persistent-chat continuity with the Q2 continuity value absent from the worker packet, while preserving the accepted A7 frontend and append-only candidate history.",
+  "approval_basis": {
+    "authority_owner": "operator",
+    "approval_date": "2026-11-24",
+    "approval_form": "EXPLICIT_OPERATOR_INSTRUCTION_TO_PROCEED_WITH_STATED_CORRECTED_D4_AND_SYSTEM_TEST_PLAN",
+    "approval_source_summary": "After the assistant proposed repairing the Q2 continuity fixture, adding literal connected-tool prefixes, closing corrected D4, then proceeding to integrated research-iterate and Supervisor testing, the operator explicitly instructed the system to proceed.",
+    "approved_scope": "EXACTLY_ONE_V1_15_D4_ATTEMPT",
+    "standing_or_future_authority_inferred": false,
+    "approved_gate_head": "d7bdd6e90bcb6ed15050bb66dc9af08241418cd5",
+    "approved_review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.15.json",
+    "approved_review_blob_sha": "48049d8bdc1b1c8dc4853ef0565e5e41e349458d",
+    "approved_procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.15.md",
+    "approved_procedure_blob_sha": "e9dc74292e82e52098f03642e95cf361b22c24d7",
+    "frozen_review_validation": {
+      "workspace_control_run": 3159,
+      "semantic_execution_run": 461,
+      "operator_bridge_run": 732,
+      "result": "SUCCESS"
+    },
+    "approval_scope_exact": true
+  },
+  "predecessor": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.14.json",
+    "status": "CONSUMED_PUBLICATION_PATH_PASS_Q2_CONTINUITY_CLAIM_INVALID",
+    "consumed": true,
+    "reusable": false,
+    "final_candidate_head": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+    "preserved_publication_evidence": {
+      "q1": "35d1e95be1ec544845cc2170dd57a6b36f86d0fa",
+      "q2": "71f72bd6acf2d5217f026e9139b5af0dd1714925",
+      "q3_replacement": "d9f636ef508245459b3dd0a35b8d5587f533bac6"
+    }
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "exact_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "exact_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed_in_v115": false,
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "literal_github_prefix": "@github",
+    "autocomplete_selection_required": false,
+    "tab_required": false,
+    "click_required": false
+  },
+  "validated_v115_repair": {
+    "implementation_head": "3058e98bc95087d3759631cd9b2c23065c8b1da4",
+    "review_head": "d7bdd6e90bcb6ed15050bb66dc9af08241418cd5",
+    "candidate_baseline": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+    "linux_transaction_blob": "a25ec2594fce96a20e3d8fdff8346c274f2056bb",
+    "calibration_harness_blob": "8b0f3a11e39e47417ea46487791e4b7e5cdb577a",
+    "stage12_real_test_blob": "fe53eb4d2016b44aa072a214570a60ae1fbca8ec",
+    "static_regression_blob": "ea35516d7c73f5a22673c94a054f62120debcf45",
+    "implementation_validation": {
+      "workspace_control_run": 3158,
+      "semantic_execution_run": 460,
+      "operator_bridge_run": 731,
+      "result": "SUCCESS"
+    },
+    "review_validation": {
+      "workspace_control_run": 3159,
+      "semantic_execution_run": 461,
+      "operator_bridge_run": 732,
+      "result": "SUCCESS"
+    }
+  },
+  "plugin_contract": {
+    "github": {
+      "literal": "@github",
+      "live_proven": true,
+      "required_for_d4": true
+    },
+    "workspace_shell": {
+      "literal": "@Workspace Shell",
+      "live_proven": false,
+      "used_by_this_d4_authority": false,
+      "authority_widened_by_this_artifact": false,
+      "next_probe": "Harmless read-only leaf in integrated research-iterate after corrected D4 PASS."
+    }
+  },
+  "execution_start": {
+    "exact_command": "wop d4",
+    "separate_chat_approval_required": false,
+    "approval_already_observed": true
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": true,
+    "reusable": false,
+    "candidate_baseline_required_marker": "STAGE12_CANDIDATE_BASELINE=PASS",
+    "clean_route_required_marker": "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
+    "semantic_binding_required_marker": "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+    "live_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "q1_candidate_observed_marker": "STAGE12_Q1_CANDIDATE_OBSERVED=<sha>",
+    "q1_durable_ingest_marker": "STAGE12_Q1_DURABLE_INGEST=PASS",
+    "q1_success_marker": "STAGE12_Q1_REAL_INSTANT=PASS",
+    "q2_token_hidden_marker": "STAGE12_Q2_CONTINUITY_TOKEN_HIDDEN=PASS",
+    "q2_reuse_ready_marker": "STAGE12_Q2_REUSE_READY",
+    "q2_success_marker": "STAGE12_PERSISTENT_SESSION_REUSE=PASS",
+    "stale_fence_marker": "STAGE12_STALE_SESSION_FENCE=PASS",
+    "q3_replacement_ready_marker": "STAGE12_Q3_REPLACEMENT_READY",
+    "final_success_prefix": "STAGE12_REAL_INSTANT_CALIBRATION=",
+    "required_pre_consumption_order": [
+      "STAGE12_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
+      "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
+      "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+    ],
+    "required_post_consumption_order": [
+      "STAGE12_Q1_CANDIDATE_OBSERVED=<sha>",
+      "STAGE12_Q1_DURABLE_INGEST=PASS",
+      "STAGE12_Q1_REAL_INSTANT=PASS",
+      "STAGE12_Q2_CONTINUITY_TOKEN_HIDDEN=PASS",
+      "STAGE12_Q2_REUSE_READY",
+      "STAGE12_PERSISTENT_SESSION_REUSE=PASS",
+      "STAGE12_STALE_SESSION_FENCE=PASS",
+      "STAGE12_Q3_REPLACEMENT_READY",
+      "STAGE12_REAL_INSTANT_CALIBRATION={...\"result\":\"PASS\"...}"
+    ],
+    "q2_fail_closed_error": "q2_continuity_token_disclosed_in_worker_packet",
+    "consumed_on_success_or_failure_after_marker": true,
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "no_silent_retry": true
+  },
+  "exact_execution_bindings": {
+    "authority_parent_head": "d7bdd6e90bcb6ed15050bb66dc9af08241418cd5",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.15.json": "48049d8bdc1b1c8dc4853ef0565e5e41e349458d",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.15.md": "e9dc74292e82e52098f03642e95cf361b22c24d7",
+    "architecture/workspace-semantic-execution-supervisor-chat.v0.1.md": "56ad6832ae6011e961e77b37e443f70221c167c6",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "a25ec2594fce96a20e3d8fdff8346c274f2056bb",
+    "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py": "8b0f3a11e39e47417ea46487791e4b7e5cdb577a",
+    "tests/test_workspace_semantic_execution_stage12_real_instant.py": "fe53eb4d2016b44aa072a214570a60ae1fbca8ec",
+    "tests/test_workspace_semantic_execution_stage12_v114.py": "ea35516d7c73f5a22673c94a054f62120debcf45",
+    "candidate_baseline": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/tools/run-stage12-wop.ps1": "87e2b22d010adcefde075089156ec4c8d3974964",
+    "operator-bridge/tools/run-stage12-remote-bootstrap.sh": "905d1f8e21c45c78fd244f1192a420ff457f221c"
+  },
+  "launch_contract": {
+    "backend_first": true,
+    "frontend_launch_context": "interactive parent PowerShell",
+    "start_job_for_frontend": false,
+    "candidate_baseline_preflight_required": true,
+    "q2_compiled_packet_token_absence_required": true,
+    "q2_hidden_marker_required_before_q2_ready": true,
+    "post_a7_backend_revalidation_required": true,
+    "required_post_a7_marker": "D4_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS",
+    "q1_packet_must_already_include_literal_github": true,
+    "manual_packet_editing_allowed": false,
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter"
+  },
+  "retained_prohibitions": {
+    "credential_automation": false,
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_submission": false,
+    "mouse_automation": false,
+    "dom_or_page_content_scraping": false,
+    "browser_permission_widening": false,
+    "api_key_or_paid_api_fallback": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "production_postgres_mutation": false,
+    "gpu_use": false,
+    "padataset_mutation": false,
+    "workspace_shell_authority_widening": false,
+    "workspace_shell_live_execution_under_this_authority": false,
+    "stale_generation_result_acceptance": false,
+    "candidate_history_rewrite": false,
+    "arbitrary_tailscale_handler_mutation": false
+  },
+  "execution_tip_contract": {
+    "branch": "workspace-semantic-execution-migration-v1",
+    "rule": "The exact v1.15 authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
+    "no_branch_mutation_after_final_validation_before_wop": true
+  },
+  "postcondition": "Exactly one corrected v1.15 D4 attempt is authorized. Any abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming; any success or failure after that marker consumes the attempt. Corrected D4 PASS is required before integrated research-iterate E1.",
+  "live_closeout": {
+    "observed_date": "2026-11-24",
+    "authority_head": "5172a37781834c19a6eda8ad2e040ea39aefb5d3",
+    "result": "PASS",
+    "candidate_chain": {
+      "baseline": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+      "q1": "6eeaf5ab39a45298f4cf0e7f20b40fd7990f75ea",
+      "q2": "f3f6d1e6e32cb830f9a3538c8b7013f0dfa284d8",
+      "q3_replacement": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+      "final_candidate_head": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+      "append_only": true
+    },
+    "continuity_proof": {
+      "hidden_before_q2": "STAGE12_Q2_CONTINUITY_TOKEN_HIDDEN=PASS",
+      "q2_candidate_contains_recovered_ref": true,
+      "q2_session_generation": 0,
+      "conclusion": "PASS_TRUE_PRECEDING_CONVERSATION_CONTINUITY"
+    },
+    "backend_report": {
+      "result": "PASS",
+      "q1_real_instant": true,
+      "persistent_session_reuse": true,
+      "continuity_cache_probe": true,
+      "stale_session_fencing": true,
+      "late_old_generation_rejected_without_mutation": true,
+      "replacement_session_generation": 1,
+      "final_session_state": "READY"
+    },
+    "cleanup": {
+      "private_route_transaction": "PASS",
+      "tailscale_config_restored": true,
+      "jupyter_root_preserved": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true,
+      "windows_cleanup": true
+    },
+    "launcher_false_negative": {
+      "classification": "POSTSUCCESS_TEARDOWN_RACE",
+      "invalidates_d4": false,
+      "repaired_at": "8237e5490b61146533710e8d6d50c67345492a71"
+    },
+    "disposition": "D4_ACCEPTED_ADVANCE_TO_INTEGRATED_RESEARCH_ITERATE_E1"
+  }
+}

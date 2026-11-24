@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-engine-kernel-canary-v1",
+  "evidence_class": "FROZEN_REAL_WORKFLOW_SHAPE",
+  "source": {
+    "repository": "adamtrott78/research-engine",
+    "commit_sha": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+    "path": "src/research_engine/orchestration.py",
+    "inspected_regions": [
+      "ExecutorTier/JobType/JOB_TIERS",
+      "OrchestratorStore.enqueue/lease_next",
+      "ResearchPlanner.reconcile",
+      "AgentWorker.run_once"
+    ]
+  },
+  "claim_limits": [
+    "This fixture replays the real Research Engine workflow shape and dependency semantics; it does not claim production Research Engine execution through the new kernel yet.",
+    "Effect receipts in this canary are deterministic replay receipts, not external side-effect evidence.",
+    "The research-engine repository remains read-only under the semantic-execution migration task."
+  ],
+  "executor_tiers": {
+    "DISCOVERY": "CHEAP",
+    "SCREEN": "CHEAP",
+    "ACQUIRE": "DETERMINISTIC",
+    "EXTRACT": "STANDARD",
+    "VERIFY": "STANDARD",
+    "CHECKPOINT": "DETERMINISTIC",
+    "SYNTHESIZE": "STRONG",
+    "GAP_GENERATE": "STRONG",
+    "NOVELTY_SEARCH": "CHEAP",
+    "NOVELTY_ARBITRATE": "STRONG",
+    "HUMAN_REVIEW": "HUMAN"
+  },
+  "nodes": [
+    {
+      "process_id": "re:discovery",
+      "job_type": "DISCOVERY",
+      "dependencies": []
+    },
+    {
+      "process_id": "re:screen",
+      "job_type": "SCREEN",
+      "dependencies": [
+        "re:discovery"
+      ]
+    },
+    {
+      "process_id": "re:acquire:paper1",
+      "job_type": "ACQUIRE",
+      "dependencies": [
+        "re:screen"
+      ]
+    },
+    {
+      "process_id": "re:extract:paper1",
+      "job_type": "EXTRACT",
+      "dependencies": [
+        "re:acquire:paper1"
+      ]
+    },
+    {
+      "process_id": "re:verify:paper1",
+      "job_type": "VERIFY",
+      "dependencies": [
+        "re:extract:paper1"
+      ]
+    },
+    {
+      "process_id": "re:acquire:paper2",
+      "job_type": "ACQUIRE",
+      "dependencies": [
+        "re:screen"
+      ]
+    },
+    {
+      "process_id": "re:extract:paper2",
+      "job_type": "EXTRACT",
+      "dependencies": [
+        "re:acquire:paper2"
+      ]
+    },
+    {
+      "process_id": "re:verify:paper2",
+      "job_type": "VERIFY",
+      "dependencies": [
+        "re:extract:paper2"
+      ]
+    },
+    {
+      "process_id": "re:checkpoint",
+      "job_type": "CHECKPOINT",
+      "dependencies": [
+        "re:verify:paper1",
+        "re:verify:paper2"
+      ]
+    },
+    {
+      "process_id": "re:synthesize",
+      "job_type": "SYNTHESIZE",
+      "dependencies": [
+        "re:checkpoint"
+      ]
+    },
+    {
+      "process_id": "re:gap",
+      "job_type": "GAP_GENERATE",
+      "dependencies": [
+        "re:synthesize"
+      ]
+    },
+    {
+      "process_id": "re:novelty:g1:0",
+      "job_type": "NOVELTY_SEARCH",
+      "dependencies": [
+        "re:gap"
+      ]
+    },
+    {
+      "process_id": "re:novelty:g1:1",
+      "job_type": "NOVELTY_SEARCH",
+      "dependencies": [
+        "re:gap"
+      ]
+    },
+    {
+      "process_id": "re:arbitrate:g1",
+      "job_type": "NOVELTY_ARBITRATE",
+      "dependencies": [
+        "re:novelty:g1:0",
+        "re:novelty:g1:1"
+      ]
+    },
+    {
+      "process_id": "re:human-review",
+      "job_type": "HUMAN_REVIEW",
+      "dependencies": [
+        "re:arbitrate:g1"
+      ]
+    }
+  ],
+  "expected_properties": {
+    "branch_fanout": {
+      "after": "re:screen",
+      "children": [
+        "re:acquire:paper1",
+        "re:acquire:paper2"
+      ]
+    },
+    "verification_fanin": {
+      "node": "re:checkpoint",
+      "requires": [
+        "re:verify:paper1",
+        "re:verify:paper2"
+      ]
+    },
+    "novelty_fanout": {
+      "after": "re:gap",
+      "children": [
+        "re:novelty:g1:0",
+        "re:novelty:g1:1"
+      ]
+    },
+    "novelty_fanin": {
+      "node": "re:arbitrate:g1",
+      "requires": [
+        "re:novelty:g1:0",
+        "re:novelty:g1:1"
+      ]
+    },
+    "terminal_gate": {
+      "node": "re:human-review",
+      "behavior": "WAITING_EXTERNAL",
+      "wait_kind": "HUMAN_DECISION"
+    }
+  }
+}

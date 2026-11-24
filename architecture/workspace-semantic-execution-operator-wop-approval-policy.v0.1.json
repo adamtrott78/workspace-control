@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-operator-wop-approval-policy-v0.1",
+  "status": "ACTIVE_OPERATOR_AUTHORED_STANDING_APPROVAL_SIGNAL_POLICY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "authority_owner": "operator",
+  "recorded_on": "2026-11-22",
+  "operator_utterance": "approval greanted, btw you don ned to ask for mapproval, i grant approval implicitly when i copy your wop and paste it into my PS. pls document that for later tests",
+  "purpose": "Define the operator's preferred approval signal for later bounded Workspace semantic-execution tests so a separate chat approval prompt is unnecessary when the operator executes the exact reviewed PowerShell WOP.",
+  "scope": {
+    "task": "workspace-semantic-execution-migration-v1",
+    "applies_to": "Future bounded operator WOP tests whose exact review/procedure is already exact-head validated and whose authority model permits one-shot operator approval.",
+    "does_not_widen_test_scope": true
+  },
+  "approval_signal_contract": {
+    "actual_execution_of_exact_presented_powershell_wop_on_intended_operator_host_counts_as_fresh_operator_approval": true,
+    "copying_or_pasting_without_execution_is_not_sufficient": true,
+    "command_execution_evidence_must_be_observed": true,
+    "approval_is_bound_to_exact_presented_test_version_review_procedure_source_and_wop_bytes": true,
+    "approval_count_per_distinct_wop_execution": 1,
+    "no_silent_retry": true,
+    "same_consumed_wop_must_not_be_reused_for_retry": true,
+    "a_retry_requires_a_new_reviewed_attempt_and_new_exact_wop": true
+  },
+  "authority_persistence_pattern": {
+    "assistant_may_persist_conditional_one_shot_authority_after_exact_head_review_validation": true,
+    "conditional_authority_state": "PENDING_OPERATOR_WOP_EXECUTION",
+    "conditional_authority_does_not_activate_live_execution_by_itself": true,
+    "observed_exact_wop_execution_activates_the_single_attempt": true,
+    "consumption_marker_contract_remains_independent": true
+  },
+  "retained_boundaries": {
+    "no_model_inferred_approval": true,
+    "no_scope_widening": true,
+    "no_credential_automation": true,
+    "no_automatic_typing_paste_enter_send_or_mouse": true,
+    "no_browser_permission_widening": true,
+    "no_public_or_funnel_exposure": true,
+    "no_paid_api_fallback": true,
+    "no_production_database_mutation": true,
+    "no_gpu_or_padataset_mutation": true,
+    "no_workspace_shell_authority_widening": true,
+    "no_stale_generation_acceptance": true
+  },
+  "precedence": "A later explicit operator instruction or a stricter task/review/policy gate overrides this standing signal policy."
+}

@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e1-review-v0.2",
+  "status": "VALIDATED_IMPLEMENTATION_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Freeze the corrected first production-like E1 mission after repairing live fixture staging: recursive decomposition, deterministic exact-source routing, Instant reasoning, literal connected Workspace Shell read-only probing, fan-in, synthesis, and Supervisor S1 durable projection.",
+  "predecessor": {
+    "review": "architecture/workspace-semantic-execution-research-iterate-e1-review.v0.1.json",
+    "issue": "Live E1 shell transaction contained literal backslash-n separators in fixture variable/copy staging. Bash syntax validation passed but live fixture staging would fail.",
+    "superseded": true
+  },
+  "stage12_closeout": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-closeout.v1.15.json",
+    "result": "PASS",
+    "d4_complete": true
+  },
+  "implementation": {
+    "head": "65bdef0e3572c5cfed8b8e59298ce86fc15b59af",
+    "validation": {
+      "workspace_control_run": 3173,
+      "semantic_execution_run": 475,
+      "operator_bridge_run": 746,
+      "result": "SUCCESS"
+    },
+    "exact_bindings": {
+      "benchmarks/workspace-semantic-execution/live_research_iterate_e1.py": "055c692cc6b321a8e74906a30d0c8752346064ba",
+      "benchmarks/workspace-semantic-execution/private_route_research_iterate_e1_v1.sh": "60113edde80323e0fcbfb0c5aeac835c61091dd1",
+      "operator-bridge/tools/run-research-iterate-e1-remote-bootstrap.sh": "65816def4f45c3b25a642b8375a98dd2ceb91e67",
+      "operator-bridge/tools/run-research-iterate-e1-wop.ps1": "612b53b8c7703265aeb89d57040ddc3b52045fca",
+      "operator-bridge/tools/install-wop-commands.ps1": "5624145e51ffd36af8d16ab7d3df7d595d59e8f2",
+      "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+      "architecture/workspace-semantic-execution-research-iterate-e1.v0.1.md": "88caecd0cab77c12bce994a755c935e63b7ecc9f",
+      "architecture/workspace-semantic-execution-supervisor-chat.v0.1.md": "56ad6832ae6011e961e77b37e443f70221c167c6",
+      "tests/test_workspace_semantic_execution_research_iterate_e1_live.py": "7e197d09793922f0ed5ea12759f658166053a3fc",
+      "tests/test_workspace_semantic_execution_research_iterate_e1_transport.py": "ec073eb88205616373e54f429c17329e11d2ab9f"
+    },
+    "candidate_baseline": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+    "live_fixture_staging_repair": {
+      "literal_backslash_n_remaining": false,
+      "fixture_exists_preflight_required": true,
+      "runtime_root": "/tmp/workspace-semantic-execution-e1-v1",
+      "post_success_route_teardown_handled": true
+    }
+  },
+  "workspace_shell_probe": {
+    "literal_prefixes": [
+      "@Workspace Shell",
+      "@github"
+    ],
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "control_side_observation_rechecked_after_implementation_validation": true,
+    "control_side_expected_evidence": [
+      "workspace-shell:mcp-transport:HTTPS_MTLS_REQUIRED",
+      "workspace-shell:uids:41010:41010:41011:41012",
+      "workspace-shell:launcher-socket:1:660:0:41010",
+      "workspace-shell:broker-socket:1:660:0:41010",
+      "workspace-shell:receipt-root:1:750:0:41010"
+    ],
+    "prohibited_tools": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper"
+    ],
+    "expected_values_disclosed_in_worker_packet": false,
+    "authority_widening": false
+  },
+  "exact_source": {
+    "repository": "adamtrott78/research-engine",
+    "revision": "1031861c03b2af8cff5cf72939bbbc83a95e65a4",
+    "path": "src/research_engine/orchestration.py",
+    "blob": "0d051fa50960708e0e773f6871c7e924c5796394",
+    "executor": "research-engine-exact-source-read",
+    "invocation_mode": "DETERMINISTIC"
+  },
+  "supervisor_s1": {
+    "interface_contract_path": "architecture/workspace-semantic-execution-supervisor-chat.v0.1.md",
+    "read_only": true,
+    "projection_source": "durable Postgres state",
+    "fresh_store_rehydration_required": true,
+    "conversation_memory_authoritative": false,
+    "authority_mutations_allowed": 0,
+    "live_chat_surface_proof_deferred_until_after_e1_core_pass": true
+  },
+  "accepted_frontend": {
+    "checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed": false,
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter"
+  },
+  "authority_gate": {
+    "live_attempt_authorized": false,
+    "exact_head_review_validation_required": true,
+    "fresh_one_shot_authority_required": true,
+    "no_silent_retry": true,
+    "standing_or_future_authority_inferred": false
+  },
+  "approval_context": {
+    "operator_statement": "well lets get fucjking started tgeb'",
+    "interpreted_scope": "Proceed with the previously stated D4 closeout, integrated research-iterate E1, harmless read-only @Workspace Shell proof, and initial read-only Supervisor slice.",
+    "grants_this_review_live_execution_authority": false,
+    "may_support_one_exact_E1_authority_after_review_validation": true
+  },
+  "prohibitions": [
+    "no automatic typing/paste/submission",
+    "no ChatGPT DOM/page-content scraping",
+    "no credential automation",
+    "no paid API fallback",
+    "no Workspace Shell exec/helper/privileged mutation",
+    "no authority widening",
+    "no candidate history rewrite",
+    "no stale generation acceptance"
+  ],
+  "next_gate": "This exact v0.2 review commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation while the candidate baseline remains stable. Only then may exactly one E1 live authority be persisted."
+}

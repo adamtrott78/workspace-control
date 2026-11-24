@@ -1,0 +1,22 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Workspace Operator Fake Worker</title>
+<form id="fake-worker-form">
+  <label>
+    Synthetic simulator packet
+    <textarea id="synthetic-packet" rows="8" cols="80"></textarea>
+  </label>
+  <button type="submit">Submit</button>
+</form>
+<output id="status">Simulator-only fake worker surface.</output>
+<script>
+"use strict";
+// This page is intentionally inert in Stage 05. Stage 06 wires it to the
+// simulator service for human-in-loop/local-browser integration. Production
+// bridge code must never inspect this page.
+document.getElementById("fake-worker-form").addEventListener("submit", event => {
+  event.preventDefault();
+  document.getElementById("status").textContent =
+    "Submission boundary reached; Stage 06 integration supplies transport.";
+});
+</script>
