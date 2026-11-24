@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e1-retry-review-v0.3",
+  "status": "VALIDATED_RETRY_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-research-iterate-e1-authority.v0.1.json",
+    "closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.1.json",
+    "result": "CONSUMED_FAILED_HARNESS_COMPILER_ENVELOPE_MISMATCH",
+    "candidate_partial_chain": {
+      "root": "f065ec8c274575b6b86e296e2784c1e126c69bdc",
+      "analysis": "705ac86d8a95e210ada81747bcc7fc22983928c3"
+    }
+  },
+  "implementation": {
+    "head": "ad468737d57ed1e441d7676a52112f75a60d0fca",
+    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "validation": {
+      "workspace_control_run": 3182,
+      "semantic_execution_run": 485,
+      "operator_bridge_run": 755,
+      "result": "SUCCESS"
+    },
+    "exact_bindings": {
+      "semantic-execution/src/workspace_semantic_execution/application/packet_compiler.py": "cf6200aa4b5a669dd023bc3c6478770bf4658528",
+      "benchmarks/workspace-semantic-execution/live_research_iterate_e1.py": "055c692cc6b321a8e74906a30d0c8752346064ba",
+      "operator-bridge/src/WorkspaceOperator/Windows/IWorkerWindowSafetyPort.cs": "b2c285bbe0614280c1fe21d879bc70eb94260d03",
+      "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs": "fe4c69dd37c531383fa2559f1d26a676f9b72e08",
+      "operator-bridge/tools/run-research-iterate-e1-wop.ps1": "612b53b8c7703265aeb89d57040ddc3b52045fca",
+      "operator-bridge/tools/run-research-iterate-e1-remote-bootstrap.sh": "65816def4f45c3b25a642b8375a98dd2ceb91e67",
+      "benchmarks/workspace-semantic-execution/private_route_research_iterate_e1_v1.sh": "60113edde80323e0fcbfb0c5aeac835c61091dd1",
+      "operator-bridge/tools/install-wop-commands.ps1": "5624145e51ffd36af8d16ab7d3df7d595d59e8f2"
+    }
+  },
+  "repairs": {
+    "connected_tool_prefix": {
+      "classification": "HARNESS_COMPILER_ENVELOPE_MISMATCH",
+      "mechanism": "SemanticPacketCompiler deterministically lifts leading @-mention lines from the already-hashed objective into raw clipboard prefix lines.",
+      "expected_prefix": "@Workspace Shell\n@github\n\nWORKSPACE_REASONING_PACKET_V1\n",
+      "canonical_payload_hash_semantics_changed": false,
+      "durable_packet_source_schema_changed": false
+    },
+    "foreground_enter_gate": {
+      "observation": "First E1 attempt did not reliably foreground managed Firefox and showed Enter confirmation monitor unavailable.",
+      "mechanism": [
+        "retry foreground activation up to 20 times at 25 ms intervals",
+        "arm HumanSubmitConfirmationGate even if the immediate foreground recapture loses the Windows focus race",
+        "keep next dispatch blocked until Enter is observed with the prepared worker foreground"
+      ],
+      "automatic_typing_or_submission": false,
+      "mouse_automation": false,
+      "fail_closed": true
+    }
+  },
+  "workspace_shell_boundary": {
+    "literal_mentions": [
+      "@Workspace Shell",
+      "@github"
+    ],
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "prohibited": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper",
+      "authority widening",
+      "repository mutation",
+      "service mutation"
+    ],
+    "expected_values_worker_hidden": true
+  },
+  "attempt_gate": {
+    "live_attempt_authorized": false,
+    "previous_authority_consumed": true,
+    "fresh_operator_approval_required": true,
+    "no_silent_retry": true,
+    "fresh_one_shot_authority_required": true
+  },
+  "acceptance": [
+    "root decomposition PASS",
+    "Supervisor S1 rehydration PASS",
+    "child contract inheritance PASS",
+    "deterministic exact-source PASS",
+    "analysis PASS",
+    "raw @Workspace Shell then @github clipboard prefix PASS",
+    "Workspace Shell read-only probe PASS",
+    "fan-in PASS",
+    "final Instant synthesis PASS",
+    "private route rollback PASS",
+    "Windows cleanup PASS"
+  ],
+  "next_gate": "After this review head is 3/3 green, require a fresh explicit operator instruction to run E1 again before minting exactly one new live authority."
+}

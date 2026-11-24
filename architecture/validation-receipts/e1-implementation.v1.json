@@ -1,25 +1,25 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
-  "status": "VALIDATED_E1_PREFIX_REPAIR_IMPLEMENTATION",
-  "validated_head": "121a7151fa386fddb25e0244538394bef35c5c08",
+  "status": "VALIDATED_E1_RETRY_IMPLEMENTATION",
+  "validated_head": "ad468737d57ed1e441d7676a52112f75a60d0fca",
   "validation_runs": {
     "semantic_execution": {
       "workflow_name": "Semantic Execution Validation",
-      "run_id": 45492866075,
-      "run_number": 483,
+      "run_id": 45493670051,
+      "run_number": 485,
       "conclusion": "success"
     },
     "operator_bridge": {
       "workflow_name": "Operator Bridge Validation",
-      "run_id": 45492866172,
-      "run_number": 753,
+      "run_id": 45493669824,
+      "run_number": 755,
       "conclusion": "success"
     },
     "workspace_control": {
       "workflow_name": "Workspace Control Validation",
-      "run_id": 45492866227,
-      "run_number": 3180,
+      "run_id": 45493669634,
+      "run_number": 3182,
       "conclusion": "success"
     }
   },
@@ -80,10 +80,11 @@
     "receipt_or_script_parse_failure_falls_back_to_full_validation": true
   },
   "proof": {
-    "e1_prefix_repair_full_validation": true,
-    "workspace_control_run": 3180,
-    "semantic_execution_run": 483,
-    "operator_bridge_run": 753,
-    "candidate_head": "705ac86d8a95e210ada81747bcc7fc22983928c3"
+    "prefix_repair_full_validated_at": "121a7151fa386fddb25e0244538394bef35c5c08",
+    "focus_enter_gate_full_operator_validated_at": "ad468737d57ed1e441d7676a52112f75a60d0fca",
+    "workspace_control_run": 3182,
+    "semantic_execution_run": 485,
+    "operator_bridge_run": 755,
+    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3"
   }
 }
