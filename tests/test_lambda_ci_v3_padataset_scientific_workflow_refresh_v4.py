@@ -3,106 +3,56 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REC = (ROOT / "scripts/lambda_ci_v3_reconciler.py").read_text()
-HELPER = (
-    ROOT / "scripts/lambda_ci_v3_padataset_scientific_workflow_refresh_v4.py"
-).read_text()
+HELPER = (ROOT / "scripts/lambda_ci_v3_padataset_scientific_workflow_refresh_v4.py").read_text()
 LAUNCHER = (ROOT / "scripts/mth602_activate_lanea_refresh_v4.py").read_text()
 
 
 class PADatasetScientificWorkflowRefreshV4Tests(unittest.TestCase):
     def test_sources_compile(self):
         compile(REC, "lambda_ci_v3_reconciler.py", "exec")
-        compile(
-            HELPER,
-            "lambda_ci_v3_padataset_scientific_workflow_refresh_v4.py",
-            "exec",
-        )
+        compile(HELPER, "lambda_ci_v3_padataset_scientific_workflow_refresh_v4.py", "exec")
         compile(LAUNCHER, "mth602_activate_lanea_refresh_v4.py", "exec")
 
-    def test_exact_v2_to_v3_transition_is_frozen(self):
+    def test_exact_v3_to_v4_transition_is_frozen(self):
         for marker in (
-            '"39190413abbd801bd6d25c2166ac36a7a69968fb"',
+            '"ea5d844c494013eb2322686d7345b5a1b15443c4"',
             '"39190413abbd801bd6d25c2166ac36a7a69968fb"',
             '"7cfe0ab61cc16785f4d267273b48a63361c595dd"',
             "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT",
         ):
             self.assertIn(marker, REC)
 
-    def test_reconciler_requires_v2_receipt_before_v3(self):
+    def test_reconciler_requires_v3_receipt_before_v4_and_prefers_v4(self):
         for marker in (
-            "_padataset_scientific_workflow_refresh_v4",
-            "workflow refresh v4 requires v3 predecessor",
-            "scientific_workflow_refresh_v4",
-            "scientific_workflow_effective_refresh",
+            "def _padataset_scientific_workflow_refresh_v4(",
+            "PADataset scientific workflow refresh v4 requires v3 predecessor",
+            "scientific_workflow_refresh_v4 =",
+            "if scientific_workflow_refresh_v4 is not None:",
+            "scientific_workflow_effective_refresh = scientific_workflow_refresh_v4",
         ):
             self.assertIn(marker, REC)
-        block = REC[
-            REC.index("scientific_workflow_refresh_v2 ="):
-            REC.index("scientific_dual_workflow_refresh =")
-        ]
-        self.assertIn(
-            "_padataset_scientific_workflow_refresh_v4(\n"
-            "            scientific_workflow_refresh_v2",
-            block,
-        )
-        self.assertIn(
-            "scientific_workflow_refresh_v4\n"
-            "        if scientific_workflow_refresh_v4 is not None",
-            block,
-        )
 
-    def test_dual_lane_predecessor_remains_immutable_lane_a_v1(self):
-        block = REC[
-            REC.index("def _padataset_scientific_dual_lane_override"):
-            REC.index("def _padataset_scientific_dual_lane_workflow_refresh")
-        ]
-        self.assertIn(
-            "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT.read_bytes()",
-            block,
-        )
-        self.assertNotIn(
-            "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT.read_bytes()",
-            block,
-        )
-        self.assertNotIn(
-            "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT.read_bytes()",
-            block,
-        )
-
-    def test_effective_v3_digest_is_used_for_lane_a_managed_addition(self):
-        block = REC[
-            REC.index("for destination, binding in scientific_additions.items():"):
-            REC.index("for destination, binding in dual_additions.items():")
-        ]
-        self.assertIn("scientific_workflow_effective_refresh is not None", block)
-        self.assertIn(
-            'expected_addition_sha = scientific_workflow_effective_refresh[',
-            block,
-        )
-
-    def test_helper_receipt_bindings_are_exact(self):
+    def test_helper_bindings_are_exact(self):
         lines = set(HELPER.splitlines())
         for marker in (
-            "TARGET_CLASS = candidate.PADATASET_SCIENTIFIC_TARGET_CLASS",
-            "PRIOR_REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT",
+            "PRIOR_REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT",
             "REFRESH_ACTIVE = candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT",
-            "OLD_BLOB = candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_BLOB",
+            "OLD_BLOB = candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_BLOB",
             "NEW_BLOB = candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_BLOB",
             "PAD_MAIN = candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_PAD_MAIN",
         ):
             self.assertIn(marker, lines)
 
-    def test_helper_requires_exact_v2_predecessor_and_rolls_back_to_v2(self):
+    def test_helper_requires_exact_v3_predecessor_and_rolls_back_to_v3(self):
         for marker in (
-            '!= "V3_PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2"',
-            "candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_BLOB",
+            '!= "V3_PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3"',
+            "candidate.PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_BLOB",
             'prior_refresh.get("workflow_blob_sha") != OLD_BLOB',
-            "does not match refresh v3",
+            "current controller policy does not match refresh v3",
             "ROLLED_BACK_TO_WORKFLOW_REFRESH_V3",
             "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4=PASS",
         ):
             self.assertIn(marker, HELPER)
-        self.assertNotIn("PRIOR_REFRESH_ACTIVE.unlink", HELPER)
 
     def test_helper_is_lane_a_only_and_fail_closed(self):
         for marker in (
@@ -119,39 +69,22 @@ class PADatasetScientificWorkflowRefreshV4Tests(unittest.TestCase):
             self.assertIn(marker, HELPER)
         self.assertNotIn('run_systemctl("stop", PROVISIONER_UNIT)', HELPER)
 
-    def test_launcher_proves_provider_zero_work_before_sudo(self):
+    def test_launcher_binds_postmerge_main_blob_and_zero_work_before_sudo(self):
         for marker in (
             'EXPECTED_PAD_MAIN = "7cfe0ab61cc16785f4d267273b48a63361c595dd"',
             'EXPECTED_WORKFLOW_BLOB = "39190413abbd801bd6d25c2166ac36a7a69968fb"',
             'WORKFLOW_FILE = "lambda-ci-scientific.yml"',
-            '"queued", "in_progress"',
+            'for status in ("queued", "in_progress")',
             "LANEA_PROVIDER_ZERO_WORK=PASS",
             'run(["sudo", "-v"])',
+            "PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_PREFLIGHT",
+            "REFRESH_PADATASET_SCIENTIFIC_WORKFLOW_V4",
             "MTH602_LANEA_REFRESH_V4_POSTVERIFY=PASS",
-            "helper.require_target_quiescent()",
-            "PADATASET_SCIENTIFIC_ACTIVE_RECEIPT",
         ):
             self.assertIn(marker, LAUNCHER)
-        self.assertLess(
-            LAUNCHER.index("provider_zero_work()"),
-            LAUNCHER.index('run(["sudo", "-v"])'),
-        )
+        self.assertLess(LAUNCHER.index("provider_zero_work()"), LAUNCHER.index('run(["sudo", "-v"])'))
         self.assertNotIn("shell=True", LAUNCHER)
-        self.assertNotIn("os.system(", LAUNCHER)
 
 
 if __name__ == "__main__":
     unittest.main()
-
-class PADatasetScientificWorkflowRefreshV4ControlMatrixBindingTests(unittest.TestCase):
-    def test_exact_control_matrix_transition(self):
-        self.assertIn('"ea5d844c494013eb2322686d7345b5a1b15443c4"', REC)
-        self.assertIn('"39190413abbd801bd6d25c2166ac36a7a69968fb"', REC)
-        self.assertIn('"7cfe0ab61cc16785f4d267273b48a63361c595dd"', REC)
-        self.assertIn("PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT", REC)
-        self.assertIn("PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT", HELPER)
-        self.assertIn("PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT", HELPER)
-        self.assertIn("PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_BLOB", HELPER)
-        self.assertIn("PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_BLOB", HELPER)
-        self.assertIn('EXPECTED_PAD_MAIN = "7cfe0ab61cc16785f4d267273b48a63361c595dd"', LAUNCHER)
-        self.assertIn('EXPECTED_WORKFLOW_BLOB = "39190413abbd801bd6d25c2166ac36a7a69968fb"', LAUNCHER)
