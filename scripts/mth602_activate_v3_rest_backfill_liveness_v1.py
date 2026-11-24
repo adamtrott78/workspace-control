@@ -42,16 +42,52 @@ def exact_repo(repo_root: pathlib.Path, expected_head: str) -> pathlib.Path:
     return root
 
 
-def find_go() -> str:
+def find_go(repo_root: pathlib.Path) -> str:
+    module = repo_root / "controller" / "lambda-ci-controller"
     candidates = [
-        shutil.which("go"),
+        shutil.which("go1.26.3"),
+        shutil.which("go1.26"),
         "/usr/local/go/bin/go",
+        shutil.which("go"),
         "/usr/bin/go",
     ]
+    seen: set[str] = set()
+    failures: list[str] = []
     for candidate in candidates:
-        if candidate and pathlib.Path(candidate).is_file():
-            return str(pathlib.Path(candidate).resolve())
-    raise RuntimeError("Go compiler not found")
+        if not candidate:
+            continue
+        path = str(pathlib.Path(candidate).resolve())
+        if path in seen or not pathlib.Path(path).is_file():
+            continue
+        seen.add(path)
+        version = subprocess.run(
+            [path, "version"],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        label = (version.stdout or version.stderr).strip()
+        probe = subprocess.run(
+            [path, "-C", str(module), "list", "-m"],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env={**os.environ, "GOTOOLCHAIN": "local"},
+            check=False,
+        )
+        if probe.returncode == 0:
+            print(f"GO_TOOLCHAIN_SELECTED={path}")
+            print(f"GO_TOOLCHAIN_VERSION={label}")
+            return path
+        failures.append(
+            f"{path}: {label or 'version unavailable'}: "
+            f"{probe.stderr.strip()[-512:] or 'module probe failed'}"
+        )
+    raise RuntimeError(
+        "no installed Go compiler can parse the exact controller module; "
+        + " | ".join(failures)
+    )
 
 
 def root_phase(repo_root: pathlib.Path, expected_head: str) -> None:
@@ -79,7 +115,7 @@ def root_phase(repo_root: pathlib.Path, expected_head: str) -> None:
 
     current_binary = repair.CONTROLLER_BINARY.read_bytes()
     current_sha = repair.sha(current_binary)
-    go_bin = find_go()
+    go_bin = find_go(root)
     candidate_binary = repair.build_candidate(root, go_bin)
     candidate_sha = repair.sha(candidate_binary)
 
