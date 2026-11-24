@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e2-v0.1",
-  "status": "IMPLEMENTATION_CANDIDATE",
+  "status": "C1_PASS_C2_NEXT",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "e1_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.4.json",
@@ -29,12 +29,31 @@
         "replacement worker result completes",
         "a second fresh coordinator observes COMPLETED state",
         "no chat transcript is persisted in the durable graph"
-      ]
+      ],
+      "status": "PASS",
+      "validation": {
+        "head": "ff50eb53433b34e848a944a9ac976a173301cabb",
+        "workspace_control_run": 3195,
+        "semantic_execution_run": 498,
+        "operator_bridge_run": 768,
+        "result": "SUCCESS"
+      },
+      "observed": {
+        "process_generation_advanced": "0->1",
+        "session_generation_advanced": "0->1",
+        "old_operator_action_staled": true,
+        "late_old_candidate_rejected_without_mutation": true,
+        "orchestrator_runtime_reinstantiated": true,
+        "durable_state_rehydrated_without_chat_memory": true,
+        "replacement_session_completed": true,
+        "final_fresh_rehydration_completed": true,
+        "manual_state_relay": false
+      }
     },
     {
       "id": "E2-C2",
       "name": "PostgreSQL restart canary",
-      "status": "NEXT_AFTER_C1",
+      "status": "IMPLEMENT_NEXT",
       "objective": "Repeat the same recovery sequence across fresh PostgreSQL-backed application instances so recovery is proven across process boundaries rather than only object replacement."
     },
     {
