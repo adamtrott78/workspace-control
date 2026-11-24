@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e1-authority-v0.4",
-  "status": "PENDING_OPERATOR_WOP_E1_RETRY_EXECUTION",
+  "status": "CONSUMED_PASS_E1_V04_POSTSUCCESS_WRAPPER_FALSE_NEGATIVE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Authorize exactly one new corrected E1 live attempt after closing the consumed v0.3 runtime-staging failure and validating the live Semantic Execution staging repair.",
   "approval_basis": {
@@ -75,8 +75,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "no_silent_retry": true,
     "live_consumption_marker": "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "abort_before_marker_does_not_consume_live_attempt": true,
@@ -115,5 +115,88 @@
     "branch_must_remain_at_authority_commit_before_launch": true,
     "wop_driver_refresh_required_once": true
   },
-  "postcondition": "Exactly one new corrected E1 live attempt. Once E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS appears, success or failure consumes this authority and any further live attempt requires a new diagnosis/review/approval/authority cycle."
+  "postcondition": "Exactly one new corrected E1 live attempt. Once E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS appears, success or failure consumes this authority and any further live attempt requires a new diagnosis/review/approval/authority cycle.",
+  "live_closeout": {
+    "observed_date": "2026-11-24",
+    "result": "PASS",
+    "mission_id": "research-iterate-e1:c6c0a0e54d9e4a8fa57259910c610579",
+    "candidate_chain": {
+      "baseline": "5bcd6df3aac855a181c02effa2189b3b5706a1c7",
+      "root_decompose": "38c396d4b65b179a131a9c03e10c25c85dd893df",
+      "analysis": "e33b855c790a0fd2be807fe48d19c8bdd46e5fd1",
+      "workspace_shell": "d9132e55741f89eaa84ea5a659126ebc89fcf802",
+      "synthesis": "fdb801d895068c78b2e2e11e6984173812884deb",
+      "append_only": true
+    },
+    "mission_report": {
+      "schema": "workspace-semantic-research-iterate-e1.v1",
+      "result": "PASS",
+      "root_decomposition": true,
+      "supervisor_s1_fresh_store_rehydration": true,
+      "supervisor_s1_read_only_projection": true,
+      "child_contract_inheritance": true,
+      "deterministic_exact_source": true,
+      "instant_analysis": true,
+      "workspace_shell_read_only_probe": true,
+      "workspace_shell_literal_prefix": "@Workspace Shell",
+      "github_literal_prefix": "@github",
+      "workspace_shell_exec_used": false,
+      "workspace_shell_reviewed_helper_used": false,
+      "fanin": true,
+      "instant_synthesis": true,
+      "manual_durable_state_relay": false,
+      "browser_page_content_scraping": false,
+      "automatic_typing_or_submission": false,
+      "paid_api_fallback": false,
+      "routing_trace": [
+        "openai-chat-instant-current",
+        "research-engine-exact-source-read",
+        "openai-chat-instant-current",
+        "openai-chat-instant-current",
+        "openai-chat-instant-current"
+      ]
+    },
+    "supervisor_final": {
+      "mission_state": "COMPLETED",
+      "process_state_counts": {
+        "COMPLETED": 4
+      },
+      "authority_mutations": 0,
+      "conversation_memory_authoritative": false,
+      "pending_human_judgment_decisions": 0,
+      "unresolved_processes": []
+    },
+    "workspace_shell_proof": {
+      "candidate": "d9132e55741f89eaa84ea5a659126ebc89fcf802",
+      "executor_id": "openai-chat-instant-current",
+      "session_generation": 0,
+      "evidence_refs": [
+        "e1:workspace-shell:c6c0a0e54d9e",
+        "workspace-shell:mcp-transport:HTTPS_MTLS_REQUIRED",
+        "workspace-shell:uids:41010:41010:41011:41012",
+        "workspace-shell:launcher-socket:1:660:0:41010",
+        "workspace-shell:broker-socket:1:660:0:41010",
+        "workspace-shell:receipt-root:1:750:0:41010"
+      ],
+      "write_capable_workspace_shell_used": false
+    },
+    "cleanup": {
+      "tailscale_existing_config_exactly_restored": true,
+      "jupyter_root_rollback_preserved": true,
+      "private_route_transaction_pass": true,
+      "firefox_shutdown_graceful": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true,
+      "windows_cleanup": true
+    },
+    "launcher_false_negative": {
+      "observed": "E1_WOP_REMOTE_EXIT_AFTER_ROUTE_LOSS:",
+      "occurred_after_mission_pass_and_cleanup": true,
+      "classification": "POSTSUCCESS_SSH_EXITCODE_OBSERVATION_RACE",
+      "invalidates_e1": false,
+      "repair": "Persist the cmd/ssh exit code to a local sentinel file and consume that bounded durable value after route teardown instead of relying only on Process.ExitCode."
+    },
+    "disposition": "E1_ACCEPTED_ADVANCE_TO_E2_RECOVERY"
+  }
 }

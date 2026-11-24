@@ -19,7 +19,31 @@ $tempRoot = Join-Path $env:TEMP ("workspace-control-e1-" + [guid]::NewGuid().ToS
 $frontendReady = Join-Path $tempRoot "frontend-ready.txt"
 $frontendLog = Join-Path $tempRoot "frontend.log"
 $sshBatch = Join-Path $tempRoot "run-ssh.cmd"
+$sshExitFile = Join-Path $tempRoot "ssh-exit-code.txt"
 $sshProcess = $null
+
+function Get-E1RecordedSshExitCode {
+  param(
+    [Parameter(Mandatory=$true)]
+    [string]$Path,
+    [int]$TimeoutMilliseconds = 2000
+  )
+
+  $deadline = (Get-Date).AddMilliseconds($TimeoutMilliseconds)
+  do {
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
+      $raw = (Get-Content -LiteralPath $Path -Raw).Trim()
+      $parsed = 0
+      if ([int]::TryParse($raw, [ref]$parsed)) {
+        return $parsed
+      }
+      throw "E1_SSH_EXIT_CODE_INVALID:$raw"
+    }
+    Start-Sleep -Milliseconds 50
+  } while ((Get-Date) -lt $deadline)
+
+  throw "E1_SSH_EXIT_CODE_UNAVAILABLE"
+}
 
 function Get-E1BackendStatus {
   param(
@@ -100,7 +124,9 @@ try {
   $sshBatchText = @"
 @echo off
 "$ssh" -tt "$SshTarget" "$remoteCommand"
-exit /b %ERRORLEVEL%
+set "WORKSPACE_E1_SSH_RC=%ERRORLEVEL%"
+> "$sshExitFile" echo %WORKSPACE_E1_SSH_RC%
+exit /b %WORKSPACE_E1_SSH_RC%
 "@
   Set-Content -LiteralPath $sshBatch -Value $sshBatchText -Encoding ASCII
 
@@ -183,11 +209,12 @@ exit /b %ERRORLEVEL%
         if ($sshProcess.HasExited) {
           $sshProcess.WaitForExit()
           $sshProcess.Refresh()
-          if ($sshProcess.ExitCode -eq 0) {
+          $recordedExitCode = Get-E1RecordedSshExitCode -Path $sshExitFile
+          if ($recordedExitCode -eq 0) {
             Write-Host "E1_EXPECTED_POSTSUCCESS_ROUTE_TEARDOWN=PASS"
             break
           }
-          throw "E1_WOP_REMOTE_EXIT_AFTER_ROUTE_LOSS:$($sshProcess.ExitCode)"
+          throw "E1_WOP_REMOTE_EXIT_AFTER_ROUTE_LOSS:$recordedExitCode"
         }
 
         throw ("E1_OPERATOR_BACKEND_ROUTE_LOST:" + $routeLossMessage)
@@ -197,7 +224,7 @@ exit /b %ERRORLEVEL%
   }
   $sshProcess.WaitForExit()
   $sshProcess.Refresh()
-  $sshExitCode = $sshProcess.ExitCode
+  $sshExitCode = Get-E1RecordedSshExitCode -Path $sshExitFile
   if ($sshExitCode -ne 0) { throw "E1_WOP_REMOTE_EXIT:$sshExitCode" }
   Write-Host "E1_WOP_REMOTE_WORKFLOW=PASS"
 }

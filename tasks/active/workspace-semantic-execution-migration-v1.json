@@ -882,9 +882,22 @@
             "Candidate history advanced append-only through 6eeaf5ab..., f3f6d1e6..., 8aacc7ee... while source/authority state stayed isolated.",
             "Private-route rollback and Windows cleanup passed; the final WOP exit was a post-success teardown polling race repaired at 8237e549...."
           ]
+        },
+        {
+          "check": "E1 integrated Research-Iterate production-like proving workflow",
+          "result": "PASS",
+          "evidence": [
+            "Authority 20b8b5e43889f0aab870c571c94bee58dbc8a2e7 reached E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS and the final mission report returned workspace-semantic-research-iterate-e1.v1 result=PASS.",
+            "Root decomposition, Supervisor S1 fresh-store rehydration, inherited child contracts, deterministic exact Research Engine source read, Instant analysis, literal @Workspace Shell + @github read-only probe, fan-in, and Instant synthesis all passed.",
+            "Candidate history advanced append-only from 5bcd6df3... through root 38c396d4..., analysis e33b855c..., Workspace Shell d9132e55..., and synthesis fdb801d8....",
+            "Workspace Shell evidence matched the hidden runtime_inventory validator values; workspace_shell_exec and reviewed-helper paths were not used.",
+            "Final Supervisor projection reported mission_state=COMPLETED, four COMPLETED processes, zero unresolved processes, zero pending human decisions, conversation memory non-authoritative, and zero authority mutations.",
+            "Tailscale configuration/Jupyter root were restored and Windows runtime/workdir/operator cleanup all passed.",
+            "The final WOP exit was a post-success SSH exit-code observation race after the mission PASS and cleanup; it does not invalidate E1 and is repaired in the following source checkpoint."
+          ]
         }
       ],
-      "resume_condition": "Corrected D4 is accepted. Proceed to E1 mixed routing/fan-in/synthesis with a harmless read-only Workspace Shell probe and Supervisor S1; keep E2 recovery and E3 resource/soak separate."
+      "resume_condition": "E1 is accepted. Proceed to E2 deliberate worker/session/process loss with durable recovery; keep E3 resource accounting/soak separate."
     }
   ],
   "checkpoints": [

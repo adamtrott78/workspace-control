@@ -84,3 +84,12 @@ def test_e1_runtime_archives_repaired_semantic_execution() -> None:
     assert 'EXPECTED_PACKET_COMPILER_BLOB="cf6200aa4b5a669dd023bc3c6478770bf4658528"' in text
     assert "LIVE_SEMANTIC_PACKET_COMPILER_BLOB_MISMATCH" in text
     assert 'git -C "$ROOT" archive "$SEMANTIC_SHA" semantic-execution' in text
+
+
+def test_e1_windows_launcher_records_ssh_exit_code_for_teardown() -> None:
+    text = WOP.read_text(encoding="utf-8")
+    assert '$sshExitFile = Join-Path $tempRoot "ssh-exit-code.txt"' in text
+    assert "WORKSPACE_E1_SSH_RC=%ERRORLEVEL%" in text
+    assert "Get-E1RecordedSshExitCode -Path $sshExitFile" in text
+    assert "E1_SSH_EXIT_CODE_UNAVAILABLE" in text
+    assert 'throw "E1_WOP_REMOTE_EXIT_AFTER_ROUTE_LOSS:$recordedExitCode"' in text
