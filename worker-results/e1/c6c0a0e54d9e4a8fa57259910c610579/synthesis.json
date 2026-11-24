@@ -1,0 +1,22 @@
+{
+  "publication_id": "worker-result:action:e1:c6c0a0e54d9e4a8fa57259910c610579:synthesis:0",
+  "action_id": "action:e1:c6c0a0e54d9e4a8fa57259910c610579:synthesis",
+  "action_generation": 0,
+  "process_id": "research-iterate-e1:c6c0a0e54d9e4a8fa57259910c610579",
+  "process_generation": 0,
+  "executor_id": "openai-chat-instant-current",
+  "worker_slot_id": "e1-instant-slot:c6c0a0e54d9e4a8fa57259910c610579",
+  "session_generation": 0,
+  "packet_sha256": "dcc53de5bddb882f811c516016026c35f16360e68be991dd3ca90fdf8ace651b",
+  "kind": "RESULT",
+  "observed_at": "2026-11-24T22:42:06.869Z",
+  "result_payload_ref": "e1://c6c0a0e54d9e4a8fa57259910c610579/synthesis/result",
+  "result_payload_sha256": "154da99db06ef7248fd5713a5072c480ae26302f21ec7089d86e3938b233e8c3",
+  "evidence_refs": [
+    "e1://c6c0a0e54d9e4a8fa57259910c610579/analysis/result",
+    "e1://c6c0a0e54d9e4a8fa57259910c610579/workspace-shell/runtime-inventory",
+    "e1:synthesis:c6c0a0e54d9e",
+    "repo://adamtrott78/research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4/src/research_engine/orchestration.py",
+    "repo:adamtrott78/research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4:src/research_engine/orchestration.py:blob=0d051fa50960708e0e773f6871c7e924c5796394:effect_sha256=2d97317862c6101ad578421c5504fe5a76e29f39584adcd89f351a837c857aa7"
+  ]
+}
