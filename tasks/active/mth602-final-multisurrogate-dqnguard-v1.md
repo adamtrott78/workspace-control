@@ -36,15 +36,15 @@ Execute a rigorous MTH602-to-journal research program centered on backbone compe
 
 ## Next safe action
 
-Validate PADataset PR #54 exact binding head f1256048b51fd863ad3fb46f9c547eff401016e7 using available CI/contract evidence. If valid and no duplicate PA3-PA8 directional admissions exist, admit exactly PA3<-PA8 and PA8<-PA3 under unchanged standard-DQNGuard policy using artifact 14880924639. In parallel continue frozen Rule A/B/C plus retrospective confusion-exclusion analysis. Do not alter the accepted backbone or use OSR evidence for training/checkpoint/retry selection.
+Monitor exactly PA3<-PA8 run 45434894477/job 138589906286 and PA8<-PA3 run 45434902484/job 138589937033, serialized on lane A. Do not duplicate either admission. Collect and validate both result_record.json artifacts at terminal SUCCESS to close the 20/20 matrix. While they run, continue read-only Rule A/B/C replication and retrospective confusion-exclusion analysis.
 
 ## Remaining work
 
-- Validate PR #54 binding head f1256048b51fd863ad3fb46f9c547eff401016e7 and admit exactly the two final post-freeze OSRs PA3<-PA8 and PA8<-PA3; do not duplicate.
-- Collect the two final result records and complete the 20/20 directional t007 OSR matrix.
-- Complete the frozen surrogate-selector replication: Rule A guard-score calibration recall, Rule B confidence geometry (P1, P1-P2 gap, entropy), Rule C feature geometry (centroid distance/margin), plus retrospective confusion-exclusion diagnostics.
+- Monitor only PA3<-PA8 run 45434894477/job 138589906286 and PA8<-PA3 run 45434902484/job 138589937033; no duplicate admissions.
+- At terminal SUCCESS, validate both result artifacts and append the final two U-F1/AUROC/K-REJ cells to the 20/20 t007 matrix.
+- Complete the frozen surrogate-selector replication: Rule A guard-score calibration recall, Rule B confidence geometry, Rule C feature geometry, plus retrospective confusion-exclusion diagnostics.
 - Report raw and target-centered correlations, within-target ranking, top-1/top-2 accuracy, oracle regret, and distinguish deployable target-blind rules from target-observing retrospective diagnostics.
-- Preserve all scientific invariants: the PA3-PA8 backbone is frozen from known-validation only; target/test/OSR evidence cannot rewrite training/checkpoint/retry history.
+- Preserve the frozen PA3-PA8 backbone and all known-validation-only selection invariants.
 
 ## Blockers / gates
 
