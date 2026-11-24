@@ -1,19 +1,72 @@
 <!-- workspace-control:derived-task-handoff -->
 # Workspace Control Task Handoff
 
-Derived human-readable view. Authoritative capsule: `tasks/active/workspace-semantic-execution-migration-v1.json`.
+Derived human-readable view.
+
+Authoritative capsule: tasks/active/workspace-semantic-execution-migration-v1.json
 
 If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
 
-## Current state
+## Task
 
-- Task: `workspace-semantic-execution-migration-v1`
-- Status: **IN_PROGRESS**
-- Current stage: **November Integrated v0 delivery**
-- E1: **PASS**
-- E2: **PASS**
-- E2 closeout head: `090155abc1c943e629d2a9fa1e74c6cf2c8927f4`
-- E2 final candidate head: `6115b48dfdf4a4954b3b1626598f897e4e71eeec`
+- ID: workspace-semantic-execution-migration-v1
+- Title: Workspace Semantic Execution Migration v1
+- Status: IN_PROGRESS
+- Capsule schema: v2
+
+## Goal
+
+Design, benchmark, and incrementally migrate Workspace Control to an open-world semantic execution architecture that preserves current research, engineering, tutoring, publication, presentation, document, data-science, and operations workflows while minimizing scarce frontier-model allowance through deterministic execution, resumable Instant/local reasoning, bounded context, capability-aware routing, and explicit escalation—without weakening project-local truth, provenance, authority, GitRunner/Workspace Shell security, or rollback.
+
+## Workflow
+
+- Repository: workspace-control
+- Path: workflows/evidence-first-solution-research.v1.json
+- Checkpoint: d47a7922aa8d47d3a22b55c19ce4d6af7309a964
+
+## Repositories
+
+### workspace-control
+
+- Intent: mutate
+- Remote branch: workspace-semantic-execution-migration-v1
+- Remote checkpoint: 090155abc1c943e629d2a9fa1e74c6cf2c8927f4
+- Remote verified: true
+
+### PADataset
+
+- Intent: read
+- Remote branch: main
+- Remote checkpoint: a8f952c7cf964730a01b2dc5c6cd75850912f94f
+- Remote verified: true
+
+### research-engine
+
+- Intent: read
+- Remote branch: main
+- Remote checkpoint: 1031861c03b2af8cff5cf72939bbbc83a95e65a4
+- Remote verified: true
+
+### MTH602-AdamTrott
+
+- Intent: read
+- Remote branch: hw3-exam1-prep
+- Remote checkpoint: 747e49fb9219b949e0b0e9d15860a766fbcb1f23
+- Remote verified: true
+
+### EAS501-AdamTrott
+
+- Intent: read
+- Remote branch: eas501-tutor-bootstrap
+- Remote checkpoint: b2b390d042d539165f140821a3080dc4e5a82001
+- Remote verified: true
+
+### CIS560-AdamTrott
+
+- Intent: read
+- Remote branch: tutor-framework
+- Remote checkpoint: aba8c2e87dd4bb50ba414206270f592e8ca841a4
+- Remote verified: true
 
 ## Next safe action
 
@@ -30,7 +83,7 @@ E3 RESOURCE/ACCOUNTING + SOAK. E1 and E2 are accepted and must not be redone abs
 - E7: reconcile every November acceptance-matrix requirement to PASS or explicit promotion blocker.
 - E8: record explicit integrated PROMOTE_V0 / HOLD / REVISE verdict.
 
-## Current gates
+## Blockers / gates
 
 - E3 LIVE AUTHORITY: none exists. Repository-only E3-C1/C2 work may proceed; any live E3 run requires a separately frozen review and fresh explicit operator approval.
 - E4 ECONOMICS: claim-bearing comparison remains gated on calibrated comparable allowance telemetry; do not substitute raw token estimates or uncalibrated UI observations.
@@ -38,14 +91,13 @@ E3 RESOURCE/ACCOUNTING + SOAK. E1 and E2 are accepted and must not be redone abs
 ## Fresh-chat initialization
 
 @GitHub
-@Workspace Shell
 
-Continue the durable workspace-control task `workspace-semantic-execution-migration-v1`.
+https://github.com/adamtrott78/workspace-control
 
-Read:
-- `tasks/active/workspace-semantic-execution-migration-v1.json`
-- `architecture/workspace-semantic-execution-research-iterate-e2-live-closeout.v0.2.json`
-- `architecture/workspace-semantic-execution-research-iterate-e3.v0.1.json`
-- `architecture/workspace-semantic-execution-post-e2-executor-handoff.v0.1.md`
+Continue the durable workspace-control task defined by:
+Task capsule: tasks/active/workspace-semantic-execution-migration-v1.json
 
-Recover the exact current Git head first. Do not redo D4/E1/E2. Begin with E3-C1 repository-safe resource observer/accounting work.
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
+Follow the capsule's next_safe_action.
