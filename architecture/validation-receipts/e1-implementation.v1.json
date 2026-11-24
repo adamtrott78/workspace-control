@@ -1,25 +1,25 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
-  "status": "VALIDATED_E1_RETRY_BASELINE_BINDING_REPAIR",
-  "validated_head": "4fbc3bf695d9ffa2b8533a26b8ee20946f14fb59",
+  "status": "VALIDATED_E1_RUNTIME_SEMANTIC_STAGING_REPAIR",
+  "validated_head": "e6fdd3527506f13b1181201a80a0b1f170dced74",
   "validation_runs": {
     "semantic_execution": {
       "workflow_name": "Semantic Execution Validation",
-      "run_id": 45497661314,
-      "run_number": 491,
+      "run_id": 45499105550,
+      "run_number": 494,
       "conclusion": "success"
     },
     "operator_bridge": {
       "workflow_name": "Operator Bridge Validation",
-      "run_id": 45497661682,
-      "run_number": 761,
+      "run_id": 45499105701,
+      "run_number": 764,
       "conclusion": "success"
     },
     "workspace_control": {
       "workflow_name": "Workspace Control Validation",
-      "run_id": 45497661518,
-      "run_number": 3188,
+      "run_id": 45499105537,
+      "run_number": 3191,
       "conclusion": "success"
     }
   },
@@ -87,13 +87,17 @@
     "prefix_repair_present": true,
     "foreground_patch_reverted": true,
     "cross_domain_inheritance_hardened": true,
-    "workspace_control_run": 3188,
-    "semantic_execution_run": 491,
-    "operator_bridge_run": 761,
+    "workspace_control_run": 3191,
+    "semantic_execution_run": 494,
+    "operator_bridge_run": 764,
     "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
     "baseline_binding_repair_head": "4fbc3bf695d9ffa2b8533a26b8ee20946f14fb59",
     "launcher_candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
     "private_route_blob": "24d02a9e7242da08a57478d847ffb8149c73907f",
-    "candidate_branch_observed": "705ac86d8a95e210ada81747bcc7fc22983928c3"
+    "candidate_branch_observed": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "runtime_semantic_staging_repair_head": "e6fdd3527506f13b1181201a80a0b1f170dced74",
+    "runtime_semantic_sha": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "runtime_packet_compiler_blob": "cf6200aa4b5a669dd023bc3c6478770bf4658528",
+    "next_candidate_baseline": "5bcd6df3aac855a181c02effa2189b3b5706a1c7"
   }
 }
