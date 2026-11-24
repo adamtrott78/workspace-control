@@ -36,18 +36,19 @@ Execute a rigorous MTH602-to-journal research program centered on backbone compe
 
 ## Next safe action
 
-Matched control design is frozen and validated at PADataset draft PR #56 head d955a244f7cfd8bfd6cbc4e5ca9ba9c38a23a82d. Next implement the bounded control evaluator/request path against that exact frozen plan, preserving DQN-IDS-style softmax3 hard-action semantics with 625 known + 625 external-surrogate validation and historical VarMax surrogate_all+smoke semantics. Validate the implementation and all 20 requests before any control admission; do not retrain backbones or use target/test/OSR evidence for fitting, method selection, retry policy, or control redefinition.
+Promote PADataset draft PR #57 only through the normal default-branch review/merge path. After merge, record the exact resulting PADataset main SHA and verify workflow blobs lane A=39190413abbd801bd6d25c2166ac36a7a69968fb and lane B=6753795041090a5331a80354f59945be006ac889. Then freeze and validate chained Workspace Control trust-refresh helpers from the live predecessors lane A ea5d844c494013eb2322686d7345b5a1b15443c4 and lane B 8375dd0a0733b01de38f677dee58a373d3adcb48, perform zero-work/root activation, and only after both controllers trust the new blobs admit the 20 PR #56 control requests exactly once. Do not admit controls before that authority transition.
 
 ## Remaining work
 
-- Implement and validate the bounded matched-control evaluator/request path frozen by PADataset PR #56. DQN-IDS-style must use the external-surrogate validation split, never target-open; VarMax must remain historical surrogate-all and must not consume the external surrogate.
-- Execute the matched control matrix only after implementation/request validation closes, then report per-cell/aggregate DQNGuard-minus-control deltas rather than comparing repaired DQNGuard against paper-era control numbers.
-- Execute final multi-seed robustness only after the control matrix closes: repeat the frozen backbone/method recipes across the predetermined seed set, report mean/std and confidence intervals, surrogate-winner frequency, oracle-regret distributions, same-backbone directional asymmetry stability, and whether Rule A/B/C/confusion-exclusion relationships survive seeds.
-- Complete final scientific synthesis comparing paper-era versus repaired geometry, matched controls, and seeded robustness without allowing post-hoc target/test evidence to rewrite training/checkpoint/threshold history.
+- Production-promote PADataset PR #57, then freeze exact lane-A/lane-B trusted-workflow refreshes against the resulting default-branch SHA and activate them only at a zero-work root gate.
+- After both scientific controllers trust the promoted l2o_control_eval workflows, admit the 20 immutable PR #56 control requests exactly once across the two GPU lanes and close the matched DQN-IDS-style + VarMax control matrix.
+- Report DQNGuard-minus-control per-cell deltas, aggregate means/uncertainty, target-level and unordered-pair effects, and geometry concentration only after all matched control cells close.
+- Execute final multi-seed robustness after the control matrix: frozen seed set, mean/std/confidence intervals, surrogate winner frequency, oracle-regret distributions, Rule A/B/C/confusion-exclusion stability, directional asymmetry stability, and DQNGuard-minus-control stability.
+- Complete final synthesis without allowing control/seed target-test evidence to rewrite frozen backbones, checkpoints, thresholds, control semantics, selectors, or retry policy.
 
 ## Blockers / gates
 
-- None.
+- Production authority gate: PADataset PR #57 is validated but still draft/unmerged. Exact resulting main SHA does not exist yet, so chained root trusted-workflow refresh authority cannot be frozen safely. No control admission is authorized before merge + exact blob/main binding + zero-work root activation.
 
 ## Fresh-chat initialization
 
