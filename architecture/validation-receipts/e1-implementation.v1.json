@@ -1,25 +1,25 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
-  "status": "VALIDATED_IMPLEMENTATION_ALL_DOMAINS_INHERITABLE",
-  "validated_head": "483ea625242ae6dcc5cb92bed11e234ca994ec6a",
+  "status": "VALIDATED_E1_PREFIX_REPAIR_IMPLEMENTATION",
+  "validated_head": "121a7151fa386fddb25e0244538394bef35c5c08",
   "validation_runs": {
     "semantic_execution": {
       "workflow_name": "Semantic Execution Validation",
-      "run_id": 45489127632,
-      "run_number": 480,
+      "run_id": 45492866075,
+      "run_number": 483,
       "conclusion": "success"
     },
     "operator_bridge": {
       "workflow_name": "Operator Bridge Validation",
-      "run_id": 45489127436,
-      "run_number": 751,
+      "run_id": 45492866172,
+      "run_number": 753,
       "conclusion": "success"
     },
     "workspace_control": {
       "workflow_name": "Workspace Control Validation",
-      "run_id": 45489127622,
-      "run_number": 3178,
+      "run_id": 45492866227,
+      "run_number": 3180,
       "conclusion": "success"
     }
   },
@@ -80,8 +80,10 @@
     "receipt_or_script_parse_failure_falls_back_to_full_validation": true
   },
   "proof": {
-    "full_validation_completed_at_head": "483ea625242ae6dcc5cb92bed11e234ca994ec6a",
-    "all_three_domains_bound": true,
-    "next_metadata_only_commit_expected_to_inherit": true
+    "e1_prefix_repair_full_validation": true,
+    "workspace_control_run": 3180,
+    "semantic_execution_run": 483,
+    "operator_bridge_run": 753,
+    "candidate_head": "705ac86d8a95e210ada81747bcc7fc22983928c3"
   }
 }
