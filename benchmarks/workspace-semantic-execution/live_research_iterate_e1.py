@@ -1,0 +1,1187 @@
+#!/usr/bin/env python3
+"""Live integrated Research-Iterate E1 proving harness.
+
+The harness uses the reviewed Operator Bridge for human-assisted ChatGPT
+Instant actions, a deterministic exact-source reader for the frozen Research
+Engine source, and one harmless read-only Workspace Shell capability probe.
+It never reads ChatGPT page content and never automates typing/submission.
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+from urllib.parse import quote
+import uuid
+
+ROOT = Path(__file__).resolve().parents[2]
+SRC = ROOT / "semantic-execution" / "src"
+sys.path.insert(0, str(SRC))
+
+from workspace_semantic_execution.adapters import (  # noqa: E402
+    FakeClock,
+    ImmutableWorkerResultCandidate,
+    PostgresEventLedger,
+    PostgresStateStore,
+    ReadOnlyRepositoryExecutor,
+    RecordingTelemetry,
+    RepositoryReadPostconditionValidator,
+    StaticAuthorityEvaluator,
+    StaticRepositoryReader,
+    WorkerResultCandidateAdapter,
+)
+from workspace_semantic_execution.application import (  # noqa: E402
+    ExecutorDispatchCoordinator,
+    ExecutorDispatchRequest,
+    ExecutorRegistry,
+    FindingRecord,
+    OperatorDispatchParameters,
+    PacketCompilationInput,
+    PersistentExecutorSessionBroker,
+    RuntimeCoordinator,
+    SemanticPacketCompiler,
+    TaskTreeCoordinator,
+    WorkerResultIntakeService,
+    openai_chat_instant_current_profile,
+)
+from workspace_semantic_execution.domain import (  # noqa: E402
+    AuthorityDecision,
+    AuthorityOutcome,
+    CandidateAction,
+    DomainKernel,
+    ExecutionRequirement,
+    ExecutorAvailability,
+    ExecutorLifecycle,
+    ExecutorLocality,
+    ExecutorProfile,
+    InvocationMode,
+    MemoryResetPolicy,
+    OperatorActionState,
+    PrivacyClass,
+    ProcessState,
+    SessionMode,
+    ValidationResult,
+    WorkContract,
+)
+from workspace_semantic_execution.operator_bridge_server import (  # noqa: E402
+    OperatorBridgeServerConfig,
+    build_operator_bridge_server,
+)
+from workspace_semantic_execution.ports import (  # noqa: E402
+    RepositoryFileObservation,
+)
+
+PROFILE = openai_chat_instant_current_profile()
+VALIDATOR_ID = "validator:research-iterate-e1-live-v1"
+CANDIDATE_REPOSITORY = "adamtrott78/workspace-control"
+CANDIDATE_REF = "refs/heads/worker-result-candidates-v1"
+CANDIDATE_BRANCH = "worker-result-candidates-v1"
+REPO_URL = "https://github.com/adamtrott78/workspace-control.git"
+GITHUB_PLUGIN_MENTION = "@github"
+WORKSPACE_SHELL_PLUGIN_MENTION = "@Workspace Shell"
+
+RESEARCH_ENGINE_SHA = "1031861c03b2af8cff5cf72939bbbc83a95e65a4"
+SOURCE_BLOB_SHA = "0d051fa50960708e0e773f6871c7e924c5796394"
+SOURCE_PATH = "src/research_engine/orchestration.py"
+SOURCE_TARGET = (
+    "repo://adamtrott78/research-engine@"
+    f"{RESEARCH_ENGINE_SHA}/{SOURCE_PATH}"
+)
+FROZEN_SOURCE = (
+    ROOT
+    / "benchmarks"
+    / "workspace-semantic-execution"
+    / "backend"
+    / "research-engine-1031861"
+    / "orchestration.py"
+)
+SHELL_EXPECTED_EVIDENCE = frozenset(
+    {
+        "workspace-shell:mcp-transport:HTTPS_MTLS_REQUIRED",
+        "workspace-shell:uids:41010:41010:41011:41012",
+        "workspace-shell:launcher-socket:1:660:0:41010",
+        "workspace-shell:broker-socket:1:660:0:41010",
+        "workspace-shell:receipt-root:1:750:0:41010",
+    }
+)
+
+
+def _required_env(name: str) -> str:
+    value = os.environ.get(name, "")
+    if not value:
+        raise RuntimeError(f"{name}:required")
+    return value
+
+
+def _sha256_text(value: str) -> str:
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _candidate_target(path: str) -> str:
+    return (
+        f"github-candidate://{CANDIDATE_REPOSITORY}/"
+        f"ref/{quote(CANDIDATE_REF, safe='')}/"
+        f"path/{quote(path, safe='/')}"
+    )
+
+
+def _objective_with_plugin_mentions(
+    objective: str,
+    *,
+    plugin_mentions: tuple[str, ...],
+) -> str:
+    ordered: list[str] = []
+    for mention in plugin_mentions:
+        if (
+            not mention.startswith("@")
+            or mention != mention.strip()
+            or "\n" in mention
+            or "\r" in mention
+        ):
+            raise ValueError(f"invalid_plugin_mention:{mention!r}")
+        if mention not in ordered:
+            ordered.append(mention)
+    if not ordered:
+        return objective
+    return "\n".join(ordered) + "\n\n" + objective
+
+
+class CandidateWatcher:
+    def __init__(self) -> None:
+        self._root = Path(tempfile.mkdtemp(prefix="e1-candidate-watch-"))
+        self._run("init", "-q")
+        self._run("remote", "add", "origin", REPO_URL)
+        self.refresh()
+
+    def close(self) -> None:
+        import shutil
+        shutil.rmtree(self._root, ignore_errors=True)
+
+    def _run(self, *args: str, text: bool = True) -> str | bytes:
+        completed = subprocess.run(
+            ["git", "-C", str(self._root), *args],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=text,
+        )
+        return completed.stdout
+
+    def _remote_head(self) -> str:
+        raw = str(
+            self._run(
+                "ls-remote",
+                "--heads",
+                "origin",
+                f"refs/heads/{CANDIDATE_BRANCH}",
+            )
+        ).strip()
+        parts = raw.split()
+        if len(parts) != 2:
+            raise RuntimeError(f"candidate_remote_head_invalid:{raw!r}")
+        return parts[0]
+
+    def refresh(self) -> str:
+        observed = self._remote_head()
+        self._run(
+            "fetch",
+            "--quiet",
+            "--force",
+            "--depth=2",
+            "origin",
+            f"refs/heads/{CANDIDATE_BRANCH}:"
+            f"refs/remotes/origin/{CANDIDATE_BRANCH}",
+        )
+        fetched = str(
+            self._run(
+                "rev-parse",
+                f"refs/remotes/origin/{CANDIDATE_BRANCH}",
+            )
+        ).strip()
+        if fetched != observed:
+            raise RuntimeError(
+                "candidate_branch_fetch_visibility_mismatch:"
+                f"{observed}:{fetched}"
+            )
+        return observed
+
+    def wait_for_exact_candidate(
+        self,
+        *,
+        baseline_head: str,
+        path: str,
+        timeout_seconds: int,
+    ) -> tuple[str, bytes]:
+        deadline = time.monotonic() + timeout_seconds
+        while time.monotonic() < deadline:
+            head = self.refresh()
+            if head == baseline_head:
+                time.sleep(1.0)
+                continue
+            parent = str(self._run("rev-parse", f"{head}^")).strip()
+            if parent != baseline_head:
+                raise RuntimeError(
+                    "candidate_branch_non_single_commit_advance:"
+                    f"{baseline_head}:{parent}:{head}"
+                )
+            changed = [
+                line.strip()
+                for line in str(
+                    self._run(
+                        "diff-tree",
+                        "--no-commit-id",
+                        "--name-only",
+                        "-r",
+                        head,
+                    )
+                ).splitlines()
+                if line.strip()
+            ]
+            if changed != [path]:
+                raise RuntimeError(
+                    f"candidate_commit_path_mismatch:{changed!r}"
+                )
+            raw = self._run("show", f"{head}:{path}", text=False)
+            assert isinstance(raw, bytes)
+            return head, raw
+        raise RuntimeError(f"candidate_wait_timeout:{path}")
+
+
+class E1Validator:
+    def __init__(self) -> None:
+        self._expected: dict[
+            str, tuple[str, str, frozenset[str]]
+        ] = {}
+
+    def expect(
+        self,
+        *,
+        action_id: str,
+        payload_ref: str,
+        payload_sha256: str,
+        evidence_refs: set[str],
+    ) -> None:
+        self._expected[action_id] = (
+            payload_ref,
+            payload_sha256,
+            frozenset(evidence_refs),
+        )
+
+    def validate(self, publication, packet_source):
+        expected = self._expected.get(publication.action_id)
+        passed = False
+        if expected is not None:
+            payload_ref, payload_sha256, evidence_refs = expected
+            passed = (
+                publication.result_payload_ref == payload_ref
+                and publication.result_payload_sha256 == payload_sha256
+                and frozenset(publication.evidence_refs)
+                == evidence_refs
+                and publication.packet_sha256
+                == packet_source.packet_sha256
+            )
+        return ValidationResult(
+            validator_id=VALIDATOR_ID,
+            passed=passed,
+            evidence_ref=(
+                f"e1:validated:{publication.action_id}"
+                if passed
+                else f"e1:rejected:{publication.action_id}"
+            ),
+            observed_at="e1-validator",
+        )
+
+
+def read_profile() -> ExecutorProfile:
+    return ExecutorProfile(
+        executor_id="research-engine-exact-source-read",
+        provider_id="workspace-control",
+        model_id="none",
+        surface_id="machine",
+        harness_id="repository-read-only-v1",
+        toolset_id="repository-read-only",
+        capabilities=frozenset({"repository.read_exact"}),
+        invocation_mode=InvocationMode.DETERMINISTIC,
+        session_mode=SessionMode.NONE,
+        lifecycle=ExecutorLifecycle.DETERMINISTIC_PROCESS,
+        memory_reset_policy=MemoryResetPolicy.NONE,
+        availability=ExecutorAvailability.AVAILABLE,
+        locality=ExecutorLocality.LOCAL_HOST,
+        privacy_classes=frozenset(
+            {PrivacyClass.PUBLIC, PrivacyClass.INTERNAL}
+        ),
+        resource_classes=frozenset({"CPU"}),
+        scarcity_rank=0,
+    )
+
+
+def instant_requirement() -> ExecutionRequirement:
+    return ExecutionRequirement(
+        required_capabilities=frozenset({"reasoning.bounded"}),
+        allowed_invocation_modes=frozenset(
+            {InvocationMode.HUMAN_ASSISTED}
+        ),
+        allowed_session_modes=frozenset(
+            {SessionMode.PERSISTENT_CHAT}
+        ),
+        privacy_class=PrivacyClass.INTERNAL,
+        require_human_launch=True,
+    )
+
+
+def deterministic_read_requirement() -> ExecutionRequirement:
+    return ExecutionRequirement(
+        required_capabilities=frozenset({"repository.read_exact"}),
+        allowed_invocation_modes=frozenset(
+            {InvocationMode.DETERMINISTIC}
+        ),
+        allowed_session_modes=frozenset({SessionMode.NONE}),
+        privacy_class=PrivacyClass.INTERNAL,
+        required_resource_classes=frozenset({"CPU"}),
+        require_human_launch=False,
+    )
+
+
+def _wait_action_status(
+    *,
+    store: PostgresStateStore,
+    action_id: str,
+    timeout_seconds: int,
+) -> None:
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        action = store.load().graph.operator_actions.get(action_id)
+        if (
+            action is not None
+            and action.status
+            == OperatorActionState.AWAITING_DURABLE_ACK
+        ):
+            return
+        time.sleep(0.5)
+    raise RuntimeError(f"action_status_timeout:{action_id}")
+
+
+def _ingest(
+    *,
+    runtime: RuntimeCoordinator,
+    validator: E1Validator,
+    target_ref: str,
+    revision: str,
+    raw: bytes,
+):
+    return WorkerResultCandidateAdapter(
+        intake=WorkerResultIntakeService(
+            runtime=runtime,
+            validators={VALIDATOR_ID: validator},
+        )
+    ).ingest(
+        ImmutableWorkerResultCandidate(
+            target_ref=target_ref,
+            immutable_revision=revision,
+            raw_bytes=raw,
+        )
+    )
+
+
+def _candidate_location(path: str) -> FindingRecord:
+    return FindingRecord(
+        finding_id="candidate-location",
+        text=(
+            "Use the connected GitHub tool only for publication. Repository "
+            f"{CANDIDATE_REPOSITORY}; branch {CANDIDATE_BRANCH}; path {path}. "
+            "Create exactly one JSON candidate at that path and modify no "
+            "other path. Do not ask the human to relay JSON or a commit SHA."
+        ),
+    )
+
+
+def _result_packet(
+    *,
+    process_id: str,
+    checkpoint: str,
+    objective: str,
+    path: str,
+    payload_ref: str,
+    payload_sha256: str,
+    evidence_instruction: str,
+    plugin_mentions: tuple[str, ...] = (GITHUB_PLUGIN_MENTION,),
+    extra_constraints: tuple[str, ...] = (),
+) -> PacketCompilationInput:
+    return PacketCompilationInput(
+        process_id=process_id,
+        source_checkpoint=checkpoint,
+        objective=_objective_with_plugin_mentions(
+            objective,
+            plugin_mentions=plugin_mentions,
+        ),
+        findings=(
+            _candidate_location(path),
+            FindingRecord(
+                finding_id="candidate-result-values",
+                text=(
+                    "Publish kind=RESULT with result_payload_ref="
+                    f"{payload_ref} and result_payload_sha256="
+                    f"{payload_sha256}. {evidence_instruction}"
+                ),
+            ),
+        ),
+        constraints=(
+            "No API keys or credentials.",
+            "Do not modify task capsules, authority/policy state, source branches, or runtime control state.",
+            "Do not inspect ChatGPT page content or automate typing/submission.",
+            "Publish exactly one candidate JSON at the declared path.",
+            *extra_constraints,
+        ),
+        evidence_refs=(f"research-engine@{RESEARCH_ENGINE_SHA}",),
+        authority_refs=("scope:research-read-only",),
+        allowed_actions=("publish-exact-worker-result-candidate",),
+        validator_contract=VALIDATOR_ID,
+        output_schema="WORKER_RESULT_V1",
+        next_safe_boundary="publish immutable candidate and stop",
+    )
+
+
+def _root_packet(
+    *,
+    root_id: str,
+    source_id: str,
+    analysis_id: str,
+    shell_id: str,
+    path: str,
+    marker: str,
+) -> PacketCompilationInput:
+    child_text = json.dumps(
+        [
+            {
+                "process_id": source_id,
+                "objective": "Observe the exact frozen Research Engine orchestration source.",
+                "validator_contracts": [
+                    RepositoryReadPostconditionValidator.VALIDATOR_ID
+                ],
+                "output_schema_refs": [
+                    "schema:exact-source-observation-v1"
+                ],
+            },
+            {
+                "process_id": analysis_id,
+                "objective": "Analyze the exact-source evidence for synthesis-relevant workflow constraints.",
+                "validator_contracts": [VALIDATOR_ID],
+                "output_schema_refs": ["schema:e1-analysis-v1"],
+            },
+            {
+                "process_id": shell_id,
+                "objective": "Prove the connected Workspace Shell read-only runtime-inventory capability.",
+                "validator_contracts": [VALIDATOR_ID],
+                "output_schema_refs": ["schema:e1-shell-probe-v1"],
+            },
+        ],
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return PacketCompilationInput(
+        process_id=root_id,
+        source_checkpoint="research-iterate-e1@root",
+        objective=_objective_with_plugin_mentions(
+            "This mission is deliberately larger than one reasoning quantum. "
+            "Return TOO_LARGE with the exact three child process contracts "
+            "provided in the findings. Do not solve the mission directly.",
+            plugin_mentions=(GITHUB_PLUGIN_MENTION,),
+        ),
+        findings=(
+            _candidate_location(path),
+            FindingRecord(
+                finding_id="decomposition-shape",
+                text=(
+                    "Publish kind=TOO_LARGE with reason="
+                    "'independent source, analysis, and capability work'. "
+                    f"evidence_refs must contain exactly {marker}. "
+                    "children must be exactly the following JSON array, with "
+                    f"no extra child: {child_text}"
+                ),
+            ),
+        ),
+        constraints=(
+            "No write-capable external effects.",
+            "Preserve exact evidence provenance.",
+            "Do not inspect ChatGPT page content.",
+            "Publish exactly one candidate JSON at the declared path.",
+        ),
+        evidence_refs=(f"research-engine@{RESEARCH_ENGINE_SHA}",),
+        authority_refs=("scope:research-read-only",),
+        allowed_actions=("publish-exact-worker-result-candidate",),
+        validator_contract=VALIDATOR_ID,
+        output_schema="WORKER_RESULT_V1",
+        next_safe_boundary="publish decomposition candidate and stop",
+    )
+
+
+def _operator_params(
+    *,
+    task_id: str,
+    action_id: str,
+    slot_id: str,
+    sequence: int,
+    target_ref: str,
+) -> OperatorDispatchParameters:
+    return OperatorDispatchParameters(
+        task_id=task_id,
+        action_id=action_id,
+        action_generation=0,
+        worker_slot_id=slot_id,
+        session_generation=0,
+        priority_rank=10,
+        queue_sequence=sequence,
+        created_at=f"e1-{sequence}",
+        result_publication_target_ref=target_ref,
+    )
+
+
+def run_e1(
+    *,
+    postgres_dsn: str,
+    expected_tailscale_login: str,
+    serve_port: int,
+    candidate_timeout_seconds: int,
+) -> dict[str, object]:
+    token = uuid.uuid4().hex
+    short = token[:12]
+    task_id = "workspace-semantic-execution-migration-v1"
+    root_id = f"research-iterate-e1:{token}"
+    source_id = f"{root_id}.source"
+    analysis_id = f"{root_id}.analysis"
+    shell_id = f"{root_id}.workspace-shell"
+    slot_id = f"e1-instant-slot:{token}"
+    state_key = f"research-iterate-e1:{token}"
+
+    root_contract = WorkContract(
+        objective="Research the objective and synthesize a validated answer.",
+        mandatory_constraints=(
+            "no write-capable external effects",
+            "preserve exact evidence provenance",
+        ),
+        provenance_refs=(f"research-engine@{RESEARCH_ENGINE_SHA}",),
+        authority_refs=("scope:research-read-only",),
+        validator_contracts=(VALIDATOR_ID,),
+        output_schema_refs=("schema:research-e1-synthesis-v1",),
+    )
+
+    runtime = RuntimeCoordinator(
+        state_store=PostgresStateStore(
+            postgres_dsn,
+            state_key=state_key,
+        ),
+        event_ledger=PostgresEventLedger(postgres_dsn),
+        telemetry=RecordingTelemetry(),
+        clock=FakeClock(),
+    )
+    runtime.initialize(
+        DomainKernel.create_graph(
+            [
+                DomainKernel.create_process(
+                    root_id,
+                    work_contract=root_contract,
+                )
+            ]
+        )
+    )
+    PersistentExecutorSessionBroker(runtime).ensure_session(
+        profile=PROFILE,
+        slot_id=slot_id,
+        session_id=f"e1-chat:{token}:g0",
+    )
+
+    observation = RepositoryFileObservation(
+        repository="adamtrott78/research-engine",
+        revision=RESEARCH_ENGINE_SHA,
+        path=SOURCE_PATH,
+        blob_id=SOURCE_BLOB_SHA,
+        content=FROZEN_SOURCE.read_bytes(),
+    )
+    reader = StaticRepositoryReader((observation,))
+    deterministic = read_profile()
+    read_executor = ReadOnlyRepositoryExecutor(
+        reader=reader,
+        clock=FakeClock(seconds=20),
+    )
+    read_validator = RepositoryReadPostconditionValidator(
+        reader=reader,
+        clock=FakeClock(seconds=30),
+    )
+    source_action = CandidateAction(
+        action_id=f"read:e1:{short}:research-engine-orchestration",
+        process_id=source_id,
+        process_generation=0,
+        target_ref=SOURCE_TARGET,
+        executor_type="REPOSITORY_READ_ONLY",
+        idempotency_key=f"research-iterate-e1:{token}:source",
+        preconditions=(
+            "exact immutable Research Engine SHA",
+            "read-only source observation",
+        ),
+        expected_effect="observe exact Research Engine orchestration bytes",
+        postcondition_validator=(
+            RepositoryReadPostconditionValidator.VALIDATOR_ID
+        ),
+    )
+    source_authority = AuthorityDecision(
+        decision_id=f"authority:e1:{short}:source",
+        outcome=AuthorityOutcome.ALLOW,
+        action_id=source_action.action_id,
+        process_id=source_id,
+        process_generation=0,
+        target_ref=SOURCE_TARGET,
+        authority_scope_ref="scope:research-read-only",
+    )
+
+    validator = E1Validator()
+    registry = ExecutorRegistry((deterministic, PROFILE))
+    dispatcher = ExecutorDispatchCoordinator(
+        runtime=runtime,
+        registry=registry,
+        packet_compiler=SemanticPacketCompiler(),
+        authority_evaluator=StaticAuthorityEvaluator(
+            {source_action.action_id: source_authority}
+        ),
+        executor_ports={
+            deterministic.executor_id: read_executor,
+        },
+        validators={
+            RepositoryReadPostconditionValidator.VALIDATOR_ID:
+                read_validator,
+        },
+    )
+    tree = TaskTreeCoordinator(runtime)
+    store = PostgresStateStore(postgres_dsn, state_key=state_key)
+    watcher = CandidateWatcher()
+
+    server = build_operator_bridge_server(
+        OperatorBridgeServerConfig(
+            postgres_dsn=postgres_dsn,
+            expected_tailscale_login=expected_tailscale_login,
+            state_key=state_key,
+            port=serve_port,
+        )
+    )
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
+    candidate_commits: dict[str, str] = {}
+    routing_trace: list[str] = []
+    try:
+        root_path = f"worker-results/e1/{token}/root-decompose.json"
+        root_action_id = f"action:e1:{token}:root-decompose"
+        root_marker = f"e1:root-decompose:{short}"
+        root_dispatch = dispatcher.dispatch(
+            ExecutorDispatchRequest(
+                process_id=root_id,
+                expected_generation=0,
+                requirement_id="e1:root-decompose",
+                requirement=instant_requirement(),
+                packet_input=_root_packet(
+                    root_id=root_id,
+                    source_id=source_id,
+                    analysis_id=analysis_id,
+                    shell_id=shell_id,
+                    path=root_path,
+                    marker=root_marker,
+                ),
+                operator=_operator_params(
+                    task_id=task_id,
+                    action_id=root_action_id,
+                    slot_id=slot_id,
+                    sequence=1,
+                    target_ref=_candidate_target(root_path),
+                ),
+            )
+        )
+        routing_trace.append(root_dispatch.routing.selected_executor_id)
+        root_planned = root_dispatch.operator_dispatch
+        if root_planned is None:
+            raise RuntimeError("root_operator_dispatch_missing")
+        baseline = watcher.refresh()
+        print(
+            "E1_ROOT_DECOMPOSE_READY=Press Ctrl+Space, then Ctrl+V, then Enter.",
+            flush=True,
+        )
+        _wait_action_status(
+            store=store,
+            action_id=root_action_id,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+        root_commit, root_raw = watcher.wait_for_exact_candidate(
+            baseline_head=baseline,
+            path=root_path,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+        root_json = json.loads(root_raw)
+        if root_json.get("kind") != "TOO_LARGE":
+            raise RuntimeError("e1_root_not_too_large")
+        if root_json.get("evidence_refs") != [root_marker]:
+            raise RuntimeError("e1_root_evidence_mismatch")
+        child_ids = [
+            child.get("process_id")
+            for child in root_json.get("children", [])
+        ]
+        if child_ids != [source_id, analysis_id, shell_id]:
+            raise RuntimeError(
+                f"e1_root_children_mismatch:{child_ids!r}"
+            )
+        root_outcome = _ingest(
+            runtime=runtime,
+            validator=validator,
+            target_ref=_candidate_target(root_path),
+            revision=root_commit,
+            raw=root_raw,
+        )
+        if root_outcome.process_state != ProcessState.WAITING_DEPENDENCIES:
+            raise RuntimeError(
+                "e1_root_not_waiting_dependencies:"
+                f"{root_outcome.process_state.value}"
+            )
+        candidate_commits["root_decompose"] = root_commit
+        print("E1_ROOT_DECOMPOSE=PASS", flush=True)
+
+        graph = runtime.snapshot().graph
+        for child_id in (source_id, analysis_id, shell_id):
+            contract = graph.processes[child_id].work_contract
+            if contract is None:
+                raise RuntimeError(f"e1_child_contract_missing:{child_id}")
+            if (
+                "no write-capable external effects"
+                not in contract.mandatory_constraints
+                or f"research-engine@{RESEARCH_ENGINE_SHA}"
+                not in contract.provenance_refs
+                or "scope:research-read-only"
+                not in contract.authority_refs
+            ):
+                raise RuntimeError(
+                    f"e1_child_inheritance_mismatch:{child_id}"
+                )
+        print("E1_CHILD_CONTRACT_INHERITANCE=PASS", flush=True)
+
+        source_dispatch = dispatcher.dispatch(
+            ExecutorDispatchRequest(
+                process_id=source_id,
+                expected_generation=0,
+                requirement_id="e1:source",
+                requirement=deterministic_read_requirement(),
+                packet_input=PacketCompilationInput(
+                    process_id=source_id,
+                    source_checkpoint=(
+                        f"research-engine@{RESEARCH_ENGINE_SHA}"
+                    ),
+                    objective=(
+                        "Observe the exact immutable Research Engine "
+                        "orchestration source."
+                    ),
+                    constraints=("read-only exact source",),
+                    evidence_refs=(SOURCE_TARGET,),
+                    authority_refs=("scope:research-read-only",),
+                    allowed_actions=("read-exact-source",),
+                    validator_contract=(
+                        RepositoryReadPostconditionValidator.VALIDATOR_ID
+                    ),
+                    output_schema="schema:exact-source-observation-v1",
+                    next_safe_boundary=(
+                        "return independently validated receipt"
+                    ),
+                ),
+                worker_id=f"e1-deterministic:{token}",
+                lease_id=f"lease:e1:{token}:source",
+                candidate_action=source_action,
+            )
+        )
+        routing_trace.append(source_dispatch.routing.selected_executor_id)
+        source_result = source_dispatch.coordinated_result
+        if (
+            source_result is None
+            or not source_result.completed
+            or not source_result.validation.passed
+        ):
+            raise RuntimeError("e1_exact_source_failed")
+        print("E1_EXACT_SOURCE=PASS", flush=True)
+        tree.refresh_fan_in(event_id=f"e1:{token}:source-complete")
+
+        analysis_path = f"worker-results/e1/{token}/analysis.json"
+        analysis_action_id = f"action:e1:{token}:analysis"
+        analysis_marker = f"e1:analysis:{short}"
+        analysis_payload_ref = f"e1://{token}/analysis/result"
+        analysis_payload_sha = _sha256_text(
+            f"e1:{token}:analysis:accepted"
+        )
+        validator.expect(
+            action_id=analysis_action_id,
+            payload_ref=analysis_payload_ref,
+            payload_sha256=analysis_payload_sha,
+            evidence_refs={
+                analysis_marker,
+                source_result.validation.evidence_ref,
+            },
+        )
+        analysis_dispatch = dispatcher.dispatch(
+            ExecutorDispatchRequest(
+                process_id=analysis_id,
+                expected_generation=0,
+                requirement_id="e1:analysis",
+                requirement=instant_requirement(),
+                packet_input=_result_packet(
+                    process_id=analysis_id,
+                    checkpoint="research-iterate-e1@analysis",
+                    objective=(
+                        "Analyze the Research Engine workflow structure using "
+                        "the exact-source evidence. Identify the constraints "
+                        "that the final synthesis must preserve."
+                    ),
+                    path=analysis_path,
+                    payload_ref=analysis_payload_ref,
+                    payload_sha256=analysis_payload_sha,
+                    evidence_instruction=(
+                        "evidence_refs must contain exactly "
+                        f"{analysis_marker} and "
+                        f"{source_result.validation.evidence_ref}."
+                    ),
+                ),
+                operator=_operator_params(
+                    task_id=task_id,
+                    action_id=analysis_action_id,
+                    slot_id=slot_id,
+                    sequence=2,
+                    target_ref=_candidate_target(analysis_path),
+                ),
+            )
+        )
+        routing_trace.append(
+            analysis_dispatch.routing.selected_executor_id
+        )
+        if analysis_dispatch.operator_dispatch is None:
+            raise RuntimeError("analysis_operator_dispatch_missing")
+        baseline = watcher.refresh()
+        print(
+            "E1_ANALYSIS_READY=Press Ctrl+Space, then Ctrl+V, then Enter.",
+            flush=True,
+        )
+        _wait_action_status(
+            store=store,
+            action_id=analysis_action_id,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+        analysis_commit, analysis_raw = watcher.wait_for_exact_candidate(
+            baseline_head=baseline,
+            path=analysis_path,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+        analysis_outcome = _ingest(
+            runtime=runtime,
+            validator=validator,
+            target_ref=_candidate_target(analysis_path),
+            revision=analysis_commit,
+            raw=analysis_raw,
+        )
+        if analysis_outcome.process_state != ProcessState.COMPLETED:
+            raise RuntimeError("e1_analysis_not_completed")
+        candidate_commits["analysis"] = analysis_commit
+        print("E1_ANALYSIS=PASS", flush=True)
+        tree.refresh_fan_in(event_id=f"e1:{token}:analysis-complete")
+
+        shell_path = f"worker-results/e1/{token}/workspace-shell.json"
+        shell_action_id = f"action:e1:{token}:workspace-shell"
+        shell_marker = f"e1:workspace-shell:{short}"
+        shell_payload_ref = f"e1://{token}/workspace-shell/runtime-inventory"
+        shell_payload_sha = _sha256_text(
+            f"e1:{token}:workspace-shell:accepted"
+        )
+        shell_expected = set(SHELL_EXPECTED_EVIDENCE)
+        shell_expected.add(shell_marker)
+        validator.expect(
+            action_id=shell_action_id,
+            payload_ref=shell_payload_ref,
+            payload_sha256=shell_payload_sha,
+            evidence_refs=shell_expected,
+        )
+        shell_instruction = (
+            "First call connected Workspace Shell read-only inspection with "
+            "task_id=workspace-semantic-execution-migration-v1, "
+            "target=workspace-shell, operation=runtime_inventory. "
+            "Do not call Workspace Shell exec or reviewed-helper tools. "
+            "Do not use GitHub to read source or discover expected values; "
+            "GitHub is permitted only for the candidate publication. "
+            "From the returned result object derive these evidence_refs "
+            "without guessing: "
+            f"{shell_marker}; "
+            "workspace-shell:mcp-transport:<mcp_transport>; "
+            "workspace-shell:uids:<current_uid>:<configured_frontend_uid>:"
+            "<configured_worker_uid>:<configured_tunnel_uid>; "
+            "workspace-shell:launcher-socket:<exists-as-1-or-0>:<mode>:<uid>:<gid>; "
+            "workspace-shell:broker-socket:<exists-as-1-or-0>:<mode>:<uid>:<gid>; "
+            "workspace-shell:receipt-root:<exists-as-1-or-0>:<mode>:<uid>:<gid>. "
+            "Publish exactly those six evidence_refs."
+        )
+        shell_dispatch = dispatcher.dispatch(
+            ExecutorDispatchRequest(
+                process_id=shell_id,
+                expected_generation=0,
+                requirement_id="e1:workspace-shell-probe",
+                requirement=instant_requirement(),
+                packet_input=_result_packet(
+                    process_id=shell_id,
+                    checkpoint="research-iterate-e1@workspace-shell",
+                    objective=(
+                        "Perform the bounded Workspace Shell read-only "
+                        "capability probe, then publish its exact evidence."
+                    ),
+                    path=shell_path,
+                    payload_ref=shell_payload_ref,
+                    payload_sha256=shell_payload_sha,
+                    evidence_instruction=shell_instruction,
+                    plugin_mentions=(
+                        WORKSPACE_SHELL_PLUGIN_MENTION,
+                        GITHUB_PLUGIN_MENTION,
+                    ),
+                    extra_constraints=(
+                        "Workspace Shell capability is strictly read-only for this leaf.",
+                        "workspace_shell_exec and workspace_shell_run_reviewed_helper are prohibited.",
+                    ),
+                ),
+                operator=_operator_params(
+                    task_id=task_id,
+                    action_id=shell_action_id,
+                    slot_id=slot_id,
+                    sequence=3,
+                    target_ref=_candidate_target(shell_path),
+                ),
+            )
+        )
+        routing_trace.append(shell_dispatch.routing.selected_executor_id)
+        shell_planned = shell_dispatch.operator_dispatch
+        if shell_planned is None:
+            raise RuntimeError("shell_operator_dispatch_missing")
+        if not shell_planned.packet.text.lstrip().startswith(
+            "@Workspace Shell\n@github\n\n"
+        ):
+            raise RuntimeError("e1_shell_literal_plugin_prefix_mismatch")
+        for hidden in SHELL_EXPECTED_EVIDENCE:
+            if hidden in shell_planned.packet.text:
+                raise RuntimeError(
+                    "e1_shell_expected_value_disclosed_in_packet"
+                )
+        print("E1_WORKSPACE_SHELL_EXPECTED_VALUES_HIDDEN=PASS", flush=True)
+        baseline = watcher.refresh()
+        print(
+            "E1_WORKSPACE_SHELL_READY=Press Ctrl+Space, then Ctrl+V, then Enter.",
+            flush=True,
+        )
+        _wait_action_status(
+            store=store,
+            action_id=shell_action_id,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+        shell_commit, shell_raw = watcher.wait_for_exact_candidate(
+            baseline_head=baseline,
+            path=shell_path,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+        shell_outcome = _ingest(
+            runtime=runtime,
+            validator=validator,
+            target_ref=_candidate_target(shell_path),
+            revision=shell_commit,
+            raw=shell_raw,
+        )
+        if shell_outcome.process_state != ProcessState.COMPLETED:
+            raise RuntimeError("e1_workspace_shell_probe_not_completed")
+        candidate_commits["workspace_shell"] = shell_commit
+        print("E1_WORKSPACE_SHELL_READ_ONLY_PROBE=PASS", flush=True)
+
+        tree.refresh_fan_in(event_id=f"e1:{token}:shell-complete")
+        graph = runtime.snapshot().graph
+        if graph.processes[root_id].state != ProcessState.READY_TO_RESUME:
+            raise RuntimeError(
+                "e1_root_not_ready_after_fanin:"
+                f"{graph.processes[root_id].state.value}"
+            )
+        print("E1_FAN_IN=PASS", flush=True)
+
+        source_receipt = next(
+            iter(graph.processes[source_id].effect_receipts.values())
+        )
+        analysis_receipt = next(
+            iter(graph.processes[analysis_id].effect_receipts.values())
+        )
+        shell_receipt = next(
+            iter(graph.processes[shell_id].effect_receipts.values())
+        )
+
+        synthesis_path = f"worker-results/e1/{token}/synthesis.json"
+        synthesis_action_id = f"action:e1:{token}:synthesis"
+        synthesis_marker = f"e1:synthesis:{short}"
+        synthesis_payload_ref = f"e1://{token}/synthesis/result"
+        synthesis_payload_sha = _sha256_text(
+            f"e1:{token}:synthesis:accepted"
+        )
+        synthesis_evidence = {
+            synthesis_marker,
+            source_result.validation.evidence_ref,
+            source_receipt.target_ref,
+            analysis_receipt.target_ref,
+            shell_receipt.target_ref,
+        }
+        validator.expect(
+            action_id=synthesis_action_id,
+            payload_ref=synthesis_payload_ref,
+            payload_sha256=synthesis_payload_sha,
+            evidence_refs=synthesis_evidence,
+        )
+        synthesis_dispatch = dispatcher.dispatch(
+            ExecutorDispatchRequest(
+                process_id=root_id,
+                expected_generation=0,
+                requirement_id="e1:synthesis",
+                requirement=instant_requirement(),
+                packet_input=_result_packet(
+                    process_id=root_id,
+                    checkpoint="research-iterate-e1@synthesis",
+                    objective=(
+                        "Synthesize the validated exact-source, analysis, "
+                        "and Workspace Shell capability evidence into the "
+                        "final E1 mission result. Do not add unsupported "
+                        "claims."
+                    ),
+                    path=synthesis_path,
+                    payload_ref=synthesis_payload_ref,
+                    payload_sha256=synthesis_payload_sha,
+                    evidence_instruction=(
+                        "evidence_refs must contain exactly: "
+                        + ", ".join(sorted(synthesis_evidence))
+                        + "."
+                    ),
+                ),
+                operator=_operator_params(
+                    task_id=task_id,
+                    action_id=synthesis_action_id,
+                    slot_id=slot_id,
+                    sequence=4,
+                    target_ref=_candidate_target(synthesis_path),
+                ),
+            )
+        )
+        routing_trace.append(
+            synthesis_dispatch.routing.selected_executor_id
+        )
+        if synthesis_dispatch.operator_dispatch is None:
+            raise RuntimeError("synthesis_operator_dispatch_missing")
+        baseline = watcher.refresh()
+        print(
+            "E1_SYNTHESIS_READY=Press Ctrl+Space, then Ctrl+V, then Enter.",
+            flush=True,
+        )
+        _wait_action_status(
+            store=store,
+            action_id=synthesis_action_id,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+        synthesis_commit, synthesis_raw = watcher.wait_for_exact_candidate(
+            baseline_head=baseline,
+            path=synthesis_path,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+        synthesis_outcome = _ingest(
+            runtime=runtime,
+            validator=validator,
+            target_ref=_candidate_target(synthesis_path),
+            revision=synthesis_commit,
+            raw=synthesis_raw,
+        )
+        if synthesis_outcome.process_state != ProcessState.COMPLETED:
+            raise RuntimeError("e1_synthesis_not_completed")
+        candidate_commits["synthesis"] = synthesis_commit
+
+        final = runtime.snapshot().graph
+        for process_id in (
+            root_id,
+            source_id,
+            analysis_id,
+            shell_id,
+        ):
+            if final.processes[process_id].state != ProcessState.COMPLETED:
+                raise RuntimeError(
+                    f"e1_process_not_complete:{process_id}:"
+                    f"{final.processes[process_id].state.value}"
+                )
+        queued = [
+            a for a in final.operator_actions.values()
+            if a.status in {
+                OperatorActionState.QUEUED,
+                OperatorActionState.AWAITING_DURABLE_ACK,
+            }
+        ]
+        if queued:
+            raise RuntimeError("e1_operator_work_not_empty")
+
+        report = {
+            "schema": "workspace-semantic-research-iterate-e1.v1",
+            "result": "PASS",
+            "candidate_branch": CANDIDATE_BRANCH,
+            "candidate_commits": candidate_commits,
+            "root_decomposition": True,
+            "child_contract_inheritance": True,
+            "deterministic_exact_source": True,
+            "instant_analysis": True,
+            "workspace_shell_read_only_probe": True,
+            "workspace_shell_literal_prefix": "@Workspace Shell",
+            "github_literal_prefix": "@github",
+            "workspace_shell_exec_used": False,
+            "workspace_shell_reviewed_helper_used": False,
+            "fanin": True,
+            "instant_synthesis": True,
+            "routing_trace": routing_trace,
+            "manual_durable_state_relay": False,
+            "browser_page_content_scraping": False,
+            "automatic_typing_or_submission": False,
+            "paid_api_fallback": False,
+        }
+        print(
+            "E1_RESEARCH_ITERATE="
+            + json.dumps(
+                report,
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            flush=True,
+        )
+        return report
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+        watcher.close()
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--serve-port", type=int, default=8765)
+    parser.add_argument(
+        "--candidate-timeout-seconds",
+        type=int,
+        default=1200,
+    )
+    args = parser.parse_args()
+    report = run_e1(
+        postgres_dsn=_required_env("SEMANTIC_EXECUTION_POSTGRES_DSN"),
+        expected_tailscale_login=_required_env(
+            "WORKSPACE_OPERATOR_EXPECTED_TAILSCALE_LOGIN"
+        ),
+        serve_port=args.serve_port,
+        candidate_timeout_seconds=args.candidate_timeout_seconds,
+    )
+    return 0 if report.get("result") == "PASS" else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
