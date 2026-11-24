@@ -390,6 +390,51 @@ def _ingest(
     )
 
 
+def _supervisor_projection(
+    *,
+    store: PostgresStateStore,
+    root_process_id: str,
+) -> dict[str, object]:
+    """Rebuild a content-free Supervisor S1 view from durable state only."""
+    graph = store.load().graph
+    root = graph.processes[root_process_id]
+    states: dict[str, int] = {}
+    unresolved: list[str] = []
+    validated: list[str] = []
+    for process_id, process in sorted(graph.processes.items()):
+        states[process.state.value] = states.get(process.state.value, 0) + 1
+        if process.state == ProcessState.COMPLETED:
+            validated.append(process_id)
+        else:
+            unresolved.append(process_id)
+
+    service_actions = [
+        action
+        for action in graph.operator_actions.values()
+        if action.status in {
+            OperatorActionState.QUEUED,
+            OperatorActionState.AWAITING_DURABLE_ACK,
+        }
+    ]
+    provenance = (
+        list(root.work_contract.provenance_refs)
+        if root.work_contract is not None
+        else []
+    )
+    return {
+        "mission_id": root_process_id,
+        "mission_state": root.state.value,
+        "process_state_counts": states,
+        "unresolved_processes": unresolved,
+        "validated_processes": validated,
+        "critical_path": unresolved[0] if unresolved else None,
+        "manual_service_cycles_ready_or_unconfirmed": len(service_actions),
+        "pending_human_judgment_decisions": 0,
+        "provenance_refs": provenance,
+        "authority_mutations": 0,
+        "conversation_memory_authoritative": False,
+    }
+
 def _candidate_location(path: str) -> FindingRecord:
     return FindingRecord(
         finding_id="candidate-location",
@@ -748,6 +793,25 @@ def run_e1(
             )
         candidate_commits["root_decompose"] = root_commit
         print("E1_ROOT_DECOMPOSE=PASS", flush=True)
+
+        fresh_supervisor_store = PostgresStateStore(
+            postgres_dsn,
+            state_key=state_key,
+        )
+        supervisor_after_decompose = _supervisor_projection(
+            store=fresh_supervisor_store,
+            root_process_id=root_id,
+        )
+        if (
+            supervisor_after_decompose["mission_state"]
+            != ProcessState.WAITING_DEPENDENCIES.value
+            or supervisor_after_decompose["authority_mutations"] != 0
+            or supervisor_after_decompose[
+                "conversation_memory_authoritative"
+            ]
+        ):
+            raise RuntimeError("e1_supervisor_rehydration_mismatch")
+        print("E1_SUPERVISOR_S1_REHYDRATION=PASS", flush=True)
 
         graph = runtime.snapshot().graph
         for child_id in (source_id, analysis_id, shell_id):
@@ -1129,6 +1193,30 @@ def run_e1(
         if queued:
             raise RuntimeError("e1_operator_work_not_empty")
 
+        supervisor_final = _supervisor_projection(
+            store=PostgresStateStore(
+                postgres_dsn,
+                state_key=state_key,
+            ),
+            root_process_id=root_id,
+        )
+        if (
+            supervisor_final["mission_state"]
+            != ProcessState.COMPLETED.value
+            or supervisor_final["unresolved_processes"]
+            or supervisor_final["authority_mutations"] != 0
+        ):
+            raise RuntimeError("e1_supervisor_final_projection_mismatch")
+        print(
+            "E1_SUPERVISOR_S1_FINAL="
+            + json.dumps(
+                supervisor_final,
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            flush=True,
+        )
+
         report = {
             "schema": "workspace-semantic-research-iterate-e1.v1",
             "result": "PASS",
@@ -1145,6 +1233,8 @@ def run_e1(
             "workspace_shell_reviewed_helper_used": False,
             "fanin": True,
             "instant_synthesis": True,
+            "supervisor_s1_read_only_projection": True,
+            "supervisor_s1_fresh_store_rehydration": True,
             "routing_trace": routing_trace,
             "manual_durable_state_relay": False,
             "browser_page_content_scraping": False,

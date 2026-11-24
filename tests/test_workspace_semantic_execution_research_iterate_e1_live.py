@@ -48,3 +48,13 @@ def test_live_e1_shell_packet_explicitly_allows_only_read_only_inspection_and_pu
     assert '"inspect-workspace-shell-runtime-inventory"' in source
     assert '"publish-exact-worker-result-candidate"' in source
     assert "allowed_actions=allowed_actions" in source
+
+
+def test_live_e1_supervisor_s1_is_durable_read_only_projection() -> None:
+    source = text()
+    assert "def _supervisor_projection(" in source
+    assert "E1_SUPERVISOR_S1_REHYDRATION=PASS" in source
+    assert "E1_SUPERVISOR_S1_FINAL=" in source
+    assert '"authority_mutations": 0' in source
+    assert '"conversation_memory_authoritative": False' in source
+    assert "PostgresStateStore(" in source
