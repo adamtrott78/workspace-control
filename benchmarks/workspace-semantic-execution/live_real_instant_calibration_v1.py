@@ -736,13 +736,38 @@ def run_calibration(
         )
         candidate_commits["q3_replacement"] = q3_commit
 
+        retire = planner.plan_retire_session(
+            task_id="workspace-semantic-execution-migration-v1",
+            action_id=f"action:stage12:retire:{token}:sg1",
+            action_generation=0,
+            worker_slot_id=slot_id,
+            session_generation=1,
+            executor_id=PROFILE.executor_id,
+            priority_rank=1,
+            queue_sequence=5,
+            created_at="stage12-5",
+            reason="stage12_calibration_complete",
+        )
+        print(
+            "STAGE12_FINAL_RETIRE_READY="
+            "Press Ctrl+Space once to close the final managed Firefox "
+            "worker tab.",
+            flush=True,
+        )
+        _wait_action_status(
+            store=store,
+            action_id=retire.action_id,
+            status=OperatorActionState.COMPLETED,
+            timeout_seconds=candidate_timeout_seconds,
+        )
+
         final = store.load().graph
         session = final.executor_sessions[slot_id]
         if (
             final.processes[process_q1].state != ProcessState.COMPLETED
             or final.processes[process_q2].state != ProcessState.COMPLETED
             or final.processes[process_q3].state != ProcessState.COMPLETED
-            or session.state != ExecutorSessionState.READY
+            or session.state != ExecutorSessionState.RETIRED
             or session.session_generation != 1
         ):
             raise RuntimeError("stage12_final_state_mismatch")

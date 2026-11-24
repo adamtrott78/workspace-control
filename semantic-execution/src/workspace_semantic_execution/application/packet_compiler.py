@@ -129,6 +129,50 @@ class SemanticPacketCompiler:
             ):
                 raise ValueError("invalid_result_publication_contract")
 
+    @staticmethod
+    def _plugin_calls(
+        source: PacketCompilationInput,
+    ) -> tuple[str, ...]:
+        calls: list[str] = []
+
+        def add(value: str) -> None:
+            if value not in calls:
+                calls.append(value)
+
+        contract = source.result_publication
+        if (
+            contract is not None
+            and contract.target_ref.startswith("github-candidate://")
+        ):
+            add("@github")
+
+        refs = (
+            source.source_checkpoint,
+            *source.evidence_refs,
+            *source.authority_refs,
+            *source.allowed_actions,
+        )
+        for value in refs:
+            normalized = value.lower()
+            if (
+                normalized.startswith("github://")
+                or normalized.startswith("github:")
+                or "github.com/" in normalized
+            ):
+                add("@github")
+            if (
+                normalized.startswith("workspace-shell://")
+                or normalized.startswith("workspace-shell:")
+            ):
+                add("@workspace-shell")
+            if (
+                normalized.startswith("heartbeat://")
+                or normalized.startswith("heartbeat:")
+            ):
+                add("@heartbeat")
+
+        return tuple(calls)
+
     def compile(
         self,
         source: PacketCompilationInput,
@@ -136,8 +180,10 @@ class SemanticPacketCompiler:
         executor: ExecutorProfile,
     ) -> CompiledPacket:
         self._validate(source)
+        plugin_calls = self._plugin_calls(source)
 
         payload = {
+            "plugin_calls": list(plugin_calls),
             "packet_version": self.VERSION,
             "process": {
                 "process_id": source.process_id,
@@ -220,8 +266,12 @@ class SemanticPacketCompiler:
             indent=2,
             ensure_ascii=False,
         )
+        plugin_prefix = "".join(
+            f"{plugin_call}\n" for plugin_call in plugin_calls
+        )
         text = (
-            f"{self.VERSION}\n"
+            plugin_prefix
+            + f"{self.VERSION}\n"
             f"packet_sha256={digest}\n"
             f"executor_id={executor.executor_id}\n"
             f"invocation_mode={executor.invocation_mode.value}\n"

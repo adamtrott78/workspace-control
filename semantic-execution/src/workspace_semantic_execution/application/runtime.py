@@ -690,6 +690,28 @@ class RuntimeCoordinator:
             lambda graph: OperatorActionKernel.enqueue(graph, action),
         )
 
+    def plan_operator_session_retirement(
+        self,
+        *,
+        action: OperatorAction,
+        slot_id: str,
+        expected_session_generation: int,
+        reason: str,
+    ) -> StateSnapshot:
+        def transition(graph: WorkGraph) -> WorkGraph:
+            next_graph = DomainKernel.retire_executor_session(
+                graph,
+                slot_id=slot_id,
+                expected_session_generation=expected_session_generation,
+                reason=reason,
+            )
+            return OperatorActionKernel.enqueue(next_graph, action)
+
+        return self._apply(
+            "operator_session.retirement_planned",
+            transition,
+        )
+
     def claim_next_operator_action(
         self,
         *,

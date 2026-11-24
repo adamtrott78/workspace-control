@@ -269,6 +269,63 @@ class OperatorDispatchPlanner:
             packet_source=snapshot.graph.packet_sources[payload_ref],
         )
 
+    def plan_retire_session(
+        self,
+        *,
+        task_id: str,
+        action_id: str,
+        action_generation: int,
+        worker_slot_id: str,
+        session_generation: int,
+        executor_id: str,
+        priority_rank: int,
+        queue_sequence: int,
+        created_at: str,
+        reason: str,
+    ) -> OperatorAction:
+        if action_generation < 0:
+            raise ValueError("action_generation_invalid")
+        if priority_rank < 0 or queue_sequence < 0:
+            raise ValueError("queue_order_invalid")
+        if not reason:
+            raise ValueError("retirement_reason_required")
+
+        self._registry.get(executor_id)
+        action = OperatorAction(
+            action_id=action_id,
+            generation=action_generation,
+            action_type=OperatorActionType.RETIRE_SESSION,
+            status=OperatorActionState.QUEUED,
+            priority_rank=priority_rank,
+            queue_sequence=queue_sequence,
+            created_at=created_at,
+            task_id=task_id,
+            reasoning_process_id=None,
+            process_generation=None,
+            worker_slot_id=worker_slot_id,
+            session_generation=session_generation,
+            executor_id=executor_id,
+            payload_ref=None,
+            payload_sha256=None,
+            human_requirement=OperatorHumanRequirement.NONE,
+            ack_mode=OperatorAckMode.NONE,
+            post_local_success=(
+                OperatorPostLocalSuccess.COMPLETE_AND_REQUERY
+            ),
+        )
+        snapshot = self._runtime.plan_operator_session_retirement(
+            action=action,
+            slot_id=worker_slot_id,
+            expected_session_generation=session_generation,
+            reason=reason,
+        )
+        persisted = snapshot.graph.operator_actions[action_id]
+        if persisted != action:
+            raise RuntimeError(
+                "persisted_retire_operator_action_mismatch"
+            )
+        return persisted
+
 
 def _packet_source(
     *,
