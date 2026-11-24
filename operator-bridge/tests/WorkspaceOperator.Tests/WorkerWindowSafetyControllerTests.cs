@@ -27,6 +27,35 @@ public sealed class WorkerWindowSafetyControllerTests
     }
 
     [TestMethod]
+    public void ForegroundRetriesUntilPreparedWorkerWinsTransientFocusRace()
+    {
+        var port = new FakePort
+        {
+            ForegroundSucceedsOnCall = 3
+        };
+        var controller = new WorkerWindowSafetyController(port);
+
+        Assert.IsTrue(
+            controller.ForegroundPreparedWorkerWindowWithRetries(
+                attempts: 4,
+                delayMilliseconds: 0));
+        Assert.AreEqual(3, port.ForegroundCalls);
+    }
+
+    [TestMethod]
+    public void ForegroundRetriesFailClosedWhenWorkerNeverWinsFocus()
+    {
+        var port = new FakePort();
+        var controller = new WorkerWindowSafetyController(port);
+
+        Assert.IsFalse(
+            controller.ForegroundPreparedWorkerWindowWithRetries(
+                attempts: 3,
+                delayMilliseconds: 0));
+        Assert.AreEqual(3, port.ForegroundCalls);
+    }
+
+    [TestMethod]
     public void CaptureFailureDoesNotPretendNoActionMinimizeSucceeded()
     {
         var port = new FakePort
@@ -44,6 +73,7 @@ public sealed class WorkerWindowSafetyControllerTests
     {
         public bool CaptureResult { get; set; }
         public bool ForegroundResult { get; set; }
+        public int ForegroundSucceedsOnCall { get; set; }
         public bool MinimizeResult { get; set; }
         public bool IsForegroundResult { get; set; } = true;
         public int CaptureCalls { get; private set; }
@@ -59,7 +89,9 @@ public sealed class WorkerWindowSafetyControllerTests
         public bool ForegroundPreparedWorkerWindow()
         {
             ForegroundCalls++;
-            return ForegroundResult;
+            return ForegroundResult ||
+                (ForegroundSucceedsOnCall > 0 &&
+                 ForegroundCalls >= ForegroundSucceedsOnCall);
         }
 
         public bool IsCapturedWorkerWindowForeground() =>
