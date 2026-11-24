@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
+  "status": "VALIDATED_IMPLEMENTATION",
+  "validated_head": "65bdef0e3572c5cfed8b8e59298ce86fc15b59af",
+  "validation_runs": {
+    "semantic_execution": {
+      "workflow_name": "Semantic Execution Validation",
+      "run_id": 45485408237,
+      "run_number": 475,
+      "conclusion": "success"
+    },
+    "operator_bridge": {
+      "workflow_name": "Operator Bridge Validation",
+      "run_id": 45485408281,
+      "run_number": 746,
+      "conclusion": "success"
+    }
+  },
+  "domains": {
+    "semantic_execution": {
+      "validation_run": "semantic_execution",
+      "implementation_patterns": [
+        "semantic-execution/**",
+        "tests/test_workspace_semantic_execution_backend_*.py",
+        "benchmarks/workspace-semantic-execution/backend/**",
+        "benchmarks/workspace-semantic-execution/research_engine_kernel_canary_v1.json",
+        ".github/workflows/semantic-execution-validation.yml",
+        "scripts/validation_inheritance.py",
+        "tests/test_validation_inheritance.py"
+      ]
+    },
+    "operator_bridge": {
+      "validation_run": "operator_bridge",
+      "implementation_patterns": [
+        "operator-bridge/**",
+        "tests/test_workspace_semantic_execution_operator_bridge*.py",
+        "benchmarks/workspace-semantic-execution/operator_bridge/**",
+        "tasks/active/workspace-operator-bridge-implementation-v1.json",
+        "tasks/active/workspace-operator-bridge-implementation-v1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json",
+        "architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json",
+        ".github/workflows/operator-bridge-validation.yml",
+        "scripts/validation_inheritance.py",
+        "tests/test_validation_inheritance.py"
+      ]
+    }
+  },
+  "security": {
+    "validated_run_must_match_exact_head": true,
+    "validated_run_must_be_success": true,
+    "validated_head_must_be_ancestor": true,
+    "implementation_path_change_forces_full_validation": true,
+    "api_lookup_failure_falls_back_to_full_validation": true,
+    "receipt_or_script_parse_failure_falls_back_to_full_validation": true
+  }
+}

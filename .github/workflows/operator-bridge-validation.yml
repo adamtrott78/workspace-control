@@ -52,8 +52,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validation:
-    name: validation
+  inheritance:
+    name: inheritance
+    runs-on: ubuntu-latest
+    outputs:
+      inherited: ${{ steps.inherit.outputs.inherited }}
+      reason: ${{ steps.inherit.outputs.reason }}
+    steps:
+      - name: Checkout tested tree
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Check validated implementation inheritance
+        id: inherit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/validation_inheritance.py \
+            --receipt architecture/validation-receipts/e1-implementation.v1.json \
+            --domain operator_bridge \
+            --current-sha "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --repository "${{ github.repository }}"
+
+  full-validation:
+    name: full-validation
+    needs: inheritance
+    if: needs.inheritance.outputs.inherited != 'true'
     runs-on: windows-latest
     timeout-minutes: 25
 
@@ -248,6 +272,26 @@ jobs:
           }
           $json = $measurement | ConvertTo-Json -Compress
           Write-Host "OPERATOR_BRIDGE_IDLE_MEASUREMENT=$json"
+  validation:
+    name: validation
+    needs: [inheritance, full-validation]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Accept inherited or full validation
+        env:
+          INHERITED: ${{ needs.inheritance.outputs.inherited }}
+          INHERIT_REASON: ${{ needs.inheritance.outputs.reason }}
+          FULL_RESULT: ${{ needs.full-validation.result }}
+        run: |
+          set -euo pipefail
+          if [[ "$INHERITED" == "true" ]]; then
+            echo "OPERATOR_VALIDATION_INHERITED=PASS reason=$INHERIT_REASON"
+            exit 0
+          fi
+          test "$FULL_RESULT" = "success"
+          echo "OPERATOR_FULL_VALIDATION=PASS"
+
   target-profile-repair:
     name: target-profile-repair
     if: >-
