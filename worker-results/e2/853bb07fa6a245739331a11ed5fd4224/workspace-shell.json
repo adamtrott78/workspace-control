@@ -1,0 +1,23 @@
+{
+  "publication_id": "worker-result:action:e2:853bb07fa6a245739331a11ed5fd4224:workspace-shell:0",
+  "action_id": "action:e2:853bb07fa6a245739331a11ed5fd4224:workspace-shell",
+  "action_generation": 0,
+  "process_id": "research-iterate-e2:853bb07fa6a245739331a11ed5fd4224.workspace-shell",
+  "process_generation": 0,
+  "executor_id": "openai-chat-instant-current",
+  "worker_slot_id": "e2-instant-slot:853bb07fa6a245739331a11ed5fd4224",
+  "session_generation": 1,
+  "packet_sha256": "1d09fdd69e8c3b65d3d73937aa0f72b36f6bffd4020094470ea19f12c7476b42",
+  "kind": "RESULT",
+  "observed_at": "2026-11-24T23:51:00Z",
+  "result_payload_ref": "e2://853bb07fa6a245739331a11ed5fd4224/workspace-shell/runtime-inventory",
+  "result_payload_sha256": "e19410447cbc083735ab675bfdbf521c871d37e957ebc107c5b5aa31ad2ee650",
+  "evidence_refs": [
+    "e2:workspace-shell:853bb07fa6a2",
+    "workspace-shell:mcp-transport:HTTPS_MTLS_REQUIRED",
+    "workspace-shell:uids:41010:41010:41011:41012",
+    "workspace-shell:launcher-socket:1:660:0:41010",
+    "workspace-shell:broker-socket:1:660:0:41010",
+    "workspace-shell:receipt-root:1:750:0:41010"
+  ]
+}
