@@ -36,7 +36,7 @@ Execute a rigorous MTH602-to-journal research program centered on backbone compe
 
 ## Next safe action
 
-Repair the live shared v3 controller binary using Workspace Control PR #657 exact head bf380e48478d488393478d5a5e2d61b96698ae70. Run scripts/mth602_activate_v3_rest_backfill_liveness_v1.py from a clean exact-head worktree with --expected-head bf380e48478d488393478d5a5e2d61b96698ae70. This candidate is based on the accepted runtime390 generation a419a3caacec4c3c79091bc8dd2bf9f5d5c8ea12 and restores BOTH bounded REST-attested queued-demand capacity-floor liveness and positive GitHub rate-limit 403 in-process backoff. After V3_LIVE_CONTROLLER_BINARY_REPAIR=PASS + MTH602_V3_REST_BACKFILL_BOOTSTRAP=PASS, verify workspace-control-control-small remains active/running without restart growth under rate limiting. Only then admit the 20 immutable PR #56 l2o_control_eval requests exactly once; no analysis or recipe changes before the matrix closes.
+Activate only Workspace Control PR #658 exact head 16c959bddd59c6969546a651189feed4a7714877 using scripts/mth602_activate_v3_rest_backfill_liveness_v1.py from a clean exact-head worktree. PR #657 is superseded/closed and must not be used. PR #658 is based on PR #656 head 6172553a389fee392cc30b215f9380ba2725bae8, so it preserves runtime390 plus the now-live lane-A v4 / lane-B v9 trusted-workflow lineage while restoring both REST queued-demand capacity-floor liveness and positive GitHub rate-limit 403 in-process backoff. After V3_LIVE_CONTROLLER_BINARY_REPAIR=PASS and MTH602_V3_REST_BACKFILL_BOOTSTRAP=PASS, verify workspace-control-control-small remains active/running without restart growth under rate limiting; only then admit the 20 immutable PR #56 control requests exactly once.
 
 ## Remaining work
 
@@ -48,7 +48,7 @@ Repair the live shared v3 controller binary using Workspace Control PR #657 exac
 
 ## Blockers / gates
 
-- Root controller-binary activation gate: PR #657 is validated and mergeable, but the shared live v3 controller binary still runs the runtime390 source that treats GitHub rate-limit HTTP 403 as fatal and lacks the bounded REST queued-demand capacity floor. Connected Workspace Shell cannot perform this root binary swap without a reviewed root helper approval, so operator sudo is the smallest remaining action.
+- Root controller-binary activation gate: corrected PR #658 is validated and mergeable, but live controller replacement requires operator sudo. Connected Workspace Shell cannot mint the reviewed root approval. PR #657 is superseded/closed and must not be activated.
 
 ## Fresh-chat initialization
 
