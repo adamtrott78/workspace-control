@@ -19,6 +19,7 @@ class MTH602RestBackfillBootstrapTests(unittest.TestCase):
         self.assertIn("restDesiredFloor", CONTROLLER)
 
     def test_launcher_selects_go_by_exact_module_compatibility(self):
+        self.assertIn('"/opt/workspace-ci/go/1.26.3/bin/go"', LAUNCHER)
         self.assertIn('"/usr/local/go/bin/go"', LAUNCHER)
         self.assertIn('"GOTOOLCHAIN": "local"', LAUNCHER)
         self.assertIn('"list", "-m"', LAUNCHER)
