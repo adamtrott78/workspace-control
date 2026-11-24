@@ -63,9 +63,19 @@ def test_live_e1_supervisor_s1_is_durable_read_only_projection() -> None:
 
 class DiscoveryTests_tests_test_workspace_semantic_execution_research_iterate_e1_live_py(unittest.TestCase):
     def test_live_e1_harness_compiles(self) -> None:
-        globals()[\"test_live_e1_harness_compiles\"]()\n\n    def test_live_e1_has_required_real_topology(self) -> None:
-        globals()[\"test_live_e1_has_required_real_topology\"]()\n\n    def test_live_e1_workspace_shell_is_literal_and_read_only(self) -> None:
-        globals()[\"test_live_e1_workspace_shell_is_literal_and_read_only\"]()\n\n    def test_live_e1_binds_frozen_research_engine_source(self) -> None:
-        globals()[\"test_live_e1_binds_frozen_research_engine_source\"]()\n\n    def test_live_e1_shell_packet_explicitly_allows_only_read_only_inspection_and_publication(self) -> None:
-        globals()[\"test_live_e1_shell_packet_explicitly_allows_only_read_only_inspection_and_publication\"]()\n\n    def test_live_e1_supervisor_s1_is_durable_read_only_projection(self) -> None:
-        globals()[\"test_live_e1_supervisor_s1_is_durable_read_only_projection\"]()\n\n
+        globals()["test_live_e1_harness_compiles"]()
+
+    def test_live_e1_has_required_real_topology(self) -> None:
+        globals()["test_live_e1_has_required_real_topology"]()
+
+    def test_live_e1_workspace_shell_is_literal_and_read_only(self) -> None:
+        globals()["test_live_e1_workspace_shell_is_literal_and_read_only"]()
+
+    def test_live_e1_binds_frozen_research_engine_source(self) -> None:
+        globals()["test_live_e1_binds_frozen_research_engine_source"]()
+
+    def test_live_e1_shell_packet_explicitly_allows_only_read_only_inspection_and_publication(self) -> None:
+        globals()["test_live_e1_shell_packet_explicitly_allows_only_read_only_inspection_and_publication"]()
+
+    def test_live_e1_supervisor_s1_is_durable_read_only_projection(self) -> None:
+        globals()["test_live_e1_supervisor_s1_is_durable_read_only_projection"]()

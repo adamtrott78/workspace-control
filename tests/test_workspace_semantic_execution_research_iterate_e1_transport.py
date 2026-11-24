@@ -54,8 +54,16 @@ def test_e1_shell_scripts_parse() -> None:
 
 class DiscoveryTests_tests_test_workspace_semantic_execution_research_iterate_e1_transport_py(unittest.TestCase):
     def test_e1_linux_binds_candidate_harness_fixture_and_consumption(self) -> None:
-        globals()[\"test_e1_linux_binds_candidate_harness_fixture_and_consumption\"]()\n\n    def test_e1_remote_bootstrap_binds_only_exact_e1_linux_path(self) -> None:
-        globals()[\"test_e1_remote_bootstrap_binds_only_exact_e1_linux_path\"]()\n\n    def test_e1_windows_launcher_preserves_a7_and_clean_teardown(self) -> None:
-        globals()[\"test_e1_windows_launcher_preserves_a7_and_clean_teardown\"]()\n\n    def test_wop_installer_exposes_e1_without_removing_d4(self) -> None:
-        globals()[\"test_wop_installer_exposes_e1_without_removing_d4\"]()\n\n    def test_e1_shell_scripts_parse(self) -> None:
-        globals()[\"test_e1_shell_scripts_parse\"]()\n\n
+        globals()["test_e1_linux_binds_candidate_harness_fixture_and_consumption"]()
+
+    def test_e1_remote_bootstrap_binds_only_exact_e1_linux_path(self) -> None:
+        globals()["test_e1_remote_bootstrap_binds_only_exact_e1_linux_path"]()
+
+    def test_e1_windows_launcher_preserves_a7_and_clean_teardown(self) -> None:
+        globals()["test_e1_windows_launcher_preserves_a7_and_clean_teardown"]()
+
+    def test_wop_installer_exposes_e1_without_removing_d4(self) -> None:
+        globals()["test_wop_installer_exposes_e1_without_removing_d4"]()
+
+    def test_e1_shell_scripts_parse(self) -> None:
+        globals()["test_e1_shell_scripts_parse"]()

@@ -15,4 +15,4 @@ def test_d4_route_teardown_grace_accepts_only_clean_remote_exit() -> None:
 
 class DiscoveryTests_tests_test_workspace_semantic_execution_operator_bridge_stage12_teardown_py(unittest.TestCase):
     def test_d4_route_teardown_grace_accepts_only_clean_remote_exit(self) -> None:
-        globals()[\"test_d4_route_teardown_grace_accepts_only_clean_remote_exit\"]()\n\n
+        globals()["test_d4_route_teardown_grace_accepts_only_clean_remote_exit"]()

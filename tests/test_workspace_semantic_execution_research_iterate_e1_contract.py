@@ -33,7 +33,13 @@ def test_e1_keeps_recovery_and_soak_separate() -> None:
 
 class DiscoveryTests_tests_test_workspace_semantic_execution_research_iterate_e1_contract_py(unittest.TestCase):
     def test_e1_topology_is_mixed_and_fanin(self) -> None:
-        globals()[\"test_e1_topology_is_mixed_and_fanin\"]()\n\n    def test_e1_workspace_shell_probe_is_literal_read_only(self) -> None:
-        globals()[\"test_e1_workspace_shell_probe_is_literal_read_only\"]()\n\n    def test_e1_supervisor_is_projection_only(self) -> None:
-        globals()[\"test_e1_supervisor_is_projection_only\"]()\n\n    def test_e1_keeps_recovery_and_soak_separate(self) -> None:
-        globals()[\"test_e1_keeps_recovery_and_soak_separate\"]()\n\n
+        globals()["test_e1_topology_is_mixed_and_fanin"]()
+
+    def test_e1_workspace_shell_probe_is_literal_read_only(self) -> None:
+        globals()["test_e1_workspace_shell_probe_is_literal_read_only"]()
+
+    def test_e1_supervisor_is_projection_only(self) -> None:
+        globals()["test_e1_supervisor_is_projection_only"]()
+
+    def test_e1_keeps_recovery_and_soak_separate(self) -> None:
+        globals()["test_e1_keeps_recovery_and_soak_separate"]()
