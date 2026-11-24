@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e1-authority-v0.3",
+  "status": "PENDING_OPERATOR_WOP_E1_RETRY_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Rebind the same still-unconsumed corrected E1 live-attempt allocation to the repaired candidate-baseline transport source after authority v0.2 aborted before the consumption marker.",
+  "approval_basis": {
+    "source": "existing one-attempt operator approval already frozen in authority v0.2",
+    "original_scope": "EXACTLY_ONE_CORRECTED_E1_RETRY_ATTEMPT",
+    "prior_authority": "architecture/workspace-semantic-execution-research-iterate-e1-authority.v0.2.json",
+    "prior_abort": "ABORTED_PRECONSUMPTION_STALE_CANDIDATE_BASELINE_BINDING",
+    "prior_live_consumption_marker_reached": false,
+    "prior_live_attempt_consumed": false,
+    "additional_attempts_granted": 0,
+    "standing_or_future_authority_inferred": false,
+    "replacement_is_exact_rebinding_of_same_unconsumed_attempt": true
+  },
+  "reviewed_source": {
+    "review_head": "5c491ed3c25126963c278f17c28e76b647a17dca",
+    "review_path": "architecture/workspace-semantic-execution-research-iterate-e1-retry-review.v0.5.json",
+    "review_blob": "2c8e08f70e97b5465bf39f73f7894c2dddf4acde",
+    "validation": {
+      "workspace_control_run": 3189,
+      "semantic_execution_run": 492,
+      "operator_bridge_run": 762,
+      "result": "SUCCESS"
+    }
+  },
+  "execution_bindings": {
+    "source_parent_head": "5c491ed3c25126963c278f17c28e76b647a17dca",
+    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "benchmarks/workspace-semantic-execution/private_route_research_iterate_e1_v1.sh": "24d02a9e7242da08a57478d847ffb8149c73907f",
+    "semantic-execution/src/workspace_semantic_execution/application/packet_compiler.py": "cf6200aa4b5a669dd023bc3c6478770bf4658528",
+    "benchmarks/workspace-semantic-execution/live_research_iterate_e1.py": "055c692cc6b321a8e74906a30d0c8752346064ba",
+    "operator-bridge/tools/run-research-iterate-e1-wop.ps1": "612b53b8c7703265aeb89d57040ddc3b52045fca",
+    "operator-bridge/tools/run-research-iterate-e1-remote-bootstrap.sh": "65816def4f45c3b25a642b8375a98dd2ceb91e67",
+    "operator-bridge/tools/install-wop-commands.ps1": "5624145e51ffd36af8d16ab7d3df7d595d59e8f2",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417"
+  },
+  "repaired_preflight_binding": {
+    "launcher_expected_candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "remote_candidate_branch": "refs/heads/worker-result-candidates-v1",
+    "failure_before_backend_ready_is_non_consuming": true,
+    "no_candidate_history_rewrite": true
+  },
+  "workspace_shell_authority": {
+    "literal_mentions": [
+      "@Workspace Shell",
+      "@github"
+    ],
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "prohibited_tools": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper"
+    ],
+    "privileged_execution": false,
+    "repository_mutation": false,
+    "service_mutation": false,
+    "authority_widening": false
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": false,
+    "reusable": true,
+    "no_silent_retry": true,
+    "live_consumption_marker": "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "consumed_on_success_or_failure_after_marker": true,
+    "required_pre_consumption_order": [
+      "E1_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_E1_ROUTE_ABSENT=PASS",
+      "E1_SEMANTIC_LIVE_BINDING=PASS",
+      "E1_WINDOWS_READY_GATE=PASS",
+      "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+    ],
+    "required_mission_markers": [
+      "E1_ROOT_DECOMPOSE=PASS",
+      "E1_SUPERVISOR_S1_REHYDRATION=PASS",
+      "E1_CHILD_CONTRACT_INHERITANCE=PASS",
+      "E1_EXACT_SOURCE=PASS",
+      "E1_ANALYSIS=PASS",
+      "E1_WORKSPACE_SHELL_EXPECTED_VALUES_HIDDEN=PASS",
+      "E1_WORKSPACE_SHELL_READ_ONLY_PROBE=PASS",
+      "E1_FAN_IN=PASS",
+      "E1_RESEARCH_ITERATE={...\"result\":\"PASS\"...}",
+      "PRIVATE_ROUTE_RESEARCH_ITERATE_E1_V1=PASS"
+    ]
+  },
+  "accepted_frontend": {
+    "src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "changed": false,
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "page_content_scraping": false
+  },
+  "launch_contract": {
+    "exact_authority_sha_required": true,
+    "branch_must_remain_at_authority_commit_before_launch": true,
+    "wop_driver_refresh_required_once": true
+  },
+  "postcondition": "One still-unconsumed corrected E1 attempt only. Once E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS appears, success or failure consumes this allocation."
+}
