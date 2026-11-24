@@ -18,6 +18,13 @@ class MTH602RestBackfillBootstrapTests(unittest.TestCase):
         )
         self.assertIn("restDesiredFloor", CONTROLLER)
 
+    def test_launcher_selects_go_by_exact_module_compatibility(self):
+        self.assertIn('"/usr/local/go/bin/go"', LAUNCHER)
+        self.assertIn('"GOTOOLCHAIN": "local"', LAUNCHER)
+        self.assertIn('"list", "-m"', LAUNCHER)
+        self.assertIn("GO_TOOLCHAIN_SELECTED=", LAUNCHER)
+        self.assertIn("no installed Go compiler can parse the exact controller module", LAUNCHER)
+
     def test_launcher_uses_existing_transactional_controller_only_repair(self):
         self.assertIn("lambda_ci_v3_live_controller_repair_v1", LAUNCHER)
         self.assertIn("REFRESH_V3_CONTROLLER_BINARY_LIVE_V1", LAUNCHER)
