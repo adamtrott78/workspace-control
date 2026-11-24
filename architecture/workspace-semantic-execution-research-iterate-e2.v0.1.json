@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e2-v0.1",
+  "status": "IMPLEMENTATION_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "e1_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.4.json",
+    "e1_head": "78385f17c67cd32b99bd36bb5f84032f8dd730b9",
+    "e1_result": "PASS"
+  },
+  "objective": "Prove an integrated research-iterate mission can survive deliberate worker ownership loss, persistent-session loss, and orchestrator process loss by reconstructing execution solely from durable typed state, while fencing stale generations and requiring no manual state reconstruction.",
+  "invariant": "Conversation/session/process memory is a replaceable cache. Durable typed state, provenance, generation fencing, and validator evidence remain authoritative.",
+  "phases": [
+    {
+      "id": "E2-C1",
+      "name": "deterministic recovery canary",
+      "fault_injection": [
+        "recover active process generation while an operator action is locally prepared",
+        "fence the bound persistent Instant session generation",
+        "attempt a late result from the retired generation",
+        "discard and recreate RuntimeCoordinator/broker/dispatcher objects"
+      ],
+      "required_proofs": [
+        "old operator action becomes STALE",
+        "session generation advances and requires replacement",
+        "late old candidate is rejected with zero durable mutation",
+        "new coordinator rehydrates process/session/action state from durable store",
+        "replacement packet is deterministically recompiled with new process/session generations",
+        "replacement worker result completes",
+        "a second fresh coordinator observes COMPLETED state",
+        "no chat transcript is persisted in the durable graph"
+      ]
+    },
+    {
+      "id": "E2-C2",
+      "name": "PostgreSQL restart canary",
+      "status": "NEXT_AFTER_C1",
+      "objective": "Repeat the same recovery sequence across fresh PostgreSQL-backed application instances so recovery is proven across process boundaries rather than only object replacement."
+    },
+    {
+      "id": "E2-LIVE",
+      "name": "real Instant recovery mission",
+      "status": "GATED_AFTER_C1_C2",
+      "objective": "Inject real managed-worker/session/process loss during a research-iterate mission, replace the session, reject stale worker output, rehydrate Supervisor state, and complete fan-in/synthesis without manual state relay."
+    }
+  ],
+  "authority_boundaries": {
+    "canaries": "non-authoritative test execution only",
+    "live_attempt": "requires separately reviewed one-shot live authority",
+    "stale_generation_acceptance": false,
+    "authority_widening": false,
+    "manual_state_relay": false,
+    "workspace_shell_mutation": false
+  },
+  "acceptance": {
+    "c1_required_before_c2": true,
+    "c2_required_before_live": true,
+    "live_success_requires": [
+      "worker loss injection observed",
+      "session generation replacement observed",
+      "orchestrator restart observed",
+      "stale result rejected without mutation",
+      "fresh durable rehydration succeeds",
+      "mission reaches validated terminal synthesis",
+      "zero manual durable-state reconstruction"
+    ]
+  }
+}
