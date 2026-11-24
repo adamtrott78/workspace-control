@@ -1,6 +1,7 @@
 """Static acceptance checks for the live E2 recovery harness."""
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -47,3 +48,20 @@ def test_e2_live_harness_finishes_replacement_generation_and_existing_e1_safety(
     assert '"browser_page_content_scraping": False' in text
     assert '"automatic_typing_or_submission": False' in text
     assert '"workspace_shell_exec_used": False' in text
+
+
+def test_e2_live_harness_imports_cleanly_and_exposes_run_entrypoint() -> None:
+    spec = importlib.util.spec_from_file_location("live_research_iterate_e2", HARNESS)
+    module = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(module)
+    assert callable(module.run_e2)
+    params = module._operator_params(
+        task_id="test",
+        action_id="action:test",
+        slot_id="slot:test",
+        sequence=9,
+        target_ref="github-candidate://example/test.json",
+        session_generation=1,
+    )
+    assert params.session_generation == 1
