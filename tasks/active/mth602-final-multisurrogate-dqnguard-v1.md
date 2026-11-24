@@ -36,15 +36,15 @@ Execute a rigorous MTH602-to-journal research program centered on backbone compe
 
 ## Next safe action
 
-Monitor exactly PA3-PA8 t007 backbone run 45273831156/job 138040300764 on lane A at PADataset PR #40 head da521eaee997c56012290c9c261ee1831432ebbc. Do not submit a duplicate. On terminal SUCCESS, require a provenance-valid artifact and known-validation acceptance (val macro-F1 >=0.95 and min-class F1 >=0.90) before freezing. Target/test/OSR evidence remains forbidden for training/checkpoint/retry selection. While the backbone runs, continue the already-frozen surrogate-selector replication/confusion-exclusion analysis. After backbone acceptance, admit exactly PA3<-PA8 and PA8<-PA3 under unchanged standard DQNGuard.
+Validate PADataset PR #54 exact binding head f1256048b51fd863ad3fb46f9c547eff401016e7 using available CI/contract evidence. If valid and no duplicate PA3-PA8 directional admissions exist, admit exactly PA3<-PA8 and PA8<-PA3 under unchanged standard-DQNGuard policy using artifact 14880924639. In parallel continue frozen Rule A/B/C plus retrospective confusion-exclusion analysis. Do not alter the accepted backbone or use OSR evidence for training/checkpoint/retry selection.
 
 ## Remaining work
 
-- Monitor only final PA3-PA8 t007 backbone run 45273831156/job 138040300764; do not duplicate, restart, or alter the frozen PR #40 recipe while it is healthy.
-- On terminal SUCCESS, validate artifact/checkpoint provenance and apply the predeclared known-validation acceptance gate: val macro-F1 >=0.95 and min-class F1 >=0.90. Target/test/OSR evidence is prohibited from checkpoint/freeze/retry selection.
-- Complete the frozen surrogate-selector replication analysis: historical Rule A guard-score calibration recall, Rule B confidence geometry, Rule C feature geometry, plus the new retrospective confusion-exclusion diagnostic. Keep target-observing confusion analysis descriptive/oracle-only.
-- Once a provenance-valid PA3-PA8 t007 backbone is frozen, admit exactly PA3<-PA8 and PA8<-PA3 under the unchanged standard-DQNGuard evaluator to complete the 20-cell matrix.
-- After 20/20 cells are complete, report selector correlations, within-target rank quality, top-1/top-2 selection accuracy, oracle regret, and the confusion-exclusion relationship without allowing post-freeze OSR evidence to rewrite training history.
+- Validate PR #54 binding head f1256048b51fd863ad3fb46f9c547eff401016e7 and admit exactly the two final post-freeze OSRs PA3<-PA8 and PA8<-PA3; do not duplicate.
+- Collect the two final result records and complete the 20/20 directional t007 OSR matrix.
+- Complete the frozen surrogate-selector replication: Rule A guard-score calibration recall, Rule B confidence geometry (P1, P1-P2 gap, entropy), Rule C feature geometry (centroid distance/margin), plus retrospective confusion-exclusion diagnostics.
+- Report raw and target-centered correlations, within-target ranking, top-1/top-2 accuracy, oracle regret, and distinguish deployable target-blind rules from target-observing retrospective diagnostics.
+- Preserve all scientific invariants: the PA3-PA8 backbone is frozen from known-validation only; target/test/OSR evidence cannot rewrite training/checkpoint/retry history.
 
 ## Blockers / gates
 
