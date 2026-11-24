@@ -1,25 +1,25 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
-  "status": "VALIDATED_E2_LIVE_EXECUTABLE_STACK",
-  "validated_head": "d04d06cee576a21e77286f7f6efe66485ec34375",
+  "status": "VALIDATED_E2_PREFLIGHT_BINDING_REPAIR",
+  "validated_head": "1ae99627c70eeccc3a6864b0b56a91ddc1c9707c",
   "validation_runs": {
     "semantic_execution": {
       "workflow_name": "Semantic Execution Validation",
-      "run_id": 45509804669,
-      "run_number": 506,
+      "run_id": 45511804732,
+      "run_number": 509,
       "conclusion": "success"
     },
     "operator_bridge": {
       "workflow_name": "Operator Bridge Validation",
-      "run_id": 45509804733,
-      "run_number": 775,
+      "run_id": 45511804738,
+      "run_number": 778,
       "conclusion": "success"
     },
     "workspace_control": {
       "workflow_name": "Workspace Control Validation",
-      "run_id": 45509804842,
-      "run_number": 3202,
+      "run_id": 45511806020,
+      "run_number": 3207,
       "conclusion": "success"
     }
   },
@@ -87,10 +87,10 @@
     "prefix_repair_present": true,
     "foreground_patch_reverted": true,
     "cross_domain_inheritance_hardened": true,
-    "workspace_control_run": 3191,
-    "semantic_execution_run": 494,
-    "operator_bridge_run": 764,
-    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "workspace_control_run": 3207,
+    "semantic_execution_run": 509,
+    "operator_bridge_run": 778,
+    "candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
     "baseline_binding_repair_head": "4fbc3bf695d9ffa2b8533a26b8ee20946f14fb59",
     "launcher_candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
     "private_route_blob": "24d02a9e7242da08a57478d847ffb8149c73907f",
@@ -121,6 +121,9 @@
     "e2_live_wop_blob": "40f47ff0b41b2ec274d98d1d6e341794e7aee5b5",
     "e2_live_bootstrap_blob": "15ea060adc61c0bc427612601c086d220630c21c",
     "e2_live_linux_blob": "be7b358a558b950caa22ebe1996dc3fdf3daeca7",
-    "e2_live_installer_blob": "9742373ca84df33fdb883577c827636a7883c28e"
+    "e2_live_installer_blob": "9742373ca84df33fdb883577c827636a7883c28e",
+    "e2_preflight_binding_repair_head": "1ae99627c70eeccc3a6864b0b56a91ddc1c9707c",
+    "e2_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "e2_frontend_baseline_display": "a9532ca8b86b7839822939a970e16af1d4a41864"
   }
 }

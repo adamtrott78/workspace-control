@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e2-live-review-v0.3",
+  "status": "VALIDATED_EXECUTABLE_REVIEW_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-research-iterate-e2-live-authority.v0.1.json",
+    "result": "ABORTED_PRECONSUMPTION_OPERATOR_HTTP_BLOB_BINDING_TYPO",
+    "live_consumption_marker_reached": false,
+    "live_attempt_consumed": false,
+    "candidate_history_mutated": false
+  },
+  "executable": {
+    "head": "1ae99627c70eeccc3a6864b0b56a91ddc1c9707c",
+    "candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
+    "validation": {
+      "workspace_control_run": 3207,
+      "semantic_execution_run": 509,
+      "operator_bridge_run": 778,
+      "result": "SUCCESS"
+    },
+    "exact_bindings": {
+      "harness": {
+        "path": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
+        "blob": "d6acd6a4266641813deecb900b877b7250b02530"
+      },
+      "linux_transaction": {
+        "path": "benchmarks/workspace-semantic-execution/private_route_research_iterate_e2_v1.sh",
+        "blob": "818fd71b1c34851e5bfe1c4ee46c542411a0e265"
+      },
+      "windows_launcher": {
+        "path": "operator-bridge/tools/run-research-iterate-e2-wop.ps1",
+        "blob": "d5757b2c5241e7400be034a2a0f2a55e8af89fd7"
+      },
+      "remote_bootstrap": {
+        "path": "operator-bridge/tools/run-research-iterate-e2-remote-bootstrap.sh",
+        "blob": "15ea060adc61c0bc427612601c086d220630c21c"
+      },
+      "transport_test": {
+        "path": "tests/test_workspace_semantic_execution_research_iterate_e2_transport.py",
+        "blob": "e364a80cc1fe76e019b2070de6fe09842351645d"
+      }
+    }
+  },
+  "repaired_preconsumption_abort": {
+    "semantic_sha": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "stale_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee28c",
+    "corrected_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "stale_frontend_baseline_display": "a9532ca8b86b7839822939a970e26af1d4a41864",
+    "corrected_frontend_baseline_display": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "regression_assertions_added": true
+  },
+  "approval_continuity": {
+    "original_operator_statement": "GOGOGOGOGOGOGOGO",
+    "original_scope": "EXACTLY_ONE_LIVE_E2_FAULT_INJECTION_ATTEMPT",
+    "prior_authority_consumed": false,
+    "prior_contract_abort_before_marker_does_not_consume": true,
+    "replacement_authority_is_same_unconsumed_attempt": true,
+    "additional_attempts_granted": 0
+  },
+  "live_fault_contract": {
+    "manual_service_points": 5,
+    "service_order": [
+      "root decomposition",
+      "analysis generation 0",
+      "analysis generation 1 replacement",
+      "Workspace Shell read-only probe",
+      "final synthesis"
+    ],
+    "process_generation_transition": "0->1",
+    "session_generation_transition": "0->1",
+    "runtime_rehydration_source": "PostgreSQL",
+    "stale_candidate_required_outcome": "REJECTED_WITHOUT_DURABLE_MUTATION"
+  },
+  "authority_gate": {
+    "live_attempt_authorized": false,
+    "may_rebind_same_unconsumed_operator_approval": true,
+    "fresh_exact_authority_required": true,
+    "no_silent_retry_after_consumption": true
+  },
+  "next_gate": "Validate this exact review head, then persist one replacement authority for the same still-unconsumed E2 live attempt."
+}
