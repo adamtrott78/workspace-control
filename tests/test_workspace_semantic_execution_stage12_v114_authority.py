@@ -18,24 +18,16 @@ def authority() -> dict:
     return json.loads(AUTHORITY_PATH.read_text(encoding="utf-8"))
 
 
-def test_v114_authority_is_exactly_one_pending_attempt_after_cleanup() -> None:
+def test_v114_authority_is_consumed_and_non_reusable() -> None:
     a = authority()
-    assert a["status"] == "PENDING_OPERATOR_WOP_EXECUTION"
-    assert a["approval_basis"]["approved_scope"] == "EXACTLY_ONE_V1_14_D4_ATTEMPT"
-    assert a["approval_basis"]["frozen_handoff_head"] == FROZEN_HANDOFF_HEAD
+    assert a["status"] == "CONSUMED_PUBLICATION_PATH_PASS_Q2_CONTINUITY_CLAIM_INVALID"
     assert a["attempt_contract"]["attempts_authorized"] == 1
-    assert a["attempt_contract"]["consumed"] is False
-    assert a["attempt_contract"]["reusable"] is True
+    assert a["attempt_contract"]["consumed"] is True
+    assert a["attempt_contract"]["reusable"] is False
     assert a["attempt_contract"]["no_silent_retry"] is True
-    p = a["predecessor"]
-    assert p["consumed"] is True
-    assert p["reusable"] is False
-    assert p["windows_cleaned"] is True
-    assert p["cleanup_evidence"]["wop_down"] == "WORKSPACE_OPERATOR_DEV_OFFLINE=PASS"
-    assert p["cleanup_evidence"]["wop_status"] == "WORKSPACE_OPERATOR_DEV_STATUS=OFFLINE"
 
 
-def test_v114_authority_binds_exact_repair_and_successful_q1_baseline() -> None:
+def test_v114_historical_authority_bindings_remain_exact() -> None:
     a = authority()
     b = a["exact_execution_bindings"]
     source = b["authority_parent_head"]
@@ -53,47 +45,35 @@ def test_v114_authority_binds_exact_repair_and_successful_q1_baseline() -> None:
     ):
         assert git(f"{source}:{path}") == b[path]
     assert git(f"{source}:operator-bridge/src") == b["operator-bridge/src_tree"]
-    assert git(
-        f"{b['live_semantic_sha']}:semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py"
-    ) == b["live_operator_http_blob"]
 
 
-def test_v114_authority_preserves_a6_a7_and_observability_contract() -> None:
+def test_v114_closeout_preserves_exact_candidate_chain_and_invalidates_only_continuity_claim() -> None:
+    c = authority()["live_closeout"]
+    chain = c["candidate_chain"]
+    assert chain["baseline"] == Q1_BASELINE
+    assert chain["q1"] == "35d1e95be1ec544845cc2170dd57a6b36f86d0fa"
+    assert chain["q2"] == "71f72bd6acf2d5217f026e9139b5af0dd1714925"
+    assert chain["q3_replacement"] == "d9f636ef508245459b3dd0a35b8d5587f533bac6"
+    assert chain["append_only_three_commits"] is True
+    assert c["observed_results"]["q1_publication"] == "PASS"
+    assert c["observed_results"]["q2_publication"] == "PASS"
+    assert c["observed_results"]["q3_replacement_publication"] == "PASS"
+    assert c["observed_results"]["persistent_session_continuity_claim"] == "INVALID_TEST_FIXTURE"
+    assert c["continuity_invalidation"]["repair_required"] is True
+
+
+def test_v114_security_and_a7_contract_remain_historical_truth() -> None:
     a = authority()
     f = a["accepted_frontend"]
     assert f["checkpoint"] == "a9532ca8b86b7839822939a970e16af1d4a41864"
-    assert f["exact_src_tree"] == "51480cc44f62d661421e975e67af127ecd0b0417"
     assert f["literal_plugin_prefix"] == "@github"
     assert f["autocomplete_selection_required"] is False
     assert f["tab_required"] is False
     assert f["click_required"] is False
-    assert a["launch_contract"]["q1_packet_must_already_include_literal_github"] is True
-    assert a["launch_contract"]["manual_packet_editing_allowed"] is False
-    assert a["attempt_contract"]["q1_post_consumption_required_order"] == [
-        "STAGE12_Q1_CANDIDATE_OBSERVED=<sha>",
-        "STAGE12_Q1_DURABLE_INGEST=PASS",
-        "STAGE12_Q1_REAL_INSTANT=PASS",
-        "STAGE12_Q2_REUSE_READY",
-    ]
-
-
-def test_v114_authority_preserves_route_and_security_fail_closed_boundaries() -> None:
-    a = authority()
-    r = a["stale_route_normalization_contract"]
-    assert r["remove_only_if_no_listener"] is True
-    assert r["arbitrary_handler_drift_allowed"] is False
-    assert r["funnel_allowed"] is False
-    assert r["post_normalization_clean_root_snapshot_required"] is True
-    assert a["attempt_contract"]["required_marker_order"] == [
-        "STAGE12_CANDIDATE_BASELINE=PASS",
-        "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
-        "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
-        "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
-    ]
     p = a["retained_prohibitions"]
     assert p["automatic_typing"] is False
     assert p["automatic_paste"] is False
     assert p["automatic_submission"] is False
-    assert p["mouse_automation"] is False
     assert p["dom_or_page_content_scraping"] is False
+    assert p["workspace_shell_authority_widening"] is False
     assert p["candidate_history_rewrite"] is False

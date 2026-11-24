@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.14",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "CONSUMED_PUBLICATION_PATH_PASS_Q2_CONTINUITY_CLAIM_INVALID",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "backend_task": "workspace-semantic-execution-backend-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
@@ -101,8 +101,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "candidate_baseline_required_marker": "STAGE12_CANDIDATE_BASELINE=PASS",
     "stale_route_clear_marker_optional": "TAILSCALE_STALE_STAGE12_ROUTE_CLEARED=PASS",
     "clean_route_required_marker": "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
@@ -184,5 +184,34 @@
     "rule": "The exact v1.14 authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "Exactly one v1.14 D4 attempt is authorized. Any abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS does not consume the live attempt; any success or failure after that marker consumes it and requires a fresh diagnosis/review/validation/authority cycle for retry."
+  "postcondition": "Exactly one v1.14 D4 attempt is authorized. Any abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS does not consume the live attempt; any success or failure after that marker consumes it and requires a fresh diagnosis/review/validation/authority cycle for retry.",
+  "live_closeout": {
+    "observed_date": "2026-11-24",
+    "consumption_evidence": {
+      "rule": "Under the exact v1.14 harness, Q1 cannot be serviced before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS; an exact accepted Q1 candidate therefore proves that the one-shot attempt crossed the consumption point.",
+      "q1_candidate_commit": "35d1e95be1ec544845cc2170dd57a6b36f86d0fa"
+    },
+    "candidate_chain": {
+      "baseline": "daa18627982a1d406eb88d44145113f0e99561e0",
+      "q1": "35d1e95be1ec544845cc2170dd57a6b36f86d0fa",
+      "q2": "71f72bd6acf2d5217f026e9139b5af0dd1714925",
+      "q3_replacement": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+      "final_candidate_head": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+      "append_only_three_commits": true,
+      "source_branch_unchanged_during_candidate_publication": true
+    },
+    "observed_results": {
+      "q1_publication": "PASS",
+      "q2_publication": "PASS",
+      "q3_replacement_publication": "PASS",
+      "stale_generation_replacement_path": "OBSERVED_VIA_SESSION_GENERATION_1_Q3_CANDIDATE",
+      "persistent_session_continuity_claim": "INVALID_TEST_FIXTURE"
+    },
+    "continuity_invalidation": {
+      "reason": "The q2 continuity evidence value was accidentally serialized into the worker-visible candidate-result-values finding, so q2 publication succeeded but did not independently prove recovery from preceding conversation context.",
+      "worker_self_reported_caveat": true,
+      "repair_required": true
+    },
+    "disposition": "CONSUMED_NON_REUSABLE_REPAIR_AND_FRESH_AUTHORITY_REQUIRED"
+  }
 }
