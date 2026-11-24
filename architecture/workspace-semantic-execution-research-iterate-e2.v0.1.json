@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e2-v0.1",
-  "status": "LIVE_EXECUTABLE_REVIEW_FROZEN_AUTHORITY_GATE",
+  "status": "E2_LIVE_PASS_COMPLETE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "e1_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.4.json",
@@ -88,7 +88,7 @@
     {
       "id": "E2-LIVE",
       "name": "real Instant recovery mission",
-      "status": "VALIDATED_EXECUTABLE_REVIEW_NOT_AUTHORIZED",
+      "status": "PASS",
       "objective": "Inject real managed-worker/session/process loss during a research-iterate mission, replace the session, reject stale worker output, rehydrate Supervisor state, and complete fan-in/synthesis without manual state relay.",
       "implementation": {
         "harness_path": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
@@ -124,6 +124,17 @@
         "operator_bridge_run": 775,
         "result": "SUCCESS",
         "candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb"
+      },
+      "accepted_live_result": {
+        "authority_head": "2970c9ab635a338826b66847d8deb51ad8769e3a",
+        "mission_id": "research-iterate-e2:853bb07fa6a245739331a11ed5fd4224",
+        "candidate_head": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+        "process_generation": "0->1",
+        "session_generation": "0->1",
+        "stale_candidate_rejected_without_mutation": true,
+        "runtime_rehydration_source": "PostgreSQL",
+        "final_result": "PASS",
+        "cleanup": "PASS"
       }
     }
   ],

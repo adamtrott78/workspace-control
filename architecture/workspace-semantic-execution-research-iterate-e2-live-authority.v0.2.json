@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e2-live-authority-v0.2",
-  "status": "PENDING_OPERATOR_WOP_E2_EXECUTION",
+  "status": "CONSUMED_PASS_E2_LIVE_DURABLE_RECOVERY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Rebind the same still-unconsumed E2 live fault-injection attempt to corrected preflight blob bindings after authority v0.1 aborted before backend-ready and before the consumption marker.",
   "approval_basis": {
@@ -84,8 +84,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "no_silent_retry": true,
     "live_consumption_marker": "E2_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "abort_before_marker_does_not_consume_live_attempt": true,
@@ -127,5 +127,71 @@
     "branch_must_remain_at_authority_commit_before_launch": true,
     "installer_refresh_required_once": true
   },
-  "postcondition": "Same one unconsumed E2 live attempt only. After E2_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority."
+  "postcondition": "Same one unconsumed E2 live attempt only. After E2_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority.",
+  "live_closeout": {
+    "observed_date": "2026-11-24",
+    "result": "PASS",
+    "consumption_marker": "E2_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "mission_id": "research-iterate-e2:853bb07fa6a245739331a11ed5fd4224",
+    "final_schema": "workspace-semantic-research-iterate-e2.v1",
+    "final_result": "PASS",
+    "candidate_chain": {
+      "baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
+      "root_decompose": "a64deffc54a7f39b38169068549673c3434fdb9b",
+      "analysis_stale_g0": "8d3648e16929d5397dd16f34bdf0cb1837f10fa9",
+      "analysis_replacement_g1": "4f96d5c3a99414b1ff825c2668915b42fe1e50df",
+      "workspace_shell": "f5a42fffde6d654b02631e576cd6378ac8939eb7",
+      "synthesis": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+      "append_only": true
+    },
+    "observed_proofs": {
+      "root_decomposition": true,
+      "supervisor_s1_rehydration": true,
+      "child_contract_inheritance": true,
+      "deterministic_exact_source": true,
+      "fault_injection_armed": true,
+      "worker_process_session_fence": true,
+      "runtime_rehydration_from_postgres": true,
+      "supervisor_rehydration_after_loss": true,
+      "stale_worker_candidate_observed": true,
+      "stale_result_rejected_without_mutation": true,
+      "replacement_session": true,
+      "analysis_recovery": true,
+      "workspace_shell_read_only_probe": true,
+      "fan_in": true,
+      "final_synthesis": true,
+      "process_generation_recovered": "0->1",
+      "session_generation_replaced": "0->1",
+      "orchestrator_objects_discarded_and_rehydrated": true,
+      "durable_recovery_source": "PostgreSQL",
+      "manual_durable_state_relay": false,
+      "automatic_typing_or_submission": false,
+      "browser_page_content_scraping": false,
+      "paid_api_fallback": false,
+      "workspace_shell_exec_used": false,
+      "workspace_shell_reviewed_helper_used": false
+    },
+    "final_supervisor": {
+      "mission_state": "COMPLETED",
+      "process_state_counts": {
+        "COMPLETED": 4
+      },
+      "unresolved_processes": [],
+      "pending_human_judgment_decisions": 0,
+      "conversation_memory_authoritative": false,
+      "authority_mutations": 0
+    },
+    "cleanup": {
+      "tailscale_existing_config_exactly_restored": true,
+      "jupyter_root_rollback_preserved": true,
+      "private_route_pass": true,
+      "expected_postsuccess_route_teardown": true,
+      "remote_workflow_pass": true,
+      "firefox_shutdown_graceful": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true
+    },
+    "retry_policy": "NO_RETRY_REQUIRED_E2_ACCEPTED"
+  }
 }
