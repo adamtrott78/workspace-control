@@ -93,6 +93,14 @@ func newRESTVerifierTestServer(
 }
 
 
+func headerWith(values map[string]string) http.Header {
+	h := make(http.Header)
+	for key, value := range values {
+		h.Set(key, value)
+	}
+	return h
+}
+
 func TestGitHubRESTStatusIsTransientDistinguishesRateLimit403(t *testing.T) {
 	cases := []struct {
 		name   string
@@ -104,7 +112,7 @@ func TestGitHubRESTStatusIsTransientDistinguishesRateLimit403(t *testing.T) {
 		{
 			name:   "primary rate limit header",
 			status: http.StatusForbidden,
-			header: http.Header{"X-RateLimit-Remaining": []string{"0"}},
+			header: headerWith(map[string]string{"X-RateLimit-Remaining": "0"}),
 			want:   true,
 		},
 		{
@@ -122,7 +130,7 @@ func TestGitHubRESTStatusIsTransientDistinguishesRateLimit403(t *testing.T) {
 		{
 			name:   "retry after",
 			status: http.StatusForbidden,
-			header: http.Header{"Retry-After": []string{"60"}},
+			header: headerWith(map[string]string{"Retry-After": "60"}),
 			want:   true,
 		},
 		{
@@ -158,10 +166,10 @@ func TestGitHubRESTRetryDelayHonorsPrimaryReset(t *testing.T) {
 	now := time.Unix(1_000, 0)
 	resp := &http.Response{
 		StatusCode: http.StatusForbidden,
-		Header: http.Header{
-			"X-RateLimit-Remaining": []string{"0"},
-			"X-RateLimit-Reset":     []string{"1060"},
-		},
+		Header: headerWith(map[string]string{
+			"X-RateLimit-Remaining": "0",
+			"X-RateLimit-Reset":     "1060",
+		}),
 	}
 	if got, want := githubRESTRetryDelay(resp, 0, now), 65*time.Second; got != want {
 		t.Fatalf("reset-aware delay=%s want=%s", got, want)
@@ -171,7 +179,7 @@ func TestGitHubRESTRetryDelayHonorsPrimaryReset(t *testing.T) {
 func TestGitHubRESTRetryDelayHonorsRetryAfter(t *testing.T) {
 	resp := &http.Response{
 		StatusCode: http.StatusForbidden,
-		Header: http.Header{"Retry-After": []string{"120"}},
+		Header: headerWith(map[string]string{"Retry-After": "120"}),
 	}
 	if got, want := githubRESTRetryDelay(resp, 0, time.Unix(1_000, 0)), 125*time.Second; got != want {
 		t.Fatalf("Retry-After delay=%s want=%s", got, want)
