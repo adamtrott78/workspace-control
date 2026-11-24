@@ -18,37 +18,22 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Execute a rigorous MTH602-to-journal research program centered on backbone competence (H1), then resolve whether surrogate transfer remains intrinsically target-dependent or becomes target-blind-selectable (H2/H4), test multi-surrogate DQNGuard if needed (H5), and treat STFT representation as a bounded lower-priority ablation (H3). Preserve true-target quarantine, standard-DQNGuard controls, exact provenance, explicit seed separation, and a deadline-triggered pivot to complete MTH602 deliverables before December or the course due date.
 
-## Repositories
-
-### PADataset
-
-- Intent: mutate
-- Remote branch: mth602-final-multisurrogate-dqnguard-v1
-- Remote checkpoint: befe383fd67c8bca8d8ce370344b33c7e13cd52f
-- Remote verified: true
-
-### workspace-control
-
-- Intent: mutate
-- Remote branch: workspace-shell-candidate-evidence-current-v1
-- Remote checkpoint: 4469009659182c8c2f4d12d727e556f2a2995fc9
-- Remote verified: true
-
 ## Next safe action
 
-Do not duplicate any admission. PA3<-PA8 run 45434894477/job 138589906286 is terminal SUCCESS with U-F1 0.9834358549 and provenance-valid artifact 14940254253. Monitor queued PA8<-PA3 run 45434902484/job 138589937033 until it naturally acquires lane A and reaches terminal. Validate its result artifact, close the 20/20 matrix, then finalize Rule A and confusion-exclusion statistics before starting any CPU-heavy Rule B/C feature/confidence inference.
+Operator is cancelling queued PA8<-PA3 workflow run 45434902484/job 138589937033 on lane A. First verify GitHub reports that exact run terminal CANCELLED. Only then admit exactly one replacement on lane B using `/lambda-scientific-2 f1256048b51fd863ad3fb46f9c547eff401016e7 l2o_directional_eval:manifests/configs/l2o_directional_eval_v1/PA3-PA8__targetPA8__surPA3.json`. Record the new run/job binding durably, monitor it to terminal, validate its provenance-valid result artifact, and close the 20/20 matrix. After the replacement is safely running/completed, diagnose and repair lane A separately without hand-editing root state or duplicating scientific admissions.
 
 ## Remaining work
 
-- Monitor only PA8<-PA3 run 45434902484/job 138589937033; it is already admitted exactly once and queued on lane A. Do not resubmit.
-- At terminal SUCCESS, validate its result artifact and complete the 20/20 t007 directional matrix.
-- Finalize Rule A and retrospective confusion-exclusion correlations/ranking/regret on all 20 cells.
-- Only after the OSR lane is idle, execute the frozen historical Rule B confidence-geometry and Rule C feature-geometry replication on the competent backbone bank to avoid host CPU contention.
-- Preserve Rule D/confusion diagnostics as target-aware retrospective mechanism evidence, not a deployable surrogate selector; preserve all known-validation-only training invariants.
+- Verify operator cancellation of PA8<-PA3 run 45434902484/job 138589937033; do not re-admit while it is merely queued/cancelling.
+- After exact run 45434902484 is terminal CANCELLED, admit PA8<-PA3 exactly once on lane B with `/lambda-scientific-2` at frozen PR54 head f1256048b51fd863ad3fb46f9c547eff401016e7 and the unchanged PA3-PA8__targetPA8__surPA3 config.
+- Persist the replacement run/job/lane binding in the durable capsule; monitor only that replacement to terminal and validate result provenance.
+- Close the 20/20 t007 directional matrix, then finalize Rule A and confusion-exclusion statistics on all 20 cells.
+- Only after the OSR lane is idle, execute the frozen historical Rule B confidence-geometry and Rule C feature-geometry replication to avoid host CPU contention.
+- Diagnose/fix the lane-A controller/root-ledger reconciliation separately after the final OSR is safe on lane B. Preserve authority boundaries: no manual root-record edits, no duplicate admission, no recipe/checkpoint/threshold changes.
 
 ## Blockers / gates
 
-- None.
+- Operator cancellation of queued lane-A run 45434902484 must be observed as terminal CANCELLED before the lane-B replacement may be admitted.
 
 ## Fresh-chat initialization
 
