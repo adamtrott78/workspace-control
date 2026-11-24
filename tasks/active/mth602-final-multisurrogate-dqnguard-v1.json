@@ -1445,13 +1445,13 @@
   ],
   "blockers": [],
   "remaining_work": [
-    "Monitor only PA3<-PA8 run 45434894477/job 138589906286 and PA8<-PA3 run 45434902484/job 138589937033; no duplicate admissions.",
-    "At terminal SUCCESS, validate both result artifacts and append the final two U-F1/AUROC/K-REJ cells to the 20/20 t007 matrix.",
-    "Complete the frozen surrogate-selector replication: Rule A guard-score calibration recall, Rule B confidence geometry, Rule C feature geometry, plus retrospective confusion-exclusion diagnostics.",
-    "Report raw and target-centered correlations, within-target ranking, top-1/top-2 accuracy, oracle regret, and distinguish deployable target-blind rules from target-observing retrospective diagnostics.",
-    "Preserve the frozen PA3-PA8 backbone and all known-validation-only selection invariants."
+    "Monitor only PA8<-PA3 run 45434902484/job 138589937033; it is already admitted exactly once and queued on lane A. Do not resubmit.",
+    "At terminal SUCCESS, validate its result artifact and complete the 20/20 t007 directional matrix.",
+    "Finalize Rule A and retrospective confusion-exclusion correlations/ranking/regret on all 20 cells.",
+    "Only after the OSR lane is idle, execute the frozen historical Rule B confidence-geometry and Rule C feature-geometry replication on the competent backbone bank to avoid host CPU contention.",
+    "Preserve Rule D/confusion diagnostics as target-aware retrospective mechanism evidence, not a deployable surrogate selector; preserve all known-validation-only training invariants."
   ],
-  "next_safe_action": "Monitor exactly PA3<-PA8 run 45434894477/job 138589906286 and PA8<-PA3 run 45434902484/job 138589937033, serialized on lane A. Do not duplicate either admission. Collect and validate both result_record.json artifacts at terminal SUCCESS to close the 20/20 matrix. While they run, continue read-only Rule A/B/C replication and retrospective confusion-exclusion analysis.",
+  "next_safe_action": "Do not duplicate any admission. PA3<-PA8 run 45434894477/job 138589906286 is terminal SUCCESS with U-F1 0.9834358549 and provenance-valid artifact 14940254253. Monitor queued PA8<-PA3 run 45434902484/job 138589937033 until it naturally acquires lane A and reaches terminal. Validate its result artifact, close the 20/20 matrix, then finalize Rule A and confusion-exclusion statistics before starting any CPU-heavy Rule B/C feature/confidence inference.",
   "last_executor": "instant-worker",
   "last_surface": "github+workspace-shell+heartbeat",
   "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged. Workspace Shell mountpoint repair is live at runtime f3f999ff0200e2450d83e93887b2450f1ee83e2f with authority snapshot 29ba42ffde725c16f5cfc70b3c47ecfd76d2511d. Architecture-B PR #23 is candidate-validated at 82790f9c07d5eb9ea48b37be026672c0a1f7fad8, including a repair that physically delays target-open materialization until after winner freeze. Draft PADataset PR #33 stages the bounded GPU2 archb_cross_surrogate opcode but is not live. PADataset PR #33 was explicitly authorized and merged at 6a3c17c27a401f059f9ded1287d274d766f61283; default-branch GPU2 workflow blob is now 650a529aeee51b53234a84b3afea8743cc527688. Workspace Control draft PR #643 stages chained refresh-v4 at ef43b5352cf4c3e799a09ff917878b6e32ef1882; 37 dual-lane/refresh regression tests pass. Live trust remains refresh-v3 until root/operator v4 activation. PADataset PR #34 was explicitly authorized and merged at b0cbf6c1436e18cb5b793596dd790560bd2cec08; default-branch GPU2 workflow blob is now ba549b4d1560b18a9e40ef531387bc1accc90d43. Workspace Control draft PR #644 stages chained refresh-v5 at d6e2e7303c0e128f5847178253ab792ff1187d6a; 45 dual-lane/refresh regression tests pass. Live trust remains refresh-v4 until root/operator v5 activation. Fresh-chat checkpoint 2026-11-17: B0 run #97 PASS, B1 #98 PASS, B2 #99 PASS; B2 triggered bounded B3 from pseudo-open complementary value only. B3 trust PR #36 merged; refresh-v7 live PASS; B3 run #100 / 44176896203 / job 134370560805 admitted exactly once and currently IN_PROGRESS. The next worker must validate run #100 artifact at terminal completion and must not duplicate B3. Heartbeat writer may still belong to the prior conversation; durable Git/task state is authoritative. Architecture-B B3 is now terminal PASS: initial run #100 failed only at a deterministic result-record candidate-id lookup; repaired PR #23 head 0ea0d2aa655a943e921918500f72b987e79922c3 passed 27 tests; exactly one retry run #101 / 44180560029 succeeded with artifact 14372803489 digest sha256:c72fe383cdfd03ffb96eb3dda632ff1f27325066e109542e9a2209ff383423ea. Frozen winner PA3|gap_variance_equal|scale=2 was selected from off-diagonal pseudo-open evidence only; PA2 metrics remain descriptive. Current focus returns to the separate STFT lane, still gated on repaired PA1 provenance preflight; preserve the first 120 overlay records. STFT live repaired PA1 provenance preflight is now confirmed as a local/operator-only gate: connected candidate execution cannot access the required raw OTA/legacy-cache environment, and candidate-pytest lacks h5py. PR #21 remains exact head fd15238aa369118e61b21ab714900861dbb99d2c, draft/unmerged; CPU canary 43788103594 is already PASS. Preserve the first 120 overlays and run the exact-SHA persistent local bootstrap before any resume. STFT exact-checkout import shadowing was repaired after the first local preflight attempt: fd15238 failed before any cache/GPU work because stdin Python imported experiments from the canonical repo cwd ahead of PYTHONPATH. PR #21 head 5146d718006e38c6d9110e158c80dfa43b86e882 now cd's to exact ROOT before preflight imports; candidate contract 2/2 PASS and CPU canary run 44190444960 SUCCESS. The live PA1 provenance probe must now be retried locally at this exact head; first 120 overlays remain preserved. STFT record-121 provenance failure was observed after the 5146d718 local retry passed environment/raw OTA, PA1 probe, GPU-vs-CPU transform, and trajectory/provenance tests and skipped records 1-120. The failing source ota_pa1_run01__shard_001__PA1.mat exposed historical caches without protocol_name metadata. PR #21 head 122f5d21e648498b4afaa6b857b69f39dbb18222 adds a fail-closed unique-basename fallback plus an all-375-source preflight. Static contract 3/3 PASS and CPU canary 44235462841 SUCCESS. First 120 overlays remain preserved. STFT source-universe forensic corrected the prior basename-fallback hypothesis: generic discovery found 375 files, but historical unified-core production scripts define exactly 360 canonical sources (3 protocols x 20 shards x PA1 part1/part2 + PA2/PA3/PA4/PA8). The 15 ota_pa1_run01 artifacts are noncanonical extras in the core directories. PR #21 head a5cbd0d2a9e8e287d0288498735e5a4221ed3683 now freezes the canonical 360-source universe, restores strict provenance matching, passes static contract 3/3 and CPU canary 44236003500. First 120 overlays remain preserved. Live STFT cache build is now active at exact PR #21 head a5cbd0d2a9e8e287d0288498735e5a4221ed3683. Canonical/provenance preflight is fully green (360/360), first 120 overlays were skipped intact, records 121-122 completed, and record 123 entered GPU batch processing. Do not relaunch or force rebuild while this process remains active.",
@@ -5727,7 +5727,7 @@
     "accepted_for_post_freeze_osr": true
   },
   "final_pa3_pa8_osr_binding_20261124": {
-    "status": "ADMITTED_EXACTLY_ONCE_SERIAL_LANE_A",
+    "status": "ONE_SUCCESS_ONE_QUEUED_SERIAL_LANE_A",
     "padataset_pr": 54,
     "previous_head": "a711f448e38c27be3884f242d0a3bbecdcb393ce",
     "binding_head": "f1256048b51fd863ad3fb46f9c547eff401016e7",
@@ -5753,7 +5753,29 @@
         "workflow_run_id": 45434894477,
         "github_job_id": 138589906286,
         "lane": "padataset-scientific-single-gpu-v1",
-        "observed_status": "queued"
+        "observed_status": "completed_success",
+        "result_artifact_id": 14940254253,
+        "result_artifact_digest": "sha256:a29d31e8e29965bfc68f2e286a9072660c843eb3024c01b0dbff38521ace85eb",
+        "result": {
+          "unknown_f1": 0.9834358549142868,
+          "unknown_auroc": 0.9989950438518014,
+          "known_reject_rate": 0.0637287632613695,
+          "osr_macro_f1": 0.971109002210694,
+          "unknown_precision": 0.9674115103000872,
+          "unknown_recall": 1,
+          "threshold_open_recall_cal_diagnostic_only": 0.8912,
+          "threshold_known_reject_cal": 0.0512,
+          "score_threshold": -1.828920602798462
+        },
+        "provenance": {
+          "scientific_receipt_decision": "PASS",
+          "candidate_sha": "f1256048b51fd863ad3fb46f9c547eff401016e7",
+          "backbone_artifact_id": 14880924639,
+          "backbone_digest": "sha256:8aa657cc305cc989cf1bcf988ef1466b79f1b3403c973de77dd0edd20cd1191b",
+          "target_labels_used_for_tuning": false,
+          "surrogate_only_open_calibration": true,
+          "threshold_source": "known_only"
+        }
       },
       {
         "direction": "PA8<-PA3",
@@ -5766,5 +5788,58 @@
     ],
     "scheduling_reason": "Serialized on one scientific lane to avoid the severe host CPU contention observed when PA2<-PA3 and PA3<-PA2 ran concurrently.",
     "duplicate_check": "No prior PA3-PA8 directional admission comments existed before these two comments."
+  },
+  "selector_replication_interim_19cell_20261124": {
+    "status": "DESCRIPTIVE_POST_FREEZE_INTERIM_19_OF_20",
+    "ruleA_guard_score": {
+      "raw_pearson_r": 0.4701018622528987,
+      "raw_pearson_p": 0.042249797438091985,
+      "raw_spearman_rho": 0.41352079150837423,
+      "raw_spearman_p": 0.07842717469605028,
+      "target_centered_pearson_r": 0.5715737484663669,
+      "target_centered_pearson_p": 0.010570040191941719,
+      "target_centered_spearman_rho": 0.6105263157894737,
+      "target_centered_spearman_p": 0.005497326431735111,
+      "top1_observed_targets": "1/5",
+      "top2_observed_targets": "4/5",
+      "mean_oracle_regret": 0.04983745369407855,
+      "historical_reference": "paper-era Rule A rho≈-0.075, Pearson≈-0.047, top1=2/5"
+    },
+    "confusion_exclusion_diagnostic": {
+      "role": "TARGET_AWARE_RETROSPECTIVE_DIAGNOSTIC_NOT_DEPLOYABLE_SELECTOR",
+      "raw_pearson_r": 0.22544113655826278,
+      "raw_pearson_p": 0.35341440476479763,
+      "raw_spearman_rho": 0.12773834280854676,
+      "raw_spearman_p": 0.6022683407066037,
+      "target_centered_pearson_r": 0.5762277580072362,
+      "target_centered_pearson_p": 0.009816134886063432,
+      "target_centered_spearman_rho": 0.5529683684797397,
+      "target_centered_spearman_p": 0.014064018186399558,
+      "top1_observed_targets": "4/5",
+      "top2_observed_targets": "4/5",
+      "mean_oracle_regret": 0.00074793169052505,
+      "pa3_prediction_test": {
+        "predicted_surrogate": "PA8",
+        "observed_pa3_pa8_unknown_f1": 0.9834358549142868,
+        "actual_best_observed_surrogate": "PA2",
+        "actual_best_observed_unknown_f1": 0.987175513366912,
+        "regret": 0.0037396584526252497,
+        "interpretation": "Predicted a very strong cell but narrowly missed exact winner."
+      }
+    },
+    "historical_target_blind_reference": {
+      "ruleB_confidence_geometry_spearman_rho_approx": -0.552,
+      "ruleC_best_simple_feature_geometry_spearman_rho_approx": 0.406,
+      "ruleC_top1": "1/5",
+      "provenance": "Preserved MILCOM 2026 final presentation/script artifacts."
+    },
+    "pair_direction_structure": {
+      "completed_canonical_pairs": 9,
+      "mean_absolute_directional_u_f1_gap": 0.26411840333333336,
+      "pair_only_descriptive_r2_18cell": 0.7480767639196068,
+      "global_surrogate_only_descriptive_r2_18cell": 0.02160653444241556,
+      "target_only_descriptive_r2_18cell": 0.37960497538446436,
+      "interpretation": "Unordered pair/backbone geometry dominates descriptively, but large same-backbone directional asymmetry proves exclusion alone cannot explain performance."
+    }
   }
 }

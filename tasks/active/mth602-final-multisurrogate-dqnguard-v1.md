@@ -36,15 +36,15 @@ Execute a rigorous MTH602-to-journal research program centered on backbone compe
 
 ## Next safe action
 
-Monitor exactly PA3<-PA8 run 45434894477/job 138589906286 and PA8<-PA3 run 45434902484/job 138589937033, serialized on lane A. Do not duplicate either admission. Collect and validate both result_record.json artifacts at terminal SUCCESS to close the 20/20 matrix. While they run, continue read-only Rule A/B/C replication and retrospective confusion-exclusion analysis.
+Do not duplicate any admission. PA3<-PA8 run 45434894477/job 138589906286 is terminal SUCCESS with U-F1 0.9834358549 and provenance-valid artifact 14940254253. Monitor queued PA8<-PA3 run 45434902484/job 138589937033 until it naturally acquires lane A and reaches terminal. Validate its result artifact, close the 20/20 matrix, then finalize Rule A and confusion-exclusion statistics before starting any CPU-heavy Rule B/C feature/confidence inference.
 
 ## Remaining work
 
-- Monitor only PA3<-PA8 run 45434894477/job 138589906286 and PA8<-PA3 run 45434902484/job 138589937033; no duplicate admissions.
-- At terminal SUCCESS, validate both result artifacts and append the final two U-F1/AUROC/K-REJ cells to the 20/20 t007 matrix.
-- Complete the frozen surrogate-selector replication: Rule A guard-score calibration recall, Rule B confidence geometry, Rule C feature geometry, plus retrospective confusion-exclusion diagnostics.
-- Report raw and target-centered correlations, within-target ranking, top-1/top-2 accuracy, oracle regret, and distinguish deployable target-blind rules from target-observing retrospective diagnostics.
-- Preserve the frozen PA3-PA8 backbone and all known-validation-only selection invariants.
+- Monitor only PA8<-PA3 run 45434902484/job 138589937033; it is already admitted exactly once and queued on lane A. Do not resubmit.
+- At terminal SUCCESS, validate its result artifact and complete the 20/20 t007 directional matrix.
+- Finalize Rule A and retrospective confusion-exclusion correlations/ranking/regret on all 20 cells.
+- Only after the OSR lane is idle, execute the frozen historical Rule B confidence-geometry and Rule C feature-geometry replication on the competent backbone bank to avoid host CPU contention.
+- Preserve Rule D/confusion diagnostics as target-aware retrospective mechanism evidence, not a deployable surrogate selector; preserve all known-validation-only training invariants.
 
 ## Blockers / gates
 
