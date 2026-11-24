@@ -17,6 +17,7 @@ $legacyProfilePath = $PROFILE.CurrentUserAllHosts
 $commandNames = @(
   "wop",
   "wop-d4",
+  "wop-e1",
   "wop-up",
   "wop-down",
   "wop-reset",
@@ -227,6 +228,7 @@ Move-Item -LiteralPath $driverTemp -Destination $driverPath -Force
 $shimActions = [ordered]@{
   "wop" = ""
   "wop-d4" = "d4"
+  "wop-e1" = "e1"
   "wop-up" = "start"
   "wop-down" = "stop"
   "wop-reset" = "reset"
