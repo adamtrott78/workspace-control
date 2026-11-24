@@ -621,6 +621,11 @@ def run_calibration(
                 "conversation context and include it as the second evidence_ref."
             ),
         )
+        if q2_continuity in q2.packet.text:
+            raise RuntimeError(
+                "q2_continuity_token_disclosed_in_worker_packet"
+            )
+        print("STAGE12_Q2_CONTINUITY_TOKEN_HIDDEN=PASS", flush=True)
         baseline = watcher.refresh()
         print(
             "STAGE12_Q2_REUSE_READY="

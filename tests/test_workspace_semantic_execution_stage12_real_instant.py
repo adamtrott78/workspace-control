@@ -51,6 +51,14 @@ class Stage12RealInstantHarnessStaticTests(unittest.TestCase):
             "evidence_refs=set(validator_evidence_refs)",
             self.text,
         )
+        self.assertIn(
+            "q2_continuity_token_disclosed_in_worker_packet",
+            self.text,
+        )
+        self.assertIn(
+            "STAGE12_Q2_CONTINUITY_TOKEN_HIDDEN=PASS",
+            self.text,
+        )
         self.assertIn("STAGE12_PERSISTENT_SESSION_REUSE=PASS", self.text)
 
     def test_connected_tool_mentions_are_literal_and_fail_closed(self) -> None:
