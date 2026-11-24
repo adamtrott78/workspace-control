@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e2-live-review-v0.2",
+  "status": "VALIDATED_EXECUTABLE_REVIEW_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "approval_context": {
+    "fresh_operator_statement": "GOGOGOGOGOGOGOGO",
+    "intended_scope": "Proceed to one live E2 fault-injection attempt after exact executable validation.",
+    "authority_not_yet_granted_by_this_review": true
+  },
+  "predecessor_proofs": {
+    "e1_result": "PASS",
+    "e2_c1_result": "PASS",
+    "e2_c2_result": "PASS"
+  },
+  "executable": {
+    "head": "d04d06cee576a21e77286f7f6efe66485ec34375",
+    "candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
+    "validation": {
+      "workspace_control_run": 3202,
+      "semantic_execution_run": 506,
+      "operator_bridge_run": 775,
+      "result": "SUCCESS"
+    },
+    "exact_bindings": {
+      "harness": {
+        "path": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
+        "blob": "d6acd6a4266641813deecb900b877b7250b02530"
+      },
+      "harness_test": {
+        "path": "tests/test_workspace_semantic_execution_research_iterate_e2_live.py",
+        "blob": "2c24e68ceb35a9e442ecd4febdf942cfd12f8f69"
+      },
+      "wop": {
+        "path": "operator-bridge/tools/run-research-iterate-e2-wop.ps1",
+        "blob": "40f47ff0b41b2ec274d98d1d6e341794e7aee5b5"
+      },
+      "remote_bootstrap": {
+        "path": "operator-bridge/tools/run-research-iterate-e2-remote-bootstrap.sh",
+        "blob": "15ea060adc61c0bc427612601c086d220630c21c"
+      },
+      "linux_transaction": {
+        "path": "benchmarks/workspace-semantic-execution/private_route_research_iterate_e2_v1.sh",
+        "blob": "be7b358a558b950caa22ebe1996dc3fdf3daeca7"
+      },
+      "installer": {
+        "path": "operator-bridge/tools/install-wop-commands.ps1",
+        "blob": "9742373ca84df33fdb883577c827636a7883c28e"
+      },
+      "accepted_a7_dev": {
+        "path": "operator-bridge/tools/workspace-operator-dev.ps1",
+        "blob": "ac035d2fc898274c32cad43954ce44c15b198207"
+      },
+      "accepted_a7_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417"
+    }
+  },
+  "live_fault_contract": {
+    "manual_service_points": 5,
+    "service_order": [
+      "root decomposition",
+      "analysis generation 0 (will be deliberately fenced after Enter)",
+      "analysis replacement generation 1",
+      "Workspace Shell read-only probe",
+      "final synthesis"
+    ],
+    "injected_loss": [
+      "reasoning-process generation 0",
+      "persistent Instant session generation 0",
+      "in-memory RuntimeCoordinator/dispatcher/broker/tree/validator objects"
+    ],
+    "durable_recovery_source": "PostgreSQL",
+    "stale_worker_candidate_observed": true,
+    "stale_worker_candidate_must_be_rejected_without_mutation": true,
+    "replacement_process_generation": 1,
+    "replacement_session_generation": 1,
+    "manual_durable_state_relay": false
+  },
+  "safety": {
+    "accepted_a7_manual_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "browser_page_content_scraping": false,
+    "paid_api_fallback": false,
+    "workspace_shell_allowed_tool": "workspace_shell_inspect",
+    "workspace_shell_exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "workspace_shell_exec": false,
+    "workspace_shell_reviewed_helper": false,
+    "authority_widening": false
+  },
+  "authority_gate": {
+    "live_attempt_authorized": false,
+    "fresh_one_shot_authority_required": true,
+    "existing_explicit_operator_approval_may_be_bound_only_after_this_exact_review_is_green": true,
+    "no_silent_retry_after_consumption": true
+  },
+  "next_gate": "Validate this exact review commit, then bind the existing fresh explicit GO to exactly one E2 live authority with no implementation-byte changes."
+}

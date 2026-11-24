@@ -1,25 +1,25 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
-  "status": "VALIDATED_E2_C2_POSTGRES_RECOVERY_CANARY",
-  "validated_head": "7d26d9d7fb31916fec80ebfc7bdc355cb77aa25d",
+  "status": "VALIDATED_E2_LIVE_EXECUTABLE_STACK",
+  "validated_head": "d04d06cee576a21e77286f7f6efe66485ec34375",
   "validation_runs": {
     "semantic_execution": {
       "workflow_name": "Semantic Execution Validation",
-      "run_id": 45506873142,
-      "run_number": 501,
+      "run_id": 45509804669,
+      "run_number": 506,
       "conclusion": "success"
     },
     "operator_bridge": {
       "workflow_name": "Operator Bridge Validation",
-      "run_id": 45506873342,
-      "run_number": 770,
+      "run_id": 45509804733,
+      "run_number": 775,
       "conclusion": "success"
     },
     "workspace_control": {
       "workflow_name": "Workspace Control Validation",
-      "run_id": 45506873213,
-      "run_number": 3197,
+      "run_id": 45509804842,
+      "run_number": 3202,
       "conclusion": "success"
     }
   },
@@ -111,6 +111,16 @@
     "e2_c2_semantic_execution_run": 501,
     "e2_c2_operator_bridge_run": 770,
     "e2_c2_result": "PASS",
-    "e2_c2_test_blob": "69502302c4541fd17bd628e1418f51f0435724c6"
+    "e2_c2_test_blob": "69502302c4541fd17bd628e1418f51f0435724c6",
+    "e2_live_executable_head": "d04d06cee576a21e77286f7f6efe66485ec34375",
+    "e2_live_candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
+    "e2_live_workspace_control_run": 3202,
+    "e2_live_semantic_execution_run": 506,
+    "e2_live_operator_bridge_run": 775,
+    "e2_live_harness_blob": "d6acd6a4266641813deecb900b877b7250b02530",
+    "e2_live_wop_blob": "40f47ff0b41b2ec274d98d1d6e341794e7aee5b5",
+    "e2_live_bootstrap_blob": "15ea060adc61c0bc427612601c086d220630c21c",
+    "e2_live_linux_blob": "be7b358a558b950caa22ebe1996dc3fdf3daeca7",
+    "e2_live_installer_blob": "9742373ca84df33fdb883577c827636a7883c28e"
   }
 }
