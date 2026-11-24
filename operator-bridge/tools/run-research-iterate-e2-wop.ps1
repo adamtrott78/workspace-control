@@ -104,7 +104,7 @@ if ($LASTEXITCODE -ne 0 -or $linuxBlob -notmatch "^[0-9a-f]{40}$") { throw "E2_W
 New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
 Write-Host "=== E2 INTEGRATED RESEARCH-ITERATE - ACCEPTED A7 FRONTEND ==="
 Write-Host ("E2_WOP_SOURCE_SHA=" + $sourceSha)
-Write-Host "E2_FRONTEND_BASELINE_SHA=a9532ca8b86b7839822939a970e26af1d4a41864"
+Write-Host "E2_FRONTEND_BASELINE_SHA=a9532ca8b86b7839822939a970e16af1d4a41864"
 Write-Host ("E2_FRONTEND_SRC_TREE=" + $frontendTree)
 Write-Host ("E2_FRONTEND_DEV_BLOB=" + $devBlob)
 Write-Host ("E2_WOP_LINUX_BLOB=" + $linuxBlob)

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e2-live-authority-v0.1",
-  "status": "PENDING_OPERATOR_WOP_E2_EXECUTION",
+  "status": "ABORTED_PRECONSUMPTION_OPERATOR_HTTP_BLOB_BINDING_TYPO",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Authorize exactly one live E2 durable-recovery fault-injection attempt against the fully validated executable stack.",
   "approval_basis": {
@@ -75,7 +75,7 @@
   "attempt_contract": {
     "attempts_authorized": 1,
     "consumed": false,
-    "reusable": true,
+    "reusable": false,
     "no_silent_retry": true,
     "live_consumption_marker": "E2_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "abort_before_marker_does_not_consume_live_attempt": true,
@@ -117,5 +117,19 @@
     "branch_must_remain_at_authority_commit_before_launch": true,
     "installer_refresh_required_once": true
   },
-  "postcondition": "Exactly one live E2 attempt. After E2_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority."
+  "postcondition": "Exactly one live E2 attempt. After E2_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority.",
+  "prelive_abort": {
+    "observed_date": "2026-11-24",
+    "live_consumption_marker_reached": false,
+    "backend_ready_reached": false,
+    "last_successful_marker": "TAILSCALE_FUNNEL_DISABLED=PASS",
+    "failure": "E2_ACTIVATION_ERROR=LIVE_SEMANTIC_OPERATOR_HTTP_BLOB_MISMATCH:3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "semantic_sha": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "actual_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "stale_expected_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee28c",
+    "classification": "PRECONSUMPTION_ONE_CHARACTER_BLOB_BINDING_TYPO",
+    "authority_consumed": false,
+    "candidate_history_mutated": false,
+    "same_one_shot_approval_may_be_rebound_after_repair_validation": true
+  }
 }
