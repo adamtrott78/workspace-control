@@ -1,0 +1,49 @@
+{
+  "publication_id": "worker-result:action:e1:6594d6b82c854429bc1086cd15598100:root-decompose:0",
+  "action_id": "action:e1:6594d6b82c854429bc1086cd15598100:root-decompose",
+  "action_generation": 0,
+  "process_id": "research-iterate-e1:6594d6b82c854429bc1086cd15598100",
+  "process_generation": 0,
+  "executor_id": "openai-chat-instant-current",
+  "worker_slot_id": "e1-instant-slot:6594d6b82c854429bc1086cd15598100",
+  "session_generation": 0,
+  "packet_sha256": "23f181c1ea926da239c6ce6566054c091a0b5ca1a420a8baf9c1d9fe684f1511",
+  "kind": "TOO_LARGE",
+  "observed_at": "2026-11-24T17:12:00-05:00",
+  "reason": "independent source, analysis, and capability work",
+  "evidence_refs": [
+    "e1:root-decompose:6594d6b82c85"
+  ],
+  "children": [
+    {
+      "objective": "Observe the exact frozen Research Engine orchestration source.",
+      "output_schema_refs": [
+        "schema:exact-source-observation-v1"
+      ],
+      "process_id": "research-iterate-e1:6594d6b82c854429bc1086cd15598100.source",
+      "validator_contracts": [
+        "repository-read-exact-source-v1"
+      ]
+    },
+    {
+      "objective": "Analyze the exact-source evidence for synthesis-relevant workflow constraints.",
+      "output_schema_refs": [
+        "schema:e1-analysis-v1"
+      ],
+      "process_id": "research-iterate-e1:6594d6b82c854429bc1086cd15598100.analysis",
+      "validator_contracts": [
+        "validator:research-iterate-e1-live-v1"
+      ]
+    },
+    {
+      "objective": "Prove the connected Workspace Shell read-only runtime-inventory capability.",
+      "output_schema_refs": [
+        "schema:e1-shell-probe-v1"
+      ],
+      "process_id": "research-iterate-e1:6594d6b82c854429bc1086cd15598100.workspace-shell",
+      "validator_contracts": [
+        "validator:research-iterate-e1-live-v1"
+      ]
+    }
+  ]
+}
