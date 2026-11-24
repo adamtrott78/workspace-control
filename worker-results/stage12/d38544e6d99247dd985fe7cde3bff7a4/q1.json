@@ -1,0 +1,18 @@
+{
+  "publication_id": "worker-result:action:stage12:q1:d38544e6d99247dd985fe7cde3bff7a4:pg0:sg0:0",
+  "action_id": "action:stage12:q1:d38544e6d99247dd985fe7cde3bff7a4:pg0:sg0",
+  "action_generation": 0,
+  "process_id": "stage12-q1:d38544e6d99247dd985fe7cde3bff7a4",
+  "process_generation": 0,
+  "executor_id": "openai-chat-instant-current",
+  "worker_slot_id": "stage12-instant-slot:d38544e6d99247dd985fe7cde3bff7a4",
+  "session_generation": 0,
+  "packet_sha256": "75dfb55d156e552e9b0a5d53e6cd9a31a3dcd4db50c0df391e1964ba2293adef",
+  "kind": "RESULT",
+  "observed_at": "2026-11-24T15:10:00-05:00",
+  "result_payload_ref": "stage12://d38544e6d99247dd985fe7cde3bff7a4/q1/result",
+  "result_payload_sha256": "2c0d11ea1fe96c4fe7f3690319e0f28e8010be6bc8f77b781eae52b3420e2042",
+  "evidence_refs": [
+    "stage12:q1:d38544e6d992"
+  ]
+}
