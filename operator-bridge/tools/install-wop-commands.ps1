@@ -116,7 +116,7 @@ $driver = @'
 # workspace-control-owned:wop-driver-v2
 [CmdletBinding()]
 param(
-  [ValidateSet("smoke","reset","restart","start","online","d4","stop","offline","status","self-test")]
+  [ValidateSet("smoke","reset","restart","start","online","d4","e1","stop","offline","status","self-test")]
   [string]$Action = "status",
   [string]$Sha = ""
 )
@@ -136,6 +136,16 @@ try {
     $Sha = (git -C $W rev-parse FETCH_HEAD).Trim().ToLowerInvariant()
     if ($LASTEXITCODE -ne 0 -or $Sha -notmatch "^[0-9a-f]{40}$") {
       throw "WOP_D4_BRANCH_HEAD_UNAVAILABLE"
+    }
+  }
+
+  if ([string]::Equals($Action, "e1", [System.StringComparison]::OrdinalIgnoreCase) -and
+      [string]::IsNullOrWhiteSpace($Sha)) {
+    git -C $W fetch --force --depth=1 origin workspace-semantic-execution-migration-v1
+    if ($LASTEXITCODE -ne 0) { throw "WOP_E1_BRANCH_FETCH_FAILED" }
+    $Sha = (git -C $W rev-parse FETCH_HEAD).Trim().ToLowerInvariant()
+    if ($LASTEXITCODE -ne 0 -or $Sha -notmatch "^[0-9a-f]{40}$") {
+      throw "WOP_E1_BRANCH_HEAD_UNAVAILABLE"
     }
   }
 
@@ -181,6 +191,12 @@ try {
     $script = Join-Path $W "operator-bridge\tools\run-stage12-wop.ps1"
     if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
       throw "WOP_D4_SCRIPT_MISSING:$script"
+    }
+    & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script -RepositoryRoot $W
+  } elseif ([string]::Equals($Action, "e1", [System.StringComparison]::OrdinalIgnoreCase)) {
+    $script = Join-Path $W "operator-bridge\tools\run-research-iterate-e1-wop.ps1"
+    if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
+      throw "WOP_E1_SCRIPT_MISSING:$script"
     }
     & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script -RepositoryRoot $W
   } else {
@@ -240,4 +256,4 @@ exit /b %ERRORLEVEL%
 Write-Host "WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS"
 Write-Host ("COMMAND_DIRECTORY=" + $commandDirectory)
 Write-Host ("DRIVER_PATH=" + $driverPath)
-Write-Host "COMMANDS=wop,wop-d4,wop-up,wop-down,wop-reset,wop-status,wop-self-test"
+Write-Host "COMMANDS=wop,wop-d4,wop-e1,wop-up,wop-down,wop-reset,wop-status,wop-self-test"
