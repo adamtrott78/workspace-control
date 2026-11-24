@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e1-authority-v0.2",
-  "status": "PENDING_OPERATOR_WOP_E1_RETRY_EXECUTION",
+  "status": "ABORTED_PRECONSUMPTION_STALE_CANDIDATE_BASELINE_BINDING",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Authorize exactly one corrected integrated Research-Iterate E1 retry from the append-only candidate baseline after the v0.1 harness compiler-envelope failure. The retry preserves the exact accepted A7 frontend and adds only the validated deterministic raw connected-tool prefix repair.",
   "approval_basis": {
@@ -86,7 +86,7 @@
   "attempt_contract": {
     "attempts_authorized": 1,
     "consumed": false,
-    "reusable": true,
+    "reusable": false,
     "no_silent_retry": true,
     "consumed_on_success_or_failure_after_marker": true,
     "abort_before_marker_does_not_consume_live_attempt": true,
@@ -143,5 +143,18 @@
     "candidate_history_rewrite": false,
     "stale_generation_acceptance": false
   },
-  "postcondition": "One corrected E1 retry attempt only. Any failure after E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS consumes this authority; no further retry without a new diagnosis/review/approval/authority cycle."
+  "postcondition": "One corrected E1 retry attempt only. Any failure after E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS consumes this authority; no further retry without a new diagnosis/review/approval/authority cycle.",
+  "prelive_abort": {
+    "observed_date": "2026-11-24",
+    "marker_reached": false,
+    "last_successful_marker": "E1_WOP_REMOTE_EXACT_BINDINGS=PASS",
+    "failure": "E1_ACTIVATION_ERROR=CANDIDATE_BASELINE_MISMATCH:705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "actual_candidate_head": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "stale_launcher_expected_baseline": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+    "classification": "PRECONSUMPTION_STALE_BASELINE_BINDING",
+    "authority_consumed": false,
+    "e1_runtime_started": false,
+    "candidate_history_mutated": false,
+    "retry_requires_repaired_source_and_fresh_exact_authority": true
+  }
 }

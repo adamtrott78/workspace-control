@@ -21,7 +21,7 @@ FUNNEL_BEFORE="$RUNTIME_ROOT/funnel-before.json"
 HARNESS_REL="benchmarks/workspace-semantic-execution/live_research_iterate_e1.py"
 FIXTURE_REL="benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"
 REPO_URL="https://github.com/adamtrott78/workspace-control.git"
-CANDIDATE_BASELINE="8aacc7eebbbafabcb20b372aa53b88350a44e633"
+CANDIDATE_BASELINE="705ac86d8a95e210ada81747bcc7fc22983928c3"
 WINDOWS_READY_MARKER="E1_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS"
 
 ROUTE_ATTEMPTED=0

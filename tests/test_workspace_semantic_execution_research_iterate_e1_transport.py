@@ -70,3 +70,9 @@ class DiscoveryTests_tests_test_workspace_semantic_execution_research_iterate_e1
 
     def test_e1_shell_scripts_parse(self) -> None:
         globals()["test_e1_shell_scripts_parse"]()
+
+
+def test_e1_private_route_candidate_baseline_matches_current_retry_chain() -> None:
+    text = E1_LINUX.read_text(encoding="utf-8")
+    assert 'CANDIDATE_BASELINE="705ac86d8a95e210ada81747bcc7fc22983928c3"' in text
+    assert '8aacc7eebbbafabcb20b372aa53b88350a44e633' not in text
