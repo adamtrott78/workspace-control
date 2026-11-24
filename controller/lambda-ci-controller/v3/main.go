@@ -385,6 +385,29 @@ func newGitHubVerifier(
 	}, nil
 }
 
+func githubRESTStatusIsTransient(resp *http.Response, body []byte) bool {
+	if resp == nil {
+		return false
+	}
+	if resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500 {
+		return true
+	}
+	if resp.StatusCode != http.StatusForbidden {
+		return false
+	}
+
+	// GitHub reports both primary and secondary API rate limits as HTTP 403.
+	// Treat only positively identified rate-limit responses as transient; ordinary
+	// authorization/permission 403s must remain fail-closed.
+	if strings.TrimSpace(resp.Header.Get("X-RateLimit-Remaining")) == "0" ||
+		strings.TrimSpace(resp.Header.Get("Retry-After")) != "" {
+		return true
+	}
+	message := strings.ToLower(string(body))
+	return strings.Contains(message, "api rate limit exceeded") ||
+		strings.Contains(message, "secondary rate limit")
+}
+
 func (v *githubVerifier) getJSON(ctx context.Context, path string, target any) error {
 	for attempt := 0; ; attempt++ {
 		token, err := v.tokens.Token(ctx)
@@ -411,7 +434,7 @@ func (v *githubVerifier) getJSON(ctx context.Context, path string, target any) e
 		if err == nil && resp != nil {
 			body, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
 			resp.Body.Close()
-			if resp.StatusCode != http.StatusTooManyRequests && resp.StatusCode < 500 {
+			if !githubRESTStatusIsTransient(resp, body) {
 				return fmt.Errorf(
 					"GitHub REST status=%d path=%s body=%q",
 					resp.StatusCode,
