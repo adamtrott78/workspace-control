@@ -91,6 +91,56 @@ def find_go(repo_root: pathlib.Path) -> str:
     )
 
 
+EQUIVALENT_ACTIVE_CONTROLLER_SOURCES = {
+    # Previously validated and live controller-only repair.  The controller
+    # production source blobs at this head are identical to the PR #658
+    # candidate, and equality of the built binary digest is still required
+    # before this no-op path can be accepted.
+    "45bcf7caa14778baeb014d702064b4a0bfa50d94": {
+        "controller_go_blob": "59753977cb2b77d8308b58f311784da366de63bd",
+        "main_go_blob": "18abac983e389069b1f988792dbea42628486c09",
+    },
+}
+
+
+def verify_equivalent_active_source(
+    repo_root: pathlib.Path,
+    previous_source_head: object,
+) -> str:
+    if not isinstance(previous_source_head, str):
+        raise RuntimeError("active controller source head is not a string")
+    binding = EQUIVALENT_ACTIVE_CONTROLLER_SOURCES.get(previous_source_head)
+    if binding is None:
+        raise RuntimeError(
+            "candidate digest already installed from an unreviewed source head: "
+            + previous_source_head
+        )
+    controller_blob = run(
+        [
+            "git",
+            "-C",
+            str(repo_root),
+            "rev-parse",
+            "HEAD:controller/lambda-ci-controller/v3/controller.go",
+        ]
+    )
+    main_blob = run(
+        [
+            "git",
+            "-C",
+            str(repo_root),
+            "rev-parse",
+            "HEAD:controller/lambda-ci-controller/v3/main.go",
+        ]
+    )
+    if controller_blob != binding["controller_go_blob"]:
+        raise RuntimeError("candidate controller.go blob differs from reviewed equivalent source")
+    if main_blob != binding["main_go_blob"]:
+        raise RuntimeError("candidate main.go blob differs from reviewed equivalent source")
+    return previous_source_head
+
+
+
 def root_phase(repo_root: pathlib.Path, expected_head: str) -> None:
     if os.geteuid() != 0:
         raise RuntimeError("root phase requires uid 0")
@@ -129,10 +179,28 @@ def root_phase(repo_root: pathlib.Path, expected_head: str) -> None:
         raise RuntimeError("current controller refresh receipt is not a valid active predecessor")
 
     if current_sha == candidate_sha:
-        if previous_refresh.get("controller_source_head") != expected_head:
-            raise RuntimeError("candidate digest already installed from a different source head")
-        print("MTH602_V3_REST_BACKFILL_BOOTSTRAP=ALREADY_ACTIVE")
+        previous_source_head = previous_refresh.get("controller_source_head")
+        if previous_source_head == expected_head:
+            print("MTH602_V3_REST_BACKFILL_BOOTSTRAP=ALREADY_ACTIVE")
+            print(f"CONTROLLER_SOURCE_HEAD={expected_head}")
+            print(f"CONTROLLER_SHA256={candidate_sha}")
+            print("ACTIVE_CONTROLLERS=" + ",".join(active_before))
+            return
+
+        equivalent_source = verify_equivalent_active_source(root, previous_source_head)
+        after = repair.snapshot_controllers(units)
+        for cid in active_before:
+            state = after[cid]
+            if state.get("ActiveState") != "active" or state.get("SubState") != "running":
+                raise RuntimeError(
+                    f"equivalent-active postverify controller not active/running: {cid}"
+                )
+        repair.require_root_services()
+        print("MTH602_V3_REST_BACKFILL_BOOTSTRAP=ALREADY_ACTIVE_EQUIVALENT")
+        print(f"CONTROLLER_SOURCE_HEAD={equivalent_source}")
+        print(f"CANDIDATE_SOURCE_HEAD={expected_head}")
         print(f"CONTROLLER_SHA256={candidate_sha}")
+        print("ACTIVE_CONTROLLERS=" + ",".join(active_before))
         return
 
     base_sha = repair.sha(manifest_raw)
