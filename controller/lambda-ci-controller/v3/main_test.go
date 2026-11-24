@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func newRESTVerifierTestServer(
@@ -149,6 +150,170 @@ func TestGitHubRESTStatusIsTransientDistinguishesRateLimit403(t *testing.T) {
 				t.Fatalf("githubRESTStatusIsTransient()=%v want=%v", got, tc.want)
 			}
 		})
+	}
+}
+
+
+func TestGitHubRESTRetryDelayHonorsPrimaryReset(t *testing.T) {
+	now := time.Unix(1_000, 0)
+	resp := &http.Response{
+		StatusCode: http.StatusForbidden,
+		Header: http.Header{
+			"X-RateLimit-Remaining": []string{"0"},
+			"X-RateLimit-Reset":     []string{"1060"},
+		},
+	}
+	if got, want := githubRESTRetryDelay(resp, 0, now), 65*time.Second; got != want {
+		t.Fatalf("reset-aware delay=%s want=%s", got, want)
+	}
+}
+
+func TestGitHubRESTRetryDelayHonorsRetryAfter(t *testing.T) {
+	resp := &http.Response{
+		StatusCode: http.StatusForbidden,
+		Header: http.Header{"Retry-After": []string{"120"}},
+	}
+	if got, want := githubRESTRetryDelay(resp, 0, time.Unix(1_000, 0)), 125*time.Second; got != want {
+		t.Fatalf("Retry-After delay=%s want=%s", got, want)
+	}
+}
+
+func TestDiscoverTrustedDemandSkipsUntrustedWorkflowBeforeJobsCall(t *testing.T) {
+	policy := testPolicy()
+	headSHA := strings.Repeat("d", 40)
+	workflowSHA := strings.Repeat("c", 40)
+	cpuJobsCalls := 0
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs":
+			status := r.URL.Query().Get("status")
+			if status == "queued" {
+				_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{
+					map[string]any{
+						"id": 700, "head_sha": headSHA, "head_branch": "main",
+						"path": ".github/workflows/cpu.yml", "event": "issue_comment", "status": "queued",
+						"actor": map[string]any{"login": "adamtrott78"},
+						"triggering_actor": map[string]any{"login": "adamtrott78"},
+						"repository": map[string]any{"full_name": "adamtrott78/workspace-control"},
+					},
+					map[string]any{
+						"id": 600, "head_sha": headSHA, "head_branch": "main",
+						"path": ".github/workflows/control.yml", "event": "issue_comment", "status": "queued",
+						"actor": map[string]any{"login": "adamtrott78"},
+						"triggering_actor": map[string]any{"login": "adamtrott78"},
+						"repository": map[string]any{"full_name": "adamtrott78/workspace-control"},
+					},
+				}})
+				return
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{}})
+			return
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/700/jobs":
+			cpuJobsCalls++
+			t.Fatalf("untrusted workflow consumed /jobs REST call")
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/600/jobs":
+			_ = json.NewEncoder(w).Encode(map[string]any{"jobs": []any{map[string]any{
+				"id": 601, "status": "queued", "labels": []string{policy.ScaleSetName},
+				"runner_id": 0, "runner_name": "",
+			}}})
+			return
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/contents/.github/workflows/control.yml":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"type": "file", "path": ".github/workflows/control.yml", "sha": workflowSHA,
+			})
+			return
+		default:
+			t.Fatalf("unexpected REST request: %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+	}))
+	defer server.Close()
+
+	verifier := &githubVerifier{
+		policy: policy, owner: "adamtrott78", repo: "workspace-control",
+		apiBase: server.URL, httpClient: server.Client(),
+		tokens: fixedTokenSource("test-token"), logger: slog.New(slog.DiscardHandler),
+	}
+	jobs, safe, reason, err := verifier.DiscoverTrustedDemand(context.Background())
+	if err != nil || !safe || reason != "" {
+		t.Fatalf("discovery failed: jobs=%#v safe=%v reason=%q err=%v", jobs, safe, reason, err)
+	}
+	if cpuJobsCalls != 0 {
+		t.Fatalf("untrusted workflow jobs calls=%d want=0", cpuJobsCalls)
+	}
+	if len(jobs) != 1 || jobs[0].WorkflowRunID != 600 {
+		t.Fatalf("trusted candidate mismatch: %#v", jobs)
+	}
+}
+
+func TestDiscoverTrustedDemandPrefersNewestAndStopsAtMaxRunners(t *testing.T) {
+	policy := testPolicy()
+	policy.MaxRunners = 1
+	headSHA := strings.Repeat("d", 40)
+	workflowSHA := strings.Repeat("c", 40)
+	oldJobsCalls := 0
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs":
+			status := r.URL.Query().Get("status")
+			if status == "queued" {
+				_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{
+					map[string]any{
+						"id": 800, "head_sha": headSHA, "head_branch": "main",
+						"path": ".github/workflows/control.yml", "event": "issue_comment", "status": "queued",
+						"actor": map[string]any{"login": "adamtrott78"},
+						"triggering_actor": map[string]any{"login": "adamtrott78"},
+						"repository": map[string]any{"full_name": "adamtrott78/workspace-control"},
+					},
+					map[string]any{
+						"id": 700, "head_sha": headSHA, "head_branch": "main",
+						"path": ".github/workflows/control.yml", "event": "issue_comment", "status": "queued",
+						"actor": map[string]any{"login": "adamtrott78"},
+						"triggering_actor": map[string]any{"login": "adamtrott78"},
+						"repository": map[string]any{"full_name": "adamtrott78/workspace-control"},
+					},
+				}})
+				return
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{}})
+			return
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/800/jobs":
+			_ = json.NewEncoder(w).Encode(map[string]any{"jobs": []any{map[string]any{
+				"id": 801, "status": "queued", "labels": []string{policy.ScaleSetName},
+				"runner_id": 0, "runner_name": "",
+			}}})
+			return
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/700/jobs":
+			oldJobsCalls++
+			t.Fatalf("older run should not be queried after MaxRunners demand is found")
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/contents/.github/workflows/control.yml":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"type": "file", "path": ".github/workflows/control.yml", "sha": workflowSHA,
+			})
+			return
+		default:
+			t.Fatalf("unexpected REST request: %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+	}))
+	defer server.Close()
+
+	verifier := &githubVerifier{
+		policy: policy, owner: "adamtrott78", repo: "workspace-control",
+		apiBase: server.URL, httpClient: server.Client(),
+		tokens: fixedTokenSource("test-token"), logger: slog.New(slog.DiscardHandler),
+	}
+	jobs, safe, reason, err := verifier.DiscoverTrustedDemand(context.Background())
+	if err != nil || !safe || reason != "" {
+		t.Fatalf("discovery failed: jobs=%#v safe=%v reason=%q err=%v", jobs, safe, reason, err)
+	}
+	if oldJobsCalls != 0 {
+		t.Fatalf("old jobs calls=%d want=0", oldJobsCalls)
+	}
+	if len(jobs) != 1 || jobs[0].WorkflowRunID != 800 || jobs[0].GitHubJobID != 801 {
+		t.Fatalf("newest bounded candidate mismatch: %#v", jobs)
 	}
 }
 
