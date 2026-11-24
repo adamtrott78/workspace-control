@@ -12,7 +12,7 @@ INSTALL = ROOT / "operator-bridge/tools/install-wop-commands.ps1"
 
 def test_e1_linux_binds_candidate_harness_fixture_and_consumption() -> None:
     text = LINUX.read_text(encoding="utf-8")
-    assert 'CANDIDATE_BASELINE="8aacc7eebbbafabcb20b372aa53b88350a44e633"' in text
+    assert 'CANDIDATE_BASELINE="705ac86d8a95e210ada81747bcc7fc22983928c3"' in text
     assert 'HARNESS_REL="benchmarks/workspace-semantic-execution/live_research_iterate_e1.py"' in text
     assert 'FIXTURE_REL="benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"' in text
     assert "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS" in text
