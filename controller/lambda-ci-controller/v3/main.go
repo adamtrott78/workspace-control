@@ -408,6 +408,53 @@ func githubRESTStatusIsTransient(resp *http.Response, body []byte) bool {
 		strings.Contains(message, "secondary rate limit")
 }
 
+func githubRESTRetryDelay(resp *http.Response, attempt int, now time.Time) time.Duration {
+	fallback := retryDelay(attempt, time.Minute)
+	if resp == nil {
+		return fallback
+	}
+
+	const safety = 5 * time.Second
+	const maxResetSleep = 2 * time.Hour
+
+	if raw := strings.TrimSpace(resp.Header.Get("Retry-After")); raw != "" {
+		if seconds, err := strconv.ParseInt(raw, 10, 64); err == nil && seconds >= 0 {
+			delay := time.Duration(seconds)*time.Second + safety
+			if delay > maxResetSleep {
+				return maxResetSleep
+			}
+			return delay
+		}
+		if when, err := http.ParseTime(raw); err == nil {
+			delay := when.Sub(now) + safety
+			if delay < safety {
+				return safety
+			}
+			if delay > maxResetSleep {
+				return maxResetSleep
+			}
+			return delay
+		}
+	}
+
+	if strings.TrimSpace(resp.Header.Get("X-RateLimit-Remaining")) == "0" {
+		if raw := strings.TrimSpace(resp.Header.Get("X-RateLimit-Reset")); raw != "" {
+			if epoch, err := strconv.ParseInt(raw, 10, 64); err == nil {
+				delay := time.Unix(epoch, 0).Sub(now) + safety
+				if delay < safety {
+					return safety
+				}
+				if delay > maxResetSleep {
+					return maxResetSleep
+				}
+				return delay
+			}
+		}
+	}
+
+	return fallback
+}
+
 func (v *githubVerifier) getJSON(ctx context.Context, path string, target any) error {
 	for attempt := 0; ; attempt++ {
 		token, err := v.tokens.Token(ctx)
@@ -444,12 +491,24 @@ func (v *githubVerifier) getJSON(ctx context.Context, path string, target any) e
 			}
 			err = fmt.Errorf("GitHub REST transient status=%d", resp.StatusCode)
 		}
-		delay := retryDelay(attempt, time.Minute)
+		delay := githubRESTRetryDelay(resp, attempt, time.Now())
 		v.logger.Warn(
 			"Retrying GitHub REST verification in process",
 			slog.String("path", path),
 			slog.String("error", err.Error()),
 			slog.Duration("backoff", delay),
+			slog.String("rate_limit_remaining", func() string {
+				if resp == nil {
+					return ""
+				}
+				return strings.TrimSpace(resp.Header.Get("X-RateLimit-Remaining"))
+			}()),
+			slog.String("rate_limit_reset", func() string {
+				if resp == nil {
+					return ""
+				}
+				return strings.TrimSpace(resp.Header.Get("X-RateLimit-Reset"))
+			}()),
 		)
 		if err := sleepContext(ctx, delay); err != nil {
 			return err
@@ -657,8 +716,10 @@ func (v *githubVerifier) activeRuns(ctx context.Context) ([]githubWorkflowRun, e
 	for _, run := range byID {
 		result = append(result, run)
 	}
+	// Prefer newest active demand. Old repository-wide queued runs can linger for
+	// days; checking them first wastes REST quota and can block current demand.
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].ID < result[j].ID
+		return result[i].ID > result[j].ID
 	})
 	return result, nil
 }
@@ -697,6 +758,12 @@ func (v *githubVerifier) DiscoverTrustedDemand(
 
 	var candidates []verifiedJob
 	for _, run := range runs {
+		// A repository can have unrelated queued workflows for other runner
+		// classes. Their workflow path is already present in the run-list
+		// response, so reject them locally before spending another /jobs call.
+		if _, ok := v.workflowByPath(run.Path); !ok {
+			continue
+		}
 		jobs, err := v.runJobs(ctx, run.ID)
 		if err != nil {
 			return nil, false, "", err
@@ -743,6 +810,13 @@ func (v *githubVerifier) DiscoverTrustedDemand(
 			verified.GitHubJobID = job.ID
 			verified.AuthoritySource = "REST_ACTIVE_JOB_SET"
 			candidates = append(candidates, verified)
+			// REST discovery exists to create bounded capacity, not to inventory
+			// the entire repository queue. Once this class can fill MaxRunners,
+			// stop spending REST quota. Remaining queued demand will be picked up
+			// after capacity turns over.
+			if len(candidates) >= v.policy.MaxRunners {
+				return candidates, true, "", nil
+			}
 		}
 	}
 
