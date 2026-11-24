@@ -91,6 +91,67 @@ func newRESTVerifierTestServer(
 	return server, verifier
 }
 
+
+func TestGitHubRESTStatusIsTransientDistinguishesRateLimit403(t *testing.T) {
+	cases := []struct {
+		name   string
+		status int
+		header http.Header
+		body   string
+		want   bool
+	}{
+		{
+			name:   "primary rate limit header",
+			status: http.StatusForbidden,
+			header: http.Header{"X-RateLimit-Remaining": []string{"0"}},
+			want:   true,
+		},
+		{
+			name:   "primary rate limit body",
+			status: http.StatusForbidden,
+			body:   `{"message":"API rate limit exceeded for user ID 61768467"}`,
+			want:   true,
+		},
+		{
+			name:   "secondary rate limit",
+			status: http.StatusForbidden,
+			body:   `{"message":"You have exceeded a secondary rate limit."}`,
+			want:   true,
+		},
+		{
+			name:   "retry after",
+			status: http.StatusForbidden,
+			header: http.Header{"Retry-After": []string{"60"}},
+			want:   true,
+		},
+		{
+			name:   "ordinary forbidden stays fail closed",
+			status: http.StatusForbidden,
+			body:   `{"message":"Resource not accessible by integration"}`,
+			want:   false,
+		},
+		{
+			name:   "too many requests",
+			status: http.StatusTooManyRequests,
+			want:   true,
+		},
+		{
+			name:   "server error",
+			status: http.StatusServiceUnavailable,
+			want:   true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp := &http.Response{StatusCode: tc.status, Header: tc.header}
+			if got := githubRESTStatusIsTransient(resp, []byte(tc.body)); got != tc.want {
+				t.Fatalf("githubRESTStatusIsTransient()=%v want=%v", got, tc.want)
+			}
+		})
+	}
+}
+
 func TestDiscoverTrustedDemandUsesRESTJobIdentity(t *testing.T) {
 	_, verifier := newRESTVerifierTestServer(
 		t,
