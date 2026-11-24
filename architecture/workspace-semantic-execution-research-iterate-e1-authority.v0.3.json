@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e1-authority-v0.3",
-  "status": "PENDING_OPERATOR_WOP_E1_RETRY_EXECUTION",
+  "status": "CONSUMED_FAILED_E1_V03_RUNTIME_STAGED_OLD_SEMANTIC",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Rebind the same still-unconsumed corrected E1 live-attempt allocation to the repaired candidate-baseline transport source after authority v0.2 aborted before the consumption marker.",
   "approval_basis": {
@@ -66,8 +66,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "no_silent_retry": true,
     "live_consumption_marker": "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
     "abort_before_marker_does_not_consume_live_attempt": true,
@@ -106,5 +106,43 @@
     "branch_must_remain_at_authority_commit_before_launch": true,
     "wop_driver_refresh_required_once": true
   },
-  "postcondition": "One still-unconsumed corrected E1 attempt only. Once E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS appears, success or failure consumes this allocation."
+  "postcondition": "One still-unconsumed corrected E1 attempt only. Once E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS appears, success or failure consumes this allocation.",
+  "live_closeout": {
+    "observed_date": "2026-11-24",
+    "result": "FAILED_AFTER_AUTHORITY_CONSUMPTION",
+    "consumption_marker": "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "successful_markers": [
+      "E1_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_E1_ROUTE_ABSENT=PASS",
+      "E1_SEMANTIC_LIVE_BINDING=PASS",
+      "E1_WINDOWS_READY_GATE=PASS",
+      "E1_ROOT_DECOMPOSE=PASS",
+      "E1_SUPERVISOR_S1_REHYDRATION=PASS",
+      "E1_CHILD_CONTRACT_INHERITANCE=PASS",
+      "E1_EXACT_SOURCE=PASS",
+      "E1_ANALYSIS=PASS"
+    ],
+    "candidate_chain": {
+      "baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+      "root_decomposition": "18ec5028b2d5bae8bd8398a0bdf0ede2a3762daf",
+      "analysis": "5bcd6df3aac855a181c02effa2189b3b5706a1c7",
+      "append_only": true
+    },
+    "failure": {
+      "exception": "RuntimeError: e1_shell_literal_plugin_prefix_mismatch",
+      "causal_stage": "before Workspace Shell action became serviceable",
+      "workspace_shell_worker_serviced": false,
+      "workspace_shell_tool_invoked": false,
+      "classification": "RUNTIME_STAGED_OLD_SEMANTIC_EXECUTION",
+      "root_cause": "The private-route E1 transaction archived semantic-execution from legacy D4 backend SHA 020d35156d90e8268fb560a10e67098a146880de, then copied only the new E1 harness and fixture on top. Therefore live E1 imported the old SemanticPacketCompiler even though the repaired compiler was validated in the source branch."
+    },
+    "cleanup": {
+      "tailscale_existing_config_exactly_restored": true,
+      "jupyter_root_rollback_preserved": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true
+    },
+    "retry_policy": "NO_RETRY_UNDER_THIS_AUTHORITY"
+  }
 }

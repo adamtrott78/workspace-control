@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e1-closeout-v0.3",
+  "status": "CONSUMED_FAILED_RUNTIME_STAGED_OLD_SEMANTIC_EXECUTION",
+  "authority_head": "a9857b4520c84376632b7bf8e043df99601eb7ba",
+  "candidate_baseline_before_attempt": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+  "candidate_head_after_attempt": "5bcd6df3aac855a181c02effa2189b3b5706a1c7",
+  "durable_partial_results": {
+    "root_decomposition": "18ec5028b2d5bae8bd8398a0bdf0ede2a3762daf",
+    "analysis": "5bcd6df3aac855a181c02effa2189b3b5706a1c7"
+  },
+  "proven_before_failure": [
+    "real Instant root decomposition",
+    "Supervisor S1 durable rehydration",
+    "child contract inheritance",
+    "deterministic exact-source read",
+    "real Instant analysis candidate publication"
+  ],
+  "not_tested_because_runtime_staging_failed_first": [
+    "live @Workspace Shell invocation",
+    "Workspace Shell read-only evidence validation",
+    "fan-in after all three leaves",
+    "final Instant synthesis"
+  ],
+  "root_cause": {
+    "configured_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "repaired_semantic_implementation_head": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "repaired_packet_compiler_blob": "cf6200aa4b5a669dd023bc3c6478770bf4658528",
+    "explanation": "The runtime archive was pinned to the old D4 Semantic Execution commit, so the new harness executed against the old compiler."
+  },
+  "repair_contract": {
+    "runtime_semantic_sha": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "expected_packet_compiler_blob": "cf6200aa4b5a669dd023bc3c6478770bf4658528",
+    "verify_packet_compiler_before_consumption": true,
+    "next_candidate_baseline": "5bcd6df3aac855a181c02effa2189b3b5706a1c7",
+    "fresh_review_and_operator_approval_required": true
+  },
+  "candidate_history_rewrite": false,
+  "silent_retry": false
+}

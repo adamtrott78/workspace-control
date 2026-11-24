@@ -2,8 +2,9 @@
 set -Eeuo pipefail
 umask 077
 
-SEMANTIC_SHA="020d35156d90e8268fb560a10e67098a146880de"
+SEMANTIC_SHA="2e2d6ec5bcd4ba7476baafa30780f05695043bf9"
 EXPECTED_OPERATOR_HTTP_BLOB="3b6893c157c9f567c837aa70c110012eb96ee18c"
+EXPECTED_PACKET_COMPILER_BLOB="cf6200aa4b5a669dd023bc3c6478770bf4658528"
 BASE_URL="https://gokhan-lambda-vector.tailca6171.ts.net"
 ROUTE_PATH="/operator-bridge/v1"
 BACKEND_PORT="8765"
@@ -21,7 +22,7 @@ FUNNEL_BEFORE="$RUNTIME_ROOT/funnel-before.json"
 HARNESS_REL="benchmarks/workspace-semantic-execution/live_research_iterate_e1.py"
 FIXTURE_REL="benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"
 REPO_URL="https://github.com/adamtrott78/workspace-control.git"
-CANDIDATE_BASELINE="705ac86d8a95e210ada81747bcc7fc22983928c3"
+CANDIDATE_BASELINE="5bcd6df3aac855a181c02effa2189b3b5706a1c7"
 WINDOWS_READY_MARKER="E1_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS"
 
 ROUTE_ATTEMPTED=0
@@ -282,6 +283,9 @@ git -C "$ROOT" cat-file -e "$SEMANTIC_SHA^{commit}" 2>/dev/null \
 LIVE_OPERATOR_HTTP_BLOB="$(git -C "$ROOT" rev-parse "$SEMANTIC_SHA:semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py")"
 [[ "$LIVE_OPERATOR_HTTP_BLOB" == "$EXPECTED_OPERATOR_HTTP_BLOB" ]] \
   || fail "LIVE_SEMANTIC_OPERATOR_HTTP_BLOB_MISMATCH:$LIVE_OPERATOR_HTTP_BLOB"
+LIVE_PACKET_COMPILER_BLOB="$(git -C "$ROOT" rev-parse "$SEMANTIC_SHA:semantic-execution/src/workspace_semantic_execution/application/packet_compiler.py")"
+[[ "$LIVE_PACKET_COMPILER_BLOB" == "$EXPECTED_PACKET_COMPILER_BLOB" ]] \
+  || fail "LIVE_SEMANTIC_PACKET_COMPILER_BLOB_MISMATCH:$LIVE_PACKET_COMPILER_BLOB"
 [[ -f "$ROOT/$HARNESS_REL" ]] || fail "E1_HARNESS_MISSING"
 [[ -f "$ROOT/$FIXTURE_REL" ]] || fail "E1_RESEARCH_ENGINE_FIXTURE_MISSING"
 echo "E1_SEMANTIC_LIVE_BINDING=PASS"

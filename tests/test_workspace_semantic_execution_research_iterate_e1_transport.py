@@ -12,7 +12,7 @@ INSTALL = ROOT / "operator-bridge/tools/install-wop-commands.ps1"
 
 def test_e1_linux_binds_candidate_harness_fixture_and_consumption() -> None:
     text = LINUX.read_text(encoding="utf-8")
-    assert 'CANDIDATE_BASELINE="705ac86d8a95e210ada81747bcc7fc22983928c3"' in text
+    assert 'CANDIDATE_BASELINE="5bcd6df3aac855a181c02effa2189b3b5706a1c7"' in text
     assert 'HARNESS_REL="benchmarks/workspace-semantic-execution/live_research_iterate_e1.py"' in text
     assert 'FIXTURE_REL="benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"' in text
     assert "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS" in text
@@ -74,5 +74,13 @@ class DiscoveryTests_tests_test_workspace_semantic_execution_research_iterate_e1
 
 def test_e1_private_route_candidate_baseline_matches_current_retry_chain() -> None:
     text = E1_LINUX.read_text(encoding="utf-8")
-    assert 'CANDIDATE_BASELINE="705ac86d8a95e210ada81747bcc7fc22983928c3"' in text
+    assert 'CANDIDATE_BASELINE="5bcd6df3aac855a181c02effa2189b3b5706a1c7"' in text
     assert '8aacc7eebbbafabcb20b372aa53b88350a44e633' not in text
+
+
+def test_e1_runtime_archives_repaired_semantic_execution() -> None:
+    text = LINUX.read_text(encoding="utf-8")
+    assert 'SEMANTIC_SHA="2e2d6ec5bcd4ba7476baafa30780f05695043bf9"' in text
+    assert 'EXPECTED_PACKET_COMPILER_BLOB="cf6200aa4b5a669dd023bc3c6478770bf4658528"' in text
+    assert "LIVE_SEMANTIC_PACKET_COMPILER_BLOB_MISMATCH" in text
+    assert 'git -C "$ROOT" archive "$SEMANTIC_SHA" semantic-execution' in text
