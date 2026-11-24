@@ -53,3 +53,23 @@ def test_live_repair_launcher_is_controller_only():
     assert "root-policy.json" not in LAUNCHER
     assert "PROVISIONER_UNIT" not in LAUNCHER
     assert 'systemctl", "restart"' not in LAUNCHER
+
+
+def test_equivalent_active_controller_noop_is_explicit_and_fail_closed():
+    for marker in (
+        '"45bcf7caa14778baeb014d702064b4a0bfa50d94"',
+        '"59753977cb2b77d8308b58f311784da366de63bd"',
+        '"18abac983e389069b1f988792dbea42628486c09"',
+        "verify_equivalent_active_source(",
+        "candidate digest already installed from an unreviewed source head",
+        "MTH602_V3_REST_BACKFILL_BOOTSTRAP=ALREADY_ACTIVE_EQUIVALENT",
+        "CANDIDATE_SOURCE_HEAD=",
+    ):
+        assert marker in LAUNCHER
+
+
+def test_equivalent_noop_requires_exact_binary_digest_before_source_equivalence():
+    same_digest = LAUNCHER.index("if current_sha == candidate_sha:")
+    equivalent = LAUNCHER.index("verify_equivalent_active_source(", same_digest)
+    assert same_digest < equivalent
+    assert "atomic_file(" not in LAUNCHER[same_digest:equivalent]
