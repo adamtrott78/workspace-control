@@ -17,22 +17,36 @@ Authoritative capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 - Final cell: PA8<-PA3, lane B run `45444347242` / job `138623859746` = SUCCESS
 - Result artifact: `14945842346`, digest `sha256:34dac735ef37d788e956c89b91478ca0c0a07a346a789320970d1c52fc69ed01`
 - U-F1: `0.9074289030760302`; AUROC: `0.9227523467878138`; known reject: `0.0634320053416425`
-- Provenance: scientific receipt PASS; target labels not used for tuning; threshold source known-only; no recipe/checkpoint/retry feedback
+- Provenance: scientific receipt PASS; target labels not used for tuning; threshold source known-only
+
+## Lane-A recovery
+
+- Operator authority is explicit.
+- Harmless smoke comment: `7139263906`
+- Lane-A smoke run/job: `45449088526 / 138640917329`
+- Current provider state: queued, unassigned, `runner_id=0`
+- This reproduces the lane-A controller stall independently of OSR science.
+- Connected Workspace Shell cannot execute the required root restart: reviewed-helper registry is empty and signed approvals cannot be minted by chat.
+- GitHub self-hosted Workspace Control runners are intentionally isolated from root control paths.
 
 ## Next safe action
 
-Hold lane-A mutation at the authority gate. Fix lane A only if an already-reviewed recovery path with exact current-state authority becomes available. Do not hand-edit controller/root ledgers, reuse exact-job historical repair scripts outside their bindings, or widen Workspace Shell authority. Per operator sequencing, do not start Rule A/B/C analysis until lane A is resolved.
+Execute exactly:
+
+`sudo systemctl restart workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service`
+
+Then monitor only smoke run `45449088526` / job `138640917329`. Recovery is accepted only if the smoke acquires a runner and completes SUCCESS. Do not edit controller/root ledgers, restart the provisioner, widen Workspace Shell authority, issue another smoke, or admit science.
 
 ## Remaining work
 
-- Resolve lane-A recovery authority gate using an already-reviewed path only.
+- Prove lane-A recovery with the existing bounded smoke.
 - After lane A is healthy, finalize Rule A and retrospective confusion-exclusion correlations/ranking/regret on all 20 cells.
-- Only after lane A recovery is complete and OSR execution is idle, execute frozen historical Rule B confidence-geometry and Rule C feature-geometry replication.
+- Then execute frozen historical Rule B confidence-geometry and Rule C feature-geometry replication without CPU overlap.
 - Compare historical vs repaired selector behavior and distinguish target-blind deployable metrics from target-aware retrospective mechanism diagnostics.
 
 ## Blockers / gates
 
-- LANE_A_RECOVERY_AUTHORITY_GATE: final t007 OSR is complete, but connected Workspace Shell cannot inspect the scientific controller unit (`UNIT_NOT_AUTHORIZED`), the live maintenance `reset-stale` path is explicitly limited to workspace-control/cpu, and no reviewed helper/approval in the durable task targets the current lane-A controller/root-ledger state. Historical PR #593/#594 ledger repairs are exact-job bounded and cannot be repurposed. Do not hand-edit ledgers, widen Workspace Shell authority, or invent a new root action.
+- Connected root-execution capability only; authority is no longer blocked.
 
 ## Fresh-chat initialization
 
@@ -43,7 +57,5 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
+Treat the capsule and exact Git/runtime evidence as authoritative.
 Follow the capsule's next_safe_action.
