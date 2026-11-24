@@ -535,6 +535,46 @@ func TestRestAttestedAssignedDemandProvisionsWithoutBrokerIDs(t *testing.T) {
 	}
 }
 
+func TestRestAttestedQueuedDemandProvidesCapacityFloorWhenAssignedCountFallsToZero(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	verifier := &fakeVerifier{
+		discoverySafe: true,
+		discovered:    []verifiedJob{restDiscoveredJob(9001, 1901)},
+	}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("REST demand discovery calls=%d want=1", verifier.discoveryCalls)
+	}
+	if len(events) != 3 ||
+		!strings.HasPrefix(events[0], "reserve:") ||
+		!strings.HasPrefix(events[1], "jit:") ||
+		!strings.HasPrefix(events[2], "launch:") {
+		t.Fatalf("trusted queued REST demand must preserve RESERVE -> JIT -> LAUNCH: %#v", events)
+	}
+	record, ok, err := ledger.Get(9001)
+	if err != nil || !ok {
+		t.Fatalf("REST queued demand record missing: ok=%v err=%v", ok, err)
+	}
+	if record.State != "PREPARING" ||
+		record.AuthoritySource != "REST_ACTIVE_JOB_SET" ||
+		record.SchedulerState != "REST_ATTESTED_ASSIGNED" {
+		t.Fatalf("REST queued demand record mismatch: %#v", record)
+	}
+}
+
 func TestRestDemandRefreshesCompletedRootRecordBeforeCountingOutstandingCapacity(t *testing.T) {
 	events := []string{}
 	ledger := newMemoryLedger()
