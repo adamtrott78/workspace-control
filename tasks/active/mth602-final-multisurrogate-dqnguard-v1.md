@@ -5,46 +5,33 @@ Derived human-readable view.
 
 Authoritative capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 
+If this view disagrees with the JSON capsule or verified Git/runtime evidence, trust the capsule plus verified evidence.
+
 ## Task
 
 - ID: mth602-final-multisurrogate-dqnguard-v1
 - Title: MTH 602 final project / PADataset multi-surrogate DQNGuard
 - Status: IN_PROGRESS
+- Capsule schema: v2
 
-## Current scientific checkpoint
+## Goal
 
-- Final t007 directional matrix: **20/20 CLOSED**
-- Final cell: PA8<-PA3, lane B run `45444347242` / job `138623859746` = SUCCESS
-- Result artifact: `14945842346`, digest `sha256:34dac735ef37d788e956c89b91478ca0c0a07a346a789320970d1c52fc69ed01`
-- U-F1: `0.9074289030760302`; AUROC: `0.9227523467878138`; known reject: `0.0634320053416425`
-- Provenance: scientific receipt PASS; target labels not used for tuning; threshold source known-only
-
-## Lane-A recovery
-
-- **PASS / RECOVERED**
-- Operator executed exactly:
-  `sudo systemctl restart workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service`
-- Acceptance smoke: run `45449088526` / job `138640917329`
-- Smoke conclusion: **SUCCESS**
-- Runner: `lambda-padataset-scientific-single-gpu-26c92d91f498`
-- Smoke artifact: `14949111150`
-- Artifact SHA256: `092167500e6f6c8fe5c6f8b91a854eff476bb495dd3ade5a76d0407db07c9303`
-- No ledger edits, provisioner restart, policy change, duplicate smoke, or science admission occurred.
+Execute a rigorous MTH602-to-journal research program centered on backbone competence (H1), then resolve whether surrogate transfer remains intrinsically target-dependent or becomes target-blind-selectable (H2/H4), test multi-surrogate DQNGuard if needed (H5), and treat STFT representation as a bounded lower-priority ablation (H3). Preserve true-target quarantine, standard-DQNGuard controls, exact provenance, explicit seed separation, and a deadline-triggered pivot to complete MTH602 deliverables before December or the course due date.
 
 ## Next safe action
 
-Finalize Rule A guard-score and retrospective target-aware confusion-exclusion analysis on all 20 frozen post-hoc cells. Do not feed selector evidence back into backbone/checkpoint/threshold selection.
+Selector analysis is complete on the frozen 20/20 seed0 matrix, including canonical Rule B/C replication at PADataset PR55 head 59afa36826709531e64211af3c175e0378048f19. Next freeze a matched L2O control-matrix plan over the same 10 competent backbones / 20 directional cells before execution. Preserve the original DQN-IDS and VarMax control semantics; do not silently reinterpret VarMax surrogate-all as a surrogate-specific method. After matched controls, execute final multi-seed robustness with the same frozen recipes and report mean/std, winner stability, selector-regret stability, and DQNGuard-control deltas.
 
 ## Remaining work
 
-- Prove lane-A recovery with the existing bounded smoke.
-- After lane A is healthy, finalize Rule A and retrospective confusion-exclusion correlations/ranking/regret on all 20 cells.
-- Then execute frozen historical Rule B confidence-geometry and Rule C feature-geometry replication without CPU overlap.
-- Compare historical vs repaired selector behavior and distinguish target-blind deployable metrics from target-aware retrospective mechanism diagnostics.
+- Freeze the repaired L2O control-matrix design before execution, using the exact competent-backbone bank and 20 directional cells. Re-run DQN-IDS/Shreyash-style and VarMax controls under matched evidence; preserve the original VarMax surrogate-all definition unless a separately named matched surrogate-specific ablation is explicitly added.
+- Execute the matched control matrix and report per-cell/aggregate DQNGuard-minus-control deltas rather than comparing repaired DQNGuard against paper-era control numbers.
+- Execute final multi-seed robustness only after the control design is frozen: repeat the frozen backbone/method recipes across the predetermined seed set, report mean/std and confidence intervals, surrogate-winner frequency, oracle-regret distributions, same-backbone directional asymmetry stability, and whether Rule A/B/C/confusion-exclusion relationships survive seeds.
+- Complete final scientific synthesis comparing paper-era versus repaired geometry, matched controls, and seeded robustness without allowing post-hoc target/test evidence to rewrite training/checkpoint/threshold history.
 
 ## Blockers / gates
 
-- None for lane-A recovery; gate closed.
+- None.
 
 ## Fresh-chat initialization
 
@@ -55,5 +42,7 @@ https://github.com/adamtrott78/workspace-control
 Continue the durable workspace-control task defined by:
 Task capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 
-Treat the capsule and exact Git/runtime evidence as authoritative.
+Start from the normal workspace-control root route.
+Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
+Do not rely on previous conversation state.
 Follow the capsule's next_safe_action.
