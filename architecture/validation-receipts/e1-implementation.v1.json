@@ -1,25 +1,25 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
-  "status": "VALIDATED_HEAD_PENDING_CROSS_DOMAIN_REPAIR",
-  "validated_head": "ad468737d57ed1e441d7676a52112f75a60d0fca",
+  "status": "VALIDATED_E1_RETRY_SOURCE_A7_RESTORED",
+  "validated_head": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
   "validation_runs": {
     "semantic_execution": {
       "workflow_name": "Semantic Execution Validation",
-      "run_id": 45493670051,
-      "run_number": 485,
+      "run_id": 45494763841,
+      "run_number": 487,
       "conclusion": "success"
     },
     "operator_bridge": {
       "workflow_name": "Operator Bridge Validation",
-      "run_id": 45493669824,
-      "run_number": 755,
+      "run_id": 45494763813,
+      "run_number": 757,
       "conclusion": "success"
     },
     "workspace_control": {
       "workflow_name": "Workspace Control Validation",
-      "run_id": 45493669634,
-      "run_number": 3182,
+      "run_id": 45494763888,
+      "run_number": 3184,
       "conclusion": "success"
     }
   },
@@ -83,12 +83,13 @@
     "receipt_or_script_parse_failure_falls_back_to_full_validation": true
   },
   "proof": {
-    "prefix_repair_full_validated_at": "121a7151fa386fddb25e0244538394bef35c5c08",
-    "focus_enter_gate_full_operator_validated_at": "ad468737d57ed1e441d7676a52112f75a60d0fca",
-    "workspace_control_run": 3182,
-    "semantic_execution_run": 485,
-    "operator_bridge_run": 755,
-    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
-    "inheritance_dependency_repair": "Workspace Control inheritance now treats operator-bridge, semantic-execution, and benchmarks as implementation-relevant because its full unit suite asserts cross-domain historical contracts."
+    "a7_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "prefix_repair_present": true,
+    "foreground_patch_reverted": true,
+    "cross_domain_inheritance_hardened": true,
+    "workspace_control_run": 3184,
+    "semantic_execution_run": 487,
+    "operator_bridge_run": 757,
+    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3"
   }
 }
