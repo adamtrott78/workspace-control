@@ -413,6 +413,7 @@ def _result_packet(
     evidence_instruction: str,
     plugin_mentions: tuple[str, ...] = (GITHUB_PLUGIN_MENTION,),
     extra_constraints: tuple[str, ...] = (),
+    allowed_actions: tuple[str, ...] = ("publish-exact-worker-result-candidate",),
 ) -> PacketCompilationInput:
     return PacketCompilationInput(
         process_id=process_id,
@@ -441,7 +442,7 @@ def _result_packet(
         ),
         evidence_refs=(f"research-engine@{RESEARCH_ENGINE_SHA}",),
         authority_refs=("scope:research-read-only",),
-        allowed_actions=("publish-exact-worker-result-candidate",),
+        allowed_actions=allowed_actions,
         validator_contract=VALIDATOR_ID,
         output_schema="WORKER_RESULT_V1",
         next_safe_boundary="publish immutable candidate and stop",
@@ -947,6 +948,10 @@ def run_e1(
                     extra_constraints=(
                         "Workspace Shell capability is strictly read-only for this leaf.",
                         "workspace_shell_exec and workspace_shell_run_reviewed_helper are prohibited.",
+                    ),
+                    allowed_actions=(
+                        "inspect-workspace-shell-runtime-inventory",
+                        "publish-exact-worker-result-candidate",
                     ),
                 ),
                 operator=_operator_params(

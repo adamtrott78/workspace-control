@@ -41,3 +41,10 @@ def test_live_e1_binds_frozen_research_engine_source() -> None:
     assert 'SOURCE_BLOB_SHA = "0d051fa50960708e0e773f6871c7e924c5796394"' in source
     assert "ReadOnlyRepositoryExecutor" in source
     assert "RepositoryReadPostconditionValidator" in source
+
+
+def test_live_e1_shell_packet_explicitly_allows_only_read_only_inspection_and_publication() -> None:
+    source = text()
+    assert '"inspect-workspace-shell-runtime-inventory"' in source
+    assert '"publish-exact-worker-result-candidate"' in source
+    assert "allowed_actions=allowed_actions" in source
