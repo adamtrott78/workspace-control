@@ -173,7 +173,24 @@ exit /b %ERRORLEVEL%
       try {
         $null = Get-D4BackendStatus -StatusUrl $statusUrl -TimeoutSec 2
       } catch {
-        throw ("D4_OPERATOR_BACKEND_ROUTE_LOST:" + $_.Exception.Message)
+        $routeLossMessage = $_.Exception.Message
+        $teardownDeadline = (Get-Date).AddSeconds(10)
+        do {
+          Start-Sleep -Milliseconds 100
+          $sshProcess.Refresh()
+        } while (-not $sshProcess.HasExited -and (Get-Date) -lt $teardownDeadline)
+
+        if ($sshProcess.HasExited) {
+          $sshProcess.WaitForExit()
+          $sshProcess.Refresh()
+          if ($sshProcess.ExitCode -eq 0) {
+            Write-Host "D4_EXPECTED_POSTSUCCESS_ROUTE_TEARDOWN=PASS"
+            break
+          }
+          throw "D4_WOP_REMOTE_EXIT_AFTER_ROUTE_LOSS:$($sshProcess.ExitCode)"
+        }
+
+        throw ("D4_OPERATOR_BACKEND_ROUTE_LOST:" + $routeLossMessage)
       }
       $nextBackendHealthCheck = (Get-Date).AddSeconds(2)
     }
