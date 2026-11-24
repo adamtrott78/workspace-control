@@ -1,3 +1,4 @@
+import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,3 +37,11 @@ def test_supervisor_has_read_projection_and_proposal_only_port() -> None:
     assert "SupervisorProposalPort" in t
     assert "SubmitCandidateObjective" in t
     assert "GetCriticalPath" in t
+
+
+class DiscoveryTests_tests_test_workspace_semantic_execution_supervisor_chat_py(unittest.TestCase):
+    def test_supervisor_is_explicitly_non_authoritative(self) -> None:
+        globals()[\"test_supervisor_is_explicitly_non_authoritative\"]()\n\n    def test_supervisor_is_distinct_from_mechanical_operator_console(self) -> None:
+        globals()[\"test_supervisor_is_distinct_from_mechanical_operator_console\"]()\n\n    def test_supervisor_defaults_to_instant_and_recovers_from_durable_state(self) -> None:
+        globals()[\"test_supervisor_defaults_to_instant_and_recovers_from_durable_state\"]()\n\n    def test_supervisor_has_read_projection_and_proposal_only_port(self) -> None:
+        globals()[\"test_supervisor_has_read_projection_and_proposal_only_port\"]()\n\n

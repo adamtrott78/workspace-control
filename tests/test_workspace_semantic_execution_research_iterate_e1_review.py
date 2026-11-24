@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import unittest
 import json
 import subprocess
 from pathlib import Path
@@ -57,3 +58,12 @@ def test_e1_procedure_preserves_manual_loop_and_no_silent_retry() -> None:
     assert "@Workspace Shell" in text
     assert "workspace_shell_inspect" in text
     assert "No silent retry" in text
+
+
+class DiscoveryTests_tests_test_workspace_semantic_execution_research_iterate_e1_review_py(unittest.TestCase):
+    def test_e1_review_is_non_authority_and_exact_green_implementation(self) -> None:
+        globals()[\"test_e1_review_is_non_authority_and_exact_green_implementation\"]()\n\n    def test_e1_review_binds_exact_implementation_bytes(self) -> None:
+        globals()[\"test_e1_review_binds_exact_implementation_bytes\"]()\n\n    def test_e1_review_workspace_shell_is_read_only_and_hidden_expected_values(self) -> None:
+        globals()[\"test_e1_review_workspace_shell_is_read_only_and_hidden_expected_values\"]()\n\n    def test_e1_review_supervisor_is_durable_projection_only(self) -> None:
+        globals()[\"test_e1_review_supervisor_is_durable_projection_only\"]()\n\n    def test_e1_procedure_preserves_manual_loop_and_no_silent_retry(self) -> None:
+        globals()[\"test_e1_procedure_preserves_manual_loop_and_no_silent_retry\"]()\n\n

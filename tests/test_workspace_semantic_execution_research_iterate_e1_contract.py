@@ -1,3 +1,4 @@
+import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,3 +29,11 @@ def test_e1_keeps_recovery_and_soak_separate() -> None:
     text = DOC.read_text(encoding="utf-8")
     assert "E2 is deliberate worker/session/process loss" in text
     assert "E3 is resource accounting and soak" in text
+
+
+class DiscoveryTests_tests_test_workspace_semantic_execution_research_iterate_e1_contract_py(unittest.TestCase):
+    def test_e1_topology_is_mixed_and_fanin(self) -> None:
+        globals()[\"test_e1_topology_is_mixed_and_fanin\"]()\n\n    def test_e1_workspace_shell_probe_is_literal_read_only(self) -> None:
+        globals()[\"test_e1_workspace_shell_probe_is_literal_read_only\"]()\n\n    def test_e1_supervisor_is_projection_only(self) -> None:
+        globals()[\"test_e1_supervisor_is_projection_only\"]()\n\n    def test_e1_keeps_recovery_and_soak_separate(self) -> None:
+        globals()[\"test_e1_keeps_recovery_and_soak_separate\"]()\n\n

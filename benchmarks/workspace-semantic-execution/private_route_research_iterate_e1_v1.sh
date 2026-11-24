@@ -362,4 +362,4 @@ if [[ "$CAL_RC" -ne 0 ]]; then
   exit "$CAL_RC"
 fi
 
-echo "PRIVATE_ROUTE_E1_REAL_INSTANT_V3=PASS"
+echo "PRIVATE_ROUTE_RESEARCH_ITERATE_E1_V1=PASS"
