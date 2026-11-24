@@ -26,36 +26,6 @@ public sealed class WorkerWindowSafetyController
     public bool ForegroundPreparedWorkerWindow() =>
         _port.ForegroundPreparedWorkerWindow();
 
-    public bool ForegroundPreparedWorkerWindowWithRetries(
-        int attempts = 20,
-        int delayMilliseconds = 25)
-    {
-        if (attempts <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(attempts));
-        }
-
-        if (delayMilliseconds < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(delayMilliseconds));
-        }
-
-        for (var attempt = 0; attempt < attempts; attempt++)
-        {
-            if (_port.ForegroundPreparedWorkerWindow())
-            {
-                return true;
-            }
-
-            if (attempt + 1 < attempts && delayMilliseconds > 0)
-            {
-                Thread.Sleep(delayMilliseconds);
-            }
-        }
-
-        return false;
-    }
-
     public bool IsPreparedWorkerWindowForeground() =>
         _port.IsCapturedWorkerWindowForeground();
 

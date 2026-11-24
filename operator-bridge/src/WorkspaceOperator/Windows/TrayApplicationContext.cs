@@ -187,17 +187,17 @@ public sealed class TrayApplicationContext : ApplicationContext
             var result = await _dispatch.DispatchAsync();
             if (result.Outcome == DispatchOutcome.LocalPrepared)
             {
-                var foregrounded =
-                    _workerWindowSafety.ForegroundPreparedWorkerWindowWithRetries();
+                _workerWindowSafety.ForegroundPreparedWorkerWindow();
                 var captured =
                     _workerWindowSafety.RecordPreparedWorkerWindow();
-                var armed = _humanSubmitConfirmation.Arm();
-                if (!foregrounded || !captured || !armed)
+                var armed =
+                    captured && _humanSubmitConfirmation.Arm();
+                if (!armed)
                 {
                     _notifyIcon.ShowBalloonTip(
                         3000,
                         "Workspace Worker Bridge",
-                        "Worker focus/Enter confirmation degraded; this worker remains blocked until Enter is observed in the prepared Firefox worker.",
+                        "Enter confirmation monitor unavailable; this worker will remain blocked rather than advance.",
                         ToolTipIcon.Warning);
                 }
             }

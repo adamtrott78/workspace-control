@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e1-retry-review-v0.3",
-  "status": "VALIDATED_RETRY_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "status": "INVALIDATED_BEFORE_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "authority": "architecture/workspace-semantic-execution-research-iterate-e1-authority.v0.1.json",
@@ -92,5 +92,10 @@
     "private route rollback PASS",
     "Windows cleanup PASS"
   ],
-  "next_gate": "After this review head is 3/3 green, require a fresh explicit operator instruction to run E1 again before minting exactly one new live authority."
+  "next_gate": "After this review head is 3/3 green, require a fresh explicit operator instruction to run E1 again before minting exactly one new live authority.",
+  "invalidation": {
+    "reason": "Foreground/Enter-gate patch modified the frozen accepted A7 operator-bridge/src tree. Workspace full validation #3183 correctly rejected the change through historical A7 invariants.",
+    "workspace_control_run": 3183,
+    "disposition": "Restore exact accepted A7 bytes; keep the focus observation separate; create a fresh retry review after the restored source is fully validated."
+  }
 }

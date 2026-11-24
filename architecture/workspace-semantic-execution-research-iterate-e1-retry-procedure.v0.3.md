@@ -1,6 +1,6 @@
 # Integrated Research-Iterate E1 Retry Procedure v0.3
 
-Status: **REVIEWED RETRY PROCEDURE / NON-AUTHORITY**
+Status: **INVALIDATED BEFORE AUTHORITY — A7 FRONTEND RESTORATION REQUIRED**
 
 Implementation head: `ad468737d57ed1e441d7676a52112f75a60d0fca`
 Candidate baseline: `705ac86d8a95e210ada81747bcc7fc22983928c3`
@@ -24,3 +24,5 @@ Only `workspace_shell_inspect(task_id="workspace-semantic-execution-migration-v1
 ## Authority
 
 The previous E1 authority is consumed. This procedure grants no retry. A fresh explicit operator instruction is required before exactly one new E1 authority may be persisted.
+
+This v0.3 procedure is superseded and grants no execution authority.

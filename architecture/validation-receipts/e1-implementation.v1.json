@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
-  "status": "VALIDATED_E1_RETRY_IMPLEMENTATION",
+  "status": "VALIDATED_HEAD_PENDING_CROSS_DOMAIN_REPAIR",
   "validated_head": "ad468737d57ed1e441d7676a52112f75a60d0fca",
   "validation_runs": {
     "semantic_execution": {
@@ -67,7 +67,10 @@
         "tests/**",
         "tasks/**",
         ".github/workflows/workspace-control-validation.yml",
-        "scripts/validation_inheritance.py"
+        "scripts/validation_inheritance.py",
+        "operator-bridge/**",
+        "semantic-execution/**",
+        "benchmarks/**"
       ]
     }
   },
@@ -85,6 +88,7 @@
     "workspace_control_run": 3182,
     "semantic_execution_run": 485,
     "operator_bridge_run": 755,
-    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3"
+    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "inheritance_dependency_repair": "Workspace Control inheritance now treats operator-bridge, semantic-execution, and benchmarks as implementation-relevant because its full unit suite asserts cross-domain historical contracts."
   }
 }
