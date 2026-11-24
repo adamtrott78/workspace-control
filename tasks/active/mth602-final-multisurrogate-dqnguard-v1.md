@@ -18,15 +18,31 @@ If this view disagrees with the JSON capsule or verified Git/runtime evidence, t
 
 Execute a rigorous MTH602-to-journal research program centered on backbone competence (H1), then resolve whether surrogate transfer remains intrinsically target-dependent or becomes target-blind-selectable (H2/H4), test multi-surrogate DQNGuard if needed (H5), and treat STFT representation as a bounded lower-priority ablation (H3). Preserve true-target quarantine, standard-DQNGuard controls, exact provenance, explicit seed separation, and a deadline-triggered pivot to complete MTH602 deliverables before December or the course due date.
 
+## Repositories
+
+### PADataset
+
+- Intent: mutate
+- Remote branch: mth602-final-multisurrogate-dqnguard-v1
+- Remote checkpoint: befe383fd67c8bca8d8ce370344b33c7e13cd52f
+- Remote verified: true
+
+### workspace-control
+
+- Intent: mutate
+- Remote branch: workspace-shell-candidate-evidence-current-v1
+- Remote checkpoint: 4469009659182c8c2f4d12d727e556f2a2995fc9
+- Remote verified: true
+
 ## Next safe action
 
-Selector analysis is complete on the frozen 20/20 seed0 matrix, including canonical Rule B/C replication at PADataset PR55 head 59afa36826709531e64211af3c175e0378048f19. Next freeze a matched L2O control-matrix plan over the same 10 competent backbones / 20 directional cells before execution. Preserve the original DQN-IDS and VarMax control semantics; do not silently reinterpret VarMax surrogate-all as a surrogate-specific method. After matched controls, execute final multi-seed robustness with the same frozen recipes and report mean/std, winner stability, selector-regret stability, and DQNGuard-control deltas.
+Matched control design is frozen and validated at PADataset draft PR #56 head d955a244f7cfd8bfd6cbc4e5ca9ba9c38a23a82d. Next implement the bounded control evaluator/request path against that exact frozen plan, preserving DQN-IDS-style softmax3 hard-action semantics with 625 known + 625 external-surrogate validation and historical VarMax surrogate_all+smoke semantics. Validate the implementation and all 20 requests before any control admission; do not retrain backbones or use target/test/OSR evidence for fitting, method selection, retry policy, or control redefinition.
 
 ## Remaining work
 
-- Freeze the repaired L2O control-matrix design before execution, using the exact competent-backbone bank and 20 directional cells. Re-run DQN-IDS/Shreyash-style and VarMax controls under matched evidence; preserve the original VarMax surrogate-all definition unless a separately named matched surrogate-specific ablation is explicitly added.
-- Execute the matched control matrix and report per-cell/aggregate DQNGuard-minus-control deltas rather than comparing repaired DQNGuard against paper-era control numbers.
-- Execute final multi-seed robustness only after the control design is frozen: repeat the frozen backbone/method recipes across the predetermined seed set, report mean/std and confidence intervals, surrogate-winner frequency, oracle-regret distributions, same-backbone directional asymmetry stability, and whether Rule A/B/C/confusion-exclusion relationships survive seeds.
+- Implement and validate the bounded matched-control evaluator/request path frozen by PADataset PR #56. DQN-IDS-style must use the external-surrogate validation split, never target-open; VarMax must remain historical surrogate-all and must not consume the external surrogate.
+- Execute the matched control matrix only after implementation/request validation closes, then report per-cell/aggregate DQNGuard-minus-control deltas rather than comparing repaired DQNGuard against paper-era control numbers.
+- Execute final multi-seed robustness only after the control matrix closes: repeat the frozen backbone/method recipes across the predetermined seed set, report mean/std and confidence intervals, surrogate-winner frequency, oracle-regret distributions, same-backbone directional asymmetry stability, and whether Rule A/B/C/confusion-exclusion relationships survive seeds.
 - Complete final scientific synthesis comparing paper-era versus repaired geometry, matched controls, and seeded robustness without allowing post-hoc target/test evidence to rewrite training/checkpoint/threshold history.
 
 ## Blockers / gates
