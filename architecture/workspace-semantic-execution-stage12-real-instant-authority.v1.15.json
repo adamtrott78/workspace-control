@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.15",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "CONSUMED_PASS_D4_V115_POSTSUCCESS_WRAPPER_FALSE_NEGATIVE",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "backend_task": "workspace-semantic-execution-backend-v1",
   "frontend_task": "workspace-operator-bridge-implementation-v1",
@@ -91,8 +91,8 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
-    "reusable": true,
+    "consumed": true,
+    "reusable": false,
     "candidate_baseline_required_marker": "STAGE12_CANDIDATE_BASELINE=PASS",
     "clean_route_required_marker": "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
     "semantic_binding_required_marker": "STAGE12_SEMANTIC_LIVE_BINDING=PASS",
@@ -183,5 +183,49 @@
     "rule": "The exact v1.15 authority-persistence commit must pass Workspace Control, Semantic Execution, and Operator Bridge validation and remain branch-stable before wop d4 may execute.",
     "no_branch_mutation_after_final_validation_before_wop": true
   },
-  "postcondition": "Exactly one corrected v1.15 D4 attempt is authorized. Any abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming; any success or failure after that marker consumes the attempt. Corrected D4 PASS is required before integrated research-iterate E1."
+  "postcondition": "Exactly one corrected v1.15 D4 attempt is authorized. Any abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming; any success or failure after that marker consumes the attempt. Corrected D4 PASS is required before integrated research-iterate E1.",
+  "live_closeout": {
+    "observed_date": "2026-11-24",
+    "authority_head": "5172a37781834c19a6eda8ad2e040ea39aefb5d3",
+    "result": "PASS",
+    "candidate_chain": {
+      "baseline": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+      "q1": "6eeaf5ab39a45298f4cf0e7f20b40fd7990f75ea",
+      "q2": "f3f6d1e6e32cb830f9a3538c8b7013f0dfa284d8",
+      "q3_replacement": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+      "final_candidate_head": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+      "append_only": true
+    },
+    "continuity_proof": {
+      "hidden_before_q2": "STAGE12_Q2_CONTINUITY_TOKEN_HIDDEN=PASS",
+      "q2_candidate_contains_recovered_ref": true,
+      "q2_session_generation": 0,
+      "conclusion": "PASS_TRUE_PRECEDING_CONVERSATION_CONTINUITY"
+    },
+    "backend_report": {
+      "result": "PASS",
+      "q1_real_instant": true,
+      "persistent_session_reuse": true,
+      "continuity_cache_probe": true,
+      "stale_session_fencing": true,
+      "late_old_generation_rejected_without_mutation": true,
+      "replacement_session_generation": 1,
+      "final_session_state": "READY"
+    },
+    "cleanup": {
+      "private_route_transaction": "PASS",
+      "tailscale_config_restored": true,
+      "jupyter_root_preserved": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true,
+      "windows_cleanup": true
+    },
+    "launcher_false_negative": {
+      "classification": "POSTSUCCESS_TEARDOWN_RACE",
+      "invalidates_d4": false,
+      "repaired_at": "8237e5490b61146533710e8d6d50c67345492a71"
+    },
+    "disposition": "D4_ACCEPTED_ADVANCE_TO_INTEGRATED_RESEARCH_ITERATE_E1"
+  }
 }

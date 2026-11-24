@@ -872,9 +872,19 @@
             "Authority exact bindings include review blob a5af627516f8ff288d1c90570c7e09c0526da023, WOP wrapper blob 8ff4d60c1867c4fac136cb23d8408a0fa89cc46b, remote-bootstrap blob 905d1f8e21c45c78fd244f1192a420ff457f221c, and Linux private-route blob 367fea22f867e30defe17afb8abe7fc68680de69.",
             "Operator policy: exact `wop d4` is the approval signal; separate chat approval is not required."
           ]
+        },
+        {
+          "check": "Stage 12 corrected D4 v1.15 real-Instant calibration",
+          "result": "PASS",
+          "evidence": [
+            "Authority head 5172a37781834c19a6eda8ad2e040ea39aefb5d3 passed Workspace #3160, Semantic #462 and Operator #733 before execution.",
+            "Backend proved Q1 durable ingest, Q2 hidden-token persistent continuity, stale-generation fencing, generation-1 replacement and final result=PASS.",
+            "Candidate history advanced append-only through 6eeaf5ab..., f3f6d1e6..., 8aacc7ee... while source/authority state stayed isolated.",
+            "Private-route rollback and Windows cleanup passed; the final WOP exit was a post-success teardown polling race repaired at 8237e549...."
+          ]
         }
       ],
-      "resume_condition": "Stage 10 is fully accepted and Ctrl+Space retained; do not rerun UT-05–UT-12. Current critical gates are semantic Workspace Shell authority activation, exact-host fake-worker transport, live evaluator isolation, Codex #627/#630 lineage, real-account/allowance calibration, live mixed-workflow recovery, UX-09/resource proving, and final production verdict."
+      "resume_condition": "Corrected D4 is accepted. Proceed to E1 mixed routing/fan-in/synthesis with a harmless read-only Workspace Shell probe and Supervisor S1; keep E2 recovery and E3 resource/soak separate."
     }
   ],
   "checkpoints": [

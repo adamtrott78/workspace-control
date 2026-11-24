@@ -18,14 +18,14 @@ def authority() -> dict:
     return json.loads(AUTHORITY.read_text(encoding="utf-8"))
 
 
-def test_v115_authority_is_exactly_one_pending_attempt() -> None:
+def test_v115_authority_is_consumed_pass_and_non_reusable() -> None:
     a = authority()
-    assert a["status"] == "PENDING_OPERATOR_WOP_EXECUTION"
+    assert a["status"] == "CONSUMED_PASS_D4_V115_POSTSUCCESS_WRAPPER_FALSE_NEGATIVE"
     assert a["approval_basis"]["approved_scope"] == "EXACTLY_ONE_V1_15_D4_ATTEMPT"
     assert a["approval_basis"]["standing_or_future_authority_inferred"] is False
     assert a["attempt_contract"]["attempts_authorized"] == 1
-    assert a["attempt_contract"]["consumed"] is False
-    assert a["attempt_contract"]["reusable"] is True
+    assert a["attempt_contract"]["consumed"] is True
+    assert a["attempt_contract"]["reusable"] is False
     assert a["attempt_contract"]["no_silent_retry"] is True
     assert a["predecessor"]["consumed"] is True
     assert a["predecessor"]["reusable"] is False
@@ -92,3 +92,13 @@ def test_v115_execution_tip_must_be_green_and_frozen() -> None:
         "operator_bridge_run": 732,
         "result": "SUCCESS",
     }
+
+
+def test_v115_live_closeout_proves_continuity_and_replacement() -> None:
+    c = authority()["live_closeout"]
+    assert c["result"] == "PASS"
+    assert c["continuity_proof"]["conclusion"] == "PASS_TRUE_PRECEDING_CONVERSATION_CONTINUITY"
+    assert c["candidate_chain"]["append_only"] is True
+    assert c["candidate_chain"]["q3_replacement"] == "8aacc7eebbbafabcb20b372aa53b88350a44e633"
+    assert c["backend_report"]["replacement_session_generation"] == 1
+    assert c["launcher_false_negative"]["invalidates_d4"] is False

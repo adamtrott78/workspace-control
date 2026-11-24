@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-closeout-v1.15",
+  "status": "PASS",
+  "authority_head": "5172a37781834c19a6eda8ad2e040ea39aefb5d3",
+  "source_closeout_head": "8237e5490b61146533710e8d6d50c67345492a71",
+  "candidate_chain": {
+    "baseline": "d9f636ef508245459b3dd0a35b8d5587f533bac6",
+    "q1": "6eeaf5ab39a45298f4cf0e7f20b40fd7990f75ea",
+    "q2": "f3f6d1e6e32cb830f9a3538c8b7013f0dfa284d8",
+    "q3_replacement": "8aacc7eebbbafabcb20b372aa53b88350a44e633"
+  },
+  "decisive_evidence": [
+    "STAGE12_Q1_DURABLE_INGEST=PASS",
+    "STAGE12_Q2_CONTINUITY_TOKEN_HIDDEN=PASS",
+    "STAGE12_PERSISTENT_SESSION_REUSE=PASS",
+    "STAGE12_STALE_SESSION_FENCE=PASS",
+    "STAGE12_REAL_INSTANT_CALIBRATION.result=PASS",
+    "PRIVATE_ROUTE_STAGE12_REAL_INSTANT_V3=PASS",
+    "STAGE12_WOP_WINDOWS_CLEANUP=PASS"
+  ],
+  "chat_transcript_required": false,
+  "next_stage": "research-iterate integrated E1"
+}
