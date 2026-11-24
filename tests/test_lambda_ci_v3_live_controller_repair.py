@@ -5,6 +5,7 @@ import unittest
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 HELPER_PATH=ROOT/"scripts/lambda_ci_v3_live_controller_repair_v1.py"
+sys.path.insert(0, str(ROOT/"scripts"))
 HELPER=HELPER_PATH.read_text()
 CONTROLLER=(ROOT/"controller/lambda-ci-controller/v3/controller.go").read_text()
 
