@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e2-v0.1",
-  "status": "C1_PASS_C2_IMPLEMENTED_VALIDATING",
+  "status": "C1_C2_PASS_LIVE_NEXT",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "e1_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.4.json",
@@ -53,7 +53,7 @@
     {
       "id": "E2-C2",
       "name": "PostgreSQL restart canary",
-      "status": "IMPLEMENTED_VALIDATING",
+      "status": "PASS",
       "objective": "Repeat the same recovery sequence across fresh PostgreSQL-backed application instances so recovery is proven across process boundaries rather than only object replacement.",
       "implementation": {
         "test_path": "tests/test_workspace_semantic_execution_backend_dbos_postgres.py",
@@ -68,12 +68,27 @@
         "late old candidate is rejected with zero state-version change",
         "replacement session and generation-bound packet complete",
         "third fresh RuntimeCoordinator observes COMPLETED terminal state"
-      ]
+      ],
+      "validation": {
+        "head": "7d26d9d7fb31916fec80ebfc7bdc355cb77aa25d",
+        "workspace_control_run": 3197,
+        "semantic_execution_run": 501,
+        "operator_bridge_run": 770,
+        "integration_log": "test_worker_session_and_runtime_loss_recovers_from_postgres ... ok",
+        "result": "SUCCESS"
+      },
+      "observed": {
+        "postgres_durable_state_survives_fresh_application_instances": true,
+        "stale_generation_candidate_rejected_without_mutation": true,
+        "replacement_session_generation_completed": true,
+        "third_runtime_observed_terminal_completion": true,
+        "manual_state_relay": false
+      }
     },
     {
       "id": "E2-LIVE",
       "name": "real Instant recovery mission",
-      "status": "GATED_AFTER_C1_C2",
+      "status": "IMPLEMENT_NEXT",
       "objective": "Inject real managed-worker/session/process loss during a research-iterate mission, replace the session, reject stale worker output, rehydrate Supervisor state, and complete fan-in/synthesis without manual state relay."
     }
   ],

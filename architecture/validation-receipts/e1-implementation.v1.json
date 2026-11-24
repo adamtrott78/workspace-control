@@ -1,25 +1,25 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
-  "status": "VALIDATED_E2_C1_RECOVERY_CANARY",
-  "validated_head": "ff50eb53433b34e848a944a9ac976a173301cabb",
+  "status": "VALIDATED_E2_C2_POSTGRES_RECOVERY_CANARY",
+  "validated_head": "7d26d9d7fb31916fec80ebfc7bdc355cb77aa25d",
   "validation_runs": {
     "semantic_execution": {
       "workflow_name": "Semantic Execution Validation",
-      "run_id": 45506198761,
-      "run_number": 498,
+      "run_id": 45506873142,
+      "run_number": 501,
       "conclusion": "success"
     },
     "operator_bridge": {
       "workflow_name": "Operator Bridge Validation",
-      "run_id": 45506198752,
-      "run_number": 768,
+      "run_id": 45506873342,
+      "run_number": 770,
       "conclusion": "success"
     },
     "workspace_control": {
       "workflow_name": "Workspace Control Validation",
-      "run_id": 45506198743,
-      "run_number": 3195,
+      "run_id": 45506873213,
+      "run_number": 3197,
       "conclusion": "success"
     }
   },
@@ -105,6 +105,12 @@
     "e2_c1_operator_bridge_run": 768,
     "e2_c1_result": "PASS",
     "e2_c1_canary_blob": "c00a9fb2b9aee94b7efec714798ffcb000346683",
-    "e2_c1_test_blob": "5585b6cf3d1bf378b5e1288515e6ef8e36850747"
+    "e2_c1_test_blob": "5585b6cf3d1bf378b5e1288515e6ef8e36850747",
+    "e2_c2_head": "7d26d9d7fb31916fec80ebfc7bdc355cb77aa25d",
+    "e2_c2_workspace_control_run": 3197,
+    "e2_c2_semantic_execution_run": 501,
+    "e2_c2_operator_bridge_run": 770,
+    "e2_c2_result": "PASS",
+    "e2_c2_test_blob": "69502302c4541fd17bd628e1418f51f0435724c6"
   }
 }
