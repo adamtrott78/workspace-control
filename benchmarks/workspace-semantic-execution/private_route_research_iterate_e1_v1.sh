@@ -18,7 +18,8 @@ SERVE_OBSERVED="$RUNTIME_ROOT/serve-observed.json"
 FUNNEL_OBSERVED="$RUNTIME_ROOT/funnel-observed.json"
 SERVE_BEFORE="$RUNTIME_ROOT/serve-before.json"
 FUNNEL_BEFORE="$RUNTIME_ROOT/funnel-before.json"
-HARNESS_REL="benchmarks/workspace-semantic-execution/live_research_iterate_e1.py"\nFIXTURE_REL="benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"
+HARNESS_REL="benchmarks/workspace-semantic-execution/live_research_iterate_e1.py"
+FIXTURE_REL="benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"
 REPO_URL="https://github.com/adamtrott78/workspace-control.git"
 CANDIDATE_BASELINE="8aacc7eebbbafabcb20b372aa53b88350a44e633"
 WINDOWS_READY_MARKER="E1_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS"
@@ -113,7 +114,7 @@ echo "E1_CANDIDATE_BASELINE=PASS"
 [[ ! -e "$RUNTIME_ROOT" ]] || fail "RUNTIME_ROOT_ALREADY_EXISTS"
 mkdir -m 0700 "$RUNTIME_ROOT" "$PGDATA" "$PGSOCKET" "$SRCROOT"
 
-echo "=== STAGE 12 PRIVATE ROUTE PREFLIGHT ==="
+echo "=== E1 PRIVATE ROUTE PREFLIGHT ==="
 echo "SEMANTIC_SHA=$SEMANTIC_SHA"
 echo "BASE_URL=$BASE_URL"
 echo "ROUTE_PATH=$ROUTE_PATH"
@@ -282,6 +283,7 @@ LIVE_OPERATOR_HTTP_BLOB="$(git -C "$ROOT" rev-parse "$SEMANTIC_SHA:semantic-exec
 [[ "$LIVE_OPERATOR_HTTP_BLOB" == "$EXPECTED_OPERATOR_HTTP_BLOB" ]] \
   || fail "LIVE_SEMANTIC_OPERATOR_HTTP_BLOB_MISMATCH:$LIVE_OPERATOR_HTTP_BLOB"
 [[ -f "$ROOT/$HARNESS_REL" ]] || fail "E1_HARNESS_MISSING"
+[[ -f "$ROOT/$FIXTURE_REL" ]] || fail "E1_RESEARCH_ENGINE_FIXTURE_MISSING"
 echo "E1_SEMANTIC_LIVE_BINDING=PASS"
 
 echo "E1_PRELIVE_WINDOWS_CONFIRMATION_REQUIRED=$WINDOWS_READY_MARKER"
@@ -292,7 +294,9 @@ echo "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
 
 git -C "$ROOT" archive "$SEMANTIC_SHA" semantic-execution | tar -x -C "$SRCROOT"
 mkdir -p "$SRCROOT/benchmarks/workspace-semantic-execution"
-cp -- "$ROOT/$HARNESS_REL" "$SRCROOT/$HARNESS_REL"\nmkdir -p -- "$SRCROOT/$(dirname "$FIXTURE_REL")"\ncp -- "$ROOT/$FIXTURE_REL" "$SRCROOT/$FIXTURE_REL"
+cp -- "$ROOT/$HARNESS_REL" "$SRCROOT/$HARNESS_REL"
+mkdir -p -- "$SRCROOT/$(dirname "$FIXTURE_REL")"
+cp -- "$ROOT/$FIXTURE_REL" "$SRCROOT/$FIXTURE_REL"
 
 python3 -m venv "$VENV"
 "$VENV/bin/python" -m pip install --disable-pip-version-check --no-input   'psycopg[binary]==3.3.9'
@@ -358,7 +362,7 @@ LD_LIBRARY_PATH="$PG_PREFIX/lib" "$PG_PREFIX/bin/pg_ctl"   -D "$PGDATA" -m fast 
 POSTGRES_STARTED=0
 
 if [[ "$CAL_RC" -ne 0 ]]; then
-  echo "E1_REAL_INSTANT_CALIBRATION_PROCESS_EXIT=$CAL_RC" >&2
+  echo "E1_RESEARCH_ITERATE_PROCESS_EXIT=$CAL_RC" >&2
   exit "$CAL_RC"
 fi
 

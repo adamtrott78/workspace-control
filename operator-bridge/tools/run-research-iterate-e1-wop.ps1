@@ -15,7 +15,7 @@ $remoteBootstrapRel = "operator-bridge/tools/run-research-iterate-e1-remote-boot
 $remoteBootstrapPath = Join-Path $repo ($remoteBootstrapRel -replace "/", "\")
 $engine = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
 $ssh = (Get-Command ssh.exe -ErrorAction Stop).Source
-$tempRoot = Join-Path $env:TEMP ("workspace-control-d4-" + [guid]::NewGuid().ToString("N"))
+$tempRoot = Join-Path $env:TEMP ("workspace-control-e1-" + [guid]::NewGuid().ToString("N"))
 $frontendReady = Join-Path $tempRoot "frontend-ready.txt"
 $frontendLog = Join-Path $tempRoot "frontend.log"
 $sshBatch = Join-Path $tempRoot "run-ssh.cmd"
@@ -157,7 +157,7 @@ exit /b %ERRORLEVEL%
   }
 
   if ($postFrontendStatus.ReadyManualCycles -lt 1) {
-    throw "E1_Q1_NOT_CLAIMABLE_AFTER_FRONTEND_START"
+    throw "E1_ROOT_NOT_CLAIMABLE_AFTER_FRONTEND_START"
   }
 
   Write-Host "E1_BACKEND_REVALIDATED_AFTER_FRONTEND_START=PASS"

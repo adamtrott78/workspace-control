@@ -17,6 +17,9 @@ def test_e1_linux_binds_candidate_harness_fixture_and_consumption() -> None:
     assert 'FIXTURE_REL="benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"' in text
     assert "E1_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS" in text
     assert "PRIVATE_ROUTE_RESEARCH_ITERATE_E1_V1=PASS" in text
+    assert "\\nFIXTURE_REL=" not in text
+    assert '$HARNESS_REL"\\nmkdir' not in text
+    assert "E1_RESEARCH_ENGINE_FIXTURE_MISSING" in text
 
 
 def test_e1_remote_bootstrap_binds_only_exact_e1_linux_path() -> None:
