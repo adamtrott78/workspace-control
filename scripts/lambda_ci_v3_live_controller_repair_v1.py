@@ -281,10 +281,10 @@ def verify_topology(
         after_n=int(now.get("NRestarts") or "0")
         delta=after_n-before_n
         deltas[cid]=delta
-        if cid in active_before and after_n != 0:
+        if cid in active_before and after_n > before_n:
             raise ControllerRepairError(
                 f"controller auto-restarted after intentional restore: {cid} "
-                f"NRestarts={after_n}"
+                f"before={before_n} after={after_n}"
             )
         if cid not in active_before and after_n != before_n:
             raise ControllerRepairError(
