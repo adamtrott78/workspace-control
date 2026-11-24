@@ -21,21 +21,19 @@ Authoritative capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
 
 ## Lane-A recovery
 
-- Operator authority is explicit.
-- Harmless smoke comment: `7139263906`
-- Lane-A smoke run/job: `45449088526 / 138640917329`
-- Current provider state: queued, unassigned, `runner_id=0`
-- This reproduces the lane-A controller stall independently of OSR science.
-- Connected Workspace Shell cannot execute the required root restart: reviewed-helper registry is empty and signed approvals cannot be minted by chat.
-- GitHub self-hosted Workspace Control runners are intentionally isolated from root control paths.
+- **PASS / RECOVERED**
+- Operator executed exactly:
+  `sudo systemctl restart workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service`
+- Acceptance smoke: run `45449088526` / job `138640917329`
+- Smoke conclusion: **SUCCESS**
+- Runner: `lambda-padataset-scientific-single-gpu-26c92d91f498`
+- Smoke artifact: `14949111150`
+- Artifact SHA256: `092167500e6f6c8fe5c6f8b91a854eff476bb495dd3ade5a76d0407db07c9303`
+- No ledger edits, provisioner restart, policy change, duplicate smoke, or science admission occurred.
 
 ## Next safe action
 
-Execute exactly:
-
-`sudo systemctl restart workspace-ci-v3-controller@padataset-scientific-single-gpu-v1.service`
-
-Then monitor only smoke run `45449088526` / job `138640917329`. Recovery is accepted only if the smoke acquires a runner and completes SUCCESS. Do not edit controller/root ledgers, restart the provisioner, widen Workspace Shell authority, issue another smoke, or admit science.
+Finalize Rule A guard-score and retrospective target-aware confusion-exclusion analysis on all 20 frozen post-hoc cells. Do not feed selector evidence back into backbone/checkpoint/threshold selection.
 
 ## Remaining work
 
@@ -46,7 +44,7 @@ Then monitor only smoke run `45449088526` / job `138640917329`. Recovery is acce
 
 ## Blockers / gates
 
-- Connected root-execution capability only; authority is no longer blocked.
+- None for lane-A recovery; gate closed.
 
 ## Fresh-chat initialization
 
