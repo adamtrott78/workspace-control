@@ -27,7 +27,7 @@ def test_v114_q1_exposes_observation_and_durable_ingest_boundaries() -> None:
     assert observed < ingested < q2
 
 
-def test_v114_preserves_successful_q1_as_next_candidate_baseline() -> None:
+def test_v115_advances_latest_append_only_candidate_as_next_baseline() -> None:
     text = TX.read_text(encoding="utf-8")
-    assert 'CANDIDATE_BASELINE="daa18627982a1d406eb88d44145113f0e99561e0"' in text
+    assert 'CANDIDATE_BASELINE="d9f636ef508245459b3dd0a35b8d5587f533bac6"' in text
     assert "git ls-remote" in text
