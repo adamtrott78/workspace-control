@@ -36,19 +36,19 @@ Execute a rigorous MTH602-to-journal research program centered on backbone compe
 
 ## Next safe action
 
-Run the validated zero-work root trust refreshes from Workspace Control PR #655 exact head 5f49b06387a138a86ccd4bf9e7de4b7a98cb9d49: lane A v3->v4, then lane B v8->v9. Each launcher must verify PADataset main 7cfe0ab61cc16785f4d267273b48a63361c595dd, its exact promoted workflow blob, and zero queued/in-progress provider work before sudo. After both postverify PASS and both controllers trust the new blobs, admit the 20 immutable PR #56 l2o_control_eval requests exactly once; no admission is authorized before both trust refreshes close.
+Repair the live shared v3 controller binary using Workspace Control PR #657 exact head bf380e48478d488393478d5a5e2d61b96698ae70. Run scripts/mth602_activate_v3_rest_backfill_liveness_v1.py from a clean exact-head worktree with --expected-head bf380e48478d488393478d5a5e2d61b96698ae70. This candidate is based on the accepted runtime390 generation a419a3caacec4c3c79091bc8dd2bf9f5d5c8ea12 and restores BOTH bounded REST-attested queued-demand capacity-floor liveness and positive GitHub rate-limit 403 in-process backoff. After V3_LIVE_CONTROLLER_BINARY_REPAIR=PASS + MTH602_V3_REST_BACKFILL_BOOTSTRAP=PASS, verify workspace-control-control-small remains active/running without restart growth under rate limiting. Only then admit the 20 immutable PR #56 l2o_control_eval requests exactly once; no analysis or recipe changes before the matrix closes.
 
 ## Remaining work
 
-- Activate the validated lane-A v4 and lane-B v9 workflow-trust refreshes from Workspace Control PR #655 at a zero-work root gate; verify both controller policies and active receipts bind the promoted PR #57 workflow blobs.
-- After both scientific controllers trust the promoted l2o_control_eval workflows, admit the 20 immutable PR #56 control requests exactly once across the two GPU lanes and close the matched DQN-IDS-style + VarMax control matrix.
+- Operator-root activate Workspace Control PR #657 exact head bf380e48478d488393478d5a5e2d61b96698ae70 using the reviewed one-command live controller-binary repair launcher; verify transaction receipt, active controller source head/digest, all previously-active controllers restored, and workspace-control validation controller no longer exits on positively identified GitHub rate-limit 403s.
+- After the controller repair is proven, admit the 20 immutable PADataset PR #56 matched-control requests exactly once across the now-trusted lane-A/lane-B workflows and close the DQN-IDS-style + VarMax control matrix.
 - Report DQNGuard-minus-control per-cell deltas, aggregate means/uncertainty, target-level and unordered-pair effects, and geometry concentration only after all matched control cells close.
-- Execute final multi-seed robustness after the control matrix: frozen seed set, mean/std/confidence intervals, surrogate winner frequency, oracle-regret distributions, Rule A/B/C/confusion-exclusion stability, directional asymmetry stability, and DQNGuard-minus-control stability.
-- Complete final synthesis without allowing control/seed target-test evidence to rewrite frozen backbones, checkpoints, thresholds, control semantics, selectors, or retry policy.
+- Execute final multi-seed robustness after controls using the frozen seed set and no target/test feedback into recipes, checkpoints, thresholds, control definitions, selectors, or retry policy.
+- Complete final scientific synthesis and task closure.
 
 ## Blockers / gates
 
-- Root authority gate: PADataset PR #57 is merged and scientific provider work is zero, but live lane-A/lane-B controller policies still trust predecessor blobs until validated Workspace Control PR #655 launchers are executed with operator sudo. No l2o_control_eval admission is authorized before both refresh postverifications PASS.
+- Root controller-binary activation gate: PR #657 is validated and mergeable, but the shared live v3 controller binary still runs the runtime390 source that treats GitHub rate-limit HTTP 403 as fatal and lacks the bounded REST queued-demand capacity floor. Connected Workspace Shell cannot perform this root binary swap without a reviewed root helper approval, so operator sudo is the smallest remaining action.
 
 ## Fresh-chat initialization
 
@@ -56,10 +56,8 @@ Run the validated zero-work root trust refreshes from Workspace Control PR #655 
 
 https://github.com/adamtrott78/workspace-control
 
-Continue the durable workspace-control task defined by:
-Task capsule: tasks/active/mth602-final-multisurrogate-dqnguard-v1.json
+Continue durable task `mth602-final-multisurrogate-dqnguard-v1` using connected GitHub / Workspace Shell directly.
 
-Start from the normal workspace-control root route.
-Treat the task capsule, exact durable Git/runtime state, and referenced owning context/evidence as the handoff.
-Do not rely on previous conversation state.
-Follow the capsule's next_safe_action.
+Authoritative capsule: `tasks/active/mth602-final-multisurrogate-dqnguard-v1.json`
+Re-read PR #640 and the capsule before acting. Treat exact Git/runtime evidence as authoritative and fail closed on provenance mismatch.
+Follow the capsule's next_safe_action. Do not rely on prior chat state.
