@@ -1444,7 +1444,7 @@
     }
   ],
   "blockers": [
-    "Root authority gate: PADataset PR #57 is merged and scientific provider work is zero, but live lane-A/lane-B controller policies still trust predecessor blobs until validated Workspace Control PR #655 launchers are executed with operator sudo. No l2o_control_eval admission is authorized before both refresh postverifications PASS."
+    "Root authority gate: corrected PR #656 is validated on the live runtime390 reconciler lineage, but live lane-A/lane-B controller trust still requires operator sudo activation. Superseded PR #655 failed read-only before mutation and is closed."
   ],
   "remaining_work": [
     "Activate the validated lane-A v4 and lane-B v9 workflow-trust refreshes from Workspace Control PR #655 at a zero-work root gate; verify both controller policies and active receipts bind the promoted PR #57 workflow blobs.",
@@ -1453,7 +1453,7 @@
     "Execute final multi-seed robustness after the control matrix: frozen seed set, mean/std/confidence intervals, surrogate winner frequency, oracle-regret distributions, Rule A/B/C/confusion-exclusion stability, directional asymmetry stability, and DQNGuard-minus-control stability.",
     "Complete final synthesis without allowing control/seed target-test evidence to rewrite frozen backbones, checkpoints, thresholds, control semantics, selectors, or retry policy."
   ],
-  "next_safe_action": "Run the validated zero-work root trust refreshes from Workspace Control PR #655 exact head 5f49b06387a138a86ccd4bf9e7de4b7a98cb9d49: lane A v3->v4, then lane B v8->v9. Each launcher must verify PADataset main 7cfe0ab61cc16785f4d267273b48a63361c595dd, its exact promoted workflow blob, and zero queued/in-progress provider work before sudo. After both postverify PASS and both controllers trust the new blobs, admit the 20 immutable PR #56 l2o_control_eval requests exactly once; no admission is authorized before both trust refreshes close.",
+  "next_safe_action": "Execute only Workspace Control PR #656 exact head 6172553a389fee392cc30b215f9380ba2725bae8 for the zero-work root trust refresh. PR #655 is superseded/closed and must not be used. Run lane A v3->v4 then lane B v8->v9; the candidate is based on the live runtime390 reconciler generation a419a3caacec4c3c79091bc8dd2bf9f5d5c8ea12 and preserves runtime-ceiling ownership of compatibility-matrix/root policy. Admit no matched control jobs until both postverify markers PASS.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell+heartbeat",
   "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged. Workspace Shell mountpoint repair is live at runtime f3f999ff0200e2450d83e93887b2450f1ee83e2f with authority snapshot 29ba42ffde725c16f5cfc70b3c47ecfd76d2511d. Architecture-B PR #23 is candidate-validated at 82790f9c07d5eb9ea48b37be026672c0a1f7fad8, including a repair that physically delays target-open materialization until after winner freeze. Draft PADataset PR #33 stages the bounded GPU2 archb_cross_surrogate opcode but is not live. PADataset PR #33 was explicitly authorized and merged at 6a3c17c27a401f059f9ded1287d274d766f61283; default-branch GPU2 workflow blob is now 650a529aeee51b53234a84b3afea8743cc527688. Workspace Control draft PR #643 stages chained refresh-v4 at ef43b5352cf4c3e799a09ff917878b6e32ef1882; 37 dual-lane/refresh regression tests pass. Live trust remains refresh-v3 until root/operator v4 activation. PADataset PR #34 was explicitly authorized and merged at b0cbf6c1436e18cb5b793596dd790560bd2cec08; default-branch GPU2 workflow blob is now ba549b4d1560b18a9e40ef531387bc1accc90d43. Workspace Control draft PR #644 stages chained refresh-v5 at d6e2e7303c0e128f5847178253ab792ff1187d6a; 45 dual-lane/refresh regression tests pass. Live trust remains refresh-v4 until root/operator v5 activation. Fresh-chat checkpoint 2026-11-17: B0 run #97 PASS, B1 #98 PASS, B2 #99 PASS; B2 triggered bounded B3 from pseudo-open complementary value only. B3 trust PR #36 merged; refresh-v7 live PASS; B3 run #100 / 44176896203 / job 134370560805 admitted exactly once and currently IN_PROGRESS. The next worker must validate run #100 artifact at terminal completion and must not duplicate B3. Heartbeat writer may still belong to the prior conversation; durable Git/task state is authoritative. Architecture-B B3 is now terminal PASS: initial run #100 failed only at a deterministic result-record candidate-id lookup; repaired PR #23 head 0ea0d2aa655a943e921918500f72b987e79922c3 passed 27 tests; exactly one retry run #101 / 44180560029 succeeded with artifact 14372803489 digest sha256:c72fe383cdfd03ffb96eb3dda632ff1f27325066e109542e9a2209ff383423ea. Frozen winner PA3|gap_variance_equal|scale=2 was selected from off-diagonal pseudo-open evidence only; PA2 metrics remain descriptive. Current focus returns to the separate STFT lane, still gated on repaired PA1 provenance preflight; preserve the first 120 overlay records. STFT live repaired PA1 provenance preflight is now confirmed as a local/operator-only gate: connected candidate execution cannot access the required raw OTA/legacy-cache environment, and candidate-pytest lacks h5py. PR #21 remains exact head fd15238aa369118e61b21ab714900861dbb99d2c, draft/unmerged; CPU canary 43788103594 is already PASS. Preserve the first 120 overlays and run the exact-SHA persistent local bootstrap before any resume. STFT exact-checkout import shadowing was repaired after the first local preflight attempt: fd15238 failed before any cache/GPU work because stdin Python imported experiments from the canonical repo cwd ahead of PYTHONPATH. PR #21 head 5146d718006e38c6d9110e158c80dfa43b86e882 now cd's to exact ROOT before preflight imports; candidate contract 2/2 PASS and CPU canary run 44190444960 SUCCESS. The live PA1 provenance probe must now be retried locally at this exact head; first 120 overlays remain preserved. STFT record-121 provenance failure was observed after the 5146d718 local retry passed environment/raw OTA, PA1 probe, GPU-vs-CPU transform, and trajectory/provenance tests and skipped records 1-120. The failing source ota_pa1_run01__shard_001__PA1.mat exposed historical caches without protocol_name metadata. PR #21 head 122f5d21e648498b4afaa6b857b69f39dbb18222 adds a fail-closed unique-basename fallback plus an all-375-source preflight. Static contract 3/3 PASS and CPU canary 44235462841 SUCCESS. First 120 overlays remain preserved. STFT source-universe forensic corrected the prior basename-fallback hypothesis: generic discovery found 375 files, but historical unified-core production scripts define exactly 360 canonical sources (3 protocols x 20 shards x PA1 part1/part2 + PA2/PA3/PA4/PA8). The 15 ota_pa1_run01 artifacts are noncanonical extras in the core directories. PR #21 head a5cbd0d2a9e8e287d0288498735e5a4221ed3683 now freezes the canonical 360-source universe, restores strict provenance matching, passes static contract 3/3 and CPU canary 44236003500. First 120 overlays remain preserved. Live STFT cache build is now active at exact PR #21 head a5cbd0d2a9e8e287d0288498735e5a4221ed3683. Canonical/provenance preflight is fully green (360/360), first 120 overlays were skipped intact, records 121-122 completed, and record 123 entered GPU batch processing. Do not relaunch or force rebuild while this process remains active.",
@@ -6152,7 +6152,7 @@
       "implementation_result": "13 passed in 0.19s",
       "implementation_stdout_sha256": "e9e4f4fe473057cc278eab395f161cc910a738001ba3c578036441c68de023a1"
     },
-    "execution_gate": "BLOCKED_ON_VALIDATED_ROOT_TRUST_REFRESH_V4_V9",
+    "execution_gate": "BLOCKED_ON_VALIDATED_ROOT_TRUST_REFRESH_PR656",
     "note": "No matched control job has been admitted. PR #56 science implementation and PR #57 workflow authority are separate by design.",
     "implementation": {
       "evaluator": "experiments/pa_eval_l2o_controls_v1.py",
@@ -6187,10 +6187,11 @@
     },
     "controller_trust_refresh_candidate": {
       "status": "VALIDATED_OPERATOR_GATE",
-      "workspace_control_pr": 655,
-      "branch": "mth602-control-workflow-refresh-v4-v9-v1",
-      "exact_head": "5f49b06387a138a86ccd4bf9e7de4b7a98cb9d49",
-      "base_head": "f68c9318fd17bfeb7b09b2bb7fc11b1b50f61a17",
+      "workspace_control_pr": 656,
+      "branch": "mth602-control-workflow-refresh-v4-v9-runtime390-v2",
+      "exact_head": "6172553a389fee392cc30b215f9380ba2725bae8",
+      "base_head": "a419a3caacec4c3c79091bc8dd2bf9f5d5c8ea12",
+      "base_semantics": "accepted live runtime390 reconciler generation",
       "padataset_main_sha": "7cfe0ab61cc16785f4d267273b48a63361c595dd",
       "lane_a": {
         "predecessor_refresh": "v3",
@@ -6206,20 +6207,44 @@
         "target_blob": "6753795041090a5331a80354f59945be006ac889",
         "launcher": "scripts/mth602_activate_laneb_refresh_v9.py"
       },
+      "runtime390_invariant": {
+        "receipt_lineage_immutable": true,
+        "shared_managed_artifact_owner": "runtime-ceiling-refresh-v1",
+        "shared_paths": [
+          "/etc/workspace-ci/v3/root-policy.json",
+          "/etc/workspace-ci/v3/executor-actions.json",
+          "/etc/workspace-ci/v3/compatibility-matrix.json",
+          "/etc/workspace-ci/v3/deployment-overlay.json"
+        ],
+        "workflow_v4_v9_scope": "controller trusted_workflows only"
+      },
       "validation": [
         {
-          "receipt": "job-1c6fb1bd-da17-4cf0-824a-439ae4f0b2ee",
+          "receipt": "job-561e54c7-906e-48be-937b-eed860470eb8",
           "result": "PASS",
-          "detail": "17 passed in 0.04s"
+          "detail": "26 passed in 0.09s; successor + runtime390 targeted regression"
         },
         {
-          "receipt": "job-4bd54999-12fd-40dd-96dd-7246bb714c23",
+          "receipt": "job-ab41701c-a2d8-4e03-905c-7c4aa80051a0",
           "result": "PASS",
-          "detail": "96 passed in 0.17s"
+          "detail": "105 passed in 0.21s; complete scientific refresh lineage + runtime390"
         }
       ],
+      "dedicated_regression": "tests/test_mth602_control_refresh_runtime390_lineage.py",
       "provider_zero_work_observed": true,
       "root_mutation": "NONE_YET"
+    },
+    "controller_trust_refresh_superseded_attempt": {
+      "workspace_control_pr": 655,
+      "exact_head": "5f49b06387a138a86ccd4bf9e7de4b7a98cb9d49",
+      "incorrect_base_head": "f68c9318fd17bfeb7b09b2bb7fc11b1b50f61a17",
+      "status": "SUPERSEDED_CLOSED_NO_MUTATION",
+      "observed_failure": "candidate.verify_installed rejected /etc/workspace-ci/v3/compatibility-matrix.json as PADataset scientific dual-lane managed artifact digest drift",
+      "diagnosis": "PR #655 used a reconciler lineage predating the accepted runtime390 root managed-artifact generation. The live compatibility-matrix was legitimate runtime-ceiling state, not drift.",
+      "failure_point": "first candidate.verify_installed(BASE_MANIFEST), before controller stop or policy write",
+      "lane_a_trust_changed": false,
+      "lane_b_trust_changed": false,
+      "control_jobs_admitted": 0
     }
   }
 }
