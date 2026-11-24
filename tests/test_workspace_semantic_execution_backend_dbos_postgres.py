@@ -1312,6 +1312,299 @@ class DBOSProcessRecoveryIntegrationTests(unittest.TestCase):
 
 
 @unittest.skipUnless(
+    RUN_INTEGRATION and POSTGRES_DSN,
+    "dedicated semantic-execution PostgreSQL integration only",
+)
+class E2PostgresRecoveryIntegrationTests(unittest.TestCase):
+    """E2-C2: recovery across fresh PostgreSQL-backed app instances."""
+
+    def test_worker_session_and_runtime_loss_recovers_from_postgres(self):
+        state_key = f"e2-recovery-{uuid.uuid4()}"
+        process_id = "research-iterate-e2.postgres-leaf"
+        slot_id = "research-iterate-e2.postgres-slot"
+        validator_id = "validator:research-iterate-e2-postgres"
+        profile = openai_chat_instant_current_profile()
+        registry = ExecutorRegistry((profile,))
+
+        def packet_input():
+            return PacketCompilationInput(
+                process_id=process_id,
+                source_checkpoint="research-iterate-e2@postgres-recovery",
+                objective=(
+                    "Complete this leaf from durable PostgreSQL state after "
+                    "worker, session, and application-runtime replacement."
+                ),
+                constraints=(
+                    "conversation memory is cache only",
+                    "stale generations must not mutate durable state",
+                    "no manual durable-state relay",
+                ),
+                evidence_refs=("e2:postgres-recovery-input",),
+                authority_refs=("scope:proposal-only",),
+                allowed_actions=("publish-worker-result",),
+                validator_contract=validator_id,
+                output_schema="WORKER_RESULT_V1",
+                next_safe_boundary="publish immutable candidate result",
+            )
+
+        def candidate_bytes(planned, *, result_hash: str) -> bytes:
+            contract = planned.packet_source.result_publication
+            self.assertIsNotNone(contract)
+            assert contract is not None
+            return json.dumps(
+                {
+                    "publication_id": contract.publication_id,
+                    "action_id": planned.action.action_id,
+                    "action_generation": planned.action.generation,
+                    "process_id": process_id,
+                    "process_generation": planned.action.process_generation,
+                    "executor_id": profile.executor_id,
+                    "worker_slot_id": slot_id,
+                    "session_generation": planned.action.session_generation,
+                    "packet_sha256": planned.packet.packet_sha256,
+                    "kind": "RESULT",
+                    "observed_at": "T-worker",
+                    "result_payload_ref": "e2://postgres-recovery/result",
+                    "result_payload_sha256": result_hash,
+                    "evidence_refs": ["e2:postgres-replacement-output"],
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+
+        class Validator:
+            def validate(self, publication, packet_source):
+                return ValidationResult(
+                    validator_id=validator_id,
+                    passed=True,
+                    evidence_ref=(
+                        "e2-postgres-validation:"
+                        f"{publication.publication_id}"
+                    ),
+                    observed_at="T-validation",
+                )
+
+        store1 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        runtime1 = RuntimeCoordinator(
+            state_store=store1,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(),
+        )
+        runtime1.initialize(
+            DomainKernel.create_graph(
+                [DomainKernel.create_process(process_id)]
+            )
+        )
+        broker1 = PersistentExecutorSessionBroker(runtime1)
+        broker1.ensure_session(
+            profile=profile,
+            slot_id=slot_id,
+            session_id="e2-postgres-session-g0",
+        )
+        first = OperatorDispatchPlanner(
+            runtime=runtime1,
+            registry=registry,
+        ).plan_service_existing(
+            task_id="workspace-semantic-execution-migration-v1",
+            action_id="action:e2:postgres:g0",
+            action_generation=0,
+            process_id=process_id,
+            process_generation=0,
+            worker_slot_id=slot_id,
+            session_generation=0,
+            executor_id=profile.executor_id,
+            packet_input=packet_input(),
+            priority_rank=10,
+            queue_sequence=1,
+            created_at="T0",
+            result_publication_target_ref=(
+                "github-candidate://adamtrott78/workspace-control/"
+                "worker-results/e2/postgres/g0.json"
+            ),
+        )
+        runtime1.claim_next_operator_action(
+            helper_instance_id="e2-postgres-helper",
+            claim_id="claim:e2:postgres:g0",
+            claimed_at="T1",
+            expires_at="T2",
+        )
+        runtime1.record_operator_action_local_prepared(
+            action_id=first.action.action_id,
+            generation=0,
+            worker_slot_id=slot_id,
+            session_generation=0,
+            observed_at="T1.5",
+        )
+        old_candidate = ImmutableWorkerResultCandidate(
+            target_ref=first.packet_source.result_publication.target_ref,
+            immutable_revision="a" * 40,
+            raw_bytes=candidate_bytes(first, result_hash="b" * 64),
+        )
+
+        recovered = runtime1.recover(
+            process_id,
+            expected_generation=0,
+            reason="e2_injected_postgres_worker_loss",
+        )
+        self.assertEqual(
+            recovered.graph.processes[process_id].generation,
+            1,
+        )
+        self.assertEqual(
+            recovered.graph.processes[process_id].state,
+            ProcessState.READY_TO_RESUME,
+        )
+        self.assertEqual(
+            recovered.graph.executor_sessions[slot_id].state,
+            ExecutorSessionState.NEEDS_REPLACEMENT,
+        )
+        self.assertEqual(
+            recovered.graph.executor_sessions[slot_id].session_generation,
+            1,
+        )
+        self.assertEqual(
+            recovered.graph.operator_actions[first.action.action_id].status,
+            OperatorActionState.STALE,
+        )
+
+        # Fresh application objects: only PostgreSQL state survives.
+        store2 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        runtime2 = RuntimeCoordinator(
+            state_store=store2,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=10),
+        )
+        restored = runtime2.snapshot()
+        self.assertEqual(
+            restored.graph.processes[process_id].generation,
+            1,
+        )
+        self.assertEqual(
+            restored.graph.executor_sessions[slot_id].session_generation,
+            1,
+        )
+        self.assertEqual(
+            restored.graph.operator_actions[first.action.action_id].status,
+            OperatorActionState.STALE,
+        )
+
+        version_before_late = restored.version
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "worker_result_action_not_awaiting_ack|"
+            "worker_result_action_binding_mismatch|"
+            "worker_result_process_binding_mismatch",
+        ):
+            WorkerResultCandidateAdapter(
+                intake=WorkerResultIntakeService(
+                    runtime=runtime2,
+                    validators={validator_id: Validator()},
+                )
+            ).ingest(old_candidate)
+        self.assertEqual(runtime2.snapshot().version, version_before_late)
+        self.assertEqual(runtime2.snapshot().graph.worker_results, {})
+
+        broker2 = PersistentExecutorSessionBroker(runtime2)
+        replacement = broker2.replace(
+            slot_id=slot_id,
+            expected_session_generation=1,
+            session_id="e2-postgres-session-g1",
+        )
+        self.assertEqual(replacement.state, ExecutorSessionState.READY)
+
+        second = OperatorDispatchPlanner(
+            runtime=runtime2,
+            registry=registry,
+        ).plan_service_existing(
+            task_id="workspace-semantic-execution-migration-v1",
+            action_id="action:e2:postgres:g1",
+            action_generation=0,
+            process_id=process_id,
+            process_generation=1,
+            worker_slot_id=slot_id,
+            session_generation=1,
+            executor_id=profile.executor_id,
+            packet_input=packet_input(),
+            priority_rank=10,
+            queue_sequence=2,
+            created_at="T3",
+            result_publication_target_ref=(
+                "github-candidate://adamtrott78/workspace-control/"
+                "worker-results/e2/postgres/g1.json"
+            ),
+        )
+        self.assertNotEqual(
+            first.packet.packet_sha256,
+            second.packet.packet_sha256,
+        )
+        self.assertIn('"process_generation": 1', second.packet.text)
+        self.assertIn('"session_generation": 1', second.packet.text)
+
+        runtime2.claim_next_operator_action(
+            helper_instance_id="e2-postgres-helper",
+            claim_id="claim:e2:postgres:g1",
+            claimed_at="T4",
+            expires_at="T5",
+        )
+        runtime2.record_operator_action_local_prepared(
+            action_id=second.action.action_id,
+            generation=0,
+            worker_slot_id=slot_id,
+            session_generation=1,
+            observed_at="T4.5",
+        )
+        contract = second.packet_source.result_publication
+        self.assertIsNotNone(contract)
+        assert contract is not None
+        outcome = WorkerResultCandidateAdapter(
+            intake=WorkerResultIntakeService(
+                runtime=runtime2,
+                validators={validator_id: Validator()},
+            )
+        ).ingest(
+            ImmutableWorkerResultCandidate(
+                target_ref=contract.target_ref,
+                immutable_revision="c" * 40,
+                raw_bytes=candidate_bytes(second, result_hash="d" * 64),
+            )
+        )
+        self.assertEqual(outcome.process_state, ProcessState.COMPLETED)
+
+        # A third fresh application instance must see terminal durable truth.
+        store3 = PostgresStateStore(POSTGRES_DSN, state_key=state_key)
+        runtime3 = RuntimeCoordinator(
+            state_store=store3,
+            event_ledger=PostgresEventLedger(POSTGRES_DSN),
+            telemetry=RecordingTelemetry(),
+            clock=FakeClock(seconds=20),
+        )
+        final = runtime3.snapshot().graph
+        self.assertEqual(
+            final.processes[process_id].state,
+            ProcessState.COMPLETED,
+        )
+        self.assertEqual(
+            final.operator_actions[first.action.action_id].status,
+            OperatorActionState.STALE,
+        )
+        self.assertEqual(
+            final.operator_actions[second.action.action_id].status,
+            OperatorActionState.COMPLETED,
+        )
+        self.assertEqual(
+            final.executor_sessions[slot_id].state,
+            ExecutorSessionState.READY,
+        )
+        self.assertEqual(
+            final.executor_sessions[slot_id].session_generation,
+            1,
+        )
+        self.assertEqual(len(final.worker_results), 1)
+
+
+@unittest.skipUnless(
     RUN_INTEGRATION and DBOS_DSN,
     "dedicated semantic-execution DBOS integration only",
 )

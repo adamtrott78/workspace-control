@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e2-v0.1",
-  "status": "C1_PASS_C2_NEXT",
+  "status": "C1_PASS_C2_IMPLEMENTED_VALIDATING",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "e1_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.4.json",
@@ -53,8 +53,22 @@
     {
       "id": "E2-C2",
       "name": "PostgreSQL restart canary",
-      "status": "IMPLEMENT_NEXT",
-      "objective": "Repeat the same recovery sequence across fresh PostgreSQL-backed application instances so recovery is proven across process boundaries rather than only object replacement."
+      "status": "IMPLEMENTED_VALIDATING",
+      "objective": "Repeat the same recovery sequence across fresh PostgreSQL-backed application instances so recovery is proven across process boundaries rather than only object replacement.",
+      "implementation": {
+        "test_path": "tests/test_workspace_semantic_execution_backend_dbos_postgres.py",
+        "test_name": "E2PostgresRecoveryIntegrationTests.test_worker_session_and_runtime_loss_recovers_from_postgres",
+        "durable_store": "PostgresStateStore",
+        "event_ledger": "PostgresEventLedger"
+      },
+      "required_proofs": [
+        "process recovery advances generation and stales old operator action",
+        "bound session generation is fenced and requires replacement",
+        "fresh PostgreSQL-backed RuntimeCoordinator rehydrates the fenced state",
+        "late old candidate is rejected with zero state-version change",
+        "replacement session and generation-bound packet complete",
+        "third fresh RuntimeCoordinator observes COMPLETED terminal state"
+      ]
     },
     {
       "id": "E2-LIVE",
