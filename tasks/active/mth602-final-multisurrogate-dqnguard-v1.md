@@ -36,11 +36,11 @@ Execute a rigorous MTH602-to-journal research program centered on backbone compe
 
 ## Next safe action
 
-Promote PADataset draft PR #57 only through the normal default-branch review/merge path. After merge, record the exact resulting PADataset main SHA and verify workflow blobs lane A=39190413abbd801bd6d25c2166ac36a7a69968fb and lane B=6753795041090a5331a80354f59945be006ac889. Then freeze and validate chained Workspace Control trust-refresh helpers from the live predecessors lane A ea5d844c494013eb2322686d7345b5a1b15443c4 and lane B 8375dd0a0733b01de38f677dee58a373d3adcb48, perform zero-work/root activation, and only after both controllers trust the new blobs admit the 20 PR #56 control requests exactly once. Do not admit controls before that authority transition.
+Run the validated zero-work root trust refreshes from Workspace Control PR #655 exact head 5f49b06387a138a86ccd4bf9e7de4b7a98cb9d49: lane A v3->v4, then lane B v8->v9. Each launcher must verify PADataset main 7cfe0ab61cc16785f4d267273b48a63361c595dd, its exact promoted workflow blob, and zero queued/in-progress provider work before sudo. After both postverify PASS and both controllers trust the new blobs, admit the 20 immutable PR #56 l2o_control_eval requests exactly once; no admission is authorized before both trust refreshes close.
 
 ## Remaining work
 
-- Production-promote PADataset PR #57, then freeze exact lane-A/lane-B trusted-workflow refreshes against the resulting default-branch SHA and activate them only at a zero-work root gate.
+- Activate the validated lane-A v4 and lane-B v9 workflow-trust refreshes from Workspace Control PR #655 at a zero-work root gate; verify both controller policies and active receipts bind the promoted PR #57 workflow blobs.
 - After both scientific controllers trust the promoted l2o_control_eval workflows, admit the 20 immutable PR #56 control requests exactly once across the two GPU lanes and close the matched DQN-IDS-style + VarMax control matrix.
 - Report DQNGuard-minus-control per-cell deltas, aggregate means/uncertainty, target-level and unordered-pair effects, and geometry concentration only after all matched control cells close.
 - Execute final multi-seed robustness after the control matrix: frozen seed set, mean/std/confidence intervals, surrogate winner frequency, oracle-regret distributions, Rule A/B/C/confusion-exclusion stability, directional asymmetry stability, and DQNGuard-minus-control stability.
@@ -48,7 +48,7 @@ Promote PADataset draft PR #57 only through the normal default-branch review/mer
 
 ## Blockers / gates
 
-- Production authority gate: PADataset PR #57 is validated but still draft/unmerged. Exact resulting main SHA does not exist yet, so chained root trusted-workflow refresh authority cannot be frozen safely. No control admission is authorized before merge + exact blob/main binding + zero-work root activation.
+- Root authority gate: PADataset PR #57 is merged and scientific provider work is zero, but live lane-A/lane-B controller policies still trust predecessor blobs until validated Workspace Control PR #655 launchers are executed with operator sudo. No l2o_control_eval admission is authorized before both refresh postverifications PASS.
 
 ## Fresh-chat initialization
 
