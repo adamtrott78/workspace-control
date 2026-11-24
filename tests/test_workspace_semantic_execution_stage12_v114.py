@@ -7,7 +7,9 @@ TX = ROOT / "benchmarks/workspace-semantic-execution/private_route_stage12_real_
 
 def test_v114_restores_literal_github_packet_invariant() -> None:
     text = HARNESS.read_text(encoding="utf-8")
-    assert 'objective="@github\\n\\n" + objective' in text
+    assert 'GITHUB_PLUGIN_MENTION = "@github"' in text
+    assert "objective=_objective_with_plugin_mentions(" in text
+    assert "plugin_mentions=plugin_mentions" in text
 
 
 def test_v114_candidate_observation_is_remote_first_and_fail_closed() -> None:

@@ -42,7 +42,26 @@ class Stage12RealInstantHarnessStaticTests(unittest.TestCase):
         self.assertIn("continuity_token =", self.text)
         self.assertIn("Do NOT include that", self.text)
         self.assertIn("It is intentionally NOT present in this", self.text)
+        self.assertIn(
+            "validator_evidence_refs=(q2_marker, q2_continuity)",
+            self.text,
+        )
+        self.assertIn("worker_evidence_ref_instruction=(", self.text)
+        self.assertIn(
+            "evidence_refs=set(validator_evidence_refs)",
+            self.text,
+        )
         self.assertIn("STAGE12_PERSISTENT_SESSION_REUSE=PASS", self.text)
+
+    def test_connected_tool_mentions_are_literal_and_fail_closed(self) -> None:
+        self.assertIn('GITHUB_PLUGIN_MENTION = "@github"', self.text)
+        self.assertIn(
+            'WORKSPACE_SHELL_PLUGIN_MENTION = "@Workspace Shell"',
+            self.text,
+        )
+        self.assertIn("def _objective_with_plugin_mentions(", self.text)
+        self.assertIn('not mention.startswith("@")', self.text)
+        self.assertIn("plugin_mentions=plugin_mentions", self.text)
 
     def test_stale_generation_is_fenced_before_replacement(self) -> None:
         self.assertIn("runtime.recover(", self.text)

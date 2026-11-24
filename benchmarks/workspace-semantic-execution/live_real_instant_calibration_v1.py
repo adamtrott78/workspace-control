@@ -68,6 +68,8 @@ CANDIDATE_REPOSITORY = "adamtrott78/workspace-control"
 CANDIDATE_REF = "refs/heads/worker-result-candidates-v1"
 CANDIDATE_BRANCH = "worker-result-candidates-v1"
 REPO_URL = "https://github.com/adamtrott78/workspace-control.git"
+GITHUB_PLUGIN_MENTION = "@github"
+WORKSPACE_SHELL_PLUGIN_MENTION = "@Workspace Shell"
 
 
 def _required_env(name: str) -> str:
@@ -257,12 +259,33 @@ class CalibrationValidator:
         )
 
 
+def _objective_with_plugin_mentions(
+    objective: str,
+    *,
+    plugin_mentions: tuple[str, ...],
+) -> str:
+    ordered: list[str] = []
+    for mention in plugin_mentions:
+        if (
+            not mention.startswith("@")
+            or mention != mention.strip()
+            or "\n" in mention
+            or "\r" in mention
+        ):
+            raise ValueError(f"invalid_plugin_mention:{mention!r}")
+        if mention not in ordered:
+            ordered.append(mention)
+    if not ordered:
+        return objective
+    return "\n".join(ordered) + "\n\n" + objective
+
+
 def _result_instructions(
     *,
     path: str,
     payload_ref: str,
     payload_sha256: str,
-    evidence_refs: tuple[str, ...],
+    evidence_ref_instruction: str,
     extra: str,
 ) -> tuple[FindingRecord, ...]:
     return (
@@ -282,7 +305,7 @@ def _result_instructions(
                 "Publish kind=RESULT with result_payload_ref="
                 f"{payload_ref} and result_payload_sha256="
                 f"{payload_sha256}. evidence_refs must contain exactly: "
-                + ", ".join(evidence_refs)
+                + evidence_ref_instruction
                 + ". "
                 + extra
             ),
@@ -298,18 +321,22 @@ def _packet_input(
     path: str,
     payload_ref: str,
     payload_sha256: str,
-    evidence_refs: tuple[str, ...],
+    evidence_ref_instruction: str,
     extra: str,
+    plugin_mentions: tuple[str, ...] = (GITHUB_PLUGIN_MENTION,),
 ) -> PacketCompilationInput:
     return PacketCompilationInput(
         process_id=process_id,
         source_checkpoint=source_checkpoint,
-        objective="@github\n\n" + objective,
+        objective=_objective_with_plugin_mentions(
+            objective,
+            plugin_mentions=plugin_mentions,
+        ),
         findings=_result_instructions(
             path=path,
             payload_ref=payload_ref,
             payload_sha256=payload_sha256,
-            evidence_refs=evidence_refs,
+            evidence_ref_instruction=evidence_ref_instruction,
             extra=extra,
         ),
         constraints=(
@@ -453,8 +480,10 @@ def run_calibration(
             session_generation: int,
             sequence: int,
             objective: str,
-            evidence_refs: tuple[str, ...],
+            validator_evidence_refs: tuple[str, ...],
             extra: str,
+            worker_evidence_ref_instruction: str | None = None,
+            plugin_mentions: tuple[str, ...] = (GITHUB_PLUGIN_MENTION,),
         ):
             action_id = (
                 f"action:stage12:{phase}:{token}:"
@@ -474,8 +503,12 @@ def run_calibration(
                 action_id=action_id,
                 payload_ref=payload_ref,
                 payload_sha256=payload_sha,
-                evidence_refs=set(evidence_refs),
+                evidence_refs=set(validator_evidence_refs),
             )
+            if worker_evidence_ref_instruction is None:
+                worker_evidence_ref_instruction = ", ".join(
+                    validator_evidence_refs
+                )
             planned = planner.plan_service_existing(
                 task_id="workspace-semantic-execution-migration-v1",
                 action_id=action_id,
@@ -494,8 +527,9 @@ def run_calibration(
                     path=path,
                     payload_ref=payload_ref,
                     payload_sha256=payload_sha,
-                    evidence_refs=evidence_refs,
+                    evidence_ref_instruction=worker_evidence_ref_instruction,
                     extra=extra,
+                    plugin_mentions=plugin_mentions,
                 ),
                 priority_rank=1,
                 queue_sequence=sequence,
@@ -521,7 +555,7 @@ def run_calibration(
                 f"continuity:{continuity_token}. Do NOT include that "
                 "continuity ref in the q1 candidate."
             ),
-            evidence_refs=(q1_marker,),
+            validator_evidence_refs=(q1_marker,),
             extra=(
                 "Retain the continuity evidence ref from the objective in "
                 "conversation context for the next turn, but do not publish "
@@ -576,7 +610,11 @@ def run_calibration(
                 "packet. Do not read GitHub, another chat, or any external "
                 "source to recover that continuity ref."
             ),
-            evidence_refs=(q2_marker, q2_continuity),
+            validator_evidence_refs=(q2_marker, q2_continuity),
+            worker_evidence_ref_instruction=(
+                f"{q2_marker}, followed by the continuity evidence ref "
+                "recovered from the immediately preceding conversation context"
+            ),
             extra=(
                 "The continuity evidence ref is intentionally omitted from "
                 "this packet. Recover it only from the immediately preceding "
@@ -621,7 +659,7 @@ def run_calibration(
                 "This packet is a stale-generation probe and must never "
                 "be serviced after recovery."
             ),
-            evidence_refs=(f"stage12:stale:{short}",),
+            validator_evidence_refs=(f"stage12:stale:{short}",),
             extra="This candidate must never be published.",
         )
         runtime.recover(
@@ -703,7 +741,7 @@ def run_calibration(
                 "and publish the exact q3 replacement candidate. Do not rely "
                 "on prior-conversation continuity."
             ),
-            evidence_refs=(q3_marker,),
+            validator_evidence_refs=(q3_marker,),
             extra=(
                 "This is session_generation=1 replacement work. Do not use "
                 "or claim continuity from the retired/stale generation."
