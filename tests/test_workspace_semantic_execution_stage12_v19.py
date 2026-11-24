@@ -26,8 +26,9 @@ class Stage12V19ReviewTests(unittest.TestCase):
 
     def test_wrapper_revalidates_backend_after_frontend_start(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
+        frozen_source = review["exact_candidate_bindings"]["source_head"]
         self.assertEqual(
-            self.git("HEAD:operator-bridge/tools/run-stage12-wop.ps1"),
+            self.git(f"{frozen_source}:operator-bridge/tools/run-stage12-wop.ps1"),
             review["exact_candidate_bindings"]["operator-bridge/tools/run-stage12-wop.ps1"],
         )
         text = (ROOT / "operator-bridge/tools/run-stage12-wop.ps1").read_text(encoding="utf-8")
