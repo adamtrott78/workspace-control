@@ -45,6 +45,7 @@ def exact_repo(repo_root: pathlib.Path, expected_head: str) -> pathlib.Path:
 def find_go(repo_root: pathlib.Path) -> str:
     module = repo_root / "controller" / "lambda-ci-controller"
     candidates = [
+        "/opt/workspace-ci/go/1.26.3/bin/go",
         shutil.which("go1.26.3"),
         shutil.which("go1.26"),
         "/usr/local/go/bin/go",
