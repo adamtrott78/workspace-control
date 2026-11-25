@@ -7434,7 +7434,16 @@
       "Ctrl+C exits the dashboard viewer cleanly.",
       "no full regimen admission unless every smoke condition passes."
     ],
-    "launch_gate": "HARD_BLOCK"
+    "launch_gate": "HARD_BLOCK",
+    "resource_policy": {
+      "max_concurrent_cpu_osr_consumers": 2,
+      "gpu_training_lanes_reserved": 2,
+      "cpu_osr_must_not_use_cuda": true,
+      "osr_input": "compact post-training cache; do not reload raw dataset for each method",
+      "backpressure": "If host RAM/CPU headroom is insufficient, queue CPU OSR locally rather than slowing or destabilizing GPU training.",
+      "overlap_test": "SMOKE_B must train on both GPUs while up to two SMOKE_A CPU OSR consumers are active.",
+      "success_condition": "No runner/controller restart storm, OOM, cache corruption, GPU starvation, or telemetry stall during overlap."
+    }
   },
   "final_seed_robustness_github_budget_20261125": {
     "objective": "Make campaign progress independent of GitHub REST polling/quota.",
