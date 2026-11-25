@@ -25,7 +25,7 @@ def test_e3_a9_authority_is_fresh_one_shot_and_exactly_bound() -> None:
     assert b["observer_blob"] == "458a869252f108bea52952e12852961bc3158d1f"
     assert b["a9_private_route_blob"] == "808864ddf50bc57aa06ec0a9b45b97819040e1f8"
     assert b["a9_remote_bootstrap_blob"] == "cc61c43878ed781816c42c8f266c812341415c91"
-    assert b["a9_windows_launcher_blob"] == "2a297483876b3fac311ca44a4cb8e288cd8f71c3"
+    assert b["a9_windows_launcher_blob"] == "151ca25e87cccb2af8658844bd3942c9ca92eb9a"
     assert b["worker_result_schema_blob"] == "b84d362a8adbb1bf4a47f1dfc4f0b8089487a3c1"
     attempt = a["attempt_contract"]
     assert attempt["attempts_authorized"] == 1
@@ -50,5 +50,8 @@ def test_e3_a9_operator_transport_is_versioned_and_nonautomatic() -> None:
     assert "private_route_research_iterate_e3_a9_v1.sh" in launcher
     assert "run-research-iterate-e3-a9-remote-bootstrap.sh" in launcher
     assert "Ctrl+Space -> Ctrl+V -> Enter" in launcher
+    assert '$acceptedFrontendHead = "6fb315884804214f96ca0f7264a48eed40741a60"' in launcher
+    assert "worktree add --detach $frontendRepo $acceptedFrontendHead" in launcher
+    assert '-RepositoryRoot $frontendRepo' in launcher
     assert "private_route_research_iterate_e3_a9_v1.sh" in boot
     assert "workspace-e3-a9-wop-" in boot
