@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-operator-ux-smoke-harness-repair-v0.1",
+  "status": "FROZEN_SMOKE_HARNESS_REPAIR_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor_ux_review": "architecture/workspace-operator-enter-minimize-ready-notify.v0.1.json",
+  "predecessor_ux_head": "93e0be0ed7a8a88815f3abee0881e6a7c0d62b7f",
+  "trigger_observation": {
+    "summary": "First Windows smoke opened two Firefox windows and left focus on the blank one; Enter still minimized the ChatGPT worker, proving the Enter observer fired. Immediate rerun attempted to delete the checkout while WorkspaceOperator.exe was still executing from it, causing locked EXE/DLL removal failures; a later native-host launch also surfaced a .NET Desktop Runtime prompt.",
+    "classification": [
+      "SMOKE_READY_BEFORE_ADAPTER_HANDSHAKE",
+      "CHECKOUT_CONTAINS_RUNNING_HELPER_BINARY",
+      "FRAMEWORK_DEPENDENT_NATIVE_HOST_IN_DEV_SMOKE"
+    ]
+  },
+  "candidate_source": {
+    "source_head": "eb6a20ac098d208b69d1f21e529b80bb9c2e9138",
+    "exact_blobs": {
+      "operator-bridge/tools/workspace-operator-dev.ps1": "8c45e9dc2adb251dd526ed941d0fe74b6932558a",
+      "operator-bridge/src/WorkspaceOperator/Bootstrap/LocalSmokeOperatorActionPort.cs": "ab568173410d0e33f42cfa15af697224bce2dc96",
+      "operator-bridge/src/WorkspaceOperator/Program.cs": "e0db4cc6265dbdcc7b64bb8cc40477776600633a",
+      "operator-bridge/tests/WorkspaceOperator.Tests/LocalSmokeOperatorActionPortTests.cs": "c27904cf573a79246060febb0fcab0bec3b42eb7"
+    }
+  },
+  "repair_contract": {
+    "handshake_gate": "The dev smoke may print WORKSPACE_OPERATOR_SMOKE_READY only after a fresh browser_command_hub adapter_connected/APPLIED diagnostic from the newly launched Firefox runtime.",
+    "no_second_window_race": "An early Ctrl+Space must not be invited while the adapter is disconnected; therefore the production fallback-launch race that created a second WorkspaceWorkers Firefox window is removed from the acceptance procedure.",
+    "restart_safe_binary": "The dev helper must execute from a source-tree-keyed self-contained publish under LocalAppData, not from the Git checkout, so a running helper cannot lock checkout files during retry and Firefox native-host launch does not require machine-global .NET Desktop Runtime resolution.",
+    "smoke_ack_projection": "After RecordLocalPrepared the content-free smoke reports Ready=0 and SentUnconfirmed=1. After human Enter, a subsequent Ctrl+Space must consume the local confirmation and report pending durable acknowledgment without refocusing Firefox.",
+    "authority_boundary": "This repair changes only the development smoke/acceptance harness and local content-free status projection. It creates no live authority and does not weaken durable acknowledgment."
+  },
+  "authority_gate": {
+    "live_authorized": false,
+    "retry_authorized": false,
+    "fresh_explicit_authority_required": true
+  }
+}
