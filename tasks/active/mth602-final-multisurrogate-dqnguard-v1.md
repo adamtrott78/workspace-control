@@ -306,6 +306,12 @@ Authorized first wave:
 
 Authority: bounded scientific admission is authorized through the existing `/lambda-scientific` and `/lambda-scientific-2` train_backbone paths. No merge authority and no frozen-policy changes.
 
+First wave admitted:
+- lane A — PA1-PA2 p00/t01: comment `7173344721`, run `45692779142`, job `139482306314`, QUEUED
+- lane B — PA1-PA3 p00/t01: comment `7173345345`, run `45692782898`, job `139482318252`, QUEUED
+
+Backfill rule: only after terminal SUCCESS on a lane, record artifact identity/digest and admit the next not-yet-admitted non-p00/t00 manifest on that same lane. Never duplicate an admitted/running/successful identity. Seed-0 p00/t00 cells remain compatibility candidates until exact artifact compatibility is proven.
+
 ## Final stage
 
 Synthesize:
