@@ -258,6 +258,22 @@ Candidate validation:
 
 ### Exact current gate
 
+**SEED FREEZE ACCEPTED — SCIENCE ADMISSION AUTHORIZED THROUGH EXISTING BOUNDED PATHS.**
+
+Accepted exact candidate SHA: `3fd1454bc20b89580f14c2e319d9b33766ea14b5`.
+
+Accepted design:
+- partition seeds `[0,1,2,3,4]`
+- training/model seeds `[0,1,2,3,4,5,6,7,8,9]`
+- fixed standard-DQNGuard DQN seed `42` for the main factorial
+- separate DQN-seed sensitivity deferred
+
+No merge authority was granted.
+
+Next: generate and validate the immutable execution-package manifests, bind that derived exact SHA, then admit bounded train_backbone jobs on the two existing scientific GPU lanes.
+
+Historical pre-acceptance gate text follows for provenance only:
+
 Do **not** admit multi-seed science yet.
 
 The numeric seed values were intentionally deferred in the earlier design and therefore were not previously authorized. PR #58 is a candidate proposal, not authority.
