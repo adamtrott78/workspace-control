@@ -15,9 +15,9 @@
     "remaining_defect": "SetForegroundWindow-only activation was insufficient under Windows foreground-lock behavior."
   },
   "candidate_source": {
-    "source_head": "75ebd5c03325637280670964c0cdd26108b07f8c",
+    "source_head": "379a475b24750670dc842a645daa8355ff15972c",
     "exact_blob": {
-      "operator-bridge/src/WorkspaceOperator/Windows/Win32WorkerWindowSafetyPort.cs": "5c417e2ac1af4bd77f715eac7a94c3f59921fe94"
+      "operator-bridge/src/WorkspaceOperator/Windows/Win32WorkerWindowSafetyPort.cs": "030596ad89f70a859eebeac119d6251fd908c8a3"
     }
   },
   "repair_contract": {
