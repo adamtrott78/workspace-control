@@ -89,7 +89,7 @@ def load_manifest(path: Path) -> dict[str, Any]:
     if not isinstance(paths, dict) or not isinstance(blobs, dict) or not isinstance(provenance, dict):
         raise BindingClosureError("manifest_shape_invalid")
 
-    for key in ("wrapper", "e2_harness", "observer", "closure_helper"):
+    for key in ("wrapper", "e2_harness", "observer", "closure_helper", "fixture"):
         _relpath(f"path:{key}", paths.get(key))
         _sha(f"blob:{key}", blobs.get(key))
 
@@ -102,6 +102,9 @@ def load_manifest(path: Path) -> dict[str, Any]:
         "accepted_a7_dev_harness_blob",
         "operator_transport_head",
         "source_head",
+        "semantic_sha",
+        "semantic_operator_http_blob",
+        "semantic_packet_compiler_blob",
     ):
         _sha(f"provenance:{key}", provenance.get(key))
     return m
@@ -110,7 +113,7 @@ def load_manifest(path: Path) -> dict[str, Any]:
 def validate_repo_manifest(repo_root: Path, manifest: dict[str, Any]) -> None:
     paths = manifest["paths"]
     blobs = manifest["blobs"]
-    for key in ("wrapper", "e2_harness", "observer", "closure_helper"):
+    for key in ("wrapper", "e2_harness", "observer", "closure_helper", "fixture"):
         actual = git_blob(repo_root, paths[key])
         if actual != blobs[key]:
             raise BindingClosureError(
@@ -217,6 +220,8 @@ def _emit_lines(result: dict[str, Any]) -> None:
         b["observer"],
         p["closure_helper"],
         b["closure_helper"],
+        p["fixture"],
+        b["fixture"],
         pr["worker_result_schema_review_head"],
         pr["worker_result_schema_blob"],
         pr["a8_frontend_review_head"],
@@ -225,6 +230,9 @@ def _emit_lines(result: dict[str, Any]) -> None:
         pr["accepted_a7_dev_harness_blob"],
         pr["operator_transport_head"],
         pr["source_head"],
+        pr["semantic_sha"],
+        pr["semantic_operator_http_blob"],
+        pr["semantic_packet_compiler_blob"],
         result["review_head"],
         result["manifest_blob"],
     ]
