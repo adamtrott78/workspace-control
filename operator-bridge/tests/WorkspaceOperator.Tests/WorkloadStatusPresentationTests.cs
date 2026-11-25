@@ -65,6 +65,21 @@ public sealed class WorkloadStatusPresentationTests
     }
 
     [TestMethod]
+    public void ReadyNotificationIsEdgeTriggered()
+    {
+        var idle = WorkloadStatusSnapshot.Empty;
+        var readyOne = new WorkloadStatusSnapshot(1, 0);
+        var readyTwo = new WorkloadStatusSnapshot(2, 0);
+
+        Assert.IsTrue(
+            WorkloadStatusPresentation.BecameReady(idle, readyOne));
+        Assert.IsFalse(
+            WorkloadStatusPresentation.BecameReady(readyOne, readyTwo));
+        Assert.IsFalse(
+            WorkloadStatusPresentation.BecameReady(readyOne, idle));
+    }
+
+    [TestMethod]
     public void NoActionMinimizeRequiresTrueIdleState()
     {
         Assert.IsTrue(
