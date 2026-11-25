@@ -18,6 +18,7 @@ $cleanupResiduePath = Join-Path $runtimeRoot "cleanup-residue.jsonl"
 $registryPath = "HKCU:\Software\Mozilla\NativeMessagingHosts\com.workspacecontrol.operator_bridge"
 $firefox = "C:\Program Files\Mozilla Firefox\firefox.exe"
 $firefoxProfile = Join-Path $runtimeRoot "firefox-profile"
+$diagnosticsPath = Join-Path $env:LOCALAPPDATA "WorkspaceControl\OperatorBridge\logs\operator-bridge.jsonl"
 
 function Get-Dotnet10 {
   $candidates = @()
@@ -331,6 +332,30 @@ function Reset-DedicatedFirefoxSessionState([string]$ProfilePath) {
   Write-Host "WORKSPACE_OPERATOR_FIREFOX_SESSION_STATE_RESET=PASS"
 }
 
+function Test-BrowserAdapterConnectedSince([DateTimeOffset]$Since) {
+  if (-not (Test-Path -LiteralPath $diagnosticsPath -PathType Leaf)) {
+    return $false
+  }
+
+  $lines = @(Get-Content -LiteralPath $diagnosticsPath -Tail 256 -ErrorAction SilentlyContinue)
+  foreach ($line in $lines) {
+    if ([string]::IsNullOrWhiteSpace($line)) { continue }
+    try {
+      $entry = $line | ConvertFrom-Json
+      if (
+        [string]$entry.Component -eq "browser_command_hub" -and
+        [string]$entry.EventName -eq "adapter_connected" -and
+        [string]$entry.Outcome -eq "APPLIED" -and
+        [DateTimeOffset]$entry.Timestamp -ge $Since
+      ) {
+        return $true
+      }
+    } catch {}
+  }
+
+  return $false
+}
+
 function Start-DevRuntime([bool]$LocalSmoke) {
   if (Read-State) { throw "DEV_RUNTIME_ALREADY_EXISTS: use reset or stop" }
   if (-not (Test-Path -LiteralPath $firefox -PathType Leaf)) { throw "FIREFOX_NOT_FOUND:$firefox" }
@@ -354,24 +379,36 @@ function Start-DevRuntime([bool]$LocalSmoke) {
   $nativeManifest = $null
 
   try {
-    $helper = Join-Path $bridgeRoot "src\WorkspaceOperator\bin\Release\net10.0-windows\WorkspaceOperator.exe"
-    $buildStamp = Join-Path $runtimeRoot "build-source-tree.txt"
     $buildTree = (git -C $repo rev-parse "HEAD:operator-bridge/src").Trim().ToLowerInvariant()
     if ($LASTEXITCODE -ne 0 -or $buildTree -notmatch "^[0-9a-f]{40}$") {
       throw "DEV_BUILD_TREE_UNAVAILABLE"
     }
 
-    $cachedTree = if (Test-Path -LiteralPath $buildStamp -PathType Leaf) {
-      (Get-Content -LiteralPath $buildStamp -Raw).Trim().ToLowerInvariant()
-    } else {
-      ""
-    }
-
-    if ($cachedTree -ne $buildTree -or -not (Test-Path -LiteralPath $helper -PathType Leaf)) {
-      & $dotnet build (Join-Path $bridgeRoot "WorkspaceOperatorBridge.slnx") --configuration Release
-      if ($LASTEXITCODE -ne 0) { throw "DEV_BUILD_FAILED" }
-      Set-Content -LiteralPath $buildStamp -Value $buildTree -Encoding ASCII
-      Write-Host "WORKSPACE_OPERATOR_BUILD_CACHE=MISS"
+    # Run the dev helper from a staged self-contained publish outside the
+    # repository checkout. This prevents a live WorkspaceOperator.exe from
+    # locking the checkout during a retry and removes any dependency on a
+    # machine-global .NET Desktop Runtime for Firefox native-host launches.
+    $helperDir = Join-Path $runtimeRoot ("helper-" + $buildTree)
+    $helper = Join-Path $helperDir "WorkspaceOperator.exe"
+    if (-not (Test-Path -LiteralPath $helper -PathType Leaf)) {
+      $stageHelper = Join-Path $runtimeRoot ("helper-stage-" + [guid]::NewGuid().ToString("N"))
+      New-Item -ItemType Directory -Path $stageHelper -Force | Out-Null
+      try {
+        & $dotnet publish (Join-Path $bridgeRoot "src\WorkspaceOperator\WorkspaceOperator.csproj") --configuration Release --runtime win-x64 --self-contained true --output $stageHelper
+        if ($LASTEXITCODE -ne 0) { throw "DEV_SELF_CONTAINED_PUBLISH_FAILED" }
+        if (-not (Test-Path -LiteralPath (Join-Path $stageHelper "WorkspaceOperator.exe") -PathType Leaf)) {
+          throw "DEV_SELF_CONTAINED_HELPER_MISSING"
+        }
+        if (Test-Path -LiteralPath $helperDir) {
+          [void](Try-RemoveTreeWithRetry $helperDir)
+        }
+        Move-Item -LiteralPath $stageHelper -Destination $helperDir
+        Write-Host "WORKSPACE_OPERATOR_BUILD_CACHE=MISS"
+      } finally {
+        if (Test-Path -LiteralPath $stageHelper) {
+          [void](Try-RemoveTreeWithRetry $stageHelper)
+        }
+      }
     } else {
       Write-Host "WORKSPACE_OPERATOR_BUILD_CACHE=HIT"
     }
@@ -427,13 +464,31 @@ call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-prof
 "@ | Set-Content -LiteralPath $launcher -Encoding ASCII
 
     Reset-DedicatedFirefoxSessionState $firefoxProfile
+    $adapterWaitStart = [DateTimeOffset]::UtcNow
     $webExtProcess = Start-Process -FilePath "cmd.exe" -ArgumentList @("/d","/c",$launcher) -RedirectStandardOutput $webOut -RedirectStandardError $webErr -PassThru
-    Start-Sleep -Seconds 4
-    if ($webExtProcess.HasExited) {
+
+    # Do not advertise the smoke as ready until the exact Firefox adapter has
+    # completed its native-host handshake. Without this gate an early
+    # Ctrl+Space can take the production fallback-launch path and create a
+    # second Firefox profile/window.
+    $adapterDeadline = (Get-Date).AddSeconds(20)
+    $adapterConnected = $false
+    do {
+      Start-Sleep -Milliseconds 200
+      if ($webExtProcess.HasExited) {
+        if (Test-Path $webOut) { Get-Content $webOut }
+        if (Test-Path $webErr) { Get-Content $webErr }
+        throw "DEV_FIREFOX_START_FAILED"
+      }
+      $adapterConnected = Test-BrowserAdapterConnectedSince $adapterWaitStart
+    } while (-not $adapterConnected -and (Get-Date) -lt $adapterDeadline)
+
+    if (-not $adapterConnected) {
       if (Test-Path $webOut) { Get-Content $webOut }
       if (Test-Path $webErr) { Get-Content $webErr }
-      throw "DEV_FIREFOX_START_FAILED"
+      throw "DEV_FIREFOX_ADAPTER_HANDSHAKE_TIMEOUT"
     }
+    Write-Host "WORKSPACE_OPERATOR_BROWSER_ADAPTER_CONNECTED=PASS"
 
     $afterFirefox = @(Get-Process firefox -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
     $afterOperator = @(Get-Process WorkspaceOperator -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Id)
@@ -462,7 +517,7 @@ call "$webExt" run --source-dir "$extension" --firefox "$firefox" --firefox-prof
     Write-Host "WORKSPACE_OPERATOR_HOTKEY_REGISTERED=PASS"
     Write-Host ("WORKSPACE_OPERATOR_SOURCE_SHA=" + $sourceSha)
     if ($LocalSmoke) {
-      Write-Host "WORKSPACE_OPERATOR_SMOKE_READY=Press Ctrl+Space once. Expected clipboard: WORKSPACE_OPERATOR_SMOKE_PACKET_V1; expected foreground: the dedicated Firefox window."
+      Write-Host "WORKSPACE_OPERATOR_SMOKE_READY=Press Ctrl+Space once. Expected: one dedicated Firefox window opens/focuses Temporary Chat and clipboard contains WORKSPACE_OPERATOR_SMOKE_PACKET_V1. After Ctrl+V then Enter, that ChatGPT window should minimize. A following Ctrl+Space must report pending durable acknowledgment without refocusing Firefox."
     }
   } catch {
     if ($webExtProcess -and -not $webExtProcess.HasExited) {
