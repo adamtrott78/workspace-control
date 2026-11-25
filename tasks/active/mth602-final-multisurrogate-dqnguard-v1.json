@@ -7525,10 +7525,10 @@
     "failure_policy": "GitHub API quota exhaustion must not be required for local training telemetry or dashboard rendering. Do not build a live campaign controller whose correctness depends on REST polling."
   },
   "robustness_pipeline_plumbing_20261125": {
-    "status": "VALIDATED_CANDIDATE_NOT_YET_LIVE_SMOKE_APPROVED",
+    "status": "CANDIDATE_LIVENESS_DASHBOARD_UPDATE_PENDING_VALIDATION",
     "padataset_pr": 59,
     "branch": "mth602-robustness-pipeline-plumbing-v1",
-    "head": "61a0b915cb0234b29e7d2faa6bb3f983f902d455",
+    "head": "3fd7d95c42b6595066c90330a0aa67b68c0c16ea",
     "validation": {
       "receipt": "job-ed84509c-c615-4272-b8d4-6596e872d472",
       "result": "21 passed"
@@ -7561,7 +7561,18 @@
       "requirement": "same-backbone parity against canonical GPU evaluator during four-model smoke before final science",
       "reason": "current p00/t01 pilots predate cache hook and are not to be retrained solely for cache creation"
     },
-    "merge_authorized": false
+    "merge_authorized": false,
+    "controller_liveness_dashboard": {
+      "provider_calls_per_refresh": 0,
+      "source": "local systemctl show only",
+      "fields": [
+        "ActiveState",
+        "SubState",
+        "MainPID",
+        "NRestarts"
+      ],
+      "display": "G0/G1 controller state + pid + restart count"
+    }
   },
   "robustness_pilot_osr_status_20261125": {
     "status": "IN_PROGRESS_NOT_CLOSED",
