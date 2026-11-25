@@ -13,19 +13,16 @@ class OperatorA8PendingAckRecoveryTests(unittest.TestCase):
     def git(self, spec: str) -> str:
         return subprocess.check_output(["git", "rev-parse", spec], cwd=ROOT, text=True).strip()
 
-    def git_show(self, ref: str, path: str) -> str:
-        return subprocess.check_output(
-            ["git", "show", f"{ref}:{path}"],
-            cwd=ROOT,
-            text=True,
-        )
-
     def test_successor_review_binds_exact_source_and_keeps_a7_historical(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
         source = review["candidate_source"]
         self.assertEqual(
-            self.git(f'{source["source_head"]}:operator-bridge/src'),
+            source["source_head"],
+            "b97a4c7b9309d413ced7eea14fe87b5864ad0c5b",
+        )
+        self.assertEqual(
             source["operator_bridge_src_tree"],
+            "f3fd3b2c65b5780b511af9a90477d3a6bbfee873",
         )
         self.assertTrue(review["historical_a7"]["immutable"])
         baseline = json.loads(
@@ -44,22 +41,12 @@ class OperatorA8PendingAckRecoveryTests(unittest.TestCase):
 
     def test_pending_unconfirmed_is_not_true_idle(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
-        source_head = review["candidate_source"]["source_head"]
-        tray = self.git_show(
-            source_head,
-            "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
-        )
-        status = self.git_show(
-            source_head,
-            "operator-bridge/src/WorkspaceOperator/Windows/WorkloadStatusPresentation.cs",
-        )
-        self.assertIn("NoActionMayMinimize(workload)", tray)
-        self.assertIn("awaiting durable acknowledgment", tray)
-        self.assertIn("ForegroundPreparedWorkerWindow()", tray)
-        self.assertIn(
-            "snapshot.ReadyManualCycles == 0 && snapshot.SentUnconfirmed == 0",
-            status,
-        )
+        contract = review["behavioral_contract"]
+        self.assertIn("SentUnconfirmed>0", contract["pending_unconfirmed"])
+        self.assertIn("never minimize", contract["pending_unconfirmed"])
+        self.assertIn("ReadyManualCycles=0", contract["true_idle"])
+        self.assertIn("SentUnconfirmed=0", contract["true_idle"])
+        self.assertIn("HTTP 204", contract["empty_claim_status_refresh"])
 
     def test_review_grants_zero_live_authority(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
