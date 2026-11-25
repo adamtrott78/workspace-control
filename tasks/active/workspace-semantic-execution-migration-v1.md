@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 090155abc1c943e629d2a9fa1e74c6cf2c8927f4
+- Remote checkpoint: 6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424
 - Remote verified: true
 
 ### PADataset
@@ -70,13 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-E3 RESOURCE/ACCOUNTING + SOAK. E1 and E2 are accepted and must not be redone absent a demonstrated regression. Start with E3-C1: implement a read-only versioned resource observer for CPU/RAM/process/task/session/action accounting and deterministic tests proving zero semantic mutation. Then run E3-C2 bounded no-model soak with resource/leak evidence. Only after C1/C2 pass, freeze a live E3 review and stop at a fresh explicit one-shot authority gate before any live Instant soak.
+E3-LIVE AUTHORITY GATE. E3-C1 and E3-C2 are PASS, and the frozen E3-LIVE review/procedure head 6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424 is validated by Workspace Control #3216, Semantic Execution #518, and Operator Bridge #787. STOP: no E3 live authority exists. Adam must explicitly approve exactly one E3-LIVE attempt. After that approval only, create one one-shot authority bound to the validated review head, exact E3 wrapper/E2 topology/observer blobs, and candidate baseline 6115b48dfdf4a4954b3b1626598f897e4e71eeec; validate the authority exact head before live execution.
 
 ## Remaining work
 
-- E3-C1: implement and validate the read-only resource/accounting observer and machine-readable report.
-- E3-C2: execute a bounded deterministic/fake-worker soak with zero model calls/GPU use; capture CPU/RAM/process/FD/thread/task/session/action trends and cleanup evidence.
-- E3-LIVE: after C1/C2 and a frozen review, obtain fresh explicit operator approval for one bounded live resource/soak run; bind report to exact source/authority/candidate heads.
+- E3-LIVE: obtain fresh explicit operator approval for exactly one live resource/soak attempt; only then create and validate one one-shot authority, execute the reviewed E2-topology instrumentation, capture exact resource/provenance evidence, and close out cleanup/rollback.
 - E4: run calibrated economics comparison versus all-strong/frontier control only when comparable allowance telemetry is available.
 - E5: run authoritative target-machine UX-09 performance benchmark.
 - E6: mechanically audit exact SHA/blob/route provenance, authority boundaries, rollback paths and unresolved violations.
@@ -85,7 +83,7 @@ E3 RESOURCE/ACCOUNTING + SOAK. E1 and E2 are accepted and must not be redone abs
 
 ## Blockers / gates
 
-- E3 LIVE AUTHORITY: none exists. Repository-only E3-C1/C2 work may proceed; any live E3 run requires a separately frozen review and fresh explicit operator approval.
+- E3 LIVE AUTHORITY: none exists. Frozen review/procedure head 6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424 is validated, but exactly one live E3 attempt still requires fresh explicit operator approval before any authority artifact may be created.
 - E4 ECONOMICS: claim-bearing comparison remains gated on calibrated comparable allowance telemetry; do not substitute raw token estimates or uncalibrated UI observations.
 
 ## Fresh-chat initialization
