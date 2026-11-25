@@ -194,83 +194,81 @@ It depends jointly on:
 
 Rule C has meaningful same-backbone directional signal but poor cross-backbone calibration. Rule B is largely redundant with Rule A. The paper-era ordering was heavily entangled with weak backbone geometry; repaired within-target rankings are effectively uncorrelated with the old ordering.
 
-## Matched controls now running
+## Matched controls closed
 
-PADataset PR #56:
-- branch `mth602-repaired-l2o-controls-v1`
-- exact head `17c991dd41c16099a679cc4ad81230c7616a0db1`
+PADataset PR #56 exact head `17c991dd41c16099a679cc4ad81230c7616a0db1` is closed at **20/20 canonical directional cells**.
 
-Frozen controls:
-- DQN-IDS-style: `dqn_ids_style_softmax3_external_surrogate_cap625_v1`
-- VarMax: `varmax_surrogate_all_smoke_matched_l2o_v1`
+Canonical overnight recoveries:
+- PA4 <- PA3: run `45565602436`, job `139039493921`
+- PA4 <- PA2: run `45565606606`, job `139039506686`
 
-DQN-IDS-style semantics:
-- same exact frozen PyTorch backbone/checkpoint
-- plain softmax3 DQN state
-- hard DQN argmax action
-- exactly 625 known + 625 external-surrogate validation samples
-- no true-target calibration
-- no DQNGuard bands or score threshold
+Excluded from analysis as superseded/noncanonical:
+`45509159615`, `45509140807`, `45565324045`, `45565327001`, `45517031611`, `45517036169`.
 
-VarMax semantics:
-- historical `surrogate_all`
-- historical `smoke` sweep
-- known-validation pseudo-unknown calibration
-- external surrogate is directional/backbone provenance only and is not consumed by VarMax
+Validation:
+- 20/20 unique directional result records COMPLETE
+- 20/20 scientific receipts PASS
+- 10/10 frozen canonical backbones represented
+- target-test firewall preserved
+- no frozen recipe/checkpoint/threshold/selector/control/retry policy changed
 
-Target/test firewall:
-- no target labels for tuning
-- no target-open fitting
-- no target test before final evaluation
-- target test is not materialized until both controls are fitted/frozen
-- control outcomes may not alter any frozen method
+Matched U-F1:
+- DQNGuard mean **0.665583**
+- DQN-IDS-style mean **0.292854**
+- VarMax mean **0.706131**
+- DQNGuard - DQN-IDS-style: **+0.372730** mean, 14/20 wins, 95% paired-cell t-CI **[+0.156234, +0.589226]**
+- DQNGuard - VarMax: **-0.040548** mean, 12/20 wins, 95% paired-cell t-CI **[-0.136794, +0.055698]**
 
-## What to do while controls run
+Target-level DQNGuard deltas vs DQN-IDS / VarMax:
+- PA1: +0.440059 / -0.017370
+- PA2: +0.272857 / -0.115109
+- PA3: +0.687328 / +0.127035
+- PA4: +0.017795 / -0.163635
+- PA8: +0.445609 / -0.033660
 
-Monitor only. Do not duplicate admissions.
+Frozen Rule-B confidence-geometry score correlates with DQNGuard-minus-VarMax U-F1:
+Spearman rho **+0.541**, p **0.0137**. Frozen Rule-C centroid margin and feature-distance do not show a comparable monotonic matched-control delta signal.
 
-When a cell closes:
-1. verify workflow conclusion and scientific receipt;
-2. collect exact artifact/result record;
-3. preserve the frozen control semantics;
-4. allow the controller to backfill the same GPU lane automatically.
+## Final multi-seed robustness candidate
 
-If a cell fails, inspect the exact failure first. Do not blindly retry and do not change the control definition.
+PADataset draft PR #58:
+- branch `mth602-final-robustness-seed-freeze-v1`
+- exact candidate head `3fd1454bc20b89580f14c2e319d9b33766ea14b5`
+- base: PR #56 exact head `17c991dd41c16099a679cc4ad81230c7616a0db1`
+- status: **VALIDATED CANDIDATE / NOT AUTHORIZED FOR SCIENCE**
 
-## After 20/20 controls close
+Why PR #58 is needed: the frozen 5 x 10 design requires independent partition variance and model/training variance, but the legacy trainer's single `seed` controls both the data partition and training RNG/DataLoader order.
 
-Compute:
-- DQNGuard minus DQN-IDS-style U-F1 and other frozen metrics per directional cell
-- DQNGuard minus VarMax per directional cell
-- aggregate means and uncertainty summaries
-- target-level effects
-- unordered-pair/backbone effects
-- whether DQNGuard gains concentrate in particular target/surrogate/geometry regimes
+Candidate seed freeze:
+- partition seeds: `[0,1,2,3,4]`
+- training/model seeds: `[0,1,2,3,4,5,6,7,8,9]`
+- standard-DQNGuard DQN seed for the main factorial: **42** (preserves the existing frozen evaluator)
+- separate DQN-seed sensitivity: deferred; not a third factorial axis
+- existing exact seed-0 matrix may count only as `partition_seed=0, training_seed=0` when exact recipe/artifact-compatible
 
-Do not compare repaired DQNGuard to paper-era control numbers as if they were matched evidence.
+Candidate RNG roles:
+- `partition_seed`: split construction and deterministic OSR calibration-subset selection
+- `training_seed`: Python/NumPy/PyTorch/CUDA model RNG plus DataLoader ordering/worker RNG
+- fixed DQN seed 42: DQN initialization/fitting during the main factorial
 
-## Then: final multi-seed robustness
+Candidate validation:
+- `job-515220a4-077f-404a-981b-aaecd662e677`: **4 passed**
+- `job-abb4bb10-b745-411c-bc6d-0261fbb46bfe`: **12 passed**
+- broader Stage03 deterministic source-string test is a proven pre-existing base failure, reproduced on PR #56 as `job-57d339a6-0773-43d6-992b-8fea6224526c`; it is not caused by PR #58
 
-Only after the matched control matrix closes.
+### Exact current gate
 
-Do not rely on seed-0 exact winner identity; PA3 and PA8 contain near ties.
+Do **not** admit multi-seed science yet.
 
-Across the frozen seed set report:
-- mean/std and confidence intervals
-- surrogate winner frequency
-- oracle-regret distributions
-- Rule A/B/C picker stability
-- confusion-exclusion diagnostic stability
-- same-backbone directional-asymmetry stability
-- DQNGuard-minus-control delta stability
+The numeric seed values were intentionally deferred in the earlier design and therefore were not previously authorized. PR #58 is a candidate proposal, not authority.
 
-No seed may use target/test/OSR evidence to change:
-- backbone recipe
-- checkpoint selection
-- threshold policy
-- control definition
-- selector formula
-- retry policy
+Required next action: explicitly accept the PR #58 seed freeze (partition seeds 0..4, training/model seeds 0..9, fixed DQN seed 42 for the factorial). After that acceptance:
+1. bind the accepted exact candidate SHA;
+2. generate immutable per-cell manifests;
+3. validate the generated manifests;
+4. admit through the existing bounded train_backbone / directional-evaluator paths only.
+
+No merge authority is implied.
 
 ## Final stage
 
