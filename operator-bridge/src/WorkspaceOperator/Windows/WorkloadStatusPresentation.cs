@@ -22,6 +22,20 @@ public sealed record WorkloadStatusPresentation(
     string ReadyLabel,
     string SentUnconfirmedLabel)
 {
+
+    public static bool NoActionMayMinimize(WorkloadStatusSnapshot snapshot)
+    {
+        ArgumentNullException.ThrowIfNull(snapshot);
+        if (snapshot.ReadyManualCycles < 0 || snapshot.SentUnconfirmed < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(snapshot),
+                "Workload counters must be non-negative.");
+        }
+
+        return snapshot.ReadyManualCycles == 0 && snapshot.SentUnconfirmed == 0;
+    }
+
     public static WorkloadStatusPresentation Project(
         bool bridgeEnabled,
         WorkloadStatusSnapshot snapshot,

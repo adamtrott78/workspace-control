@@ -63,4 +63,18 @@ public sealed class WorkloadStatusPresentationTests
 
         Assert.AreEqual("99+", presentation.IconText);
     }
+
+    [TestMethod]
+    public void NoActionMinimizeRequiresTrueIdleState()
+    {
+        Assert.IsTrue(
+            WorkloadStatusPresentation.NoActionMayMinimize(
+                WorkloadStatusSnapshot.Empty));
+        Assert.IsFalse(
+            WorkloadStatusPresentation.NoActionMayMinimize(
+                new WorkloadStatusSnapshot(0, 1)));
+        Assert.IsFalse(
+            WorkloadStatusPresentation.NoActionMayMinimize(
+                new WorkloadStatusSnapshot(1, 0)));
+    }
 }
