@@ -517,6 +517,23 @@
             "model_id": null,
             "runtime_id": "padataset-dnns-v1"
           }
+        },
+        "padataset-scientific-single-gpu-2-v1": {
+          "scale_set_name": "lambda-padataset-scientific-single-gpu-2",
+          "runner_prefix": "lambda-padataset-scientific-single-gpu-2-",
+          "max_runners": 1,
+          "execution_contract_id": "scientific-single-gpu-2-v1",
+          "controller_peer": {
+            "unix_user": "ci-ctl-pad-science-2"
+          },
+          "bindings": {
+            "model_id": null,
+            "runtime_id": "padataset-dnns-v1"
+          },
+          "runner_identity": {
+            "unix_user": "ci-padataset-2",
+            "unix_group": "ci-padataset"
+          }
         }
       },
       "routes": {
@@ -574,6 +591,25 @@
           },
           "ingress": {
             "command": "/lambda-scientific",
+            "parameter_schema_id": "candidate-sha-v1"
+          }
+        },
+        "scientific-single-gpu-2": {
+          "runner_class_id": "padataset-scientific-single-gpu-2-v1",
+          "trusted_workflow": {
+            "path": ".github/workflows/lambda-ci-scientific-2.yml",
+            "default_branch": "main",
+            "blob_sha": "6280a6e7b2ad8cc379277fa320e8839a94f360ec",
+            "job_key": "padataset-scientific-2",
+            "allowed_events": [
+              "issue_comment"
+            ],
+            "allowed_actor_logins": [
+              "adamtrott78"
+            ]
+          },
+          "ingress": {
+            "command": "/lambda-scientific-2",
             "parameter_schema_id": "candidate-sha-v1"
           }
         }

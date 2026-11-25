@@ -8,7 +8,34 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
+
+	"github.com/actions/scaleset"
 )
+
+type startupScalerStub struct {
+	calls int
+	msg   *scaleset.RunnerScaleSetMessage
+}
+
+func (s *startupScalerStub) Scale(_ context.Context, msg *scaleset.RunnerScaleSetMessage) error {
+	s.calls++
+	s.msg = msg
+	return nil
+}
+
+func TestRunStartupRecoveryCallsScaleWithNilMessage(t *testing.T) {
+	stub := &startupScalerStub{}
+	if err := runStartupRecovery(context.Background(), stub); err != nil {
+		t.Fatal(err)
+	}
+	if stub.calls != 1 {
+		t.Fatalf("startup Scale calls=%d want=1", stub.calls)
+	}
+	if stub.msg != nil {
+		t.Fatalf("startup Scale message=%#v want=nil", stub.msg)
+	}
+}
 
 func newRESTVerifierTestServer(
 	t *testing.T,
@@ -89,6 +116,239 @@ func newRESTVerifierTestServer(
 		logger:     slog.New(slog.DiscardHandler),
 	}
 	return server, verifier
+}
+
+
+func headerWith(values map[string]string) http.Header {
+	h := make(http.Header)
+	for key, value := range values {
+		h.Set(key, value)
+	}
+	return h
+}
+
+func TestGitHubRESTStatusIsTransientDistinguishesRateLimit403(t *testing.T) {
+	cases := []struct {
+		name   string
+		status int
+		header http.Header
+		body   string
+		want   bool
+	}{
+		{
+			name:   "primary rate limit header",
+			status: http.StatusForbidden,
+			header: headerWith(map[string]string{"X-RateLimit-Remaining": "0"}),
+			want:   true,
+		},
+		{
+			name:   "primary rate limit body",
+			status: http.StatusForbidden,
+			body:   `{"message":"API rate limit exceeded for user ID 61768467"}`,
+			want:   true,
+		},
+		{
+			name:   "secondary rate limit",
+			status: http.StatusForbidden,
+			body:   `{"message":"You have exceeded a secondary rate limit."}`,
+			want:   true,
+		},
+		{
+			name:   "retry after",
+			status: http.StatusForbidden,
+			header: headerWith(map[string]string{"Retry-After": "60"}),
+			want:   true,
+		},
+		{
+			name:   "ordinary forbidden stays fail closed",
+			status: http.StatusForbidden,
+			body:   `{"message":"Resource not accessible by integration"}`,
+			want:   false,
+		},
+		{
+			name:   "too many requests",
+			status: http.StatusTooManyRequests,
+			want:   true,
+		},
+		{
+			name:   "server error",
+			status: http.StatusServiceUnavailable,
+			want:   true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp := &http.Response{StatusCode: tc.status, Header: tc.header}
+			if got := githubRESTStatusIsTransient(resp, []byte(tc.body)); got != tc.want {
+				t.Fatalf("githubRESTStatusIsTransient()=%v want=%v", got, tc.want)
+			}
+		})
+	}
+}
+
+
+func TestGitHubRESTRetryDelayHonorsPrimaryReset(t *testing.T) {
+	now := time.Unix(1_000, 0)
+	resp := &http.Response{
+		StatusCode: http.StatusForbidden,
+		Header: headerWith(map[string]string{
+			"X-RateLimit-Remaining": "0",
+			"X-RateLimit-Reset":     "1060",
+		}),
+	}
+	if got, want := githubRESTRetryDelay(resp, 0, now), 65*time.Second; got != want {
+		t.Fatalf("reset-aware delay=%s want=%s", got, want)
+	}
+}
+
+func TestGitHubRESTRetryDelayHonorsRetryAfter(t *testing.T) {
+	resp := &http.Response{
+		StatusCode: http.StatusForbidden,
+		Header: headerWith(map[string]string{"Retry-After": "120"}),
+	}
+	if got, want := githubRESTRetryDelay(resp, 0, time.Unix(1_000, 0)), 125*time.Second; got != want {
+		t.Fatalf("Retry-After delay=%s want=%s", got, want)
+	}
+}
+
+func TestDiscoverTrustedDemandSkipsUntrustedWorkflowBeforeJobsCall(t *testing.T) {
+	policy := testPolicy()
+	headSHA := strings.Repeat("d", 40)
+	workflowSHA := strings.Repeat("c", 40)
+	cpuJobsCalls := 0
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs":
+			status := r.URL.Query().Get("status")
+			if status == "queued" {
+				_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{
+					map[string]any{
+						"id": 700, "head_sha": headSHA, "head_branch": "main",
+						"path": ".github/workflows/cpu.yml", "event": "issue_comment", "status": "queued",
+						"actor": map[string]any{"login": "adamtrott78"},
+						"triggering_actor": map[string]any{"login": "adamtrott78"},
+						"repository": map[string]any{"full_name": "adamtrott78/workspace-control"},
+					},
+					map[string]any{
+						"id": 600, "head_sha": headSHA, "head_branch": "main",
+						"path": ".github/workflows/control.yml", "event": "issue_comment", "status": "queued",
+						"actor": map[string]any{"login": "adamtrott78"},
+						"triggering_actor": map[string]any{"login": "adamtrott78"},
+						"repository": map[string]any{"full_name": "adamtrott78/workspace-control"},
+					},
+				}})
+				return
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{}})
+			return
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/700/jobs":
+			cpuJobsCalls++
+			t.Fatalf("untrusted workflow consumed /jobs REST call")
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/600/jobs":
+			_ = json.NewEncoder(w).Encode(map[string]any{"jobs": []any{map[string]any{
+				"id": 601, "status": "queued", "labels": []string{policy.ScaleSetName},
+				"runner_id": 0, "runner_name": "",
+			}}})
+			return
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/contents/.github/workflows/control.yml":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"type": "file", "path": ".github/workflows/control.yml", "sha": workflowSHA,
+			})
+			return
+		default:
+			t.Fatalf("unexpected REST request: %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+	}))
+	defer server.Close()
+
+	verifier := &githubVerifier{
+		policy: policy, owner: "adamtrott78", repo: "workspace-control",
+		apiBase: server.URL, httpClient: server.Client(),
+		tokens: fixedTokenSource("test-token"), logger: slog.New(slog.DiscardHandler),
+	}
+	jobs, safe, reason, err := verifier.DiscoverTrustedDemand(context.Background())
+	if err != nil || !safe || reason != "" {
+		t.Fatalf("discovery failed: jobs=%#v safe=%v reason=%q err=%v", jobs, safe, reason, err)
+	}
+	if cpuJobsCalls != 0 {
+		t.Fatalf("untrusted workflow jobs calls=%d want=0", cpuJobsCalls)
+	}
+	if len(jobs) != 1 || jobs[0].WorkflowRunID != 600 {
+		t.Fatalf("trusted candidate mismatch: %#v", jobs)
+	}
+}
+
+func TestDiscoverTrustedDemandPrefersNewestAndStopsAtMaxRunners(t *testing.T) {
+	policy := testPolicy()
+	policy.MaxRunners = 1
+	headSHA := strings.Repeat("d", 40)
+	workflowSHA := strings.Repeat("c", 40)
+	oldJobsCalls := 0
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch {
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs":
+			status := r.URL.Query().Get("status")
+			if status == "queued" {
+				_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{
+					map[string]any{
+						"id": 800, "head_sha": headSHA, "head_branch": "main",
+						"path": ".github/workflows/control.yml", "event": "issue_comment", "status": "queued",
+						"actor": map[string]any{"login": "adamtrott78"},
+						"triggering_actor": map[string]any{"login": "adamtrott78"},
+						"repository": map[string]any{"full_name": "adamtrott78/workspace-control"},
+					},
+					map[string]any{
+						"id": 700, "head_sha": headSHA, "head_branch": "main",
+						"path": ".github/workflows/control.yml", "event": "issue_comment", "status": "queued",
+						"actor": map[string]any{"login": "adamtrott78"},
+						"triggering_actor": map[string]any{"login": "adamtrott78"},
+						"repository": map[string]any{"full_name": "adamtrott78/workspace-control"},
+					},
+				}})
+				return
+			}
+			_ = json.NewEncoder(w).Encode(map[string]any{"workflow_runs": []any{}})
+			return
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/800/jobs":
+			_ = json.NewEncoder(w).Encode(map[string]any{"jobs": []any{map[string]any{
+				"id": 801, "status": "queued", "labels": []string{policy.ScaleSetName},
+				"runner_id": 0, "runner_name": "",
+			}}})
+			return
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/actions/runs/700/jobs":
+			oldJobsCalls++
+			t.Fatalf("older run should not be queried after MaxRunners demand is found")
+		case r.URL.Path == "/repos/adamtrott78/workspace-control/contents/.github/workflows/control.yml":
+			_ = json.NewEncoder(w).Encode(map[string]any{
+				"type": "file", "path": ".github/workflows/control.yml", "sha": workflowSHA,
+			})
+			return
+		default:
+			t.Fatalf("unexpected REST request: %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+	}))
+	defer server.Close()
+
+	verifier := &githubVerifier{
+		policy: policy, owner: "adamtrott78", repo: "workspace-control",
+		apiBase: server.URL, httpClient: server.Client(),
+		tokens: fixedTokenSource("test-token"), logger: slog.New(slog.DiscardHandler),
+	}
+	jobs, safe, reason, err := verifier.DiscoverTrustedDemand(context.Background())
+	if err != nil || !safe || reason != "" {
+		t.Fatalf("discovery failed: jobs=%#v safe=%v reason=%q err=%v", jobs, safe, reason, err)
+	}
+	if oldJobsCalls != 0 {
+		t.Fatalf("old jobs calls=%d want=0", oldJobsCalls)
+	}
+	if len(jobs) != 1 || jobs[0].WorkflowRunID != 800 || jobs[0].GitHubJobID != 801 {
+		t.Fatalf("newest bounded candidate mismatch: %#v", jobs)
+	}
 }
 
 func TestDiscoverTrustedDemandUsesRESTJobIdentity(t *testing.T) {

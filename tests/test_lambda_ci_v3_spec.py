@@ -41,8 +41,8 @@ class V3LaunchSpecTests(unittest.TestCase):
             jit_config="ZmFrZS1qaXQ=",
         )
 
-    def test_all_ten_runner_classes_build(self):
-        self.assertEqual(len(self.root["runner_classes"]), 10)
+    def test_all_eleven_runner_classes_build(self):
+        self.assertEqual(len(self.root["runner_classes"]), 11)
         for class_id in sorted(self.root["runner_classes"]):
             request, spec = self.build(class_id)
             cls = self.root["runner_classes"][class_id]
@@ -97,7 +97,7 @@ class V3LaunchSpecTests(unittest.TestCase):
     def test_scientific_class_binds_exact_padataset_runtime(self):
         _, spec = self.build("padataset-scientific-single-gpu-v1")
         self.assertEqual(spec["execution_contract"]["resource_class"], "scientific_gpu_single_v1")
-        self.assertEqual(spec["resources"]["runtime_max_seconds"], 14400)
+        self.assertEqual(spec["resources"]["runtime_max_seconds"], 23400)
         self.assertEqual(spec["runtime_binding"]["runtime_id"], "padataset-dnns-v1")
         self.assertEqual(
             spec["runtime_binding"]["promotion_method"],

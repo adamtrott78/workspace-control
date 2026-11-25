@@ -83,6 +83,14 @@
         "state": "CLEAR",
         "source": null
       }
+    },
+    "padataset-scientific-single-gpu-2-v1": {
+      "install_state": "NOT_INSTALLED",
+      "controller_state": "INACTIVE",
+      "containment": {
+        "state": "CLEAR",
+        "source": null
+      }
     }
   },
   "routes": {
@@ -181,6 +189,10 @@
     "padataset:scientific-single-gpu": {
       "admission_state": "DISABLED",
       "source": "scientific activation default: dedicated v3 route disabled until explicit reviewed host activation"
+    },
+    "padataset:scientific-single-gpu-2": {
+      "admission_state": "DISABLED",
+      "source": "dual-lane scientific candidate default: lane B remains disabled until explicit reviewed host activation after all scientific work drains"
     }
   },
   "legacy": {

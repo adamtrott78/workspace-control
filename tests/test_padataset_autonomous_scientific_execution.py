@@ -142,11 +142,11 @@ class PADatasetAutonomousScientificExecutionTests(unittest.TestCase):
         )
         self.assertEqual(
             PROFILES["profiles"]["gpu-scientific-single"]["RuntimeMaxSec"],
-            "4h",
+            "390min",
         )
         self.assertEqual(
             WORKLOAD["resource_classes"]["scientific_gpu_single_v1"]["max_runtime_seconds"],
-            14400,
+            23400,
         )
 
     def test_scientific_route_is_active_with_exact_promoted_bindings(self):

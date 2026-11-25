@@ -489,6 +489,56 @@ func restDiscoveredJob(jobID, runID int64) verifiedJob {
 	}
 }
 
+func TestRestDiscoverySkippedWhenOutstandingAuthorityCoversAssignedDemand(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	policy := testPolicy()
+	root := newFakeRoot(&events)
+
+	activeJob := restDiscoveredJob(9001, 1901)
+	activeRecord, err := newJobRecord(policy, activeJob, "PREPARING", time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	activeRecord.SchedulerState = "STARTED"
+	activeRecord.LastRootStatus = "PREPARING"
+	root.statusByRequest[activeRecord.RequestID] = "PREPARING"
+	if err := ledger.Put(activeRecord); err != nil {
+		t.Fatal(err)
+	}
+
+	verifier := &fakeVerifier{
+		discoverySafe: true,
+		discovered:    []verifiedJob{restDiscoveredJob(9002, 1902)},
+	}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		root,
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 0 {
+		t.Fatalf("REST discovery ran despite fully covered assigned demand: calls=%d", verifier.discoveryCalls)
+	}
+	if len(events) != 0 {
+		t.Fatalf("covered assigned demand created extra capacity: %#v", events)
+	}
+	current, ok, err := ledger.Get(activeJob.GitHubJobID)
+	if err != nil || !ok {
+		t.Fatalf("active authority record missing: ok=%v err=%v", ok, err)
+	}
+	if current.State != "PREPARING" || current.LastRootStatus != "PREPARING" {
+		t.Fatalf("active authority drifted while suppressing REST: %#v", current)
+	}
+}
+
 func TestRestAttestedAssignedDemandProvisionsWithoutBrokerIDs(t *testing.T) {
 	events := []string{}
 	ledger := newMemoryLedger()
@@ -532,6 +582,109 @@ func TestRestAttestedAssignedDemandProvisionsWithoutBrokerIDs(t *testing.T) {
 		record.WorkflowRunID != 1901 ||
 		record.SchedulerState != "REST_ATTESTED_ASSIGNED" {
 		t.Fatalf("REST-attested authority record mismatch: %#v", record)
+	}
+}
+
+func TestRestAttestedQueuedDemandProvidesCapacityFloorWhenAssignedCountFallsToZero(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	verifier := &fakeVerifier{
+		discoverySafe: true,
+		discovered:    []verifiedJob{restDiscoveredJob(9001, 1901)},
+	}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("REST demand discovery calls=%d want=1", verifier.discoveryCalls)
+	}
+	if len(events) != 3 ||
+		!strings.HasPrefix(events[0], "reserve:") ||
+		!strings.HasPrefix(events[1], "jit:") ||
+		!strings.HasPrefix(events[2], "launch:") {
+		t.Fatalf("trusted queued REST demand must preserve RESERVE -> JIT -> LAUNCH: %#v", events)
+	}
+	record, ok, err := ledger.Get(9001)
+	if err != nil || !ok {
+		t.Fatalf("REST queued demand record missing: ok=%v err=%v", ok, err)
+	}
+	if record.State != "PREPARING" ||
+		record.AuthoritySource != "REST_ACTIVE_JOB_SET" ||
+		record.SchedulerState != "REST_ATTESTED_ASSIGNED" {
+		t.Fatalf("REST queued demand record mismatch: %#v", record)
+	}
+}
+
+func TestRestDemandRefreshesCompletedRootRecordBeforeCountingOutstandingCapacity(t *testing.T) {
+	events := []string{}
+	ledger := newMemoryLedger()
+	policy := testPolicy()
+	root := newFakeRoot(&events)
+
+	oldJob := restDiscoveredJob(9001, 1901)
+	oldRecord, err := newJobRecord(policy, oldJob, "PREPARING", time.Now())
+	if err != nil {
+		t.Fatal(err)
+	}
+	oldRecord.SchedulerState = "COMPLETED"
+	oldRecord.LastRootStatus = "PREPARING"
+	root.statusByRequest[oldRecord.RequestID] = "COMPLETED"
+	if err := ledger.Put(oldRecord); err != nil {
+		t.Fatal(err)
+	}
+
+	freshJob := restDiscoveredJob(9002, 1902)
+	verifier := &fakeVerifier{
+		discoverySafe: true,
+		discovered:    []verifiedJob{freshJob},
+	}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		root,
+	)
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 1},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	completed, ok, err := ledger.Get(oldJob.GitHubJobID)
+	if err != nil || !ok {
+		t.Fatalf("old REST record missing: ok=%v err=%v", ok, err)
+	}
+	if completed.State != "COMPLETED" || completed.LastRootStatus != "COMPLETED" {
+		t.Fatalf("old root-completed record was not refreshed before demand: %#v", completed)
+	}
+
+	fresh, ok, err := ledger.Get(freshJob.GitHubJobID)
+	if err != nil || !ok {
+		t.Fatalf("fresh REST demand was not admitted in same scale cycle: ok=%v err=%v", ok, err)
+	}
+	if fresh.State != "PREPARING" || fresh.LastRootStatus != "PREPARING" {
+		t.Fatalf("fresh REST demand did not launch after capacity refresh: %#v", fresh)
+	}
+	if fresh.AuthoritySource != "REST_ACTIVE_JOB_SET" {
+		t.Fatalf("fresh REST authority source drifted: %#v", fresh)
+	}
+	if len(events) != 3 ||
+		!strings.HasPrefix(events[0], "reserve:") ||
+		!strings.HasPrefix(events[1], "jit:") ||
+		!strings.HasPrefix(events[2], "launch:") {
+		t.Fatalf("fresh REST demand did not execute RESERVE -> JIT -> LAUNCH: %#v", events)
 	}
 }
 

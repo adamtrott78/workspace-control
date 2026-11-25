@@ -3,9 +3,22 @@ set -euo pipefail
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
 
+git_retry() {
+  local attempt rc
+  for attempt in 1 2 3 4 5; do
+    if "$@"; then
+      return 0
+    fi
+    rc=$?
+    echo "Git operation failed (attempt $attempt/5, rc=$rc); retrying..." >&2
+    sleep $((attempt * 2))
+  done
+  return "$rc"
+}
+
 EXPECTED_AUTHORITY_SHA="${1:-}"
 EXPECTED_EXEC_SHA="${2:-}"
-EXPECTED_PAD_EXEC_SHA="${3:-17e1147614f27702e43565089d618182ff71c5af}"
+EXPECTED_PAD_EXEC_SHA="${3:-}"
 PAD_EVIDENCE_ROOT="${PADATASET_CHECKOUT:-$HOME/adamArchives/Adam/varMax/PADataset}"
 PAD_EXEC_REPO_URL="https://github.com/adamtrott78/PADataset.git"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
@@ -13,9 +26,10 @@ STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP="/var/lib/workspace-shell/upgrades/padataset-multirepo-v1-${STAMP}"
 AUTHORITY_ROOT="/etc/workspace-shell/authority"
 EVIDENCE_MOUNT="/srv/workspace-shell/PADataset-evidence"
-SERVICES=(workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service)
+BASE_SERVICES=(workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service)
+SERVICES=(workspace-shell-candidate-materializer.service "${BASE_SERVICES[@]}")
 
-[[ "$EXPECTED_AUTHORITY_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "usage: bash upgrade_multirepo_padataset_v1.sh <expected-authority-sha> <expected-workspace-control-exec-sha> [expected-padataset-execution-sha]"
+[[ "$EXPECTED_AUTHORITY_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "usage: bash upgrade_multirepo_padataset_v1.sh <expected-authority-sha> <expected-workspace-control-exec-sha> <expected-padataset-execution-sha>"
 [[ "$EXPECTED_EXEC_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "expected workspace-control execution SHA must be full lowercase SHA"
 [[ "$EXPECTED_PAD_EXEC_SHA" =~ ^[0-9a-f]{40}$ ]] || fail "expected PADataset execution SHA must be full lowercase SHA"
 [[ -d "$ROOT/.git" || -f "$ROOT/.git" ]] || fail "upgrade script must run from a workspace-control Git checkout"
@@ -49,13 +63,15 @@ root = Path(sys.argv[1])
 expected_exec = sys.argv[2]
 expected_pad = sys.argv[3]
 
-def load(task_id):
+def load(task_id, allowed_statuses):
     path = root / "tasks" / "active" / f"{task_id}.json"
     data = json.loads(path.read_text(encoding="utf-8"))
     if data.get("task_id") != task_id:
         raise SystemExit(f"{task_id}: task_id mismatch")
-    if data.get("status") != "IN_PROGRESS":
-        raise SystemExit(f"{task_id}: status must be IN_PROGRESS")
+    if data.get("status") not in allowed_statuses:
+        raise SystemExit(
+            f"{task_id}: status {data.get('status')!r} not in {sorted(allowed_statuses)}"
+        )
     return data
 
 def checkpoint(task, repository):
@@ -66,8 +82,11 @@ def checkpoint(task, repository):
                 return value
     return None
 
-shell = load("workspace-shell-multirepo-research-v1")
-research = load("mth602-final-multisurrogate-dqnguard-v1")
+shell = load("workspace-shell-multirepo-research-v1", {"IN_PROGRESS"})
+research = load(
+    "mth602-final-multisurrogate-dqnguard-v1",
+    {"IN_PROGRESS", "CHECKPOINTED"},
+)
 if checkpoint(shell, "workspace-control") != expected_exec:
     raise SystemExit("workspace-shell task does not bind expected workspace-control execution SHA")
 if checkpoint(shell, "PADataset") != expected_pad:
@@ -129,15 +148,24 @@ cleanup_tmp() {
 trap cleanup_tmp EXIT
 
 echo "Materializing clean workspace-control execution source at exact SHA $EXPECTED_EXEC_SHA"
-git clone --no-checkout "$ROOT" "$WC_FETCH"
-git -C "$WC_FETCH" checkout --detach "$EXPECTED_EXEC_SHA"
-git -C "$WC_FETCH" remote remove origin >/dev/null 2>&1 || true
+rm -rf "$WC_FETCH"
+mkdir -p "$WC_FETCH"
+git -C "$WC_FETCH" init --quiet
+git -C "$WC_FETCH" remote add origin "https://github.com/adamtrott78/workspace-control.git"
+git_retry git -C "$WC_FETCH" -c http.version=HTTP/1.1 fetch --quiet --depth=1 --no-tags origin "$EXPECTED_EXEC_SHA" \
+  || fail "unable to fetch exact workspace-control execution SHA after bounded retries"
+git -C "$WC_FETCH" -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD
 [[ "$(git -C "$WC_FETCH" rev-parse HEAD)" == "$EXPECTED_EXEC_SHA" ]] || fail "workspace-control execution checkout SHA mismatch"
 [[ -z "$(git -C "$WC_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] || fail "workspace-control execution checkout unexpectedly dirty"
 
 echo "Materializing clean PADataset execution source at exact SHA $EXPECTED_PAD_EXEC_SHA"
-git clone --filter=blob:none --no-checkout "$PAD_EXEC_REPO_URL" "$PAD_FETCH"
-git -C "$PAD_FETCH" checkout --detach "$EXPECTED_PAD_EXEC_SHA"
+rm -rf "$PAD_FETCH"
+mkdir -p "$PAD_FETCH"
+git -C "$PAD_FETCH" init --quiet
+git -C "$PAD_FETCH" remote add origin "$PAD_EXEC_REPO_URL"
+git_retry git -C "$PAD_FETCH" -c http.version=HTTP/1.1 fetch --quiet --depth=1 --no-tags origin "$EXPECTED_PAD_EXEC_SHA" \
+  || fail "unable to fetch exact PADataset execution SHA after bounded retries"
+git -C "$PAD_FETCH" -c advice.detachedHead=false checkout --quiet --detach FETCH_HEAD
 [[ "$(git -C "$PAD_FETCH" rev-parse HEAD)" == "$EXPECTED_PAD_EXEC_SHA" ]] || fail "clean PADataset execution checkout SHA mismatch"
 [[ -z "$(git -C "$PAD_FETCH" status --porcelain=v1 --untracked-files=normal)" ]] || fail "clean PADataset execution checkout unexpectedly dirty"
 
@@ -181,8 +209,11 @@ for p in \
   /srv/workspace-shell/PADataset \
   /opt/workspace-shell/runtime/plugins/workspace-shell \
   /etc/workspace-shell/profiles.v1.json \
+  /etc/workspace-shell/frontend.json \
+  /etc/workspace-shell/candidate-materializer.json \
   /etc/workspace-shell/job-launcher.json \
-  /etc/workspace-shell/broker-verifier.json; do
+  /etc/workspace-shell/broker-verifier.json \
+  /etc/systemd/system/workspace-shell-candidate-materializer.service; do
   if sudo test -e "$p"; then
     name="$(echo "$p" | sed 's#^/##; s#/#__#g')"
     sudo cp -a --reflink=auto "$p" "$BACKUP/$name"
@@ -216,17 +247,30 @@ rollback() {
   restore /srv/workspace-shell/PADataset
   restore /opt/workspace-shell/runtime/plugins/workspace-shell
   restore /etc/workspace-shell/profiles.v1.json
+  restore /etc/workspace-shell/frontend.json
+  restore /etc/workspace-shell/candidate-materializer.json
   restore /etc/workspace-shell/job-launcher.json
   restore /etc/workspace-shell/broker-verifier.json
+  restore /etc/systemd/system/workspace-shell-candidate-materializer.service
+  if [[ ! -e "$BACKUP/etc__workspace-shell__candidate-materializer.json" ]]; then
+    sudo rm -f /etc/workspace-shell/candidate-materializer.json
+  fi
+  if [[ ! -e "$BACKUP/etc__systemd__system__workspace-shell-candidate-materializer.service" ]]; then
+    sudo rm -f /etc/systemd/system/workspace-shell-candidate-materializer.service
+  fi
 
   sudo systemctl daemon-reload || true
-  sudo systemctl start workspace-shell-job-launcher.service workspace-shell-root-broker.service workspace-shell-mcp.service workspace-shell-tunnel.service || true
+  if [[ -e "$BACKUP/etc__systemd__system__workspace-shell-candidate-materializer.service" ]]; then
+    sudo systemctl start workspace-shell-candidate-materializer.service || true
+  fi
+  sudo systemctl start "${BASE_SERVICES[@]}" || true
   cleanup_tmp
   exit "$rc"
 }
 trap 'rollback "$?"' EXIT
 
 sudo systemctl stop workspace-shell-tunnel.service workspace-shell-mcp.service workspace-shell-root-broker.service workspace-shell-job-launcher.service
+sudo systemctl stop workspace-shell-candidate-materializer.service >/dev/null 2>&1 || true
 
 AUTH_NEXT="$AUTHORITY_ROOT.next.$$"
 WC_NEXT="/srv/workspace-shell/workspace-control.next.$$"
@@ -289,10 +333,30 @@ sudo chmod -R go-w "$RUNTIME_PLUGIN"
 echo "RUNTIME_NODE_DEPENDENCIES=PASS"
 
 sudo install -o root -g root -m 0644 "$WC_FETCH/plugins/workspace-shell/config/profiles.v1.json" /etc/workspace-shell/profiles.v1.json
+sudo install -o root -g root -m 0644 \
+  "$WC_FETCH/plugins/workspace-shell/install/workspace-shell-candidate-materializer.service.in" \
+  /etc/systemd/system/workspace-shell-candidate-materializer.service
+sudo mkdir -p /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
+sudo chown root:root /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
+sudo chmod 0700 /var/lib/workspace-shell/candidates /etc/workspace-shell/candidate-sources
 
 sudo python3 - <<'PY'
 import json
 from pathlib import Path
+
+frontend = Path("/etc/workspace-shell/frontend.json")
+fdata = json.loads(frontend.read_text())
+units = fdata.setdefault("allowed_units", [])
+candidate_unit = "workspace-shell-candidate-materializer.service"
+if candidate_unit not in units:
+    units.append(candidate_unit)
+fst = frontend.stat()
+ftmp = frontend.with_suffix(frontend.suffix + ".tmp")
+ftmp.write_text(json.dumps(fdata, indent=2) + "\n")
+ftmp.chmod(fst.st_mode & 0o777)
+import os
+os.chown(ftmp, fst.st_uid, fst.st_gid)
+ftmp.replace(frontend)
 
 launcher = Path("/etc/workspace-shell/job-launcher.json")
 data = json.loads(launcher.read_text())
@@ -301,10 +365,41 @@ roots["workspace-control"] = "/srv/workspace-shell/workspace-control"
 roots["PADataset"] = "/srv/workspace-shell/PADataset"
 evidence = data.setdefault("evidence_roots", {})
 evidence["PADataset"] = "/srv/workspace-shell/PADataset-evidence"
+data["candidate_materializer_socket"] = "/run/workspace-shell-control/candidate-materializer.sock"
+data["candidate_store_root"] = "/var/lib/workspace-shell/candidates"
 tmp = launcher.with_suffix(launcher.suffix + ".tmp")
 tmp.write_text(json.dumps(data, indent=2) + "\n")
 tmp.chmod(0o600)
 tmp.replace(launcher)
+
+materializer = Path("/etc/workspace-shell/candidate-materializer.json")
+if materializer.exists():
+    mdata = json.loads(materializer.read_text())
+else:
+    mdata = {}
+mdata["socket_path"] = "/run/workspace-shell-control/candidate-materializer.sock"
+mdata["candidate_store_root"] = "/var/lib/workspace-shell/candidates"
+sources = mdata.setdefault("sources", {})
+sources.setdefault("workspace-control", {
+    "repository": "adamtrott78/workspace-control",
+    "transport": "public_https",
+    "url": "https://github.com/adamtrott78/workspace-control.git",
+})
+sources.setdefault("PADataset", {
+    "repository": "adamtrott78/PADataset",
+    "transport": "public_https",
+    "url": "https://github.com/adamtrott78/PADataset.git",
+})
+for target, repository in (
+    ("workspace-control", "adamtrott78/workspace-control"),
+    ("PADataset", "adamtrott78/PADataset"),
+):
+    if (sources.get(target) or {}).get("repository") != repository:
+        raise SystemExit(f"candidate source repository mismatch for {target}")
+mtmp = materializer.with_suffix(materializer.suffix + ".tmp")
+mtmp.write_text(json.dumps(mdata, indent=2) + "\n")
+mtmp.chmod(0o600)
+mtmp.replace(materializer)
 
 verifier = Path("/etc/workspace-shell/broker-verifier.json")
 vdata = json.loads(verifier.read_text())
@@ -318,6 +413,7 @@ vtmp.replace(verifier)
 PY
 
 sudo systemctl daemon-reload
+sudo systemctl start workspace-shell-candidate-materializer.service
 sudo systemctl start workspace-shell-job-launcher.service
 sudo systemctl start workspace-shell-root-broker.service
 sudo systemctl start workspace-shell-mcp.service
@@ -380,7 +476,7 @@ profile=((schema.get("properties") or {}).get("profile") or {}).get("enum") or [
 for value in ("workspace-control","PADataset"):
     if value not in target:
         raise SystemExit(f"workspace_shell_exec target missing {value}")
-for value in ("file-list","file-read","file-hash","research-bounded"):
+for value in ("file-list","file-read","file-hash","research-bounded","candidate-pytest"):
     if value not in profile:
         raise SystemExit(f"workspace_shell_exec profile missing {value}")
 print("LOCAL_MCP_DISCOVERY=PASS")

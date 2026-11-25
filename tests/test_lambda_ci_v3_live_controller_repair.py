@@ -1,9 +1,19 @@
+import importlib.util
 import pathlib
+import sys
 import unittest
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
-HELPER=(ROOT/"scripts/lambda_ci_v3_live_controller_repair_v1.py").read_text()
+HELPER_PATH=ROOT/"scripts/lambda_ci_v3_live_controller_repair_v1.py"
+sys.path.insert(0, str(ROOT/"scripts"))
+HELPER=HELPER_PATH.read_text()
 CONTROLLER=(ROOT/"controller/lambda-ci-controller/v3/controller.go").read_text()
+
+spec=importlib.util.spec_from_file_location("lambda_ci_v3_live_controller_repair_v1_tested",HELPER_PATH)
+live=importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+sys.modules[spec.name]=live
+spec.loader.exec_module(live)
 
 class LiveControllerRepairTests(unittest.TestCase):
     def test_controller_source_contains_terminal_rest_revival(self):
@@ -40,6 +50,12 @@ class LiveControllerRepairTests(unittest.TestCase):
         self.assertNotIn('ctl("stop",PROVISIONER_UNIT)',HELPER)
         self.assertNotIn('ctl("stop",RECONCILER_UNIT)',HELPER)
 
+        first_live_check = HELPER.index("require_no_live_provisioner_records()")
+        first_transient_check = HELPER.index("require_no_transients(units)")
+        first_stop = HELPER.index('ctl("stop",units[cid])')
+        self.assertLess(first_live_check, first_stop)
+        self.assertLess(first_transient_check, first_stop)
+
     def test_post_restore_allows_existing_queued_smoke_to_revive(self):
         marker="Do not require post-restore scheduler emptiness"
         self.assertIn(marker,HELPER)
@@ -48,6 +64,16 @@ class LiveControllerRepairTests(unittest.TestCase):
         self.assertNotIn(
             "require_no_live_provisioner_records()",
             HELPER[post:commit],
+        )
+
+    def test_controller_build_uses_cwd_not_go_dash_c(self):
+        self.assertIn(
+            'cwd=str(repo/"controller/lambda-ci-controller")',
+            HELPER,
+        )
+        self.assertNotIn(
+            'str(go),"-C",str(repo/"controller/lambda-ci-controller")',
+            HELPER,
         )
 
     def test_repair_receipt_is_reconciler_compatible(self):
@@ -63,10 +89,66 @@ class LiveControllerRepairTests(unittest.TestCase):
         ):
             self.assertIn(marker,HELPER)
 
-    def test_topology_and_restart_deltas_are_bounded(self):
-        self.assertIn("previously-stable controller restarted during refresh",HELPER)
-        self.assertIn("pre-existing restarting controller exceeded bounded restart delta",HELPER)
+    def test_topology_accepts_preserved_or_reset_restart_counter_after_intentional_stop_start(self):
+        before={
+            "lane-a":{
+                "ActiveState":"active",
+                "SubState":"running",
+                "UnitFileState":"disabled",
+                "NRestarts":"3",
+            },
+            "inactive":{
+                "ActiveState":"inactive",
+                "SubState":"dead",
+                "UnitFileState":"disabled",
+                "NRestarts":"0",
+            },
+        }
+        after={
+            "lane-a":{
+                "ActiveState":"active",
+                "SubState":"running",
+                "UnitFileState":"disabled",
+                "NRestarts":"3",
+            },
+            "inactive":{
+                "ActiveState":"inactive",
+                "SubState":"dead",
+                "UnitFileState":"disabled",
+                "NRestarts":"0",
+            },
+        }
+        deltas=live.verify_topology(before,after,["lane-a"])
+        self.assertEqual(deltas["lane-a"],0)
+        self.assertEqual(deltas["inactive"],0)
+
+    def test_topology_rejects_automatic_restart_after_restore(self):
+        before={
+            "lane-a":{
+                "ActiveState":"active",
+                "SubState":"running",
+                "UnitFileState":"disabled",
+                "NRestarts":"2",
+            },
+        }
+        after={
+            "lane-a":{
+                "ActiveState":"active",
+                "SubState":"running",
+                "UnitFileState":"disabled",
+                "NRestarts":"3",
+            },
+        }
+        with self.assertRaisesRegex(
+            live.ControllerRepairError,
+            "auto-restarted after intentional restore",
+        ):
+            live.verify_topology(before,after,["lane-a"])
+
+    def test_topology_restart_evidence_is_recorded(self):
         self.assertIn('"controller_restart_deltas":deltas',HELPER)
+        self.assertIn("after_n > before_n",HELPER)
+        self.assertNotIn("controller restart counter regressed",HELPER)
 
 if __name__=="__main__":
     unittest.main()
