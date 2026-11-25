@@ -1278,9 +1278,10 @@ func (s *v3Scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessag
 }
 
 type retryingSessionClient struct {
-	inner      listener.Client
-	logger     *slog.Logger
-	maxBackoff time.Duration
+	inner                listener.Client
+	logger               *slog.Logger
+	maxBackoff           time.Duration
+	getMessageMaxRetries int
 }
 
 func sleepContext(ctx context.Context, delay time.Duration) error {
@@ -1305,6 +1306,10 @@ func retryDelay(attempt int, max time.Duration) time.Duration {
 	return delay
 }
 
+func retryBudgetExhausted(attempt, maxRetries int) bool {
+	return maxRetries > 0 && attempt+1 >= maxRetries
+}
+
 func (c *retryingSessionClient) GetMessage(
 	ctx context.Context,
 	lastMessageID, maxCapacity int,
@@ -1313,6 +1318,13 @@ func (c *retryingSessionClient) GetMessage(
 		value, err := c.inner.GetMessage(ctx, lastMessageID, maxCapacity)
 		if err == nil {
 			return value, nil
+		}
+		if retryBudgetExhausted(attempt, c.getMessageMaxRetries) {
+			return nil, fmt.Errorf(
+				"scale-set GetMessage retry budget exhausted after %d attempts: %w",
+				attempt+1,
+				err,
+			)
 		}
 		delay := retryDelay(attempt, c.maxBackoff)
 		c.logger.Warn("Retrying scale-set GetMessage in process", slog.String("error", err.Error()), slog.Duration("backoff", delay))
