@@ -7525,13 +7525,15 @@
     "failure_policy": "GitHub API quota exhaustion must not be required for local training telemetry or dashboard rendering. Do not build a live campaign controller whose correctness depends on REST polling."
   },
   "robustness_pipeline_plumbing_20261125": {
-    "status": "CANDIDATE_LIVENESS_DASHBOARD_UPDATE_PENDING_VALIDATION",
+    "status": "VALIDATED_CANDIDATE_LIVENESS_DASHBOARD",
     "padataset_pr": 59,
     "branch": "mth602-robustness-pipeline-plumbing-v1",
     "head": "3fd7d95c42b6595066c90330a0aa67b68c0c16ea",
     "validation": {
       "receipt": "job-ed84509c-c615-4272-b8d4-6596e872d472",
-      "result": "21 passed"
+      "result": "21 passed",
+      "liveness_dashboard_receipt": "job-2eddca1a-58bf-4dab-a36e-35223ea238ae",
+      "liveness_dashboard_result": "10 passed in 0.02s"
     },
     "components": [
       "min-class-F1 live training telemetry",
