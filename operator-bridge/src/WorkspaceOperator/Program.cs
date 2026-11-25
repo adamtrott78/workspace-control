@@ -57,7 +57,7 @@ internal static class Program
                     : localSmokePort is not null
                         ? () => new WorkloadStatusSnapshot(
                             localSmokePort.HasReadyAction ? 1 : 0,
-                            0)
+                            localSmokePort.HasSentUnconfirmed ? 1 : 0)
                         : null;
 
             var context = new TrayApplicationContext(
