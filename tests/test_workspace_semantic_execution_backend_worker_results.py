@@ -1,6 +1,7 @@
 """Durable worker-result publication and intake acceptance tests."""
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 import sys
@@ -199,7 +200,26 @@ class FixedValidator:
         )
 
 
+
+def _load_e3_a9_replay_module():
+    path = (
+        ROOT
+        / "tests"
+        / "test_workspace_semantic_execution_research_iterate_e3_a9_root_intake.py"
+    )
+    spec = importlib.util.spec_from_file_location("e3_a9_root_intake_replay", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 class WorkerResultIntakeTests(unittest.TestCase):
+    def test_e3_a9_exact_a8_root_candidate_replay(self):
+        replay = _load_e3_a9_replay_module()
+        replay.test_e3_a9_exact_root_packet_reproduces_a8_sha()
+        replay.test_e3_a9_exact_candidate_replay_passes_immutable_intake()
+
     def test_result_completes_only_after_independent_validation(self):
         coordinator = runtime(contracted=True)
         planned = plan_and_prepare(coordinator)
