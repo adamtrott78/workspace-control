@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-e3-live-binding-manifest-v1",
+  "candidate_branch": "worker-result-candidates-v1",
+  "candidate_baseline": "968db0800e9dcdee6e5a784889d74653276fb184",
+  "root_packet_sha256": "f104a451c60ee168f9236b0075b1a00c20b2bb12f40dbd23b414dff6ae74d60b",
+  "paths": {
+    "wrapper": "benchmarks/workspace-semantic-execution/live_research_iterate_e3_a10_v1.py",
+    "e2_harness": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
+    "observer": "benchmarks/workspace-semantic-execution/resource_observer_v1.py",
+    "closure_helper": "benchmarks/workspace-semantic-execution/e3_live_binding_closure_v1.py"
+  },
+  "blobs": {
+    "wrapper": "bddf10aea83e0916c1a6ac0288504d645bb97e12",
+    "e2_harness": "d6acd6a4266641813deecb900b877b7250b02530",
+    "observer": "458a869252f108bea52952e12852961bc3158d1f",
+    "closure_helper": "47ecf1e1ee73a1d37ce280cf8b7b2596a111f593"
+  },
+  "provenance": {
+    "worker_result_schema_review_head": "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc",
+    "worker_result_schema_blob": "b84d362a8adbb1bf4a47f1dfc4f0b8089487a3c1",
+    "a8_frontend_review_head": "6fb315884804214f96ca0f7264a48eed40741a60",
+    "a8_frontend_source_head": "b97a4c7b9309d413ced7eea14fe87b5864ad0c5b",
+    "a8_frontend_src_tree": "f3fd3b2c65b5780b511af9a90477d3a6bbfee873",
+    "accepted_a7_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator_transport_head": "55edb7a6e618f5a49ddf17ec5c9426f70fa08f2d",
+    "source_head": "e14e71d1981a4aedbe9af75a54087683fe4718e1"
+  }
+}
