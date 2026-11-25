@@ -263,10 +263,6 @@ def run_e3_live(
         )
     except Exception as exc:
         execution_error = f"{type(exc).__name__}:{exc}"
-        print(
-            "E3_A9_EXECUTION_ERROR=" + execution_error,
-            flush=True,
-        )
     finally:
         stop.set()
         thread.join(timeout=max(5.0, sample_interval_seconds * 2))
