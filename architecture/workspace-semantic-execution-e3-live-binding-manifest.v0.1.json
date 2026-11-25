@@ -8,13 +8,15 @@
     "wrapper": "benchmarks/workspace-semantic-execution/live_research_iterate_e3_a10_v1.py",
     "e2_harness": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
     "observer": "benchmarks/workspace-semantic-execution/resource_observer_v1.py",
-    "closure_helper": "benchmarks/workspace-semantic-execution/e3_live_binding_closure_v1.py"
+    "closure_helper": "benchmarks/workspace-semantic-execution/e3_live_binding_closure_v1.py",
+    "fixture": "benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"
   },
   "blobs": {
     "wrapper": "bddf10aea83e0916c1a6ac0288504d645bb97e12",
     "e2_harness": "d6acd6a4266641813deecb900b877b7250b02530",
     "observer": "458a869252f108bea52952e12852961bc3158d1f",
-    "closure_helper": "47ecf1e1ee73a1d37ce280cf8b7b2596a111f593"
+    "closure_helper": "d48ec9770144e883f431979bc045fe74f152c855",
+    "fixture": "0d051fa50960708e0e773f6871c7e924c5796394"
   },
   "provenance": {
     "worker_result_schema_review_head": "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc",
@@ -24,6 +26,9 @@
     "a8_frontend_src_tree": "f3fd3b2c65b5780b511af9a90477d3a6bbfee873",
     "accepted_a7_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
     "operator_transport_head": "55edb7a6e618f5a49ddf17ec5c9426f70fa08f2d",
-    "source_head": "e14e71d1981a4aedbe9af75a54087683fe4718e1"
+    "source_head": "e14e71d1981a4aedbe9af75a54087683fe4718e1",
+    "semantic_sha": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "semantic_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "semantic_packet_compiler_blob": "cf6200aa4b5a669dd023bc3c6478770bf4658528"
   }
 }
