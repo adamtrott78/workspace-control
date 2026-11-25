@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-a10-live-authority-v0.1",
+  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Authorize exactly one E3-A10 live attempt only after structural binding-closure validation eliminated duplicated live SHA bindings and moved authority consumption behind deterministic route/wrapper/runtime preflight.",
+  "approval_basis": {
+    "source": "fresh explicit operator approval in the current ChatGPT conversation",
+    "original_statement": "DO IT",
+    "observed_date": "2026-11-25",
+    "original_scope": "EXACTLY_ONE_E3_A10_LIVE_ATTEMPT_AFTER_BINDING_CLOSURE_VALIDATION",
+    "attempts_granted": 1,
+    "standing_or_future_authority_inferred": false,
+    "consumed_predecessor_authority_reused": false
+  },
+  "reviewed_source": {
+    "zero_authority_review_head": "fbca3389192cb14ce241c4f097b9c13e5ac84e15",
+    "review_head": "fbca3389192cb14ce241c4f097b9c13e5ac84e15",
+    "validation": {
+      "workspace_control_run": 3253,
+      "semantic_execution_run": 552,
+      "operator_bridge_run": 821,
+      "result": "SUCCESS"
+    }
+  },
+  "execution_bindings": {
+    "binding_manifest_path": "architecture/workspace-semantic-execution-e3-live-binding-manifest.v0.1.json",
+    "binding_manifest_blob": "85c3079d370f855c250ec6bb37002d53b9a70257",
+    "a10_private_route_blob": "7cd1449deb85c8f9b1e24f505a0b6313517963d5",
+    "a10_remote_bootstrap_blob": "4bfc9f5eb11af1d27e464fa8401c2c9b644bec84",
+    "a10_windows_launcher_blob": "43c1b6bf9bbb4df155066f76b82dd4c4618aee8b"
+  },
+  "predecessor_state": {
+    "e3_a9_authority_consumed": true,
+    "e3_a9_authority_reusable": false,
+    "e3_a9_failure": "stale duplicated wrapper candidate baseline constant",
+    "e3_a9_reuse_forbidden": true
+  },
+  "preconsumption_guards": {
+    "canonical_binding_manifest_required": true,
+    "cross_artifact_binding_closure_required": true,
+    "live_candidate_branch_head_must_equal_manifest": true,
+    "frontend_bindings_must_come_from_manifest": true,
+    "frontend_self_test_must_pass_before_remote_start": true,
+    "semantic_source_blob_checks_must_pass": true,
+    "pinned_dependency_setup_must_pass": true,
+    "postgresql_setup_must_pass": true,
+    "tailscale_private_route_verification_must_pass": true,
+    "wrapper_preflight_only_must_pass": true,
+    "consumption_marker_after_all_above": true,
+    "duplicated_candidate_baseline_constant_forbidden": true,
+    "consumed_a9_authority_reuse_forbidden": true
+  },
+  "workspace_shell_boundary": {
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "prohibited_tools": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper"
+    ],
+    "repository_mutation": false,
+    "service_mutation": false,
+    "authority_widening": false
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": false,
+    "reusable": false,
+    "no_silent_retry": true,
+    "live_consumption_marker": "E3_A10_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "consumed_on_success_or_failure_after_marker": true
+  },
+  "accepted_frontend": {
+    "version": "A8_FROZEN_VIA_CANONICAL_BINDING_MANIFEST",
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "page_content_scraping": false
+  },
+  "launch_contract": {
+    "launcher": "operator-bridge/tools/run-research-iterate-e3-a10-wop.ps1",
+    "exact_authority_sha_required": true,
+    "branch_must_contain_authority_commit": true,
+    "historical_a9_authority_reused": false
+  },
+  "postcondition": "Exactly one E3-A10 live attempt. Before E3_A10_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, deterministic failures do not consume the attempt. After the marker, success or failure consumes it. No silent retry."
+}
