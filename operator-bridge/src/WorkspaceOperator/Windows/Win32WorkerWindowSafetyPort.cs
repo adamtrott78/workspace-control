@@ -40,19 +40,12 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
             _ = ShowWindow(window, SwRestore);
         }
 
-        _ = SetForegroundWindow(window);
-
-        for (var attempt = 0; attempt < 10; attempt++)
+        if (TryActivateForeground(window))
         {
-            if (GetForegroundWindow() == window)
-            {
-                return true;
-            }
-
-            Thread.Sleep(25);
+            return true;
         }
 
-        return false;
+        return TryActivateForegroundWithAttachedInput(window);
     }
 
     public bool IsCapturedWorkerWindowForeground()
@@ -76,6 +69,82 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
 
         _ = ShowWindow(window, SwShowMinNoActive);
         return IsIconic(window);
+    }
+
+    private static bool TryActivateForeground(nint window)
+    {
+        _ = BringWindowToTop(window);
+        _ = SetForegroundWindow(window);
+        return WaitForForeground(window);
+    }
+
+    private static bool TryActivateForegroundWithAttachedInput(nint window)
+    {
+        var currentThread = GetCurrentThreadId();
+        var targetThread = GetWindowThreadProcessId(window, out _);
+        var foreground = GetForegroundWindow();
+        var foregroundThread = foreground == 0
+            ? 0u
+            : GetWindowThreadProcessId(foreground, out _);
+
+        var attachedCurrentToTarget = false;
+        var attachedForegroundToCurrent = false;
+
+        try
+        {
+            if (targetThread != 0 && targetThread != currentThread)
+            {
+                attachedCurrentToTarget =
+                    AttachThreadInput(currentThread, targetThread, true);
+            }
+
+            if (foregroundThread != 0 &&
+                foregroundThread != currentThread &&
+                foregroundThread != targetThread)
+            {
+                attachedForegroundToCurrent =
+                    AttachThreadInput(foregroundThread, currentThread, true);
+            }
+
+            _ = BringWindowToTop(window);
+            _ = SetForegroundWindow(window);
+            _ = SetActiveWindow(window);
+
+            return WaitForForeground(window);
+        }
+        finally
+        {
+            if (attachedForegroundToCurrent)
+            {
+                _ = AttachThreadInput(
+                    foregroundThread,
+                    currentThread,
+                    false);
+            }
+
+            if (attachedCurrentToTarget)
+            {
+                _ = AttachThreadInput(
+                    currentThread,
+                    targetThread,
+                    false);
+            }
+        }
+    }
+
+    private static bool WaitForForeground(nint window)
+    {
+        for (var attempt = 0; attempt < 12; attempt++)
+        {
+            if (GetForegroundWindow() == window)
+            {
+                return true;
+            }
+
+            Thread.Sleep(25);
+        }
+
+        return false;
     }
 
     private static nint FindSoleVisibleFirefoxWindow()
@@ -153,6 +222,23 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool SetForegroundWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern nint SetActiveWindow(nint hWnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool BringWindowToTop(nint hWnd);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AttachThreadInput(
+        uint idAttach,
+        uint idAttachTo,
+        [MarshalAs(UnmanagedType.Bool)] bool fAttach);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
 
     [DllImport("user32.dll")]
     private static extern bool ShowWindow(nint hWnd, int nCmdShow);
