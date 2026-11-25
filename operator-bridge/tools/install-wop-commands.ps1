@@ -19,6 +19,7 @@ $commandNames = @(
   "wop-d4",
   "wop-e1",
   "wop-e2",
+  "wop-e3",
   "wop-up",
   "wop-down",
   "wop-reset",
@@ -118,7 +119,7 @@ $driver = @'
 # workspace-control-owned:wop-driver-v2
 [CmdletBinding()]
 param(
-  [ValidateSet("smoke","reset","restart","start","online","d4","e1","e2","stop","offline","status","self-test")]
+  [ValidateSet("smoke","reset","restart","start","online","d4","e1","e2","e3","stop","offline","status","self-test")]
   [string]$Action = "status",
   [string]$Sha = ""
 )
@@ -158,6 +159,16 @@ try {
     $Sha = (git -C $W rev-parse FETCH_HEAD).Trim().ToLowerInvariant()
     if ($LASTEXITCODE -ne 0 -or $Sha -notmatch "^[0-9a-f]{40}$") {
       throw "WOP_E2_BRANCH_HEAD_UNAVAILABLE"
+    }
+  }
+
+  if ([string]::Equals($Action, "e3", [System.StringComparison]::OrdinalIgnoreCase) -and
+      [string]::IsNullOrWhiteSpace($Sha)) {
+    git -C $W fetch --force --depth=1 origin workspace-semantic-execution-migration-v1
+    if ($LASTEXITCODE -ne 0) { throw "WOP_E3_BRANCH_FETCH_FAILED" }
+    $Sha = (git -C $W rev-parse FETCH_HEAD).Trim().ToLowerInvariant()
+    if ($LASTEXITCODE -ne 0 -or $Sha -notmatch "^[0-9a-f]{40}$") {
+      throw "WOP_E3_BRANCH_HEAD_UNAVAILABLE"
     }
   }
 
@@ -217,6 +228,12 @@ try {
       throw "WOP_E2_SCRIPT_MISSING:$script"
     }
     & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script -RepositoryRoot $W
+  } elseif ([string]::Equals($Action, "e3", [System.StringComparison]::OrdinalIgnoreCase)) {
+    $script = Join-Path $W "operator-bridge\tools\run-research-iterate-e3-wop.ps1"
+    if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
+      throw "WOP_E3_SCRIPT_MISSING:$script"
+    }
+    & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $script -RepositoryRoot $W
   } else {
     $script = Join-Path $W "operator-bridge\tools\workspace-operator-dev.ps1"
     if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
@@ -247,6 +264,7 @@ $shimActions = [ordered]@{
   "wop-d4" = "d4"
   "wop-e1" = "e1"
   "wop-e2" = "e2"
+  "wop-e3" = "e3"
   "wop-up" = "start"
   "wop-down" = "stop"
   "wop-reset" = "reset"
@@ -276,4 +294,4 @@ exit /b %ERRORLEVEL%
 Write-Host "WORKSPACE_OPERATOR_COMMANDS_INSTALLED=PASS"
 Write-Host ("COMMAND_DIRECTORY=" + $commandDirectory)
 Write-Host ("DRIVER_PATH=" + $driverPath)
-Write-Host "COMMANDS=wop,wop-d4,wop-e1,wop-e2,wop-up,wop-down,wop-reset,wop-status,wop-self-test"
+Write-Host "COMMANDS=wop,wop-d4,wop-e1,wop-e2,wop-e3,wop-up,wop-down,wop-reset,wop-status,wop-self-test"
