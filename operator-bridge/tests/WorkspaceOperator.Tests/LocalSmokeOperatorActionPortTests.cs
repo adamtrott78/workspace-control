@@ -13,6 +13,7 @@ public sealed class LocalSmokeOperatorActionPortTests
         var port = new LocalSmokeOperatorActionPort();
 
         Assert.IsTrue(port.HasReadyAction);
+        Assert.IsFalse(port.HasSentUnconfirmed);
         var action = await port.ClaimNextAsync(CancellationToken.None);
 
         Assert.IsNotNull(action);
@@ -24,6 +25,7 @@ public sealed class LocalSmokeOperatorActionPortTests
             action.PacketText);
         Assert.AreEqual(64, action.PayloadSha256.Length);
         Assert.IsFalse(port.HasReadyAction);
+        Assert.IsFalse(port.HasSentUnconfirmed);
         Assert.IsTrue(await port.RevalidateAsync(
             action.Identity,
             CancellationToken.None));
@@ -35,6 +37,7 @@ public sealed class LocalSmokeOperatorActionPortTests
         Assert.IsFalse(await port.RevalidateAsync(
             action.Identity,
             CancellationToken.None));
+        Assert.IsTrue(port.HasSentUnconfirmed);
         Assert.IsNull(await port.ClaimNextAsync(CancellationToken.None));
     }
 }
