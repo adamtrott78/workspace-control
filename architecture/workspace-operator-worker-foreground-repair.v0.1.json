@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-operator-worker-foreground-repair-v0.1",
+  "status": "FROZEN_FOREGROUND_REPAIR_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor_smoke_repair": "architecture/workspace-operator-ux-smoke-harness-repair.v0.1.json",
+  "trigger_observation": {
+    "summary": "Windows UX smoke at 00c49f9f75ef6c98b92c27d63522562217ed3c3d produced one correct Firefox window and confirmed Enter->minimize, but Ctrl+Space did not reliably foreground the existing ChatGPT Firefox worker. Manual click was required.",
+    "proven_working": [
+      "single dedicated Firefox window",
+      "Firefox adapter handshake gate",
+      "human Enter confirmation",
+      "Enter-triggered minimize"
+    ],
+    "remaining_defect": "SetForegroundWindow-only activation was insufficient under Windows foreground-lock behavior."
+  },
+  "candidate_source": {
+    "source_head": "75ebd5c03325637280670964c0cdd26108b07f8c",
+    "exact_blob": {
+      "operator-bridge/src/WorkspaceOperator/Windows/Win32WorkerWindowSafetyPort.cs": "5c417e2ac1af4bd77f715eac7a94c3f59921fe94"
+    }
+  },
+  "repair_contract": {
+    "ordinary_path": "Restore a minimized captured worker, call BringWindowToTop + SetForegroundWindow, and accept immediately if the exact worker becomes foreground.",
+    "fallback_path": "Only when ordinary activation fails, temporarily attach the operator thread input queue to the target worker and current foreground input queues, activate the exact captured Firefox window, then always detach in finally.",
+    "bounded_wait": "Each activation attempt uses a bounded foreground verification loop; no infinite retry or polling is introduced.",
+    "safety": "The repair does not type, paste, press Enter, move/click the mouse, inspect page content, create authority, or broaden the worker-window selection rule.",
+    "worker_selection": "The exact captured Firefox HWND remains preferred; sole-visible-Firefox fallback is unchanged and only used when the captured HWND is absent/invalid."
+  },
+  "authority_gate": {
+    "live_authorized": false,
+    "retry_authorized": false,
+    "fresh_explicit_authority_required": true
+  }
+}
