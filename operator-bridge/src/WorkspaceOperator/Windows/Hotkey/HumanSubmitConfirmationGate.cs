@@ -40,6 +40,8 @@ internal sealed class HumanSubmitConfirmationGate : IDisposable
         _source.PlainEnterPressed += PlainEnterPressed;
     }
 
+    public event EventHandler? Confirmed;
+
     public bool IsAwaitingConfirmation =>
         Volatile.Read(ref _awaiting) != 0;
 
@@ -96,6 +98,7 @@ internal sealed class HumanSubmitConfirmationGate : IDisposable
         if (_isPreparedWorkerForeground())
         {
             Volatile.Write(ref _confirmed, 1);
+            Confirmed?.Invoke(this, EventArgs.Empty);
         }
     }
 
