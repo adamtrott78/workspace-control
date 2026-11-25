@@ -21,9 +21,10 @@ public sealed class WorkerWindowSafetyControllerTests
         Assert.IsTrue(controller.ForegroundPreparedWorkerWindow());
         Assert.IsTrue(controller.IsPreparedWorkerWindowForeground());
         Assert.IsTrue(controller.MinimizeAfterNoAction());
+        Assert.IsTrue(controller.MinimizeAfterHumanSubmit());
         Assert.AreEqual(1, port.CaptureCalls);
         Assert.AreEqual(1, port.ForegroundCalls);
-        Assert.AreEqual(1, port.MinimizeCalls);
+        Assert.AreEqual(2, port.MinimizeCalls);
     }
 
     [TestMethod]
@@ -38,6 +39,7 @@ public sealed class WorkerWindowSafetyControllerTests
 
         Assert.IsFalse(controller.RecordPreparedWorkerWindow());
         Assert.IsFalse(controller.MinimizeAfterNoAction());
+        Assert.IsFalse(controller.MinimizeAfterHumanSubmit());
     }
 
     private sealed class FakePort : IWorkerWindowSafetyPort
