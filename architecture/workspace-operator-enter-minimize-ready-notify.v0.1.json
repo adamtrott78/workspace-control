@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-operator-enter-minimize-ready-notify-v1",
+  "status": "FROZEN_SUCCESSOR_REVIEW_NOT_AUTHORITY",
+  "parent_operator_task": "workspace-operator-bridge-implementation-v1",
+  "parent_semantic_task": "workspace-semantic-execution-migration-v1",
+  "predecessor_review": "architecture/workspace-semantic-execution-operator-a8-pending-ack-recovery.v0.1.json",
+  "purpose": "Refine the accepted A8 low-attention worker UX without weakening durable acknowledgment: plain Enter hides the prepared Firefox worker after key delivery, new READY work raises one Windows notification without focus steal, and Ctrl+Space remains the explicit service/check action.",
+  "historical_a8": {
+    "immutable": true,
+    "review_head": "6fb315884804214f96ca0f7264a48eed40741a60",
+    "source_head": "b97a4c7b9309d413ced7eea14fe87b5864ad0c5b",
+    "src_tree": "f3fd3b2c65b5780b511af9a90477d3a6bbfee873",
+    "rule": "A8 evidence remains bound to its frozen source/review. This successor does not rewrite historical contracts or authority."
+  },
+  "candidate_source": {
+    "source_head": "5434a883506914a1c52f0ee956b79f1e33ee5a00",
+    "operator_bridge_src_tree": "7eaaacda5bab596e3fb3c48977b7af215cfa6e48",
+    "exact_blobs": {
+      "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs": "63d2dfb6f75d4a599d031bed845304cf8fe3c5c6",
+      "operator-bridge/src/WorkspaceOperator/Windows/Hotkey/HumanSubmitConfirmationGate.cs": "c7b30bdb1f2967fede6745d0baad12b2df68eb50",
+      "operator-bridge/src/WorkspaceOperator/Windows/IWorkerWindowSafetyPort.cs": "3c38d891e81e25339389a75220fecfd3ca946167",
+      "operator-bridge/src/WorkspaceOperator/Windows/WorkloadStatusPresentation.cs": "9ab249b67ea0beb75974ca1799010d5f03610a12",
+      "operator-bridge/tests/WorkspaceOperator.Tests/HumanSubmitConfirmationGateTests.cs": "6865e2d08559c83707ee1b3ac8cf6583ef8e527d",
+      "operator-bridge/tests/WorkspaceOperator.Tests/WorkerWindowSafetyControllerTests.cs": "17879ed2f8813355b2dac4f1474660fe56daa33d",
+      "operator-bridge/tests/WorkspaceOperator.Tests/WorkloadStatusPresentationTests.cs": "49fea03e4c764cb8981b1858e4fe74c56ec88259"
+    }
+  },
+  "behavioral_contract": {
+    "enter_minimize": "A confirmed plain Enter in the captured prepared Firefox window schedules a trusted-window minimize on the WinForms UI timer. Minimize is deferred until after the low-level hook returns so Firefox receives Enter first.",
+    "enter_semantics": "Enter changes only local window-management UX. It does not count as durable success, does not advance authoritative state, and does not suppress or inject input.",
+    "ready_notification": "When serviceable READY work appears from a non-READY state, or the bridge becomes enabled with ready work, emit one Windows notification instructing Ctrl+Space to service. Do not restore/focus Firefox automatically.",
+    "waiting_unconfirmed": "If claim returns no new action while SentUnconfirmed>0, report that durable acknowledgment is still pending and leave the worker Firefox minimized; do not mislabel the state as empty/no-work and do not refocus it merely because Ctrl+Space was used as a status check.",
+    "true_idle": "Only ReadyManualCycles=0 AND SentUnconfirmed=0 may use the existing trusted no-work minimize path.",
+    "manual_check": "Ctrl+Space remains the explicit manual service/check gesture. A missed READY notification is recoverable by pressing Ctrl+Space.",
+    "input_boundary": "Ctrl+V and Enter remain manual. No automatic paste, typing, Enter, Send, mouse input, DOM scraping, page-content inspection, or focus stealing on READY is introduced.",
+    "authority_boundary": "No execution authority, permission, retry authority, or durable-ack proof is created by this UX refinement."
+  },
+  "authority_gate": {
+    "live_authorized": false,
+    "retry_authorized": false,
+    "fresh_explicit_authority_required": true,
+    "no_silent_retry": true
+  }
+}
