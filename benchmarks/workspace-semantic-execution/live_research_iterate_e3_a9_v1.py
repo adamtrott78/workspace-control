@@ -1,12 +1,15 @@
-"""E3-A8 retry instrumentation wrapper around the accepted E2 topology.
+"""E3-A9 diagnostic successor around the accepted E2 topology.
 
-This module is inert on import. A live run is authority-gated by the reviewed
-procedure and must pass exact source/review/authority/candidate bindings.
+This module is inert on import. It preserves the accepted E2/A8 bytes, binds
+worker-result schema provenance to the validated A8 review head, and emits a
+compact exception marker before the large resource report. Any future live run
+remains separately authority-gated.
 """
 from __future__ import annotations
 
 import argparse
 import builtins
+from dataclasses import replace
 from datetime import datetime, timezone
 import importlib.util
 import json
@@ -30,6 +33,16 @@ OBSERVER_PATH = (
     / "resource_observer_v1.py"
 )
 CANDIDATE_BASELINE = "fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f"
+WORKER_RESULT_SCHEMA_PROVENANCE_HEAD = "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc"
+WORKER_RESULT_SCHEMA_PATH = (
+    "architecture/workspace-semantic-execution-worker-result.v0.1.json"
+)
+WORKER_RESULT_SCHEMA_BLOB = "b84d362a8adbb1bf4a47f1dfc4f0b8089487a3c1"
+WORKER_RESULT_SCHEMA_REF = (
+    "github://adamtrott78/workspace-control@"
+    f"{WORKER_RESULT_SCHEMA_PROVENANCE_HEAD}/"
+    f"{WORKER_RESULT_SCHEMA_PATH}#blob={WORKER_RESULT_SCHEMA_BLOB}"
+)
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
@@ -45,6 +58,19 @@ def _load(name: str, path: Path):
     sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _install_a9_schema_provenance(e2):
+    original = e2._operator_params
+
+    def a9_operator_params(**kwargs):
+        return replace(
+            original(**kwargs),
+            result_publication_schema_ref=WORKER_RESULT_SCHEMA_REF,
+        )
+
+    e2._operator_params = a9_operator_params
+    return original
 
 
 def _required_sha(name: str, value: str) -> str:
@@ -178,7 +204,8 @@ def run_e3_live(
     if candidate_baseline != CANDIDATE_BASELINE:
         raise E3LiveError("candidate_baseline_mismatch")
 
-    e2 = _load("e3_live_accepted_e2_topology", E2_PATH)
+    e2 = _load("e3_a9_accepted_e2_topology", E2_PATH)
+    original_operator_params = _install_a9_schema_provenance(e2)
     observer_module = _load("e3_live_resource_observer", OBSERVER_PATH)
     observer = observer_module.ResourceObserver(
         root_pid=os.getpid(),
@@ -263,6 +290,7 @@ def run_e3_live(
         )
     except Exception as exc:
         execution_error = f"{type(exc).__name__}:{exc}"
+        print("E3_A9_EXECUTION_ERROR=" + execution_error, flush=True)
     finally:
         stop.set()
         thread.join(timeout=max(5.0, sample_interval_seconds * 2))
@@ -283,6 +311,7 @@ def run_e3_live(
                 f"final_observer:{type(exc).__name__}:{exc}"
             )
         observer.end_phase("e3_live_research_iterate")
+        e2._operator_params = original_operator_params
         e2.RuntimeCoordinator = original_runtime
         if original_print is None:
             delattr(e2, "print")
