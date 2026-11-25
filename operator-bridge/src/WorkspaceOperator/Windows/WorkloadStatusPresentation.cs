@@ -23,7 +23,6 @@ public sealed record WorkloadStatusPresentation(
     string SentUnconfirmedLabel)
 {
     public static bool BecameReady(
-        bool bridgeEnabled,
         WorkloadStatusSnapshot previous,
         WorkloadStatusSnapshot current)
     {
@@ -32,8 +31,7 @@ public sealed record WorkloadStatusPresentation(
         ValidateCounters(previous);
         ValidateCounters(current);
 
-        return bridgeEnabled &&
-            previous.ReadyManualCycles == 0 &&
+        return previous.ReadyManualCycles == 0 &&
             current.ReadyManualCycles > 0;
     }
 
