@@ -286,6 +286,26 @@ Required next action: explicitly accept the PR #58 seed freeze (partition seeds 
 
 No merge authority is implied.
 
+## Final robustness execution package
+
+Seed freeze accepted and package validated.
+
+PADataset PR #58:
+- accepted candidate SHA `3fd1454bc20b89580f14c2e319d9b33766ea14b5`
+- validated execution-package SHA `af4e2835b4e066a501b42e4b1558bee42cab9f8f`
+- 500 immutable backbone manifests = 10 canonical pairs x 5 partition seeds x 10 training/model seeds
+- partition seeds `[0,1,2,3,4]`
+- training/model seeds `[0,1,2,3,4,5,6,7,8,9]`
+- main-factorial standard-DQNGuard seed `42`
+- seed-0 frozen artifacts are compatibility candidates only; do not rerun or count them until exact compatibility is checked
+- validation receipt `job-5df04c94-5332-46fa-b5c0-e9ba244543d2`: **14 passed**
+
+Authorized first wave:
+- lane A: PA1-PA2, partition 0, training 1, `manifests/configs/mth602_final_robustness_v1/PA1-PA2/p00_t01.json`
+- lane B: PA1-PA3, partition 0, training 1, `manifests/configs/mth602_final_robustness_v1/PA1-PA3/p00_t01.json`
+
+Authority: bounded scientific admission is authorized through the existing `/lambda-scientific` and `/lambda-scientific-2` train_backbone paths. No merge authority and no frozen-policy changes.
+
 ## Final stage
 
 Synthesize:
