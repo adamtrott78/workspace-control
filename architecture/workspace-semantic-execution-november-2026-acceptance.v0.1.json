@@ -208,7 +208,7 @@
     },
     {
       "id": "INST-01",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Production semantic scheduler action/status transport replaces NoWorkOperatorActionPort and the empty workload-status provider.",
       "evidence": [
         "Durable OperatorAction lifecycle and Ready/SentUnconfirmed projection are validated in semantic control state.",
@@ -224,7 +224,10 @@
         "Workspace Shell semantic authority enrollment first activation rolled back safely on a false-negative MCP stdout assertion. Receipt-based semantic enrollment repair ccdde5c9… passed Workspace #2896 and owning authority-state ee586acf… passed #2898; live root retry remains required before exact-host transport proof.",
         "workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29 passed Workspace #2904 / Semantic #226 / Operator #504 and adds a standalone account-free exact-host fake-worker transport harness over the production Postgres-backed Operator Bridge stack.",
         "The harness requires exact status/claim/revalidate/local-prepared/candidate-intake/independent-validation/final-status behavior and verifies durable process COMPLETED, action COMPLETED and session READY.",
-        "Private-route mode does not set Tailscale-User-Login client-side and cannot configure Tailscale, so PASS requires the reviewed private reverse proxy to inject authenticated identity. Live exact-host execution is still required before INST-01 can PASS."
+        "Private-route mode does not set Tailscale-User-Login client-side and cannot configure Tailscale, so PASS requires the reviewed private reverse proxy to inject authenticated identity. Live exact-host execution is still required before INST-01 can PASS.",
+        "E3-A10 live authority cc36a689e690ca0e90ac58b5715029fb69cd826c was 3/3 green before execution (Workspace #3258, Semantic #557, Operator #826); the live Windows frontend used the reviewed private-tailnet HTTPS route and production Postgres-backed scheduler/action/status transport.",
+        "E3-A10 exact-host execution reached E3_BINDING_CLOSURE=PASS, E3_A10_CANDIDATE_BASELINE=PASS, TAILSCALE_E3_A10_ROUTE_EXACT_BINDING=PASS and E3_A10_WRAPPER_PREFLIGHT=PASS before the live worker loop; the integrated E2 workflow completed with four COMPLETED actions, zero queued or awaiting-durable-ack actions, and session READY@1.",
+        "The immutable candidate branch advanced append-only from 968db080... through root 07724337..., stale generation-0 analysis adcb82b2..., replacement generation-1 analysis 4ddd49f6..., Workspace Shell f5dfb848..., and synthesis dfe79d8e.... Tailscale/Jupyter state and Windows runtime/workdir were restored cleanly."
       ]
     },
     {
@@ -269,9 +272,12 @@
     },
     {
       "id": "INST-06",
-      "status": "PENDING",
+      "status": "PASS",
       "requirement": "Bounded real-account Stage-12 calibration passes without expanding browser permissions, DOM/content automation, or security boundaries.",
-      "evidence": []
+      "evidence": [
+        "Bounded real-account E3-A10/Stage-12 successor run completed PASS through the accepted human-assisted Instant loop. The live report records automatic_typing_or_submission=false, browser_page_content_scraping=false, paid_api_fallback=false, workspace_shell_authority_widened=false, and no Workspace Shell exec/reviewed-helper use.",
+        "The operator interaction remained Ctrl+Space -> Ctrl+V -> Enter with the reviewed A8 frontend; browser permissions/security boundaries were not expanded, and post-run private-route plus Windows cleanup passed."
+      ]
     },
     {
       "id": "REL-01",
@@ -282,7 +288,9 @@
         "Semantic Execution #100 passes stale-generation race fencing after routing/packet compilation in addition to existing crash/event/validator fault coverage.",
         "Semantic #160 adds an end-to-end persistent-chat continuity-loss fault after local-prepared, stale result rejection, explicit replacement, and successful resumed completion.",
         "Semantic #163 validates scheduler restart, duplicate candidate delivery, exact observation mismatch rejection and wait no-poll behavior through the production scheduler.",
-        "Semantic #167 adds scheduler-level stale-generation recovery, late immutable candidate rejection and replacement-session completion."
+        "Semantic #167 adds scheduler-level stale-generation recovery, late immutable candidate rejection and replacement-session completion.",
+        "Integrated live fault evidence is now stronger: E3-A10 proves worker/process/session loss, stale-generation publication, stale-result rejection, PostgreSQL rehydration, replacement session completion and final synthesis under the real workflow.",
+        "REL-01 remains PARTIAL because the full campaign requirement also names DB disconnect, validator timeout, and delayed/out-of-order event cases; those must be reconciled as an integrated campaign rather than inferred from the A10 session-loss proof alone."
       ]
     },
     {
@@ -292,38 +300,45 @@
       "evidence": [
         "Semantic #158/#160 control-plane probes remained GPU blind; recovery head max RSS was 18.5546875 MiB at ~1 observed CPU core. Live-host/soak budget proof remains.",
         "Semantic #163 production scheduler resource probe remained GPU blind at max RSS 18.51171875 MiB and ~1 CPU core; live-host/soak evidence remains.",
-        "Semantic #167 runs a 1,000-cycle WAITING_EXTERNAL scheduler soak with zero durable mutation/reasoning; control-plane probe stayed GPU blind at max RSS 18.46875 MiB and ~1 CPU core."
+        "Semantic #167 runs a 1,000-cycle WAITING_EXTERNAL scheduler soak with zero durable mutation/reasoning; control-plane probe stayed GPU blind at max RSS 18.46875 MiB and ~1 CPU core.",
+        "E3-A10 collected 166 live-host resource samples with zero sampling gaps while the first real workflow completed; GPU telemetry was explicitly FORBIDDEN_NOT_COLLECTED and PADataset access FORBIDDEN_NOT_USED.",
+        "REL-02 remains PARTIAL pending an explicit target-budget comparison/representative soak closeout rather than inferring PASS solely from the bounded A10 resource trace."
       ]
     },
     {
       "id": "E2E-01",
-      "status": "PENDING",
+      "status": "PASS",
       "requirement": "A real Research Engine / research-iterate workflow completes decomposition -> routing -> executor -> validated result -> authorized low-consequence effect -> synthesis.",
       "evidence": [
         "PRECURSOR PASS: exact Research Engine objective now traverses generic routing -> deterministic packet -> authority -> RuntimeCoordinator -> exact read effect -> independent postcondition validation -> COMPLETED.",
         "Still PENDING: full research-iterate E2E-01 additionally requires recursive decomposition, fan-in, and synthesis.",
         "Recursive decomposition/fan-in semantics required by the full research-iterate path are now production-validated at f104361f…, but the real mixed-executor research-iterate synthesis remains pending.",
         "PRECURSOR PASS: full persistent-Instant leaf transport and durable result cycle is now production-validated; mixed Research Engine fan-out/fan-in remains pending.",
-        "STRONG PRECURSOR PASS: Semantic #158 runs a complete mixed research-iterate production-component tree over exact frozen Research Engine provenance: Instant decomposition -> deterministic exact-source validated effect -> Instant analysis -> fan-in -> Instant synthesis -> COMPLETED. Live account/host proving run remains required for PASS."
+        "STRONG PRECURSOR PASS: Semantic #158 runs a complete mixed research-iterate production-component tree over exact frozen Research Engine provenance: Instant decomposition -> deterministic exact-source validated effect -> Instant analysis -> fan-in -> Instant synthesis -> COMPLETED. Live account/host proving run remains required for PASS.",
+        "E3-A10 live Research Engine/research-iterate completed the full path on the real account/host: root decomposition -> Supervisor rehydration -> child-contract inheritance -> deterministic exact-source read -> Instant analysis -> fan-in -> Instant synthesis -> COMPLETED. E2_RESEARCH_ITERATE result=PASS and the final Supervisor projection had four COMPLETED processes and zero unresolved processes.",
+        "The deterministic exact-source step supplied the authorized low-consequence effect/read path while all Instant worker results returned through immutable candidate commits and independent durable intake."
       ]
     },
     {
       "id": "E2E-02",
-      "status": "PENDING",
+      "status": "PASS",
       "requirement": "The proving workflow uses mixed executor classes based on routing decisions, including deterministic execution plus Instant and/or Codex.",
       "evidence": [
         "Instant is now a validated production executor path; the next stage composes it with the already-validated deterministic exact-source executor in one research-iterate tree.",
-        "STRONG PRECURSOR PASS: Semantic #158 routing trace selected persistent Instant, deterministic exact-source, Instant, Instant from typed requirements/scarcity only. Live proving workflow remains required for PASS."
+        "STRONG PRECURSOR PASS: Semantic #158 routing trace selected persistent Instant, deterministic exact-source, Instant, Instant from typed requirements/scarcity only. Live proving workflow remains required for PASS.",
+        "E3-A10 live routing trace used mixed executor classes in one proving workflow: openai-chat-instant-current for decomposition/analysis/synthesis and research-engine-exact-source-read for deterministic source execution. The final report records paid_api_fallback=false."
       ]
     },
     {
       "id": "E2E-03",
-      "status": "PENDING",
+      "status": "PASS",
       "requirement": "The real workflow survives at least one worker/session/process loss without manual task-state reconstruction.",
       "evidence": [
         "Session-loss/process-recovery primitives now resume from durable typed state without transcript reconstruction; real integrated research-iterate fault injection remains required.",
         "Semantic #152 proves a late worker publication after process recovery is rejected fail-closed and the exact result-intake state survives PostgreSQL adapter recreation.",
-        "Semantic #160 proves persistent Instant session/process continuity loss after local-prepared is recovered from durable state with stale candidate rejection and replacement session completion; inject the same loss into the live proving workflow for PASS."
+        "Semantic #160 proves persistent Instant session/process continuity loss after local-prepared is recovered from durable state with stale candidate rejection and replacement session completion; inject the same loss into the live proving workflow for PASS.",
+        "E3-A10 deliberately fenced the generation-0 worker process/session after local submission, rehydrated runtime/orchestration state from PostgreSQL, observed stale candidate adcb82b2597908bb505ecbd9a40e399b7caf7817, rejected it without durable mutation, created a generation-1 replacement session, and completed replacement analysis at 4ddd49f643d72b224817bdf21d1e58799abc1679.",
+        "No manual task-state reconstruction or transcript relay was required; the final Supervisor projection was COMPLETED with session READY@1."
       ]
     },
     {
@@ -350,7 +365,9 @@
         "Production scheduler provenance is generation-bound and candidate evidence binds exact repository/ref/path/commit/content at workspace-control@0afd7837f15ccc573d9dba8ce0422aa5a2d0b061; live route provenance remains authority-gated.",
         "workspace-control@41d32010… is 3/3 green (#2849/#178/#437) and integrates scarcity admission without allowing the governor to widen executor capability/privacy/session eligibility.",
         "Workspace Shell bundled activation runtime 6d47e3ec… passed #2902 and transactionally prepares semantic authority plus evaluator sealed-store control-readback/hostile-worker-denial acceptance without adding generic shell/helper authority.",
-        "Semantic execution head 7c20097c… is 3/3 green (#2904/#226/#504) and provides an account-free exact-host private-route harness binding packet SHA, action/process/session generations, immutable candidate revision and independent validator outcome."
+        "Semantic execution head 7c20097c… is 3/3 green (#2904/#226/#504) and provides an account-free exact-host private-route harness binding packet SHA, action/process/session generations, immutable candidate revision and independent validator outcome.",
+        "E3-A10 added and enforced a canonical live binding manifest plus cross-artifact closure before authority consumption; exact candidate head, semantic blobs, frontend review/tree/dev-harness, route/bootstrap/launcher blobs, authority and rollback were mechanically bound and the live run/cleanup passed.",
+        "PROD-02 remains PARTIAL because the emitted A10 resource report retained the stale artifact_id workspace-semantic-execution-e3-a9-live-resource-v1. The closeout classifies this as a non-authority metadata-label defect; correct/normalize that provenance label before declaring zero unresolved violations."
       ]
     },
     {
@@ -404,6 +421,6 @@
   ],
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
-  "last_updated": "2026-11-16",
-  "latest_validated_checkpoint": "workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29"
+  "last_updated": "2026-11-25",
+  "latest_validated_checkpoint": "workspace-control@cc36a689e690ca0e90ac58b5715029fb69cd826c (E3-A10 live PASS; durable closeout pending reconciliation validation)"
 }
