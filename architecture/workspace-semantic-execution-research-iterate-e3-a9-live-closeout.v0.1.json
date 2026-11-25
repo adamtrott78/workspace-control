@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-a9-live-closeout-v0.1",
+  "status": "CONSUMED_FAILED",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "authority_head": "89a8504b89aa3e727c420359a6df9f605663bab0",
+  "authority_artifact": "architecture/workspace-semantic-execution-research-iterate-e3-a9-live-authority.v0.1.json",
+  "consumption": {
+    "marker": "E3_A9_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "observed": true,
+    "reusable": false,
+    "silent_retry_permitted": false
+  },
+  "failure": {
+    "stage": "live_wrapper_pre_backend_ready",
+    "exception": "E3LiveError:candidate_baseline_mismatch",
+    "observed_candidate_branch_head": "968db0800e9dcdee6e5a784889d74653276fb184",
+    "route_candidate_baseline": "968db0800e9dcdee6e5a784889d74653276fb184",
+    "stale_wrapper_candidate_baseline": "fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f",
+    "root_cause": "duplicated live binding state allowed route and wrapper constants to drift while independent tests remained green"
+  },
+  "successor_requirement": {
+    "single_canonical_binding_manifest": true,
+    "cross_artifact_closure_before_consumption": true,
+    "wrapper_must_not_define_candidate_baseline_constant": true,
+    "live_candidate_head_check_before_consumption": true,
+    "deterministic_wrapper_preflight_before_consumption": true
+  }
+}
