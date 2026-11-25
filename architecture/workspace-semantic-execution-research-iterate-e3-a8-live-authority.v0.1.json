@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-a8-live-authority-v0.1",
+  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Authorize exactly one E3-A8 live retry of the accepted E2 durable-recovery mission using the validated A8 pending sent-unconfirmed frontend successor and E3 read-only resource observer.",
+  "approval_basis": {
+    "source": "fresh explicit operator approval in the current ChatGPT conversation",
+    "original_statement": "GOOOO",
+    "observed_date": "2026-11-25",
+    "original_scope": "EXACTLY_ONE_E3_A8_LIVE_RETRY",
+    "attempts_granted": 1,
+    "standing_or_future_authority_inferred": false,
+    "consumed_predecessor_authority_reused": false
+  },
+  "reviewed_source": {
+    "review_head": "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc",
+    "review_path": "architecture/workspace-semantic-execution-research-iterate-e3-a8-live-review.v0.1.json",
+    "review_blob": "ab851da8e2ba49251fb82ab8e3633e2aecc75a48",
+    "procedure_path": "architecture/workspace-semantic-execution-research-iterate-e3-a8-live-procedure.v0.1.md",
+    "procedure_blob": "c375f3228b88094a9a03a275c330ecbc5bdd8553",
+    "validation": {
+      "workspace_control_run": 3230,
+      "semantic_execution_run": 530,
+      "operator_bridge_run": 799,
+      "result": "SUCCESS"
+    }
+  },
+  "execution_bindings": {
+    "candidate_baseline": "fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f",
+    "e3_a8_wrapper_blob": "4615149b8ed20d327a8ceaf8dfd6605524f858da",
+    "linux_transaction_blob": "3a186e7ec8f4cc8ec0ab14e7e8fc408c6619be12",
+    "e2_harness_blob": "d6acd6a4266641813deecb900b877b7250b02530",
+    "observer_blob": "458a869252f108bea52952e12852961bc3158d1f",
+    "a8_frontend_review_head": "6fb315884804214f96ca0f7264a48eed40741a60",
+    "a8_frontend_source_head": "b97a4c7b9309d413ced7eea14fe87b5864ad0c5b",
+    "a8_frontend_src_tree": "f3fd3b2c65b5780b511af9a90477d3a6bbfee873",
+    "operator_transport_head": "55edb7a6e618f5a49ddf17ec5c9426f70fa08f2d",
+    "windows_launcher_blob": "428eceab4e9f8d04bb1980be2368c8ff707588d2",
+    "remote_bootstrap_blob": "12dc82fd42bfeeff98eae5501d015259778e3442",
+    "accepted_a7_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207"
+  },
+  "preconsumption_guards": {
+    "review_head_must_equal": "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc",
+    "candidate_baseline_must_equal": "fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f",
+    "e3_a8_wrapper_blob_must_equal": "4615149b8ed20d327a8ceaf8dfd6605524f858da",
+    "e2_harness_blob_must_equal": "d6acd6a4266641813deecb900b877b7250b02530",
+    "observer_blob_must_equal": "458a869252f108bea52952e12852961bc3158d1f",
+    "a8_frontend_review_head_must_equal": "6fb315884804214f96ca0f7264a48eed40741a60",
+    "a8_frontend_source_head_must_equal": "b97a4c7b9309d413ced7eea14fe87b5864ad0c5b",
+    "operator_transport_head_must_equal": "55edb7a6e618f5a49ddf17ec5c9426f70fa08f2d",
+    "review_must_be_ancestor_of_authority_head": true,
+    "exact_blob_guards_before_consumption": true
+  },
+  "retry_contract": {
+    "accepted_topology": "E2_RESEARCH_ITERATE_DURABLE_RECOVERY",
+    "repair": "A8_PENDING_SENT_UNCONFIRMED_RECOVERY",
+    "manual_service_points": 5,
+    "service_order": [
+      "root decomposition",
+      "analysis generation 0",
+      "analysis generation 1 replacement",
+      "Workspace Shell read-only probe",
+      "final synthesis"
+    ],
+    "pending_ack_invariant": "On HTTP 204, synchronously refresh workload counters. If SentUnconfirmed>0, never present idle/no-work or minimize; refocus the trusted prepared worker and warn that durable acknowledgement remains pending.",
+    "required_process_generation_transition": "0->1",
+    "required_session_generation_transition": "0->1",
+    "old_action_required_state": "STALE",
+    "stale_candidate_required_outcome": "REJECTED_WITHOUT_DURABLE_MUTATION",
+    "runtime_rehydration_source": "PostgreSQL",
+    "resource_sample_interval_seconds": 1,
+    "manual_durable_state_relay": false,
+    "automatic_typing_or_submission": false,
+    "automatic_mouse_input": false,
+    "browser_page_content_scraping": false,
+    "paid_api_fallback": false,
+    "gpu_telemetry": false,
+    "padataset_access": false
+  },
+  "workspace_shell_boundary": {
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "prohibited_tools": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper"
+    ],
+    "repository_mutation": false,
+    "service_mutation": false,
+    "authority_widening": false
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": false,
+    "reusable": false,
+    "no_silent_retry": true,
+    "live_consumption_marker": "E3_A8_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "consumed_on_success_or_failure_after_marker": true,
+    "required_pre_consumption_order": [
+      "E3_A8_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_E3_A8_ROUTE_ABSENT=PASS",
+      "E3_A8_AUTHORITY_BINDING=PASS",
+      "E3_A8_SEMANTIC_LIVE_BINDING=PASS",
+      "E3_A8_WINDOWS_READY_GATE=PASS",
+      "E3_A8_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+    ]
+  },
+  "accepted_frontend": {
+    "version": "A8",
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "page_content_scraping": false
+  },
+  "launch_contract": {
+    "launcher": "operator-bridge/tools/run-research-iterate-e3-a8-wop.ps1",
+    "historical_wop_e3_alias_reused": false,
+    "exact_authority_sha_required": true,
+    "branch_must_contain_authority_commit": true
+  },
+  "postcondition": "Exactly one E3-A8 live retry. After E3_A8_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority. No silent retry."
+}
