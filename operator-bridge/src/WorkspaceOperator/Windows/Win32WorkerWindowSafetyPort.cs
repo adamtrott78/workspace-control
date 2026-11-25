@@ -71,6 +71,24 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
         return IsIconic(window);
     }
 
+    private static nint FindSoleVisibleFirefoxWindow()
+    {
+        var matches = new List<nint>();
+        _ = EnumWindows(
+            (window, _) =>
+            {
+                if (IsWindowVisible(window) && IsFirefoxWindow(window))
+                {
+                    matches.Add(window);
+                }
+
+                return true;
+            },
+            0);
+
+        return matches.Count == 1 ? matches[0] : 0;
+    }
+
     private static bool TryActivateForeground(nint window)
     {
         _ = BringWindowToTop(window);
@@ -145,24 +163,6 @@ public sealed class Win32WorkerWindowSafetyPort : IWorkerWindowSafetyPort
         }
 
         return false;
-    }
-
-    private static nint FindSoleVisibleFirefoxWindow()
-    {
-        var matches = new List<nint>();
-        _ = EnumWindows(
-            (window, _) =>
-            {
-                if (IsWindowVisible(window) && IsFirefoxWindow(window))
-                {
-                    matches.Add(window);
-                }
-
-                return true;
-            },
-            0);
-
-        return matches.Count == 1 ? matches[0] : 0;
     }
 
     private static bool IsFirefoxWindow(nint window)
