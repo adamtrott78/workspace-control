@@ -996,6 +996,17 @@ func (c *retryingJITClient) RemoveRunner(ctx context.Context, runnerID int64) er
 	}
 }
 
+type startupScaler interface {
+	Scale(context.Context, *scaleset.RunnerScaleSetMessage) error
+}
+
+func runStartupRecovery(ctx context.Context, scaler startupScaler) error {
+	if err := scaler.Scale(ctx, nil); err != nil {
+		return fmt.Errorf("initial REST recovery scale: %w", err)
+	}
+	return nil
+}
+
 func runController(ctx context.Context, cfg runtimeConfig, logger *slog.Logger) error {
 	policy, err := loadControllerPolicy(cfg.PolicyPath)
 	if err != nil {
@@ -1071,6 +1082,9 @@ func runController(ctx context.Context, cfg runtimeConfig, logger *slog.Logger) 
 		slog.String("controller_policy_sha256", policy.ControllerPolicySHA256),
 		slog.String("state_dir", stateDir),
 	)
+	if err := runStartupRecovery(ctx, scaler); err != nil {
+		return err
+	}
 	if err := l.Run(ctx, scaler); err != nil && !errors.Is(err, context.Canceled) {
 		return fmt.Errorf("v3 listener stopped: %w", err)
 	}
