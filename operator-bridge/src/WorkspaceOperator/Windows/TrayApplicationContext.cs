@@ -203,14 +203,33 @@ public sealed class TrayApplicationContext : ApplicationContext
             }
             else if (result.Outcome == DispatchOutcome.NoAction)
             {
-                var minimized = _workerWindowSafety.MinimizeAfterNoAction();
-                _notifyIcon.ShowBalloonTip(
-                    1500,
-                    "Workspace Worker Bridge",
-                    minimized
-                        ? "Nothing needs service; worker Firefox minimized"
-                        : "Nothing needs service",
-                    ToolTipIcon.None);
+                var workload = _workloadStatusProvider();
+                if (!WorkloadStatusPresentation.NoActionMayMinimize(workload))
+                {
+                    var refocused =
+                        _workerWindowSafety.ForegroundPreparedWorkerWindow();
+                    var message = workload.SentUnconfirmed > 0
+                        ? (refocused
+                            ? "Prepared worker action is still awaiting durable acknowledgment; worker Firefox refocused. Do not treat this as empty/no-work."
+                            : "Prepared worker action is still awaiting durable acknowledgment; no new action was claimed. Worker Firefox could not be safely refocused.")
+                        : "Backend still reports ready work; no action was claimed. Worker Firefox was not minimized.";
+                    _notifyIcon.ShowBalloonTip(
+                        3000,
+                        "Workspace Worker Bridge",
+                        message,
+                        ToolTipIcon.None);
+                }
+                else
+                {
+                    var minimized = _workerWindowSafety.MinimizeAfterNoAction();
+                    _notifyIcon.ShowBalloonTip(
+                        1500,
+                        "Workspace Worker Bridge",
+                        minimized
+                            ? "Nothing needs service; worker Firefox minimized"
+                            : "Nothing needs service",
+                        ToolTipIcon.None);
+                }
             }
 
             RefreshPresentation();

@@ -17,9 +17,10 @@ class Stage12V19ReviewTests(unittest.TestCase):
     def test_frozen_a7_bytes_are_unchanged(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
         bindings = review["exact_candidate_bindings"]
-        self.assertEqual(self.git("HEAD:operator-bridge/src"), bindings["operator-bridge/src_tree"])
+        frozen_source = bindings["source_head"]
+        self.assertEqual(self.git(f"{frozen_source}:operator-bridge/src"), bindings["operator-bridge/src_tree"])
         self.assertEqual(
-            self.git("HEAD:operator-bridge/tools/workspace-operator-dev.ps1"),
+            self.git(f"{frozen_source}:operator-bridge/tools/workspace-operator-dev.ps1"),
             bindings["operator-bridge/tools/workspace-operator-dev.ps1"],
         )
         self.assertFalse(review["accepted_frontend"]["changed_in_v19"])

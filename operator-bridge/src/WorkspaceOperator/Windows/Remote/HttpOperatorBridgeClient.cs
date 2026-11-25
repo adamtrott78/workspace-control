@@ -98,6 +98,12 @@ public sealed class HttpOperatorBridgeClient :
 
         if (response.StatusCode == HttpStatusCode.NoContent)
         {
+            // A 204 means there is no *new* claimable action. It does not
+            // mean the workload is truly idle: a previously prepared action
+            // may still be awaiting durable acknowledgement. Refresh the
+            // authoritative content-free counters before the caller decides
+            // whether the worker window may be minimized.
+            await RefreshStatusAsync(cancellationToken);
             return null;
         }
 

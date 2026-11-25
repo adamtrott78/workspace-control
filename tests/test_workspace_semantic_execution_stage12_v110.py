@@ -23,15 +23,16 @@ class Stage12V110ReviewTests(unittest.TestCase):
     def test_backend_repair_and_a7_bindings_are_exact(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
         bindings = review["exact_candidate_bindings"]
+        frozen_source = bindings["source_head"]
         self.assertEqual(
-            self.git("HEAD:semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py"),
+            self.git(f"{frozen_source}:semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py"),
             bindings["semantic-execution/src/workspace_semantic_execution/adapters/operator_bridge_http.py"],
         )
         self.assertEqual(
-            self.git("HEAD:tests/test_workspace_semantic_execution_backend_operator_http.py"),
+            self.git(f"{frozen_source}:tests/test_workspace_semantic_execution_backend_operator_http.py"),
             bindings["tests/test_workspace_semantic_execution_backend_operator_http.py"],
         )
-        self.assertEqual(self.git("HEAD:operator-bridge/src"), bindings["operator-bridge/src_tree"])
+        self.assertEqual(self.git(f"{frozen_source}:operator-bridge/src"), bindings["operator-bridge/src_tree"])
         self.assertFalse(review["accepted_frontend"]["changed_in_v110"])
 
     def test_review_grants_zero_live_authority(self) -> None:
