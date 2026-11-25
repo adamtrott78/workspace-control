@@ -87,15 +87,6 @@ CANDIDATE_BRANCH = "worker-result-candidates-v1"
 REPO_URL = "https://github.com/adamtrott78/workspace-control.git"
 GITHUB_PLUGIN_MENTION = "@github"
 WORKSPACE_SHELL_PLUGIN_MENTION = "@Workspace Shell"
-WORKER_RESULT_SCHEMA_PROVENANCE_HEAD = "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc"
-WORKER_RESULT_SCHEMA_PATH = (
-    "architecture/workspace-semantic-execution-worker-result.v0.1.json"
-)
-WORKER_RESULT_SCHEMA_BLOB = "b84d362a8adbb1bf4a47f1dfc4f0b8089487a3c1"
-WORKER_RESULT_SCHEMA_REF = (
-    f"github://{CANDIDATE_REPOSITORY}@{WORKER_RESULT_SCHEMA_PROVENANCE_HEAD}/"
-    f"{WORKER_RESULT_SCHEMA_PATH}#blob={WORKER_RESULT_SCHEMA_BLOB}"
-)
 
 RESEARCH_ENGINE_SHA = "1031861c03b2af8cff5cf72939bbbc83a95e65a4"
 SOURCE_BLOB_SHA = "0d051fa50960708e0e773f6871c7e924c5796394"
@@ -597,7 +588,6 @@ def _operator_params(
         queue_sequence=sequence,
         created_at=f"e2-{sequence}",
         result_publication_target_ref=target_ref,
-        result_publication_schema_ref=WORKER_RESULT_SCHEMA_REF,
     )
 
 
