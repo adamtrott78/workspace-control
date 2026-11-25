@@ -196,3 +196,38 @@ def test_e3_a9_exact_candidate_replay_passes_immutable_intake() -> None:
     assert len(graph.processes[root_id].children) == 3
     assert graph.executor_sessions[slot_id].state == ExecutorSessionState.READY
     assert graph.operator_actions[action_id].status == OperatorActionState.COMPLETED
+
+
+def test_e3_a9_future_packets_bind_validated_schema_provenance() -> None:
+    e2 = _load_e2_harness()
+    params = e2._operator_params(
+        task_id="workspace-semantic-execution-migration-v1",
+        action_id="action:a9:schema-provenance",
+        slot_id="a9-schema-slot",
+        sequence=1,
+        target_ref="github-candidate://example",
+    )
+    assert (
+        e2.WORKER_RESULT_SCHEMA_PROVENANCE_HEAD
+        == "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc"
+    )
+    assert (
+        e2.WORKER_RESULT_SCHEMA_BLOB
+        == "b84d362a8adbb1bf4a47f1dfc4f0b8089487a3c1"
+    )
+    assert params.result_publication_schema_ref == e2.WORKER_RESULT_SCHEMA_REF
+    assert "worker-result-candidates-v1" not in params.result_publication_schema_ref
+
+
+def test_e3_a9_wrapper_emits_compact_error_before_resource_report() -> None:
+    wrapper = (
+        ROOT
+        / "benchmarks"
+        / "workspace-semantic-execution"
+        / "live_research_iterate_e3_a8_v1.py"
+    ).read_text(encoding="utf-8")
+    marker = '"E3_A9_EXECUTION_ERROR=" + execution_error'
+    report = "resource_report = observer.report()"
+    assert marker in wrapper
+    assert report in wrapper
+    assert wrapper.index(marker) < wrapper.index(report)
