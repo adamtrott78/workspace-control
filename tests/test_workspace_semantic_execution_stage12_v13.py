@@ -23,12 +23,12 @@ class Stage12V13WopRepairTests(unittest.TestCase):
 
     def test_v13_frontend_edits_are_superseded_by_accepted_a7_baseline(self) -> None:
         dev_blob = subprocess.check_output(
-            ["git","rev-parse","HEAD:operator-bridge/tools/workspace-operator-dev.ps1"],
+            ["git","rev-parse","a9532ca8b86b7839822939a970e16af1d4a41864:operator-bridge/tools/workspace-operator-dev.ps1"],
             cwd=ROOT,
             text=True,
         ).strip()
         tray_blob = subprocess.check_output(
-            ["git","rev-parse","HEAD:operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"],
+            ["git","rev-parse","a9532ca8b86b7839822939a970e16af1d4a41864:operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"],
             cwd=ROOT,
             text=True,
         ).strip()

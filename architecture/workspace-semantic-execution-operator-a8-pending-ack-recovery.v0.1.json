@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-operator-a8-pending-ack-recovery-v0.1",
+  "status": "FROZEN_SUCCESSOR_REVIEW_NOT_AUTHORITY",
+  "parent_operator_task": "workspace-operator-bridge-implementation-v1",
+  "parent_semantic_task": "workspace-semantic-execution-migration-v1",
+  "trigger_e3_closeout": "architecture/workspace-semantic-execution-research-iterate-e3-live-closeout.v0.1.json",
+  "purpose": "Version a minimal successor to the accepted A7 frontend so a durable SentUnconfirmed>0 action can never be mislabeled as empty/no-work or minimized by a subsequent scheduler hotkey.",
+  "historical_a7": {
+    "immutable": true,
+    "accepted_checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "rule": "Historical D4/E1/E2 evidence remains bound to A7 at its frozen source commits; no historical authority artifact is rewritten."
+  },
+  "candidate_source": {
+    "source_head": "3d014655769b50df2dfc5cd5b14f4a9a51c70b58",
+    "operator_bridge_src_tree": "7859480592d7d8710aedd35fc73fa760c51af718",
+    "exact_blobs": {
+      "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs": "8c2d424046a5b25f27208016bc6a0cd8ccbaef46",
+      "operator-bridge/src/WorkspaceOperator/Windows/WorkloadStatusPresentation.cs": "82009ce8bbcdeb50b8be3ed3c5eca83ee863b56b",
+      "operator-bridge/tests/WorkspaceOperator.Tests/WorkloadStatusPresentationTests.cs": "c7162d95fcbca8bb7c50c65acd96a67d56f1c8f6"
+    }
+  },
+  "behavioral_contract": {
+    "true_idle": "Only ReadyManualCycles=0 AND SentUnconfirmed=0 may take the existing no-work minimize path.",
+    "pending_unconfirmed": "If SentUnconfirmed>0 and claim returns no new action, preserve pending state, never say Nothing needs service, never minimize, and attempt only the existing fail-closed trusted Firefox refocus.",
+    "inconsistent_ready": "If ReadyManualCycles>0 but claim yields no action, do not minimize; warn and leave the worker visible.",
+    "input_boundary": "Ctrl+V and Enter remain manual. No automatic typing, paste, Enter, Send, mouse input, DOM scraping, or page-content inspection is introduced.",
+    "authority_boundary": "No execution authority, permission, or retry authority is created."
+  },
+  "e3_binding_rule": "A future E3 retry may use this successor only after this review head is validated and a separate fresh one-shot E3 authority explicitly binds that validated review/source. The consumed E3 authority 1f6d3639ade8469ca2a7caeab4a9fbdc1fba881d remains nonreusable.",
+  "authority_gate": {
+    "live_authorized": false,
+    "retry_authorized": false,
+    "fresh_explicit_authority_required": true,
+    "no_silent_retry": true
+  }
+}

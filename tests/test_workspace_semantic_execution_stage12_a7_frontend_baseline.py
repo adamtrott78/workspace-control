@@ -16,8 +16,9 @@ class D4AcceptedFrontendBaselineTests(unittest.TestCase):
 
     def test_exact_a7_runtime_tree_is_restored(self) -> None:
         baseline = json.loads(BASELINE.read_text(encoding="utf-8"))
-        self.assertEqual(self.git("HEAD:operator-bridge/src"), baseline["exact_runtime_bindings"]["operator-bridge/src_tree"])
-        self.assertEqual(self.git("HEAD:operator-bridge/tools/workspace-operator-dev.ps1"), baseline["exact_runtime_bindings"]["operator-bridge/tools/workspace-operator-dev.ps1"])
+        accepted = baseline["accepted_checkpoint"]
+        self.assertEqual(self.git(f"{accepted}:operator-bridge/src"), baseline["exact_runtime_bindings"]["operator-bridge/src_tree"])
+        self.assertEqual(self.git(f"{accepted}:operator-bridge/tools/workspace-operator-dev.ps1"), baseline["exact_runtime_bindings"]["operator-bridge/tools/workspace-operator-dev.ps1"])
 
     def test_d4_waits_for_ready_action_before_frontend_launch(self) -> None:
         text = WOP.read_text(encoding="utf-8")
