@@ -70,13 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-E3-A9 ROOT-CANDIDATE INTAKE DIAGNOSTIC / REPAIR. E3-A8 authority 0f8d98af4c7ac83e3b78fe2a59e9bc13f1b6fa28 is CONSUMED FAIL and non-reusable. Closeout is frozen at 884995786caacced63098f5a592895ae328cd2cc. The root candidate commit 968db0800e9dcdee6e5a784889d74653276fb184 is a single append-only child of baseline fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f and its JSON matches the frozen worker-result schema shape, but final durable state still had worker_results=0, root RUNNING@0, session BOUND@0 and action AWAITING_DURABLE_ACK with sent_unconfirmed=1. No new live authority exists. First reproduce the exact root packet/candidate deterministically, assert packet SHA f104a451c60ee168f9236b0075b1a00c20b2bb12f40dbd23b414dff6ae74d60b, replay commit 968db080… through the immutable candidate/intake path, and capture the exact exception or PASS before changing runtime code or proposing another live attempt.
+STOP_AT_FRESH_AUTHORITY_GATE. E3-A9 deterministic replay PASS proved the exact A8 candidate and semantic intake path are valid under equivalent AWAITING_DURABLE_ACK state. Frozen zero-authority review 8d31dde05dc7fd6a49bba187fe380cf355fb78e5 is exact-head 3/3 green (Workspace #3247 / Semantic #546 / Operator #815) and binds A9 successor blob 89f14c3e89c0773d78c2472f76db00a5b6f3edaa with immutable worker-result schema provenance and immediate E3_A9_EXECUTION_ERROR visibility. No live authority exists. The only safe E3 action is to obtain fresh explicit operator approval for exactly one A9 live attempt; only after that approval may a one-shot authority be persisted and exact-head validated.
 
 ## Remaining work
 
-- E3-A9: deterministically reproduce the exact root token 63e9b17e492c4ed3a36d20c83172abf3, compile the root packet and assert packet SHA f104a451c60ee168f9236b0075b1a00c20b2bb12f40dbd23b414dff6ae74d60b; replay exact raw candidate commit 968db0800e9dcdee6e5a784889d74653276fb184 against an equivalent AWAITING_DURABLE_ACK root action/session/process and record the exact intake outcome.
-- E3-A9: if deterministic replay fails, repair only the proven binding/intake defect and add regression coverage; if it passes, instrument CandidateWatcher/intake to emit a compact exact exception marker before the large resource report. Also make worker-result schema provenance explicit from the validated source/review head rather than guessing candidate-branch location.
-- E3-A9 REVIEW: validate the repair head and freeze a new zero-authority review. Do not create any live authority until that review is green and Adam gives a fresh explicit approval.
+- E3-A9 AUTHORITY GATE: after fresh explicit operator approval only, persist exactly one new A9 live authority bound to frozen review head 8d31dde05dc7fd6a49bba187fe380cf355fb78e5, A9 successor blob 89f14c3e89c0773d78c2472f76db00a5b6f3edaa, accepted E2/A8/resource/operator bindings, and the required append-only candidate baseline; exact-head validate that authority before any live launch.
+- E3-A9: do not retry A8, reuse authority 0f8d98af4c7ac83e3b78fe2a59e9bc13f1b6fa28, infer standing authority, or launch a live attempt from the validated review alone.
 - E4: run calibrated economics comparison versus all-strong/frontier control only when comparable allowance telemetry is available.
 - E5: run authoritative target-machine UX-09 performance benchmark.
 - E6: mechanically audit exact SHA/blob/route provenance, authority boundaries, rollback paths and unresolved violations.
@@ -85,8 +84,7 @@ E3-A9 ROOT-CANDIDATE INTAKE DIAGNOSTIC / REPAIR. E3-A8 authority 0f8d98af4c7ac83
 
 ## Blockers / gates
 
-- E3-A9 ROOT INTAKE DIAGNOSTIC: the exact execution_error field was not present in the captured terminal tail. Durable evidence proves the candidate was not registered (worker_results=0) and the root action remained AWAITING_DURABLE_ACK; deterministic replay is required before any repair claim.
-- E3 LIVE AUTHORITY: none exists. A8 authority 0f8d98af4c7ac83e3b78fe2a59e9bc13f1b6fa28 is consumed and non-reusable; no silent retry is permitted.
+- E3-A9 LIVE AUTHORITY GATE: frozen review 8d31dde05dc7fd6a49bba187fe380cf355fb78e5 is validated 3/3 and grants zero authority. No live authority exists; fresh explicit operator approval is required before creating exactly one new live attempt. A8 authority 0f8d98af4c7ac83e3b78fe2a59e9bc13f1b6fa28 remains consumed/non-reusable and no silent retry is permitted.
 - E4 ECONOMICS: claim-bearing comparison remains gated on calibrated comparable allowance telemetry; do not substitute raw token estimates or uncalibrated UI observations.
 
 ## Fresh-chat initialization
