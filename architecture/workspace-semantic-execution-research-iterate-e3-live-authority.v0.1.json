@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e3-live-authority-v0.1",
-  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "status": "CONSUMED_FAIL_SENT_UNCONFIRMED_WORKSPACE_SHELL",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "purpose": "Authorize exactly one live E3 resource/accounting mission over the already-accepted E2 Research-Iterate recovery topology with the frozen E3 read-only observer attached.",
   "approval_basis": {
@@ -63,7 +63,7 @@
       "Workspace Shell read-only probe",
       "final synthesis"
     ],
-    "resource_sample_interval_seconds": 1.0,
+    "resource_sample_interval_seconds": 1,
     "required_process_generation_transition": "0->1",
     "required_session_generation_transition": "0->1",
     "old_action_required_state": "STALE",
@@ -93,7 +93,7 @@
   },
   "attempt_contract": {
     "attempts_authorized": 1,
-    "consumed": false,
+    "consumed": true,
     "reusable": false,
     "no_silent_retry": true,
     "live_consumption_marker": "E3_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
@@ -136,5 +136,89 @@
     "installer_refresh_required_once": true,
     "branch_must_contain_authority_commit": true
   },
-  "postcondition": "Exactly one E3-LIVE attempt. After E3_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority. No silent retry."
+  "postcondition": "Exactly one E3-LIVE attempt. After E3_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority. No silent retry.",
+  "live_closeout": {
+    "observed_date": "2026-11-25",
+    "result": "FAIL",
+    "authority_consumed": true,
+    "no_retry_authorized": true,
+    "failure_boundary": "WORKSPACE_SHELL_SENT_UNCONFIRMED_NO_CANDIDATE_PUBLICATION",
+    "exact_exception": "UNAVAILABLE_IN_PROVIDED_TERMINAL_EXCERPT",
+    "candidate_chain": {
+      "baseline": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+      "root_decompose": "ec0e49308692ced00e65c0b0e41bfebb63a5cfdd",
+      "analysis_stale_g0": "2cf2e5ec886bcde07531b5dc4de9566c25bd082b",
+      "analysis_replacement_g1": "fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f",
+      "workspace_shell": null,
+      "synthesis": null,
+      "append_only": true
+    },
+    "observed_pass_markers": [
+      "E3_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+      "E2_ROOT_DECOMPOSE=PASS",
+      "E2_SUPERVISOR_S1_REHYDRATION=PASS",
+      "E2_CHILD_CONTRACT_INHERITANCE=PASS",
+      "E2_EXACT_SOURCE=PASS",
+      "E2_FAULT_INJECTION_ARMED=PASS",
+      "E2_WORKER_PROCESS_SESSION_FENCE=PASS",
+      "E2_RUNTIME_REHYDRATION_FROM_POSTGRES=PASS",
+      "E2_SUPERVISOR_REHYDRATION_AFTER_LOSS=PASS",
+      "E2_STALE_RESULT_REJECTED_WITHOUT_MUTATION=PASS",
+      "E2_SESSION_REPLACEMENT=PASS",
+      "E2_ANALYSIS_RECOVERY=PASS"
+    ],
+    "final_durable_projection": {
+      "graph_version": 36,
+      "process_states": [
+        "COMPLETED@0",
+        "COMPLETED@1",
+        "RUNNING@0",
+        "WAITING_DEPENDENCIES@0"
+      ],
+      "session_states": [
+        "BOUND@1"
+      ],
+      "operator_action_states": [
+        "AWAITING_DURABLE_ACK",
+        "COMPLETED",
+        "COMPLETED",
+        "STALE"
+      ],
+      "queued_actions": 0,
+      "awaiting_durable_ack_actions": 1,
+      "ready_manual_cycles": 0,
+      "sent_unconfirmed_current_binding": 1,
+      "operator_actions_total": 4,
+      "expected_operator_actions": 5
+    },
+    "resource_observation": {
+      "sample_count": 782,
+      "gap_count": 0,
+      "estimated_missing_sample_count": 0,
+      "final_phase": "workspace_shell",
+      "sample_errors": []
+    },
+    "cleanup": {
+      "tailscale_existing_config_exactly_restored": true,
+      "jupyter_root_rollback_preserved": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true,
+      "e3_wop_windows_cleanup": true
+    },
+    "diagnosis": {
+      "proven": [
+        "Workspace Shell action reached AWAITING_DURABLE_ACK and remained current-bound.",
+        "Remote workload state was readyManualCycles=0 and sent_unconfirmed_current_binding=1.",
+        "No Workspace Shell worker-result candidate was published before termination.",
+        "A subsequent Ctrl+Space surfaced the frontend no-action/minimize path despite durable sent-unconfirmed work.",
+        "Private route and Windows Operator cleanup completed."
+      ],
+      "not_proven": [
+        "Whether the human Enter confirmation was lost, consumed before publication, or the frontend process lost local confirmation state.",
+        "The exact Python exception string because the provided terminal excerpt begins after that field."
+      ]
+    },
+    "repair_dependency": "Operator Bridge pending sent-unconfirmed recovery must fail closed and refocus/warn rather than label the state as empty/no-work; repair must be reviewed under workspace-operator-bridge-implementation-v1 authority before any new E3 live authority."
+  }
 }
