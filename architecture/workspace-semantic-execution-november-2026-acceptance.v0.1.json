@@ -40,10 +40,11 @@
   "requirements": [
     {
       "id": "ORCH-01",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Durable domain kernel covers WorkItem/ReasoningProcess/Attempt/Lease/Event/WaitCondition/RoutingDecision/ExecutorSession/ValidationResult semantics and fails closed on unknown transitions.",
       "evidence": [
-        "Production domain kernel and state-machine tests already exist; integrated real-workflow proof remains."
+        "Production domain kernel and state-machine tests already exist; integrated real-workflow proof remains.",
+        "E3-A10 supplies the previously missing integrated real-workflow proof: the production durable kernel carried the live research-iterate graph through decomposition, routing, executor-session replacement, durable events, validation and terminal completion, with unknown/stale transitions still fail-closed by the validated kernel contracts."
       ]
     },
     {
@@ -70,7 +71,7 @@
     },
     {
       "id": "ORCH-04",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "CAS/generation fencing, leases, stale-worker rejection, retry/idempotency and multi-worker recovery work under the production kernel.",
       "evidence": [
         "Existing runtime/fault tests cover stale generations, executor loss, duplicate events, crash boundaries and waits.",
@@ -78,7 +79,8 @@
         "Semantic #152 proves manual Instant dispatch atomically owns the process lease and stale recovered worker-result publications cannot mutate current generations; exact duplicate publication is idempotent.",
         "Semantic #160 forces process/session recovery after Instant local-prepared: old generation action becomes STALE, late old candidate is rejected pre-mutation, replacement generation completes from durable state.",
         "Semantic #163 adds durable generation-bound scheduler specs, duplicate-plan rejection, PostgreSQL scheduler restart, duplicate candidate idempotency and pre-mutation observation mismatch rejection.",
-        "Semantic #167 proves production scheduler recovery cannot reuse a stale generation plan; old candidate delivery is non-mutating and explicit replacement session/generation is required."
+        "Semantic #167 proves production scheduler recovery cannot reuse a stale generation plan; old candidate delivery is non-mutating and explicit replacement session/generation is required.",
+        "E3-A10 live fault injection proves the production kernel's generation fencing and recovery path end-to-end: generation-0 worker/process/session was fenced, stale candidate adcb82b2... was rejected without mutation, PostgreSQL state was rehydrated, and generation-1 replacement completed. Existing production tests already cover leases, duplicate/idempotent delivery, retries and multi-worker/CAS behavior."
       ]
     },
     {
@@ -136,12 +138,13 @@
     },
     {
       "id": "SAFE-02",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Every real effect is idempotent, receipt-bound, independently postcondition-validated, and repairable without duplicate effects.",
       "evidence": [
         "EffectReceipt, independent validation, duplicate-effect and crash-after-effect tests exist.",
         "Coordinated slice records EffectReceipt before terminal proposal, independently rereads the exact source, completes only on validator PASS, returns repair-ready on changed bytes, and preserves a single effect for exact duplicate receipt.",
-        "Worker RESULT does not complete work directly: intake records a durable effect/reference, proposes terminal state, and requires an independent validator PASS; validator failure returns repair-ready."
+        "Worker RESULT does not complete work directly: intake records a durable effect/reference, proposes terminal state, and requires an independent validator PASS; validator failure returns repair-ready.",
+        "E3-A10 live execution traversed the production deterministic effect and worker-result intake paths without duplicate effects: exact-source evidence was independently validated, stale generation-0 result was non-mutating, replacement result was accepted once, and the workflow completed only after validated durable intake."
       ]
     },
     {
