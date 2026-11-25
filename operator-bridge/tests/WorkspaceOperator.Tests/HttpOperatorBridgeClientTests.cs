@@ -158,11 +158,27 @@ public sealed class HttpOperatorBridgeClientTests
     }
 
     [TestMethod]
-    public async Task NoWorkClaimReturnsNull()
+    public async Task NoWorkClaimRefreshesStatusBeforeReturningNull()
     {
-        var handler = new StubHandler(_ =>
-            Task.FromResult(new HttpResponseMessage(
-                HttpStatusCode.NoContent)));
+        var requests = new List<string>();
+        var handler = new StubHandler(request =>
+        {
+            requests.Add(request.RequestUri!.AbsolutePath);
+            if (request.RequestUri.AbsolutePath.EndsWith(
+                    "/actions/claim",
+                    StringComparison.Ordinal))
+            {
+                return Task.FromResult(new HttpResponseMessage(
+                    HttpStatusCode.NoContent));
+            }
+
+            Assert.AreEqual(
+                "/operator-bridge/v1/status",
+                request.RequestUri.AbsolutePath);
+            return Task.FromResult(Json(
+                HttpStatusCode.OK,
+                """{"readyManualCycles":0,"sentUnconfirmed":1}"""));
+        });
 
         using var http = new HttpClient(handler);
         using var client = new HttpOperatorBridgeClient(
@@ -173,6 +189,15 @@ public sealed class HttpOperatorBridgeClientTests
         var action = await client.ClaimNextAsync(CancellationToken.None);
 
         Assert.IsNull(action);
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                "/operator-bridge/v1/actions/claim",
+                "/operator-bridge/v1/status"
+            },
+            requests);
+        Assert.AreEqual(0, client.CurrentStatus.ReadyManualCycles);
+        Assert.AreEqual(1, client.CurrentStatus.SentUnconfirmed);
     }
 
     [TestMethod]
