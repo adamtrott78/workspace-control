@@ -347,8 +347,15 @@ def main() -> int:
     }
     authority,authority_raw=validate_authority(args.authorization_receipt,expected)
 
-    # Quiesce before consuming authority; then prove there is no live root work
-    # that could observe the shared executable changing.
+    # Refuse maintenance before changing controller topology if any live root
+    # work or transient runner exists. This keeps a failed preflight from
+    # stranding the previously-active controller set in the stopped state.
+    require_no_live_provisioner_records()
+    require_no_transients(units)
+
+    # Quiesce only after the zero-work preflight succeeds, then repeat the
+    # checks after stopping controllers to close the race between preflight
+    # and executable replacement.
     for cid in active_before:
         ctl("stop",units[cid]); wait_state(units[cid],"inactive")
     require_root_services()

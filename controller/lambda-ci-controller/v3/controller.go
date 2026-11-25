@@ -612,6 +612,14 @@ func (s *v3Scaler) processRESTDemand(
 	}
 	outstanding := s.outstandingAcquired(records)
 
+	// REST is a recovery path, not the normal scaling path. If broker statistics
+	// already request capacity and existing durable authority fully covers that
+	// demand, rediscovering repository-wide queued/in-progress runs only burns
+	// GitHub REST quota and cannot increase safe capacity.
+	if desired > 0 && outstanding >= desired {
+		return desired, nil
+	}
+
 	// Broker-acquired authority with no assigned-capacity signal must remain
 	// non-provisioning. REST fallback is only needed when the controller has no
 	// outstanding local authority and GitHub still exposes exact queued,

@@ -50,6 +50,12 @@ class LiveControllerRepairTests(unittest.TestCase):
         self.assertNotIn('ctl("stop",PROVISIONER_UNIT)',HELPER)
         self.assertNotIn('ctl("stop",RECONCILER_UNIT)',HELPER)
 
+        first_live_check = HELPER.index("require_no_live_provisioner_records()")
+        first_transient_check = HELPER.index("require_no_transients(units)")
+        first_stop = HELPER.index('ctl("stop",units[cid])')
+        self.assertLess(first_live_check, first_stop)
+        self.assertLess(first_transient_check, first_stop)
+
     def test_post_restore_allows_existing_queued_smoke_to_revive(self):
         marker="Do not require post-restore scheduler emptiness"
         self.assertIn(marker,HELPER)
