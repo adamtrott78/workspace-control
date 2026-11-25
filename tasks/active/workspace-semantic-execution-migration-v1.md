@@ -30,7 +30,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 - Intent: mutate
 - Remote branch: workspace-semantic-execution-migration-v1
-- Remote checkpoint: 6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424
+- Remote checkpoint: 54ccc5c2e45841ba1e0ee22eed074f24a022712c
 - Remote verified: true
 
 ### PADataset
@@ -70,11 +70,11 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-E3-LIVE AUTHORITY GATE. E3-C1 and E3-C2 are PASS, and the frozen E3-LIVE review/procedure head 6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424 is validated by Workspace Control #3216, Semantic Execution #518, and Operator Bridge #787. STOP: no E3 live authority exists. Adam must explicitly approve exactly one E3-LIVE attempt. After that approval only, create one one-shot authority bound to the validated review head, exact E3 wrapper/E2 topology/observer blobs, and candidate baseline 6115b48dfdf4a4954b3b1626598f897e4e71eeec; validate the authority exact head before live execution.
+E3-A8 FRESH AUTHORITY GATE. The predecessor E3 authority 1f6d3639ade8469ca2a7caeab4a9fbdc1fba881d was consumed and failed at the Workspace Shell sent-unconfirmed boundary; it is non-reusable. Consumed-attempt closeout ce447d0e132f0a801e09930bfb3e6ce4e7a8302f is validated by Workspace Control #3221, Semantic Execution #521, and Operator Bridge #790. The A8 pending-ack repair is validated on PR #663: frontend review 6fb315884804214f96ca0f7264a48eed40741a60 passed #3226/#526/#795, and versioned operator transport 55edb7a6e618f5a49ddf17ec5c9426f70fa08f2d passed #3228/#528/#797. Zero-authority E3-A8 retry review PR #665 exact head c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc passed Workspace Control #3230, Semantic Execution #530, and Operator Bridge #799 and binds candidate baseline fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f. The semantic retry artifacts were imported onto PR #590 at 54ccc5c2e45841ba1e0ee22eed074f24a022712c and validated by #3231/#531/#800. STOP: no E3-A8 live authority exists. Adam must explicitly approve exactly one new E3-A8 live retry. After that approval only, create one one-shot authority artifact on a child of c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc bound to that retry review, A8 frontend review/source, operator transport, exact wrapper/Linux/E2/observer blobs, and candidate baseline fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f; validate the authority exact head before launch.
 
 ## Remaining work
 
-- E3-LIVE: obtain fresh explicit operator approval for exactly one live resource/soak attempt; only then create and validate one one-shot authority, execute the reviewed E2-topology instrumentation, capture exact resource/provenance evidence, and close out cleanup/rollback.
+- E3-A8 LIVE RETRY: obtain fresh explicit operator approval for exactly one new live attempt; only then create and validate one one-shot authority on a child of retry review c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc, bound to A8 frontend review 6fb315884804214f96ca0f7264a48eed40741a60, A8 source b97a4c7b9309d413ced7eea14fe87b5864ad0c5b, operator transport 55edb7a6e618f5a49ddf17ec5c9426f70fa08f2d, wrapper blob 4615149b8ed20d327a8ceaf8dfd6605524f858da, Linux transaction blob 3a186e7ec8f4cc8ec0ab14e7e8fc408c6619be12, accepted E2 topology blob d6acd6a4266641813deecb900b877b7250b02530, observer blob 458a869252f108bea52952e12852961bc3158d1f, and candidate baseline fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f; execute only after exact-head validation, then capture resource/provenance evidence and close out cleanup/rollback.
 - E4: run calibrated economics comparison versus all-strong/frontier control only when comparable allowance telemetry is available.
 - E5: run authoritative target-machine UX-09 performance benchmark.
 - E6: mechanically audit exact SHA/blob/route provenance, authority boundaries, rollback paths and unresolved violations.
@@ -83,7 +83,7 @@ E3-LIVE AUTHORITY GATE. E3-C1 and E3-C2 are PASS, and the frozen E3-LIVE review/
 
 ## Blockers / gates
 
-- E3 LIVE AUTHORITY: none exists. Frozen review/procedure head 6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424 is validated, but exactly one live E3 attempt still requires fresh explicit operator approval before any authority artifact may be created.
+- E3-A8 LIVE AUTHORITY: none exists. The predecessor authority 1f6d3639ade8469ca2a7caeab4a9fbdc1fba881d is consumed/non-reusable. A8 frontend repair and transport are validated, zero-authority retry review c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc is 3/3 green (#3230/#530/#799), and its semantic artifacts are imported/validated on PR #590 at 54ccc5c2e45841ba1e0ee22eed074f24a022712c (#3231/#531/#800), but exactly one new E3-A8 live retry still requires fresh explicit operator approval before any authority artifact may be created.
 - E4 ECONOMICS: claim-bearing comparison remains gated on calibrated comparable allowance telemetry; do not substitute raw token estimates or uncalibrated UI observations.
 
 ## Fresh-chat initialization
