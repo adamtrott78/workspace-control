@@ -243,10 +243,13 @@
     },
     {
       "id": "INST-03",
-      "status": "PASS",
-      "requirement": "Repeated scheduler presses before durable acknowledgment refocus/block the pending action rather than dispatch another packet.",
+      "status": "PARTIAL",
+      "requirement": "Repeated scheduler presses remain fail-closed: before human Enter confirmation they refocus/block the prepared worker; after confirmed Enter but before durable acknowledgment they must not dispatch another packet, must report the pending acknowledgment, and must leave the worker Firefox minimized unless an explicit recovery/inspection path is invoked.",
       "evidence": [
-        "UT-03 and prior repaired UT-01 recovery evidence passed."
+        "UT-03 and prior repaired UT-01 recovery evidence passed.",
+        "2026-11-25 operator UX decision supersedes the earlier always-refocus interpretation after Enter: plain Enter should hide the worker immediately, READY should notify without focus steal, and Ctrl+Space remains a manual service/check gesture.",
+        "Safety semantics are unchanged: durable acknowledgment remains authoritative and a scheduler press while SentUnconfirmed>0 may not dispatch or advance another packet.",
+        "Successor review workspace-operator-enter-minimize-ready-notify-v1 is under exact-head validation; INST-03 returns to PASS only after that source is green and bounded Windows acceptance confirms the revised focus/minimize behavior."
       ]
     },
     {
