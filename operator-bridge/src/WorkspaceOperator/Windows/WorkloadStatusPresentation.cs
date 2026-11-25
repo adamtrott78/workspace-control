@@ -22,17 +22,25 @@ public sealed record WorkloadStatusPresentation(
     string ReadyLabel,
     string SentUnconfirmedLabel)
 {
+    public static bool BecameReady(
+        bool bridgeEnabled,
+        WorkloadStatusSnapshot previous,
+        WorkloadStatusSnapshot current)
+    {
+        ArgumentNullException.ThrowIfNull(previous);
+        ArgumentNullException.ThrowIfNull(current);
+        ValidateCounters(previous);
+        ValidateCounters(current);
+
+        return bridgeEnabled &&
+            previous.ReadyManualCycles == 0 &&
+            current.ReadyManualCycles > 0;
+    }
 
     public static bool NoActionMayMinimize(WorkloadStatusSnapshot snapshot)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
-        if (snapshot.ReadyManualCycles < 0 || snapshot.SentUnconfirmed < 0)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(snapshot),
-                "Workload counters must be non-negative.");
-        }
-
+        ValidateCounters(snapshot);
         return snapshot.ReadyManualCycles == 0 && snapshot.SentUnconfirmed == 0;
     }
 
@@ -44,12 +52,7 @@ public sealed record WorkloadStatusPresentation(
         ArgumentNullException.ThrowIfNull(snapshot);
         ArgumentException.ThrowIfNullOrWhiteSpace(schedulerHotkey);
 
-        if (snapshot.ReadyManualCycles < 0 || snapshot.SentUnconfirmed < 0)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(snapshot),
-                "Workload counters must be non-negative.");
-        }
+        ValidateCounters(snapshot);
 
         var readyLabel = $"Ready now: {snapshot.ReadyManualCycles}";
         var sentLabel = $"Sent / unconfirmed: {snapshot.SentUnconfirmed}";
@@ -94,5 +97,15 @@ public sealed record WorkloadStatusPresentation(
             "Nothing needs service",
             readyLabel,
             sentLabel);
+    }
+
+    private static void ValidateCounters(WorkloadStatusSnapshot snapshot)
+    {
+        if (snapshot.ReadyManualCycles < 0 || snapshot.SentUnconfirmed < 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(snapshot),
+                "Workload counters must be non-negative.");
+        }
     }
 }
