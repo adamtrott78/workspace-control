@@ -9,7 +9,33 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/actions/scaleset"
 )
+
+type startupScalerStub struct {
+	calls int
+	msg   *scaleset.RunnerScaleSetMessage
+}
+
+func (s *startupScalerStub) Scale(_ context.Context, msg *scaleset.RunnerScaleSetMessage) error {
+	s.calls++
+	s.msg = msg
+	return nil
+}
+
+func TestRunStartupRecoveryCallsScaleWithNilMessage(t *testing.T) {
+	stub := &startupScalerStub{}
+	if err := runStartupRecovery(context.Background(), stub); err != nil {
+		t.Fatal(err)
+	}
+	if stub.calls != 1 {
+		t.Fatalf("startup Scale calls=%d want=1", stub.calls)
+	}
+	if stub.msg != nil {
+		t.Fatalf("startup Scale message=%#v want=nil", stub.msg)
+	}
+}
 
 func newRESTVerifierTestServer(
 	t *testing.T,
