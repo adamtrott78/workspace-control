@@ -120,7 +120,8 @@ def _three_window_growth(values: list[float]) -> dict[str, object]:
     }
 
 
-def _cycle(canary):
+def _make_runtime_capture(canary):
+    """Build one capture type for the whole soak, not one type per cycle."""
     original = canary.RuntimeCoordinator
     created = []
 
@@ -129,7 +130,13 @@ def _cycle(canary):
             super().__init__(*args, **kwargs)
             created.append(self)
 
-    canary.RuntimeCoordinator = CapturingRuntimeCoordinator
+    return original, CapturingRuntimeCoordinator, created
+
+
+def _cycle(canary, capturing_runtime, created):
+    original = canary.RuntimeCoordinator
+    created.clear()
+    canary.RuntimeCoordinator = capturing_runtime
     try:
         result = canary.run_e2_recovery_canary()
     finally:
@@ -241,6 +248,11 @@ def run_e3_c2_soak(
         raise E3C2SoakError("claim_bearing_bounds_are_frozen")
 
     canary = _load("e3_c2_accepted_e2_canary", CANARY_PATH)
+    (
+        original_runtime,
+        capturing_runtime,
+        captured_runtimes,
+    ) = _make_runtime_capture(canary)
     observer_module = _load("e3_c2_resource_observer", OBSERVER_PATH)
     observer = observer_module.ResourceObserver(
         root_pid=os.getpid(),
@@ -255,7 +267,11 @@ def run_e3_c2_soak(
     observer.sample(phase="baseline")
     for index in range(1, cycles + 1):
         try:
-            cycle_report, final_snapshot = _cycle(canary)
+            cycle_report, final_snapshot = _cycle(
+                canary,
+                capturing_runtime,
+                captured_runtimes,
+            )
             cycle_failures = _check_cycle(cycle_report)
             if cycle_failures:
                 failures.extend(
@@ -283,6 +299,7 @@ def run_e3_c2_soak(
             )
 
     observer.end_phase("bounded_no_model_soak")
+    canary.RuntimeCoordinator = original_runtime
     if final_snapshot is None:
         raise E3C2SoakError("no_final_snapshot")
 

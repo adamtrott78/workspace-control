@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-c2-attempt-01-v0.1",
+  "status": "FAIL",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "source_head": "2f1c94d80e76e0514d2a081c1f6095c48d25ca13",
+  "workspace_control_validation": {
+    "run_number": 3214,
+    "run_id": 45517202067,
+    "job_id": 138879657354,
+    "result": "FAIL"
+  },
+  "frozen_review": "architecture/workspace-semantic-execution-research-iterate-e3-c2-review.v0.1.json",
+  "accepted_workflow_results": {
+    "recovery_cycles_completed": 1000,
+    "cycle_sample_count": 100,
+    "steady_sample_count": 90,
+    "terminal_contract_passed": true,
+    "discrete_process_thread_fd_child_counts_invariant": true,
+    "cleanup_resource_counts_lte_steady_max": true,
+    "model_calls": 0,
+    "human_service_cycles": 0,
+    "gpu_use": false,
+    "padataset_access": false,
+    "new_gpu_modules": [],
+    "sampling_gap_count": 0
+  },
+  "failure": {
+    "codes": ["rss_monotonic_growth", "pss_monotonic_growth"],
+    "rss_window_medians_bytes": [74878976.0, 79437824.0, 79450112.0],
+    "rss_window_minima_bytes": [74878976.0, 78118912.0, 79450112.0],
+    "pss_window_medians_bytes": [64408576.0, 68967424.0, 68979712.0],
+    "pss_window_minima_bytes": [64408576.0, 67648512.0, 68979712.0],
+    "resource_report_sha256": "d9d1b4703cd8305f132f508b8ffb749f5651c744934ac3dc30a3f07f57190c23"
+  },
+  "diagnosis": {
+    "classification": "HARNESS_ALLOCATION_CHURN_CANDIDATE",
+    "evidence": [
+      "The claim-bearing harness constructed a new CapturingRuntimeCoordinator Python subclass type inside every cycle.",
+      "All durable state, generation fencing, stale-result rejection, terminal action/session/process, FD, thread and child-process checks passed.",
+      "The bounded repair removes only per-cycle capture-type construction by reusing one capture subclass for all cycles.",
+      "The frozen 1000-cycle bound, warmup, sampling cadence and RSS/PSS acceptance rule are unchanged."
+    ],
+    "claim": "Attempt 01 remains a failed C2 attempt. The diagnosis is a repair hypothesis until the unchanged acceptance rule passes on a new exact head."
+  }
+}
