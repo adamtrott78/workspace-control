@@ -17,28 +17,32 @@ class OperatorA8PendingAckRecoveryTests(unittest.TestCase):
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
         source = review["candidate_source"]
         self.assertEqual(
-            self.git(f'{source["source_head"]}:operator-bridge/src'),
+            self.git("HEAD:operator-bridge/src"),
             source["operator_bridge_src_tree"],
         )
         self.assertTrue(review["historical_a7"]["immutable"])
+        baseline = json.loads(
+            (ROOT / "architecture/workspace-operator-bridge-a7-frontend-baseline.v0.1.json").read_text(
+                encoding="utf-8"
+            )
+        )
         self.assertEqual(
-            self.git(f'{review["historical_a7"]["accepted_checkpoint"]}:operator-bridge/src'),
+            baseline["accepted_checkpoint"],
+            review["historical_a7"]["accepted_checkpoint"],
+        )
+        self.assertEqual(
+            baseline["exact_runtime_bindings"]["operator-bridge/src_tree"],
             review["historical_a7"]["src_tree"],
         )
 
     def test_pending_unconfirmed_is_not_true_idle(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
-        source = review["candidate_source"]["source_head"]
-        tray = subprocess.check_output(
-            ["git", "show", f"{source}:operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"],
-            cwd=ROOT,
-            text=True,
-        )
-        status = subprocess.check_output(
-            ["git", "show", f"{source}:operator-bridge/src/WorkspaceOperator/Windows/WorkloadStatusPresentation.cs"],
-            cwd=ROOT,
-            text=True,
-        )
+        tray = (
+            ROOT / "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"
+        ).read_text(encoding="utf-8")
+        status = (
+            ROOT / "operator-bridge/src/WorkspaceOperator/Windows/WorkloadStatusPresentation.cs"
+        ).read_text(encoding="utf-8")
         self.assertIn("NoActionMayMinimize(workload)", tray)
         self.assertIn("awaiting durable acknowledgment", tray)
         self.assertIn("ForegroundPreparedWorkerWindow()", tray)
