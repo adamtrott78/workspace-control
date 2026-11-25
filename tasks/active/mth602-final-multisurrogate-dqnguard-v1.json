@@ -6,7 +6,7 @@
   "goal": "Execute a rigorous MTH602-to-journal research program centered on backbone competence (H1), then resolve whether surrogate transfer remains intrinsically target-dependent or becomes target-blind-selectable (H2/H4), test multi-surrogate DQNGuard if needed (H5), and treat STFT representation as a bounded lower-priority ablation (H3). Preserve true-target quarantine, standard-DQNGuard controls, exact provenance, explicit seed separation, and a deadline-triggered pivot to complete MTH602 deliverables before December or the course due date.",
   "execution_topology": "remote_only",
   "parent_execution_owner": "PADataset:docs/experiments/multisurrogate_dqnguard/TASK.md",
-  "current_stage": "tracka_surrogate_selector_retest",
+  "current_stage": "final_seeded_robustness",
   "acceptance_criteria": [
     "Track A remains a control repair: original leave-two-out target/surrogate taxonomy and original DQNGuard evaluator are preserved while backbones are retrained to genuine convergence under known-only selection.",
     "Track B compares Architecture A (pooled DQN), Architecture B (surrogate-specific DQNs with cross-surrogate selection), and Architecture C (hybrid pooled DQN + deterministic guard) on the same competent target-withheld four-known backbone/evidence partitions.",
@@ -954,7 +954,32 @@
         "selector stability statistics",
         "separate DQN-seed sensitivity if frozen"
       ],
-      "validation": [],
+      "validation": [
+        {
+          "check": "Matched-control prerequisite",
+          "result": "PASS_20_OF_20_CANONICAL_ANALYSIS_CLOSED",
+          "evidence": [
+            "PADataset PR #56 exact head 17c991dd41c16099a679cc4ad81230c7616a0db1.",
+            "20/20 unique canonical result records COMPLETE and scientific receipts PASS; target-test firewall preserved.",
+            "Canonical V2 recoveries: PA4<-PA3 run 45565602436/job 139039493921; PA4<-PA2 run 45565606606/job 139039506686.",
+            "Superseded/noncanonical runs excluded from analysis: 45509159615, 45509140807, 45565324045, 45565327001, 45517031611, 45517036169.",
+            "Primary matched U-F1: DQNGuard mean 0.665583; DQN-IDS-style mean 0.292854; VarMax mean 0.706131.",
+            "DQNGuard-DQN-IDS mean +0.372730 (14/20 wins; 95% paired-cell t-CI +0.156234 to +0.589226).",
+            "DQNGuard-VarMax mean -0.040548 (12/20 wins; 95% paired-cell t-CI -0.136794 to +0.055698)."
+          ]
+        },
+        {
+          "check": "Seed identity freeze gate",
+          "result": "BLOCKED",
+          "evidence": [
+            "program_plan_v2 freezes only counts: 5 partition seeds and 10 model/training seeds per partition.",
+            "No explicit partition-seed list is present in durable state.",
+            "No explicit model/training-seed list is present in durable state.",
+            "E1 dqn_seed_policy remains TBD.",
+            "No multi-seed admission was issued."
+          ]
+        }
+      ],
       "resume_condition": "Do not spend the 5x10 budget until architecture, representation, HPO policy, standard-DQNGuard control, selector/method, seed semantics, and result schema are frozen."
     }
   ],
@@ -1450,7 +1475,7 @@
     "Execute final multi-seed robustness using the frozen seed set and frozen recipes. Report mean/std and confidence intervals, surrogate-winner frequency, oracle-regret distributions, Rule A/B/C picker stability, confusion-exclusion diagnostic stability, same-backbone directional-asymmetry stability, and DQNGuard-minus-control delta stability.",
     "Complete the final scientific synthesis comparing paper-era geometry, repaired seed-0 geometry, matched controls, and seeded robustness. Do not allow target/test/OSR evidence to retroactively alter backbone recipe, checkpoint choice, threshold policy, selector formula, control definition, or retry policy."
   ],
-  "next_safe_action": "Monitor the already-admitted 20 matched-control jobs from PADataset PR #56 head 17c991dd41c16099a679cc4ad81230c7616a0db1. Do not re-admit or alter them. Current live state: 2 running (PA1<-PA2 on lane A, run 45509095061/job 138851867447; PA2<-PA1 on lane B, run 45509096369/job 138851868167), 18 queued, 0 success, 0 failure. As each lane completes, verify automatic backfill continues. After 20/20 close, collect exact result artifacts/receipts and compute frozen DQNGuard-minus-DQN-IDS-style and DQNGuard-minus-VarMax per-cell and aggregate analyses. Only after that control analysis closes, advance to the frozen multi-seed robustness stage.",
+  "next_safe_action": "Matched-control execution and exact artifact analysis are closed. Do not admit any multi-seed science yet: the durable plan freezes the 5x10 budget size but does not contain the explicit independent partition-seed list or model/training-seed list, and E1 still records dqn_seed_policy=TBD. Freeze those exact seed identities plus the DQN-seed policy/result schema in reviewed durable state first; then existing bounded train_backbone / directional-evaluator authority may be used without changing recipes, checkpoints, selectors, thresholds, controls, or retry policy.",
   "last_executor": "chatgpt",
   "last_surface": "github+workspace-shell+heartbeat",
   "notes": "Track A backbone bank is complete: 10/10 canonical backbones and 20/20 directional evaluator requests are frozen in PR #26 exact head 99ba123e1455566e16d86d6faf67fef3be8ab0b9. PR #26 final candidate suite passed 35 tests. Lane-B root refresh v1 and v2 are live and successful. Two GPU2 evaluator acceptance attempts proved real GPU2 provisioning but failed before science due workflow shell defects; PR #29 and #30 fixed those defects, and current corrected trusted workflow is PADataset main dbf167b23e6a1777a31ad5c4bccde44d26d0aad6 blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. Refresh-v3 operator attempt failed before mutation because the v3 helper reversed PRIOR_REFRESH_ACTIVE and REFRESH_ACTIVE constants. Live state remains refresh-v2. Heartbeat for this task is currently owned by the previous conversation; new chat should use durable Git/task state as authority and not depend on that heartbeat writer. Refresh-v3 receipt-binding repair is now validated on branch mth602-laneb-workflow-refresh-v3-binding-fix-v1 at exact head 5a7134056fef65b44e25bf06ac66f975f1903bff; candidate-pytest job-250a3ad2-69ef-4adf-8e2e-92aaf4748e3b passed 33 tests. Effective diff from failed head 9ea2444d54d97c0e2a740c660589e6675e1c207d is limited to the two receipt binding lines plus the regression test. No root mutation has occurred yet. A second pre-mutation operator attempt exposed a separate predecessor-mode typo: refresh-v2 receipts identify as V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2, while v3 validated V3. This is repaired on mth602-laneb-workflow-refresh-v3-predecessor-mode-fix-v2 at fc6c1cbac894d9350d11bae4859cbbb27b2da175; candidate-pytest job-4cf75745-3a81-407b-bfa0-1b9319b54bca passed 34 tests. The operator failure occurred before authority consumption/controller mutation. Refresh-v3 is now live: active receipt SHA256 94082c91fabefa2330829197c79acf5f644e78630ae92a6e75264b29cbbe20ab, lane-B policy a9c7cb11b0933b5265c9f667c93403e131264f62439660fb0ad8beabf40318be, trusted workflow blob 85e8deef5240e2d6d7db34318e6b2c35947a83f3. The first post-v3 acceptance run exposed an empty optional target val_open bug; a second repair retry exposed that surrogate calibration inherited target quarantine open_val_frac=0. Stacked draft PR #31 fixes both without changing the frozen request/backbone or allowing target tuning. Final head b141020bf7b171571879abdf18a836132e80d1d5 passed 40 candidate tests and PA1->PA2 acceptance run 43975684664/job 133678922111 completed SUCCESS with full provenance-valid result artifact 14280124476. After the PA1->PA2 acceptance PASS, all remaining 19 immutable directional requests were queued exactly once on the same PR #31 repair head. Current lane-A workflow does not implement l2o_directional_eval, so scheduling remains GPU2-only rather than widening trusted lane-A authority. Track A completed overnight on 2026-11-17: acceptance plus runs #77-#95 are 20/20 SUCCESS with provenance-valid frozen records. Full paper comparison is 17 improved / 3 declined, mean unknown-F1 0.4115 -> 0.531841. GPU0 evaluator PR #32 is no longer needed for Track-A completion and remains draft/unmerged. Workspace Shell mountpoint repair is live at runtime f3f999ff0200e2450d83e93887b2450f1ee83e2f with authority snapshot 29ba42ffde725c16f5cfc70b3c47ecfd76d2511d. Architecture-B PR #23 is candidate-validated at 82790f9c07d5eb9ea48b37be026672c0a1f7fad8, including a repair that physically delays target-open materialization until after winner freeze. Draft PADataset PR #33 stages the bounded GPU2 archb_cross_surrogate opcode but is not live. PADataset PR #33 was explicitly authorized and merged at 6a3c17c27a401f059f9ded1287d274d766f61283; default-branch GPU2 workflow blob is now 650a529aeee51b53234a84b3afea8743cc527688. Workspace Control draft PR #643 stages chained refresh-v4 at ef43b5352cf4c3e799a09ff917878b6e32ef1882; 37 dual-lane/refresh regression tests pass. Live trust remains refresh-v3 until root/operator v4 activation. PADataset PR #34 was explicitly authorized and merged at b0cbf6c1436e18cb5b793596dd790560bd2cec08; default-branch GPU2 workflow blob is now ba549b4d1560b18a9e40ef531387bc1accc90d43. Workspace Control draft PR #644 stages chained refresh-v5 at d6e2e7303c0e128f5847178253ab792ff1187d6a; 45 dual-lane/refresh regression tests pass. Live trust remains refresh-v4 until root/operator v5 activation. Fresh-chat checkpoint 2026-11-17: B0 run #97 PASS, B1 #98 PASS, B2 #99 PASS; B2 triggered bounded B3 from pseudo-open complementary value only. B3 trust PR #36 merged; refresh-v7 live PASS; B3 run #100 / 44176896203 / job 134370560805 admitted exactly once and currently IN_PROGRESS. The next worker must validate run #100 artifact at terminal completion and must not duplicate B3. Heartbeat writer may still belong to the prior conversation; durable Git/task state is authoritative. Architecture-B B3 is now terminal PASS: initial run #100 failed only at a deterministic result-record candidate-id lookup; repaired PR #23 head 0ea0d2aa655a943e921918500f72b987e79922c3 passed 27 tests; exactly one retry run #101 / 44180560029 succeeded with artifact 14372803489 digest sha256:c72fe383cdfd03ffb96eb3dda632ff1f27325066e109542e9a2209ff383423ea. Frozen winner PA3|gap_variance_equal|scale=2 was selected from off-diagonal pseudo-open evidence only; PA2 metrics remain descriptive. Current focus returns to the separate STFT lane, still gated on repaired PA1 provenance preflight; preserve the first 120 overlay records. STFT live repaired PA1 provenance preflight is now confirmed as a local/operator-only gate: connected candidate execution cannot access the required raw OTA/legacy-cache environment, and candidate-pytest lacks h5py. PR #21 remains exact head fd15238aa369118e61b21ab714900861dbb99d2c, draft/unmerged; CPU canary 43788103594 is already PASS. Preserve the first 120 overlays and run the exact-SHA persistent local bootstrap before any resume. STFT exact-checkout import shadowing was repaired after the first local preflight attempt: fd15238 failed before any cache/GPU work because stdin Python imported experiments from the canonical repo cwd ahead of PYTHONPATH. PR #21 head 5146d718006e38c6d9110e158c80dfa43b86e882 now cd's to exact ROOT before preflight imports; candidate contract 2/2 PASS and CPU canary run 44190444960 SUCCESS. The live PA1 provenance probe must now be retried locally at this exact head; first 120 overlays remain preserved. STFT record-121 provenance failure was observed after the 5146d718 local retry passed environment/raw OTA, PA1 probe, GPU-vs-CPU transform, and trajectory/provenance tests and skipped records 1-120. The failing source ota_pa1_run01__shard_001__PA1.mat exposed historical caches without protocol_name metadata. PR #21 head 122f5d21e648498b4afaa6b857b69f39dbb18222 adds a fail-closed unique-basename fallback plus an all-375-source preflight. Static contract 3/3 PASS and CPU canary 44235462841 SUCCESS. First 120 overlays remain preserved. STFT source-universe forensic corrected the prior basename-fallback hypothesis: generic discovery found 375 files, but historical unified-core production scripts define exactly 360 canonical sources (3 protocols x 20 shards x PA1 part1/part2 + PA2/PA3/PA4/PA8). The 15 ota_pa1_run01 artifacts are noncanonical extras in the core directories. PR #21 head a5cbd0d2a9e8e287d0288498735e5a4221ed3683 now freezes the canonical 360-source universe, restores strict provenance matching, passes static contract 3/3 and CPU canary 44236003500. First 120 overlays remain preserved. Live STFT cache build is now active at exact PR #21 head a5cbd0d2a9e8e287d0288498735e5a4221ed3683. Canonical/provenance preflight is fully green (360/360), first 120 overlays were skipped intact, records 121-122 completed, and record 123 entered GPU batch processing. Do not relaunch or force rebuild while this process remains active.",
@@ -6513,5 +6538,483 @@
       "Across seeds report mean/std and confidence intervals, surrogate winner frequency, oracle-regret distributions, Rule A/B/C picker stability, confusion-exclusion diagnostic stability, same-backbone directional-asymmetry stability, and DQNGuard-minus-control delta stability.",
       "Finally synthesize paper-era vs repaired geometry vs matched controls vs multi-seed robustness and close the task."
     ]
+  },
+  "matched_control_closure_20261125": {
+    "status": "VALIDATED_20_OF_20_CANONICAL_AND_ANALYZED",
+    "padataset_pr": 56,
+    "exact_head": "17c991dd41c16099a679cc4ad81230c7616a0db1",
+    "canonical_count": 20,
+    "unique_direction_count": 20,
+    "unique_backbone_count": 10,
+    "canonical_recovery": {
+      "PA4<-PA3": {
+        "run_id": 45565602436,
+        "job_id": 139039493921
+      },
+      "PA4<-PA2": {
+        "run_id": 45565606606,
+        "job_id": 139039506686
+      }
+    },
+    "excluded_noncanonical_runs": [
+      45509159615,
+      45509140807,
+      45565324045,
+      45565327001,
+      45517031611,
+      45517036169
+    ],
+    "validation": {
+      "all_result_records_complete": true,
+      "all_scientific_receipts_pass": true,
+      "exact_candidate_sha": true,
+      "controls_fitted_before_target_test": true,
+      "target_labels_used_for_tuning": false,
+      "target_test_consumed_before_final_eval": false,
+      "standard_dqnguard_target_labels_used_for_tuning": false,
+      "standard_dqnguard_threshold_source": "known_only",
+      "standard_dqnguard_mix_true_open": false
+    },
+    "canonical_control_artifacts": [
+      {
+        "direction": "PA1<-PA2",
+        "run_id": 45509095061,
+        "artifact_id": 14976389406,
+        "artifact_digest": "sha256:2cb08c652d93c761b1163a630a56a6a8723dda42f9b15feb7b56f91886f0703f"
+      },
+      {
+        "direction": "PA2<-PA1",
+        "run_id": 45509096369,
+        "artifact_id": 14977293364,
+        "artifact_digest": "sha256:92d4e2387e03b83c95670837c1a86a4b228d87fb5f1ff1d9810debe002a0ba54"
+      },
+      {
+        "direction": "PA1<-PA3",
+        "run_id": 45509099366,
+        "artifact_id": 14984779055,
+        "artifact_digest": "sha256:d3a50fe5047d7afc8e8054164771fbb2023b6a84535b00ecc8677c1453e27f2b"
+      },
+      {
+        "direction": "PA3<-PA1",
+        "run_id": 45509105858,
+        "artifact_id": 14985652136,
+        "artifact_digest": "sha256:7f47bdecb11ebb3c45c3cecc1d3d486c3b67a067ebe938c3a6cb64131c6522e8"
+      },
+      {
+        "direction": "PA1<-PA4",
+        "run_id": 45509110227,
+        "artifact_id": 14988055269,
+        "artifact_digest": "sha256:8c19998f9a880867b136e9df3a60260ddb24e099e1edd69b5532f83b60461baa"
+      },
+      {
+        "direction": "PA4<-PA1",
+        "run_id": 45509116195,
+        "artifact_id": 14987572185,
+        "artifact_digest": "sha256:2faa34c65160f48220ae7542002f123152ebcbbda3984335af4cf1b7d6c980c2"
+      },
+      {
+        "direction": "PA1<-PA8",
+        "run_id": 45509120543,
+        "artifact_id": 14989660748,
+        "artifact_digest": "sha256:a98f7a02dc3fa3c187749e65479afc04bc1a2fd5fd929400b8c0b69c0ec62716"
+      },
+      {
+        "direction": "PA8<-PA1",
+        "run_id": 45509123601,
+        "artifact_id": 14988664370,
+        "artifact_digest": "sha256:b35cfb879fca9714a5407ec7b5e23b3a00b9046740130b55d3a4e3559caa9edd"
+      },
+      {
+        "direction": "PA2<-PA3",
+        "run_id": 45509125037,
+        "artifact_id": 14991168470,
+        "artifact_digest": "sha256:1c91a24f824053d84652d9c08faf94e34053711f0c0c131e2a5b2629c4a21f24"
+      },
+      {
+        "direction": "PA3<-PA2",
+        "run_id": 45509130406,
+        "artifact_id": 14990903947,
+        "artifact_digest": "sha256:f50884477d13827038e9be4d5ef395e61a4c7da6fd1e613863b4bbe591ed4894"
+      },
+      {
+        "direction": "PA2<-PA4",
+        "run_id": 45509137540,
+        "artifact_id": 15015123556,
+        "artifact_digest": "sha256:d159bf6caa751a8cabfe606028ce9f8d9841963fc28d81722b52311d07003230"
+      },
+      {
+        "direction": "PA4<-PA2",
+        "run_id": 45565606606,
+        "artifact_id": 15021597077,
+        "artifact_digest": "sha256:798dca6585cf0fd4e999f56271daa274660b5c60073c7c846ca13736318ec516"
+      },
+      {
+        "direction": "PA2<-PA8",
+        "run_id": 45509144517,
+        "artifact_id": 14994361146,
+        "artifact_digest": "sha256:e6597457e2cb8031172bd8be2cb682e4ac5fc90f30a391818e7b87e8130851f8"
+      },
+      {
+        "direction": "PA8<-PA2",
+        "run_id": 45509147490,
+        "artifact_id": 14994351749,
+        "artifact_digest": "sha256:f0c42bc0e06deea505ca8b30c655e32acda8f85139406c86b716e9fffdd4fbce"
+      },
+      {
+        "direction": "PA3<-PA4",
+        "run_id": 45509153258,
+        "artifact_id": 14993914287,
+        "artifact_digest": "sha256:cabefb82cf403519af5eea1667118048cb89d053caa9caef084c99122d08e6e5"
+      },
+      {
+        "direction": "PA4<-PA3",
+        "run_id": 45565602436,
+        "artifact_id": 15021055725,
+        "artifact_digest": "sha256:22f424fe1ef6bad5eadb2ecd4ca858c1ce02eaa563a48038c433b477980748cd"
+      },
+      {
+        "direction": "PA3<-PA8",
+        "run_id": 45509163076,
+        "artifact_id": 14996374261,
+        "artifact_digest": "sha256:ebb36d40e110d1cfc3dde121bae29fcb037161d635c28caae547778c0b2164b1"
+      },
+      {
+        "direction": "PA8<-PA3",
+        "run_id": 45509168850,
+        "artifact_id": 14995989376,
+        "artifact_digest": "sha256:da977603654b3a11ecb926f2ce5a3b33f8c03c6bd206e24a2810d0592aab28bc"
+      },
+      {
+        "direction": "PA4<-PA8",
+        "run_id": 45509189876,
+        "artifact_id": 15004996220,
+        "artifact_digest": "sha256:5bc862464580005ed7272870f29effe674cce296e9c64b94899e55d2317f2b7c"
+      },
+      {
+        "direction": "PA8<-PA4",
+        "run_id": 45509193006,
+        "artifact_id": 15002999008,
+        "artifact_digest": "sha256:12fcd3c3823cc7bc668c9763bf381112231b5ee35f70f22d009c9432b407d478"
+      }
+    ],
+    "uf1_per_cell": [
+      {
+        "direction": "PA1<-PA2",
+        "dqnguard": 0.0184953572105362,
+        "dqn_ids": 0.0235563553083592,
+        "varmax": 0.20935192780968,
+        "delta_vs_dqn_ids": -0.005060998097823,
+        "delta_vs_varmax": -0.19085657059914382
+      },
+      {
+        "direction": "PA1<-PA3",
+        "dqnguard": 0.6839824658638585,
+        "dqn_ids": 0.0119650208902672,
+        "varmax": 0.6835161979060104,
+        "delta_vs_dqn_ids": 0.6720174449735913,
+        "delta_vs_varmax": 0.0004662679578480988
+      },
+      {
+        "direction": "PA1<-PA4",
+        "dqnguard": 0.8000830009452885,
+        "dqn_ids": 0,
+        "varmax": 0.723201180080651,
+        "delta_vs_dqn_ids": 0.8000830009452885,
+        "delta_vs_varmax": 0.07688182086463746
+      },
+      {
+        "direction": "PA1<-PA8",
+        "dqnguard": 0.3009529962849297,
+        "dqn_ids": 0.0077579650777235,
+        "varmax": 0.2569256138980797,
+        "delta_vs_dqn_ids": 0.29319503120720625,
+        "delta_vs_varmax": 0.04402738238685
+      },
+      {
+        "direction": "PA2<-PA1",
+        "dqnguard": 0.4724354297388005,
+        "dqn_ids": 0.6776777540659134,
+        "varmax": 0.6508568509340747,
+        "delta_vs_dqn_ids": -0.20524232432711287,
+        "delta_vs_varmax": -0.17842142119527427
+      },
+      {
+        "direction": "PA2<-PA3",
+        "dqnguard": 0.9075358977046432,
+        "dqn_ids": 0.0317523553442283,
+        "varmax": 0.8203935820035578,
+        "delta_vs_dqn_ids": 0.8757835423604149,
+        "delta_vs_varmax": 0.08714231570108533
+      },
+      {
+        "direction": "PA2<-PA4",
+        "dqnguard": 0.1383737517831669,
+        "dqn_ids": 0.1885204843225578,
+        "varmax": 0.651480221596444,
+        "delta_vs_dqn_ids": -0.05014673253939089,
+        "delta_vs_varmax": -0.5131064698132771
+      },
+      {
+        "direction": "PA2<-PA8",
+        "dqnguard": 0.984758990646242,
+        "dqn_ids": 0.5137243793526836,
+        "varmax": 0.840809955605246,
+        "delta_vs_dqn_ids": 0.4710346112935584,
+        "delta_vs_varmax": 0.143949035040996
+      },
+      {
+        "direction": "PA3<-PA1",
+        "dqnguard": 0.986555759744656,
+        "dqn_ids": 0,
+        "varmax": 0.7168045444058386,
+        "delta_vs_dqn_ids": 0.986555759744656,
+        "delta_vs_varmax": 0.2697512153388174
+      },
+      {
+        "direction": "PA3<-PA2",
+        "dqnguard": 0.987175513366912,
+        "dqn_ids": 0,
+        "varmax": 0.9484040376640022,
+        "delta_vs_dqn_ids": 0.987175513366912,
+        "delta_vs_varmax": 0.03877147570290984
+      },
+      {
+        "direction": "PA3<-PA4",
+        "dqnguard": 0.7887343500497559,
+        "dqn_ids": 0,
+        "varmax": 0.760601084230518,
+        "delta_vs_dqn_ids": 0.7887343500497559,
+        "delta_vs_varmax": 0.028133265819237918
+      },
+      {
+        "direction": "PA3<-PA8",
+        "dqnguard": 0.9834358549142868,
+        "dqn_ids": 0.9965878625592199,
+        "varmax": 0.8119507411657756,
+        "delta_vs_dqn_ids": -0.013152007644933184,
+        "delta_vs_varmax": 0.17148511374851116
+      },
+      {
+        "direction": "PA4<-PA1",
+        "dqnguard": 0.5237947122861586,
+        "dqn_ids": 0,
+        "varmax": 0.6079598759779816,
+        "delta_vs_dqn_ids": 0.5237947122861586,
+        "delta_vs_varmax": -0.08416516369182303
+      },
+      {
+        "direction": "PA4<-PA2",
+        "dqnguard": 0.3513759452759735,
+        "dqn_ids": 0.828279249710854,
+        "varmax": 0.7152279265256902,
+        "delta_vs_dqn_ids": -0.4769033044348805,
+        "delta_vs_varmax": -0.36385198124971674
+      },
+      {
+        "direction": "PA4<-PA3",
+        "dqnguard": 0.4978006713740016,
+        "dqn_ids": 0.8619375669271101,
+        "varmax": 0.7832872556566624,
+        "delta_vs_dqn_ids": -0.3641368955531085,
+        "delta_vs_varmax": -0.28548658428266077
+      },
+      {
+        "direction": "PA4<-PA8",
+        "dqnguard": 0.4716707302914199,
+        "dqn_ids": 0.0832456517462283,
+        "varmax": 0.3927047567074415,
+        "delta_vs_dqn_ids": 0.3884250785451916,
+        "delta_vs_varmax": 0.07896597358397844
+      },
+      {
+        "direction": "PA8<-PA1",
+        "dqnguard": 0.5539290575261798,
+        "dqn_ids": 0.5193357405427392,
+        "varmax": 0.8858381921767715,
+        "delta_vs_dqn_ids": 0.03459331698344059,
+        "delta_vs_varmax": -0.3319091346505917
+      },
+      {
+        "direction": "PA8<-PA2",
+        "dqnguard": 0.9792627621225628,
+        "dqn_ids": 0.7116462519174683,
+        "varmax": 0.8683695191025909,
+        "delta_vs_dqn_ids": 0.26761651020509447,
+        "delta_vs_varmax": 0.11089324301997194
+      },
+      {
+        "direction": "PA8<-PA3",
+        "dqnguard": 0.9074289030760302,
+        "dqn_ids": 0.4010876149070523,
+        "varmax": 0.9378455101019306,
+        "delta_vs_dqn_ids": 0.5063412881689779,
+        "delta_vs_varmax": -0.030416607025900433
+      },
+      {
+        "direction": "PA8<-PA4",
+        "dqnguard": 0.9738869278623944,
+        "dqn_ids": 0,
+        "varmax": 0.857093665750852,
+        "delta_vs_dqn_ids": 0.9738869278623944,
+        "delta_vs_varmax": 0.1167932621115424
+      }
+    ],
+    "aggregate": {
+      "dqnguard_mean_uf1": 0.6655834539033899,
+      "dqn_ids_mean_uf1": 0.29285368570582687,
+      "varmax_mean_uf1": 0.7061311906457621,
+      "dqnguard_minus_dqn_ids": {
+        "mean": 0.372729768197563,
+        "sd": 0.4625838122463069,
+        "ci95": [
+          0.1562338798896441,
+          0.5892256565054819
+        ],
+        "wins": 14,
+        "losses": 6
+      },
+      "dqnguard_minus_varmax": {
+        "mean": -0.040547736742372324,
+        "sd": 0.20564724268775256,
+        "ci95": [
+          -0.136793608960774,
+          0.055698135476029344
+        ],
+        "wins": 12,
+        "losses": 8
+      },
+      "other_metric_mean_deltas": {
+        "unknown_auroc": {
+          "vs_dqn_ids": 0.12683975408323664,
+          "vs_varmax": -0.02918548991393111
+        },
+        "osr_acc": {
+          "vs_dqn_ids": 0.2445108665119979,
+          "vs_varmax": 0.009896840444064017
+        },
+        "osr_macro_f1": {
+          "vs_dqn_ids": 0.2363808944946651,
+          "vs_varmax": 0.04161969830320615
+        },
+        "unknown_precision": {
+          "vs_dqn_ids": 0.35690492665715096,
+          "vs_varmax": 0.03405722315888527
+        },
+        "unknown_recall": {
+          "vs_dqn_ids": 0.31313481204246857,
+          "vs_varmax": -0.03600974239509977
+        },
+        "known_reject_rate": {
+          "vs_dqn_ids": -0.11361511574888594,
+          "vs_varmax": -0.0964482219066292
+        }
+      }
+    },
+    "target_effects": {
+      "PA1": {
+        "dqnguard_mean": 0.4508784550761532,
+        "delta_vs_dqn_ids": 0.4400586197570657,
+        "delta_vs_varmax": -0.01737027484745208
+      },
+      "PA2": {
+        "dqnguard_mean": 0.6257760174682131,
+        "delta_vs_dqn_ids": 0.2728573959875641,
+        "delta_vs_varmax": -0.11510897061930953
+      },
+      "PA3": {
+        "dqnguard_mean": 0.9364753695189026,
+        "delta_vs_dqn_ids": 0.6873284779715405,
+        "delta_vs_varmax": 0.12703517215711155
+      },
+      "PA4": {
+        "dqnguard_mean": 0.4611605148068884,
+        "delta_vs_dqn_ids": 0.017794847594685748,
+        "delta_vs_varmax": -0.1636345735354002
+      },
+      "PA8": {
+        "dqnguard_mean": 0.8536269126467918,
+        "delta_vs_dqn_ids": 0.44560949967695884,
+        "delta_vs_varmax": -0.03366003686681135
+      }
+    },
+    "backbone_effects": {
+      "PA1-PA2": {
+        "delta_vs_dqn_ids": -0.10515164022240964,
+        "delta_vs_varmax": -0.18463899348712165
+      },
+      "PA1-PA3": {
+        "delta_vs_dqn_ids": 0.8292864741869115,
+        "delta_vs_varmax": 0.13510860660304796
+      },
+      "PA1-PA4": {
+        "delta_vs_dqn_ids": 0.6619388566157236,
+        "delta_vs_varmax": -0.0036415961075409453
+      },
+      "PA1-PA8": {
+        "delta_vs_dqn_ids": 0.16389436798395532,
+        "delta_vs_varmax": -0.1439408801934283
+      },
+      "PA2-PA3": {
+        "delta_vs_dqn_ids": 0.9314796388024802,
+        "delta_vs_varmax": 0.06295675961704017
+      },
+      "PA2-PA4": {
+        "delta_vs_dqn_ids": -0.2635249266358699,
+        "delta_vs_varmax": -0.43847912100876507
+      },
+      "PA2-PA8": {
+        "delta_vs_dqn_ids": 0.3693256040324711,
+        "delta_vs_varmax": 0.12742127594381497
+      },
+      "PA3-PA4": {
+        "delta_vs_dqn_ids": 0.21229859117631114,
+        "delta_vs_varmax": -0.12867669920528665
+      },
+      "PA3-PA8": {
+        "delta_vs_dqn_ids": 0.24659472692909667,
+        "delta_vs_varmax": 0.07053401428541017
+      },
+      "PA4-PA8": {
+        "delta_vs_dqn_ids": 0.6811559891069597,
+        "delta_vs_varmax": 0.09787926612910611
+      }
+    },
+    "geometry_effects": {
+      "confidence_geometry_score_vs_delta_dqn_ids_spearman": {
+        "rho": 0.2992481203007519,
+        "p": 0.19994045290488688
+      },
+      "confidence_geometry_score_vs_delta_varmax_spearman": {
+        "rho": 0.5413533834586466,
+        "p": 0.0136974953970477
+      },
+      "centroid_margin_vs_delta_dqn_ids_spearman": {
+        "rho": 0.28872180451127816,
+        "p": 0.2169926666873039
+      },
+      "centroid_margin_vs_delta_varmax_spearman": {
+        "rho": 0.03909774436090225,
+        "p": 0.8700037043301221
+      },
+      "feature_distance_vs_delta_dqn_ids_spearman": {
+        "rho": -0.13383458646616542,
+        "p": 0.5737559530736435
+      },
+      "feature_distance_vs_delta_varmax_spearman": {
+        "rho": -0.030075187969924807,
+        "p": 0.8998365956859304
+      }
+    },
+    "seed_transition_gate": {
+      "status": "BLOCKED_BY_UNFROZEN_SEED_IDENTITIES",
+      "durable_budget": "5 partition seeds x 10 model/training seeds x 10 canonical pairs x 2 directions",
+      "partition_seed_count": 5,
+      "model_training_seeds_per_partition": 10,
+      "explicit_partition_seed_list_present": false,
+      "explicit_model_training_seed_list_present": false,
+      "dqn_seed_policy": "TBD; proposed fixed main-seed + separate sensitivity",
+      "admission_permitted_now": false,
+      "reason": "Stage final_seeded_robustness explicitly requires independent seed lists and frozen seed semantics/result schema before spending the 5x10 budget. No execution authority can bind undefined seed identities."
+    }
   }
 }
