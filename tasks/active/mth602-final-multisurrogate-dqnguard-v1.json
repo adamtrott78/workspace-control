@@ -7720,5 +7720,36 @@
       "do not activate while any scientific job is active"
     ],
     "live_evidence": "After PA1<-PA2 controls completed on GPU0, next valid GPU0 pilot job remained queued rather than auto-advancing, reproducing the active-but-dead lifecycle stall."
+  },
+  "future_journal_research_ideas_20261125": {
+    "synthetic_unknown_surrogate_generator": {
+      "status": "DOCUMENTED_FUTURE_WORK_ONLY",
+      "current_project_scope": "OUT_OF_SCOPE_DO_NOT_EXECUTE_FOR_MTH602_FINAL",
+      "motivation": "DQNGuard performance appears strongly dependent on surrogate direction/geometry. A learned generator could synthesize pseudo-unknown RF examples from known-only data, providing a task-specific surrogate class for DQN calibration without consuming true unknown target data.",
+      "concept": [
+        "Train an autoencoder/generative model only on allowed known/surrogate-side data.",
+        "Generate synthetic signals or latent perturbations intended to behave like useful pseudo-unknowns.",
+        "Define a surrogate-quality objective from measurable properties that correlate with strong real surrogate directions, rather than using target unknown labels.",
+        "Use the generated pseudo-unknown class to tune/train the DQNGuard rejector while preserving the target-unknown firewall."
+      ],
+      "key_research_question": "Identify which observable surrogate properties predict strong DQNGuard unknown detection, then optimize a generator toward those properties.",
+      "possible_quality_signals": [
+        "confidence geometry / margin structure",
+        "logit separation and entropy",
+        "distance from known manifolds while remaining physically plausible",
+        "calibration rejection behavior under known-only constraints",
+        "representation-space coverage and diversity",
+        "directional surrogate effectiveness learned from training folds only"
+      ],
+      "core_challenge": "A universal generator may leak information or fail to generalize across leave-one/leave-two-out unknown folds. A strict design may require one generator per training fold/unknown holdout configuration, or a conditional generator trained without access to the held-out unknown.",
+      "scientific_constraints": [
+        "No true held-out unknown data for generator tuning or model selection.",
+        "No target-test labels before final scoring.",
+        "Generator selection criteria must be frozen using training-fold information only.",
+        "Any fold-specific generator must preserve exact holdout provenance.",
+        "Compare against deterministic real-surrogate picker and existing DQNGuard/VarMax/DQN-IDS baselines."
+      ],
+      "journal_article_value": "Potentially replaces hand-picked external surrogates with a learned synthetic pseudo-unknown mechanism, converting observed surrogate-geometry effects into a trainable component of DQNGuard."
+    }
   }
 }
