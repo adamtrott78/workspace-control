@@ -219,6 +219,8 @@ class WorkerResultIntakeTests(unittest.TestCase):
         replay = _load_e3_a9_replay_module()
         replay.test_e3_a9_exact_root_packet_reproduces_a8_sha()
         replay.test_e3_a9_exact_candidate_replay_passes_immutable_intake()
+        replay.test_e3_a9_future_packets_bind_validated_schema_provenance()
+        replay.test_e3_a9_wrapper_emits_compact_error_before_resource_report()
 
     def test_result_completes_only_after_independent_validation(self):
         coordinator = runtime(contracted=True)
