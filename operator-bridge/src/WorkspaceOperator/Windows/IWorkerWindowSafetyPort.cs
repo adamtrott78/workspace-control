@@ -31,4 +31,7 @@ public sealed class WorkerWindowSafetyController
 
     public bool MinimizeAfterNoAction() =>
         _port.MinimizeCapturedWorkerWindow();
+
+    public bool MinimizeAfterHumanSubmit() =>
+        _port.MinimizeCapturedWorkerWindow();
 }
