@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-a9-live-authority-v0.1",
+  "status": "PENDING_OPERATOR_WOP_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Authorize exactly one E3-A9 live diagnostic retry of the accepted E2 durable-recovery mission using the validated A9 CandidateWatcher/intake exception-visibility successor while preserving the accepted A8 frontend and E2 topology.",
+  "approval_basis": {
+    "source": "fresh explicit operator approval in the current ChatGPT conversation",
+    "original_statement": "well lets fuckin do it then",
+    "observed_date": "2026-11-25",
+    "original_scope": "EXACTLY_ONE_E3_A9_LIVE_ATTEMPT",
+    "attempts_granted": 1,
+    "standing_or_future_authority_inferred": false,
+    "consumed_predecessor_authority_reused": false
+  },
+  "reviewed_source": {
+    "zero_authority_review_head": "8d31dde05dc7fd6a49bba187fe380cf355fb78e5",
+    "final_state_head": "f2593a53eefa85d4e66784325e15d3559e8583fc",
+    "review_path": "architecture/workspace-semantic-execution-research-iterate-e3-a9-root-intake-review.v0.1.json",
+    "review_blob": "f06c1e11efbc8be967105b8368c0d696964a5b42",
+    "validation": {
+      "workspace_control_run": 3247,
+      "semantic_execution_run": 546,
+      "operator_bridge_run": 815,
+      "result": "SUCCESS"
+    },
+    "final_state_validation": {
+      "workspace_control_run": 3249,
+      "semantic_execution_run": 548,
+      "operator_bridge_run": 817,
+      "result": "SUCCESS"
+    }
+  },
+  "execution_bindings": {
+    "candidate_baseline": "968db0800e9dcdee6e5a784889d74653276fb184",
+    "root_packet_sha256": "f104a451c60ee168f9236b0075b1a00c20b2bb12f40dbd23b414dff6ae74d60b",
+    "exact_replayed_candidate": "968db0800e9dcdee6e5a784889d74653276fb184",
+    "e3_a9_wrapper_blob": "89f14c3e89c0773d78c2472f76db00a5b6f3edaa",
+    "e2_harness_blob": "d6acd6a4266641813deecb900b877b7250b02530",
+    "observer_blob": "458a869252f108bea52952e12852961bc3158d1f",
+    "a8_frontend_review_head": "6fb315884804214f96ca0f7264a48eed40741a60",
+    "a8_frontend_source_head": "b97a4c7b9309d413ced7eea14fe87b5864ad0c5b",
+    "a8_frontend_src_tree": "f3fd3b2c65b5780b511af9a90477d3a6bbfee873",
+    "accepted_a7_dev_harness_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "a8_operator_transport_head": "55edb7a6e618f5a49ddf17ec5c9426f70fa08f2d",
+    "a9_private_route_blob": "808864ddf50bc57aa06ec0a9b45b97819040e1f8",
+    "a9_remote_bootstrap_blob": "cc61c43878ed781816c42c8f266c812341415c91",
+    "a9_windows_launcher_blob": "2a297483876b3fac311ca44a4cb8e288cd8f71c3",
+    "worker_result_schema_review_head": "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc",
+    "worker_result_schema_blob": "b84d362a8adbb1bf4a47f1dfc4f0b8089487a3c1"
+  },
+  "preconsumption_guards": {
+    "zero_authority_review_must_be_ancestor": true,
+    "candidate_baseline_must_equal": "968db0800e9dcdee6e5a784889d74653276fb184",
+    "exact_blob_guards_before_consumption": true,
+    "consumed_a8_authority_reuse_forbidden": true
+  },
+  "diagnostic_contract": {
+    "deterministic_replay_result": "PASS",
+    "semantic_intake_repair_authorized": false,
+    "live_successor_goal": "Capture the exact live CandidateWatcher/intake exception if the failure recurs; otherwise prove durable candidate registration under the live path.",
+    "required_compact_error_prefix": "E3_A9_EXECUTION_ERROR=",
+    "preserve_large_resource_report": true,
+    "worker_result_schema_source": "validated review head c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc, not worker-result-candidates-v1"
+  },
+  "workspace_shell_boundary": {
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "prohibited_tools": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper"
+    ],
+    "repository_mutation": false,
+    "service_mutation": false,
+    "authority_widening": false
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": false,
+    "reusable": false,
+    "no_silent_retry": true,
+    "live_consumption_marker": "E3_A9_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "consumed_on_success_or_failure_after_marker": true
+  },
+  "accepted_frontend": {
+    "version": "A8_FROZEN",
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "page_content_scraping": false
+  },
+  "launch_contract": {
+    "launcher": "operator-bridge/tools/run-research-iterate-e3-a9-wop.ps1",
+    "exact_authority_sha_required": true,
+    "branch_must_contain_authority_commit": true,
+    "historical_a8_authority_reused": false
+  },
+  "postcondition": "Exactly one E3-A9 live diagnostic attempt. After E3_A9_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority. No silent retry."
+}
