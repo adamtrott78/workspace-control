@@ -34,7 +34,9 @@
     "e3_a9_authority_consumed": true,
     "e3_a9_authority_reusable": false,
     "e3_a9_failure": "stale duplicated wrapper candidate baseline constant",
-    "e3_a9_reuse_forbidden": true
+    "e3_a9_reuse_forbidden": true,
+    "e3_a9_closeout_path": "architecture/workspace-semantic-execution-research-iterate-e3-a9-live-closeout.v0.1.json",
+    "e3_a9_closeout_blob": "4ad2fa07bec3ed70712a5e077dca7f4e6ab33f79"
   },
   "preconsumption_guards": {
     "canonical_binding_manifest_required": true,
