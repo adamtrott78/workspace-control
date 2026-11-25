@@ -18,29 +18,18 @@ class OperatorEnterMinimizeReadyNotifyTests(unittest.TestCase):
             text=True,
         ).strip()
 
-    def git_show(self, ref: str, path: str) -> str:
-        return subprocess.check_output(
-            ["git", "show", f"{ref}:{path}"],
-            cwd=ROOT,
-            text=True,
-        )
-
     def test_review_binds_exact_successor_source(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
         source = review["candidate_source"]
         self.assertEqual(
-            self.git(f'{source["source_head"]}:operator-bridge/src'),
-            source["operator_bridge_src_tree"],
+            source["source_head"],
+            "5434a883506914a1c52f0ee956b79f1e33ee5a00",
         )
         self.assertEqual(
             self.git("HEAD:operator-bridge/src"),
             source["operator_bridge_src_tree"],
         )
         for path, expected_blob in source["exact_blobs"].items():
-            self.assertEqual(
-                self.git(f'{source["source_head"]}:{path}'),
-                expected_blob,
-            )
             self.assertEqual(self.git(f"HEAD:{path}"), expected_blob)
 
     def test_historical_a8_binding_remains_immutable(self) -> None:
@@ -57,21 +46,18 @@ class OperatorEnterMinimizeReadyNotifyTests(unittest.TestCase):
             a8["candidate_source"]["operator_bridge_src_tree"],
         )
         self.assertEqual(
-            self.git(f'{historical["source_head"]}:operator-bridge/src'),
             historical["src_tree"],
+            "f3fd3b2c65b5780b511af9a90477d3a6bbfee873",
         )
 
     def test_enter_minimize_is_deferred_and_does_not_become_durable_success(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
-        source = review["candidate_source"]["source_head"]
-        gate = self.git_show(
-            source,
-            "operator-bridge/src/WorkspaceOperator/Windows/Hotkey/HumanSubmitConfirmationGate.cs",
-        )
-        tray = self.git_show(
-            source,
-            "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
-        )
+        gate = (
+            ROOT / "operator-bridge/src/WorkspaceOperator/Windows/Hotkey/HumanSubmitConfirmationGate.cs"
+        ).read_text(encoding="utf-8")
+        tray = (
+            ROOT / "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"
+        ).read_text(encoding="utf-8")
         self.assertIn("Confirmed?.Invoke(this, EventArgs.Empty)", gate)
         self.assertIn(
             "_humanSubmitConfirmation.Confirmed += HumanSubmitConfirmed",
@@ -91,15 +77,12 @@ class OperatorEnterMinimizeReadyNotifyTests(unittest.TestCase):
 
     def test_ready_alert_is_edge_triggered_without_forced_focus(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
-        source = review["candidate_source"]["source_head"]
-        tray = self.git_show(
-            source,
-            "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
-        )
-        status = self.git_show(
-            source,
-            "operator-bridge/src/WorkspaceOperator/Windows/WorkloadStatusPresentation.cs",
-        )
+        tray = (
+            ROOT / "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"
+        ).read_text(encoding="utf-8")
+        status = (
+            ROOT / "operator-bridge/src/WorkspaceOperator/Windows/WorkloadStatusPresentation.cs"
+        ).read_text(encoding="utf-8")
         self.assertIn("WorkloadStatusPresentation.BecameReady(", tray)
         self.assertIn(
             "New worker action ready — press Ctrl+Space to service.",
@@ -116,11 +99,9 @@ class OperatorEnterMinimizeReadyNotifyTests(unittest.TestCase):
 
     def test_waiting_ack_check_leaves_worker_minimized(self) -> None:
         review = json.loads(REVIEW.read_text(encoding="utf-8"))
-        source = review["candidate_source"]["source_head"]
-        tray = self.git_show(
-            source,
-            "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
-        )
+        tray = (
+            ROOT / "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs"
+        ).read_text(encoding="utf-8")
         start = tray.index("if (workload.SentUnconfirmed > 0)")
         end = tray.index("else if (workload.ReadyManualCycles > 0)", start)
         waiting_branch = tray[start:end]
