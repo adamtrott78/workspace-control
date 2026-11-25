@@ -1,21 +1,26 @@
 # E3-A9 successor orchestrator. Historical A7 launchers remain untouched; this launcher is bound to the validated A9 diagnostic successor.
 [CmdletBinding()]
 param(
-  [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path,
+  [string]$RepositoryRoot = "",
   [string]$OperatorBridgeUrl = "https://gokhan-lambda-vector.tailca6171.ts.net/",
   [string]$SshTarget = "atrott@gokhan-lambda-vector.tailca6171.ts.net",
   [string]$SchedulerHotkey = "Ctrl+Space"
 )
 
 $ErrorActionPreference = "Stop"
+if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+  $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+}
 $repo = [System.IO.Path]::GetFullPath($RepositoryRoot)
-$dev = Join-Path $repo "operator-bridge\tools\workspace-operator-dev.ps1"
+$acceptedFrontendHead = "6fb315884804214f96ca0f7264a48eed40741a60"
 $linuxRel = "benchmarks/workspace-semantic-execution/private_route_research_iterate_e3_a9_v1.sh"
 $remoteBootstrapRel = "operator-bridge/tools/run-research-iterate-e3-a9-remote-bootstrap.sh"
 $remoteBootstrapPath = Join-Path $repo ($remoteBootstrapRel -replace "/", "\")
 $engine = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
 $ssh = (Get-Command ssh.exe -ErrorAction Stop).Source
 $tempRoot = Join-Path $env:TEMP ("workspace-control-e3-a9-" + [guid]::NewGuid().ToString("N"))
+$frontendRepo = Join-Path $tempRoot "accepted-a8-frontend"
+$dev = Join-Path $frontendRepo "operator-bridge\tools\workspace-operator-dev.ps1"
 $frontendReady = Join-Path $tempRoot "frontend-ready.txt"
 $frontendLog = Join-Path $tempRoot "frontend.log"
 $sshBatch = Join-Path $tempRoot "run-ssh.cmd"
@@ -89,19 +94,23 @@ function Get-E3BackendStatus {
   }
 }
 
-if (-not (Test-Path -LiteralPath $dev -PathType Leaf)) { throw "E3_A9_WOP_DEV_SCRIPT_MISSING:$dev" }
 if (-not (Test-Path -LiteralPath $remoteBootstrapPath -PathType Leaf)) { throw "E3_A9_WOP_REMOTE_BOOTSTRAP_MISSING:$remoteBootstrapPath" }
 
 $sourceSha = (git -C $repo rev-parse HEAD).Trim().ToLowerInvariant()
 if ($LASTEXITCODE -ne 0 -or $sourceSha -notmatch "^[0-9a-f]{40}$") { throw "E3_A9_WOP_SOURCE_SHA_UNAVAILABLE" }
-$frontendTree = (git -C $repo rev-parse ($sourceSha + ":operator-bridge/src")).Trim().ToLowerInvariant()
-if ($LASTEXITCODE -ne 0 -or $frontendTree -ne "f3fd3b2c65b5780b511af9a90477d3a6bbfee873") { throw "E3_A9_FRONTEND_TREE_MISMATCH:$frontendTree" }
-$devBlob = (git -C $repo rev-parse ($sourceSha + ":operator-bridge/tools/workspace-operator-dev.ps1")).Trim().ToLowerInvariant()
-if ($LASTEXITCODE -ne 0 -or $devBlob -ne "ac035d2fc898274c32cad43954ce44c15b198207") { throw "E3_FRONTEND_DEV_HARNESS_NOT_ACCEPTED_A7:$devBlob" }
 $linuxBlob = (git -C $repo rev-parse ("{0}:{1}" -f $sourceSha,$linuxRel)).Trim().ToLowerInvariant()
 if ($LASTEXITCODE -ne 0 -or $linuxBlob -notmatch "^[0-9a-f]{40}$") { throw "E3_A9_WOP_LINUX_BLOB_UNAVAILABLE" }
 
 New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
+git -C $repo fetch --no-tags origin $acceptedFrontendHead
+if ($LASTEXITCODE -ne 0) { throw "E3_A9_FRONTEND_FETCH_FAILED:$LASTEXITCODE" }
+git -C $repo worktree add --detach $frontendRepo $acceptedFrontendHead | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "E3_A9_FRONTEND_WORKTREE_FAILED:$LASTEXITCODE" }
+if (-not (Test-Path -LiteralPath $dev -PathType Leaf)) { throw "E3_A9_WOP_DEV_SCRIPT_MISSING:$dev" }
+$frontendTree = (git -C $frontendRepo rev-parse "HEAD:operator-bridge/src").Trim().ToLowerInvariant()
+if ($LASTEXITCODE -ne 0 -or $frontendTree -ne "f3fd3b2c65b5780b511af9a90477d3a6bbfee873") { throw "E3_A9_FRONTEND_TREE_MISMATCH:$frontendTree" }
+$devBlob = (git -C $frontendRepo rev-parse "HEAD:operator-bridge/tools/workspace-operator-dev.ps1").Trim().ToLowerInvariant()
+if ($LASTEXITCODE -ne 0 -or $devBlob -ne "ac035d2fc898274c32cad43954ce44c15b198207") { throw "E3_FRONTEND_DEV_HARNESS_NOT_ACCEPTED_A7:$devBlob" }
 Write-Host "=== E3-A9 INTEGRATED RESEARCH-ITERATE - VALIDATED A8 FRONTEND ==="
 Write-Host ("E3_A9_WOP_SOURCE_SHA=" + $sourceSha)
 Write-Host "E3_A9_FRONTEND_REVIEW_HEAD=6fb315884804214f96ca0f7264a48eed40741a60"
@@ -110,7 +119,7 @@ Write-Host ("E3_FRONTEND_SRC_TREE=" + $frontendTree)
 Write-Host ("E3_FRONTEND_DEV_BLOB=" + $devBlob)
 Write-Host ("E3_A9_WOP_LINUX_BLOB=" + $linuxBlob)
 
-& $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev stop -RepositoryRoot $repo
+& $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev stop -RepositoryRoot $frontendRepo
 if ($LASTEXITCODE -ne 0) { throw "E3_A9_WOP_PRESTOP_FAILED:$LASTEXITCODE" }
 
 try {
@@ -161,7 +170,7 @@ exit /b %WORKSPACE_E3_A9_SSH_RC%
 
   # Critical A7 invariant: launch the accepted frontend from this interactive
   # PowerShell session, exactly as the validated operator UX was exercised.
-  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev online -RepositoryRoot $repo -SchedulerHotkey $SchedulerHotkey -OperatorBridgeUrl $OperatorBridgeUrl
+  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev online -RepositoryRoot $frontendRepo -SchedulerHotkey $SchedulerHotkey -OperatorBridgeUrl $OperatorBridgeUrl
   if ($LASTEXITCODE -ne 0) {
     Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue
     throw "E3_A9_ACCEPTED_FRONTEND_START_FAILED:$LASTEXITCODE"
@@ -231,7 +240,8 @@ exit /b %WORKSPACE_E3_A9_SSH_RC%
 }
 finally {
   if ($sshProcess -and -not $sshProcess.HasExited) { Stop-Process -Id $sshProcess.Id -Force -ErrorAction SilentlyContinue }
-  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev stop -RepositoryRoot $repo
+  & $engine -NoLogo -NoProfile -ExecutionPolicy Bypass -File $dev stop -RepositoryRoot $frontendRepo
   if ($LASTEXITCODE -eq 0) { Write-Host "E3_A9_WOP_WINDOWS_CLEANUP=PASS" } else { Write-Warning ("E3_A9_WOP_WINDOWS_CLEANUP=FAIL:" + $LASTEXITCODE) }
+  git -C $repo worktree remove --force $frontendRepo 2>$null | Out-Null
   Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
