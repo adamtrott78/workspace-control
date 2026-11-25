@@ -33,7 +33,7 @@ OPERATOR_TRANSPORT_HEAD="55edb7a6e618f5a49ddf17ec5c9426f70fa08f2d"
 REVIEW_HEAD=""
 FIXTURE_REL="benchmarks/workspace-semantic-execution/backend/research-engine-1031861/orchestration.py"
 REPO_URL="https://github.com/adamtrott78/workspace-control.git"
-CANDIDATE_BASELINE="fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f"
+CANDIDATE_BASELINE="968db0800e9dcdee6e5a784889d74653276fb184"
 WINDOWS_READY_MARKER="E3_A9_WINDOWS_MANUAL_AUTH_AND_INSTANT_CONFIRMED=PASS"
 
 ROUTE_ATTEMPTED=0
