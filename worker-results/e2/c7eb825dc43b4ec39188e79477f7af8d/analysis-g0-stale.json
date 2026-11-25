@@ -1,0 +1,19 @@
+{
+  "publication_id": "worker-result:action:e2:c7eb825dc43b4ec39188e79477f7af8d:analysis-g0:0",
+  "action_id": "action:e2:c7eb825dc43b4ec39188e79477f7af8d:analysis-g0",
+  "action_generation": 0,
+  "process_id": "research-iterate-e2:c7eb825dc43b4ec39188e79477f7af8d.analysis",
+  "process_generation": 0,
+  "executor_id": "openai-chat-instant-current",
+  "worker_slot_id": "e2-instant-slot:c7eb825dc43b4ec39188e79477f7af8d",
+  "session_generation": 0,
+  "packet_sha256": "9ef45c1ec94cc5e72a78601ed6681152a7b634d064976fe3f71e7519471d4ed5",
+  "kind": "RESULT",
+  "observed_at": "2026-11-25T05:45:06.916Z",
+  "result_payload_ref": "e2://c7eb825dc43b4ec39188e79477f7af8d/analysis/result",
+  "result_payload_sha256": "43e2a7207370599f022285d98a0eb4c2a06512f662c2072fc396aa0b0c02466d",
+  "evidence_refs": [
+    "e2:analysis:c7eb825dc43b",
+    "repo:adamtrott78/research-engine@1031861c03b2af8cff5cf72939bbbc83a95e65a4:src/research_engine/orchestration.py:blob=0d051fa50960708e0e773f6871c7e924c5796394:effect_sha256=2d97317862c6101ad578421c5504fe5a76e29f39584adcd89f351a837c857aa7"
+  ]
+}
