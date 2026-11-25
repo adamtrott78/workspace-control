@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "artifact_id": "workspace-semantic-execution-research-iterate-e3-v0.1",
-  "status": "READY_FOR_IMPLEMENTATION_NO_LIVE_AUTHORITY",
+  "status": "C1_C2_PASS_LIVE_REVIEW_FROZEN_ZERO_AUTHORITY",
   "parent_task": "workspace-semantic-execution-migration-v1",
   "predecessor": {
     "e1_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.4.json",
@@ -17,7 +17,7 @@
     {
       "id": "E3-C1",
       "name": "resource observer and accounting canary",
-      "status": "NEXT",
+      "status": "PASS",
       "implementation_goal": "Add a deterministic machine-readable observer for the Linux semantic backend/harness and durable task state, with unit tests proving observation-only behavior.",
       "required_metrics": [
         "wall-clock phase timestamps and durations",
@@ -44,18 +44,22 @@
         "observer cannot mutate task/process/session/action state",
         "metrics serialize deterministically to a versioned JSON report",
         "unknown/unavailable metrics are explicit rather than fabricated"
-      ]
+      ],
+      "closeout": "architecture/workspace-semantic-execution-research-iterate-e3-c1-closeout.v0.1.json",
+      "source_head": "0f1db2cb1c1c958af2784a7b47882c1f242a3489"
     },
     {
       "id": "E3-C2",
       "name": "bounded no-model soak",
-      "status": "AFTER_C1",
+      "status": "PASS",
       "implementation_goal": "Run the integrated scheduler/runtime through repeated deterministic/fake-worker cycles with the E3 observer attached, including normal cleanup and at least one generation-recovery cycle.",
       "bounds": {
         "model_calls": 0,
         "gpu_use": false,
         "human_service_cycles": 0,
-        "duration_or_cycles": "Choose a bounded duration/cycle count from existing validated soak conventions; record the exact chosen bound in the review before execution."
+        "cycle_count": 1000,
+        "sample_every_cycles": 10,
+        "warmup_cycles": 100
       },
       "required_evidence": [
         "peak and steady-state CPU/RAM/resource envelope",
@@ -63,12 +67,14 @@
         "all intentionally created stale generations remain fenced",
         "all cycles reach expected terminal/cleanup states",
         "sampling gaps and failed observations are counted"
-      ]
+      ],
+      "closeout": "architecture/workspace-semantic-execution-research-iterate-e3-c2-closeout.v0.1.json",
+      "source_head": "e14e71d1981a4aedbe9af75a54087683fe4718e1"
     },
     {
       "id": "E3-LIVE",
       "name": "bounded live resource/soak evidence",
-      "status": "GATED_AFTER_C1_C2",
+      "status": "REVIEW_FROZEN_VALIDATION_REQUIRED_THEN_AUTHORITY_GATE",
       "implementation_goal": "Instrument a representative accepted Research-Iterate live mission, preferably the E2 recovery topology because it exercises the hardest validated path, and capture the same resource/accounting evidence through cleanup.",
       "authority_required": true,
       "required_evidence": [
@@ -78,7 +84,10 @@
         "Windows Operator offline and Linux private-route rollback after completion",
         "no GPU/PADataset mutation",
         "no automatic typing/submission, browser scraping, paid API fallback, or authority widening"
-      ]
+      ],
+      "review": "architecture/workspace-semantic-execution-research-iterate-e3-live-review.v0.1.json",
+      "procedure": "architecture/workspace-semantic-execution-research-iterate-e3-live-procedure.v0.1.md",
+      "live_authority_exists": false
     }
   ],
   "after_e3": [
@@ -92,6 +101,8 @@
     "repository_canaries_authorized_by_existing_task_scope": true,
     "live_e3_authorized": false,
     "fresh_explicit_operator_approval_required_before_live": true,
-    "no_silent_live_attempt": true
+    "no_silent_live_attempt": true,
+    "live_e3_authority_exists": false,
+    "next_action": "Validate the frozen E3-LIVE review/procedure exact head, then STOP for fresh explicit operator approval."
   }
 }

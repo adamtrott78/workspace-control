@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-c2-closeout-v0.1",
+  "status": "PASS",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "source_head": "e14e71d1981a4aedbe9af75a54087683fe4718e1",
+  "c1_closeout": "architecture/workspace-semantic-execution-research-iterate-e3-c1-closeout.v0.1.json",
+  "frozen_review": "architecture/workspace-semantic-execution-research-iterate-e3-c2-review.v0.1.json",
+  "failed_attempt": "architecture/workspace-semantic-execution-research-iterate-e3-c2-attempt-01.v0.1.json",
+  "repair": {
+    "classification": "REMOVE_MEASUREMENT_HARNESS_ALLOCATION_CHURN",
+    "description": "Reuse one capture subclass for the entire soak instead of allocating a new Python subclass type on every cycle.",
+    "acceptance_rule_changed": false,
+    "cycle_bound_changed": false,
+    "warmup_changed": false,
+    "sampling_cadence_changed": false
+  },
+  "validation": {
+    "workspace_control": {
+      "run_number": 3215,
+      "run_id": 45517470310,
+      "result": "SUCCESS"
+    },
+    "semantic_execution": {
+      "run_number": 517,
+      "run_id": 45517470365,
+      "result": "SUCCESS"
+    },
+    "operator_bridge": {
+      "run_number": 786,
+      "run_id": 45517470323,
+      "result": "SUCCESS"
+    }
+  },
+  "claim_bearing_result": {
+    "result": "PASS",
+    "cycles": 1000,
+    "recovery_cycles_completed": 1000,
+    "sample_every_cycles": 10,
+    "warmup_cycles": 100,
+    "cycle_sample_count": 100,
+    "steady_sample_count": 90,
+    "phase_duration_seconds": 7.538886292999962,
+    "model_calls": 0,
+    "human_service_cycles": 0,
+    "gpu_use": false,
+    "padataset_access": false,
+    "new_gpu_modules": [],
+    "sampling_gap_count": 0,
+    "estimated_missing_sample_count": 0,
+    "failures": [],
+    "resource_report_sha256": "5914fbcfc5299c79d25c6918ebf53986b7c159fbee4425b37d88e5be3dbeebb3"
+  },
+  "steady_resource_envelope": {
+    "rss_bytes": {
+      "min": 74764288.0,
+      "median": 74764288.0,
+      "max": 74764288.0,
+      "three_window_medians": [74764288.0, 74764288.0, 74764288.0],
+      "three_window_minima": [74764288.0, 74764288.0, 74764288.0],
+      "monotonic_growth": false
+    },
+    "pss_bytes": {
+      "three_window_medians": [64310272.0, 64310272.0, 64310272.0],
+      "three_window_minima": [64310272.0, 64310272.0, 64310272.0],
+      "monotonic_growth": false
+    },
+    "peak_rss_bytes": {
+      "min": 74764288.0,
+      "median": 74764288.0,
+      "max": 74764288.0
+    },
+    "cpu_user_delta_seconds": {
+      "min": 0.07,
+      "median": 0.07500000000000001,
+      "max": 0.08
+    },
+    "cpu_system_delta_seconds": {
+      "min": 0.0,
+      "median": 0.0,
+      "max": 0.01
+    },
+    "process_count": 1,
+    "thread_count": 1,
+    "file_descriptor_count": 6,
+    "managed_child_process_count": 0
+  },
+  "terminal_durable_state": {
+    "reasoning_processes": {"COMPLETED@1": 1},
+    "executor_sessions": {"READY@1": 1},
+    "operator_actions": {"COMPLETED": 1, "STALE": 1},
+    "ready_manual_cycles": 0,
+    "sent_unconfirmed_current_binding": 0,
+    "awaiting_durable_ack_total": 0
+  },
+  "verdicts": {
+    "bounded_no_model_soak": "PASS",
+    "generation_recovery": "PASS",
+    "stale_generation_rejection": "PASS",
+    "durable_terminal_cleanup": "PASS",
+    "thread_fd_process_child_trends": "PASS",
+    "rss_pss_monotonic_growth_gate": "PASS",
+    "sampling_completeness": "PASS",
+    "zero_model_human_gpu_padataset": "PASS"
+  },
+  "candidate_head_unchanged": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+  "next_stage": "Freeze and validate E3-LIVE review/procedure, then stop at fresh explicit operator approval. No live authority exists."
+}

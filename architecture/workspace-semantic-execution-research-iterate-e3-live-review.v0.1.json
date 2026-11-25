@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-live-review-v0.1",
+  "status": "FROZEN_ZERO_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "c2_closeout": "architecture/workspace-semantic-execution-research-iterate-e3-c2-closeout.v0.1.json",
+  "validated_c2_source_head": "e14e71d1981a4aedbe9af75a54087683fe4718e1",
+  "candidate_baseline": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+  "objective": "Run exactly one authority-gated live Research-Iterate mission using the accepted E2 recovery topology with E3 read-only CPU/RAM/task/resource observation attached, then prove exact cleanup and rollback.",
+  "bindings": {
+    "accepted_e2_topology": {
+      "path": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
+      "blob": "d6acd6a4266641813deecb900b877b7250b02530"
+    },
+    "resource_observer": {
+      "path": "benchmarks/workspace-semantic-execution/resource_observer_v1.py",
+      "blob": "458a869252f108bea52952e12852961bc3158d1f"
+    },
+    "e3_live_wrapper": {
+      "path": "benchmarks/workspace-semantic-execution/live_research_iterate_e3.py",
+      "blob": "51e471886a4911c9f00d824316c600bf8f8fae19"
+    },
+    "candidate_branch": "worker-result-candidates-v1",
+    "candidate_baseline": "6115b48dfdf4a4954b3b1626598f897e4e71eeec"
+  },
+  "review_head_rule": "The exact Git commit containing this frozen review/procedure/wrapper becomes review_head only after its required exact-head validations are SUCCESS.",
+  "mission_topology": [
+    "real Instant root decomposition",
+    "Supervisor S1 durable/fresh-store rehydration",
+    "inherited child contracts",
+    "deterministic exact Research Engine source read",
+    "generation-0 real Instant analysis service",
+    "deliberate worker/process/session loss and generation fence",
+    "PostgreSQL-only runtime/supervisor rehydration",
+    "late generation-0 candidate rejection without mutation",
+    "generation-1 replacement managed session and analysis completion",
+    "read-only Workspace Shell runtime-inventory probe",
+    "fan-in",
+    "real Instant synthesis",
+    "private-route rollback and Windows Operator cleanup"
+  ],
+  "resource_observation": {
+    "sample_interval_seconds": 1.0,
+    "root_required": false,
+    "gpu_telemetry": false,
+    "padataset_access": false,
+    "required_metrics": [
+      "phase marker timestamps and durations",
+      "managed process-tree CPU user/system deltas",
+      "RSS and peak RSS",
+      "PSS when safely available without privilege",
+      "thread count",
+      "file-descriptor count",
+      "managed child-process count",
+      "ReasoningProcess state/generation counts",
+      "ExecutorSession state/generation counts",
+      "OperatorAction durable-state counts",
+      "ready/manual and sent-unconfirmed/awaiting-ack counts",
+      "PostgreSQL-backed graph version/object counts",
+      "sample interval and telemetry gap counts"
+    ],
+    "unknown_policy": "Unavailable metrics remain explicit UNKNOWN/UNAVAILABLE and are never invented."
+  },
+  "precommitted_acceptance": {
+    "e2_semantic_result": "PASS required",
+    "phase_timing": "All required E2 phase markers through synthesis must be present and ordered; rollback timing/evidence is recorded by the enclosing reviewed transaction.",
+    "resource_evidence": "CPU/RAM/thread/FD/child metrics are descriptive evidence, not a post-hoc performance threshold. Required metrics must be captured; PSS remains best-effort.",
+    "final_durable_state": "All four E2 processes COMPLETED, analysis generation 1, persistent session READY generation 1, generation-0 analysis action STALE, replacement and remaining actions terminal, and no ready/manual, sent-unconfirmed, or awaiting-ack work.",
+    "stale_generation": "The deliberately late generation-0 candidate must be rejected without durable mutation.",
+    "cleanup": "Windows Operator must be OFFLINE and the Linux private route/server must be torn down after success or failure; no managed child/process/session/action leak may remain.",
+    "provenance": "Final resource evidence must include exact source_head, validated review_head, one-shot authority_head, and candidate_baseline.",
+    "candidate_history": "Worker-result candidate history is append-only; no rewrite or force update is permitted.",
+    "telemetry_gaps": "Gap counts are always reported. A gap is not silently discarded or converted into an invented sample.",
+    "safety": "No automatic typing/paste/Enter, no mouse automation, no ChatGPT DOM/page-content scraping, no paid API fallback, no GPU/PADataset mutation, and no Workspace Shell authority widening."
+  },
+  "authority_gate": {
+    "live_authority_exists": false,
+    "live_authorized": false,
+    "fresh_explicit_operator_approval_required": true,
+    "authority_count_after_approval": 1,
+    "one_shot": true,
+    "no_silent_retry": true,
+    "model_reasoning_cannot_create_authority": true
+  },
+  "stop_condition": "After exact-head validation of this review/procedure, STOP_AT_AUTHORITY_GATE. Do not create an E3 live authority until Adam explicitly approves one live attempt."
+}
