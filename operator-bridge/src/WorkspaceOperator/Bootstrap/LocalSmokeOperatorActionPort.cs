@@ -24,6 +24,8 @@ public sealed class LocalSmokeOperatorActionPort : IOperatorActionPort
 
     public bool HasReadyAction => Volatile.Read(ref _state) == 0;
 
+    public bool HasSentUnconfirmed => Volatile.Read(ref _state) == 2;
+
     public Task<OperatorAction?> ClaimNextAsync(
         CancellationToken cancellationToken)
     {
@@ -79,6 +81,10 @@ public sealed class LocalSmokeOperatorActionPort : IOperatorActionPort
                 "LOCAL_SMOKE_ACTION_IDENTITY_MISMATCH");
         }
 
+        // Smoke deliberately stays in a content-free pending-ack state after
+        // local preparation. This lets the Windows UX acceptance distinguish
+        // "Enter was observed" from "Enter was missed" on the next Ctrl+Space:
+        // the former reports pending durable acknowledgment without refocusing.
         Interlocked.Exchange(ref _state, 2);
     }
 }
