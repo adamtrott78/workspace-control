@@ -1,7 +1,7 @@
 """E3-A10 diagnostic successor around the accepted E2 topology.
 
 This module is inert on import. It preserves the accepted E2/A8 bytes, binds
-worker-result schema provenance to the validated A8 review head, and emits a
+worker-result schema provenance from the canonical binding manifest, and emits a
 compact exception marker before the large resource report. Any future live run
 remains separately authority-gated.
 """
@@ -346,7 +346,7 @@ def run_e3_live(
             "authority_head": authority_head,
             "candidate_baseline": candidate_baseline,
         },
-        "accepted_topology": "research-iterate-e2-a9-diagnostic-successor",
+        "accepted_topology": "research-iterate-e2-a10-binding-closure-successor",
         "model_path": "real_instant_existing_e2_actions",
         "observer_sample_interval_seconds": sample_interval_seconds,
         "phase_timing": phase_timing,
