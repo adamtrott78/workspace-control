@@ -22,22 +22,59 @@ The standard-DQNGuard directional OSR matrix is complete: **20/20 directional ce
 
 Do not retrain or alter either frozen result set.
 
-The matched-control matrix is now live from PADataset PR #56 at exact head `17c991dd41c16099a679cc4ad81230c7616a0db1`.
+The matched-control matrix is **closed and validated at 20/20 canonical directional cells** from PADataset PR #56 exact head `17c991dd41c16099a679cc4ad81230c7616a0db1`.
 
-Current control status:
-- **2 running**
-- **18 queued**
-- **0 complete**
-- **0 failed**
-- **0 duplicate admissions**
+Canonical recovery identities:
+- PA4 <- PA3: run `45565602436`, job `139039493921`
+- PA4 <- PA2: run `45565606606`, job `139039506686`
 
-Running now:
-- lane A: `PA1 <- PA2`, run `45509095061`, job `138851867447`
-- lane B: `PA2 <- PA1`, run `45509096369`, job `138851868167`
+Excluded as superseded/noncanonical:
+- original/recovery attempts `45509159615`, `45509140807`
+- V1 replacements `45565324045`, `45565327001`
+- prior duplicates `45517031611`, `45517036169`
 
-Both are inside **Execute bounded scientific request** after exact-head verification, bounded-runner proof, checkout, and request validation all passed.
+Artifact audit:
+- **20/20** unique directional result records COMPLETE
+- **20/20** scientific receipts PASS
+- **10/10** unique frozen backbones represented
+- exact PR #56 candidate SHA preserved
+- target labels used for tuning: **false**
+- both controls fitted/frozen before target-test materialization: **true**
+- standard DQNGuard threshold source: **known-only**
+- no frozen recipe/checkpoint/threshold/selector/control/retry policy changed
 
-Do not re-admit any control request. The 20 immutable requests already exist exactly once, split 10/10 across the two GPU lanes.
+Matched U-F1 summary:
+- DQNGuard mean: **0.665583**
+- DQN-IDS-style mean: **0.292854**
+- VarMax mean: **0.706131**
+- DQNGuard - DQN-IDS-style: **+0.372730 mean**, 14/20 wins, 95% paired-cell t-CI **[+0.156234, +0.589226]**
+- DQNGuard - VarMax: **-0.040548 mean**, 12/20 wins, 95% paired-cell t-CI **[-0.136794, +0.055698]**
+
+Target-level DQNGuard U-F1 deltas vs DQN-IDS / VarMax:
+- PA1: **+0.440059 / -0.017370**
+- PA2: **+0.272857 / -0.115109**
+- PA3: **+0.687328 / +0.127035**
+- PA4: **+0.017795 / -0.163635**
+- PA8: **+0.445609 / -0.033660**
+
+Geometry result: DQNGuard-minus-VarMax U-F1 increases with the frozen Rule-B confidence-geometry score (Spearman rho **+0.541**, p **0.0137**); no comparable monotonic signal was observed for frozen Rule-C centroid margin or feature-distance score.
+
+## Multi-seed transition gate
+
+The control prerequisite is satisfied, but **no seed admission is authorized yet because the seed identities are not actually frozen in durable state**.
+
+The durable plan fixes the budget at:
+- 5 partition seeds
+- 10 model/training seeds per partition
+- 10 canonical pairs
+- 2 directional OSR cells per pair
+
+But it does **not** contain:
+- the explicit 5 partition-seed values;
+- the explicit 10 model/training-seed values;
+- a frozen DQN-seed policy (E1 still says `TBD; proposed fixed main-seed + separate sensitivity`).
+
+Stage `final_seeded_robustness` explicitly requires those seed semantics before spending the 5x10 budget. Do not invent seed identities or admit jobs until that reviewed durable freeze exists.
 
 ## Controller/runtime state
 
