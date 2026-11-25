@@ -1022,9 +1022,10 @@ func runController(ctx context.Context, cfg runtimeConfig, logger *slog.Logger) 
 	defer session.Close(context.Background())
 
 	retryingSession := &retryingSessionClient{
-		inner:      session,
-		logger:     logger.WithGroup("session"),
-		maxBackoff: time.Minute,
+		inner:                session,
+		logger:               logger.WithGroup("session"),
+		maxBackoff:           time.Minute,
+		getMessageMaxRetries: 8,
 	}
 	schedulerCapacity := schedulerAdvertisedMaxCapacity(policy)
 	l, err := listener.New(retryingSession, listener.Config{

@@ -473,3 +473,25 @@ func TestDiscoverTrustedDemandFallsBackToUnfilteredRecentRuns(t *testing.T) {
 		t.Fatalf("fallback REST candidate mismatch: %#v", jobs)
 	}
 }
+
+
+func TestRetryBudgetExhausted(t *testing.T) {
+	tests := []struct {
+		name       string
+		attempt    int
+		maxRetries int
+		want       bool
+	}{
+		{name: "disabled", attempt: 100, maxRetries: 0, want: false},
+		{name: "before_budget", attempt: 6, maxRetries: 8, want: false},
+		{name: "at_budget", attempt: 7, maxRetries: 8, want: true},
+		{name: "past_budget", attempt: 9, maxRetries: 8, want: true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := retryBudgetExhausted(tc.attempt, tc.maxRetries); got != tc.want {
+				t.Fatalf("retryBudgetExhausted(%d,%d)=%v want %v", tc.attempt, tc.maxRetries, got, tc.want)
+			}
+		})
+	}
+}
