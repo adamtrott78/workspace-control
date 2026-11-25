@@ -30,6 +30,11 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly CancellationTokenSource _ipcCancellation = new();
     private readonly Task _ipcTask;
     private readonly BrowserCommandHub _browserCommandHub;
+    private WorkloadStatusSnapshot _lastWorkloadStatus =
+        WorkloadStatusSnapshot.Empty;
+    private bool _lastBridgeEnabled;
+    private bool _hasObservedWorkloadStatus;
+    private int _humanSubmitMinimizePending;
     private int _hotkeyDispatching;
 
     public TrayApplicationContext(
@@ -121,6 +126,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         _notifyIcon.ContextMenuStrip.Items.Add(exitItem);
 
         _hotkeyWindow.HotkeyPressed += HotkeyPressed;
+        _humanSubmitConfirmation.Confirmed += HumanSubmitConfirmed;
 
         if (startEnabled)
         {
@@ -129,9 +135,13 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         _statusTimer = new System.Windows.Forms.Timer
         {
-            Interval = 500
+            Interval = 250
         };
-        _statusTimer.Tick += (_, _) => RefreshPresentation();
+        _statusTimer.Tick += (_, _) =>
+        {
+            ProcessHumanSubmitUiEffects();
+            RefreshPresentation();
+        };
         _statusTimer.Start();
         RefreshPresentation();
 
@@ -204,20 +214,21 @@ public sealed class TrayApplicationContext : ApplicationContext
             else if (result.Outcome == DispatchOutcome.NoAction)
             {
                 var workload = _workloadStatusProvider();
-                if (!WorkloadStatusPresentation.NoActionMayMinimize(workload))
+                if (workload.SentUnconfirmed > 0)
                 {
-                    var refocused =
-                        _workerWindowSafety.ForegroundPreparedWorkerWindow();
-                    var message = workload.SentUnconfirmed > 0
-                        ? (refocused
-                            ? "Prepared worker action is still awaiting durable acknowledgment; worker Firefox refocused. Do not treat this as empty/no-work."
-                            : "Prepared worker action is still awaiting durable acknowledgment; no new action was claimed. Worker Firefox could not be safely refocused.")
-                        : "Backend still reports ready work; no action was claimed. Worker Firefox was not minimized.";
+                    _notifyIcon.ShowBalloonTip(
+                        2500,
+                        "Workspace Worker Bridge",
+                        "Still awaiting durable acknowledgment; no new action is ready. Worker Firefox remains minimized.",
+                        ToolTipIcon.None);
+                }
+                else if (workload.ReadyManualCycles > 0)
+                {
                     _notifyIcon.ShowBalloonTip(
                         3000,
                         "Workspace Worker Bridge",
-                        message,
-                        ToolTipIcon.None);
+                        "Backend reports ready work, but no action was claimed. Worker Firefox was not changed.",
+                        ToolTipIcon.Warning);
                 }
                 else
                 {
@@ -240,15 +251,62 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
     }
 
+    private void HumanSubmitConfirmed(object? sender, EventArgs e)
+    {
+        // Do not minimize from inside the low-level keyboard hook callback.
+        // Deferring to the UI timer lets Firefox receive the Enter key first.
+        Volatile.Write(ref _humanSubmitMinimizePending, 1);
+    }
+
+    private void ProcessHumanSubmitUiEffects()
+    {
+        if (Interlocked.Exchange(ref _humanSubmitMinimizePending, 0) == 0)
+        {
+            return;
+        }
+
+        if (!_workerWindowSafety.MinimizeAfterHumanSubmit())
+        {
+            _notifyIcon.ShowBalloonTip(
+                3000,
+                "Workspace Worker Bridge",
+                "Enter was observed, but the prepared worker Firefox window could not be safely minimized. Durable acknowledgment still controls progress.",
+                ToolTipIcon.Warning);
+        }
+    }
+
     private void ExitClicked(object? sender, EventArgs e) => ExitThread();
 
     private void RefreshPresentation()
     {
         var enabled = _bridgeController.IsEnabled;
+        var workload = _workloadStatusProvider();
         var presentation = WorkloadStatusPresentation.Project(
             enabled,
-            _workloadStatusProvider(),
+            workload,
             _configuredHotkey);
+
+        var readyBecameServiceable =
+            enabled &&
+            workload.ReadyManualCycles > 0 &&
+            (!_hasObservedWorkloadStatus ||
+             !_lastBridgeEnabled ||
+             WorkloadStatusPresentation.BecameReady(
+                 _lastWorkloadStatus,
+                 workload));
+
+        if (readyBecameServiceable)
+        {
+            _notifyIcon.ShowBalloonTip(
+                2500,
+                "Workspace Worker Bridge",
+                "New worker action ready — press Ctrl+Space to service.",
+                ToolTipIcon.Info);
+        }
+
+        _lastWorkloadStatus = workload;
+        _lastBridgeEnabled = enabled;
+        _hasObservedWorkloadStatus = true;
 
         _toggleItem.Text = enabled ? "Bridge: ON" : "Bridge: OFF";
         _readyItem.Text = presentation.ReadyLabel;
@@ -282,6 +340,7 @@ public sealed class TrayApplicationContext : ApplicationContext
         }
 
         _hotkeyWindow.HotkeyPressed -= HotkeyPressed;
+        _humanSubmitConfirmation.Confirmed -= HumanSubmitConfirmed;
         _humanSubmitConfirmation.Dispose();
         _idleProbeTimer?.Dispose();
         _statusTimer.Stop();
