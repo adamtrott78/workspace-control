@@ -124,5 +124,15 @@
     "workspace_shell_authority_widening": false,
     "repository_authority_widening": false
   },
-  "stop_condition": "After exact-head validation of this A9 review, STOP_AT_FRESH_AUTHORITY_GATE. Do not create an A9 live authority and do not retry A8 until Adam explicitly approves exactly one new live attempt."
+  "stop_condition": "After exact-head validation of this A9 review, STOP_AT_FRESH_AUTHORITY_GATE. Do not create an A9 live authority and do not retry A8 until Adam explicitly approves exactly one new live attempt.",
+  "review_regressions": {
+    "review_contract_test": {
+      "path": "tests/test_workspace_semantic_execution_research_iterate_e3_a9_review.py",
+      "blob": "b3261087a0aef4f0429e4d94692bd7d68d1262e5"
+    },
+    "operator_authority_gate_test": {
+      "path": "tests/test_workspace_semantic_execution_operator_bridge_e3_a9_zero_authority.py",
+      "blob": "9b67cfeee15d903335e2f0ed5e585028bf94679f"
+    }
+  }
 }
