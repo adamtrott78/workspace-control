@@ -14,6 +14,8 @@ public sealed class HumanSubmitConfirmationGateTests
         using var gate = new HumanSubmitConfirmationGate(
             source,
             () => foreground);
+        var confirmedEvents = 0;
+        gate.Confirmed += (_, _) => confirmedEvents++;
 
         Assert.IsTrue(gate.Arm());
         Assert.IsTrue(gate.IsAwaitingConfirmation);
@@ -23,6 +25,9 @@ public sealed class HumanSubmitConfirmationGateTests
         source.RaisePlainEnter();
 
         Assert.IsTrue(gate.IsConfirmed);
+        Assert.AreEqual(1, confirmedEvents);
+        source.RaisePlainEnter();
+        Assert.AreEqual(1, confirmedEvents);
         Assert.IsTrue(gate.TryConsumeConfirmed());
         Assert.IsFalse(gate.IsAwaitingConfirmation);
         Assert.IsFalse(gate.IsConfirmed);
@@ -38,16 +43,20 @@ public sealed class HumanSubmitConfirmationGateTests
         using var gate = new HumanSubmitConfirmationGate(
             source,
             () => foreground);
+        var confirmedEvents = 0;
+        gate.Confirmed += (_, _) => confirmedEvents++;
 
         Assert.IsTrue(gate.Arm());
         source.RaisePlainEnter();
 
         Assert.IsFalse(gate.IsConfirmed);
+        Assert.AreEqual(0, confirmedEvents);
         Assert.IsFalse(gate.TryConsumeConfirmed());
 
         foreground = true;
         source.RaisePlainEnter();
 
+        Assert.AreEqual(1, confirmedEvents);
         Assert.IsTrue(gate.TryConsumeConfirmed());
     }
 
