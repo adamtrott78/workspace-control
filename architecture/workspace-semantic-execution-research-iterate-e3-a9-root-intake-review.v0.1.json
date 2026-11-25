@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-a9-root-intake-review-v0.1",
+  "status": "FROZEN_EXECUTABLE_REVIEW_ZERO_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "a8_authority_head": "0f8d98af4c7ac83e3b78fe2a59e9bc13f1b6fa28",
+    "a8_closeout_head": "884995786caacced63098f5a592895ae328cd2cc",
+    "a8_authority_consumed": true,
+    "a8_authority_reusable": false,
+    "silent_retry_permitted": false,
+    "pr590_handoff_head": "469377ebb99376e19dbd4c42125416d07ed2103b"
+  },
+  "objective": "Diagnose the E3-A8 root candidate durable-intake failure without live authority, replay the exact candidate deterministically, and prepare only the smallest future diagnostic successor needed after the replay result.",
+  "deterministic_replay": {
+    "token": "63e9b17e492c4ed3a36d20c83172abf3",
+    "root_packet_sha256": "f104a451c60ee168f9236b0075b1a00c20b2bb12f40dbd23b414dff6ae74d60b",
+    "candidate_commit": "968db0800e9dcdee6e5a784889d74653276fb184",
+    "candidate_parent": "fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f",
+    "candidate_path": "worker-results/e2/63e9b17e492c4ed3a36d20c83172abf3/root-decompose.json",
+    "candidate_blob": "25837b0eed5bb27c354e5e8ac04dc549e48238ea",
+    "candidate_raw_sha256": "896b4fb08a4a73f5913a1dc028a4118971274795051fa90230b77d8c616c734f",
+    "equivalent_pre_intake_state": {
+      "process": "RUNNING@0",
+      "executor_session": "BOUND@0",
+      "operator_action": "AWAITING_DURABLE_ACK",
+      "worker_results": 0
+    },
+    "result": "PASS",
+    "post_intake_state": {
+      "process": "WAITING_DEPENDENCIES@0",
+      "child_count": 3,
+      "executor_session": "READY@0",
+      "operator_action": "COMPLETED",
+      "worker_results": 1
+    },
+    "conclusion": "The exact A8 candidate bytes and immutable WorkerResultCandidateAdapter intake path do not reproduce the live failure. No semantic worker-result binding/intake repair is justified."
+  },
+  "diagnosis": {
+    "exact_a8_live_exception": "UNAVAILABLE_FROM_CAPTURED_TERMINAL_TAIL",
+    "proven_not_defect": "Exact candidate JSON shape, packet binding, immutable candidate adapter parsing, and semantic worker-result intake against equivalent AWAITING_DURABLE_ACK state.",
+    "remaining_uncertainty": "The live CandidateWatcher-to-intake boundary or surrounding live wrapper failed before durable worker-result registration, but the original exact exception was not captured.",
+    "classification": "LIVE_CANDIDATE_WATCHER_OR_EXCEPTION_VISIBILITY_BOUNDARY_REQUIRES_NEXT_ATTEMPT_DIAGNOSTIC"
+  },
+  "implementation": {
+    "head": "dbd1acde9713c01f534a313e0bf31ad1254a6185",
+    "accepted_e2_topology": {
+      "path": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
+      "blob": "d6acd6a4266641813deecb900b877b7250b02530",
+      "modified": false
+    },
+    "accepted_a8_wrapper": {
+      "path": "benchmarks/workspace-semantic-execution/live_research_iterate_e3_a8_v1.py",
+      "blob": "4615149b8ed20d327a8ceaf8dfd6605524f858da",
+      "modified": false
+    },
+    "a9_successor": {
+      "path": "benchmarks/workspace-semantic-execution/live_research_iterate_e3_a9_v1.py",
+      "blob": "89f14c3e89c0773d78c2472f76db00a5b6f3edaa",
+      "changes": [
+        "Bind worker-result schema provenance to validated A8 review head c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc and schema blob b84d362a8adbb1bf4a47f1dfc4f0b8089487a3c1.",
+        "Emit E3_A9_EXECUTION_ERROR=<ExceptionType>:<message> immediately on live E2 exception, before the large resource report.",
+        "Restore the original accepted E2 operator-parameter function and RuntimeCoordinator after the wrapper run."
+      ]
+    },
+    "exact_candidate_fixture": {
+      "path": "benchmarks/workspace-semantic-execution/e3_a9_root_candidate_968db080.json",
+      "blob": "25837b0eed5bb27c354e5e8ac04dc549e48238ea"
+    },
+    "replay_test": {
+      "path": "tests/test_workspace_semantic_execution_research_iterate_e3_a9_root_intake.py",
+      "blob": "380bff241442f73bf63b64c9682cced24b4d9734"
+    },
+    "semantic_suite_binding": {
+      "path": "tests/test_workspace_semantic_execution_backend_worker_results.py",
+      "blob": "48bae49221ac9cd025a7e26fcfa6875eddf67539"
+    },
+    "operator_zero_authority_test": {
+      "path": "tests/test_workspace_semantic_execution_operator_bridge_e3_a9_zero_authority.py",
+      "blob": "813b8f49e51ef4b2673ff203494da7e381fd166f"
+    }
+  },
+  "schema_provenance": {
+    "repository": "adamtrott78/workspace-control",
+    "validated_review_head": "c6dd247faaee12f1d8ade2cb53c60de41e3c3cdc",
+    "path": "architecture/workspace-semantic-execution-worker-result.v0.1.json",
+    "blob": "b84d362a8adbb1bf4a47f1dfc4f0b8089487a3c1",
+    "candidate_branch_is_schema_source": false
+  },
+  "implementation_validation": {
+    "head": "dbd1acde9713c01f534a313e0bf31ad1254a6185",
+    "workspace_control": {
+      "run_number": 3244,
+      "run_id": 45694328127,
+      "result": "SUCCESS"
+    },
+    "semantic_execution": {
+      "run_number": 543,
+      "run_id": 45694327866,
+      "result": "SUCCESS"
+    },
+    "operator_bridge": {
+      "run_number": 812,
+      "run_id": 45694327851,
+      "result": "SUCCESS"
+    },
+    "result": "SUCCESS"
+  },
+  "review_head_rule": "The exact Git commit containing this review and its zero-authority regressions becomes review_head only after Workspace Control, Semantic Execution, and Operator Bridge validations all succeed on that exact head.",
+  "authority_gate": {
+    "live_authority_exists": false,
+    "live_authorized": false,
+    "retry_authorized": false,
+    "fresh_explicit_operator_approval_required": true,
+    "one_shot_only": true,
+    "no_silent_retry": true,
+    "a8_authority_reusable": false
+  },
+  "safety": {
+    "automatic_typing_or_submission": false,
+    "automatic_mouse_input": false,
+    "chatgpt_page_content_scraping": false,
+    "paid_api_fallback": false,
+    "workspace_shell_authority_widening": false,
+    "repository_authority_widening": false
+  },
+  "stop_condition": "After exact-head validation of this A9 review, STOP_AT_FRESH_AUTHORITY_GATE. Do not create an A9 live authority and do not retry A8 until Adam explicitly approves exactly one new live attempt."
+}
