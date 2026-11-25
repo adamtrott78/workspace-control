@@ -1,4 +1,4 @@
-# E3-A10 successor orchestrator. Historical A7 launchers remain untouched; this launcher is bound to the validated A9 diagnostic successor.
+# E3-A10 binding-closure successor orchestrator. Historical launchers remain untouched.
 [CmdletBinding()]
 param(
   [string]$RepositoryRoot = "",
@@ -12,7 +12,18 @@ if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
   $RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 }
 $repo = [System.IO.Path]::GetFullPath($RepositoryRoot)
-$acceptedFrontendHead = "6fb315884804214f96ca0f7264a48eed40741a60"
+$bindingManifestRel = "architecture/workspace-semantic-execution-e3-live-binding-manifest.v0.1.json"
+$bindingManifestPath = Join-Path $repo ($bindingManifestRel -replace "/", "\")
+if (-not (Test-Path -LiteralPath $bindingManifestPath -PathType Leaf)) { throw "E3_A10_BINDING_MANIFEST_MISSING:$bindingManifestPath" }
+$bindingManifest = Get-Content -LiteralPath $bindingManifestPath -Raw | ConvertFrom-Json
+if ([string]$bindingManifest.artifact_id -ne "workspace-semantic-execution-e3-live-binding-manifest-v1") { throw "E3_A10_BINDING_MANIFEST_ID_MISMATCH" }
+$acceptedFrontendHead = [string]$bindingManifest.provenance.a8_frontend_review_head
+$acceptedFrontendSourceHead = [string]$bindingManifest.provenance.a8_frontend_source_head
+$expectedFrontendTree = [string]$bindingManifest.provenance.a8_frontend_src_tree
+$expectedDevBlob = [string]$bindingManifest.provenance.accepted_a7_dev_harness_blob
+foreach ($binding in @($acceptedFrontendHead,$acceptedFrontendSourceHead,$expectedFrontendTree,$expectedDevBlob)) {
+  if ($binding -notmatch "^[0-9a-f]{40}$") { throw "E3_A10_FRONTEND_MANIFEST_SHA_INVALID:$binding" }
+}
 $linuxRel = "benchmarks/workspace-semantic-execution/private_route_research_iterate_e3_a10_v1.sh"
 $remoteBootstrapRel = "operator-bridge/tools/run-research-iterate-e3-a10-remote-bootstrap.sh"
 $remoteBootstrapPath = Join-Path $repo ($remoteBootstrapRel -replace "/", "\")
