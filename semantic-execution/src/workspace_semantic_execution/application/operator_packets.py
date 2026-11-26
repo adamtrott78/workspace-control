@@ -26,6 +26,43 @@ from .packet_compiler import (
 )
 from .router import ExecutorRegistry
 from .runtime import RuntimeCoordinator
+from .token_economy import (
+    TokenEconomyDecision,
+    TokenEconomyPlanner,
+    TokenEconomyRequest,
+)
+
+
+def _operator_token_economy_decision(
+    *,
+    packet_input: PacketCompilationInput,
+    executor,
+    planner: TokenEconomyPlanner,
+) -> TokenEconomyDecision:
+    """Deterministic default economy plan for an Operator-dispatched worker.
+
+    Until durable per-session checkpoint acknowledgments are added, the
+    Operator path deliberately starts REF_ONLY rather than assuming chat memory.
+    """
+    return planner.plan(
+        TokenEconomyRequest(
+            required_refs=tuple(
+                dict.fromkeys(
+                    packet_input.evidence_refs
+                    + packet_input.authority_refs
+                )
+            ),
+            base_checkpoint=packet_input.source_checkpoint,
+            session_has_base_checkpoint=False,
+            recovery_required=False,
+            broad_context_required=False,
+            waiting_external=False,
+            invocation_mode=executor.invocation_mode,
+            session_mode=executor.session_mode,
+            user_facing=False,
+            deep_reasoning_required=False,
+        )
+    )
 
 
 def operator_dispatch_worker_id(
@@ -76,10 +113,14 @@ class DurableOperatorPacketMaterializer:
         runtime: RuntimeCoordinator,
         registry: ExecutorRegistry,
         compiler: SemanticPacketCompiler | None = None,
+        token_economy_planner: TokenEconomyPlanner | None = None,
     ) -> None:
         self._runtime = runtime
         self._registry = registry
         self._compiler = compiler or SemanticPacketCompiler()
+        self._token_economy_planner = (
+            token_economy_planner or TokenEconomyPlanner()
+        )
 
     def materialize(self, action: OperatorAction) -> CompiledPacket:
         if action.payload_ref is None or action.payload_sha256 is None:
@@ -127,9 +168,16 @@ class DurableOperatorPacketMaterializer:
                 "packet_source_executor_unknown"
             ) from exc
 
-        packet = self._compiler.compile(
-            _compilation_input(source),
+        packet_input = _compilation_input(source)
+        economy = _operator_token_economy_decision(
+            packet_input=packet_input,
             executor=executor,
+            planner=self._token_economy_planner,
+        )
+        packet = self._compiler.compile(
+            packet_input,
+            executor=executor,
+            token_economy=economy,
         )
         if packet.packet_sha256 != source.packet_sha256:
             raise DurablePacketMaterializationError(
@@ -147,10 +195,14 @@ class OperatorDispatchPlanner:
         runtime: RuntimeCoordinator,
         registry: ExecutorRegistry,
         compiler: SemanticPacketCompiler | None = None,
+        token_economy_planner: TokenEconomyPlanner | None = None,
     ) -> None:
         self._runtime = runtime
         self._registry = registry
         self._compiler = compiler or SemanticPacketCompiler()
+        self._token_economy_planner = (
+            token_economy_planner or TokenEconomyPlanner()
+        )
 
     def plan_service_existing(
         self,
@@ -206,9 +258,15 @@ class OperatorDispatchPlanner:
         )
 
         executor = self._registry.get(executor_id)
+        economy = _operator_token_economy_decision(
+            packet_input=effective_packet_input,
+            executor=executor,
+            planner=self._token_economy_planner,
+        )
         packet = self._compiler.compile(
             effective_packet_input,
             executor=executor,
+            token_economy=economy,
         )
         payload_ref = (
             f"semantic-packet://{process_id}/"
