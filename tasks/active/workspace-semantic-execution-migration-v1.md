@@ -70,11 +70,10 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Finish the zero-authority Operator UX successor review/validation and bounded Windows acceptance for Enter->minimize plus edge-triggered READY notification. This is a UX-only refinement: durable acknowledgment remains authoritative, READY notifications must not steal focus, and Ctrl+Space remains the explicit service/check gesture. After that successor is green, bind it for future live transport and proceed to E4 subscription-Codex + calibrated allowance/economics work; no new E3 live retry is needed because E3-A10 completed PASS.
+Proceed to E4/CODEX economics calibration: run the bounded subscription-only Codex live job and controlled usage/allowance calibration, then feed comparable observations into the economics ledger and weekly governor. The Operator UX successor is physically accepted and bound at 33ef885354ada6522e7f2e482dd164c78e01c2ff; E3-A10 already completed PASS, so no E3 retry or frontend rework is needed unless a new defect is observed.
 
 ## Remaining work
 
-- Operator UX successor: finish exact-head validation, perform bounded Windows acceptance for Enter->minimize + edge-triggered READY alert + no-refocus while awaiting durable acknowledgment, then bind the validated successor review for future live runs.
 - E4/CODEX: run subscription-only Codex live bounded job and controlled usage/allowance calibration; feed comparable observations into the economics ledger and weekly governor.
 - E4 quality/economics: complete claim-bearing matched reasoning-quality/holdout evidence and compare validated progress plus scarce-allowance consumption against the all-strong/frontier control.
 - REL-01: close the remaining integrated fault-campaign cases named by the matrix, especially DB disconnect, validator timeout and delayed/out-of-order event handling.
@@ -85,7 +84,6 @@ Finish the zero-authority Operator UX successor review/validation and bounded Wi
 
 ## Blockers / gates
 
-- OPERATOR UX REFINEMENT: Enter->minimize and edge-triggered READY notification successor is under exact-head validation/physical acceptance; do not replace the frozen A8 frontend binding until the successor review is green.
 - E4 ECONOMICS / CODEX: claim-bearing comparison remains gated on calibrated comparable allowance telemetry plus live subscription-only Codex bounded-job evidence; do not substitute raw token estimates or uncalibrated UI observations.
 - REL-01 / REL-02: A10 proves integrated session/process loss and live bounded resource behavior, but the remaining fault-campaign cases plus explicit target-budget/representative-soak closeout are not yet reconciled to PASS.
 - PROD-02: A10 binding/provenance closure passed, but the emitted resource report retained stale artifact_id workspace-semantic-execution-e3-a9-live-resource-v1; normalize that non-authority metadata defect before claiming zero unresolved provenance violations.
