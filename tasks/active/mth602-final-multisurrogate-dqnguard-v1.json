@@ -7830,5 +7830,36 @@
       ],
       "journal_article_value": "Potentially replaces hand-picked external surrogates with a learned synthetic pseudo-unknown mechanism, converting observed surrogate-geometry effects into a trainable component of DQNGuard."
     }
+  },
+  "robustness_pilot_osr_stall_diagnosis_20261125": {
+    "status": "HOST_LOCAL_DIAGNOSIS_REQUIRED",
+    "live": {
+      "pa2_from_pa1_control": {
+        "run_id": 45714686647,
+        "job_id": 139557604223,
+        "state": "IN_PROGRESS_EXECUTE_SCIENCE",
+        "normal_seed0_elapsed_sec": 1027.267442703247
+      },
+      "pa3_from_pa1_dqnguard": {
+        "run_id": 45714695107,
+        "job_id": 139557636761,
+        "state": "IN_PROGRESS_EXECUTE_SCIENCE",
+        "normal_seed0_elapsed_sec": 370.33907103538513
+      },
+      "pa3_from_pa1_control": {
+        "run_id": 45714697077,
+        "job_id": 139557643686,
+        "state": "QUEUED",
+        "normal_seed0_elapsed_sec": 8019.549169301987
+      }
+    },
+    "inference": "The two active execute-science jobs exceed historical same-direction evaluator compute envelopes by a large margin. The queued PA3<-PA1 control is historically slow (~2h13m) but has not started, so it does not explain the current stall.",
+    "ruled_out": [
+      "PA3 target size alone: historical PA3<-PA1 DQNGuard evaluator completed in ~6.2 min.",
+      "PA2 control inherently multi-hour: historical PA2<-PA1 matched-control evaluator completed in ~17.1 min.",
+      "full-factorial plumbing interference: PR59 plumbing is candidate-only and not active in these pilot jobs."
+    ],
+    "provenance_gate": "Workspace Shell refused the new diagnostic probe because PR59 diagnostic SHA is not the main task PADataset checkpoint; do not widen task authority solely to inspect host.",
+    "next_safe_action": "Run one read-only host-local probe with zero GitHub API calls: nvidia-smi/processes/RAM+swap/current evaluator PIDs and command lines/controller status/recent runner workdir files. Do not restart/cancel until evidence identifies the stuck stage."
   }
 }
