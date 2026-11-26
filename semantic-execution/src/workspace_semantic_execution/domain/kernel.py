@@ -660,9 +660,21 @@ class DomainKernel:
         session.last_ack_id = ack_id
         session.last_ack_process_id = process_id
         session.last_ack_process_generation = process_generation
+        session.last_ack_packet_sha256 = session.bound_packet_sha256
+        session.last_ack_session_generation = session.session_generation
         session.state = ExecutorSessionState.READY
+        ack_packet_sha256 = session.last_ack_packet_sha256
         cls._clear_session_binding(session)
-        cls._graph_event(next_graph, "SESSION_ACK", slot_id=slot_id, session_generation=session.session_generation, process_id=process_id, process_generation=process_generation, ack_id=ack_id)
+        cls._graph_event(
+            next_graph,
+            "SESSION_ACK",
+            slot_id=slot_id,
+            session_generation=session.session_generation,
+            process_id=process_id,
+            process_generation=process_generation,
+            packet_sha256=ack_packet_sha256,
+            ack_id=ack_id,
+        )
         cls.validate(next_graph)
         return next_graph
 
@@ -1157,9 +1169,34 @@ class DomainKernel:
                     raise KernelError("inactive_session_has_binding")
                 if not session.retirement_reason:
                     raise KernelError("inactive_session_missing_reason")
-            ack_values = (session.last_ack_id, session.last_ack_process_id, session.last_ack_process_generation)
-            if any(value is None for value in ack_values) and any(value is not None for value in ack_values):
+            ack_values = (
+                session.last_ack_id,
+                session.last_ack_process_id,
+                session.last_ack_process_generation,
+                session.last_ack_packet_sha256,
+                session.last_ack_session_generation,
+            )
+            if any(value is None for value in ack_values) and any(
+                value is not None for value in ack_values
+            ):
                 raise KernelError("partial_session_ack")
+            if all(value is not None for value in ack_values):
+                ack_packet_hash = session.last_ack_packet_sha256 or ""
+                if (
+                    len(ack_packet_hash) != 64
+                    or any(
+                        ch not in "0123456789abcdef"
+                        for ch in ack_packet_hash
+                    )
+                ):
+                    raise KernelError("session_ack_invalid_packet_hash")
+                if (
+                    session.last_ack_session_generation is None
+                    or session.last_ack_session_generation < 0
+                    or session.last_ack_session_generation
+                    > session.session_generation
+                ):
+                    raise KernelError("session_ack_generation_invalid")
 
         OperatorActionKernel.validate_graph(graph)
         PacketSourceKernel.validate_graph(graph)
