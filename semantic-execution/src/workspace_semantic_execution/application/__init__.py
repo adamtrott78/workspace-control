@@ -1,5 +1,15 @@
 """Application services for Workspace Semantic Execution."""
 
+from .token_economy import (
+    TokenEconomyDecision,
+    TokenEconomyPlanner,
+    TokenEconomyRequest,
+)
+from .frontdoor import (
+    FrontDoorIntakeError,
+    FrontDoorIntakeResult,
+    InstantFrontDoorIntake,
+)
 from .executor_dispatch import (
     ExecutorDispatchCoordinator,
     ExecutorDispatchError,
@@ -66,6 +76,12 @@ from .vertical_slice import (
 
 __all__ = [
     "CompiledPacket",
+    "InstantFrontDoorIntake",
+    "FrontDoorIntakeResult",
+    "FrontDoorIntakeError",
+    "TokenEconomyRequest",
+    "TokenEconomyPlanner",
+    "TokenEconomyDecision",
     "ExecutorDispatchCoordinator",
     "ExecutorDispatchError",
     "ExecutorDispatchRequest",
