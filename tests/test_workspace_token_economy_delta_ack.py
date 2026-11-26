@@ -22,6 +22,8 @@ from workspace_semantic_execution.application.operator_packets import (  # noqa:
 from workspace_semantic_execution.adapters import (  # noqa: E402
     FakeClock,
     InMemoryEventLedger,
+    decode_work_graph,
+    encode_work_graph,
     InMemoryStateStore,
     RecordingTelemetry,
 )
@@ -229,6 +231,54 @@ class DeltaAckTests(unittest.TestCase):
             planner=TokenEconomyPlanner(),
             session=session,
             expected_session_generation=1,
+        )
+        self.assertEqual(decision.context.context_mode, ContextMode.REF_ONLY)
+
+
+    def test_schema_v8_ack_history_is_not_trusted_for_delta(self) -> None:
+        runtime = _runtime()
+        broker = PersistentExecutorSessionBroker(runtime)
+        profile = openai_chat_instant_current_profile()
+        broker.ensure_session(
+            profile=profile,
+            slot_id="slot",
+            session_id="chat-a",
+        )
+        broker.bind(
+            profile=profile,
+            slot_id="slot",
+            expected_session_generation=0,
+            process_id="P1",
+            process_generation=0,
+            packet_sha256="e" * 64,
+        )
+        broker.acknowledge(
+            slot_id="slot",
+            expected_session_generation=0,
+            process_id="P1",
+            process_generation=0,
+            ack_id="ack:P1",
+        )
+        payload = encode_work_graph(runtime.snapshot().graph)
+        payload["schema_version"] = 8
+        raw_session = payload["executor_sessions"][0]
+        raw_session.pop("last_ack_session_generation", None)
+        raw_session.pop("last_ack_packet_sha256", None)
+
+        decoded = decode_work_graph(payload)
+        session = decoded.executor_sessions["slot"]
+        self.assertIsNone(session.last_ack_id)
+        self.assertIsNone(session.last_ack_process_id)
+        self.assertIsNone(session.last_ack_process_generation)
+        self.assertIsNone(session.last_ack_session_generation)
+        self.assertIsNone(session.last_ack_packet_sha256)
+
+        decision = _operator_token_economy_decision(
+            packet_input=_packet_input("P2"),
+            executor=profile,
+            planner=TokenEconomyPlanner(),
+            session=session,
+            expected_session_generation=0,
         )
         self.assertEqual(decision.context.context_mode, ContextMode.REF_ONLY)
 
