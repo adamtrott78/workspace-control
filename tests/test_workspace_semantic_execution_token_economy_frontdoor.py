@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import sys
+import json
+import tempfile
 from pathlib import Path
 import unittest
 
@@ -9,6 +11,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "semantic-execution" / "src"
 sys.path.insert(0, str(SRC))
 
+from workspace_semantic_execution.adapters import (  # noqa: E402
+    FileFrontDoorIntakeStore,
+    FrontDoorIntakeStoreError,
+)
 from workspace_semantic_execution.application import (  # noqa: E402
     InstantFrontDoorIntake,
     PacketCompilationInput,
@@ -226,6 +232,56 @@ class InstantFrontDoorTests(unittest.TestCase):
                 )
                 self.assertIsNone(result.candidate)
                 self.assertTrue(result.requires_existing_task_lookup)
+
+
+class FrontDoorDurableStoreTests(unittest.TestCase):
+    def test_round_trip_is_candidate_only_and_duplicate_fails(self) -> None:
+        intake = InstantFrontDoorIntake().ingest(
+            FrontDoorMessage(
+                message_id="m-store",
+                conversation_id="frontdoor-main",
+                text="Implement the next bounded task.",
+                submitted_at="2026-11-26T12:00:00-05:00",
+                intent=FrontDoorIntent.SUBMIT_TASK,
+            )
+        )
+        assert intake.candidate is not None
+        with tempfile.TemporaryDirectory() as tmp:
+            store = FileFrontDoorIntakeStore(Path(tmp))
+            path = store.persist(
+                intake.candidate,
+                submitted_at=intake.message.submitted_at,
+            )
+            loaded = store.load(path)
+            self.assertEqual(loaded, intake.candidate)
+            self.assertEqual(loaded.authorization_state, "UNDECIDED")
+            with self.assertRaises(FrontDoorIntakeStoreError):
+                store.persist(
+                    intake.candidate,
+                    submitted_at=intake.message.submitted_at,
+                )
+
+    def test_tampered_authority_record_is_rejected(self) -> None:
+        intake = InstantFrontDoorIntake().ingest(
+            FrontDoorMessage(
+                message_id="m-tamper",
+                conversation_id="frontdoor-main",
+                text="Run a task.",
+                submitted_at="2026-11-26T12:00:00-05:00",
+            )
+        )
+        assert intake.candidate is not None
+        with tempfile.TemporaryDirectory() as tmp:
+            store = FileFrontDoorIntakeStore(Path(tmp))
+            path = store.persist(
+                intake.candidate,
+                submitted_at=intake.message.submitted_at,
+            )
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            payload["candidate"]["authorization_state"] = "ALLOW"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaises(FrontDoorIntakeStoreError):
+                store.load(path)
 
 
 if __name__ == "__main__":
