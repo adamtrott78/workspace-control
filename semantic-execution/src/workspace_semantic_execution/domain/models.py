@@ -335,6 +335,8 @@ class ExecutorSession:
     last_ack_id: str | None = None
     last_ack_process_id: str | None = None
     last_ack_process_generation: int | None = None
+    last_ack_session_generation: int | None = None
+    last_ack_packet_sha256: str | None = None
     retirement_reason: str | None = None
 
 
