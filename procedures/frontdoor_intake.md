@@ -45,3 +45,33 @@ discovery but cannot substitute for durable lookup.
 Front-door presentation may be concise and user-facing. Internal worker packets
 default to machine-minimal output and minimum sufficient context. Waiting on
 external work is a zero-model control-plane state.
+
+## Existing-task control
+
+The front door may resolve an explicit durable `task_id` for these operations:
+
+- `QUERY_STATUS`: read-only projection from the authoritative task capsule;
+  no candidate record and no model invocation are required by the control path.
+- `RESUME_TASK`: persist a candidate requesting resume of the exact task.
+- `PROVIDE_DECISION`: persist a candidate carrying the human decision for the
+  exact task.
+- `CANCEL_REQUEST`: persist a candidate requesting cancellation of the exact
+  task.
+
+Resume, decision and cancellation records use
+`FRONTDOOR_TASK_CONTROL_CANDIDATE` and remain
+`authorization_state=UNDECIDED`. They do not directly edit the task capsule,
+scheduler state, authority state, repository state or external systems.
+
+Existing-task operations fail closed without an explicit durable task identity.
+Conversation-memory guesses are not enough. The Instant front door may use
+connected GitHub/Workspace tools to discover candidate task identities, but
+must resolve the final operation against the exact durable capsule.
+
+## Status projection
+
+Status output is deliberately compact and deterministic: task id, title,
+durable status, current stage when present, next safe action, blockers,
+remaining-work count and latest checkpoint id. The user-facing Instant model may
+explain this projection concisely, but should not re-read or narrate unrelated
+history merely to answer a status question.

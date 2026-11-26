@@ -27,6 +27,12 @@ from .frontdoor_intake import (
     FileFrontDoorIntakeStore,
     FrontDoorIntakeStoreError,
 )
+from .frontdoor_tasks import (
+    FileFrontDoorControlStore,
+    FileTaskCapsuleCatalog,
+    FrontDoorControlStoreError,
+    FrontDoorTaskCatalogError,
+)
 from .dbos_runtime import DBOSDurableRuntime
 from .in_memory import (
     DeterministicFakeExecutor,
@@ -92,6 +98,10 @@ __all__ = [
     "DBOSDurableRuntime",
     "FileFrontDoorIntakeStore",
     "FrontDoorIntakeStoreError",
+    "FrontDoorTaskCatalogError",
+    "FrontDoorControlStoreError",
+    "FileTaskCapsuleCatalog",
+    "FileFrontDoorControlStore",
     "DeterministicFakeExecutor",
     "DeterministicSemanticProjection",
     "FakeClock",

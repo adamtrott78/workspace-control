@@ -52,6 +52,7 @@ class InstantFrontDoorIntake:
             )
 
         if message.intent in {
+            FrontDoorIntent.RESUME_TASK,
             FrontDoorIntent.QUERY_STATUS,
             FrontDoorIntent.PROVIDE_DECISION,
             FrontDoorIntent.CANCEL_REQUEST,
