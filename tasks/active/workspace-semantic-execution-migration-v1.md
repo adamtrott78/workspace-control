@@ -70,10 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Proceed to E4/CODEX economics calibration: run the bounded subscription-only Codex live job and controlled usage/allowance calibration, then feed comparable observations into the economics ledger and weekly governor. The Operator UX successor is physically accepted and bound at 33ef885354ada6522e7f2e482dd164c78e01c2ff; E3-A10 already completed PASS, so no E3 retry or frontend rework is needed unless a new defect is observed.
+Complete E4-0 Token Economy + Instant front-door integration before meaningful live Codex benchmarking: bind TokenEconomyPlanner decisions to actual packet materialization/executor invocation, integrate front-door task/status/decision intake with durable Workspace Control state, replay existing A10 packets to quantify old-vs-compact input/output overhead, and validate zero-model waits. Real Codex use remains conserved to explicit auth/preflight or the minimum calibrated invocation after E4-0 passes.
 
 ## Remaining work
 
+- E4-0 Token Economy: enforce REF_ONLY/DELTA/SELECTED/FULL_RECOVERY context plans, reasoning profiles, bounded output modes and zero-model wait/deterministic states in actual packet/executor paths; replay existing packets to measure savings before live Codex calibration.
+- Instant front door: make a persistent ChatGPT Instant conversation the primary human Workspace Control interface for task submission/status/decisions/cancel-revise; persist typed intake and resolve every operation from durable state without chat-created authority.
 - E4/CODEX: run subscription-only Codex live bounded job and controlled usage/allowance calibration; feed comparable observations into the economics ledger and weekly governor.
 - E4 quality/economics: complete claim-bearing matched reasoning-quality/holdout evidence and compare validated progress plus scarce-allowance consumption against the all-strong/frontier control.
 - REL-01: close the remaining integrated fault-campaign cases named by the matrix, especially DB disconnect, validator timeout and delayed/out-of-order event handling.
@@ -84,6 +86,7 @@ Proceed to E4/CODEX economics calibration: run the bounded subscription-only Cod
 
 ## Blockers / gates
 
+- E4-0 TOKEN CONSERVATION: do not spend meaningful live Codex allowance until Token Economy enforcement/replay is validated. Before E4-0 PASS, live Codex is limited to an explicitly necessary auth/preflight probe; no exploratory benchmark batch.
 - E4 ECONOMICS / CODEX: claim-bearing comparison remains gated on calibrated comparable allowance telemetry plus live subscription-only Codex bounded-job evidence; do not substitute raw token estimates or uncalibrated UI observations.
 - REL-01 / REL-02: A10 proves integrated session/process loss and live bounded resource behavior, but the remaining fault-campaign cases plus explicit target-budget/representative-soak closeout are not yet reconciled to PASS.
 - PROD-02: A10 binding/provenance closure passed, but the emitted resource report retained stale artifact_id workspace-semantic-execution-e3-a9-live-resource-v1; normalize that non-authority metadata defect before claiming zero unresolved provenance violations.
