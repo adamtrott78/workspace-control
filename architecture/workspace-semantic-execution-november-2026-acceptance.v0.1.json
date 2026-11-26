@@ -23,7 +23,7 @@
     {
       "id": "C",
       "name": "Instant Chat execution",
-      "goal": "Production semantic work dispatched to persistent ChatGPT Instant sessions through the accepted low-attention Operator Bridge."
+      "goal": "Production semantic work dispatched to persistent ChatGPT Instant sessions through the accepted low-attention Operator Bridge, with a persistent Instant front door as the primary human task/status/decision interface."
     },
     {
       "id": "D",
@@ -210,6 +210,16 @@
       ]
     },
     {
+      "id": "ECON-04",
+      "status": "PARTIAL",
+      "requirement": "Every model-backed attempt is admitted through a deterministic token-economy plan that constrains input context, reasoning effort class and visible output; deterministic work and WAITING_EXTERNAL consume zero model calls, and context expands only when durable evidence justifies REF_ONLY -> DELTA/SELECTED/FULL_RECOVERY.",
+      "evidence": [
+        "Candidate implementation on workspace-token-economy-frontdoor-v1 adds TokenBudget, ContextPlan, TokenEconomyObservation and TokenEconomyPlanner with REF_ONLY/DELTA/SELECTED/FULL_RECOVERY context modes, NO_MODEL/ECONOMY/STANDARD/DEEP reasoning profiles and bounded communication modes.",
+        "Planner contract assigns exactly zero model/input/output budget to WAITING_EXTERNAL and deterministic execution; persistent sessions use DELTA only when an exact durable base checkpoint is declared bound.",
+        "PASS still requires integration with actual packet materialization/executor invocation plus replay/live evidence that budgets are enforced rather than descriptive."
+      ]
+    },
+    {
       "id": "INST-01",
       "status": "PASS",
       "requirement": "Production semantic scheduler action/status transport replaces NoWorkOperatorActionPort and the empty workload-status provider.",
@@ -286,6 +296,17 @@
       "evidence": [
         "Bounded real-account E3-A10/Stage-12 successor run completed PASS through the accepted human-assisted Instant loop. The live report records automatic_typing_or_submission=false, browser_page_content_scraping=false, paid_api_fallback=false, workspace_shell_authority_widened=false, and no Workspace Shell exec/reviewed-helper use.",
         "The operator interaction remained Ctrl+Space -> Ctrl+V -> Enter with the reviewed A8 frontend; browser permissions/security boundaries were not expanded, and post-run private-route plus Windows cleanup passed."
+      ]
+    },
+    {
+      "id": "INST-07",
+      "status": "PARTIAL",
+      "requirement": "A persistent ChatGPT Instant front door is the primary human Workspace Control interface for natural-language task submission, durable status queries, explicit human decisions and cancellation/revision requests; conversation state is non-authoritative and every operation resolves through durable Workspace Control state.",
+      "evidence": [
+        "Candidate implementation on workspace-token-economy-frontdoor-v1 adds typed FrontDoorMessage/FrontDoorIntent and InstantFrontDoorIntake contracts.",
+        "Task submissions deterministically become TaskIntakeCandidate records with authorization_state=UNDECIDED; the front door cannot mint executable authority.",
+        "Status/decision/cancel intents require durable existing-task lookup rather than conversation-memory interpretation.",
+        "PASS still requires durable persistence/task creation-resume integration and bounded live front-door acceptance."
       ]
     },
     {
@@ -412,6 +433,10 @@
       "exit_gate": "Recursive decomposition, mixed Instant/Codex routing, allowance calibration and weekly governor operational."
     },
     {
+      "window": "2026-11-26..2026-11-27",
+      "exit_gate": "Token Economy E4-0 passes: compact/delta/recovery packet enforcement, zero-model waits, bounded worker output, and durable Instant front-door intake/status contracts are integrated before meaningful Codex benchmarking."
+    },
+    {
       "window": "2026-11-25..2026-11-27",
       "exit_gate": "Reliability/fault-injection campaign passes on integrated stack."
     },
@@ -431,5 +456,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-26",
-  "latest_validated_checkpoint": "workspace-operator UX successor 33ef885354ada6522e7f2e482dd164c78e01c2ff physically accepted; Workspace #3279 / Semantic #575 / Operator #844 SUCCESS"
+  "latest_validated_checkpoint": "Operator UX successor accepted; Token Economy + Instant front-door implementation candidate opened for E4-0 before live Codex calibration."
 }
