@@ -13,6 +13,19 @@ from .executors import (
     RoutingDecision,
     SessionMode,
 )
+from .token_economy import (
+    CommunicationMode,
+    ContextMode,
+    ContextPlan,
+    ReasoningProfile,
+    TokenBudget,
+    TokenEconomyObservation,
+)
+from .frontdoor import (
+    FrontDoorIntent,
+    FrontDoorMessage,
+    TaskIntakeCandidate,
+)
 from .kernel import DomainKernel, KernelError
 from .packet_sources import PacketSourceError, PacketSourceKernel
 from .worker_results import WorkerResultError, WorkerResultKernel
@@ -56,6 +69,15 @@ from .models import (
 
 __all__ = [
     "ActionSpec",
+    "TaskIntakeCandidate",
+    "FrontDoorMessage",
+    "FrontDoorIntent",
+    "TokenEconomyObservation",
+    "TokenBudget",
+    "ReasoningProfile",
+    "ContextPlan",
+    "ContextMode",
+    "CommunicationMode",
     "AuthorityDecision",
     "AuthorityOutcome",
     "CandidateAction",
