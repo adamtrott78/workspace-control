@@ -140,7 +140,7 @@ class GraphCodecTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertEqual(loads_work_graph(first), graph)
         payload = json.loads(first)
-        self.assertEqual(payload["schema_version"], 8)
+        self.assertEqual(payload["schema_version"], 9)
         self.assertEqual(
             [item["process_id"] for item in payload["processes"]],
             ["complete", "waiting"],
