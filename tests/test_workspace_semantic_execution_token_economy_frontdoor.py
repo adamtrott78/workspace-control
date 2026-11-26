@@ -11,8 +11,11 @@ sys.path.insert(0, str(SRC))
 
 from workspace_semantic_execution.application import (  # noqa: E402
     InstantFrontDoorIntake,
+    PacketCompilationInput,
+    SemanticPacketCompiler,
     TokenEconomyPlanner,
     TokenEconomyRequest,
+    openai_chat_instant_current_profile,
 )
 from workspace_semantic_execution.domain import (  # noqa: E402
     CommunicationMode,
@@ -105,6 +108,84 @@ class TokenEconomyPlannerTests(unittest.TestCase):
             CommunicationMode.USER_FACING,
         )
         self.assertEqual(result.context.context_mode, ContextMode.REF_ONLY)
+
+
+class EconomicalPacketRenderingTests(unittest.TestCase):
+    def test_compact_projection_preserves_canonical_hash_and_mandatory_contract(self) -> None:
+        compiler = SemanticPacketCompiler()
+        executor = openai_chat_instant_current_profile()
+        source = PacketCompilationInput(
+            process_id="P1",
+            source_checkpoint="checkpoint:abc",
+            objective="Inspect the exact bounded source and report the result.",
+            findings=(),
+            decisions=(),
+            constraints=("do not widen authority", "read only exact source"),
+            evidence_refs=("evidence://one",),
+            authority_refs=("authority://scope",),
+            allowed_actions=("read",),
+            validator_contract="validator:exact-source",
+            output_schema="RESULT_V1",
+            next_safe_boundary="return candidate only",
+        )
+        full = compiler.compile(source, executor=executor)
+        decision = TokenEconomyPlanner().plan(
+            TokenEconomyRequest(
+                required_refs=source.evidence_refs + source.authority_refs,
+                base_checkpoint=source.source_checkpoint,
+                invocation_mode=executor.invocation_mode,
+                session_mode=executor.session_mode,
+            )
+        )
+        compact = compiler.compile(
+            source,
+            executor=executor,
+            token_economy=decision,
+        )
+
+        self.assertEqual(compact.packet_sha256, full.packet_sha256)
+        self.assertEqual(
+            compact.canonical_payload_json,
+            full.canonical_payload_json,
+        )
+        self.assertLess(len(compact.text), len(full.text))
+        self.assertIn("AUTHORITY=PROPOSAL_ONLY", compact.text)
+        self.assertIn("COMPLETION=VALIDATOR_REQUIRED", compact.text)
+        self.assertIn("CONSTRAINTS=do not widen authority|read only exact source", compact.text)
+        self.assertIn("AUTHORITY_REFS=authority://scope", compact.text)
+        self.assertIn("VALIDATOR=validator:exact-source", compact.text)
+        self.assertIn("OUTPUT_SCHEMA=RESULT_V1", compact.text)
+        self.assertNotIn('"execution_contract"', compact.text)
+
+    def test_full_recovery_keeps_complete_payload_rendering(self) -> None:
+        compiler = SemanticPacketCompiler()
+        executor = openai_chat_instant_current_profile()
+        source = PacketCompilationInput(
+            process_id="P2",
+            source_checkpoint="checkpoint:recovery",
+            objective="Recover from durable state.",
+            constraints=("preserve authority",),
+            validator_contract="validator:recovery",
+            output_schema="RESULT_V1",
+            next_safe_boundary="resume",
+        )
+        baseline = compiler.compile(source, executor=executor)
+        decision = TokenEconomyPlanner().plan(
+            TokenEconomyRequest(
+                recovery_required=True,
+                base_checkpoint=source.source_checkpoint,
+                invocation_mode=executor.invocation_mode,
+                session_mode=executor.session_mode,
+            )
+        )
+        recovery = compiler.compile(
+            source,
+            executor=executor,
+            token_economy=decision,
+        )
+        self.assertEqual(recovery.text, baseline.text)
+        self.assertIn("BEGIN_PAYLOAD", recovery.text)
+        self.assertIn('"execution_contract"', recovery.text)
 
 
 class InstantFrontDoorTests(unittest.TestCase):
