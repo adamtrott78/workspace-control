@@ -109,7 +109,7 @@ required evidence merely to save tokens.
 
 ## Waiting
 
-Waiting is a control-plane state, not a reasoning activity.
+WAITING is a control-plane state, not a reasoning activity.
 
 When a durable external dependency is pending, stop model work unless there is
 new evidence to process. Do not emit repeated status narration, repeatedly
