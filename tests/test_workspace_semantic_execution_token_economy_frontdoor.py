@@ -12,10 +12,16 @@ SRC = ROOT / "semantic-execution" / "src"
 sys.path.insert(0, str(SRC))
 
 from workspace_semantic_execution.adapters import (  # noqa: E402
+    FileFrontDoorControlStore,
     FileFrontDoorIntakeStore,
+    FileTaskCapsuleCatalog,
+    FrontDoorControlStoreError,
     FrontDoorIntakeStoreError,
+    FrontDoorTaskCatalogError,
 )
 from workspace_semantic_execution.application import (  # noqa: E402
+    FrontDoorControlError,
+    InstantFrontDoorControlService,
     InstantFrontDoorIntake,
     PacketCompilationInput,
     SemanticPacketCompiler,
@@ -282,6 +288,186 @@ class FrontDoorDurableStoreTests(unittest.TestCase):
             path.write_text(json.dumps(payload), encoding="utf-8")
             with self.assertRaises(FrontDoorIntakeStoreError):
                 store.load(path)
+
+
+class InstantFrontDoorControlServiceTests(unittest.TestCase):
+    @staticmethod
+    def _write_task(root: Path, task_id: str = "task-one") -> Path:
+        root.mkdir(parents=True, exist_ok=True)
+        path = root / f"{task_id}.json"
+        path.write_text(
+            json.dumps(
+                {
+                    "schema_version": 2,
+                    "task_id": task_id,
+                    "title": "Task One",
+                    "status": "IN_PROGRESS",
+                    "current_stage": "stage-a",
+                    "next_safe_action": "Run the next deterministic gate.",
+                    "blockers": ["authority gate remains"],
+                    "remaining_work": ["one", "two"],
+                    "checkpoints": [
+                        {
+                            "id": "checkpoint-a",
+                            "kind": "integrated_handoff_checkpoint",
+                            "identity": "repo@abc",
+                            "required_for_resume": True,
+                            "evidence": ["pass"],
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        return path
+
+    def _service(self, tmp: str):
+        root = Path(tmp)
+        active = root / "tasks" / "active"
+        intake = root / "tasks" / "intake"
+        self._write_task(active)
+        return (
+            InstantFrontDoorControlService(
+                task_catalog=FileTaskCapsuleCatalog(active),
+                intake_store=FileFrontDoorIntakeStore(intake),
+                control_store=FileFrontDoorControlStore(intake),
+            ),
+            intake,
+        )
+
+    def test_status_is_exact_durable_read_and_creates_no_candidate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            service, intake = self._service(tmp)
+            result = service.handle(
+                FrontDoorMessage(
+                    message_id="status-1",
+                    conversation_id="frontdoor-main",
+                    text="what is the status?",
+                    submitted_at="2026-11-26T12:00:00-05:00",
+                    intent=FrontDoorIntent.QUERY_STATUS,
+                ),
+                target_task_id="task-one",
+            )
+            self.assertIsNotNone(result.task_status)
+            assert result.task_status is not None
+            self.assertEqual(result.task_status.task_id, "task-one")
+            self.assertEqual(result.task_status.status, "IN_PROGRESS")
+            self.assertEqual(result.task_status.current_stage, "stage-a")
+            self.assertEqual(result.task_status.remaining_work_count, 2)
+            self.assertEqual(
+                result.task_status.latest_checkpoint_id,
+                "checkpoint-a",
+            )
+            self.assertIsNone(result.intake_ref)
+            self.assertIsNone(result.control_ref)
+            self.assertFalse(intake.exists())
+
+    def test_submit_task_persists_candidate_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            service, _ = self._service(tmp)
+            result = service.handle(
+                FrontDoorMessage(
+                    message_id="submit-1",
+                    conversation_id="frontdoor-main",
+                    text="Build the bounded next feature.",
+                    submitted_at="2026-11-26T12:00:00-05:00",
+                    intent=FrontDoorIntent.SUBMIT_TASK,
+                )
+            )
+            self.assertIsNotNone(result.intake_ref)
+            payload = json.loads(
+                Path(result.intake_ref).read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                payload["candidate"]["authorization_state"],
+                "UNDECIDED",
+            )
+
+    def test_resume_decision_and_cancel_are_existing_task_candidates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            service, _ = self._service(tmp)
+            for index, intent in enumerate(
+                (
+                    FrontDoorIntent.RESUME_TASK,
+                    FrontDoorIntent.PROVIDE_DECISION,
+                    FrontDoorIntent.CANCEL_REQUEST,
+                ),
+                start=1,
+            ):
+                with self.subTest(intent=intent):
+                    result = service.handle(
+                        FrontDoorMessage(
+                            message_id=f"control-{index}",
+                            conversation_id="frontdoor-main",
+                            text=f"request {intent.value}",
+                            submitted_at="2026-11-26T12:00:00-05:00",
+                            intent=intent,
+                        ),
+                        target_task_id="task-one",
+                    )
+                    self.assertIsNotNone(result.control_ref)
+                    candidate = FileFrontDoorControlStore(
+                        Path(tmp) / "tasks" / "intake"
+                    ).load(Path(result.control_ref))
+                    self.assertEqual(candidate.intent, intent)
+                    self.assertEqual(candidate.target_task_id, "task-one")
+                    self.assertEqual(
+                        candidate.authorization_state,
+                        "UNDECIDED",
+                    )
+                    self.assertEqual(result.task_status.status, "IN_PROGRESS")
+
+    def test_control_request_fails_closed_when_task_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            service, intake = self._service(tmp)
+            with self.assertRaises(FrontDoorTaskCatalogError):
+                service.handle(
+                    FrontDoorMessage(
+                        message_id="missing-1",
+                        conversation_id="frontdoor-main",
+                        text="resume it",
+                        submitted_at="2026-11-26T12:00:00-05:00",
+                        intent=FrontDoorIntent.RESUME_TASK,
+                    ),
+                    target_task_id="missing-task",
+                )
+            if intake.exists():
+                self.assertEqual(list(intake.iterdir()), [])
+
+    def test_existing_task_operations_require_explicit_task_identity(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            service, _ = self._service(tmp)
+            with self.assertRaises(FrontDoorControlError):
+                service.handle(
+                    FrontDoorMessage(
+                        message_id="no-id",
+                        conversation_id="frontdoor-main",
+                        text="status",
+                        submitted_at="2026-11-26T12:00:00-05:00",
+                        intent=FrontDoorIntent.QUERY_STATUS,
+                    )
+                )
+
+    def test_control_store_rejects_authority_tampering(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            service, _ = self._service(tmp)
+            result = service.handle(
+                FrontDoorMessage(
+                    message_id="tamper-control",
+                    conversation_id="frontdoor-main",
+                    text="cancel",
+                    submitted_at="2026-11-26T12:00:00-05:00",
+                    intent=FrontDoorIntent.CANCEL_REQUEST,
+                ),
+                target_task_id="task-one",
+            )
+            assert result.control_ref is not None
+            path = Path(result.control_ref)
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            payload["candidate"]["authorization_state"] = "ALLOW"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaises(FrontDoorControlStoreError):
+                FileFrontDoorControlStore(path.parent).load(path)
 
 
 if __name__ == "__main__":
