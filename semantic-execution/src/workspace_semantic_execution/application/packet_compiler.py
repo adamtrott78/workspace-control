@@ -6,10 +6,12 @@ import hashlib
 import json
 
 from ..domain import (
+    ContextMode,
     ExecutorProfile,
     SessionMode,
     WorkerResultPublicationContract,
 )
+from .token_economy import TokenEconomyDecision
 
 
 @dataclass(frozen=True)
@@ -148,11 +150,99 @@ class SemanticPacketCompiler:
             return ""
         return "\n".join(mentions) + "\n\n"
 
+    @staticmethod
+    def _compact_list(label: str, values: tuple[str, ...]) -> str:
+        if not values:
+            return f"{label}=NONE\n"
+        return f"{label}=" + "|".join(values) + "\n"
+
+    def _render_compact(
+        self,
+        *,
+        source: PacketCompilationInput,
+        executor: ExecutorProfile,
+        digest: str,
+        decision: TokenEconomyDecision,
+    ) -> str:
+        """Render a token-economical worker projection.
+
+        The full canonical payload remains hashed and durable. Compact rendering
+        removes repeated presentation/contract boilerplate only; mandatory
+        constraints, authority refs, validator/output contracts, findings,
+        decisions, questions and result-publication bindings remain explicit.
+        """
+        budget = decision.budget
+        context = decision.context
+        lines = [
+            self.VERSION,
+            f"packet_sha256={digest}",
+            f"executor_id={executor.executor_id}",
+            f"context_mode={context.context_mode.value}",
+            f"reasoning_profile={budget.reasoning_profile.value}",
+            f"communication_mode={budget.communication_mode.value}",
+            f"max_output_tokens={budget.max_output_tokens}",
+            f"source_checkpoint={source.source_checkpoint}",
+            "AUTHORITY=PROPOSAL_ONLY",
+            "COMPLETION=VALIDATOR_REQUIRED",
+            "RETRY=NEW_EVIDENCE_REQUIRED",
+            "DURABLE_STATE=AUTHORITATIVE",
+            "OBJECTIVE",
+            source.objective,
+            "END_OBJECTIVE",
+        ]
+        text = "\n".join(lines) + "\n"
+        text += self._compact_list("CONSTRAINTS", source.constraints)
+        text += self._compact_list("EVIDENCE_REFS", source.evidence_refs)
+        text += self._compact_list("AUTHORITY_REFS", source.authority_refs)
+        text += self._compact_list("ALLOWED_ACTIONS", source.allowed_actions)
+        text += f"VALIDATOR={source.validator_contract}\n"
+        text += f"OUTPUT_SCHEMA={source.output_schema}\n"
+        text += f"NEXT_SAFE_BOUNDARY={source.next_safe_boundary}\n"
+
+        if source.findings:
+            text += "FINDINGS_BEGIN\n"
+            for item in source.findings:
+                refs = "|".join(item.evidence_refs) or "NONE"
+                text += f"{item.finding_id}\t{refs}\t{item.text}\n"
+            text += "FINDINGS_END\n"
+        if source.decisions:
+            text += "DECISIONS_BEGIN\n"
+            for item in source.decisions:
+                refs = "|".join(item.evidence_refs) or "NONE"
+                alternatives = "|".join(item.alternatives) or "NONE"
+                text += (
+                    f"{item.decision_id}\t{refs}\t{alternatives}\t"
+                    f"{item.decision}\t{item.rationale}\n"
+                )
+            text += "DECISIONS_END\n"
+        if source.unresolved_questions:
+            text += "QUESTIONS_BEGIN\n"
+            for item in source.unresolved_questions:
+                text += f"{item.question_id}\t{item.text}\n"
+            text += "QUESTIONS_END\n"
+
+        if context.context_mode == ContextMode.DELTA:
+            text += (
+                f"BASE_CHECKPOINT={context.base_checkpoint or source.source_checkpoint}\n"
+            )
+            text += self._compact_list("DELTA_REFS", context.delta_refs)
+
+        if source.result_publication is not None:
+            publication = json.dumps(
+                asdict(source.result_publication),
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+            )
+            text += f"RESULT_PUBLICATION={publication}\n"
+        return text
+
     def compile(
         self,
         source: PacketCompilationInput,
         *,
         executor: ExecutorProfile,
+        token_economy: TokenEconomyDecision | None = None,
     ) -> CompiledPacket:
         self._validate(source)
 
@@ -240,19 +330,30 @@ class SemanticPacketCompiler:
             ensure_ascii=False,
         )
         surface_prefix = self._surface_prefix(source.objective)
-        text = (
-            surface_prefix
-            + f"{self.VERSION}\n"
-            f"packet_sha256={digest}\n"
-            f"executor_id={executor.executor_id}\n"
-            f"invocation_mode={executor.invocation_mode.value}\n"
-            f"session_mode={executor.session_mode.value}\n"
-            f"lifecycle={executor.lifecycle.value}\n"
-            f"memory_reset_policy={executor.memory_reset_policy.value}\n"
-            "BEGIN_PAYLOAD\n"
-            f"{pretty}\n"
-            "END_PAYLOAD\n"
-        )
+        if (
+            token_economy is None
+            or token_economy.context.context_mode == ContextMode.FULL_RECOVERY
+        ):
+            text = (
+                surface_prefix
+                + f"{self.VERSION}\n"
+                f"packet_sha256={digest}\n"
+                f"executor_id={executor.executor_id}\n"
+                f"invocation_mode={executor.invocation_mode.value}\n"
+                f"session_mode={executor.session_mode.value}\n"
+                f"lifecycle={executor.lifecycle.value}\n"
+                f"memory_reset_policy={executor.memory_reset_policy.value}\n"
+                "BEGIN_PAYLOAD\n"
+                f"{pretty}\n"
+                "END_PAYLOAD\n"
+            )
+        else:
+            text = surface_prefix + self._render_compact(
+                source=source,
+                executor=executor,
+                digest=digest,
+                decision=token_economy,
+            )
         return CompiledPacket(
             packet_version=self.VERSION,
             executor_id=executor.executor_id,
