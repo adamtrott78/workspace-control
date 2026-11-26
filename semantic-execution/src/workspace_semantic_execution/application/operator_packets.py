@@ -38,22 +38,43 @@ def _operator_token_economy_decision(
     packet_input: PacketCompilationInput,
     executor,
     planner: TokenEconomyPlanner,
+    session=None,
+    expected_session_generation: int | None = None,
 ) -> TokenEconomyDecision:
-    """Deterministic default economy plan for an Operator-dispatched worker.
+    """Plan Operator context without trusting conversational continuity.
 
-    Until durable per-session checkpoint acknowledgments are added, the
-    Operator path deliberately starts REF_ONLY rather than assuming chat memory.
+    DELTA is permitted only when the current durable session generation carries
+    an exact ACK for a previous packet SHA. Missing/stale evidence falls back to
+    REF_ONLY; a replaced session therefore cannot inherit old chat context.
     """
+    ack_packet_sha = None
+    if (
+        session is not None
+        and expected_session_generation is not None
+        and session.session_generation == expected_session_generation
+        and session.executor_id == executor.executor_id
+        and session.last_ack_session_generation == expected_session_generation
+        and session.last_ack_packet_sha256 is not None
+    ):
+        ack_packet_sha = session.last_ack_packet_sha256
+
+    required_refs = tuple(
+        dict.fromkeys(
+            packet_input.evidence_refs
+            + packet_input.authority_refs
+        )
+    )
     return planner.plan(
         TokenEconomyRequest(
-            required_refs=tuple(
-                dict.fromkeys(
-                    packet_input.evidence_refs
-                    + packet_input.authority_refs
-                )
+            required_refs=required_refs,
+            optional_refs=(),
+            delta_refs=required_refs if ack_packet_sha is not None else (),
+            base_checkpoint=(
+                f"packet:{ack_packet_sha}"
+                if ack_packet_sha is not None
+                else packet_input.source_checkpoint
             ),
-            base_checkpoint=packet_input.source_checkpoint,
-            session_has_base_checkpoint=False,
+            session_has_base_checkpoint=ack_packet_sha is not None,
             recovery_required=False,
             broad_context_required=False,
             waiting_external=False,
@@ -169,10 +190,17 @@ class DurableOperatorPacketMaterializer:
             ) from exc
 
         packet_input = _compilation_input(source)
+        session = (
+            None
+            if action.worker_slot_id is None
+            else graph.executor_sessions.get(action.worker_slot_id)
+        )
         economy = _operator_token_economy_decision(
             packet_input=packet_input,
             executor=executor,
             planner=self._token_economy_planner,
+            session=session,
+            expected_session_generation=action.session_generation,
         )
         packet = self._compiler.compile(
             packet_input,
@@ -258,10 +286,14 @@ class OperatorDispatchPlanner:
         )
 
         executor = self._registry.get(executor_id)
+        graph = self._runtime.snapshot().graph
+        session = graph.executor_sessions.get(worker_slot_id)
         economy = _operator_token_economy_decision(
             packet_input=effective_packet_input,
             executor=executor,
             planner=self._token_economy_planner,
+            session=session,
+            expected_session_generation=session_generation,
         )
         packet = self._compiler.compile(
             effective_packet_input,
