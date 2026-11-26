@@ -186,6 +186,10 @@ class SemanticPacketCompiler:
             "COMPLETION=VALIDATOR_REQUIRED",
             "RETRY=NEW_EVIDENCE_REQUIRED",
             "DURABLE_STATE=AUTHORITATIVE",
+            (
+                "Do not modify task capsules, authority/policy state, runtime "
+                "control state, or any path other than the exact candidate target."
+            ),
             "OBJECTIVE",
             source.objective,
             "END_OBJECTIVE",
@@ -231,7 +235,6 @@ class SemanticPacketCompiler:
             publication = json.dumps(
                 asdict(source.result_publication),
                 sort_keys=True,
-                separators=(",", ":"),
                 ensure_ascii=False,
             )
             text += f"RESULT_PUBLICATION={publication}\n"
