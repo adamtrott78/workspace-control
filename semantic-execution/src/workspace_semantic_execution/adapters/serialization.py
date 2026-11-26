@@ -164,6 +164,8 @@ def _encode_executor_session(session: ExecutorSession) -> dict[str, Any]:
         "last_ack_id": session.last_ack_id,
         "last_ack_process_id": session.last_ack_process_id,
         "last_ack_process_generation": session.last_ack_process_generation,
+        "last_ack_packet_sha256": session.last_ack_packet_sha256,
+        "last_ack_session_generation": session.last_ack_session_generation,
         "retirement_reason": session.retirement_reason,
     }
 
@@ -995,6 +997,8 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
                 last_ack_id=raw.get("last_ack_id"),
                 last_ack_process_id=raw.get("last_ack_process_id"),
                 last_ack_process_generation=(None if raw.get("last_ack_process_generation") is None else int(raw["last_ack_process_generation"])),
+                last_ack_packet_sha256=raw.get("last_ack_packet_sha256"),
+                last_ack_session_generation=(None if raw.get("last_ack_session_generation") is None else int(raw["last_ack_session_generation"])),
                 retirement_reason=raw.get("retirement_reason"),
             )
 
