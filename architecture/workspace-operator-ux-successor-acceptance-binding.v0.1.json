@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-operator-ux-successor-acceptance-binding-v0.1",
+  "status": "PHYSICAL_ACCEPTANCE_PASS_BOUND_FOR_FUTURE_LIVE_STAGING",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor_frontend": {
+    "review_head": "6fb315884804214f96ca0f7264a48eed40741a60",
+    "note": "Historical A8 frontend remains immutable evidence; this artifact supersedes it only for future staging."
+  },
+  "accepted_successor": {
+    "head": "33ef885354ada6522e7f2e482dd164c78e01c2ff",
+    "operator_bridge_src_tree": "acdcabb9da82ff8aeae130a7e5f3b78c690f2f9a",
+    "dev_harness_blob": "8c45e9dc2adb251dd526ed941d0fe74b6932558a",
+    "critical_blobs": {
+      "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs": "63d2dfb6f75d4a599d031bed845304cf8fe3c5c6",
+      "operator-bridge/src/WorkspaceOperator/Windows/Hotkey/HumanSubmitConfirmationGate.cs": "c7b30bdb1f2967fede6745d0baad12b2df68eb50",
+      "operator-bridge/src/WorkspaceOperator/Windows/IWorkerWindowSafetyPort.cs": "3c38d891e81e25339389a75220fecfd3ca946167",
+      "operator-bridge/src/WorkspaceOperator/Windows/Win32WorkerWindowSafetyPort.cs": "030596ad89f70a859eebeac119d6251fd908c8a3",
+      "operator-bridge/src/WorkspaceOperator/Windows/WorkloadStatusPresentation.cs": "9ab249b67ea0beb75974ca1799010d5f03610a12",
+      "operator-bridge/src/WorkspaceOperator/Program.cs": "e0db4cc6265dbdcc7b64bb8cc40477776600633a",
+      "operator-bridge/src/WorkspaceOperator/Bootstrap/LocalSmokeOperatorActionPort.cs": "ab568173410d0e33f42cfa15af697224bce2dc96"
+    },
+    "review_blobs": {
+      "architecture/workspace-operator-enter-minimize-ready-notify.v0.1.json": "db92d5f1016aec8bdc893b3aae4951e2d7787d6d",
+      "architecture/workspace-operator-ux-smoke-harness-repair.v0.1.json": "0581ff68505a5322884bfc565c8b41eb89066ccd",
+      "architecture/workspace-operator-worker-foreground-repair.v0.1.json": "4c92eaacad009e663a89f57067df73fc69faae36"
+    }
+  },
+  "validation": {
+    "workspace_control": {
+      "run_number": 3279,
+      "result": "SUCCESS"
+    },
+    "semantic_execution": {
+      "run_number": 575,
+      "result": "SUCCESS"
+    },
+    "operator_bridge": {
+      "run_number": 844,
+      "result": "SUCCESS"
+    }
+  },
+  "physical_acceptance": {
+    "platform": "Windows",
+    "result": "PASS",
+    "observations": [
+      "One dedicated Firefox worker window only; no duplicate about:blank/second-window regression.",
+      "Ctrl+Space foregrounded the existing ChatGPT worker without manual window selection.",
+      "Manual Ctrl+V then Enter submitted the packet and the worker Firefox minimized.",
+      "A subsequent Ctrl+Space while the smoke projected SentUnconfirmed=1 reported pending durable acknowledgment and did not reopen/refocus Firefox."
+    ]
+  },
+  "behavior_contract": {
+    "ready_transition": "New READY work may notify but must not steal focus; Ctrl+Space is the explicit service gesture.",
+    "service": "Ctrl+Space activates the exact managed/captured Firefox worker and clipboard preparation remains explicit/manual-paste only.",
+    "submit": "Manual Enter is observed only in the prepared trusted worker; UI minimize follows after key delivery and does not imply durable success.",
+    "pending_ack": "While SentUnconfirmed>0, another Ctrl+Space must not dispatch a new packet and must leave Firefox minimized.",
+    "idle": "True idle may keep/minimize the trusted worker; no automatic typing, mouse, DOM/page scraping, or submission is allowed."
+  },
+  "future_live_staging": {
+    "required_frontend_head": "33ef885354ada6522e7f2e482dd164c78e01c2ff",
+    "required_src_tree": "acdcabb9da82ff8aeae130a7e5f3b78c690f2f9a",
+    "rule": "Future live launchers that stage the Operator frontend must use this exact accepted successor (or a later independently reviewed/accepted successor), not silently fall back to the frozen A8 frontend.",
+    "authority_created": false
+  }
+}
