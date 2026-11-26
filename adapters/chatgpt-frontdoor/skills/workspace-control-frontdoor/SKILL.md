@@ -123,6 +123,5 @@ action.
 
 ## Front-door continuity
 
-Prefer this persistent conversation for normal user interaction, but do not
-depend on it for recovery. If the chat is replaced or context becomes
+Prefer this persistent conversation for normal user interaction, but do not depend on it for recovery. If the chat is replaced or context becomes
 untrustworthy, recover from the task capsule and exact durable evidence.
