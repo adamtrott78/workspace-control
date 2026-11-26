@@ -10,6 +10,11 @@ from .frontdoor import (
     FrontDoorIntakeResult,
     InstantFrontDoorIntake,
 )
+from .frontdoor_control import (
+    FrontDoorControlError,
+    FrontDoorControlResult,
+    InstantFrontDoorControlService,
+)
 from .executor_dispatch import (
     ExecutorDispatchCoordinator,
     ExecutorDispatchError,
@@ -77,6 +82,9 @@ from .vertical_slice import (
 __all__ = [
     "CompiledPacket",
     "InstantFrontDoorIntake",
+    "InstantFrontDoorControlService",
+    "FrontDoorControlResult",
+    "FrontDoorControlError",
     "FrontDoorIntakeResult",
     "FrontDoorIntakeError",
     "TokenEconomyRequest",
