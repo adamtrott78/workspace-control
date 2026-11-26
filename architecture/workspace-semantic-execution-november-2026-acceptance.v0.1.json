@@ -246,13 +246,16 @@
     },
     {
       "id": "INST-03",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Repeated scheduler presses remain fail-closed: before human Enter confirmation they refocus/block the prepared worker; after confirmed Enter but before durable acknowledgment they must not dispatch another packet, must report the pending acknowledgment, and must leave the worker Firefox minimized unless an explicit recovery/inspection path is invoked.",
       "evidence": [
         "UT-03 and prior repaired UT-01 recovery evidence passed.",
         "2026-11-25 operator UX decision supersedes the earlier always-refocus interpretation after Enter: plain Enter should hide the worker immediately, READY should notify without focus steal, and Ctrl+Space remains a manual service/check gesture.",
         "Safety semantics are unchanged: durable acknowledgment remains authoritative and a scheduler press while SentUnconfirmed>0 may not dispatch or advance another packet.",
-        "Successor review workspace-operator-enter-minimize-ready-notify-v1 is under exact-head validation; INST-03 returns to PASS only after that source is green and bounded Windows acceptance confirms the revised focus/minimize behavior."
+        "Successor review workspace-operator-enter-minimize-ready-notify-v1 is under exact-head validation; INST-03 returns to PASS only after that source is green and bounded Windows acceptance confirms the revised focus/minimize behavior.",
+        "Operator UX successor head 33ef885354ada6522e7f2e482dd164c78e01c2ff passed Workspace #3279, Semantic #575 and Operator #844.",
+        "Bounded Windows physical acceptance passed: Ctrl+Space foregrounded the existing managed ChatGPT Firefox worker; manual Ctrl+V then Enter caused the prepared worker to minimize; a subsequent Ctrl+Space while SentUnconfirmed=1 reported pending durable acknowledgment and did not reopen/refocus Firefox.",
+        "The accepted successor is durably bound by architecture/workspace-operator-ux-successor-acceptance-binding.v0.1.json for future live frontend staging; historical A8 evidence remains immutable."
       ]
     },
     {
@@ -427,6 +430,6 @@
   ],
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
-  "last_updated": "2026-11-25",
-  "latest_validated_checkpoint": "workspace-control@cc36a689e690ca0e90ac58b5715029fb69cd826c (E3-A10 live PASS; durable closeout pending reconciliation validation)"
+  "last_updated": "2026-11-26",
+  "latest_validated_checkpoint": "workspace-operator UX successor 33ef885354ada6522e7f2e482dd164c78e01c2ff physically accepted; Workspace #3279 / Semantic #575 / Operator #844 SUCCESS"
 }
