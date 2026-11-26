@@ -24,7 +24,9 @@ from .token_economy import (
 from .frontdoor import (
     FrontDoorIntent,
     FrontDoorMessage,
+    TaskControlCandidate,
     TaskIntakeCandidate,
+    TaskStatusView,
 )
 from .kernel import DomainKernel, KernelError
 from .packet_sources import PacketSourceError, PacketSourceKernel
@@ -70,6 +72,8 @@ from .models import (
 __all__ = [
     "ActionSpec",
     "TaskIntakeCandidate",
+    "TaskStatusView",
+    "TaskControlCandidate",
     "FrontDoorMessage",
     "FrontDoorIntent",
     "TokenEconomyObservation",
