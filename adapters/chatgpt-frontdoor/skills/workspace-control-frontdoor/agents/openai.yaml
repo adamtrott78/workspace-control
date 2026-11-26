@@ -1,0 +1,8 @@
+interface:
+  display_name: Workspace Control
+  short_description: Persistent Instant control
+  default_prompt: Use this conversation as my Workspace Control front door. Recover durable state first, keep outputs concise, and use connected tools directly instead of asking me to relay routine state.
+policy:
+  allow_implicit_invocation: true
+  products:
+    - CHAT
