@@ -936,27 +936,43 @@
     {
       "id": "token_economy_and_instant_frontdoor",
       "status": "IN_PROGRESS",
-      "objective": "Before meaningful live Codex benchmarking, implement Token Economy enforcement and the persistent Instant front door: minimum sufficient context, bounded reasoning/output, zero-model waits, and non-authoritative natural-language task/status/decision intake.",
+      "execution_owner": "chatgpt",
+      "selected_executor": "deterministic-control-plane",
+      "selected_surface": "github",
+      "inputs": [
+        "architecture/workspace-token-economy-instant-frontdoor.v0.1.json",
+        "existing semantic packet compiler/operator transport/session semantics",
+        "existing task-capsule and authority contracts",
+        "A10/Operator UX accepted evidence"
+      ],
+      "outputs": [
+        "semantic-execution/src/workspace_semantic_execution/domain/token_economy.py",
+        "semantic-execution/src/workspace_semantic_execution/application/token_economy.py",
+        "semantic-execution/src/workspace_semantic_execution/domain/frontdoor.py",
+        "semantic-execution/src/workspace_semantic_execution/application/frontdoor.py",
+        "architecture/workspace-token-economy-instant-frontdoor.v0.1.json"
+      ],
       "validation": [
         {
-          "check": "E4-0 contracts and deterministic planner candidate",
-          "result": "PARTIAL",
+          "check": "E4-0 token-economy contracts, compact packet rendering and zero-model invariants",
+          "result": "NOT_RUN",
           "evidence": [
-            "workspace-token-economy-frontdoor-v1 adds token/context/reasoning/output domain contracts plus deterministic TokenEconomyPlanner.",
-            "WAITING_EXTERNAL and deterministic work receive allow_model_call=false, NO_MODEL reasoning, and zero inline/retrieval/output budgets.",
-            "Persistent-session DELTA requires an explicitly bound base checkpoint; recovery selects FULL_RECOVERY."
+            "Candidate branch adds deterministic token/context/reasoning/output planning.",
+            "Operator packet path now renders a compact worker projection while retaining the unchanged full canonical payload/hash.",
+            "Dedicated tests require zero model budget for WAITING_EXTERNAL/deterministic work and equal compact/full durable packet identity."
           ]
         },
         {
-          "check": "Instant front-door intake candidate",
-          "result": "PARTIAL",
+          "check": "Instant front-door non-authoritative intake foundation",
+          "result": "NOT_RUN",
           "evidence": [
             "Typed FrontDoorMessage/FrontDoorIntent/TaskIntakeCandidate contracts exist.",
             "SUBMIT_TASK yields authorization_state=UNDECIDED; status/decision/cancel require durable task lookup.",
-            "Durable task persistence/resume integration and live front-door acceptance remain."
+            "Durable intake persistence/task promotion and live front-door acceptance remain subsequent slices."
           ]
         }
-      ]
+      ],
+      "resume_condition": "E4-0 packet enforcement and front-door durable intake are validated before meaningful live Codex calibration."
     }
   ],
   "checkpoints": [
