@@ -70,7 +70,7 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Complete E4-0 Token Economy + Instant front-door integration before meaningful live Codex benchmarking: bind TokenEconomyPlanner decisions to actual packet materialization/executor invocation, integrate front-door task/status/decision intake with durable Workspace Control state, replay existing A10 packets to quantify old-vs-compact input/output overhead, and validate zero-model waits. Real Codex use remains conserved to explicit auth/preflight or the minimum calibrated invocation after E4-0 passes.
+Continue E4-0 from validated foundation workspace-control@0ff0c143f269b648ad9a1a3921e8e4e28673e072: implement deterministic front-door promotion/status/decision resolution against durable task capsules, add exact per-session checkpoint acknowledgment before enabling DELTA packets, and run offline full-vs-compact packet replay/usage measurements. Keep meaningful live Codex benchmarking blocked until those E4-0 gates pass.
 
 ## Remaining work
 
