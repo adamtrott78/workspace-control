@@ -50,8 +50,8 @@ from ..domain import (
 )
 
 
-SCHEMA_VERSION = 8
-SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8}
+SCHEMA_VERSION = 9
+SUPPORTED_SCHEMA_VERSIONS = {1, 2, 3, 4, 5, 6, 7, 8, 9}
 
 
 class GraphCodecError(ValueError):
@@ -164,6 +164,8 @@ def _encode_executor_session(session: ExecutorSession) -> dict[str, Any]:
         "last_ack_id": session.last_ack_id,
         "last_ack_process_id": session.last_ack_process_id,
         "last_ack_process_generation": session.last_ack_process_generation,
+        "last_ack_session_generation": session.last_ack_session_generation,
+        "last_ack_packet_sha256": session.last_ack_packet_sha256,
         "retirement_reason": session.retirement_reason,
     }
 
@@ -992,9 +994,27 @@ def decode_work_graph(payload: dict[str, Any]) -> WorkGraph:
                 bound_process_id=raw.get("bound_process_id"),
                 bound_process_generation=(None if raw.get("bound_process_generation") is None else int(raw["bound_process_generation"])),
                 bound_packet_sha256=raw.get("bound_packet_sha256"),
-                last_ack_id=raw.get("last_ack_id"),
-                last_ack_process_id=raw.get("last_ack_process_id"),
-                last_ack_process_generation=(None if raw.get("last_ack_process_generation") is None else int(raw["last_ack_process_generation"])),
+                # Pre-v9 ACKs did not bind the acknowledged packet/session
+                # generation. They remain valid historical events but are not
+                # sufficient proof for DELTA context reuse, so drop the
+                # optimization metadata on decode.
+                last_ack_id=(raw.get("last_ack_id") if schema_version >= 9 else None),
+                last_ack_process_id=(raw.get("last_ack_process_id") if schema_version >= 9 else None),
+                last_ack_process_generation=(
+                    None
+                    if schema_version < 9 or raw.get("last_ack_process_generation") is None
+                    else int(raw["last_ack_process_generation"])
+                ),
+                last_ack_session_generation=(
+                    None
+                    if schema_version < 9 or raw.get("last_ack_session_generation") is None
+                    else int(raw["last_ack_session_generation"])
+                ),
+                last_ack_packet_sha256=(
+                    raw.get("last_ack_packet_sha256")
+                    if schema_version >= 9
+                    else None
+                ),
                 retirement_reason=raw.get("retirement_reason"),
             )
 
