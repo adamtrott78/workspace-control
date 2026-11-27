@@ -9,8 +9,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+import json
 import shutil
 import subprocess
+import tempfile
 from typing import Any, Callable, Mapping, Protocol, Sequence
 
 from .codex_usage import (
@@ -24,6 +26,7 @@ from ..economics.codex_trace import (
     CodexTraceError,
     parse_codex_exec_jsonl,
 )
+from ..domain import CommunicationMode, ReasoningProfile, TokenBudget
 from ..ports import UsageSnapshot, UsageTelemetryPort
 
 
@@ -79,6 +82,8 @@ class CodexSubscriptionRunObservation:
     trace: CodexExecTraceSummary
     returncode: int
     final_agent_message: str | None
+    token_budget: TokenBudget
+    budget_violations: tuple[str, ...] = ()
 
 
 def parse_account_read_response(
@@ -206,14 +211,26 @@ def resolve_codex_executable() -> str:
     raise CodexSubscriptionError("native_codex_executable_not_found")
 
 
+def _reasoning_effort(profile: ReasoningProfile) -> str:
+    if profile == ReasoningProfile.ECONOMY:
+        return "low"
+    if profile == ReasoningProfile.STANDARD:
+        return "medium"
+    if profile == ReasoningProfile.DEEP:
+        return "high"
+    raise CodexSubscriptionError("codex_no_model_budget_forbids_execution")
+
+
 def build_read_only_exec_command(
     *,
     executable: str,
     model_id: str,
+    reasoning_profile: ReasoningProfile,
+    output_schema_path: Path | None = None,
 ) -> tuple[str, ...]:
     if not executable or not model_id:
         raise CodexSubscriptionError("codex_exec_identity_required")
-    return (
+    command = [
         executable,
         "exec",
         "--json",
@@ -222,8 +239,32 @@ def build_read_only_exec_command(
         "read-only",
         "-m",
         model_id,
-        "-",
-    )
+        "--config",
+        f"model_reasoning_effort={_reasoning_effort(reasoning_profile)}",
+    ]
+    if output_schema_path is not None:
+        command.extend(("--output-schema", str(output_schema_path)))
+    command.append("-")
+    return tuple(command)
+
+
+def _machine_minimal_schema() -> dict[str, Any]:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": ["result_kind", "summary", "evidence_refs"],
+        "properties": {
+            "result_kind": {
+                "type": "string",
+                "enum": ["RESULT", "BLOCKED", "NEEDS_ESCALATION"],
+            },
+            "summary": {"type": "string"},
+            "evidence_refs": {
+                "type": "array",
+                "items": {"type": "string"},
+            },
+        },
+    }
 
 
 def extract_last_agent_message(jsonl: str) -> str | None:
@@ -283,35 +324,77 @@ class CodexSubscriptionExecutor:
         prompt: str,
         model_id: str,
         cwd: Path,
+        budget: TokenBudget,
     ) -> CodexSubscriptionRunObservation:
         if not prompt.strip():
             raise CodexSubscriptionError("prompt_required")
         if not cwd.is_dir():
             raise CodexSubscriptionError("cwd_must_exist")
+        if (
+            not budget.allow_model_call
+            or budget.reasoning_profile == ReasoningProfile.NO_MODEL
+        ):
+            raise CodexSubscriptionError(
+                "codex_no_model_budget_forbids_execution"
+            )
+        if budget.max_output_tokens <= 0:
+            raise CodexSubscriptionError("codex_output_budget_required")
 
         # Hard billing gate before any model call.
         self._auth_guard.require_authorized()
 
         usage_before = self._usage.read_snapshot()
         started = self._now()
-        command = build_read_only_exec_command(
-            executable=self._executable or resolve_codex_executable(),
-            model_id=model_id,
-        )
         environment = sanitized_codex_environment(self._environment)
-        result = self._process_runner.run(
-            command=command,
-            prompt=prompt,
-            cwd=cwd,
-            environment=environment,
-            timeout_sec=self._timeout_sec,
-        )
+        with tempfile.TemporaryDirectory(prefix="workspace-codex-schema-") as tmp:
+            schema_path = None
+            if budget.communication_mode == CommunicationMode.MACHINE_MINIMAL:
+                schema_path = Path(tmp) / "output.schema.json"
+                schema_path.write_text(
+                    json.dumps(_machine_minimal_schema(), sort_keys=True),
+                    encoding="utf-8",
+                )
+            command = build_read_only_exec_command(
+                executable=self._executable or resolve_codex_executable(),
+                model_id=model_id,
+                reasoning_profile=budget.reasoning_profile,
+                output_schema_path=schema_path,
+            )
+            result = self._process_runner.run(
+                command=command,
+                prompt=prompt,
+                cwd=cwd,
+                environment=environment,
+                timeout_sec=self._timeout_sec,
+            )
         ended = self._now()
 
         # Snapshot even on failed turns: failed work still consumes allowance.
         usage_after = self._usage.read_snapshot()
         trace = parse_codex_exec_jsonl(result.stdout)
         final_message = extract_last_agent_message(result.stdout)
+
+        violations: list[str] = []
+        observed_output = trace.token_usage.output_tokens
+        if (
+            observed_output is not None
+            and observed_output > budget.max_output_tokens
+        ):
+            violations.append(
+                "visible_output_tokens_exceeded:"
+                f"{observed_output}>{budget.max_output_tokens}"
+            )
+        if (
+            budget.communication_mode == CommunicationMode.MACHINE_MINIMAL
+            and final_message is not None
+        ):
+            try:
+                parsed = json.loads(final_message)
+            except json.JSONDecodeError:
+                violations.append("machine_minimal_output_not_json")
+            else:
+                if not isinstance(parsed, dict):
+                    violations.append("machine_minimal_output_not_object")
 
         observation = CodexSubscriptionRunObservation(
             model_id=model_id,
@@ -322,6 +405,8 @@ class CodexSubscriptionExecutor:
             trace=trace,
             returncode=result.returncode,
             final_agent_message=final_message,
+            token_budget=budget,
+            budget_violations=tuple(violations),
         )
         if result.returncode != 0 or trace.turns_failed or trace.fatal_errors:
             raise CodexSubscriptionExecutionFailed(
@@ -334,6 +419,12 @@ class CodexSubscriptionExecutor:
         if trace.turns_completed < 1:
             raise CodexSubscriptionExecutionFailed(
                 "codex_exec_missing_completed_turn",
+                observation,
+            )
+        if observation.budget_violations:
+            raise CodexSubscriptionExecutionFailed(
+                "codex_token_budget_violation:"
+                + ",".join(observation.budget_violations),
                 observation,
             )
 
