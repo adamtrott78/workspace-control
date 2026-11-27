@@ -86,7 +86,6 @@ CODEX-01 zero-inference bootstrap is accepted. CODEX-02 is blocked before accoun
 ## Blockers / gates
 
 - CODEX-02 LIVE PREFLIGHT PATH: trusted control-small validation reached the runner but could not resolve the bootstrap-installed Codex executable on PATH, so account/read did not execute. Repair must be authority-owned; do not bypass through generic validation or infer plan telemetry.
-
 - CODEX-01 ZERO-INFERENCE BOOTSTRAP: live additive /workspace-codex-bootstrap activation PASSED against main@de3d0642b3b300859c2508f829d5d7ca44eca77c under consumed one-shot authority b95c06d2-f43a-4871-acf5-d128b22d656c. Do not rerun activation or reuse the authority. Next trigger a fresh zero-inference bootstrap against an open same-repository PR head and verify ChatGPT-subscription auth/no-API-fallback receipt before any inference.
 - E4 ECONOMICS / CODEX: claim-bearing comparison remains gated on calibrated comparable allowance telemetry plus live subscription-only Codex bounded-job evidence; do not substitute raw token estimates or uncalibrated UI observations.
 - REL-01 / REL-02: A10 proves integrated session/process loss and live bounded resource behavior, but the remaining fault-campaign cases plus explicit target-budget/representative-soak closeout are not yet reconciled to PASS.
