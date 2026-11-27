@@ -315,6 +315,119 @@ def current_reconciler_override(
     return value, raw
 
 
+def _root_envelope_map(root: dict[str, Any], label: str) -> dict[str, str]:
+    classes = root.get("runner_classes")
+    if not isinstance(classes, dict):
+        raise RouteActivationError(f"{label} runner classes missing")
+    result: dict[str, str] = {}
+    for class_id, value in classes.items():
+        if not isinstance(class_id, str) or not isinstance(value, dict):
+            raise RouteActivationError(f"{label} runner class binding invalid")
+        digest = value.get("root_envelope_sha256")
+        if not isinstance(digest, str) or SHA64.fullmatch(digest) is None:
+            raise RouteActivationError(
+                f"{label} root envelope digest invalid: {class_id}"
+            )
+        result[class_id] = digest
+    return result
+
+
+def _require_root_authority_equivalent(
+    *,
+    candidate_root: dict[str, Any],
+    installed_root: dict[str, Any],
+) -> None:
+    candidate_digest = candidate_root.get("root_policy_sha256")
+    installed_digest = installed_root.get("root_policy_sha256")
+    if candidate_digest == installed_digest:
+        return
+
+    receipt_path = (
+        candidate.PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT
+    )
+    try:
+        refresh_raw = require_root_private(receipt_path)
+    except FileNotFoundError as exc:
+        raise RouteActivationError(
+            "Codex route candidate root-policy mismatch without accepted "
+            "runtime390 successor"
+        ) from exc
+    refresh = json.loads(refresh_raw)
+    if not isinstance(refresh, dict):
+        raise RouteActivationError("runtime390 root receipt invalid")
+    required_identity = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH",
+        "phase": "ACTIVE",
+        "previous_root_policy_sha256": candidate_digest,
+        "root_policy_sha256": installed_digest,
+    }
+    for key, expected in required_identity.items():
+        if refresh.get(key) != expected:
+            raise RouteActivationError(
+                f"runtime390 root authority binding mismatch: {key}"
+            )
+
+    if (
+        candidate_root.get("host_resource_policy")
+        != installed_root.get("host_resource_policy")
+    ):
+        raise RouteActivationError(
+            "runtime390 root successor changed host-resource authority"
+        )
+    if candidate_root.get("upstream_pins") != installed_root.get("upstream_pins"):
+        raise RouteActivationError(
+            "runtime390 root successor changed upstream-pin authority"
+        )
+
+    predecessor = refresh.get("previous_root_envelope_sha256")
+    successor = refresh.get("root_envelope_sha256")
+    if not isinstance(predecessor, dict) or not isinstance(successor, dict):
+        raise RouteActivationError("runtime390 root envelope maps missing")
+    candidate_envelopes = _root_envelope_map(
+        candidate_root,
+        "Codex route candidate",
+    )
+    installed_envelopes = _root_envelope_map(
+        installed_root,
+        "installed runtime390 root",
+    )
+    if candidate_envelopes != predecessor:
+        raise RouteActivationError(
+            "Codex route candidate is not the runtime390 root predecessor"
+        )
+    if installed_envelopes != successor:
+        raise RouteActivationError(
+            "installed root is not the accepted runtime390 successor"
+        )
+
+    changed = {
+        class_id
+        for class_id in predecessor
+        if predecessor[class_id] != successor[class_id]
+    }
+    expected_changed = {
+        candidate.PADATASET_SCIENTIFIC_TARGET_CLASS,
+        candidate.PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+    }
+    if changed != expected_changed:
+        raise RouteActivationError(
+            "runtime390 root successor changed unexpected root envelopes"
+        )
+
+    target_candidate = candidate_envelopes.get(TARGET_CLASS)
+    target_installed = installed_envelopes.get(TARGET_CLASS)
+    if (
+        target_candidate is None
+        or target_candidate != target_installed
+        or TARGET_CLASS in changed
+    ):
+        raise RouteActivationError(
+            "runtime390 root successor changed Workspace Control control-small "
+            "authority"
+        )
+
+
 def build_candidate_policy(
     *,
     repo: pathlib.Path,
@@ -323,13 +436,10 @@ def build_candidate_policy(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     compiled = compiler.compile_policy(repo)
     candidate_root = compiled["root_projection"]
-    if (
-        candidate_root["root_policy_sha256"]
-        != installed_root.get("root_policy_sha256")
-    ):
-        raise RouteActivationError(
-            "Codex route candidate changed root-policy authority"
-        )
+    _require_root_authority_equivalent(
+        candidate_root=candidate_root,
+        installed_root=installed_root,
+    )
     candidate_policy = compiled["controller_projections"][TARGET_CLASS]
 
     structural_keys = {
