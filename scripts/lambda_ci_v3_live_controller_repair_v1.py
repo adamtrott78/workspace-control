@@ -299,6 +299,7 @@ def main() -> int:
     ap.add_argument("--expected-head",required=True)
     ap.add_argument("--authorization-receipt",type=Path,required=True)
     ap.add_argument("--go-bin",required=True)
+    ap.add_argument("--prequiesced-active-controller",action="append",default=[])
     args=ap.parse_args()
 
     if os.geteuid()!=0:
@@ -310,9 +311,32 @@ def main() -> int:
     root,_=load(ROOT_POLICY)
     units=controller_units(root)
     before=snapshot_controllers(units)
-    active_before=[cid for cid,s in before.items() if s.get("ActiveState")=="active"]
+    requested_prequiesced=sorted(set(args.prequiesced_active_controller))
+    if requested_prequiesced:
+        unknown=[cid for cid in requested_prequiesced if cid not in units]
+        if unknown:
+            raise ControllerRepairError(
+                "unknown prequiesced controller ids: "+",".join(unknown)
+            )
+        active_now=[
+            cid for cid,state in before.items()
+            if state.get("ActiveState")=="active"
+        ]
+        if active_now:
+            raise ControllerRepairError(
+                "prequiesced activation requires all controller units inactive: "
+                + ",".join(active_now)
+            )
+        active_before=requested_prequiesced
+    else:
+        active_before=[
+            cid for cid,state in before.items()
+            if state.get("ActiveState")=="active"
+        ]
     if TARGET_CLASS not in active_before:
-        raise ControllerRepairError("scientific controller must be active before refresh")
+        raise ControllerRepairError(
+            "scientific controller must be in the restore set before refresh"
+        )
     require_root_services()
 
     current_binary=CONTROLLER_BINARY.read_bytes()
@@ -345,13 +369,15 @@ def main() -> int:
         "candidate_controller_sha256":candidate_sha,
         "previous_controller_refresh_sha256":sha(previous_refresh_raw),
         "previous_controller_source_head":previous_refresh.get("controller_source_head"),
+        "active_controller_set_before":active_before,
     }
     authority,authority_raw=validate_authority(args.authorization_receipt,expected)
 
     # Quiesce before consuming authority; then prove there is no live root work
     # that could observe the shared executable changing.
     for cid in active_before:
-        ctl("stop",units[cid]); wait_state(units[cid],"inactive")
+        if systemd(units[cid]).get("ActiveState")=="active":
+            ctl("stop",units[cid]); wait_state(units[cid],"inactive")
     require_root_services()
     require_no_live_provisioner_records()
     require_no_transients(units)
