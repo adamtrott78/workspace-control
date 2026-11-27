@@ -58,8 +58,15 @@ class CodexRouteScientificLineageCompatibilityTests(unittest.TestCase):
             )
         )
         self.assertEqual(
-            reconciler.WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
+            reconciler.WORKSPACE_CONTROL_CODEX_WORKFLOW_INITIAL_BLOB,
             "520da69cfb9b28c81fb1121a16c12d3715892cc7",
+        )
+        self.assertEqual(
+            reconciler.WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
+            "b17526353acb531010fce019337f7b3080ba235b",
+        )
+        self.assertTrue(
+            hasattr(reconciler, "_workspace_control_codex_workflow_refresh")
         )
 
     def test_source_selects_effective_science_refresh_before_codex_overlay(self):

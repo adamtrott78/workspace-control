@@ -339,15 +339,15 @@
     {
       "project_id": "workspace-control",
       "repository": "adamtrott78/workspace-control",
-      "source_checkpoint": "5cf2821c2aac415cba72ff3798f89afa01052cbf",
+      "source_checkpoint": "9f3dca9810b56f3714037e24fd59b3f30e0943f0",
       "route_id": "codex-bootstrap",
       "workflow_path": ".github/workflows/lambda-ci-workspace-control-codex-bootstrap.yml",
-      "workflow_blob_sha": "520da69cfb9b28c81fb1121a16c12d3715892cc7",
+      "workflow_blob_sha": "b17526353acb531010fce019337f7b3080ba235b",
       "top_level_job_count": 1,
       "top_level_job_key": "codex-bootstrap",
       "current_scale_set_name": "lambda-workspace-control-control-small",
       "target_scale_set_name": "lambda-workspace-control-control-small",
-      "evidence_status": "VERIFIED_FROM_EXACT_DEFAULT_BRANCH_BLOB_ROUTE_NOT_LIVE"
+      "evidence_status": "VERIFIED_FROM_EXACT_CANDIDATE_BLOB_PENDING_DEFAULT_BRANCH_PROMOTION"
     }
   ]
 }

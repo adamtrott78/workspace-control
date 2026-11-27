@@ -191,5 +191,57 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
             self.assertEqual(text.count(root_path), 1)
 
 
+    def test_codex_preflight_reuses_persistent_runtime_and_reads_only_redacted_account_usage(self):
+        text = _workflow()
+
+        self.assertIn("/workspace-codex-preflight ", text)
+        self.assertIn("steps.gate.outputs.mode == 'preflight'", text)
+        self.assertIn(
+            'install_dir="$PROJECT_HOME/.local/share/workspace-reasoning-economy/codex/$CODEX_VERSION"',
+            text,
+        )
+        self.assertIn('[[ -x "$codex_bin" ]]', text)
+        self.assertIn('"account/read"', text)
+        self.assertIn('"account/rateLimits/read"', text)
+        self.assertIn('"account/usage/read"', text)
+        self.assertIn('"account_type": "chatgpt"', text)
+        self.assertIn('"plan_type": plan_type.lower()', text)
+        self.assertIn('"api_key_present": False', text)
+        self.assertIn('"model_inference_performed": False', text)
+        self.assertIn('"credential_material_in_receipt": False', text)
+        self.assertIn("workspace-control-codex-preflight-receipt.json", text)
+        self.assertIn("workspace-control-codex-preflight-receipt", text)
+        self.assertIn("stderr=subprocess.DEVNULL", text)
+
+        install_index = text.index(
+            "- name: Install checksum-pinned Codex CLI in Workspace Control home"
+        )
+        install_guard = text.index(
+            "if: steps.gate.outputs.mode == 'bootstrap'",
+            install_index,
+        )
+        self.assertGreater(install_guard, install_index)
+
+        preflight_index = text.index(
+            "- name: Bind existing Workspace Control Codex runtime"
+        )
+        preflight_guard = text.index(
+            "if: steps.gate.outputs.mode == 'preflight'",
+            preflight_index,
+        )
+        self.assertGreater(preflight_guard, preflight_index)
+
+        for forbidden in (
+            '"email"',
+            '"user_id"',
+            '"account_id"',
+            '"access_token"',
+            '"refresh_token"',
+            '"device_code"',
+            '"threadUsage"',
+        ):
+            self.assertNotIn(forbidden, text)
+
+
 if __name__ == "__main__":
     unittest.main()

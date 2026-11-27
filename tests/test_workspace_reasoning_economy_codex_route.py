@@ -19,7 +19,7 @@ WORKFLOW = ROOT / ".github" / "workflows" / "lambda-ci-workspace-control-codex-b
 
 ROUTE_ID = "codex-bootstrap"
 CLASS_ID = "workspace-control-control-small-v1"
-WORKFLOW_BLOB = "520da69cfb9b28c81fb1121a16c12d3715892cc7"
+WORKFLOW_BLOB = "b17526353acb531010fce019337f7b3080ba235b"
 
 
 class WorkspaceCodexBootstrapAdditiveRouteTests(unittest.TestCase):
