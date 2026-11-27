@@ -169,14 +169,16 @@ def root_phase(
             raise RuntimeError(
                 "unknown resume controller ids: " + ",".join(unknown)
             )
-        active_now = [
+        active_now = sorted(
             cid for cid, state in before.items()
             if state.get("ActiveState") == "active"
-        ]
-        if active_now:
+        )
+        if active_now not in ([], resume_restore_set):
             raise RuntimeError(
-                "resume-prequiesced requires every controller unit inactive; active="
+                "resume topology mismatch: active="
                 + ",".join(active_now)
+                + " expected either none or "
+                + ",".join(resume_restore_set)
             )
         active_before = resume_restore_set
     else:
@@ -246,6 +248,11 @@ def root_phase(
                 "DRAIN_RESUME_PREQUIESCED controllers=" + ",".join(active_before),
                 flush=True,
             )
+            for cid in active_before:
+                if repair.systemd(units[cid]).get("ActiveState") == "active":
+                    repair.ctl("stop", units[cid])
+                    repair.wait_state(units[cid], "inactive")
+                    quiesced_here = True
         else:
             print("DRAIN_QUIESCE_BEGIN controllers=" + ",".join(active_before), flush=True)
             for cid in active_before:
