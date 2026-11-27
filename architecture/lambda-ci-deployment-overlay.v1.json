@@ -193,6 +193,10 @@
     "padataset:scientific-single-gpu-2": {
       "admission_state": "DISABLED",
       "source": "dual-lane scientific candidate default: lane B remains disabled until explicit reviewed host activation after all scientific work drains"
+    },
+    "workspace-control:codex-bootstrap": {
+      "admission_state": "DISABLED",
+      "source": "Codex bootstrap candidate: exact main workflow is catalog-bound but route remains disabled until explicit reviewed activation"
     }
   },
   "legacy": {
