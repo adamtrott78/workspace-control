@@ -166,7 +166,13 @@
         "Root cause was a missing accepted runtime390 precedence layer: live runtime390 owns shared managed root-policy/executor-actions/compatibility-matrix/deployment-overlay artifacts after the original dual-lane receipt, while lane-A v4/lane-B v9 are later controller-workflow trust successors.",
         "Historical PR #656 head 6172553a389fee392cc30b215f9380ba2725bae8 already encoded the correct precedence: runtime390 receipt bound to frozen lane-A v3 + lane-B v8 predecessors, with runtime390 overrides above dual/scientific/production managed-artifact digests.",
         "Repair PR #706 restored that accepted runtime390 precedence into current main and additionally composes Workspace Control Codex overlay ownership above runtime390. Exact head 861503d5776fc53714c52f5cae9d22fb4ee9f31f passed Workspace Control Validation #3354.",
-        "PR #706 merged as main fe0283578789a5de64a4a2404a4927711ac35132. Read-only post-failure inspection shows workspace-control-control-small-v1 and workspace-ci-v3-provisioner remain active/running with unchanged PIDs from the preceding inspection."
+        "PR #706 merged as main fe0283578789a5de64a4a2404a4927711ac35132. Read-only post-failure inspection shows workspace-control-control-small-v1 and workspace-ci-v3-provisioner remain active/running with unchanged PIDs from the preceding inspection.",
+        "A third live activation retry against main@fe0283578789a5de64a4a2404a4927711ac35132 passed the repaired science/runtime390 preflight but failed later in build_candidate_policy() with `RouteActivationError: Codex route candidate changed root-policy authority`. This call occurs before authorization receipt creation/consumption and before any controller stop or policy mutation.",
+        "Root-cause analysis compared every root-policy-affecting repository input between accepted PR #627 head acd420758eb0124646988ee8776939572c88a82d and fe0283578789a5de64a4a2404a4927711ac35132. Host resource policy, upstream pins, execution contracts, systemd profiles, workload policy, project registry, and both project manifests were root-equivalent; only the Codex route entries were added, and routes are excluded from root_policy_sha256.",
+        "The digest mismatch therefore came from comparing the repo's pre-runtime390 base root to the accepted effective runtime390 live root. The runtime390 receipt explicitly changes only the two PADataset scientific root envelopes while preserving Workspace Control control-small authority.",
+        "Repair PR #709 replaced broken whole-digest equality with exact runtime390 lineage proof: candidate root must equal receipt predecessor; installed root must equal receipt successor; host resources/upstream pins must match; changed envelope set must be exactly scientific lane A+B; workspace-control-control-small-v1 envelope must remain identical. No ignore/accept-any-digest path exists.",
+        "PR #709 exact head 99fba1c908377596de19062fca48befb7c8d406e passed Workspace Control Validation #3359 and merged as main 17345570329cfa31022d58ab8110c4df743c4ca9.",
+        "Read-only post-failure inspection confirms workspace-ci-v3-controller@workspace-control-control-small-v1.service remains loaded, active and running (MainPID 2411495); the failed retry did not mutate live route/controller state."
       ]
     },
     {
@@ -478,5 +484,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-27",
-  "latest_validated_checkpoint": "main@fe0283578789a5de64a4a2404a4927711ac35132 (Codex route verifier restored accepted runtime390 managed-artifact precedence; fresh live activation pending)"
+  "latest_validated_checkpoint": "main@17345570329cfa31022d58ab8110c4df743c4ca9 (Codex route activation root-equivalence proof aligned with accepted runtime390 successor; fresh live activation pending)"
 }
