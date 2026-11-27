@@ -184,7 +184,12 @@
         "The activation helper's BaseException rollback restores the previous controller policy, deployment overlay, reconciler override, installed reconciler, removes the active route receipt, restarts the target controller, marks the transaction ROLLED_BACK_PREVIOUS_ROUTE_STATE, then re-raises. Read-only post-failure inspection shows workspace-control-control-small-v1 active/running (MainPID 4010013), consistent with completed rollback.",
         "Repair PR #715 separates base and effective root identities: `base_root_policy_sha256` remains bound to the install manifest, while authority/active route/transaction `root_policy_sha256` binds the effective installed root already accepted by verify_installed(). The reconciler requires base provenance separately and still compares the effective receipt root digest against `/etc/workspace-ci/v3/root-policy.json`.",
         "PR #715 exact head 9a6554a93681a423f358f0ae7efa461f1d23c836 passed Workspace Control Validation #3368 and merged as main de3d0642b3b300859c2508f829d5d7ca44eca77c.",
-        "Because the fifth attempt consumed its authority, authorization 7cdff1d6-cdd8-4e07-8bb1-353dab45aa09 is non-reusable. The next retry requires a fresh one-shot authority against exact main@de3d0642b3b300859c2508f829d5d7ca44eca77c."
+        "Because the fifth attempt consumed its authority, authorization 7cdff1d6-cdd8-4e07-8bb1-353dab45aa09 is non-reusable. The next retry requires a fresh one-shot authority against exact main@de3d0642b3b300859c2508f829d5d7ca44eca77c.",
+        "Live Workspace Control Codex bootstrap-route activation completed successfully against exact main@de3d0642b3b300859c2508f829d5d7ca44eca77c.",
+        "The one-shot operator authority b95c06d2-f43a-4871-acf5-d128b22d656c was created for ACTIVATE_WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_V1 and consumed by the reviewed activation transaction; it is non-reusable.",
+        "Activation emitted WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_ACTIVATION=PASS and transaction receipt /var/lib/workspace-ci/v3/workspace-control/codex-bootstrap-route/transactions/activation-657a60ba-aa7f-4805-89a1-2f59ff26bdcf/receipt.json.",
+        "This is the first accepted live activation of the additive /workspace-codex-bootstrap route on the existing workspace-control-control-small-v1 controller; the activation transaction preserves existing root/GPU/capacity authority and the control-validation route.",
+        "CODEX-01 remains PARTIAL only until a fresh zero-inference bootstrap proves the live control-small route plus ChatGPT-subscription authentication/no-API-fallback receipt."
       ]
     },
     {
@@ -496,5 +501,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-27",
-  "latest_validated_checkpoint": "main@de3d0642b3b300859c2508f829d5d7ca44eca77c (Codex route receipt now separates base-manifest and effective-installed root identity; fifth activation authority consumed and transaction rolled back; fresh retry pending)"
+  "latest_validated_checkpoint": "main@de3d0642b3b300859c2508f829d5d7ca44eca77c live /workspace-codex-bootstrap activation PASS; zero-inference bootstrap/auth receipt pending"
 }
