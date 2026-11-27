@@ -167,7 +167,8 @@
       "requirement": "Subscription-only Codex executor performs bounded jobs and returns structured JSONL-derived thread/token/tool/error telemetry.",
       "evidence": [
         "Codex subscription adapter and trace tests exist; Workspace Control live runtime binding remains.",
-        "Workspace #2844 full unit regression proves subscription executor auth/command/execution fixtures: ChatGPT Plus accepted; API-key, non-Plus, other-provider, signed-out and unknown auth fail closed; OPENAI_API_KEY is stripped and usage snapshots bracket execution. Live reserved-runner preflight remains pending."
+        "Workspace #2844 full unit regression proves subscription executor auth/command/execution fixtures: ChatGPT Plus accepted; API-key, non-Plus, other-provider, signed-out and unknown auth fail closed; OPENAI_API_KEY is stripped and usage snapshots bracket execution. Live reserved-runner preflight remains pending.",
+        "Token-budgeted subscription-Codex execution path is now merged at 21ab03b57ffa0865f7a37817ba484a0d7bf49ee1. Tests prove explicit budget admission, reasoning-effort mapping, structured MACHINE_MINIMAL output, output-overrun telemetry/fail-closed behavior, subscription-only auth, API-key stripping, and usage snapshots. Live bounded execution remains the final CODEX-03 gate."
       ]
     },
     {
@@ -211,12 +212,16 @@
     },
     {
       "id": "ECON-04",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Every model-backed attempt is admitted through a deterministic token-economy plan that constrains input context, reasoning effort class and visible output; deterministic work and WAITING_EXTERNAL consume zero model calls, and context expands only when durable evidence justifies REF_ONLY -> DELTA/SELECTED/FULL_RECOVERY.",
       "evidence": [
         "Candidate implementation on workspace-token-economy-frontdoor-v1 adds TokenBudget, ContextPlan, TokenEconomyObservation and TokenEconomyPlanner with REF_ONLY/DELTA/SELECTED/FULL_RECOVERY context modes, NO_MODEL/ECONOMY/STANDARD/DEEP reasoning profiles and bounded communication modes.",
         "Planner contract assigns exactly zero model/input/output budget to WAITING_EXTERNAL and deterministic execution; persistent sessions use DELTA only when an exact durable base checkpoint is declared bound.",
-        "PASS still requires integration with actual packet materialization/executor invocation plus replay/live evidence that budgets are enforced rather than descriptive."
+        "PASS still requires integration with actual packet materialization/executor invocation plus replay/live evidence that budgets are enforced rather than descriptive.",
+        "E4-0 exact-session DELTA/compact materialization was cleanly integrated at df04a62903899fae08af1c799c68eb9a54f35b0b after exact-head Workspace #3316 / Semantic #614 / Operator #881 SUCCESS. Durable session ACK identity gates DELTA; otherwise model packets fail closed to REF_ONLY/FULL_RECOVERY behavior.",
+        "Offline full-vs-compact replay preserves canonical packet SHA/payload identity while measuring worker-text reduction with model_calls=0; deterministic execution and WAITING_EXTERNAL retain exact zero-model budgets.",
+        "PROGRAMMATIC model dispatch and subscription Codex enforcement merged at 21ab03b57ffa0865f7a37817ba484a0d7bf49ee1 after Workspace #3323 / Semantic #622 / Operator #888 SUCCESS. Programmatic calls now require a deterministic TokenEconomyDecision; NO_MODEL cannot launch Codex; ECONOMY/STANDARD/DEEP map to Codex reasoning effort low/medium/high; MACHINE_MINIMAL uses structured output; observed output-budget overrun is retained and fails closed.",
+        "Human-assisted Instant and programmatic model invocation paths therefore both pass through Token Economy before model work; unprovisioned programmatic executors have no runnable port and fail closed."
       ]
     },
     {
@@ -306,7 +311,10 @@
         "Candidate implementation on workspace-token-economy-frontdoor-v1 adds typed FrontDoorMessage/FrontDoorIntent and InstantFrontDoorIntake contracts.",
         "Task submissions deterministically become TaskIntakeCandidate records with authorization_state=UNDECIDED; the front door cannot mint executable authority.",
         "Status/decision/cancel intents require durable existing-task lookup rather than conversation-memory interpretation.",
-        "PASS still requires durable persistence/task creation-resume integration and bounded live front-door acceptance."
+        "PASS still requires durable persistence/task creation-resume integration and bounded live front-door acceptance.",
+        "Durable Instant front-door control is now implemented: SUBMIT_TASK persists UNDECIDED intake candidates; QUERY_STATUS reads authoritative active task capsules; resume/decision/cancel persist UNDECIDED task-control candidates against an explicit durable task identity.",
+        "Private ChatGPT front-door plugin was created from exact repository source at workspace-control@21ab03b57ffa0865f7a37817ba484a0d7bf49ee1: plugin_id plugins_6b08cf5ea1548191b543faab9952bd26, release pluginrel_6b08cf5f385c8191a51997a2a124e5e6, scope USER, discoverability PRIVATE.",
+        "INST-07 remains PARTIAL only for bounded live acceptance through the created plugin: one new-task candidate, one durable status query, and one explicit decision/cancel-revise candidate must be observed without chat-created authority."
       ]
     },
     {
@@ -456,5 +464,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-26",
-  "latest_validated_checkpoint": "Operator UX successor accepted; Token Economy + Instant front-door implementation candidate opened for E4-0 before live Codex calibration."
+  "latest_validated_checkpoint": "workspace-control@21ab03b57ffa0865f7a37817ba484a0d7bf49ee1 (E4-0 Token Economy enforcement PASS; private Instant front-door plugin created, live acceptance pending)"
 }
