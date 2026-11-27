@@ -405,22 +405,48 @@ def build_generation(
         for class_id in ACCEPTED_CLASSES
     }
     for class_id, policy in policies.items():
-        if len(policy["trusted_workflows"]) != 1:
-            raise CutoverError(
-                f"{class_id}: accepted production class must trust exactly one workflow"
-            )
         route_key = next(
             key
             for key, spec in ROUTES.items()
             if spec["runner_class_id"] == class_id
         )
-        if (
-            policy["trusted_workflows"][0]["blob_sha"]
-            != bindings[route_key]["new_blob_sha"]
-        ):
+        accepted_route_id = ROUTES[route_key]["route_id"]
+        selected = [
+            workflow
+            for workflow in policy["trusted_workflows"]
+            if workflow["route_id"] == accepted_route_id
+        ]
+        if len(selected) != 1:
+            raise CutoverError(
+                f"{class_id}: accepted production route must bind exactly one workflow"
+            )
+        if selected[0]["blob_sha"] != bindings[route_key]["new_blob_sha"]:
             raise CutoverError(
                 f"{class_id}: compiled policy did not bind retargeted workflow"
             )
+
+        base_workflows = {
+            workflow["route_id"]: workflow
+            for workflow in base_compiled["controller_projections"][class_id][
+                "trusted_workflows"
+            ]
+        }
+        compiled_workflows = {
+            workflow["route_id"]: workflow
+            for workflow in policy["trusted_workflows"]
+        }
+        if set(compiled_workflows) != set(base_workflows):
+            raise CutoverError(
+                f"{class_id}: production retarget changed trusted route set"
+            )
+        for route_id, workflow in compiled_workflows.items():
+            if route_id == accepted_route_id:
+                continue
+            if workflow != base_workflows[route_id]:
+                raise CutoverError(
+                    f"{class_id}: production retarget changed additive trusted workflow "
+                    f"{route_id}"
+                )
 
     active_overlay = build_overlay(
         live_overlay,
