@@ -647,6 +647,25 @@
             "command": "/workspace-control-validate",
             "parameter_schema_id": "candidate-sha-v1"
           }
+        },
+        "codex-bootstrap": {
+          "runner_class_id": "workspace-control-control-small-v1",
+          "trusted_workflow": {
+            "path": ".github/workflows/lambda-ci-workspace-control-codex-bootstrap.yml",
+            "default_branch": "main",
+            "blob_sha": "520da69cfb9b28c81fb1121a16c12d3715892cc7",
+            "job_key": "codex-bootstrap",
+            "allowed_events": [
+              "issue_comment"
+            ],
+            "allowed_actor_logins": [
+              "adamtrott78"
+            ]
+          },
+          "ingress": {
+            "command": "/workspace-codex-bootstrap",
+            "parameter_schema_id": "candidate-sha-v1"
+          }
         }
       }
     }
