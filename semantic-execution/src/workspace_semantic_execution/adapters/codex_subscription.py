@@ -296,6 +296,35 @@ def extract_last_agent_message(jsonl: str) -> str | None:
     return final
 
 
+class CodexSubscriptionProgrammaticPort:
+    """Bind a budget-admitted compiled packet to subscription Codex."""
+
+    def __init__(
+        self,
+        *,
+        executor: "CodexSubscriptionExecutor",
+        cwd: Path,
+    ) -> None:
+        if not cwd.is_dir():
+            raise CodexSubscriptionError("cwd_must_exist")
+        self._executor = executor
+        self._cwd = cwd
+
+    def execute(
+        self,
+        *,
+        packet,
+        executor,
+        budget: TokenBudget,
+    ) -> CodexSubscriptionRunObservation:
+        return self._executor.run_read_only(
+            prompt=packet.text,
+            model_id=executor.model_id,
+            cwd=self._cwd,
+            budget=budget,
+        )
+
+
 class CodexSubscriptionExecutor:
     """One bounded subscription-backed Codex execution."""
 
