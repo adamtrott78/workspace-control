@@ -24,3 +24,13 @@ def test_drain_happens_before_authority_and_binds_restore_set():
 def test_drain_activation_scripts_compile():
     py_compile.compile(str(BOOT), doraise=True)
     py_compile.compile(str(REPAIR), doraise=True)
+
+
+def test_resume_prequiesced_drain_requires_explicit_restore_set():
+    boot = BOOT.read_text()
+
+    assert "--resume-prequiesced-active-controller" in boot
+    assert "DRAIN_RESUME_PREQUIESCED" in boot
+    assert "resume-prequiesced requires every controller unit inactive" in boot
+    assert "PADataset scientific lane A is not in restore set" in boot
+    assert '"active_controller_set_before": active_before' in boot
