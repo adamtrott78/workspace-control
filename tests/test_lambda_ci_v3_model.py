@@ -71,7 +71,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             "pull_request_number": -1,
         }
 
-    def test_all_24_routes_attest_from_structured_workflow_identity(self):
+    def test_all_25_routes_attest_from_structured_workflow_identity(self):
         total = 0
         for class_id, policy in self.compiled["controller_projections"].items():
             controller = model.RunnerClassControllerModel(policy)
@@ -85,7 +85,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
                     controller.scale_result_for_admission(decision),
                     "ACQUIRE",
                 )
-        self.assertEqual(total, 24)
+        self.assertEqual(total, 25)
 
     def test_job_display_candidate_and_pr_fields_have_zero_admission_effect(self):
         class_id = "workspace-control-control-small-v1"
@@ -258,24 +258,28 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             )
 
     def test_busy_does_not_generate_jit(self):
-        root = self.root()  # migration host max = 1
-        wc = "workspace-control-control-small-v1"
-        pad = "padataset-cpu-public-v1"
-        first = model.ClassCapacityControllerModel(self.controller_policy(wc), root)
-        second = model.ClassCapacityControllerModel(self.controller_policy(pad), root)
+        root = self.root()
+        lane_a = "padataset-gpu-single-public-v1"
+        lane_conflict = "padataset-scientific-single-gpu-v1"
+        first = model.ClassCapacityControllerModel(
+            self.controller_policy(lane_a), root
+        )
+        second = model.ClassCapacityControllerModel(
+            self.controller_policy(lane_conflict), root
+        )
 
         self.assertEqual(
             first.provision_one(
-                request_id="req-wc",
-                runner_name=self.runner_name(wc, "one"),
+                request_id="req-gpu-a",
+                runner_name=self.runner_name(lane_a, "one"),
             ),
             "ACCEPTED",
         )
         self.assertEqual(first.jit_generation_count, 1)
         self.assertEqual(
             second.provision_one(
-                request_id="req-pad",
-                runner_name=self.runner_name(pad, "two"),
+                request_id="req-gpu-conflict",
+                runner_name=self.runner_name(lane_conflict, "two"),
             ),
             "BUSY",
         )
@@ -478,26 +482,86 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             "FAILED",
         )
 
-    def test_migration_host_max_one_serializes_even_disjoint_cpu_classes(self):
-        root = self.root()  # host max one is deliberate migration policy.
+    def test_host_max_three_allows_three_disjoint_classes_then_blocks_fourth(self):
+        root = self.root()
         a = "workspace-control-control-small-v1"
         b = "research-cpu-public-v1"
+        c = "padataset-cpu-public-v1"
+        d = "padataset-scientific-single-gpu-v1"
+        for class_id, request_id in (
+            (a, "req-host-a"),
+            (b, "req-host-b"),
+            (c, "req-host-c"),
+        ):
+            self.assertEqual(
+                root.reserve(
+                    peer_user=self.peer(class_id),
+                    request_id=request_id,
+                    runner_name=self.runner_name(class_id, request_id),
+                )["status"],
+                "RESERVED",
+            )
         self.assertEqual(
             root.reserve(
-                peer_user=self.peer(a),
-                request_id="req-host-a",
-                runner_name=self.runner_name(a, "a"),
-            )["status"],
-            "RESERVED",
-        )
-        self.assertEqual(
-            root.reserve(
-                peer_user=self.peer(b),
-                request_id="req-host-b",
-                runner_name=self.runner_name(b, "b"),
+                peer_user=self.peer(d),
+                request_id="req-host-d",
+                runner_name=self.runner_name(d, "d"),
             )["status"],
             "BUSY",
         )
+
+    def test_two_science_lanes_leave_reserved_workspace_control_slot(self):
+        root = self.root()
+        science0 = "padataset-scientific-single-gpu-v1"
+        science1 = "padataset-scientific-single-gpu-2-v1"
+        research = "research-cpu-public-v1"
+        control = "workspace-control-control-small-v1"
+
+        for class_id, request_id in (
+            (science0, "req-science-0"),
+            (science1, "req-science-1"),
+        ):
+            self.assertEqual(
+                root.reserve(
+                    peer_user=self.peer(class_id),
+                    request_id=request_id,
+                    runner_name=self.runner_name(class_id, request_id),
+                )["status"],
+                "RESERVED",
+            )
+
+        self.assertEqual(
+            root.reserve(
+                peer_user=self.peer(research),
+                request_id="req-research-third",
+                runner_name=self.runner_name(research, "third"),
+            )["status"],
+            "BUSY",
+        )
+        self.assertEqual(
+            root.reserve(
+                peer_user=self.peer(control),
+                request_id="req-control-third",
+                runner_name=self.runner_name(control, "third"),
+            )["status"],
+            "RESERVED",
+        )
+
+    def test_control_first_then_two_science_lanes_fill_three_host_slots(self):
+        root = self.root()
+        for class_id, request_id in (
+            ("workspace-control-control-small-v1", "req-control-first"),
+            ("padataset-scientific-single-gpu-v1", "req-science-0"),
+            ("padataset-scientific-single-gpu-2-v1", "req-science-1"),
+        ):
+            self.assertEqual(
+                root.reserve(
+                    peer_user=self.peer(class_id),
+                    request_id=request_id,
+                    runner_name=self.runner_name(class_id, request_id),
+                )["status"],
+                "RESERVED",
+            )
 
     def test_project_and_class_limits_are_independent_when_host_limit_raised(self):
         root = self.root(host_max=9, project_max=1)

@@ -322,6 +322,19 @@
       "current_scale_set_name": "lambda-padataset-gpu-single-public",
       "target_scale_set_name": "lambda-padataset-scientific-single-gpu",
       "evidence_status": "VERIFIED_FROM_EXACT_GITHUB_FILE_AT_SOURCE_CHECKPOINT"
+    },
+    {
+      "project_id": "padataset",
+      "repository": "adamtrott78/PADataset",
+      "source_checkpoint": "3e2245448ed42af025084f2479fc844e72a2c604",
+      "route_id": "scientific-single-gpu-2",
+      "workflow_path": ".github/workflows/lambda-ci-scientific-2.yml",
+      "workflow_blob_sha": "6b710d36a7bcd59bfba7224ab4a068411398edfd",
+      "top_level_job_count": 1,
+      "top_level_job_key": "padataset-scientific-2",
+      "current_scale_set_name": "lambda-padataset-scientific-single-gpu",
+      "target_scale_set_name": "lambda-padataset-scientific-single-gpu-2",
+      "evidence_status": "CANDIDATE_FROM_EXACT_SAME_REPOSITORY_PR_HEAD"
     }
   ]
 }
