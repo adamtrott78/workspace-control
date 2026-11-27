@@ -172,7 +172,13 @@
         "The digest mismatch therefore came from comparing the repo's pre-runtime390 base root to the accepted effective runtime390 live root. The runtime390 receipt explicitly changes only the two PADataset scientific root envelopes while preserving Workspace Control control-small authority.",
         "Repair PR #709 replaced broken whole-digest equality with exact runtime390 lineage proof: candidate root must equal receipt predecessor; installed root must equal receipt successor; host resources/upstream pins must match; changed envelope set must be exactly scientific lane A+B; workspace-control-control-small-v1 envelope must remain identical. No ignore/accept-any-digest path exists.",
         "PR #709 exact head 99fba1c908377596de19062fca48befb7c8d406e passed Workspace Control Validation #3359 and merged as main 17345570329cfa31022d58ab8110c4df743c4ca9.",
-        "Read-only post-failure inspection confirms workspace-ci-v3-controller@workspace-control-control-small-v1.service remains loaded, active and running (MainPID 2411495); the failed retry did not mutate live route/controller state."
+        "Read-only post-failure inspection confirms workspace-ci-v3-controller@workspace-control-control-small-v1.service remains loaded, active and running (MainPID 2411495); the failed retry did not mutate live route/controller state.",
+        "A fourth live activation retry against main@17345570329cfa31022d58ab8110c4df743c4ca9 passed the repaired science/runtime390 managed-artifact preflight but failed while constructing the route candidate with `RouteActivationError: runtime390 root authority binding mismatch: previous_root_policy_sha256`. The failure happened inside build_candidate_policy() before the inline launcher created/consumed an operator authority and before any controller stop or policy mutation.",
+        "Historical runtime390 activation at source a419a3caacec4c3c79091bc8dd2bf9f5d5c8ea12 records its previous_root_policy_sha256 from the live dual-lane predecessor at that historical transaction. Requiring today's compiled root digest to equal that historical predecessor was therefore invalid after later legitimate control-plane evolution.",
+        "Repair PR #712 makes Codex route activation controller-local: candidate.verify_installed() remains the full effective-generation/root attestation; the route candidate is derived from the installed workspace-control-control-small-v1 controller policy; only the exact compiled codex-bootstrap trusted-workflow row plus derived controller_policy_sha256 may change; the installed control_plane_generation_sha256 is preserved; root-policy.json is not in the mutation set.",
+        "The controller-local candidate separately re-proves installed control-small root bindings, max_runners=1, project_max_active_runners=1 and zero exclusive-resource claims, and fails closed on any control-small root/controller structural drift.",
+        "Focused hostile-worker receipt job-18c14452-8d75-4738-adeb-a9d1d74e2c49 passed 34/34 activation/runtime390/reconciler tests; exact PR #712 head ad294631746f2b1b9eba9cb2d2b8424a51fc999b passed Workspace Control Validation #3363 and merged as main 57831303912b899fd48ee54b0738283acc9c8303.",
+        "Read-only post-failure inspection still shows workspace-ci-v3-controller@workspace-control-control-small-v1.service loaded, active/running with MainPID 2411495. No failed-attempt mutation is present."
       ]
     },
     {
@@ -484,5 +490,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-27",
-  "latest_validated_checkpoint": "main@17345570329cfa31022d58ab8110c4df743c4ca9 (Codex route activation root-equivalence proof aligned with accepted runtime390 successor; fresh live activation pending)"
+  "latest_validated_checkpoint": "main@57831303912b899fd48ee54b0738283acc9c8303 (Codex route activation converted to controller-local additive policy proof; fresh live activation pending)"
 }
