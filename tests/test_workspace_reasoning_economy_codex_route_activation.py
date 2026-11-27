@@ -48,24 +48,31 @@ class WorkspaceControlCodexRouteActivationTests(unittest.TestCase):
         ]
         return value
 
-    def test_candidate_adds_only_codex_workflow_and_preserves_root_authority(self):
+    def test_candidate_adds_only_codex_workflow_and_preserves_installed_generation(self):
         current = self.predecessor_policy()
-        candidate, root = activation.build_candidate_policy(
+        current["control_plane_generation_sha256"] = "9" * 64
+        current["controller_policy_sha256"] = activation._controller_policy_digest(
+            current
+        )
+        installed = copy.deepcopy(self.root_policy)
+        installed["root_policy_sha256"] = "8" * 64
+
+        candidate_policy, returned_root = activation.build_candidate_policy(
             repo=ROOT,
-            installed_root={
-                "root_policy_sha256": self.root_policy["root_policy_sha256"]
-            },
+            installed_root=installed,
             current_policy=current,
         )
+
+        self.assertIs(returned_root, installed)
         self.assertEqual(
-            root["root_policy_sha256"],
-            self.root_policy["root_policy_sha256"],
+            candidate_policy["control_plane_generation_sha256"],
+            current["control_plane_generation_sha256"],
         )
-        self.assertEqual(candidate["runner_class_id"], activation.TARGET_CLASS)
-        self.assertEqual(candidate["max_runners"], 1)
+        self.assertEqual(candidate_policy["runner_class_id"], activation.TARGET_CLASS)
+        self.assertEqual(candidate_policy["max_runners"], 1)
         by_route = {
             row["route_id"]: row
-            for row in candidate["trusted_workflows"]
+            for row in candidate_policy["trusted_workflows"]
         }
         self.assertEqual(set(by_route), {"control-validation", "codex-bootstrap"})
         self.assertEqual(
@@ -76,133 +83,81 @@ class WorkspaceControlCodexRouteActivationTests(unittest.TestCase):
             by_route["codex-bootstrap"]["blob_sha"],
             activation.candidate.WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
         )
-
-    def test_runtime390_successor_is_accepted_only_with_exact_root_lineage(self):
-        candidate_root = copy.deepcopy(self.root_policy)
-        installed_root = copy.deepcopy(candidate_root)
-        predecessor = {
-            class_id: value["root_envelope_sha256"]
-            for class_id, value in candidate_root["runner_classes"].items()
+        changed = {
+            key
+            for key in set(current) | set(candidate_policy)
+            if current.get(key) != candidate_policy.get(key)
         }
-        successor = dict(predecessor)
-        successor[activation.candidate.PADATASET_SCIENTIFIC_TARGET_CLASS] = "1" * 64
-        successor[
-            activation.candidate.PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS
-        ] = "2" * 64
-        installed_root["runner_classes"][
-            activation.candidate.PADATASET_SCIENTIFIC_TARGET_CLASS
-        ]["root_envelope_sha256"] = "1" * 64
-        installed_root["runner_classes"][
-            activation.candidate.PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS
-        ]["root_envelope_sha256"] = "2" * 64
-        installed_root["root_policy_sha256"] = "b" * 64
-
-        receipt = {
-            "schema_version": 1,
-            "mode": "V3_PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH",
-            "phase": "ACTIVE",
-            "previous_root_policy_sha256":
-                candidate_root["root_policy_sha256"],
-            "root_policy_sha256": installed_root["root_policy_sha256"],
-            "previous_root_envelope_sha256": predecessor,
-            "root_envelope_sha256": successor,
-        }
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "active.json"
-            path.write_text(json.dumps(receipt), encoding="utf-8")
-            with (
-                mock.patch.object(
-                    activation.candidate,
-                    "PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT",
-                    path,
-                ),
-                mock.patch.object(
-                    activation,
-                    "require_root_private",
-                    side_effect=lambda p: p.read_bytes(),
-                ),
-            ):
-                activation._require_root_authority_equivalent(
-                    candidate_root=candidate_root,
-                    installed_root=installed_root,
-                )
-
         self.assertEqual(
-            predecessor[activation.TARGET_CLASS],
-            successor[activation.TARGET_CLASS],
+            changed,
+            {"trusted_workflows", "controller_policy_sha256"},
         )
 
-    def test_runtime390_successor_rejects_unexpected_root_envelope_change(self):
-        candidate_root = copy.deepcopy(self.root_policy)
-        installed_root = copy.deepcopy(candidate_root)
-        predecessor = {
-            class_id: value["root_envelope_sha256"]
-            for class_id, value in candidate_root["runner_classes"].items()
-        }
-        successor = dict(predecessor)
-        successor[activation.candidate.PADATASET_SCIENTIFIC_TARGET_CLASS] = "1" * 64
-        successor[
+    def test_unrelated_installed_root_digest_does_not_block_controller_local_route(self):
+        current = self.predecessor_policy()
+        installed = copy.deepcopy(self.root_policy)
+        installed["root_policy_sha256"] = "a" * 64
+        # Simulate unrelated accepted scientific/runtime evolution.
+        installed["runner_classes"][
+            activation.candidate.PADATASET_SCIENTIFIC_TARGET_CLASS
+        ]["root_envelope_sha256"] = "1" * 64
+        installed["runner_classes"][
             activation.candidate.PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS
-        ] = "2" * 64
-        successor[activation.TARGET_CLASS] = "3" * 64
-        for class_id, digest in successor.items():
-            installed_root["runner_classes"][class_id][
-                "root_envelope_sha256"
-            ] = digest
-        installed_root["root_policy_sha256"] = "c" * 64
-        receipt = {
-            "schema_version": 1,
-            "mode": "V3_PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH",
-            "phase": "ACTIVE",
-            "previous_root_policy_sha256":
-                candidate_root["root_policy_sha256"],
-            "root_policy_sha256": installed_root["root_policy_sha256"],
-            "previous_root_envelope_sha256": predecessor,
-            "root_envelope_sha256": successor,
-        }
-        with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "active.json"
-            path.write_text(json.dumps(receipt), encoding="utf-8")
-            with (
-                mock.patch.object(
-                    activation.candidate,
-                    "PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT",
-                    path,
-                ),
-                mock.patch.object(
-                    activation,
-                    "require_root_private",
-                    side_effect=lambda p: p.read_bytes(),
-                ),
-            ):
-                with self.assertRaisesRegex(
-                    activation.RouteActivationError,
-                    "unexpected root envelopes",
-                ):
-                    activation._require_root_authority_equivalent(
-                        candidate_root=candidate_root,
-                        installed_root=installed_root,
-                    )
+        ]["root_envelope_sha256"] = "2" * 64
 
-    def test_root_digest_mismatch_without_runtime390_receipt_fails_closed(self):
-        candidate_root = copy.deepcopy(self.root_policy)
-        installed_root = copy.deepcopy(candidate_root)
-        installed_root["root_policy_sha256"] = "d" * 64
-        with tempfile.TemporaryDirectory() as tmp:
-            missing = Path(tmp) / "missing.json"
-            with mock.patch.object(
-                activation.candidate,
-                "PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT",
-                missing,
-            ):
-                with self.assertRaisesRegex(
-                    activation.RouteActivationError,
-                    "without accepted runtime390 successor",
-                ):
-                    activation._require_root_authority_equivalent(
-                        candidate_root=candidate_root,
-                        installed_root=installed_root,
-                    )
+        candidate_policy, _ = activation.build_candidate_policy(
+            repo=ROOT,
+            installed_root=installed,
+            current_policy=current,
+        )
+        self.assertEqual(
+            candidate_policy["trusted_workflows"][1]["route_id"],
+            "codex-bootstrap",
+        )
+
+    def test_installed_control_small_root_binding_drift_fails_closed(self):
+        current = self.predecessor_policy()
+        installed = copy.deepcopy(self.root_policy)
+        installed["runner_classes"][activation.TARGET_CLASS][
+            "scale_set_name"
+        ] = "unexpected-scale-set"
+        with self.assertRaisesRegex(
+            activation.RouteActivationError,
+            "installed control-small root binding drift: scale_set_name",
+        ):
+            activation.build_candidate_policy(
+                repo=ROOT,
+                installed_root=installed,
+                current_policy=current,
+            )
+
+    def test_installed_controller_must_match_live_control_small_root(self):
+        current = self.predecessor_policy()
+        current["runner_prefix"] = "wrong-prefix"
+        with self.assertRaisesRegex(
+            activation.RouteActivationError,
+            "installed control-small controller/root mismatch: runner_prefix",
+        ):
+            activation.build_candidate_policy(
+                repo=ROOT,
+                installed_root=copy.deepcopy(self.root_policy),
+                current_policy=current,
+            )
+
+    def test_helper_no_longer_reconstructs_historical_runtime390_root_predecessor(self):
+        self.assertNotIn("_require_root_authority_equivalent(", HELPER)
+        self.assertNotIn(
+            "previous_root_policy_sha256",
+            HELPER[HELPER.index("def build_candidate_policy("):HELPER.index("def build_overlay(")],
+        )
+        self.assertIn(
+            "installed control-small root binding drift",
+            HELPER,
+        )
+        self.assertIn(
+            "Codex bootstrap candidate changed non-controller-local fields",
+            HELPER,
+        )
 
     def test_overlay_change_is_additive_and_preserves_existing_state(self):
         current = {
