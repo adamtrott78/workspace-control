@@ -226,6 +226,29 @@ class WorkspaceControlCodexRouteActivationTests(unittest.TestCase):
         ):
             activation.build_overlay(current)
 
+    def test_activation_receipt_binds_effective_root_separately_from_base_manifest(self):
+        self.assertIn(
+            '"root_policy_sha256": installed_root.get("root_policy_sha256")',
+            HELPER,
+        )
+        self.assertIn(
+            '"base_root_policy_sha256": manifest.get("root_policy_sha256")',
+            HELPER,
+        )
+        self.assertNotIn(
+            '"authorization_id": authority["authorization_id"],\n'
+            '        "root_policy_sha256": manifest.get("root_policy_sha256")',
+            HELPER,
+        )
+        self.assertIn(
+            '"base_root_policy_sha256": manifest.get("root_policy_sha256")',
+            REC,
+        )
+        self.assertIn(
+            'root_policy.get("root_policy_sha256") != active["root_policy_sha256"]',
+            REC,
+        )
+
     def test_helper_requires_one_shot_root_authority_and_target_quiescence(self):
         for marker in (
             "ACTIVATE_WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_V1",
