@@ -204,7 +204,12 @@
       "evidence": [
         "Bootstrap run 46036997293 completed ChatGPT device authorization successfully and its redacted receipt records auth_mode=chatgpt and api_key_present=false.",
         "The bootstrap workflow forces forced_login_method=chatgpt and unsets OPENAI_API_KEY; zero inference was performed, so no API-billing fallback was used during bootstrap.",
-        "Live account/read was not invoked by the bootstrap workflow, so account.type and planType are not yet independently observed and remain UNKNOWN for CODEX-02."
+        "Live account/read was not invoked by the bootstrap workflow, so account.type and planType are not yet independently observed and remain UNKNOWN for CODEX-02.",
+        "Trusted /workspace-control-validate preflight attempt used issue comment 7223978182 against exact PR #590 head 1cce63b0fe34cabc71e17dfceb288ac4bf417bde.",
+        "Lambda CI Workspace Control Validation run 46038749199 reached the reserved control-small runner and passed exact-head and isolation gates.",
+        "The zero-inference live Codex preflight failed before account/read because shutil.which('codex') returned None; bootstrap had installed Codex under the persistent Workspace Control project home, but control-validation does not expose that executable on PATH.",
+        "The failed validation also encountered unrelated shallow-checkout history-bound test errors, so the generic control-validation workflow is not a valid substitute for a dedicated account/read/calibration route.",
+        "No model inference occurred, account.type and planType were not observed, and no allowance relationship is inferred."
       ]
     },
     {
@@ -222,7 +227,8 @@
       "status": "PENDING",
       "requirement": "Controlled actions calibrate account/usage/read and rate-limit deltas; unknown allowance mappings remain explicitly unknown.",
       "evidence": [
-        "Calibration harness exists at 59d69e0f… and conservatively treats zero movement as below-resolution/UNKNOWN; live controlled Codex/Instant actions remain required."
+        "Calibration harness exists at 59d69e0f… and conservatively treats zero movement as below-resolution/UNKNOWN; live controlled Codex/Instant actions remain required.",
+        "Live calibration remains blocked before the first inference because the reserved-runner account/read preflight cannot currently resolve the bootstrap-installed Codex executable in the trusted control-validation execution surface. UNKNOWN remains UNKNOWN."
       ]
     },
     {
@@ -510,5 +516,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-27",
-  "latest_validated_checkpoint": "PR #590@bff5bf875cb6688b81744701aa375875d265d9a1 zero-inference Workspace Control Codex bootstrap run 46036997293 SUCCESS; receipt artifact 15217972982; CODEX-01 PASS; live account/read/calibration pending"
+  "latest_validated_checkpoint": "PR #590 zero-inference bootstrap run 46036997293 SUCCESS / CODEX-01 PASS; follow-up account/read preflight run 46038749199 reached control-small but failed before telemetry because Codex executable was not on control-validation PATH; CODEX-02 remains PARTIAL"
 }

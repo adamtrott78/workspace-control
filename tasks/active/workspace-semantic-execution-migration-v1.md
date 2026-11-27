@@ -70,12 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Do NOT rerun Codex route activation. The live /workspace-codex-bootstrap route is ACTIVE. Trigger one fresh zero-inference bootstrap against the current open same-repository PR #590 exact head, verify the control-small receipt plus account.type=chatgpt / planType=plus / OPENAI_API_KEY absent / no API billing fallback, then run only the first minimal planner-enforced subscription-Codex calibration action.
+CODEX-01 zero-inference bootstrap is accepted. CODEX-02 is blocked before account/read because the trusted control-validation job does not expose the bootstrap-installed Codex executable on PATH. Do not rerun activation/bootstrap and do not repurpose control-validation as an inference bypass. The smallest next action is an authority-owned wiring/route fix that exposes the existing project-home Codex executable to a dedicated zero-inference account/usage preflight; only after account.type/planType are observed may a separately authorized Token Economy PROGRAMMATIC calibration inference run.
 
 ## Remaining work
 
 - Instant front door: perform bounded live acceptance through private plugin plugins_6b08cf5ea1548191b543faab9952bd26 (new-task candidate, durable status query, explicit decision/cancel-revise candidate), then close INST-07 if no chat-created authority occurs.
-- E4/CODEX: trigger a fresh zero-inference control-small Codex bootstrap through the newly live route, verify the subscription-auth/no-API-fallback receipt, then run the minimum planner-enforced subscription-Codex live calibration jobs with controlled before/after usage snapshots.
+- E4/CODEX: CODEX-01 bootstrap is accepted. Repair the authority-owned live preflight execution-surface wiring so account/read can observe account.type/planType without inference; then run the minimum separately authorized planner-enforced subscription-Codex calibration with before/after usage snapshots and no API fallback.
 - E4 quality/economics: complete claim-bearing matched reasoning-quality/holdout evidence and compare validated progress plus scarce-allowance consumption against the all-strong/frontier control.
 - REL-01: close the remaining integrated fault-campaign cases named by the matrix, especially DB disconnect, validator timeout and delayed/out-of-order event handling.
 - REL-02 / PROD-01: run explicit target-budget comparison, representative soak/resource measurements and authoritative UX-09 target performance on the Windows machine.
@@ -84,6 +84,8 @@ Do NOT rerun Codex route activation. The live /workspace-codex-bootstrap route i
 - E8: record explicit integrated PROMOTE_V0 / HOLD / REVISE verdict.
 
 ## Blockers / gates
+
+- CODEX-02 LIVE PREFLIGHT PATH: trusted control-small validation reached the runner but could not resolve the bootstrap-installed Codex executable on PATH, so account/read did not execute. Repair must be authority-owned; do not bypass through generic validation or infer plan telemetry.
 
 - CODEX-01 ZERO-INFERENCE BOOTSTRAP: live additive /workspace-codex-bootstrap activation PASSED against main@de3d0642b3b300859c2508f829d5d7ca44eca77c under consumed one-shot authority b95c06d2-f43a-4871-acf5-d128b22d656c. Do not rerun activation or reuse the authority. Next trigger a fresh zero-inference bootstrap against an open same-repository PR head and verify ChatGPT-subscription auth/no-API-fallback receipt before any inference.
 - E4 ECONOMICS / CODEX: claim-bearing comparison remains gated on calibrated comparable allowance telemetry plus live subscription-only Codex bounded-job evidence; do not substitute raw token estimates or uncalibrated UI observations.

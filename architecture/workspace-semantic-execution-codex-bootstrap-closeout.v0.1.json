@@ -48,13 +48,29 @@
     "CODEX-04": "PENDING"
   },
   "next_gate": {
-    "required": "SEPARATELY_AUTHORIZED_LIVE_ACCOUNT_READ_AND_MINIMAL_PLANNER_ENFORCED_CODEX_CALIBRATION",
+    "required": "AUTHORITY_OWNED_CODEX_EXECUTION_SURFACE_WIRING_FOR_ZERO_INFERENCE_ACCOUNT_READ_THEN_SEPARATELY_AUTHORIZED_MINIMAL_PROGRAMMATIC_CALIBRATION",
     "constraints": [
       "Do not rerun route activation.",
       "Do not rerun zero-inference bootstrap.",
       "Do not infer account.type, planType or shared allowance relationships.",
       "Do not launch Codex outside the Token Economy PROGRAMMATIC path.",
       "Do not repurpose control-validation as an inference bypass without explicit authority for that effect."
+    ]
+  },
+  "follow_up_preflight": {
+    "run_id": 46038749199,
+    "trigger_comment_id": 7223978182,
+    "candidate_head": "1cce63b0fe34cabc71e17dfceb288ac4bf417bde",
+    "inference_performed": false,
+    "account_read_performed": false,
+    "result": "BLOCKED",
+    "blocker": "CONTROL_VALIDATION_CODEX_EXECUTABLE_NOT_ON_PATH",
+    "evidence": [
+      "Trusted /workspace-control-validate preflight attempt used issue comment 7223978182 against exact PR #590 head 1cce63b0fe34cabc71e17dfceb288ac4bf417bde.",
+      "Lambda CI Workspace Control Validation run 46038749199 reached the reserved control-small runner and passed exact-head and isolation gates.",
+      "The zero-inference live Codex preflight failed before account/read because shutil.which('codex') returned None; bootstrap had installed Codex under the persistent Workspace Control project home, but control-validation does not expose that executable on PATH.",
+      "The failed validation also encountered unrelated shallow-checkout history-bound test errors, so the generic control-validation workflow is not a valid substitute for a dedicated account/read/calibration route.",
+      "No model inference occurred, account.type and planType were not observed, and no allowance relationship is inferred."
     ]
   }
 }
