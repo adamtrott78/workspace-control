@@ -544,6 +544,7 @@ def stop_target_close_quiescence_and_write_first_policy(
 ) -> None:
     run_systemctl("stop", TARGET_UNIT)
     require_target_inactive()
+    require_target_quiescent()
     require_predecessor_unchanged(
         root_policy_raw=root_policy_raw,
         active_route_raw=active_route_raw,
