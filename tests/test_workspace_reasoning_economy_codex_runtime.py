@@ -244,43 +244,63 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
         ):
             self.assertNotIn(forbidden, text)
 
-    def test_codex_calibration_is_one_bounded_redacted_inference(self):
+    def test_codex_calibration_uses_only_pinned_trusted_source(self):
         text = _workflow()
 
         self.assertIn("/workspace-codex-calibrate ", text)
         self.assertIn('/workspace-codex-calibrate) mode="calibrate"', text)
         self.assertIn(
-            "steps.gate.outputs.mode == 'preflight' || steps.gate.outputs.mode == 'calibrate'",
+            "if: steps.gate.outputs.mode != 'calibrate'",
             text,
         )
         self.assertIn(
-            "- name: Run one bounded Codex allowance calibration quantum",
+            "- name: Checkout trusted calibration source",
             text,
         )
-        self.assertIn('"mode": "WORKSPACE_CONTROL_CODEX_CALIBRATION_V1"', text)
-        self.assertIn('"surface": "CODEX"', text)
-        self.assertIn('"isolation_verified": True', text)
-        self.assertIn('"model_actions": 1', text)
-        self.assertIn('"model_inference_performed": True', text)
-        self.assertIn('"api_key_present": False', text)
-        self.assertIn('"credential_material_in_receipt": False', text)
-        self.assertIn('"prompt_material_in_receipt": False', text)
-        self.assertIn('"model_output_material_in_receipt": False', text)
-        self.assertIn('"usage_before": clean_snapshot(before)', text)
-        self.assertIn('"usage_after": clean_snapshot(after)', text)
-        self.assertIn('"--ephemeral"', text)
-        self.assertIn('"read-only"', text)
-        self.assertIn('"model_reasoning_effort=low"', text)
-        self.assertIn("trace.turns_started == 1", text)
-        self.assertIn("trace.turns_completed == 1", text)
-        self.assertIn("trace.turns_failed == 0", text)
-        self.assertIn("trace.tool_calls == 0", text)
-        self.assertIn("trace.web_searches == 0", text)
-        self.assertIn("trace.file_changes == 0", text)
-        self.assertIn("workspace-control-codex-calibration-receipt.json", text)
-        self.assertIn("workspace-control-codex-calibration-receipt", text)
-        self.assertNotIn("completed.stderr", text)
-        self.assertNotIn('"final_agent_message"', text)
+        self.assertIn(
+            "if: steps.gate.outputs.mode == 'calibrate'",
+            text,
+        )
+        self.assertIn("ref: ${{ github.workflow_sha }}", text)
+        self.assertIn("path: .trusted-calibration", text)
+        self.assertIn(
+            'TRUSTED_HELPER_BLOB: "26ef79b073602418b2290f1e672467e73da0d5ea"',
+            text,
+        )
+        self.assertIn(
+            'helper_rel="scripts/lambda_ci_v3_workspace_control_codex_calibration_v1.py"',
+            text,
+        )
+        self.assertIn(
+            'git -C "$trusted_repo" rev-parse "HEAD:$helper_rel"',
+            text,
+        )
+        self.assertIn(
+            '[[ "$helper_blob" == "$TRUSTED_HELPER_BLOB" ]]',
+            text,
+        )
+        self.assertIn(
+            "unset OPENAI_API_KEY PYTHONPATH PYTHONHOME",
+            text,
+        )
+        self.assertIn('/usr/bin/python3 -I "$helper"', text)
+        self.assertIn(
+            "workspace-control-codex-calibration-receipt.json",
+            text,
+        )
+        self.assertIn(
+            "workspace-control-codex-calibration-receipt",
+            text,
+        )
+        self.assertNotIn(
+            "workspace_semantic_execution.adapters.codex_subscription",
+            text,
+        )
+        self.assertNotIn(
+            "workspace_semantic_execution.economics.codex_trace",
+            text,
+        )
+        self.assertNotIn("sys.path.insert", text)
         self.assertNotIn("scored_replicate_plan_v1", text)
         self.assertNotIn("matrix-v1/", text)
 
