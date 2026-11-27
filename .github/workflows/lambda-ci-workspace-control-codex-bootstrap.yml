@@ -377,13 +377,13 @@ jobs:
               raise SystemExit("account/read missing account")
           account_type = account.get("type")
           plan_type = account.get("planType")
-          requires_openai_auth = account_result.get("requiresOpenAIAuth")
+          requires_openai_auth = account_result.get("requiresOpenaiAuth")
           if account_type != "chatgpt":
               raise SystemExit("ChatGPT subscription account required")
           if not isinstance(plan_type, str) or plan_type.lower() != "plus":
               raise SystemExit("ChatGPT Plus plan required")
           if not isinstance(requires_openai_auth, bool):
-              raise SystemExit("requiresOpenAIAuth must be boolean")
+              raise SystemExit("requiresOpenaiAuth must be boolean")
 
           def optional_int(value: object, label: str) -> int | None:
               if value is None:
