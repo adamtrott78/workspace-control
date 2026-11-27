@@ -185,10 +185,14 @@ class WorkspaceControlCodexCalibrationTests(unittest.TestCase):
             "refresh_token",
             "device_code",
             "auth.json",
-            "prompt",
             "final_agent_message",
+            "thread-1",
+            "CALIBRATION_OK",
         ):
-            self.assertNotIn(forbidden, serialized.lower())
+            self.assertNotIn(forbidden.lower(), serialized.lower())
+        self.assertFalse(receipt["prompt_material_in_receipt"])
+        self.assertFalse(receipt["model_output_material_in_receipt"])
+        self.assertFalse(receipt["credential_material_in_receipt"])
         self.assertEqual(snapshots_before, "2026-11-27T22:00:00+00:00")
 
     def test_trace_rejects_forbidden_activity_on_every_item_stage(self):
