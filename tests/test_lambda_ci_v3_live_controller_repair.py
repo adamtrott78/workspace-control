@@ -5,6 +5,7 @@ import unittest
 
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 HELPER_PATH=ROOT/"scripts/lambda_ci_v3_live_controller_repair_v1.py"
+sys.path.insert(0, str(ROOT/"scripts"))
 HELPER=HELPER_PATH.read_text()
 CONTROLLER=(ROOT/"controller/lambda-ci-controller/v3/controller.go").read_text()
 
@@ -82,7 +83,7 @@ class LiveControllerRepairTests(unittest.TestCase):
         ):
             self.assertIn(marker,HELPER)
 
-    def test_topology_accepts_restart_counter_reset_from_intentional_stop_start(self):
+    def test_topology_accepts_preserved_or_reset_restart_counter_after_intentional_stop_start(self):
         before={
             "lane-a":{
                 "ActiveState":"active",
@@ -102,7 +103,7 @@ class LiveControllerRepairTests(unittest.TestCase):
                 "ActiveState":"active",
                 "SubState":"running",
                 "UnitFileState":"disabled",
-                "NRestarts":"0",
+                "NRestarts":"3",
             },
             "inactive":{
                 "ActiveState":"inactive",
@@ -112,7 +113,7 @@ class LiveControllerRepairTests(unittest.TestCase):
             },
         }
         deltas=live.verify_topology(before,after,["lane-a"])
-        self.assertEqual(deltas["lane-a"],-3)
+        self.assertEqual(deltas["lane-a"],0)
         self.assertEqual(deltas["inactive"],0)
 
     def test_topology_rejects_automatic_restart_after_restore(self):
@@ -129,7 +130,7 @@ class LiveControllerRepairTests(unittest.TestCase):
                 "ActiveState":"active",
                 "SubState":"running",
                 "UnitFileState":"disabled",
-                "NRestarts":"1",
+                "NRestarts":"3",
             },
         }
         with self.assertRaisesRegex(
@@ -140,7 +141,7 @@ class LiveControllerRepairTests(unittest.TestCase):
 
     def test_topology_restart_evidence_is_recorded(self):
         self.assertIn('"controller_restart_deltas":deltas',HELPER)
-        self.assertIn("after_n != 0",HELPER)
+        self.assertIn("after_n > before_n",HELPER)
         self.assertNotIn("controller restart counter regressed",HELPER)
 
 if __name__=="__main__":

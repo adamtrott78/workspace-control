@@ -397,18 +397,22 @@ func resetFreshAttempt(policy controllerPolicy, record *jobRecord, now time.Time
 	return nil
 }
 
+const defaultRESTDemandMinInterval = time.Minute
+
 type v3Scaler struct {
-	policy       controllerPolicy
-	verifier     jobVerifier
-	ledger       ledgerStore
-	session      jobAcquirer
-	jit          runnerJITClient
-	root         capacityClient
-	scaleSetID   int
-	logger       *slog.Logger
-	now          func() time.Time
-	lastStats    *scaleset.RunnerScaleSetStatistic
-	mu           sync.Mutex
+	policy                controllerPolicy
+	verifier              jobVerifier
+	ledger                ledgerStore
+	session               jobAcquirer
+	jit                   runnerJITClient
+	root                  capacityClient
+	scaleSetID            int
+	logger                *slog.Logger
+	now                   func() time.Time
+	lastStats             *scaleset.RunnerScaleSetStatistic
+	lastRESTDemandAttempt time.Time
+	restDemandMinInterval time.Duration
+	mu                    sync.Mutex
 }
 
 func (s *v3Scaler) desiredCapacity(stats *scaleset.RunnerScaleSetStatistic) int {
@@ -593,34 +597,66 @@ func (s *v3Scaler) refreshRootStateBeforeDemand(
 	return nil
 }
 
+func (s *v3Scaler) restDemandDiscoveryAllowed() (bool, time.Duration) {
+	interval := s.restDemandMinInterval
+	if interval <= 0 {
+		interval = defaultRESTDemandMinInterval
+	}
+	now := s.now()
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !s.lastRESTDemandAttempt.IsZero() {
+		elapsed := now.Sub(s.lastRESTDemandAttempt)
+		if elapsed < interval {
+			return false, interval - elapsed
+		}
+	}
+	s.lastRESTDemandAttempt = now
+	return true, 0
+}
+
 func (s *v3Scaler) processRESTDemand(
 	ctx context.Context,
 	stats *scaleset.RunnerScaleSetStatistic,
-) error {
+) (int, error) {
 	desired := s.desiredCapacity(stats)
-	if desired <= 0 {
-		return nil
-	}
 
 	records, err := s.ledger.List()
 	if err != nil {
-		return fmt.Errorf("list controller ledger for REST demand: %w", err)
+		return 0, fmt.Errorf("list controller ledger for REST demand: %w", err)
 	}
 	if err := s.refreshRootStateBeforeDemand(ctx, records); err != nil {
-		return err
+		return 0, err
 	}
 	records, err = s.ledger.List()
 	if err != nil {
-		return fmt.Errorf("reload controller ledger after root refresh: %w", err)
+		return 0, fmt.Errorf("reload controller ledger after root refresh: %w", err)
 	}
 	outstanding := s.outstandingAcquired(records)
-	if outstanding >= desired {
-		return nil
+
+	// Broker-acquired authority with no assigned-capacity signal must remain
+	// non-provisioning. REST fallback is only needed when the controller has no
+	// outstanding local authority and GitHub still exposes exact queued,
+	// unbound jobs for this scale set.
+	if desired <= 0 && outstanding > 0 {
+		return desired, nil
+	}
+
+	allowed, retryAfter := s.restDemandDiscoveryAllowed()
+	if !allowed {
+		s.logger.Info(
+			"Deferring REST demand discovery inside anti-spam interval",
+			slog.Duration("retry_after", retryAfter),
+			slog.Int("desired", desired),
+			slog.Int("outstanding", outstanding),
+		)
+		return desired, nil
 	}
 
 	jobs, safe, reason, err := s.verifier.DiscoverTrustedDemand(ctx)
 	if err != nil {
-		return fmt.Errorf("discover REST-attested scheduler demand: %w", err)
+		return 0, fmt.Errorf("discover REST-attested scheduler demand: %w", err)
 	}
 	if !safe {
 		s.logger.Warn(
@@ -629,15 +665,35 @@ func (s *v3Scaler) processRESTDemand(
 			slog.Int("desired", desired),
 			slog.Int("outstanding", outstanding),
 		)
-		return nil
+		return desired, nil
 	}
 	if len(jobs) == 0 {
-		s.logger.Info(
-			"Waiting for REST job evidence for assigned scheduler demand",
-			slog.Int("desired", desired),
-			slog.Int("outstanding", outstanding),
+		if desired > outstanding {
+			s.logger.Info(
+				"Waiting for REST job evidence for assigned scheduler demand",
+				slog.Int("desired", desired),
+				slog.Int("outstanding", outstanding),
+			)
+		}
+		return desired, nil
+	}
+
+	// The listener's TotalAssignedJobs statistic can fall back to zero after a
+	// one-shot runner completes even while GitHub still has trusted queued,
+	// unbound jobs for the same scale set. Those REST-attested jobs are already
+	// exact workflow/head/actor/label evidence. Use them only as a bounded
+	// capacity floor, never above the class's existing MaxRunners.
+	if desired <= 0 {
+		desired = minInt(len(jobs), s.policy.MaxRunners)
+		s.logger.Warn(
+			"Using REST-attested queued demand as bounded capacity floor",
+			slog.Int("rest_candidate_count", len(jobs)),
+			slog.Int("effective_desired", desired),
+			slog.Int("max_runners", s.policy.MaxRunners),
 		)
-		return nil
+	}
+	if outstanding >= desired {
+		return desired, nil
 	}
 
 	existingJobs := make(map[int64]jobRecord, len(records))
@@ -657,7 +713,7 @@ func (s *v3Scaler) processRESTDemand(
 			break
 		}
 		if job.GitHubJobID <= 0 || job.WorkflowRunID <= 0 {
-			return fmt.Errorf("REST-attested job identity is incomplete")
+			return 0, fmt.Errorf("REST-attested job identity is incomplete")
 		}
 		if collision, ok := existingAuthorityKeys[job.GitHubJobID]; ok {
 			if !restRevivalProvenanceMatches(collision, job) {
@@ -677,7 +733,7 @@ func (s *v3Scaler) processRESTDemand(
 		if existing, ok := existingJobs[job.GitHubJobID]; ok {
 			current, err := s.currentPolicyRecord(existing)
 			if err != nil {
-				return err
+				return 0, err
 			}
 			if !current {
 				continue
@@ -703,11 +759,11 @@ func (s *v3Scaler) processRESTDemand(
 					continue
 				}
 				if err := resetFreshAttempt(s.policy, &existing, s.now()); err != nil {
-					return err
+					return 0, err
 				}
 				existing.SchedulerState = "REST_ATTESTED_QUEUED_RETRY"
 				if err := s.ledger.Put(existing); err != nil {
-					return fmt.Errorf("revive terminal REST-attested queued job: %w", err)
+					return 0, fmt.Errorf("revive terminal REST-attested queued job: %w", err)
 				}
 				s.logger.Warn(
 					"Revived terminal local record for still-queued REST-attested GitHub job",
@@ -725,11 +781,11 @@ func (s *v3Scaler) processRESTDemand(
 		job.AuthoritySource = "REST_ACTIVE_JOB_SET"
 		record, err := newJobRecord(s.policy, job, "ACQUIRED", s.now())
 		if err != nil {
-			return err
+			return 0, err
 		}
 		record.SchedulerState = "REST_ATTESTED_ASSIGNED"
 		if err := s.ledger.Put(record); err != nil {
-			return fmt.Errorf("persist REST-attested scheduler authority: %w", err)
+			return 0, fmt.Errorf("persist REST-attested scheduler authority: %w", err)
 		}
 		s.logger.Info(
 			"Admitted REST-attested scheduler demand",
@@ -749,7 +805,7 @@ func (s *v3Scaler) processRESTDemand(
 			slog.Int("candidate_count", len(jobs)),
 		)
 	}
-	return nil
+	return desired, nil
 }
 
 func (s *v3Scaler) processAssigned(
@@ -1122,7 +1178,11 @@ func (s *v3Scaler) progressReserved(ctx context.Context, records []jobRecord) er
 	return nil
 }
 
-func (s *v3Scaler) reconcileCapacity(ctx context.Context, stats *scaleset.RunnerScaleSetStatistic) error {
+func (s *v3Scaler) reconcileCapacity(
+	ctx context.Context,
+	stats *scaleset.RunnerScaleSetStatistic,
+	restDesiredFloor int,
+) error {
 	records, err := s.ledger.List()
 	if err != nil {
 		return err
@@ -1136,6 +1196,9 @@ func (s *v3Scaler) reconcileCapacity(ctx context.Context, stats *scaleset.Runner
 		return err
 	}
 	desired := s.desiredCapacity(stats)
+	if restDesiredFloor > desired {
+		desired = restDesiredFloor
+	}
 	held := 0
 	for _, record := range records {
 		if record.rootCapacityHeld() {
@@ -1241,10 +1304,11 @@ func (s *v3Scaler) Scale(ctx context.Context, msg *scaleset.RunnerScaleSetMessag
 			return fmt.Errorf("process JobAvailable: %w", err)
 		}
 	}
-	if err := s.processRESTDemand(ctx, stats); err != nil {
+	restDesiredFloor, err := s.processRESTDemand(ctx, stats)
+	if err != nil {
 		return fmt.Errorf("process REST-attested demand: %w", err)
 	}
-	return s.reconcileCapacity(ctx, stats)
+	return s.reconcileCapacity(ctx, stats, restDesiredFloor)
 }
 
 type retryingSessionClient struct {
