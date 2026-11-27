@@ -278,20 +278,28 @@ def verify_topology(
             )
         before_n=int(state.get("NRestarts") or "0")
         after_n=int(now.get("NRestarts") or "0")
-        delta=after_n-before_n
-        deltas[cid]=delta
-        if delta<0:
-            raise ControllerRepairError(
-                f"controller restart counter regressed: {cid}"
-            )
-        if before_n==0 and delta!=0:
-            raise ControllerRepairError(
-                f"previously-stable controller restarted during refresh: {cid}"
-            )
-        if before_n>0 and delta>1:
-            raise ControllerRepairError(
-                f"pre-existing restarting controller exceeded bounded restart delta: {cid}"
-            )
+        if state.get("ActiveState")=="active":
+            delta=after_n-before_n
+            deltas[cid]=delta
+            if delta<0:
+                raise ControllerRepairError(
+                    f"controller restart counter regressed: {cid}"
+                )
+            if before_n==0 and delta!=0:
+                raise ControllerRepairError(
+                    f"previously-stable controller restarted during refresh: {cid}"
+                )
+            if before_n>0 and delta>1:
+                raise ControllerRepairError(
+                    f"pre-existing restarting controller exceeded bounded restart delta: {cid}"
+                )
+        else:
+            # A prequiesced resume intentionally snapshots the unit while
+            # inactive. systemd may reset NRestarts across a later clean
+            # start, so restart-counter continuity is not meaningful here.
+            # Record the post-start value for observability without treating
+            # it as a delta from the inactive snapshot.
+            deltas[cid]=after_n
     return deltas
 
 def main() -> int:
