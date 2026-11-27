@@ -191,16 +191,57 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
             self.assertEqual(text.count(root_path), 1)
 
 
-    def test_codex_preflight_reuses_persistent_runtime_and_reads_only_redacted_account_usage(self):
+    def test_codex_preflight_uses_fresh_verified_runtime_and_reads_only_redacted_account_usage(self):
         text = _workflow()
 
         self.assertIn("/workspace-codex-preflight ", text)
         self.assertIn("steps.gate.outputs.mode == 'preflight'", text)
+        self.assertNotIn("- name: Checkout exact candidate SHA", text)
+        self.assertNotIn("ref: ${{ steps.gate.outputs.expected_sha }}", text)
         self.assertIn(
-            'install_dir="$PROJECT_HOME/.local/share/workspace-reasoning-economy/codex/$CODEX_VERSION"',
+            "- name: Bind fresh checksum-pinned Codex runtime to persistent ChatGPT auth",
             text,
         )
-        self.assertIn('[[ -x "$codex_bin" ]]', text)
+        self.assertIn(
+            'archive="$RUNNER_TEMP/codex-$CODEX_VERSION-trusted.tar.gz"',
+            text,
+        )
+        self.assertGreaterEqual(text.count("sha256sum -c -"), 2)
+        self.assertIn(
+            'runtime_dir="$(mktemp -d "$RUNNER_TEMP/codex-trusted-runtime.XXXXXX")"',
+            text,
+        )
+        self.assertIn(
+            'codex_home="$(mktemp -d "$RUNNER_TEMP/codex-trusted-home.XXXXXX")"',
+            text,
+        )
+        self.assertIn(
+            'install -m 0600 "$persistent_auth" "$codex_home/auth.json"',
+            text,
+        )
+        self.assertNotIn(
+            'codex_home="$PROJECT_HOME/.codex-reasoning-economy"\n'
+            '          codex_bin="$install_dir/codex"',
+            text,
+        )
+        self.assertIn('web_search = "disabled"', text)
+        self.assertIn("[agents]\n          enabled = false", text)
+        for disabled_feature in (
+            "apps = false",
+            "plugins = false",
+            "tool_suggest = false",
+            "shell_tool = false",
+            "unified_exec = false",
+            "view_image = false",
+            "sleep_tool = false",
+            "multi_agent = false",
+            "image_generation = false",
+            "code_mode = false",
+            "memories = false",
+        ):
+            self.assertIn(disabled_feature, text)
+        self.assertIn("[tools.update_plan]", text)
+        self.assertIn("[tools.experimental_request_user_input]", text)
         self.assertIn('"account/read"', text)
         self.assertIn('"account/rateLimits/read"', text)
         self.assertIn('"account/usage/read"', text)
@@ -214,6 +255,8 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
         self.assertIn("workspace-control-codex-preflight-receipt.json", text)
         self.assertIn("workspace-control-codex-preflight-receipt", text)
         self.assertIn("stderr=subprocess.DEVNULL", text)
+        self.assertIn("/usr/bin/python3 -I - <<'PY'", text)
+        self.assertIn('actual_sha="$EXPECTED_SHA"', text)
 
         install_index = text.index(
             "- name: Install checksum-pinned Codex CLI in Workspace Control home"
@@ -225,7 +268,7 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
         self.assertGreater(install_guard, install_index)
 
         preflight_index = text.index(
-            "- name: Bind existing Workspace Control Codex runtime"
+            "- name: Bind fresh checksum-pinned Codex runtime to persistent ChatGPT auth"
         )
         preflight_guard = text.index(
             "if: steps.gate.outputs.mode == 'preflight' || steps.gate.outputs.mode == 'calibrate'",
@@ -249,8 +292,12 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
 
         self.assertIn("/workspace-codex-calibrate ", text)
         self.assertIn('/workspace-codex-calibrate) mode="calibrate"', text)
-        self.assertIn(
-            "if: steps.gate.outputs.mode != 'calibrate'",
+        self.assertNotIn(
+            "- name: Checkout exact candidate SHA",
+            text,
+        )
+        self.assertNotIn(
+            "ref: ${{ steps.gate.outputs.expected_sha }}",
             text,
         )
         self.assertIn(
@@ -264,7 +311,7 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
         self.assertIn("ref: ${{ github.workflow_sha }}", text)
         self.assertIn("path: .trusted-calibration", text)
         self.assertIn(
-            'TRUSTED_HELPER_BLOB: "26ef79b073602418b2290f1e672467e73da0d5ea"',
+            'TRUSTED_HELPER_BLOB: "9076fc7598671b17546a6df60f7091d15e851bb4"',
             text,
         )
         self.assertIn(
@@ -284,6 +331,13 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
             text,
         )
         self.assertIn('/usr/bin/python3 -I "$helper"', text)
+        self.assertIn(
+            "- name: Bind fresh checksum-pinned Codex runtime to persistent ChatGPT auth",
+            text,
+        )
+        self.assertIn('shell_tool = false', text)
+        self.assertIn('multi_agent = false', text)
+        self.assertIn('web_search = "disabled"', text)
         self.assertIn(
             "workspace-control-codex-calibration-receipt.json",
             text,

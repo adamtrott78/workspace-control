@@ -46,6 +46,28 @@ ALLOWED_EVENT_TYPES = frozenset(
         "turn.completed",
     }
 )
+CALIBRATION_MODEL = "gpt-6-astra"
+EXACT_EVENT_KEYS = {
+    "thread.started": frozenset({"type", "thread_id"}),
+    "turn.started": frozenset({"type"}),
+    "item.started": frozenset({"type", "item"}),
+    "item.updated": frozenset({"type", "item"}),
+    "item.completed": frozenset({"type", "item"}),
+    "turn.completed": frozenset({"type", "usage"}),
+}
+EXACT_ITEM_KEYS = {
+    "reasoning": frozenset({"id", "type", "text"}),
+    "agent_message": frozenset({"id", "type", "text"}),
+}
+EXACT_USAGE_KEYS = frozenset(
+    {
+        "input_tokens",
+        "cached_input_tokens",
+        "cache_write_input_tokens",
+        "output_tokens",
+        "reasoning_output_tokens",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -58,11 +80,25 @@ class ExecResult:
 class StrictTrace:
     input_tokens: int
     cached_input_tokens: int
-    cache_write_input_tokens: int | None
+    cache_write_input_tokens: int
     output_tokens: int
-    reasoning_output_tokens: int | None
+    reasoning_output_tokens: int
     total_tokens: int
     final_agent_message: str
+
+
+def _require_exact_keys(
+    raw: Mapping[str, Any],
+    expected: frozenset[str],
+    label: str,
+) -> None:
+    actual = frozenset(raw.keys())
+    if actual != expected:
+        missing = ",".join(sorted(expected - actual)) or "-"
+        extra = ",".join(sorted(actual - expected)) or "-"
+        raise CalibrationError(
+            f"{label}:shape_mismatch:missing={missing}:extra={extra}"
+        )
 
 
 def _nonnegative_int(raw: Mapping[str, Any], key: str) -> int:
@@ -122,6 +158,11 @@ def parse_strict_calibration_trace(text: str) -> StrictTrace:
             raise CalibrationError(
                 f"line_{line_number}:event_type_not_allowed:{event_type}"
             )
+        _require_exact_keys(
+            raw,
+            EXACT_EVENT_KEYS[event_type],
+            f"line_{line_number}:{event_type}",
+        )
         if seen_turn_complete:
             raise CalibrationError("event_after_turn_completed")
 
@@ -162,6 +203,16 @@ def parse_strict_calibration_trace(text: str) -> StrictTrace:
                 raise CalibrationError(
                     f"unknown_item_type:{event_type}:{item_type}"
                 )
+            _require_exact_keys(
+                item,
+                EXACT_ITEM_KEYS[item_type],
+                f"line_{line_number}:{event_type}:{item_type}",
+            )
+            item_text = item.get("text")
+            if not isinstance(item_text, str):
+                raise CalibrationError(
+                    f"line_{line_number}:item_text_required"
+                )
             item_id = item.get("id")
             if not isinstance(item_id, str) or not item_id:
                 raise CalibrationError(
@@ -186,10 +237,7 @@ def parse_strict_calibration_trace(text: str) -> StrictTrace:
                     raise CalibrationError("duplicate_item_completed")
                 item_states[item_id] = "completed"
                 if item_type == "agent_message":
-                    message = item.get("text")
-                    if not isinstance(message, str):
-                        raise CalibrationError("agent_message_text_required")
-                    final_messages.append(message)
+                    final_messages.append(item_text)
             continue
 
         if event_type == "turn.completed":
@@ -205,6 +253,11 @@ def parse_strict_calibration_trace(text: str) -> StrictTrace:
             candidate_usage = raw.get("usage")
             if not isinstance(candidate_usage, Mapping):
                 raise CalibrationError("turn_usage_required")
+            _require_exact_keys(
+                candidate_usage,
+                EXACT_USAGE_KEYS,
+                f"line_{line_number}:turn.completed:usage",
+            )
             usage = candidate_usage
             seen_turn_complete = True
             continue
@@ -219,12 +272,8 @@ def parse_strict_calibration_trace(text: str) -> StrictTrace:
     input_tokens = _nonnegative_int(usage, "input_tokens")
     cached_input_tokens = _nonnegative_int(usage, "cached_input_tokens")
     output_tokens = _nonnegative_int(usage, "output_tokens")
-    cache_write = _optional_nonnegative_int(
-        usage, "cache_write_input_tokens"
-    )
-    reasoning = _optional_nonnegative_int(
-        usage, "reasoning_output_tokens"
-    )
+    cache_write = _nonnegative_int(usage, "cache_write_input_tokens")
+    reasoning = _nonnegative_int(usage, "reasoning_output_tokens")
     return StrictTrace(
         input_tokens=input_tokens,
         cached_input_tokens=cached_input_tokens,
@@ -519,6 +568,49 @@ def read_usage_snapshot(
     }
 
 
+def _tool_free_model_catalog() -> dict[str, Any]:
+    """Pinned 0.155.1 model metadata with every model-visible tool surface removed."""
+    return {
+        "models": [
+            {
+                "slug": CALIBRATION_MODEL,
+                "display_name": "GPT-6-Astra",
+                "description": "Workspace Control bounded allowance calibration",
+                "default_reasoning_level": "low",
+                "supported_reasoning_levels": [
+                    {
+                        "effort": "low",
+                        "description": "Fast responses with lighter reasoning",
+                    }
+                ],
+                "shell_type": "disabled",
+                "visibility": "list",
+                "supported_in_api": True,
+                "priority": 1,
+                "availability_nux": None,
+                "upgrade": None,
+                "include_skills_usage_instructions": False,
+                "include_plugin_usage_instructions": False,
+                "include_apps_usage_instructions": False,
+                "support_verbosity": True,
+                "default_verbosity": "low",
+                "apply_patch_tool_type": None,
+                "web_search_tool_type": "text",
+                "truncation_policy": {"mode": "tokens", "limit": 10000},
+                "context_window": 272000,
+                "max_context_window": 872000,
+                "experimental_supported_tools": [],
+                "input_modalities": ["text"],
+                "supports_search_tool": False,
+                "use_responses_lite": True,
+                "node_repl_disabled": True,
+                "tool_mode": "direct",
+                "multi_agent_version": "disabled",
+            }
+        ]
+    }
+
+
 def native_exec_runner(
     *,
     codex_bin: str,
@@ -557,6 +649,11 @@ def native_exec_runner(
         ),
         encoding="utf-8",
     )
+    model_catalog = temp_root / "codex-calibration.models.json"
+    model_catalog.write_text(
+        json.dumps(_tool_free_model_catalog(), sort_keys=True),
+        encoding="utf-8",
+    )
     command = [
         codex_bin,
         "exec",
@@ -564,8 +661,12 @@ def native_exec_runner(
         "--ephemeral",
         "--sandbox",
         "read-only",
+        "--model",
+        CALIBRATION_MODEL,
         "--config",
         "model_reasoning_effort=low",
+        "--config",
+        f"model_catalog_json={json.dumps(str(model_catalog))}",
         "--output-schema",
         str(schema),
         "-",
@@ -675,7 +776,7 @@ def execute_calibration(
         "surface": "CODEX",
         "isolation_verified": True,
         "model_actions": 1,
-        "model_selector": "codex_cli_default",
+        "model_selector": CALIBRATION_MODEL,
         "reasoning_effort": "low",
         "sandbox": "read-only",
         "ephemeral": True,

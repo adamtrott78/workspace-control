@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,25 +38,25 @@ def successful_trace() -> str:
             event(
                 {
                     "type": "item.started",
-                    "item": {"id": "r1", "type": "reasoning"},
+                    "item": {"id": "r1", "type": "reasoning", "text": ""},
                 }
             ),
             event(
                 {
                     "type": "item.completed",
-                    "item": {"id": "r1", "type": "reasoning"},
+                    "item": {"id": "r1", "type": "reasoning", "text": ""},
                 }
             ),
             event(
                 {
                     "type": "item.started",
-                    "item": {"id": "m1", "type": "agent_message"},
+                    "item": {"id": "m1", "type": "agent_message", "text": ""},
                 }
             ),
             event(
                 {
                     "type": "item.updated",
-                    "item": {"id": "m1", "type": "agent_message"},
+                    "item": {"id": "m1", "type": "agent_message", "text": ""},
                 }
             ),
             event(
@@ -81,7 +82,7 @@ def successful_trace() -> str:
                     "usage": {
                         "input_tokens": 12,
                         "cached_input_tokens": 4,
-                        "cache_write_input_tokens": None,
+                        "cache_write_input_tokens": 0,
                         "output_tokens": 7,
                         "reasoning_output_tokens": 2,
                     },
@@ -227,6 +228,105 @@ class WorkspaceControlCodexCalibrationTests(unittest.TestCase):
                         "forbidden_item_activity",
                     ):
                         calibration.parse_strict_calibration_trace(trace)
+
+    def test_trace_rejects_unknown_fields_in_known_shapes(self):
+        base = [json.loads(line) for line in successful_trace().splitlines()]
+        mutations = {}
+
+        thread_extra = json.loads(json.dumps(base))
+        thread_extra[0]["future_field"] = True
+        mutations["thread_extra"] = thread_extra
+
+        turn_extra = json.loads(json.dumps(base))
+        turn_extra[1]["future_field"] = True
+        mutations["turn_extra"] = turn_extra
+
+        event_extra = json.loads(json.dumps(base))
+        event_extra[2]["future_field"] = True
+        mutations["item_event_extra"] = event_extra
+
+        item_extra = json.loads(json.dumps(base))
+        item_extra[2]["item"]["future_field"] = True
+        mutations["item_payload_extra"] = item_extra
+
+        usage_extra = json.loads(json.dumps(base))
+        usage_extra[-1]["usage"]["future_tokens"] = 1
+        mutations["usage_extra"] = usage_extra
+
+        item_missing = json.loads(json.dumps(base))
+        del item_missing[2]["item"]["text"]
+        mutations["item_missing_text"] = item_missing
+
+        for name, rows in mutations.items():
+            with self.subTest(name=name):
+                trace = "\n".join(event(row) for row in rows)
+                with self.assertRaisesRegex(
+                    calibration.CalibrationError,
+                    "shape_mismatch",
+                ):
+                    calibration.parse_strict_calibration_trace(trace)
+
+    def test_native_exec_runner_removes_model_visible_tool_surfaces(self):
+        with tempfile.TemporaryDirectory() as temp:
+            temp_root = Path(temp)
+            completed = subprocess.CompletedProcess(
+                args=["codex"],
+                returncode=0,
+                stdout=successful_trace(),
+            )
+            with mock.patch.object(
+                calibration.subprocess,
+                "run",
+                side_effect=[
+                    subprocess.CompletedProcess(args=["git"], returncode=0),
+                    completed,
+                ],
+            ) as run:
+                result = calibration.native_exec_runner(
+                    codex_bin="/trusted/codex",
+                    environment={
+                        "CODEX_HOME": "/trusted/codex-home",
+                        "OPENAI_API_KEY": "must-not-propagate",
+                        "PYTHONPATH": "/candidate",
+                        "PYTHONHOME": "/candidate-python",
+                    },
+                    temp_root=temp_root,
+                )
+
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(run.call_count, 2)
+            command = run.call_args_list[1].args[0]
+            self.assertEqual(command[0:3], ["/trusted/codex", "exec", "--json"])
+            self.assertIn("--ephemeral", command)
+            self.assertIn("--sandbox", command)
+            self.assertEqual(
+                command[command.index("--model") + 1],
+                calibration.CALIBRATION_MODEL,
+            )
+            model_config = next(
+                value
+                for value in command
+                if value.startswith("model_catalog_json=")
+            )
+            catalog_path = Path(json.loads(model_config.split("=", 1)[1]))
+            catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(catalog["models"]), 1)
+            model = catalog["models"][0]
+            self.assertEqual(model["slug"], calibration.CALIBRATION_MODEL)
+            self.assertEqual(model["shell_type"], "disabled")
+            self.assertIsNone(model["apply_patch_tool_type"])
+            self.assertFalse(model["supports_search_tool"])
+            self.assertEqual(model["experimental_supported_tools"], [])
+            self.assertEqual(model["input_modalities"], ["text"])
+            self.assertEqual(model["tool_mode"], "direct")
+            self.assertEqual(model["multi_agent_version"], "disabled")
+            self.assertTrue(model["node_repl_disabled"])
+
+            child_env = run.call_args_list[1].kwargs["env"]
+            self.assertNotIn("OPENAI_API_KEY", child_env)
+            self.assertNotIn("PYTHONPATH", child_env)
+            self.assertNotIn("PYTHONHOME", child_env)
+            self.assertEqual(child_env["CODEX_HOME"], "/trusted/codex-home")
 
     def test_trace_rejects_unknown_error_and_incomplete_events(self):
         cases = {
