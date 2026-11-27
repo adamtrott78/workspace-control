@@ -9014,5 +9014,77 @@
       "Do not start extra training or HPO merely because an interesting result appears; first complete the frozen 60-cell analysis and document the evidence."
     ],
     "next_safe_action": "Let the frozen two-GPU robustness queue and local cached-OSR pipeline drain. Intervene only on concrete failure. After closure gate passes, build the canonical 60-cell/120-direction result table and execute the post-training analysis plan."
+  },
+  "final_robustness_live_reconciliation_20261127_1359_est": {
+    "status": "RUNNING_HEALTHY_NO_INTERVENTION",
+    "observed_at_utc": "2026-11-27T18:59:22Z",
+    "provenance": {
+      "workspace_control_task_branch_prewrite_head": "e76f6a9f92116ea8697ae1ac68f8262b7b7ba249",
+      "padataset_pr": 59,
+      "padataset_pr59_head": "3df8fc990e3c8e23e818b71eb2f415e66d1570de",
+      "padataset_pr59_frozen_verified": true
+    },
+    "continuation_provider_state": {
+      "expected_executable_runs": 46,
+      "executable_runs_accounted_for": 46,
+      "success": 9,
+      "in_progress": 2,
+      "queued": 35,
+      "failure": 0,
+      "counterpart_workflow_skips": 46,
+      "note": "Each continuation admission materializes both scientific workflow surfaces; exactly one lane executes and the counterpart is skipped."
+    },
+    "total_train_required_progress": {
+      "expected": 50,
+      "valid_success_before_continuation": 4,
+      "continuation_success": 9,
+      "total_success": 13,
+      "in_progress": 2,
+      "queued": 35,
+      "scientific_failure": 0
+    },
+    "active_bindings": [
+      {
+        "cell": "PA1-PA8 p03_t00",
+        "workflow_run_id": 45967810154,
+        "job_id": 140400626195,
+        "lane": "padataset-scientific-single-gpu-v1",
+        "state": "in_progress",
+        "active_step": "Execute bounded scientific request",
+        "request": "train_backbone:manifests/configs/mth602_final_robustness_v1/PA1-PA8/p03_t00.json"
+      },
+      {
+        "cell": "PA2-PA3 p02_t00",
+        "workflow_run_id": 45967969034,
+        "job_id": 140401143268,
+        "lane": "padataset-scientific-single-gpu-2-v1",
+        "state": "in_progress",
+        "active_step": "Execute bounded scientific request",
+        "request": "train_backbone:manifests/configs/mth602_final_robustness_v1/PA2-PA3/p02_t00.json"
+      }
+    ],
+    "cutover_retries_still_durable_queued": [
+      {
+        "workflow_run_id": 45967805588,
+        "attempt": 2
+      },
+      {
+        "workflow_run_id": 45967964283,
+        "attempt": 2
+      }
+    ],
+    "workspace_shell_observation": {
+      "runtime_inventory_ok": true,
+      "unit_level_science_inspection": "NOT_ASSERTED",
+      "note": "Workspace Shell unit inspection for the requested units was not authorized by its root-owned inspect allowlist; no gate was weakened."
+    },
+    "decision": "NO_INTERVENTION",
+    "rationale": [
+      "Both GPU-lane jobs are executing the bounded scientific request step after exact-head/provenance validation.",
+      "The full continuation executable cardinality is accounted for with no scientific failures.",
+      "Queued admissions are durable and must not be duplicated.",
+      "PR #59 remains exactly frozen."
+    ],
+    "next_safe_action": "Leave the two active jobs and 35 queued continuation jobs alone; continue observation. Do not mutate PR #59, re-admit cells, restart healthy runners/controllers, or begin final analysis until the closure gate passes."
   }
 }
