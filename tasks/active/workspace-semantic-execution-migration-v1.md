@@ -70,12 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Run one fresh root/operator Codex bootstrap-route activation against exact main@57831303912b899fd48ee54b0738283acc9c8303. The helper now derives only the additive controller-policy delta from the installed control-small predecessor and does not reconstruct historical runtime390 root authority. After WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_ACTIVATION=PASS, trigger a fresh zero-inference bootstrap against an open same-repository PR head and verify the control-small receipt/auth runtime; then run only the first minimal planner-enforced subscription-Codex calibration action.
+Run one fresh root/operator Codex bootstrap-route activation against exact main@de3d0642b3b300859c2508f829d5d7ca44eca77c. The authority payload must bind root_policy_sha256 to installed_root.root_policy_sha256 (effective root), while base install provenance remains separate. On WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_ACTIVATION=PASS, trigger a fresh zero-inference bootstrap against an open same-repository PR head and verify the control-small receipt/auth runtime; then run only the first minimal planner-enforced subscription-Codex calibration action.
 
 ## Remaining work
 
 - Instant front door: perform bounded live acceptance through private plugin plugins_6b08cf5ea1548191b543faab9952bd26 (new-task candidate, durable status query, explicit decision/cancel-revise candidate), then close INST-07 if no chat-created authority occurs.
-- E4/CODEX: activate the additive bootstrap route once against controller-local main@57831303912b899fd48ee54b0738283acc9c8303, then run a fresh zero-inference control-small bootstrap and the minimum planner-enforced subscription-Codex live calibration jobs with controlled before/after usage snapshots.
+- E4/CODEX: perform the fresh effective-root-bound route activation against main@de3d0642b3b300859c2508f829d5d7ca44eca77c, then run a fresh zero-inference control-small bootstrap and the minimum planner-enforced subscription-Codex live calibration jobs with controlled before/after usage snapshots.
 - E4 quality/economics: complete claim-bearing matched reasoning-quality/holdout evidence and compare validated progress plus scarce-allowance consumption against the all-strong/frontier control.
 - REL-01: close the remaining integrated fault-campaign cases named by the matrix, especially DB disconnect, validator timeout and delayed/out-of-order event handling.
 - REL-02 / PROD-01: run explicit target-budget comparison, representative soak/resource measurements and authoritative UX-09 target performance on the Windows machine.
@@ -85,7 +85,7 @@ Run one fresh root/operator Codex bootstrap-route activation against exact main@
 
 ## Blockers / gates
 
-- CODEX-01 LIVE ACTIVATION: the fourth retry on 17345570… failed before authority creation/consumption or mutation because it equated today's compiled root with the historical runtime390 predecessor. Controller-local repair PR #712 is merged at main@57831303912b899fd48ee54b0738283acc9c8303 and validated by Workspace #3363. Use only a fresh one-shot root/operator authority against this exact head. On PASS, trigger a fresh zero-inference bootstrap.
+- CODEX-01 LIVE ACTIVATION: fifth retry consumed one-shot authority 7cdff1d6-cdd8-4e07-8bb1-353dab45aa09, staged the controller-local route transaction, then failed self-verification because the active receipt used the base manifest root digest instead of the effective installed root digest. Helper rollback restored the previous state and the controller is active/running. Effective-root receipt repair is merged/validated at main@de3d0642b3b300859c2508f829d5d7ca44eca77c. Never reuse the consumed authority; use a fresh one-shot authority against this exact head.
 - E4 ECONOMICS / CODEX: claim-bearing comparison remains gated on calibrated comparable allowance telemetry plus live subscription-only Codex bounded-job evidence; do not substitute raw token estimates or uncalibrated UI observations.
 - REL-01 / REL-02: A10 proves integrated session/process loss and live bounded resource behavior, but the remaining fault-campaign cases plus explicit target-budget/representative-soak closeout are not yet reconciled to PASS.
 - PROD-02: A10 binding/provenance closure passed, but the emitted resource report retained stale artifact_id workspace-semantic-execution-e3-a9-live-resource-v1; normalize that non-authority metadata defect before claiming zero unresolved provenance violations.
