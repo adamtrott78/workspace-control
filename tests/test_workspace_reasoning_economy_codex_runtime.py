@@ -206,6 +206,8 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
         self.assertIn('"account/usage/read"', text)
         self.assertIn('"account_type": "chatgpt"', text)
         self.assertIn('"plan_type": plan_type.lower()', text)
+        self.assertIn('account_result.get("requiresOpenaiAuth")', text)
+        self.assertNotIn('account_result.get("requiresOpenAIAuth")', text)
         self.assertIn('"api_key_present": False', text)
         self.assertIn('"model_inference_performed": False', text)
         self.assertIn('"credential_material_in_receipt": False', text)
