@@ -588,8 +588,6 @@ def verify_predecessor_restored(
         raise RefreshError("rollback reconciler override bytes mismatch")
     if REFRESH_ACTIVE.exists():
         raise RefreshError("rollback refresh v2 receipt still present")
-    if PRIOR_REFRESH_ACTIVE.read_bytes() != prior_refresh_raw:
-        raise RefreshError("rollback prior refresh receipt changed")
 
     target_after = require_target_active()
     require_roots()
@@ -668,6 +666,8 @@ def rollback_after_mutation(
         raise RefreshError("rollback root policy changed")
     if ACTIVE_ROUTE.read_bytes() != active_route_raw:
         raise RefreshError("rollback active-route receipt changed")
+    if PRIOR_REFRESH_ACTIVE.read_bytes() != prior_refresh_raw:
+        raise RefreshError("rollback prior refresh receipt changed")
 
     candidate.verify_installed(BASE_MANIFEST)
     run_systemctl("start", TARGET_UNIT)
@@ -806,6 +806,7 @@ def main() -> int:
         "source_head": args.expected_head,
         "authorization_id": authority["authorization_id"],
         "active_route_receipt_sha256": sha(active_raw),
+        "previous_refresh_receipt_sha256": sha(prior_refresh_raw),
         "target_class_id": TARGET_CLASS,
         "workflow_path": WORKFLOW_PATH,
         "previous_workflow_blob_sha": OLD_BLOB,
@@ -836,6 +837,7 @@ def main() -> int:
         "authorization_id": authority["authorization_id"],
         "authority_sha256": sha(authority_raw),
         "active_route_receipt_sha256": sha(active_raw),
+        "previous_refresh_receipt_sha256": sha(prior_refresh_raw),
         "previous_workflow_blob_sha": OLD_BLOB,
         "workflow_blob_sha": NEW_BLOB,
         "target_controller_before": target_before,
@@ -901,7 +903,7 @@ def main() -> int:
         candidate.verify_installed(BASE_MANIFEST)
 
         tx.update({
-            "phase": "COMMITTED_ACTIVE_CODEX_WORKFLOW_REFRESH",
+            "phase": "COMMITTED_ACTIVE_CODEX_WORKFLOW_REFRESH_V2",
             "mutation_performed": mutation_state["started"],
             "refresh_receipt_sha256": sha(REFRESH_ACTIVE.read_bytes()),
             "controller_policy_file_sha256": sha(TARGET_POLICY.read_bytes()),
@@ -928,7 +930,7 @@ def main() -> int:
                     reconciler_mode=reconciler_mode,
                     others_before=others_before,
                 )
-                tx["phase"] = "ROLLED_BACK_PREVIOUS_CODEX_WORKFLOW"
+                tx["phase"] = "ROLLED_BACK_PREVIOUS_CODEX_WORKFLOW_V2"
             else:
                 target_restored, others_restored = recover_pre_mutation_failure(
                     root_policy_raw=root_policy_raw,
