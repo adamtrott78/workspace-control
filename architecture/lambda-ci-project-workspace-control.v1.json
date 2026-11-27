@@ -62,6 +62,30 @@
         "model_id": null,
         "runtime_id": null
       }
+    },
+    "codex-bootstrap": {
+      "activation_state": "PLANNED_NOT_BOUND",
+      "lane": "cpu",
+      "execution_contract_id": "control-small-ci-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-workspace-control-codex-bootstrap.yml",
+        "default_branch": "main",
+        "blob_sha": "520da69cfb9b28c81fb1121a16c12d3715892cc7"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/workspace-codex-bootstrap",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": null
+      }
     }
   },
   "bindings": {
