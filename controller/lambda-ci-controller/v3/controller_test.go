@@ -1093,3 +1093,93 @@ func TestReadSecretFileAllowsOnlyReadOnlyCredentialGroup(t *testing.T) {
 		t.Fatal("group-writable project credential must be rejected")
 	}
 }
+
+
+func TestRESTDemandDiscoveryIsCoalescedWithinAntiSpamInterval(t *testing.T) {
+	events := []string{}
+	verifier := &fakeVerifier{discoverySafe: true}
+	scaler := testScaler(
+		verifier,
+		newMemoryLedger(),
+		&fakeSession{},
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+	now := time.Date(2026, 11, 27, 12, 0, 0, 0, time.UTC)
+	scaler.now = func() time.Time { return now }
+	scaler.restDemandMinInterval = time.Minute
+
+	msg := &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
+	}
+	if err := scaler.Scale(context.Background(), msg); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("first REST demand discovery calls=%d want=1", verifier.discoveryCalls)
+	}
+	if len(events) != 0 {
+		t.Fatalf("empty fresh REST evidence must not provision capacity: %#v", events)
+	}
+
+	for i := 0; i < 10; i++ {
+		now = now.Add(5 * time.Second)
+		if err := scaler.Scale(context.Background(), msg); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("REST demand spam inside interval calls=%d want=1", verifier.discoveryCalls)
+	}
+	if len(events) != 0 {
+		t.Fatalf("coalesced REST path used stale evidence to provision: %#v", events)
+	}
+
+	now = now.Add(11 * time.Second)
+	if err := scaler.Scale(context.Background(), msg); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 2 {
+		t.Fatalf("REST demand did not refresh after interval calls=%d want=2", verifier.discoveryCalls)
+	}
+}
+
+func TestRESTDemandCoalescingNeverBlocksBrokerJobAvailable(t *testing.T) {
+	events := []string{}
+	verifier := &fakeVerifier{trusted: true, discoverySafe: true}
+	ledger := newMemoryLedger()
+	session := &fakeSession{}
+	scaler := testScaler(
+		verifier,
+		ledger,
+		session,
+		&fakeJIT{events: &events},
+		newFakeRoot(&events),
+	)
+	now := time.Date(2026, 11, 27, 12, 0, 0, 0, time.UTC)
+	scaler.now = func() time.Time { return now }
+	scaler.restDemandMinInterval = time.Hour
+
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics: &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("initial REST discovery calls=%d want=1", verifier.discoveryCalls)
+	}
+
+	now = now.Add(time.Second)
+	if err := scaler.Scale(context.Background(), &scaleset.RunnerScaleSetMessage{
+		Statistics:           &scaleset.RunnerScaleSetStatistic{TotalAssignedJobs: 0},
+		JobAvailableMessages: []*scaleset.JobAvailable{available(77, 177)},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if len(session.acquireCalls) != 1 || len(session.acquireCalls[0]) != 1 || session.acquireCalls[0][0] != 77 {
+		t.Fatalf("broker JobAvailable was blocked by REST coalescing: %#v", session.acquireCalls)
+	}
+	if verifier.discoveryCalls != 1 {
+		t.Fatalf("coalesced fallback unexpectedly re-hit REST calls=%d want=1", verifier.discoveryCalls)
+	}
+}
