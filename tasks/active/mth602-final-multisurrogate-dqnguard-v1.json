@@ -8948,7 +8948,25 @@
         }
       ],
       "dashboard": "sudo tmux attach -t mth602-robustness-ui",
-      "dashboard_contract": "HOST LOCAL ONLY; 0 GitHub/REST/GraphQL calls per refresh."
+      "dashboard_contract": "HOST LOCAL ONLY; 0 GitHub/REST/GraphQL calls per refresh.",
+      "exact_active_bindings": [
+        {
+          "cell": "PA1-PA8 p03_t00",
+          "workflow_run_id": 45967810154,
+          "job_id": 140400626195,
+          "lane": "padataset-scientific-single-gpu-v1",
+          "state": "in_progress",
+          "request": "train_backbone:manifests/configs/mth602_final_robustness_v1/PA1-PA8/p03_t00.json"
+        },
+        {
+          "cell": "PA2-PA3 p02_t00",
+          "workflow_run_id": 45967969034,
+          "job_id": 140401143268,
+          "lane": "padataset-scientific-single-gpu-2-v1",
+          "state": "in_progress",
+          "request": "train_backbone:manifests/configs/mth602_final_robustness_v1/PA2-PA3/p02_t00.json"
+        }
+      ]
     },
     "interruption_playbook": [
       "Treat the durable task capsule and exact GitHub/runtime evidence as authoritative; do not rely on prior chat prose.",
