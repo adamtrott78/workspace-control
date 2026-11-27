@@ -70,12 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Perform bounded live acceptance of the private Workspace Control Instant front-door plugin, then proceed to E4-1 subscription-Codex auth/preflight and the minimum controlled live calibration jobs needed for CODEX-02/03/04 and economics telemetry. E4-0 Token Economy is now enforced and validated; meaningful Codex testing no longer needs to remain blocked by the old E4-0 conservation gate.
+Two bounded live gates are now ready and independent: (1) perform live acceptance of private Instant front-door plugin plugins_6b08cf5ea1548191b543faab9952bd26; (2) run the default-branch zero-inference Workspace Control Codex bootstrap from main@5cf2821c2aac415cba72ff3798f89afa01052cbf and verify the control-small receipt. After bootstrap PASS, run the first minimal planner-enforced subscription-Codex auth/calibration action. Do not launch the frozen 54-run claim-bearing matrix yet.
 
 ## Remaining work
 
 - Instant front door: perform bounded live acceptance through private plugin plugins_6b08cf5ea1548191b543faab9952bd26 (new-task candidate, durable status query, explicit decision/cancel-revise candidate), then close INST-07 if no chat-created authority occurs.
-- E4/CODEX: run subscription-only Codex live bounded job and controlled usage/allowance calibration; feed comparable observations into the economics ledger and weekly governor.
+- E4/CODEX: run the default-branch zero-inference control-small bootstrap and verify its receipt/auth runtime; then run the minimum planner-enforced subscription-Codex live calibration jobs with controlled before/after usage snapshots.
 - E4 quality/economics: complete claim-bearing matched reasoning-quality/holdout evidence and compare validated progress plus scarce-allowance consumption against the all-strong/frontier control.
 - REL-01: close the remaining integrated fault-campaign cases named by the matrix, especially DB disconnect, validator timeout and delayed/out-of-order event handling.
 - REL-02 / PROD-01: run explicit target-budget comparison, representative soak/resource measurements and authoritative UX-09 target performance on the Windows machine.
@@ -85,6 +85,7 @@ Perform bounded live acceptance of the private Workspace Control Instant front-d
 
 ## Blockers / gates
 
+- CODEX-01 LIVE BOOTSTRAP: validated #627/#630 reserved-capacity + inert Codex bootstrap lineage is promoted to main@5cf2821c2aac415cba72ff3798f89afa01052cbf. Do not infer a live Codex runtime yet: run the default-branch zero-inference control-small bootstrap and verify its receipt/auth/runtime gates first. API billing and manual runner/sidecar bypass remain forbidden.
 - E4 ECONOMICS / CODEX: claim-bearing comparison remains gated on calibrated comparable allowance telemetry plus live subscription-only Codex bounded-job evidence; do not substitute raw token estimates or uncalibrated UI observations.
 - REL-01 / REL-02: A10 proves integrated session/process loss and live bounded resource behavior, but the remaining fault-campaign cases plus explicit target-budget/representative-soak closeout are not yet reconciled to PASS.
 - PROD-02: A10 binding/provenance closure passed, but the emitted resource report retained stale artifact_id workspace-semantic-execution-e3-a9-live-resource-v1; normalize that non-authority metadata defect before claiming zero unresolved provenance violations.
