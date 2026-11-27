@@ -116,8 +116,10 @@ class WorkspaceControlCodexWorkflowRefreshTests(unittest.TestCase):
             {"trusted_workflows", "controller_policy_sha256"},
         )
 
-    def test_post_stop_quiescence_race_fails_before_mutation_gate(self):
+    def test_final_quiescence_rejects_work_after_predecessor_checks_before_write(self):
         events: list[str] = []
+        mutation_state = {"started": False}
+        late_work = {"present": False}
 
         def stop(*_args):
             events.append("stop")
@@ -126,9 +128,14 @@ class WorkspaceControlCodexWorkflowRefreshTests(unittest.TestCase):
             events.append("inactive")
             return inactive_state()
 
-        def late_work():
+        def quiescence():
             events.append("quiescence")
-            raise refresh.RefreshError("late target work appeared")
+            if late_work["present"]:
+                raise refresh.RefreshError("late target work appeared")
+
+        def predecessor(**_kwargs):
+            events.append("predecessor")
+            late_work["present"] = True
 
         with (
             mock.patch.object(refresh, "run_systemctl", side_effect=stop),
@@ -140,32 +147,37 @@ class WorkspaceControlCodexWorkflowRefreshTests(unittest.TestCase):
             mock.patch.object(
                 refresh,
                 "require_target_quiescent",
-                side_effect=late_work,
+                side_effect=quiescence,
             ),
             mock.patch.object(
                 refresh,
                 "require_predecessor_unchanged",
-            ) as predecessor,
+                side_effect=predecessor,
+            ),
             mock.patch.object(refresh, "atomic_file") as atomic_file,
-            mock.patch.object(refresh, "atomic_json") as atomic_json,
         ):
             with self.assertRaisesRegex(
                 refresh.RefreshError,
                 "late target work appeared",
             ):
-                refresh.stop_target_and_close_quiescence_window(
+                refresh.stop_target_close_quiescence_and_write_first_policy(
                     root_policy_raw=b"root",
                     active_route_raw=b"active",
                     policy_raw=b"policy",
                     reconciler_raw=b"reconciler",
                     reconciler_override_raw=b"override",
                     others_before={},
+                    refreshed_policy_raw=b"new-policy",
+                    mutation_state=mutation_state,
                 )
 
-        self.assertEqual(events, ["stop", "inactive", "quiescence"])
-        predecessor.assert_not_called()
+        self.assertEqual(
+            events,
+            ["stop", "inactive", "quiescence", "predecessor", "quiescence"],
+        )
+        self.assertFalse(mutation_state["started"])
         atomic_file.assert_not_called()
-        atomic_json.assert_not_called()
+
 
     def test_pre_mutation_failure_recovery_writes_no_managed_files(self):
         expected_target = active_state()
@@ -408,6 +420,93 @@ class WorkspaceControlCodexWorkflowRefreshTests(unittest.TestCase):
                         )
 
                 self.assertTrue(marker.exists())
+                with self.assertRaises(FileExistsError):
+                    refresh.consume_authority(authority, authority_raw)
+
+    def test_late_work_race_keeps_authority_consumed_and_recovery_write_free(self):
+        with tempfile.TemporaryDirectory() as raw:
+            authority_root = Path(raw) / "consumed"
+            authority = {
+                "authorization_id": "22222222-2222-2222-2222-222222222222",
+                "operation": "REFRESH_WORKSPACE_CONTROL_CODEX_WORKFLOW_V1",
+            }
+            authority_raw = b"authority-receipt"
+            mutation_state = {"started": False}
+            late_work = {"present": False}
+
+            def ensure(path: Path):
+                path.mkdir(parents=True, exist_ok=True)
+
+            def predecessor(**_kwargs):
+                late_work["present"] = True
+
+            def quiescence():
+                if late_work["present"]:
+                    raise refresh.RefreshError("late target work appeared")
+
+            with (
+                mock.patch.object(refresh, "AUTHORITY_ROOT", authority_root),
+                mock.patch.object(refresh, "ensure_dir", side_effect=ensure),
+                mock.patch.object(os, "chown"),
+            ):
+                marker_path = refresh.consume_authority(authority, authority_raw)
+                self.assertTrue(marker_path.exists())
+
+                with (
+                    mock.patch.object(refresh, "run_systemctl") as systemctl,
+                    mock.patch.object(refresh, "require_target_inactive"),
+                    mock.patch.object(
+                        refresh,
+                        "require_target_quiescent",
+                        side_effect=quiescence,
+                    ),
+                    mock.patch.object(
+                        refresh,
+                        "require_predecessor_unchanged",
+                        side_effect=predecessor,
+                    ),
+                    mock.patch.object(refresh, "atomic_file") as atomic_file,
+                    mock.patch.object(
+                        refresh,
+                        "verify_predecessor_restored",
+                        return_value=(active_state(), {}),
+                    ),
+                ):
+                    with self.assertRaisesRegex(
+                        refresh.RefreshError,
+                        "late target work appeared",
+                    ):
+                        refresh.stop_target_close_quiescence_and_write_first_policy(
+                            root_policy_raw=b"root",
+                            active_route_raw=b"active",
+                            policy_raw=b"policy",
+                            reconciler_raw=b"reconciler",
+                            reconciler_override_raw=b"override",
+                            others_before={},
+                            refreshed_policy_raw=b"new-policy",
+                            mutation_state=mutation_state,
+                        )
+
+                    self.assertFalse(mutation_state["started"])
+                    refresh.recover_pre_mutation_failure(
+                        root_policy_raw=b"root",
+                        active_route_raw=b"active",
+                        policy_raw=b"policy",
+                        reconciler_raw=b"reconciler",
+                        reconciler_override_raw=b"override",
+                        others_before={},
+                    )
+
+                    atomic_file.assert_not_called()
+                    self.assertEqual(
+                        systemctl.call_args_list,
+                        [
+                            mock.call("stop", refresh.TARGET_UNIT),
+                            mock.call("start", refresh.TARGET_UNIT),
+                        ],
+                    )
+
+                self.assertTrue(marker_path.exists())
                 with self.assertRaises(FileExistsError):
                     refresh.consume_authority(authority, authority_raw)
 
