@@ -149,7 +149,7 @@
     },
     {
       "id": "CODEX-01",
-      "status": "PARTIAL",
+      "status": "PASS",
       "requirement": "Workspace Control Codex runtime is live through an approved v3 control-small route while preserving PR #627 reserved-capacity invariants.",
       "evidence": [
         "Inert bootstrap workflow and static contracts are validated; promotion is gated on PR #627 lineage.",
@@ -189,14 +189,23 @@
         "The one-shot operator authority b95c06d2-f43a-4871-acf5-d128b22d656c was created for ACTIVATE_WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_V1 and consumed by the reviewed activation transaction; it is non-reusable.",
         "Activation emitted WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_ACTIVATION=PASS and transaction receipt /var/lib/workspace-ci/v3/workspace-control/codex-bootstrap-route/transactions/activation-657a60ba-aa7f-4805-89a1-2f59ff26bdcf/receipt.json.",
         "This is the first accepted live activation of the additive /workspace-codex-bootstrap route on the existing workspace-control-control-small-v1 controller; the activation transaction preserves existing root/GPU/capacity authority and the control-validation route.",
-        "CODEX-01 remains PARTIAL only until a fresh zero-inference bootstrap proves the live control-small route plus ChatGPT-subscription authentication/no-API-fallback receipt."
+        "CODEX-01 remains PARTIAL only until a fresh zero-inference bootstrap proves the live control-small route plus ChatGPT-subscription authentication/no-API-fallback receipt.",
+        "Fresh zero-inference bootstrap trigger was posted exactly once on PR #590 as issue comment 7223734551 for exact head bff5bf875cb6688b81744701aa375875d265d9a1.",
+        "Lambda CI Workspace Control Codex Bootstrap run 46036997293 / job 140634802844 completed SUCCESS; exact same-repository PR-head verification, bounded workspace-control-control-small isolation, exact checkout, checksum-pinned Codex 0.155.1 install, ChatGPT login, receipt generation and artifact upload all passed.",
+        "The redacted receipt records expected_sha=actual_sha=bff5bf875cb6688b81744701aa375875d265d9a1, runner_class=workspace-control-control-small-v1, runner_name=lambda-workspace-control-control-small-e77d9ad0a64c, runner_user=ci-workspace-control, auth_mode=chatgpt, api_key_present=false, model_inference_performed=false and gpu_visible=false.",
+        "Durable GitHub artifact 15217972982 (workspace-control-codex-bootstrap-receipt) has zip digest sha256:8704e750c20e35101e337da9b2dac87238428633267c4c639768c40d1878c8cd and expires 2027-02-25.",
+        "The workflow config forces login method chatgpt and explicitly unsets OPENAI_API_KEY before install/login/receipt; no model inference occurred, so no API-billing fallback was used."
       ]
     },
     {
       "id": "CODEX-02",
-      "status": "PENDING",
+      "status": "PARTIAL",
       "requirement": "Live authentication proves account.type=chatgpt and planType=plus with OPENAI_API_KEY absent and no paid API fallback.",
-      "evidence": []
+      "evidence": [
+        "Bootstrap run 46036997293 completed ChatGPT device authorization successfully and its redacted receipt records auth_mode=chatgpt and api_key_present=false.",
+        "The bootstrap workflow forces forced_login_method=chatgpt and unsets OPENAI_API_KEY; zero inference was performed, so no API-billing fallback was used during bootstrap.",
+        "Live account/read was not invoked by the bootstrap workflow, so account.type and planType are not yet independently observed and remain UNKNOWN for CODEX-02."
+      ]
     },
     {
       "id": "CODEX-03",
@@ -501,5 +510,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-27",
-  "latest_validated_checkpoint": "main@de3d0642b3b300859c2508f829d5d7ca44eca77c live /workspace-codex-bootstrap activation PASS; zero-inference bootstrap/auth receipt pending"
+  "latest_validated_checkpoint": "PR #590@bff5bf875cb6688b81744701aa375875d265d9a1 zero-inference Workspace Control Codex bootstrap run 46036997293 SUCCESS; receipt artifact 15217972982; CODEX-01 PASS; live account/read/calibration pending"
 }
