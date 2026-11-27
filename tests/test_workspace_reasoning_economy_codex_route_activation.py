@@ -5,7 +5,9 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -74,6 +76,133 @@ class WorkspaceControlCodexRouteActivationTests(unittest.TestCase):
             by_route["codex-bootstrap"]["blob_sha"],
             activation.candidate.WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
         )
+
+    def test_runtime390_successor_is_accepted_only_with_exact_root_lineage(self):
+        candidate_root = copy.deepcopy(self.root_policy)
+        installed_root = copy.deepcopy(candidate_root)
+        predecessor = {
+            class_id: value["root_envelope_sha256"]
+            for class_id, value in candidate_root["runner_classes"].items()
+        }
+        successor = dict(predecessor)
+        successor[activation.candidate.PADATASET_SCIENTIFIC_TARGET_CLASS] = "1" * 64
+        successor[
+            activation.candidate.PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS
+        ] = "2" * 64
+        installed_root["runner_classes"][
+            activation.candidate.PADATASET_SCIENTIFIC_TARGET_CLASS
+        ]["root_envelope_sha256"] = "1" * 64
+        installed_root["runner_classes"][
+            activation.candidate.PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS
+        ]["root_envelope_sha256"] = "2" * 64
+        installed_root["root_policy_sha256"] = "b" * 64
+
+        receipt = {
+            "schema_version": 1,
+            "mode": "V3_PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH",
+            "phase": "ACTIVE",
+            "previous_root_policy_sha256":
+                candidate_root["root_policy_sha256"],
+            "root_policy_sha256": installed_root["root_policy_sha256"],
+            "previous_root_envelope_sha256": predecessor,
+            "root_envelope_sha256": successor,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "active.json"
+            path.write_text(json.dumps(receipt), encoding="utf-8")
+            with (
+                mock.patch.object(
+                    activation.candidate,
+                    "PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT",
+                    path,
+                ),
+                mock.patch.object(
+                    activation,
+                    "require_root_private",
+                    side_effect=lambda p: p.read_bytes(),
+                ),
+            ):
+                activation._require_root_authority_equivalent(
+                    candidate_root=candidate_root,
+                    installed_root=installed_root,
+                )
+
+        self.assertEqual(
+            predecessor[activation.TARGET_CLASS],
+            successor[activation.TARGET_CLASS],
+        )
+
+    def test_runtime390_successor_rejects_unexpected_root_envelope_change(self):
+        candidate_root = copy.deepcopy(self.root_policy)
+        installed_root = copy.deepcopy(candidate_root)
+        predecessor = {
+            class_id: value["root_envelope_sha256"]
+            for class_id, value in candidate_root["runner_classes"].items()
+        }
+        successor = dict(predecessor)
+        successor[activation.candidate.PADATASET_SCIENTIFIC_TARGET_CLASS] = "1" * 64
+        successor[
+            activation.candidate.PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS
+        ] = "2" * 64
+        successor[activation.TARGET_CLASS] = "3" * 64
+        for class_id, digest in successor.items():
+            installed_root["runner_classes"][class_id][
+                "root_envelope_sha256"
+            ] = digest
+        installed_root["root_policy_sha256"] = "c" * 64
+        receipt = {
+            "schema_version": 1,
+            "mode": "V3_PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH",
+            "phase": "ACTIVE",
+            "previous_root_policy_sha256":
+                candidate_root["root_policy_sha256"],
+            "root_policy_sha256": installed_root["root_policy_sha256"],
+            "previous_root_envelope_sha256": predecessor,
+            "root_envelope_sha256": successor,
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "active.json"
+            path.write_text(json.dumps(receipt), encoding="utf-8")
+            with (
+                mock.patch.object(
+                    activation.candidate,
+                    "PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT",
+                    path,
+                ),
+                mock.patch.object(
+                    activation,
+                    "require_root_private",
+                    side_effect=lambda p: p.read_bytes(),
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    activation.RouteActivationError,
+                    "unexpected root envelopes",
+                ):
+                    activation._require_root_authority_equivalent(
+                        candidate_root=candidate_root,
+                        installed_root=installed_root,
+                    )
+
+    def test_root_digest_mismatch_without_runtime390_receipt_fails_closed(self):
+        candidate_root = copy.deepcopy(self.root_policy)
+        installed_root = copy.deepcopy(candidate_root)
+        installed_root["root_policy_sha256"] = "d" * 64
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = Path(tmp) / "missing.json"
+            with mock.patch.object(
+                activation.candidate,
+                "PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT",
+                missing,
+            ):
+                with self.assertRaisesRegex(
+                    activation.RouteActivationError,
+                    "without accepted runtime390 successor",
+                ):
+                    activation._require_root_authority_equivalent(
+                        candidate_root=candidate_root,
+                        installed_root=installed_root,
+                    )
 
     def test_overlay_change_is_additive_and_preserves_existing_state(self):
         current = {
