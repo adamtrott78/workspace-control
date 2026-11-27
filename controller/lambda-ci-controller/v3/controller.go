@@ -397,18 +397,22 @@ func resetFreshAttempt(policy controllerPolicy, record *jobRecord, now time.Time
 	return nil
 }
 
+const defaultRESTDemandMinInterval = time.Minute
+
 type v3Scaler struct {
-	policy       controllerPolicy
-	verifier     jobVerifier
-	ledger       ledgerStore
-	session      jobAcquirer
-	jit          runnerJITClient
-	root         capacityClient
-	scaleSetID   int
-	logger       *slog.Logger
-	now          func() time.Time
-	lastStats    *scaleset.RunnerScaleSetStatistic
-	mu           sync.Mutex
+	policy                controllerPolicy
+	verifier              jobVerifier
+	ledger                ledgerStore
+	session               jobAcquirer
+	jit                   runnerJITClient
+	root                  capacityClient
+	scaleSetID            int
+	logger                *slog.Logger
+	now                   func() time.Time
+	lastStats             *scaleset.RunnerScaleSetStatistic
+	lastRESTDemandAttempt time.Time
+	restDemandMinInterval time.Duration
+	mu                    sync.Mutex
 }
 
 func (s *v3Scaler) desiredCapacity(stats *scaleset.RunnerScaleSetStatistic) int {
@@ -593,6 +597,25 @@ func (s *v3Scaler) refreshRootStateBeforeDemand(
 	return nil
 }
 
+func (s *v3Scaler) restDemandDiscoveryAllowed() (bool, time.Duration) {
+	interval := s.restDemandMinInterval
+	if interval <= 0 {
+		interval = defaultRESTDemandMinInterval
+	}
+	now := s.now()
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !s.lastRESTDemandAttempt.IsZero() {
+		elapsed := now.Sub(s.lastRESTDemandAttempt)
+		if elapsed < interval {
+			return false, interval - elapsed
+		}
+	}
+	s.lastRESTDemandAttempt = now
+	return true, 0
+}
+
 func (s *v3Scaler) processRESTDemand(
 	ctx context.Context,
 	stats *scaleset.RunnerScaleSetStatistic,
@@ -617,6 +640,17 @@ func (s *v3Scaler) processRESTDemand(
 	// outstanding local authority and GitHub still exposes exact queued,
 	// unbound jobs for this scale set.
 	if desired <= 0 && outstanding > 0 {
+		return desired, nil
+	}
+
+	allowed, retryAfter := s.restDemandDiscoveryAllowed()
+	if !allowed {
+		s.logger.Info(
+			"Deferring REST demand discovery inside anti-spam interval",
+			slog.Duration("retry_after", retryAfter),
+			slog.Int("desired", desired),
+			slog.Int("outstanding", outstanding),
+		)
 		return desired, nil
 	}
 
