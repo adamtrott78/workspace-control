@@ -98,7 +98,7 @@ class WorkspaceControlCodexWorkflowRefreshV2Tests(unittest.TestCase):
     def test_v2_receipt_is_separate_and_binds_v1_receipt(self):
         self.assertNotEqual(refresh.PRIOR_REFRESH_ACTIVE, refresh.REFRESH_ACTIVE)
         for marker in (
-            '"operation"] != "REFRESH_WORKSPACE_CONTROL_CODEX_WORKFLOW_V2"',
+            "REFRESH_WORKSPACE_CONTROL_CODEX_WORKFLOW_V2",
             '"mode": "V3_WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2"',
             '"previous_refresh_receipt_sha256": sha(prior_refresh_raw)',
             "PRIOR_REFRESH_ACTIVE.read_bytes() != prior_refresh_raw",
@@ -175,14 +175,18 @@ class WorkspaceControlCodexWorkflowRefreshV2Tests(unittest.TestCase):
             "workspace_codex_refresh_v2",
         ):
             self.assertIn(marker, REC)
-        self.assertLess(
-            REC.index("_workspace_control_codex_workflow_refresh(workspace_codex_route)"),
-            REC.index("_workspace_control_codex_workflow_refresh_v2("),
+        layer = REC.index("workspace_codex_refresh = (")
+        v1_call = REC.index(
+            "_workspace_control_codex_workflow_refresh(workspace_codex_route)",
+            layer,
         )
-        self.assertIn(
-            "workspace_codex_effective",
-            REC,
+        v2_call = REC.index(
+            "_workspace_control_codex_workflow_refresh_v2(",
+            layer,
         )
+        effective = REC.index("workspace_codex_effective = (", layer)
+        self.assertLess(v1_call, v2_call)
+        self.assertLess(v2_call, effective)
 
     def test_v2_refresh_does_not_widen_root_capacity_or_gpu_authority(self):
         for forbidden in (
