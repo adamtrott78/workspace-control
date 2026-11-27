@@ -196,14 +196,27 @@ jobs:
             list(production.ACCEPTED_CLASSES),
         )
         for route_key, spec in production.ROUTES.items():
-            policy = self.result["controller_policies"][
-                spec["runner_class_id"]
-            ]
-            self.assertEqual(len(policy["trusted_workflows"]), 1)
+            class_id = spec["runner_class_id"]
+            policy = self.result["controller_policies"][class_id]
+            by_route = {
+                workflow["route_id"]: workflow
+                for workflow in policy["trusted_workflows"]
+            }
             self.assertEqual(
-                policy["trusted_workflows"][0]["blob_sha"],
+                by_route[spec["route_id"]]["blob_sha"],
                 manifest["workflow_bindings"][route_key]["new_blob_sha"],
             )
+            base_by_route = {
+                workflow["route_id"]: workflow
+                for workflow in self.base_compiled[
+                    "controller_projections"
+                ][class_id]["trusted_workflows"]
+            }
+            self.assertEqual(set(by_route), set(base_by_route))
+            for other_route, workflow in by_route.items():
+                if other_route == spec["route_id"]:
+                    continue
+                self.assertEqual(workflow, base_by_route[other_route])
 
     def test_overlay_activates_only_accepted_v3_and_never_research(self):
         active = self.result["active_overlay"]

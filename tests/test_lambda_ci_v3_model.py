@@ -71,7 +71,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
             "pull_request_number": -1,
         }
 
-    def test_all_25_routes_attest_from_structured_workflow_identity(self):
+    def test_all_26_routes_attest_from_structured_workflow_identity(self):
         total = 0
         for class_id, policy in self.compiled["controller_projections"].items():
             controller = model.RunnerClassControllerModel(policy)
@@ -85,7 +85,7 @@ class V3ControlPlaneModelTests(unittest.TestCase):
                     controller.scale_result_for_admission(decision),
                     "ACQUIRE",
                 )
-        self.assertEqual(total, 25)
+        self.assertEqual(total, 26)
 
     def test_job_display_candidate_and_pr_fields_have_zero_admission_effect(self):
         class_id = "workspace-control-control-small-v1"

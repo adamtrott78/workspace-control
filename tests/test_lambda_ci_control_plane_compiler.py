@@ -34,10 +34,10 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
         result = self.compile()
         self.assertEqual(len(result["root_projection"]["runner_classes"]), 11)
         self.assertEqual(len(result["controller_projections"]), 11)
-        self.assertEqual(len(result["compatibility_matrix"]), 25)
+        self.assertEqual(len(result["compatibility_matrix"]), 26)
         self.assertEqual(
             len(result["executor_projection"]["execution_actions"]),
-            25,
+            26,
         )
         self.assertEqual(
             len(result["executor_projection"]["maintenance_actions"]),
@@ -317,7 +317,7 @@ class ControlPlanePolicyCompilerTests(unittest.TestCase):
             receipt = json.loads((out / "compilation-receipt.json").read_text())
             self.assertEqual(receipt["decision"], "PASS")
             self.assertEqual(receipt["runner_class_count"], 11)
-            self.assertEqual(receipt["route_count"], 25)
+            self.assertEqual(receipt["route_count"], 26)
             root_text = (out / "root-policy.json").read_text()
             self.assertNotIn("jit_config", root_text)
             self.assertNotIn("candidate_sha", root_text)

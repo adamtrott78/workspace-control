@@ -26,11 +26,11 @@ eq_spec.loader.exec_module(equivalence)
 
 
 class MigrationEquivalenceTests(unittest.TestCase):
-    def test_all_25_routes_preserve_exact_root_launch_semantics(self):
+    def test_all_26_routes_preserve_exact_root_launch_semantics(self):
         result = equivalence.verify_migration(ROOT)
         self.assertEqual(result["decision"], "PASS")
-        self.assertEqual(result["route_count"], 25)
-        self.assertEqual(result["exact_equivalence_count"], 25)
+        self.assertEqual(result["route_count"], 26)
+        self.assertEqual(result["exact_equivalence_count"], 26)
 
     def test_padataset_cpu_and_gpu_preserve_contracts(self):
         rows = equivalence.verify_migration(ROOT)["rows"]
@@ -48,6 +48,28 @@ class MigrationEquivalenceTests(unittest.TestCase):
         )
         self.assertEqual(row["execution_contract_id"], "control-small-ci-v1")
         self.assertEqual(row["gpu_count"], 0)
+
+    def test_codex_bootstrap_reuses_control_small_without_new_root_envelope(self):
+        rows = equivalence.verify_migration(ROOT)["rows"]
+        row = next(
+            x for x in rows
+            if x["project_id"] == "workspace-control"
+            and x["route_id"] == "codex-bootstrap"
+        )
+        self.assertEqual(
+            row["target_runner_class_id"],
+            "workspace-control-control-small-v1",
+        )
+        self.assertEqual(row["execution_contract_id"], "control-small-ci-v1")
+        self.assertEqual(row["gpu_count"], 0)
+        self.assertEqual(
+            row["legacy_scale_set_name"],
+            "lambda-workspace-control-control-small",
+        )
+        self.assertEqual(
+            row["target_scale_set_name"],
+            "lambda-workspace-control-control-small",
+        )
 
     def test_exact_provenance_moves_scale_set_without_gaining_gpu(self):
         row = next(
