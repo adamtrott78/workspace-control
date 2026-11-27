@@ -34,7 +34,7 @@
     "/var/lib/workspace-ci/provisioner",
     "/run/workspace-ci"
   ],
-  "concurrency": 1,
+  "concurrency": 2,
   "routes": {
     "cpu-ci": {
       "activation_state": "ACTIVE",
@@ -96,6 +96,30 @@
       "trigger": {
         "event_name": "issue_comment",
         "command": "/lambda-scientific",
+        "claim_version": "wc-admission-v1",
+        "allowed_actor_logins": [
+          "adamtrott78"
+        ],
+        "require_open_same_repository_pr_head": true,
+        "fork_pr_execution_allowed": false
+      },
+      "bindings": {
+        "model_id": null,
+        "runtime_id": "padataset-dnns-v1"
+      }
+    },
+    "scientific-single-gpu-2": {
+      "activation_state": "ACTIVE",
+      "lane": "gpu",
+      "execution_contract_id": "scientific-single-gpu-2-v1",
+      "trusted_workflow": {
+        "path": ".github/workflows/lambda-ci-scientific-2.yml",
+        "default_branch": "main",
+        "blob_sha": "6b710d36a7bcd59bfba7224ab4a068411398edfd"
+      },
+      "trigger": {
+        "event_name": "issue_comment",
+        "command": "/lambda-scientific-2",
         "claim_version": "wc-admission-v1",
         "allowed_actor_logins": [
           "adamtrott78"

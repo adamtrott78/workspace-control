@@ -31,11 +31,12 @@ class ExecutorBuilderTests(unittest.TestCase):
 
     def test_catalog_exposes_every_compiled_action(self):
         actions = builder.list_actions(compiled=self.compiled)
-        self.assertEqual(len(actions), 28)
-        self.assertEqual(len(set(actions)), 28)
+        self.assertEqual(len(actions), 29)
+        self.assertEqual(len(set(actions)), 29)
         self.assertIn("workspace_control.control_validation", actions)
         self.assertIn("padataset.cpu_ci", actions)
         self.assertIn("padataset.gpu_ci", actions)
+        self.assertIn("padataset.scientific_single_gpu_2", actions)
         self.assertIn("research_engine.model_eval_local_extract_wave7a3", actions)
         self.assertIn("maintenance.host_attest", actions)
 
