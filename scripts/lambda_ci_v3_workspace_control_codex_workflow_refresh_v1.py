@@ -486,6 +486,181 @@ def consume_authority(value: dict[str, Any], raw: bytes) -> pathlib.Path:
     return marker
 
 
+def require_target_inactive() -> dict[str, str]:
+    state = systemd(TARGET_UNIT)
+    if (
+        state.get("ActiveState") != "inactive"
+        or state.get("MainPID") not in {"", "0"}
+    ):
+        raise RefreshError("target controller is not proven inactive")
+    return state
+
+
+def require_target_active() -> dict[str, str]:
+    state = systemd(TARGET_UNIT)
+    if (
+        state.get("ActiveState") != "active"
+        or state.get("SubState") != "running"
+        or state.get("UnitFileState") != "enabled"
+    ):
+        raise RefreshError("target controller is not active/running/enabled")
+    return state
+
+
+def require_predecessor_unchanged(
+    *,
+    root_policy_raw: bytes,
+    active_route_raw: bytes,
+    policy_raw: bytes,
+    reconciler_raw: bytes,
+    reconciler_override_raw: bytes,
+    others_before: dict[str, dict[str, str]],
+) -> None:
+    if ROOT_POLICY.read_bytes() != root_policy_raw:
+        raise RefreshError("root policy changed before workflow refresh mutation")
+    if ACTIVE_ROUTE.read_bytes() != active_route_raw:
+        raise RefreshError("active Codex route receipt changed before mutation")
+    if TARGET_POLICY.read_bytes() != policy_raw:
+        raise RefreshError("target controller policy changed before mutation")
+    if INSTALLED_RECONCILER.read_bytes() != reconciler_raw:
+        raise RefreshError("installed reconciler changed before mutation")
+    if RECONCILER_OVERRIDE.read_bytes() != reconciler_override_raw:
+        raise RefreshError("reconciler override changed before mutation")
+    if REFRESH_ACTIVE.exists():
+        raise RefreshError("Codex workflow refresh appeared concurrently")
+    require_snapshot_same(others_before, controller_snapshots())
+
+
+def stop_target_and_close_quiescence_window(
+    *,
+    root_policy_raw: bytes,
+    active_route_raw: bytes,
+    policy_raw: bytes,
+    reconciler_raw: bytes,
+    reconciler_override_raw: bytes,
+    others_before: dict[str, dict[str, str]],
+) -> None:
+    run_systemctl("stop", TARGET_UNIT)
+    require_target_inactive()
+    require_target_quiescent()
+    require_predecessor_unchanged(
+        root_policy_raw=root_policy_raw,
+        active_route_raw=active_route_raw,
+        policy_raw=policy_raw,
+        reconciler_raw=reconciler_raw,
+        reconciler_override_raw=reconciler_override_raw,
+        others_before=others_before,
+    )
+
+
+def verify_predecessor_restored(
+    *,
+    root_policy_raw: bytes,
+    active_route_raw: bytes,
+    policy_raw: bytes,
+    reconciler_raw: bytes,
+    reconciler_override_raw: bytes,
+    others_before: dict[str, dict[str, str]],
+) -> tuple[dict[str, str], dict[str, dict[str, str]]]:
+    if ROOT_POLICY.read_bytes() != root_policy_raw:
+        raise RefreshError("rollback root policy digest mismatch")
+    if ACTIVE_ROUTE.read_bytes() != active_route_raw:
+        raise RefreshError("rollback active-route receipt mismatch")
+    if TARGET_POLICY.read_bytes() != policy_raw:
+        raise RefreshError("rollback target policy bytes mismatch")
+    if INSTALLED_RECONCILER.read_bytes() != reconciler_raw:
+        raise RefreshError("rollback reconciler bytes mismatch")
+    if RECONCILER_OVERRIDE.read_bytes() != reconciler_override_raw:
+        raise RefreshError("rollback reconciler override bytes mismatch")
+    if REFRESH_ACTIVE.exists():
+        raise RefreshError("rollback refresh receipt still present")
+
+    target_after = require_target_active()
+    require_roots()
+    require_target_quiescent()
+    others_after = controller_snapshots()
+    require_snapshot_same(others_before, others_after)
+    candidate.verify_installed(BASE_MANIFEST)
+    return target_after, others_after
+
+
+def recover_pre_mutation_failure(
+    *,
+    root_policy_raw: bytes,
+    active_route_raw: bytes,
+    policy_raw: bytes,
+    reconciler_raw: bytes,
+    reconciler_override_raw: bytes,
+    others_before: dict[str, dict[str, str]],
+) -> tuple[dict[str, str], dict[str, dict[str, str]]]:
+    require_target_inactive()
+    require_predecessor_unchanged(
+        root_policy_raw=root_policy_raw,
+        active_route_raw=active_route_raw,
+        policy_raw=policy_raw,
+        reconciler_raw=reconciler_raw,
+        reconciler_override_raw=reconciler_override_raw,
+        others_before=others_before,
+    )
+    run_systemctl("start", TARGET_UNIT)
+    return verify_predecessor_restored(
+        root_policy_raw=root_policy_raw,
+        active_route_raw=active_route_raw,
+        policy_raw=policy_raw,
+        reconciler_raw=reconciler_raw,
+        reconciler_override_raw=reconciler_override_raw,
+        others_before=others_before,
+    )
+
+
+def rollback_after_mutation(
+    *,
+    root_policy_raw: bytes,
+    active_route_raw: bytes,
+    policy_raw: bytes,
+    reconciler_raw: bytes,
+    reconciler_override_raw: bytes,
+    reconciler_mode: int,
+    others_before: dict[str, dict[str, str]],
+) -> tuple[dict[str, str], dict[str, dict[str, str]]]:
+    current = systemd(TARGET_UNIT)
+    if current.get("ActiveState") != "inactive":
+        run_systemctl("stop", TARGET_UNIT)
+    require_target_inactive()
+
+    atomic_file(TARGET_POLICY, policy_raw, 0o644)
+    try:
+        REFRESH_ACTIVE.unlink()
+    except FileNotFoundError:
+        pass
+    atomic_file(RECONCILER_OVERRIDE, reconciler_override_raw, 0o600)
+    atomic_file(INSTALLED_RECONCILER, reconciler_raw, reconciler_mode)
+
+    if TARGET_POLICY.read_bytes() != policy_raw:
+        raise RefreshError("rollback target policy restore failed")
+    if INSTALLED_RECONCILER.read_bytes() != reconciler_raw:
+        raise RefreshError("rollback reconciler restore failed")
+    if RECONCILER_OVERRIDE.read_bytes() != reconciler_override_raw:
+        raise RefreshError("rollback reconciler override restore failed")
+    if REFRESH_ACTIVE.exists():
+        raise RefreshError("rollback refresh receipt removal failed")
+    if ROOT_POLICY.read_bytes() != root_policy_raw:
+        raise RefreshError("rollback root policy changed")
+    if ACTIVE_ROUTE.read_bytes() != active_route_raw:
+        raise RefreshError("rollback active-route receipt changed")
+
+    candidate.verify_installed(BASE_MANIFEST)
+    run_systemctl("start", TARGET_UNIT)
+    return verify_predecessor_restored(
+        root_policy_raw=root_policy_raw,
+        active_route_raw=active_route_raw,
+        policy_raw=policy_raw,
+        reconciler_raw=reconciler_raw,
+        reconciler_override_raw=reconciler_override_raw,
+        others_before=others_before,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo-root", type=pathlib.Path, required=True)
@@ -506,6 +681,7 @@ def main() -> int:
     if REFRESH_ACTIVE.exists():
         raise RefreshError("Codex workflow refresh already exists")
     active, active_raw = load(ACTIVE_ROUTE)
+    root_policy_raw = ROOT_POLICY.read_bytes()
     if (
         active.get("mode")
         != "V3_WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_OVERRIDE"
@@ -640,20 +816,26 @@ def main() -> int:
     atomic_json(tx_path, tx)
     consume_authority(authority, authority_raw)
 
-    target_stopped = False
+    mutation_started = False
+    reconciler_mode = int(str(reconciler_entry.get("mode")), 8)
     try:
-        run_systemctl("stop", TARGET_UNIT)
-        target_stopped = True
-        if systemd(TARGET_UNIT).get("ActiveState") != "inactive":
-            raise RefreshError("target controller did not stop")
+        stop_target_and_close_quiescence_window(
+            root_policy_raw=root_policy_raw,
+            active_route_raw=active_raw,
+            policy_raw=current_policy_raw,
+            reconciler_raw=old_reconciler,
+            reconciler_override_raw=old_reconciler_override_raw,
+            others_before=others_before,
+        )
 
+        mutation_started = True
         atomic_file(TARGET_POLICY, refreshed_policy_raw, 0o644)
         atomic_json(REFRESH_ACTIVE, refresh)
         atomic_json(RECONCILER_OVERRIDE, new_reconciler_override)
         atomic_file(
             INSTALLED_RECONCILER,
             new_reconciler,
-            int(str(reconciler_entry.get("mode")), 8),
+            reconciler_mode,
         )
 
         candidate.verify_installed(BASE_MANIFEST)
@@ -680,16 +862,7 @@ def main() -> int:
         atomic_json(tx_path, tx)
 
         run_systemctl("start", TARGET_UNIT)
-        target_stopped = False
-        target_after = systemd(TARGET_UNIT)
-        if (
-            target_after.get("ActiveState") != "active"
-            or target_after.get("SubState") != "running"
-            or target_after.get("UnitFileState") != "enabled"
-        ):
-            raise RefreshError(
-                "target controller did not return active/running/enabled"
-            )
+        target_after = require_target_active()
         require_roots()
         require_target_quiescent()
         others_after = controller_snapshots()
@@ -698,6 +871,7 @@ def main() -> int:
 
         tx.update({
             "phase": "COMMITTED_ACTIVE_CODEX_WORKFLOW_REFRESH",
+            "mutation_performed": True,
             "refresh_receipt_sha256": sha(REFRESH_ACTIVE.read_bytes()),
             "controller_policy_file_sha256": sha(TARGET_POLICY.read_bytes()),
             "reconciler_sha256": sha(INSTALLED_RECONCILER.read_bytes()),
@@ -710,34 +884,46 @@ def main() -> int:
         print(f"TRANSACTION_RECEIPT={tx_path}")
         return 0
     except BaseException as exc:
+        rollback_error: BaseException | None = None
         try:
-            if not target_stopped:
-                subprocess.run(["systemctl", "stop", TARGET_UNIT], check=False)
-            atomic_file(TARGET_POLICY, backups["policy"], 0o644)
-            try:
-                REFRESH_ACTIVE.unlink()
-            except FileNotFoundError:
-                pass
-            atomic_file(
-                RECONCILER_OVERRIDE,
-                backups["reconciler_override"],
-                0o600,
-            )
-            atomic_file(
-                INSTALLED_RECONCILER,
-                backups["reconciler"],
-                int(str(reconciler_entry.get("mode")), 8),
-            )
-            subprocess.run(["systemctl", "start", TARGET_UNIT], check=False)
-            tx["phase"] = "ROLLED_BACK_PREVIOUS_CODEX_WORKFLOW"
+            if mutation_started:
+                target_restored, others_restored = rollback_after_mutation(
+                    root_policy_raw=root_policy_raw,
+                    active_route_raw=active_raw,
+                    policy_raw=backups["policy"],
+                    reconciler_raw=backups["reconciler"],
+                    reconciler_override_raw=backups["reconciler_override"],
+                    reconciler_mode=reconciler_mode,
+                    others_before=others_before,
+                )
+                tx["phase"] = "ROLLED_BACK_PREVIOUS_CODEX_WORKFLOW"
+            else:
+                target_restored, others_restored = recover_pre_mutation_failure(
+                    root_policy_raw=root_policy_raw,
+                    active_route_raw=active_raw,
+                    policy_raw=backups["policy"],
+                    reconciler_raw=backups["reconciler"],
+                    reconciler_override_raw=backups["reconciler_override"],
+                    others_before=others_before,
+                )
+                tx["phase"] = "FAILED_PRE_MUTATION_RESTORED"
             tx["rollback_completed"] = True
+            tx["mutation_performed"] = mutation_started
+            tx["target_controller_after_rollback"] = target_restored
+            tx["existing_controller_snapshot_after_rollback"] = others_restored
         except BaseException as rollback_exc:
+            rollback_error = rollback_exc
             tx["phase"] = "ROLLBACK_INCOMPLETE"
             tx["rollback_completed"] = False
+            tx["mutation_performed"] = mutation_started
             tx["rollback_error"] = str(rollback_exc)
         tx["failure"] = str(exc)
         tx["failed_at"] = datetime.now(timezone.utc).isoformat()
         atomic_json(tx_path, tx)
+        if rollback_error is not None:
+            raise RefreshError(
+                f"refresh failed and rollback is incomplete: {rollback_error}"
+            ) from exc
         raise
 
 

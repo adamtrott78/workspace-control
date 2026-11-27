@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import copy
 import importlib.util
+import os
 from pathlib import Path
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +30,30 @@ HELPER = (
     SCRIPTS / "lambda_ci_v3_workspace_control_codex_workflow_refresh_v1.py"
 ).read_text(encoding="utf-8")
 REC = (SCRIPTS / "lambda_ci_v3_reconciler.py").read_text(encoding="utf-8")
+
+
+def inactive_state() -> dict[str, str]:
+    return {
+        "ActiveState": "inactive",
+        "SubState": "dead",
+        "MainPID": "0",
+        "NRestarts": "0",
+        "InvocationID": "inactive-id",
+        "UnitFileState": "enabled",
+        "LoadState": "loaded",
+    }
+
+
+def active_state() -> dict[str, str]:
+    return {
+        "ActiveState": "active",
+        "SubState": "running",
+        "MainPID": "123",
+        "NRestarts": "0",
+        "InvocationID": "active-id",
+        "UnitFileState": "enabled",
+        "LoadState": "loaded",
+    }
 
 
 class WorkspaceControlCodexWorkflowRefreshTests(unittest.TestCase):
@@ -89,21 +116,300 @@ class WorkspaceControlCodexWorkflowRefreshTests(unittest.TestCase):
             {"trusted_workflows", "controller_policy_sha256"},
         )
 
-    def test_refresh_is_single_use_authority_bound_and_rollback_safe(self):
-        for marker in (
-            "REFRESH_WORKSPACE_CONTROL_CODEX_WORKFLOW_V1",
-            "require_target_quiescent()",
-            "consume_authority(authority, authority_raw)",
-            "os.O_EXCL",
-            'run_systemctl("stop", TARGET_UNIT)',
-            'run_systemctl("start", TARGET_UNIT)',
-            "require_snapshot_same(others_before, others_after)",
-            "COMMITTED_ACTIVE_CODEX_WORKFLOW_REFRESH",
-            "ROLLED_BACK_PREVIOUS_CODEX_WORKFLOW",
+    def test_post_stop_quiescence_race_fails_before_mutation_gate(self):
+        events: list[str] = []
+
+        def stop(*_args):
+            events.append("stop")
+
+        def inactive():
+            events.append("inactive")
+            return inactive_state()
+
+        def late_work():
+            events.append("quiescence")
+            raise refresh.RefreshError("late target work appeared")
+
+        with (
+            mock.patch.object(refresh, "run_systemctl", side_effect=stop),
+            mock.patch.object(
+                refresh,
+                "require_target_inactive",
+                side_effect=inactive,
+            ),
+            mock.patch.object(
+                refresh,
+                "require_target_quiescent",
+                side_effect=late_work,
+            ),
+            mock.patch.object(
+                refresh,
+                "require_predecessor_unchanged",
+            ) as predecessor,
+            mock.patch.object(refresh, "atomic_file") as atomic_file,
+            mock.patch.object(refresh, "atomic_json") as atomic_json,
         ):
-            self.assertIn(marker, HELPER)
-        self.assertNotIn('run_systemctl("stop", PROVISIONER_UNIT)', HELPER)
-        self.assertNotIn('run_systemctl("restart"', HELPER)
+            with self.assertRaisesRegex(
+                refresh.RefreshError,
+                "late target work appeared",
+            ):
+                refresh.stop_target_and_close_quiescence_window(
+                    root_policy_raw=b"root",
+                    active_route_raw=b"active",
+                    policy_raw=b"policy",
+                    reconciler_raw=b"reconciler",
+                    reconciler_override_raw=b"override",
+                    others_before={},
+                )
+
+        self.assertEqual(events, ["stop", "inactive", "quiescence"])
+        predecessor.assert_not_called()
+        atomic_file.assert_not_called()
+        atomic_json.assert_not_called()
+
+    def test_pre_mutation_failure_recovery_writes_no_managed_files(self):
+        expected_target = active_state()
+        expected_others = {"sibling": active_state()}
+        with (
+            mock.patch.object(refresh, "require_target_inactive"),
+            mock.patch.object(refresh, "require_predecessor_unchanged"),
+            mock.patch.object(refresh, "run_systemctl") as systemctl,
+            mock.patch.object(
+                refresh,
+                "verify_predecessor_restored",
+                return_value=(expected_target, expected_others),
+            ),
+            mock.patch.object(refresh, "atomic_file") as atomic_file,
+            mock.patch.object(refresh, "atomic_json") as atomic_json,
+        ):
+            actual = refresh.recover_pre_mutation_failure(
+                root_policy_raw=b"root",
+                active_route_raw=b"active",
+                policy_raw=b"policy",
+                reconciler_raw=b"reconciler",
+                reconciler_override_raw=b"override",
+                others_before=expected_others,
+            )
+
+        self.assertEqual(actual, (expected_target, expected_others))
+        systemctl.assert_called_once_with("start", refresh.TARGET_UNIT)
+        atomic_file.assert_not_called()
+        atomic_json.assert_not_called()
+
+    def test_rollback_stop_failure_blocks_restore_and_cannot_attest(self):
+        with (
+            mock.patch.object(
+                refresh,
+                "systemd",
+                return_value=active_state(),
+            ),
+            mock.patch.object(
+                refresh,
+                "run_systemctl",
+                side_effect=refresh.RefreshError("stop failed"),
+            ),
+            mock.patch.object(refresh, "atomic_file") as atomic_file,
+        ):
+            with self.assertRaisesRegex(refresh.RefreshError, "stop failed"):
+                refresh.rollback_after_mutation(
+                    root_policy_raw=b"root",
+                    active_route_raw=b"active",
+                    policy_raw=b"policy",
+                    reconciler_raw=b"reconciler",
+                    reconciler_override_raw=b"override",
+                    reconciler_mode=0o755,
+                    others_before={},
+                )
+        atomic_file.assert_not_called()
+
+    def test_rollback_start_failure_is_not_silently_accepted(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            root_policy = root / "root.json"
+            active_route = root / "active.json"
+            target_policy = root / "policy.json"
+            reconciler = root / "reconciler.py"
+            override = root / "override.json"
+            refresh_receipt = root / "refresh.json"
+
+            root_policy.write_bytes(b"root-before")
+            active_route.write_bytes(b"route-before")
+            target_policy.write_bytes(b"mutated-policy")
+            reconciler.write_bytes(b"mutated-reconciler")
+            override.write_bytes(b"mutated-override")
+            refresh_receipt.write_bytes(b"refresh")
+
+            def atomic(path: Path, data: bytes, _mode: int):
+                path.write_bytes(data)
+
+            with (
+                mock.patch.object(refresh, "ROOT_POLICY", root_policy),
+                mock.patch.object(refresh, "ACTIVE_ROUTE", active_route),
+                mock.patch.object(refresh, "TARGET_POLICY", target_policy),
+                mock.patch.object(refresh, "INSTALLED_RECONCILER", reconciler),
+                mock.patch.object(refresh, "RECONCILER_OVERRIDE", override),
+                mock.patch.object(refresh, "REFRESH_ACTIVE", refresh_receipt),
+                mock.patch.object(
+                    refresh,
+                    "systemd",
+                    side_effect=[inactive_state(), inactive_state()],
+                ),
+                mock.patch.object(refresh, "atomic_file", side_effect=atomic),
+                mock.patch.object(
+                    refresh.candidate,
+                    "verify_installed",
+                ),
+                mock.patch.object(
+                    refresh,
+                    "run_systemctl",
+                    side_effect=refresh.RefreshError("start failed"),
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    refresh.RefreshError,
+                    "start failed",
+                ):
+                    refresh.rollback_after_mutation(
+                        root_policy_raw=b"root-before",
+                        active_route_raw=b"route-before",
+                        policy_raw=b"policy-before",
+                        reconciler_raw=b"reconciler-before",
+                        reconciler_override_raw=b"override-before",
+                        reconciler_mode=0o755,
+                        others_before={},
+                    )
+
+            self.assertEqual(target_policy.read_bytes(), b"policy-before")
+            self.assertEqual(reconciler.read_bytes(), b"reconciler-before")
+            self.assertEqual(override.read_bytes(), b"override-before")
+            self.assertFalse(refresh_receipt.exists())
+
+    def test_rollback_proves_exact_restoration_and_runtime_invariants(self):
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            root_policy = root / "root.json"
+            active_route = root / "active.json"
+            target_policy = root / "policy.json"
+            reconciler = root / "reconciler.py"
+            override = root / "override.json"
+            refresh_receipt = root / "refresh.json"
+
+            root_policy.write_bytes(b"root-before")
+            active_route.write_bytes(b"route-before")
+            target_policy.write_bytes(b"mutated-policy")
+            reconciler.write_bytes(b"mutated-reconciler")
+            override.write_bytes(b"mutated-override")
+            refresh_receipt.write_bytes(b"refresh")
+
+            sibling = {"sibling": active_state()}
+
+            def atomic(path: Path, data: bytes, _mode: int):
+                path.write_bytes(data)
+
+            with (
+                mock.patch.object(refresh, "ROOT_POLICY", root_policy),
+                mock.patch.object(refresh, "ACTIVE_ROUTE", active_route),
+                mock.patch.object(refresh, "TARGET_POLICY", target_policy),
+                mock.patch.object(refresh, "INSTALLED_RECONCILER", reconciler),
+                mock.patch.object(refresh, "RECONCILER_OVERRIDE", override),
+                mock.patch.object(refresh, "REFRESH_ACTIVE", refresh_receipt),
+                mock.patch.object(
+                    refresh,
+                    "systemd",
+                    side_effect=[
+                        inactive_state(),
+                        inactive_state(),
+                        active_state(),
+                    ],
+                ),
+                mock.patch.object(refresh, "atomic_file", side_effect=atomic),
+                mock.patch.object(refresh, "run_systemctl") as systemctl,
+                mock.patch.object(refresh, "require_roots") as roots,
+                mock.patch.object(
+                    refresh,
+                    "require_target_quiescent",
+                ) as quiescent,
+                mock.patch.object(
+                    refresh,
+                    "controller_snapshots",
+                    return_value=sibling,
+                ),
+                mock.patch.object(
+                    refresh.candidate,
+                    "verify_installed",
+                ) as verify,
+            ):
+                target_after, others_after = refresh.rollback_after_mutation(
+                    root_policy_raw=b"root-before",
+                    active_route_raw=b"route-before",
+                    policy_raw=b"policy-before",
+                    reconciler_raw=b"reconciler-before",
+                    reconciler_override_raw=b"override-before",
+                    reconciler_mode=0o755,
+                    others_before=sibling,
+                )
+
+            self.assertEqual(target_after["ActiveState"], "active")
+            self.assertEqual(others_after, sibling)
+            self.assertEqual(target_policy.read_bytes(), b"policy-before")
+            self.assertEqual(reconciler.read_bytes(), b"reconciler-before")
+            self.assertEqual(override.read_bytes(), b"override-before")
+            self.assertEqual(root_policy.read_bytes(), b"root-before")
+            self.assertEqual(active_route.read_bytes(), b"route-before")
+            self.assertFalse(refresh_receipt.exists())
+            systemctl.assert_called_once_with("start", refresh.TARGET_UNIT)
+            roots.assert_called_once_with()
+            quiescent.assert_called_once_with()
+            self.assertGreaterEqual(verify.call_count, 2)
+
+    def test_single_use_authority_survives_failed_pre_mutation_recovery(self):
+        with tempfile.TemporaryDirectory() as raw:
+            authority_root = Path(raw) / "consumed"
+            authority = {
+                "authorization_id": "11111111-1111-1111-1111-111111111111",
+                "operation": "REFRESH_WORKSPACE_CONTROL_CODEX_WORKFLOW_V1",
+            }
+            authority_raw = b"authority-receipt"
+
+            def ensure(path: Path):
+                path.mkdir(parents=True, exist_ok=True)
+
+            with (
+                mock.patch.object(refresh, "AUTHORITY_ROOT", authority_root),
+                mock.patch.object(refresh, "ensure_dir", side_effect=ensure),
+                mock.patch.object(os, "chown"),
+            ):
+                marker = refresh.consume_authority(authority, authority_raw)
+                self.assertTrue(marker.exists())
+
+                with (
+                    mock.patch.object(refresh, "require_target_inactive"),
+                    mock.patch.object(
+                        refresh,
+                        "require_predecessor_unchanged",
+                    ),
+                    mock.patch.object(
+                        refresh,
+                        "run_systemctl",
+                        side_effect=refresh.RefreshError("restart failed"),
+                    ),
+                ):
+                    with self.assertRaisesRegex(
+                        refresh.RefreshError,
+                        "restart failed",
+                    ):
+                        refresh.recover_pre_mutation_failure(
+                            root_policy_raw=b"root",
+                            active_route_raw=b"active",
+                            policy_raw=b"policy",
+                            reconciler_raw=b"reconciler",
+                            reconciler_override_raw=b"override",
+                            others_before={},
+                        )
+
+                self.assertTrue(marker.exists())
+                with self.assertRaises(FileExistsError):
+                    refresh.consume_authority(authority, authority_raw)
 
     def test_refresh_preserves_root_overlay_capacity_and_gpu_authority(self):
         for forbidden in (
