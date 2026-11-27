@@ -15,7 +15,10 @@ jobs:
       github.event.issue.pull_request &&
       github.actor == 'adamtrott78' &&
       github.event.comment.author_association == 'OWNER' &&
-      startsWith(github.event.comment.body, '/workspace-codex-bootstrap ')
+      (
+        startsWith(github.event.comment.body, '/workspace-codex-bootstrap ') ||
+        startsWith(github.event.comment.body, '/workspace-codex-preflight ')
+      )
     runs-on: lambda-workspace-control-control-small
     timeout-minutes: 10
 
@@ -30,6 +33,20 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
+          command="$(printf '%s\n' "$COMMENT_BODY" | awk '{print $1}')"
+          extra="$(printf '%s\n' "$COMMENT_BODY" | awk '{print $3}')"
+          [[ -z "$extra" ]] || {
+            echo "Codex command accepts exactly one SHA argument" >&2
+            exit 19
+          }
+          case "$command" in
+            /workspace-codex-bootstrap) mode="bootstrap" ;;
+            /workspace-codex-preflight) mode="preflight" ;;
+            *)
+              echo "Unsupported Workspace Control Codex command" >&2
+              exit 19
+              ;;
+          esac
           expected_sha="$(printf '%s\n' "$COMMENT_BODY" | awk '{print $2}')"
           [[ "$expected_sha" =~ ^[0-9a-f]{40}$ ]] || {
             echo "Invalid /workspace-codex-bootstrap SHA" >&2
@@ -57,6 +74,7 @@ jobs:
             echo "PR is not open" >&2
             exit 23
           }
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
           echo "expected_sha=$expected_sha" >> "$GITHUB_OUTPUT"
 
       - name: Prove bounded workspace-control runner isolation
@@ -109,6 +127,7 @@ jobs:
           clean: true
 
       - name: Install checksum-pinned Codex CLI in Workspace Control home
+        if: steps.gate.outputs.mode == 'bootstrap'
         id: install
         env:
           CODEX_VERSION: "0.155.1"
@@ -158,6 +177,7 @@ jobs:
           echo "codex_home=$codex_home" >> "$GITHUB_OUTPUT"
 
       - name: Ensure ChatGPT login
+        if: steps.gate.outputs.mode == 'bootstrap'
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -178,7 +198,339 @@ jobs:
           [[ -f "$CODEX_HOME/auth.json" ]]
           chmod 0600 "$CODEX_HOME/auth.json"
 
+
+      - name: Bind existing Workspace Control Codex runtime
+        if: steps.gate.outputs.mode == 'preflight'
+        env:
+          CODEX_VERSION: "0.155.1"
+          PROJECT_HOME: "/srv/workspace-ci/workspace-control/home"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY
+
+          install_dir="$PROJECT_HOME/.local/share/workspace-reasoning-economy/codex/$CODEX_VERSION"
+          codex_home="$PROJECT_HOME/.codex-reasoning-economy"
+          codex_bin="$install_dir/codex"
+
+          [[ -x "$codex_bin" ]] || {
+            echo "Persistent Workspace Control Codex runtime is absent" >&2
+            exit 41
+          }
+          [[ -d "$codex_home" && -f "$codex_home/config.toml" && -f "$codex_home/auth.json" ]] || {
+            echo "Persistent Workspace Control Codex auth state is incomplete" >&2
+            exit 42
+          }
+          [[ "$(stat -c '%a' "$codex_home/auth.json")" == "600" ]] || {
+            echo "Persistent Workspace Control Codex auth file mode drift" >&2
+            exit 43
+          }
+
+          actual_version="$("$codex_bin" --version)"
+          [[ "$actual_version" == *"$CODEX_VERSION"* ]] || {
+            echo "Unexpected Codex version: $actual_version" >&2
+            exit 44
+          }
+          status="$(CODEX_HOME="$codex_home" "$codex_bin" login status 2>&1)"
+          printf '%s\n' "$status" | grep -Fq "Logged in using ChatGPT"
+          [[ ! -v OPENAI_API_KEY ]]
+
+          echo "CODEX_BIN=$codex_bin" >> "$GITHUB_ENV"
+          echo "CODEX_HOME=$codex_home" >> "$GITHUB_ENV"
+          echo "CODEX_VERSION=$CODEX_VERSION" >> "$GITHUB_ENV"
+
+      - name: Read redacted ChatGPT account and usage telemetry
+        if: steps.gate.outputs.mode == 'preflight'
+        env:
+          EXPECTED_SHA: ${{ steps.gate.outputs.expected_sha }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+          PROJECT_HOME: "/srv/workspace-ci/workspace-control/home"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY
+          export CODEX_HOME
+
+          actual_sha="$(git rev-parse HEAD)"
+          [[ "$actual_sha" == "$EXPECTED_SHA" ]]
+          receipt="$RUNNER_TEMP/workspace-control-codex-preflight-receipt.json"
+          export RECEIPT_PATH="$receipt" ACTUAL_SHA="$actual_sha"
+
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          from datetime import datetime, timezone
+          import json
+          import os
+          import pathlib
+          import queue
+          import subprocess
+          import threading
+
+          if "OPENAI_API_KEY" in os.environ:
+              raise SystemExit("OPENAI_API_KEY must be absent")
+
+          command = [
+              os.environ["CODEX_BIN"],
+              "app-server",
+              "--listen",
+              "stdio://",
+          ]
+          child_env = dict(os.environ)
+          child_env.pop("OPENAI_API_KEY", None)
+          proc = subprocess.Popen(
+              command,
+              stdin=subprocess.PIPE,
+              stdout=subprocess.PIPE,
+              stderr=subprocess.DEVNULL,
+              text=True,
+              encoding="utf-8",
+              bufsize=1,
+              env=child_env,
+              shell=False,
+          )
+          if proc.stdin is None or proc.stdout is None:
+              raise SystemExit("Codex app-server stdio unavailable")
+
+          lines: queue.Queue[object] = queue.Queue()
+
+          def read_stdout() -> None:
+              try:
+                  for line in proc.stdout:
+                      lines.put(line)
+              finally:
+                  lines.put(None)
+
+          threading.Thread(target=read_stdout, daemon=True).start()
+          next_id = 1
+
+          def write(payload: dict[str, object]) -> None:
+              proc.stdin.write(
+                  json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
+                  + "\n"
+              )
+              proc.stdin.flush()
+
+          def request(method: str, params: dict[str, object] | None = None) -> dict[str, object]:
+              global next_id
+              request_id = next_id
+              next_id += 1
+              payload: dict[str, object] = {"method": method, "id": request_id}
+              if params is not None:
+                  payload["params"] = params
+              write(payload)
+              while True:
+                  try:
+                      item = lines.get(timeout=8.0)
+                  except queue.Empty as exc:
+                      raise SystemExit(f"Codex RPC timeout: {method}") from exc
+                  if item is None:
+                      raise SystemExit(f"Codex app-server closed: {method}")
+                  try:
+                      response = json.loads(str(item))
+                  except json.JSONDecodeError:
+                      continue
+                  if not isinstance(response, dict) or response.get("id") != request_id:
+                      continue
+                  if response.get("error") is not None:
+                      error = response.get("error")
+                      code = error.get("code") if isinstance(error, dict) else "unknown"
+                      raise SystemExit(f"Codex RPC failed: {method}: code={code}")
+                  return response
+
+          def notify(method: str, params: dict[str, object]) -> None:
+              write({"method": method, "params": params})
+
+          try:
+              request(
+                  "initialize",
+                  {
+                      "clientInfo": {
+                          "name": "workspace-control-codex-preflight",
+                          "version": "1.0",
+                      }
+                  },
+              )
+              notify("initialized", {})
+              account_response = request("account/read", {})
+              rate_response = request("account/rateLimits/read")
+              usage_response = request("account/usage/read")
+          finally:
+              try:
+                  proc.stdin.close()
+              except OSError:
+                  pass
+              if proc.poll() is None:
+                  proc.terminate()
+                  try:
+                      proc.wait(timeout=1.0)
+                  except subprocess.TimeoutExpired:
+                      proc.kill()
+                      proc.wait(timeout=1.0)
+
+          account_result = account_response.get("result")
+          if not isinstance(account_result, dict):
+              raise SystemExit("account/read missing result")
+          account = account_result.get("account")
+          if not isinstance(account, dict):
+              raise SystemExit("account/read missing account")
+          account_type = account.get("type")
+          plan_type = account.get("planType")
+          requires_openai_auth = account_result.get("requiresOpenAIAuth")
+          if account_type != "chatgpt":
+              raise SystemExit("ChatGPT subscription account required")
+          if not isinstance(plan_type, str) or plan_type.lower() != "plus":
+              raise SystemExit("ChatGPT Plus plan required")
+          if not isinstance(requires_openai_auth, bool):
+              raise SystemExit("requiresOpenAIAuth must be boolean")
+
+          def optional_int(value: object, label: str) -> int | None:
+              if value is None:
+                  return None
+              if isinstance(value, bool) or not isinstance(value, int):
+                  raise SystemExit(f"{label} must be integer or null")
+              return value
+
+          def optional_str(value: object, label: str) -> str | None:
+              if value is None:
+                  return None
+              if not isinstance(value, str):
+                  raise SystemExit(f"{label} must be string or null")
+              return value
+
+          def clean_window(raw: object) -> dict[str, object] | None:
+              if raw is None:
+                  return None
+              if not isinstance(raw, dict):
+                  raise SystemExit("rate-limit window must be object")
+              used = raw.get("usedPercent")
+              if isinstance(used, bool) or not isinstance(used, int):
+                  raise SystemExit("rate-limit usedPercent must be integer")
+              return {
+                  "used_percent": used,
+                  "window_duration_mins": optional_int(
+                      raw.get("windowDurationMins"),
+                      "windowDurationMins",
+                  ),
+                  "resets_at": optional_int(raw.get("resetsAt"), "resetsAt"),
+              }
+
+          def clean_bucket(raw: object, fallback_id: str | None = None) -> dict[str, object]:
+              if not isinstance(raw, dict):
+                  raise SystemExit("rate-limit bucket must be object")
+              return {
+                  "limit_id": optional_str(raw.get("limitId"), "limitId") or fallback_id,
+                  "limit_name": optional_str(raw.get("limitName"), "limitName"),
+                  "normal_model_slug": optional_str(
+                      raw.get("normalModelSlug"),
+                      "normalModelSlug",
+                  ),
+                  "plan_type": optional_str(raw.get("planType"), "rateLimit.planType"),
+                  "primary": clean_window(raw.get("primary")),
+                  "secondary": clean_window(raw.get("secondary")),
+              }
+
+          rate_result = rate_response.get("result")
+          if not isinstance(rate_result, dict):
+              raise SystemExit("rateLimits/read missing result")
+          ordinary = rate_result.get("ordinaryUsageAllowed")
+          if ordinary is not None and not isinstance(ordinary, bool):
+              raise SystemExit("ordinaryUsageAllowed must be boolean or null")
+          rate_limits: list[dict[str, object]] = []
+          if rate_result.get("rateLimits") is not None:
+              rate_limits.append(clean_bucket(rate_result["rateLimits"]))
+          by_id = rate_result.get("rateLimitsByLimitId")
+          if by_id is not None:
+              if not isinstance(by_id, dict):
+                  raise SystemExit("rateLimitsByLimitId must be object or null")
+              for limit_id in sorted(by_id):
+                  if not isinstance(limit_id, str):
+                      raise SystemExit("rateLimitsByLimitId key must be string")
+                  cleaned = clean_bucket(by_id[limit_id], limit_id)
+                  if cleaned not in rate_limits:
+                      rate_limits.append(cleaned)
+
+          usage_result = usage_response.get("result")
+          if not isinstance(usage_result, dict):
+              raise SystemExit("usage/read missing result")
+          summary_raw = usage_result.get("summary")
+          if not isinstance(summary_raw, dict):
+              raise SystemExit("usage summary must be object")
+          token_summary = {
+              "lifetime_tokens": optional_int(
+                  summary_raw.get("lifetimeTokens"),
+                  "lifetimeTokens",
+              ),
+              "peak_daily_tokens": optional_int(
+                  summary_raw.get("peakDailyTokens"),
+                  "peakDailyTokens",
+              ),
+              "longest_running_turn_sec": optional_int(
+                  summary_raw.get("longestRunningTurnSec"),
+                  "longestRunningTurnSec",
+              ),
+              "current_streak_days": optional_int(
+                  summary_raw.get("currentStreakDays"),
+                  "currentStreakDays",
+              ),
+              "longest_streak_days": optional_int(
+                  summary_raw.get("longestStreakDays"),
+                  "longestStreakDays",
+              ),
+          }
+          daily = usage_result.get("dailyUsageBuckets")
+          if daily is not None and not isinstance(daily, list):
+              raise SystemExit("dailyUsageBuckets must be array or null")
+
+          receipt = {
+              "schema_version": 1,
+              "mode": "WORKSPACE_CONTROL_CODEX_PREFLIGHT_V1",
+              "decision": "PASS",
+              "expected_sha": os.environ["EXPECTED_SHA"],
+              "actual_sha": os.environ["ACTUAL_SHA"],
+              "pr_number": int(os.environ["PR_NUMBER"]),
+              "actor": os.environ["ACTOR"],
+              "runner_name": os.environ.get("RUNNER_NAME"),
+              "runner_user": os.environ.get("USER"),
+              "runner_class": "workspace-control-control-small-v1",
+              "project_home": os.environ["PROJECT_HOME"],
+              "codex_home": os.environ["CODEX_HOME"],
+              "codex_version": os.environ["CODEX_VERSION"],
+              "account_type": "chatgpt",
+              "plan_type": plan_type.lower(),
+              "requires_openai_auth": requires_openai_auth,
+              "api_key_present": False,
+              "model_inference_performed": False,
+              "credential_material_in_receipt": False,
+              "usage_snapshot": {
+                  "captured_at": datetime.now(timezone.utc).isoformat(),
+                  "ordinary_usage_allowed": ordinary,
+                  "rate_limits": rate_limits,
+                  "token_summary": token_summary,
+                  "daily_usage_bucket_count": (
+                      len(daily) if isinstance(daily, list) else None
+                  ),
+              },
+          }
+          pathlib.Path(os.environ["RECEIPT_PATH"]).write_text(
+              json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(receipt, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload redacted preflight receipt
+        if: steps.gate.outputs.mode == 'preflight'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: workspace-control-codex-preflight-receipt
+          path: ${{ runner.temp }}/workspace-control-codex-preflight-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+
       - name: Write redacted bootstrap receipt
+        if: steps.gate.outputs.mode == 'bootstrap'
         env:
           EXPECTED_SHA: ${{ steps.gate.outputs.expected_sha }}
           PR_NUMBER: ${{ github.event.issue.number }}
@@ -222,6 +574,7 @@ jobs:
           PY
 
       - name: Upload redacted bootstrap receipt
+        if: steps.gate.outputs.mode == 'bootstrap'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: workspace-control-codex-bootstrap-receipt
