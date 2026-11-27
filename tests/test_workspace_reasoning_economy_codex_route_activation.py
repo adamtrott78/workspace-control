@@ -46,6 +46,9 @@ class WorkspaceControlCodexRouteActivationTests(unittest.TestCase):
             for row in value["trusted_workflows"]
             if row["route_id"] == "control-validation"
         ]
+        value["controller_policy_sha256"] = activation._controller_policy_digest(
+            value
+        )
         return value
 
     def test_candidate_adds_only_codex_workflow_and_preserves_installed_generation(self):
