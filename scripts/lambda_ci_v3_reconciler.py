@@ -90,8 +90,18 @@ WORKSPACE_CONTROL_CODEX_TARGET_SCALE_SET = "lambda-workspace-control-control-sma
 WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH = (
     ".github/workflows/lambda-ci-workspace-control-codex-bootstrap.yml"
 )
-WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB = (
+WORKSPACE_CONTROL_CODEX_WORKFLOW_INITIAL_BLOB = (
     "520da69cfb9b28c81fb1121a16c12d3715892cc7"
+)
+WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB = (
+    "b17526353acb531010fce019337f7b3080ba235b"
+)
+WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "workspace-control"
+    / "codex-bootstrap-route"
+    / "workflow-refresh"
+    / "active.json"
 )
 WORKSPACE_CONTROL_VALIDATION_WORKFLOW_PATH = (
     ".github/workflows/lambda-ci-workspace-control-validation.yml"
@@ -528,7 +538,6 @@ def _workspace_control_codex_route_override(
         "target_route_key": WORKSPACE_CONTROL_CODEX_TARGET_ROUTE,
         "target_scale_set_name": WORKSPACE_CONTROL_CODEX_TARGET_SCALE_SET,
         "workflow_path": WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH,
-        "workflow_blob_sha": WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
         "control_validation_workflow_path":
             WORKSPACE_CONTROL_VALIDATION_WORKFLOW_PATH,
         "control_validation_workflow_blob_sha":
@@ -541,6 +550,14 @@ def _workspace_control_codex_route_override(
             raise ReconcileError(
                 f"active Workspace Control Codex route binding mismatch: {key}"
             )
+    active_workflow_blob = active.get("workflow_blob_sha")
+    if active_workflow_blob not in {
+        WORKSPACE_CONTROL_CODEX_WORKFLOW_INITIAL_BLOB,
+        WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
+    }:
+        raise ReconcileError(
+            "active Workspace Control Codex route workflow blob is not an accepted lineage"
+        )
     _require_source_head(
         active.get("source_head"),
         "Workspace Control Codex route override",
@@ -574,9 +591,80 @@ def _workspace_control_codex_route_override(
     return active
 
 
+def _workspace_control_codex_workflow_refresh(
+    active: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_ACTIVE_RECEIPT
+    ):
+        return None
+
+    refresh = _load_override_receipt(
+        WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_ACTIVE_RECEIPT,
+        "active Workspace Control Codex workflow refresh",
+    )
+    active_raw = WORKSPACE_CONTROL_CODEX_ROUTE_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH",
+        "phase": "ACTIVE",
+        "active_route_receipt_sha256": _sha256(active_raw),
+        "target_class_id": WORKSPACE_CONTROL_CODEX_TARGET_CLASS,
+        "workflow_path": WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH,
+        "previous_workflow_blob_sha": active.get("workflow_blob_sha"),
+        "workflow_blob_sha": WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
+        "previous_controller_policy_sha256": active.get(
+            "controller_policy_sha256"
+        ),
+        "previous_controller_policy_file_sha256": active.get(
+            "controller_policy_file_sha256"
+        ),
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"Workspace Control Codex workflow refresh binding mismatch: {key}"
+            )
+    if refresh["previous_workflow_blob_sha"] == refresh["workflow_blob_sha"]:
+        raise ReconcileError(
+            "Workspace Control Codex workflow refresh did not change blob"
+        )
+    _require_source_head(
+        refresh.get("source_head"),
+        "Workspace Control Codex workflow refresh",
+    )
+    authorization_id = refresh.get("authorization_id")
+    if (
+        not isinstance(authorization_id, str)
+        or re.fullmatch(
+            r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+            authorization_id,
+        )
+        is None
+    ):
+        raise ReconcileError(
+            "Workspace Control Codex workflow refresh authorization id invalid"
+        )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if (
+            not isinstance(value, str)
+            or re.fullmatch(r"[0-9a-f]{64}", value) is None
+        ):
+            raise ReconcileError(
+                f"Workspace Control Codex workflow refresh {key} invalid"
+            )
+    return refresh
+
+
 def _verify_workspace_control_codex_route_effective_state(
     active: dict[str, Any],
+    refresh: dict[str, Any] | None = None,
 ) -> None:
+    effective = refresh if refresh is not None else active
     root_policy = _json(V3_CONFIG_ROOT / "root-policy.json")
     if root_policy.get("root_policy_sha256") != active["root_policy_sha256"]:
         raise ReconcileError(
@@ -647,7 +735,7 @@ def _verify_workspace_control_codex_route_effective_state(
     controller_raw = controller_path.read_bytes()
     if (
         _sha256(controller_raw)
-        != active["controller_policy_file_sha256"]
+        != effective["controller_policy_file_sha256"]
     ):
         raise ReconcileError(
             "Workspace Control Codex route controller file digest mismatch"
@@ -655,7 +743,7 @@ def _verify_workspace_control_codex_route_effective_state(
     controller = json.loads(controller_raw)
     if (
         controller.get("controller_policy_sha256")
-        != active["controller_policy_sha256"]
+        != effective["controller_policy_sha256"]
     ):
         raise ReconcileError(
             "Workspace Control Codex route controller policy digest mismatch"
@@ -690,7 +778,7 @@ def _verify_workspace_control_codex_route_effective_state(
         )
     if (
         codex.get("path") != WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH
-        or codex.get("blob_sha") != WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB
+        or codex.get("blob_sha") != effective["workflow_blob_sha"]
     ):
         raise ReconcileError(
             "Workspace Control Codex bootstrap workflow binding drift"
@@ -2785,10 +2873,20 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             production_overrides,
             predecessor_overlay_sha256=predecessor_overlay_sha256,
         )
+    workspace_codex_refresh = (
+        _workspace_control_codex_workflow_refresh(workspace_codex_route)
+        if workspace_codex_route is not None
+        else None
+    )
+    workspace_codex_effective = (
+        workspace_codex_refresh
+        if workspace_codex_refresh is not None
+        else workspace_codex_route
+    )
     workspace_codex_overrides = (
         {
             WORKSPACE_CONTROL_CODEX_CONTROLLER_DESTINATION:
-                workspace_codex_route["controller_policy_file_sha256"],
+                workspace_codex_effective["controller_policy_file_sha256"],
             WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION:
                 workspace_codex_route["overlay_file_sha256"],
         }
@@ -3099,7 +3197,8 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
 
     if workspace_codex_route is not None:
         _verify_workspace_control_codex_route_effective_state(
-            workspace_codex_route
+            workspace_codex_route,
+            workspace_codex_refresh,
         )
 
 
