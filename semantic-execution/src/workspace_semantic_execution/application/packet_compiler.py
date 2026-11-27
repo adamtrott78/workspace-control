@@ -196,7 +196,14 @@ class SemanticPacketCompiler:
         ]
         text = "\n".join(lines) + "\n"
         text += self._compact_list("CONSTRAINTS", source.constraints)
-        text += self._compact_list("EVIDENCE_REFS", source.evidence_refs)
+        evidence_refs = source.evidence_refs
+        if context.context_mode == ContextMode.DELTA:
+            delta_ref_set = set(context.delta_refs)
+            evidence_refs = tuple(
+                ref for ref in source.evidence_refs
+                if ref in delta_ref_set
+            )
+        text += self._compact_list("EVIDENCE_REFS", evidence_refs)
         text += self._compact_list("AUTHORITY_REFS", source.authority_refs)
         text += self._compact_list("ALLOWED_ACTIONS", source.allowed_actions)
         text += f"VALIDATOR={source.validator_contract}\n"
@@ -228,6 +235,9 @@ class SemanticPacketCompiler:
         if context.context_mode == ContextMode.DELTA:
             text += (
                 f"BASE_CHECKPOINT={context.base_checkpoint or source.source_checkpoint}\n"
+            )
+            text += (
+                f"BASE_PACKET_SHA256={context.base_packet_sha256}\n"
             )
             text += self._compact_list("DELTA_REFS", context.delta_refs)
 

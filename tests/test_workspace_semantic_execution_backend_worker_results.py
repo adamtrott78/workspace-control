@@ -47,6 +47,7 @@ from workspace_semantic_execution.domain import (  # noqa: E402
 
 
 PROCESS_ID = "research-iterate.instant-leaf"
+PROCESS_ID_2 = "research-iterate.instant-leaf-2"
 SLOT_ID = "instant-result-slot"
 PROFILE = openai_chat_instant_current_profile()
 REGISTRY = ExecutorRegistry((PROFILE,))
@@ -76,7 +77,11 @@ def runtime(*, contracted: bool = False) -> RuntimeCoordinator:
                 DomainKernel.create_process(
                     PROCESS_ID,
                     work_contract=contract,
-                )
+                ),
+                DomainKernel.create_process(
+                    PROCESS_ID_2,
+                    work_contract=contract,
+                ),
             ]
         )
     )
@@ -88,13 +93,18 @@ def runtime(*, contracted: bool = False) -> RuntimeCoordinator:
     return coordinator
 
 
-def packet_input() -> PacketCompilationInput:
+def packet_input(
+    *,
+    process_id: str = PROCESS_ID,
+    source_checkpoint: str = "task@result-sha",
+    evidence_refs: tuple[str, ...] = ("evidence:input",),
+) -> PacketCompilationInput:
     return PacketCompilationInput(
-        process_id=PROCESS_ID,
-        source_checkpoint="task@result-sha",
+        process_id=process_id,
+        source_checkpoint=source_checkpoint,
         objective="Return one typed durable transition proposal.",
         constraints=("publish durable result only",),
-        evidence_refs=("evidence:input",),
+        evidence_refs=evidence_refs,
         authority_refs=("scope:proposal-only",),
         allowed_actions=("publish-worker-result",),
         validator_contract=VALIDATOR_ID,
@@ -225,6 +235,11 @@ class WorkerResultIntakeTests(unittest.TestCase):
         )
         self.assertEqual(session.state, ExecutorSessionState.READY)
         self.assertEqual(session.last_ack_id, "result:1")
+        self.assertEqual(
+            session.last_ack_packet_sha256,
+            planned.packet.packet_sha256,
+        )
+        self.assertEqual(session.last_ack_session_generation, 0)
         self.assertEqual(len(process.effect_receipts), 1)
         self.assertEqual(
             next(iter(process.effect_receipts.values())).effect_hash,
@@ -233,6 +248,48 @@ class WorkerResultIntakeTests(unittest.TestCase):
         self.assertEqual(
             graph.worker_results["result:1"],
             publication(planned),
+        )
+
+    def test_next_packet_uses_delta_only_after_exact_durable_session_ack(self):
+        coordinator = runtime(contracted=True)
+        first = plan_and_prepare(coordinator)
+        WorkerResultIntakeService(
+            runtime=coordinator,
+            validators={VALIDATOR_ID: FixedValidator(passed=True)},
+        ).ingest(publication(first))
+
+        second = OperatorDispatchPlanner(
+            runtime=coordinator,
+            registry=REGISTRY,
+        ).plan_service_existing(
+            task_id="task:research-iterate",
+            action_id="action:worker-result-2",
+            action_generation=0,
+            process_id=PROCESS_ID_2,
+            process_generation=0,
+            worker_slot_id=SLOT_ID,
+            session_generation=0,
+            executor_id=PROFILE.executor_id,
+            packet_input=packet_input(
+                process_id=PROCESS_ID_2,
+                source_checkpoint="task@result-sha-2",
+                evidence_refs=("evidence:input", "evidence:new"),
+            ),
+            priority_rank=11,
+            queue_sequence=2,
+            created_at="T5",
+        )
+
+        self.assertIn("context_mode=DELTA", second.packet.text)
+        self.assertIn(
+            f"BASE_PACKET_SHA256={first.packet.packet_sha256}",
+            second.packet.text,
+        )
+        self.assertIn("BASE_CHECKPOINT=task@result-sha", second.packet.text)
+        self.assertIn("EVIDENCE_REFS=evidence:new", second.packet.text)
+        self.assertNotIn(
+            "EVIDENCE_REFS=evidence:input|evidence:new",
+            second.packet.text,
         )
 
     def test_validator_failure_returns_repair_ready(self):

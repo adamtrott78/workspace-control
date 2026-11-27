@@ -33,27 +33,87 @@ from .token_economy import (
 )
 
 
+def _session_delta_base(
+    graph,
+    *,
+    worker_slot_id: str | None,
+    session_generation: int | None,
+    executor_id: str,
+):
+    if worker_slot_id is None or session_generation is None:
+        return None
+    session = graph.executor_sessions.get(worker_slot_id)
+    if session is None:
+        return None
+    if session.session_generation != session_generation:
+        return None
+    if session.last_ack_session_generation != session_generation:
+        return None
+    if (
+        session.last_ack_packet_sha256 is None
+        or session.last_ack_process_id is None
+        or session.last_ack_process_generation is None
+    ):
+        return None
+    payload_ref = (
+        f"semantic-packet://{session.last_ack_process_id}/"
+        f"{session.last_ack_process_generation}/"
+        f"{session.last_ack_packet_sha256}"
+    )
+    source = graph.packet_sources.get(payload_ref)
+    if source is None:
+        return None
+    if (
+        source.executor_id != executor_id
+        or source.packet_sha256 != session.last_ack_packet_sha256
+    ):
+        return None
+    return source
+
+
 def _operator_token_economy_decision(
     *,
+    graph,
     packet_input: PacketCompilationInput,
     executor,
     planner: TokenEconomyPlanner,
+    worker_slot_id: str | None,
+    session_generation: int | None,
 ) -> TokenEconomyDecision:
-    """Deterministic default economy plan for an Operator-dispatched worker.
+    """Plan the smallest safe Operator context from durable session evidence."""
+    required_refs = tuple(
+        dict.fromkeys(
+            packet_input.evidence_refs
+            + packet_input.authority_refs
+        )
+    )
+    base = _session_delta_base(
+        graph,
+        worker_slot_id=worker_slot_id,
+        session_generation=session_generation,
+        executor_id=executor.executor_id,
+    )
+    if base is None:
+        base_checkpoint = packet_input.source_checkpoint
+        base_packet_sha256 = None
+        session_has_base_checkpoint = False
+        delta_refs: tuple[str, ...] = ()
+    else:
+        base_refs = set(base.evidence_refs + base.authority_refs)
+        base_checkpoint = base.source_checkpoint
+        base_packet_sha256 = base.packet_sha256
+        session_has_base_checkpoint = True
+        delta_refs = tuple(
+            ref for ref in required_refs if ref not in base_refs
+        )
 
-    Until durable per-session checkpoint acknowledgments are added, the
-    Operator path deliberately starts REF_ONLY rather than assuming chat memory.
-    """
     return planner.plan(
         TokenEconomyRequest(
-            required_refs=tuple(
-                dict.fromkeys(
-                    packet_input.evidence_refs
-                    + packet_input.authority_refs
-                )
-            ),
-            base_checkpoint=packet_input.source_checkpoint,
-            session_has_base_checkpoint=False,
+            required_refs=required_refs,
+            delta_refs=delta_refs,
+            base_checkpoint=base_checkpoint,
+            base_packet_sha256=base_packet_sha256,
+            session_has_base_checkpoint=session_has_base_checkpoint,
             recovery_required=False,
             broad_context_required=False,
             waiting_external=False,
@@ -170,9 +230,12 @@ class DurableOperatorPacketMaterializer:
 
         packet_input = _compilation_input(source)
         economy = _operator_token_economy_decision(
+            graph=graph,
             packet_input=packet_input,
             executor=executor,
             planner=self._token_economy_planner,
+            worker_slot_id=action.worker_slot_id,
+            session_generation=action.session_generation,
         )
         packet = self._compiler.compile(
             packet_input,
@@ -259,9 +322,12 @@ class OperatorDispatchPlanner:
 
         executor = self._registry.get(executor_id)
         economy = _operator_token_economy_decision(
+            graph=self._runtime.snapshot().graph,
             packet_input=effective_packet_input,
             executor=executor,
             planner=self._token_economy_planner,
+            worker_slot_id=worker_slot_id,
+            session_generation=session_generation,
         )
         packet = self._compiler.compile(
             effective_packet_input,
