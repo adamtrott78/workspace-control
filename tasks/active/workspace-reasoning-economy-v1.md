@@ -36,20 +36,20 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 ## Next safe action
 
-CLAIM-BEARING PREPARATION IS COMPLETE BUT LAUNCH REMAINS FAIL-CLOSED. Protocol screening is complete; the exact 54-run scored-replicate plan is frozen; evaluator sealed-store primitive head 8470957f880bcf871c21b762aeb70d25d9188ce9 passed Workspace #2897 / Semantic #223 / Operator #501; and plan head 74958b5d0d325893fd39045d1e49b5320dca7fa3 passed Workspace #2899 / Semantic #224 / Operator #502 and now explicitly requires live evaluator-isolation acceptance. DO NOT launch/materialize the 54 scored runs until all three gates are satisfied: (1) reviewed live Instant/operator authority, (2) live hostile-worker denial + evaluator readback/commitment acceptance for the sealed store, and (3) calibrated comparable weekly allowance telemetry. Codex remains suspended on PR #627/#630. UNKNOWN allowance remains UNKNOWN.
+DEFAULT-BRANCH CODEX LINEAGE IS PROMOTED; CLAIM-BEARING 54-RUN EXECUTION REMAINS FAIL-CLOSED. Next run the zero-inference control-small Codex bootstrap from main@5cf2821c2aac415cba72ff3798f89afa01052cbf and verify its receipt/auth runtime. After that, run only the minimum controlled Codex/Instant allowance calibration needed to establish comparable telemetry. Do not launch/materialize the frozen 54 scored runs until live evaluator isolation, calibrated allowance, and reviewed live executor authority are all satisfied.
 
 ## Remaining work
 
 - Execute the frozen 54-run claim-bearing scored-replicate plan only after live executor authority, live evaluator-isolation acceptance, and a calibrated comparable allowance relationship all exist; materialize run-state files lazily at admission time.
 - Preserve UNKNOWN allowance for traces without controlled comparable meter deltas; never infer shared allowance from raw tokens.
-- When PR #627/#630 lineage clears, run reserved Workspace Control zero-inference Codex bootstrap and prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, no API billing/fallback.
+- Run the default-main zero-inference Workspace Control Codex bootstrap and verify the control-small receipt; prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, and no API billing/fallback before any live inference.
 - Run isolated controlled Codex and Instant actions bracketed by official account/rate-limit/usage snapshots; determine which meter actually moves and keep unresolved mappings unknown.
 - Feed calibrated traces into weekly governor + matched holdout protocol and compare validated progress per scarce allowance against all-strong/frontier control.
 - Promote a routing policy only with claim-bearing comparable evidence, quality-floor PASS and strictly lower scarce allowance.
 
 ## Blockers / gates
 
-- LIVE CODEX LINEAGE AUTHORITY: PR #627 and stacked PR #630 remain open drafts at their validated SHAs. Live Codex runtime/auth is suspended until the reserved-capacity lineage reaches a trusted/default-branch promotion path; API billing and manual runner/sidecar bypass remain forbidden.
+- LIVE CODEX BOOTSTRAP: #627/#630 reserved-capacity + inert Codex bootstrap lineage is now promoted to default main@5cf2821c2aac415cba72ff3798f89afa01052cbf. The remaining runtime gate is a zero-inference bootstrap receipt proving the control-small route/auth environment. API billing and manual runner/sidecar bypass remain forbidden.
 - CLAIM-BEARING EXECUTION GATE: protocol screening is complete and the exact 54-run scored plan is frozen, but launch remains blocked on three independent gates: reviewed live Instant/operator authority, live evaluator sealed-store worker-denial/readback acceptance, and calibrated shared ChatGPT/Codex weekly allowance telemetry. Do not spend 54 manual clean-chat runs or treat UNKNOWN meter cost as free.
 
 ## Fresh-chat initialization
