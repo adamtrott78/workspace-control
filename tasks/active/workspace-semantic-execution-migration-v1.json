@@ -932,7 +932,7 @@
         },
         {
           "check": "E4-0 Token Economy enforcement and private Instant front door",
-          "result": "PASS_WITH_FRONTDOOR_LIVE_ACCEPTANCE_PENDING",
+          "result": "PASS",
           "evidence": [
             "Exact-session DELTA/compact integration df04a62903899fae08af1c799c68eb9a54f35b0b passed Workspace #3316, Semantic #614 and Operator #881. DELTA is authorized only from exact durable session/checkpoint ACK evidence; offline replay uses zero model calls and preserves canonical packet identity.",
             "Programmatic model Token Economy enforcement 21ab03b57ffa0865f7a37817ba484a0d7bf49ee1 passed Workspace #3323, Semantic #622 and Operator #888. PROGRAMMATIC calls are planner-admitted; NO_MODEL forbids launch; Codex reasoning profile is mapped to low/medium/high; MACHINE_MINIMAL uses structured output and output overrun fails closed with telemetry.",
@@ -4032,7 +4032,7 @@
     },
     {
       "check": "E4-0 Token Economy enforcement and private Instant front door",
-      "result": "PASS_WITH_FRONTDOOR_LIVE_ACCEPTANCE_PENDING",
+      "result": "PASS",
       "evidence": [
         "Exact-session DELTA/compact integration df04a62903899fae08af1c799c68eb9a54f35b0b passed Workspace #3316, Semantic #614 and Operator #881. DELTA is authorized only from exact durable session/checkpoint ACK evidence; offline replay uses zero model calls and preserves canonical packet identity.",
         "Programmatic model Token Economy enforcement 21ab03b57ffa0865f7a37817ba484a0d7bf49ee1 passed Workspace #3323, Semantic #622 and Operator #888. PROGRAMMATIC calls are planner-admitted; NO_MODEL forbids launch; Codex reasoning profile is mapped to low/medium/high; MACHINE_MINIMAL uses structured output and output overrun fails closed with telemetry.",
