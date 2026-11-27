@@ -36,20 +36,20 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 ## Next safe action
 
-DEFAULT-BRANCH CODEX LINEAGE IS PROMOTED; CLAIM-BEARING 54-RUN EXECUTION REMAINS FAIL-CLOSED. Next run the zero-inference control-small Codex bootstrap from main@5cf2821c2aac415cba72ff3798f89afa01052cbf and verify its receipt/auth runtime. After that, run only the minimum controlled Codex/Instant allowance calibration needed to establish comparable telemetry. Do not launch/materialize the frozen 54 scored runs until live evaluator isolation, calibrated allowance, and reviewed live executor authority are all satisfied.
+Run the fresh one-shot root/operator Codex bootstrap-route activation against main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277. On PASS, run a fresh zero-inference control-small bootstrap and verify ChatGPT-subscription auth/no-API-fallback receipt. Only then run the minimum controlled Codex/Instant allowance calibration; the frozen 54 scored runs remain fail-closed.
 
 ## Remaining work
 
 - Execute the frozen 54-run claim-bearing scored-replicate plan only after live executor authority, live evaluator-isolation acceptance, and a calibrated comparable allowance relationship all exist; materialize run-state files lazily at admission time.
 - Preserve UNKNOWN allowance for traces without controlled comparable meter deltas; never infer shared allowance from raw tokens.
-- Run the default-main zero-inference Workspace Control Codex bootstrap and verify the control-small receipt; prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, and no API billing/fallback before any live inference.
+- Run one fresh root/operator route activation against repaired main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277, then a fresh zero-inference Workspace Control Codex bootstrap; prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, and no API billing/fallback before any live inference.
 - Run isolated controlled Codex and Instant actions bracketed by official account/rate-limit/usage snapshots; determine which meter actually moves and keep unresolved mappings unknown.
 - Feed calibrated traces into weekly governor + matched holdout protocol and compare validated progress per scarce allowance against all-strong/frontier control.
 - Promote a routing policy only with claim-bearing comparable evidence, quality-floor PASS and strictly lower scarce allowance.
 
 ## Blockers / gates
 
-- LIVE CODEX BOOTSTRAP: #627/#630 reserved-capacity + inert Codex bootstrap lineage is now promoted to default main@5cf2821c2aac415cba72ff3798f89afa01052cbf. The remaining runtime gate is a zero-inference bootstrap receipt proving the control-small route/auth environment. API billing and manual runner/sidecar bypass remain forbidden.
+- LIVE CODEX ROUTE ACTIVATION: activation source is repaired/validated at main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277 after the earlier preflight rejected a newer accepted PADataset scientific workflow blob. Prior attempt consumed no authority and mutated nothing. Fresh one-shot root/operator activation against cf8141aa… remains required before zero-inference bootstrap.
 - CLAIM-BEARING EXECUTION GATE: protocol screening is complete and the exact 54-run scored plan is frozen, but launch remains blocked on three independent gates: reviewed live Instant/operator authority, live evaluator sealed-store worker-denial/readback acceptance, and calibrated shared ChatGPT/Codex weekly allowance telemetry. Do not spend 54 manual clean-chat runs or treat UNKNOWN meter cost as free.
 
 ## Fresh-chat initialization

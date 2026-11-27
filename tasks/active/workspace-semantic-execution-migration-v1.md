@@ -70,12 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Two bounded live gates are now ready and independent: (1) perform live acceptance of private Instant front-door plugin plugins_6b08cf5ea1548191b543faab9952bd26; (2) run the default-branch zero-inference Workspace Control Codex bootstrap from main@5cf2821c2aac415cba72ff3798f89afa01052cbf and verify the control-small receipt. After bootstrap PASS, run the first minimal planner-enforced subscription-Codex auth/calibration action. Do not launch the frozen 54-run claim-bearing matrix yet.
+Run one fresh root/operator Codex bootstrap-route activation against exact main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277 using the reviewed one-shot activation helper. After WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_ACTIVATION=PASS, trigger a fresh zero-inference bootstrap against an open same-repository PR head and verify the control-small receipt/auth runtime. Then run only the first minimal planner-enforced subscription-Codex calibration action.
 
 ## Remaining work
 
 - Instant front door: perform bounded live acceptance through private plugin plugins_6b08cf5ea1548191b543faab9952bd26 (new-task candidate, durable status query, explicit decision/cancel-revise candidate), then close INST-07 if no chat-created authority occurs.
-- E4/CODEX: run the default-branch zero-inference control-small bootstrap and verify its receipt/auth runtime; then run the minimum planner-enforced subscription-Codex live calibration jobs with controlled before/after usage snapshots.
+- E4/CODEX: activate the additive bootstrap route once against repaired main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277, then run a fresh zero-inference control-small bootstrap and the minimum planner-enforced subscription-Codex live calibration jobs with controlled before/after usage snapshots.
 - E4 quality/economics: complete claim-bearing matched reasoning-quality/holdout evidence and compare validated progress plus scarce-allowance consumption against the all-strong/frontier control.
 - REL-01: close the remaining integrated fault-campaign cases named by the matrix, especially DB disconnect, validator timeout and delayed/out-of-order event handling.
 - REL-02 / PROD-01: run explicit target-budget comparison, representative soak/resource measurements and authoritative UX-09 target performance on the Windows machine.
@@ -85,7 +85,7 @@ Two bounded live gates are now ready and independent: (1) perform live acceptanc
 
 ## Blockers / gates
 
-- CODEX-01 LIVE BOOTSTRAP: validated #627/#630 reserved-capacity + inert Codex bootstrap lineage is promoted to main@5cf2821c2aac415cba72ff3798f89afa01052cbf. Do not infer a live Codex runtime yet: run the default-branch zero-inference control-small bootstrap and verify its receipt/auth/runtime gates first. API billing and manual runner/sidecar bypass remain forbidden.
+- CODEX-01 LIVE ACTIVATION: repo-side additive route + one-shot activation transaction + accepted-science-lineage verifier repair are merged at main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277. The prior activation failed before authority creation/consumption or mutation. A fresh root/operator activation against this exact head is required; never reuse the stale 1836ff50… authority/head. After PASS, trigger a fresh zero-inference bootstrap and verify the receipt/auth runtime.
 - E4 ECONOMICS / CODEX: claim-bearing comparison remains gated on calibrated comparable allowance telemetry plus live subscription-only Codex bounded-job evidence; do not substitute raw token estimates or uncalibrated UI observations.
 - REL-01 / REL-02: A10 proves integrated session/process loss and live bounded resource behavior, but the remaining fault-campaign cases plus explicit target-budget/representative-soak closeout are not yet reconciled to PASS.
 - PROD-02: A10 binding/provenance closure passed, but the emitted resource report retained stale artifact_id workspace-semantic-execution-e3-a9-live-resource-v1; normalize that non-authority metadata defect before claiming zero unresolved provenance violations.

@@ -156,7 +156,12 @@
         "Historical PR #627 exact head acd420758eb0124646988ee8776939572c88a82d passed authoritative self-hosted validation and its separate Phase-B root/operator activation completed live: host max=3, PADataset max=2, Workspace Control max=1, one reserved CPU-only Workspace Control slot, dual GPU lanes isolated, DUAL_SCIENCE_PLUS_CONTROL_READY=1.",
         "Historical PR #630 exact head 9d206a8f608ed86b416473e0ff66fabd99fea884 passed Workspace Control Validation #2790 with inert Codex bootstrap/static contracts; it performed no live model inference or root-policy mutation.",
         "A fresh current-main composition c5605192fac09d50ea8f4012670c83741dd26239 overlaid the exact validated #627/#630 lineage onto main without touching the four non-overlapping main-only commits. Workspace Control #3329 SUCCESS; promotion PR #698 merged as main 5cf2821c2aac415cba72ff3798f89afa01052cbf.",
-        "CODEX-01 remains PARTIAL only until the now-default-branch lambda-ci-workspace-control-codex-bootstrap workflow is run in zero-inference mode and the live control-small runtime/receipt is verified."
+        "CODEX-01 remains PARTIAL only until the now-default-branch lambda-ci-workspace-control-codex-bootstrap workflow is run in zero-inference mode and the live control-small runtime/receipt is verified.",
+        "First live activation attempt against main@1836ff501afc158cdfc1c7684100ffbe7b8ca4ab failed during preflight verify_installed with active PADataset scientific dual-lane trusted_workflow_blob_sha mismatch. Failure occurred before operator authority creation/consumption and before any controller/policy/runtime mutation.",
+        "The mismatch was traced to a legitimate newer accepted PADataset scientific workflow-refresh lineage rather than corruption or unauthorized drift.",
+        "Repair PR #703 rebased the Codex route activation verifier on the accepted scientific refresh lineage while preserving exact scientific workflow attestation; exact head fb14873f4bd2818cad6fc2f73402dc76ce76dee6 passed Workspace Control Validation #3347.",
+        "PR #703 merged as main cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277. Live workspace-control-control-small-v1 controller was subsequently inspected read-only and remains active/running; no failed-attempt mutation is present.",
+        "Remaining CODEX-01 live gate is now exactly one fresh root/operator activation against main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277, followed by a fresh zero-inference bootstrap receipt. The stale pre-repair authority/head must not be reused."
       ]
     },
     {
@@ -467,6 +472,6 @@
   ],
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
-  "last_updated": "2026-11-26",
-  "latest_validated_checkpoint": "main@5cf2821c2aac415cba72ff3798f89afa01052cbf (validated #627/#630 reserved-capacity + inert Codex bootstrap lineage promoted; zero-inference live bootstrap pending)"
+  "last_updated": "2026-11-27",
+  "latest_validated_checkpoint": "main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277 (Codex route activation verifier rebased on accepted PADataset scientific refresh lineage; live activation retry pending)"
 }
