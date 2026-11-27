@@ -53,7 +53,7 @@ class WorkspaceControlCodexWorkflowRefreshV3Tests(unittest.TestCase):
         )
         self.assertEqual(
             refresh.NEW_BLOB,
-            "21f1615b859496fa1919103b153374da85345c3e",
+            "7e4efd33389d27a67d71fe91661bfbcb2a7a9b9e",
         )
         self.assertEqual(
             reconciler.WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2_BLOB,
