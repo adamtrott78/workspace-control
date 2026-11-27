@@ -523,7 +523,7 @@ def _workspace_control_codex_route_override(
         "phase": "ACTIVE",
         "base_source_head": manifest.get("source_head"),
         "base_install_manifest_sha256": _sha256(manifest_raw),
-        "root_policy_sha256": manifest.get("root_policy_sha256"),
+        "base_root_policy_sha256": manifest.get("root_policy_sha256"),
         "target_class_id": WORKSPACE_CONTROL_CODEX_TARGET_CLASS,
         "target_route_key": WORKSPACE_CONTROL_CODEX_TARGET_ROUTE,
         "target_scale_set_name": WORKSPACE_CONTROL_CODEX_TARGET_SCALE_SET,
@@ -558,6 +558,7 @@ def _workspace_control_codex_route_override(
             "Workspace Control Codex route authorization id invalid"
         )
     for key in (
+        "root_policy_sha256",
         "controller_policy_sha256",
         "controller_policy_file_sha256",
         "overlay_file_sha256",
