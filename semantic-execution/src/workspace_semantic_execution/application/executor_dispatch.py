@@ -10,6 +10,7 @@ from ..domain import (
     ExecutorProfile,
     InvocationMode,
     RoutingDecision,
+    TokenBudget,
     WorkDisposition,
 )
 from ..ports import (
@@ -21,11 +22,17 @@ from .operator_packets import (
     PlannedOperatorDispatch,
 )
 from .packet_compiler import (
+    CompiledPacket,
     PacketCompilationInput,
     SemanticPacketCompiler,
 )
 from .router import ExecutorRegistry, route_executor
 from .runtime import RuntimeCoordinator
+from .token_economy import (
+    TokenEconomyDecision,
+    TokenEconomyPlanner,
+    TokenEconomyRequest,
+)
 from .vertical_slice import (
     CoordinatedActionService,
     CoordinatedExecutionRequest,
@@ -39,6 +46,16 @@ class ExecutorSelectionPolicyDecision:
     selected_executor_id: str | None
     outcome: str
     rationale: str
+
+
+class ProgrammaticReasoningPort(Protocol):
+    def execute(
+        self,
+        *,
+        packet: CompiledPacket,
+        executor: ExecutorProfile,
+        budget: TokenBudget,
+    ) -> object: ...
 
 
 class ExecutorSelectionPolicy(Protocol):
@@ -87,12 +104,20 @@ class ExecutorDispatchRequest:
 
 
 @dataclass(frozen=True)
+class ProgrammaticDispatchResult:
+    packet: CompiledPacket
+    token_economy: TokenEconomyDecision
+    executor_result: object
+
+
+@dataclass(frozen=True)
 class ExecutorDispatchResult:
     routing: RoutingDecision
     executor: ExecutorProfile
     dispatch_mode: str
     coordinated_result: CoordinatedExecutionResult | None = None
     operator_dispatch: PlannedOperatorDispatch | None = None
+    programmatic_dispatch: ProgrammaticDispatchResult | None = None
     selection_policy: ExecutorSelectionPolicyDecision | None = None
 
 
@@ -109,11 +134,17 @@ class ExecutorDispatchCoordinator:
         executor_ports: Mapping[str, ExecutorPort],
         validators: Mapping[str, PostconditionValidator],
         selection_policy: ExecutorSelectionPolicy | None = None,
+        programmatic_ports: Mapping[str, ProgrammaticReasoningPort] | None = None,
+        token_economy_planner: TokenEconomyPlanner | None = None,
     ) -> None:
         self._runtime = runtime
         self._registry = registry
         self._packet_compiler = packet_compiler
         self._selection_policy = selection_policy
+        self._programmatic_ports = dict(programmatic_ports or {})
+        self._token_economy_planner = (
+            token_economy_planner or TokenEconomyPlanner()
+        )
         self._operator = OperatorDispatchPlanner(
             runtime=runtime,
             registry=registry,
@@ -236,6 +267,72 @@ class ExecutorDispatchCoordinator:
                 executor=executor,
                 dispatch_mode="OPERATOR_ACTION",
                 operator_dispatch=planned,
+                selection_policy=policy_decision,
+            )
+
+        if executor.invocation_mode == InvocationMode.PROGRAMMATIC:
+            graph = self._runtime.snapshot().graph
+            process = graph.processes.get(request.process_id)
+            if process is None:
+                raise ExecutorDispatchError(
+                    "programmatic_process_unknown"
+                )
+            if process.generation != request.expected_generation:
+                raise ExecutorDispatchError(
+                    "programmatic_stale_process_generation"
+                )
+
+            required_refs = tuple(
+                dict.fromkeys(
+                    request.packet_input.evidence_refs
+                    + request.packet_input.authority_refs
+                )
+            )
+            economy = self._token_economy_planner.plan(
+                TokenEconomyRequest(
+                    required_refs=required_refs,
+                    base_checkpoint=request.packet_input.source_checkpoint,
+                    waiting_external=(
+                        process.state.value == "WAITING_EXTERNAL"
+                    ),
+                    invocation_mode=executor.invocation_mode,
+                    session_mode=executor.session_mode,
+                    user_facing=False,
+                    deep_reasoning_required=(
+                        process.disposition
+                        == WorkDisposition.INTRINSICALLY_DIFFICULT
+                    ),
+                )
+            )
+            if not economy.budget.allow_model_call:
+                raise ExecutorDispatchError(
+                    "programmatic_model_call_forbidden_by_token_budget"
+                )
+            packet = self._packet_compiler.compile(
+                request.packet_input,
+                executor=executor,
+                token_economy=economy,
+            )
+            port = self._programmatic_ports.get(executor.executor_id)
+            if port is None:
+                raise ExecutorDispatchError(
+                    "programmatic_executor_port_missing:"
+                    f"{executor.executor_id}"
+                )
+            executor_result = port.execute(
+                packet=packet,
+                executor=executor,
+                budget=economy.budget,
+            )
+            return ExecutorDispatchResult(
+                routing=routing,
+                executor=executor,
+                dispatch_mode="PROGRAMMATIC_MODEL",
+                programmatic_dispatch=ProgrammaticDispatchResult(
+                    packet=packet,
+                    token_economy=economy,
+                    executor_result=executor_result,
+                ),
                 selection_policy=policy_decision,
             )
 
