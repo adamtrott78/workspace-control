@@ -142,6 +142,42 @@ PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT = (
     / "workflow-refresh"
     / "active.json"
 )
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_BLOB = (
+    "bca2eabe3afe70ec3115391e5a6c24daefd1498b"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_PAD_MAIN = (
+    "34e150ae4fe349889a054aa2c12d33393cf64f66"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "workflow-refresh-v2"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_BLOB = (
+    "ea5d844c494013eb2322686d7345b5a1b15443c4"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_PAD_MAIN = (
+    "51073327c688d243961a0caabbb5358cc065ced1"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "workflow-refresh-v3"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_BLOB = (
+    "39190413abbd801bd6d25c2166ac36a7a69968fb"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_PAD_MAIN = (
+    "7cfe0ab61cc16785f4d267273b48a63361c595dd"
+)
+PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "workflow-refresh-v4"
+    / "active.json"
+)
 PADATASET_SCIENTIFIC_OVERRIDE_DESTINATIONS = {
     str(V3_CONFIG_ROOT / "root-policy.json"),
     str(V3_CONFIG_ROOT / "executor-actions.json"),
@@ -170,7 +206,124 @@ PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS = "padataset-scientific-single-gpu-2-v1"
 PADATASET_SCIENTIFIC_DUAL_TARGET_ROUTE = "padataset:scientific-single-gpu-2"
 PADATASET_SCIENTIFIC_DUAL_TARGET_SCALE_SET = "lambda-padataset-scientific-single-gpu-2"
 PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH = ".github/workflows/lambda-ci-scientific-2.yml"
-PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB = "6b710d36a7bcd59bfba7224ab4a068411398edfd"
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB = "6280a6e7b2ad8cc379277fa320e8839a94f360ec"
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_BLOB = (
+    "5f29137d9636ed170d3735d0f273220e7cf6f377"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_PAD_MAIN = (
+    "4674d1b07d7d7bb7ee3cbe4ab8a709d536486c13"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_BLOB = (
+    "8da00f39284745cf6c9032620d63574052cd6d61"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_PAD_MAIN = (
+    "9889a981e34de81e58f3263630f0cba54a8e9e06"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v2"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_BLOB = (
+    "85e8deef5240e2d6d7db34318e6b2c35947a83f3"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_PAD_MAIN = (
+    "dbf167b23e6a1777a31ad5c4bccde44d26d0aad6"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v3"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_BLOB = (
+    "650a529aeee51b53234a84b3afea8743cc527688"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_PAD_MAIN = (
+    "6a3c17c27a401f059f9ded1287d274d766f61283"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v4"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_BLOB = (
+    "ba549b4d1560b18a9e40ef531387bc1accc90d43"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_PAD_MAIN = (
+    "b0cbf6c1436e18cb5b793596dd790560bd2cec08"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v5"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_BLOB = (
+    "5e8abef47f7a59eab3d715836658c0e9067de187"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_PAD_MAIN = (
+    "39a798fbe6201fc81b1d7feaa9d8244e8296d61d"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v6"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_BLOB = (
+    "85dc8f289a972dddbb1a838d5596def6d872118b"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_PAD_MAIN = (
+    "af4b221f6e6014ce2047e41d9c4e91f511d9fe84"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v7"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_BLOB = (
+    "8375dd0a0733b01de38f677dee58a373d3adcb48"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_PAD_MAIN = (
+    "51073327c688d243961a0caabbb5358cc065ced1"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v8"
+    / "active.json"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V9_BLOB = (
+    "6753795041090a5331a80354f59945be006ac889"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V9_PAD_MAIN = (
+    "7cfe0ab61cc16785f4d267273b48a63361c595dd"
+)
+PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V9_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "padataset-scientific"
+    / "dual-lane"
+    / "workflow-refresh-v9"
+    / "active.json"
+)
 PADATASET_SCIENTIFIC_DUAL_GPU0 = "GPU-a333e68b-d1dc-6d25-1678-97b527bf55ea"
 PADATASET_SCIENTIFIC_DUAL_GPU1 = "GPU-cfed3394-a935-63aa-9325-c4cae7b568b6"
 PADATASET_SCIENTIFIC_DUAL_OVERRIDE_DESTINATIONS = set(
@@ -759,6 +912,168 @@ def _padataset_scientific_workflow_refresh(
     return refresh
 
 
+def _padataset_scientific_workflow_refresh_v2(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset scientific workflow refresh v2 requires v1 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT,
+        "active PADataset scientific workflow refresh v2",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh v2 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset scientific workflow refresh v2",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh v2 {key} invalid"
+            )
+    return refresh
+
+
+
+def _padataset_scientific_workflow_refresh_v3(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset scientific workflow refresh v3 requires v2 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT,
+        "active PADataset scientific workflow refresh v3",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V2_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh v3 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset scientific workflow refresh v3",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh v3 {key} invalid"
+            )
+    return refresh
+
+def _padataset_scientific_workflow_refresh_v4(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset scientific workflow refresh v4 requires v3 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT,
+        "active PADataset scientific workflow refresh v4",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V3_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_WORKFLOW_REFRESH_V4_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh v4 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset scientific workflow refresh v4",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset scientific workflow refresh v4 {key} invalid"
+            )
+    return refresh
+
+
 def _padataset_scientific_dual_lane_override(
     scientific_active: dict[str, Any],
     workflow_refresh: dict[str, Any] | None,
@@ -881,6 +1196,487 @@ def _padataset_scientific_dual_lane_override(
                 f"dual-lane addition digest invalid: {destination}"
             )
     return active
+
+
+def _padataset_scientific_dual_lane_workflow_refresh(
+    dual_active: dict[str, Any],
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_ACTIVE_RECEIPT
+    ):
+        return None
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh",
+    )
+    dual_raw = PADATASET_SCIENTIFIC_DUAL_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH",
+        "phase": "ACTIVE",
+        "dual_active_receipt_sha256": _sha256(dual_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB,
+        "workflow_blob_sha": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_BLOB,
+        "padataset_main_sha": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            dual_active["target_controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh {key} invalid"
+            )
+    return refresh
+
+
+def _padataset_scientific_dual_lane_workflow_refresh_v2(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v2 requires v1 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v2",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v2 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v2",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v2 {key} invalid"
+            )
+    return refresh
+
+
+def _padataset_scientific_dual_lane_workflow_refresh_v3(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v3 requires v2 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v3",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V2_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v3 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v3",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v3 {key} invalid"
+            )
+    return refresh
+
+
+def _padataset_scientific_dual_lane_workflow_refresh_v4(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v4 requires v3 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v4",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V3_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v4 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v4",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v4 {key} invalid"
+            )
+    return refresh
+
+
+def _padataset_scientific_dual_lane_workflow_refresh_v5(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v5 requires v4 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v5",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V4_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v5 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v5",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v5 {key} invalid"
+            )
+    return refresh
+
+
+def _padataset_scientific_dual_lane_workflow_refresh_v6(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v6 requires v5 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v6",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V5_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v6 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v6",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v6 {key} invalid"
+            )
+    return refresh
+
+
+def _padataset_scientific_dual_lane_workflow_refresh_v7(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v7 requires v6 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v7",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V6_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v7 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v7",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v7 {key} invalid"
+            )
+    return refresh
+
+def _padataset_scientific_dual_lane_workflow_refresh_v8(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v8 requires v7 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v8",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V7_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v8 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v8",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v8 {key} invalid"
+            )
+    return refresh
+
+
+
+def _padataset_scientific_dual_lane_workflow_refresh_v9(
+    prior_refresh: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V9_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_refresh is None:
+        raise ReconcileError(
+            "PADataset lane-B workflow refresh v9 requires v8 predecessor"
+        )
+
+    refresh = _load_override_receipt(
+        PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V9_ACTIVE_RECEIPT,
+        "active PADataset lane-B workflow refresh v9",
+    )
+    prior_raw = PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V9",
+        "phase": "ACTIVE",
+        "prior_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
+        "workflow_path": PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH,
+        "previous_workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V8_BLOB,
+        "workflow_blob_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V9_BLOB,
+        "padataset_main_sha":
+            PADATASET_SCIENTIFIC_DUAL_WORKFLOW_REFRESH_V9_PAD_MAIN,
+        "previous_controller_policy_sha256":
+            prior_refresh["controller_policy_sha256"],
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v9 binding mismatch: {key}"
+            )
+    _require_source_head(
+        refresh.get("source_head"),
+        "PADataset lane-B workflow refresh v9",
+    )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-f]{64}", value) is None:
+            raise ReconcileError(
+                f"PADataset lane-B workflow refresh v9 {key} invalid"
+            )
+    return refresh
+
+
 
 
 def _verify_padataset_scientific_effective_state(
@@ -1007,6 +1803,7 @@ def _verify_padataset_scientific_dual_lane_effective_state(
     scientific_active: dict[str, Any],
     workflow_refresh: dict[str, Any] | None,
     dual_active: dict[str, Any],
+    dual_workflow_refresh: dict[str, Any] | None,
 ) -> None:
     root_policy = _json(V3_CONFIG_ROOT / "root-policy.json")
     if root_policy.get("root_policy_sha256") != dual_active["root_policy_sha256"]:
@@ -1153,18 +1950,25 @@ def _verify_padataset_scientific_dual_lane_effective_state(
         / "controllers"
         / f"{PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS}.json"
     )
-    if (
-        controller_b.get("controller_policy_sha256")
-        != dual_active["target_controller_policy_sha256"]
-    ):
+    expected_b_policy_sha = (
+        dual_workflow_refresh["controller_policy_sha256"]
+        if dual_workflow_refresh is not None
+        else dual_active["target_controller_policy_sha256"]
+    )
+    if controller_b.get("controller_policy_sha256") != expected_b_policy_sha:
         raise ReconcileError("PADataset lane B controller policy digest mismatch")
     workflows_b = controller_b.get("trusted_workflows")
+    expected_b_blob = (
+        dual_workflow_refresh["workflow_blob_sha"]
+        if dual_workflow_refresh is not None
+        else PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB
+    )
     if (
         not isinstance(workflows_b, list)
         or len(workflows_b) != 1
         or workflows_b[0].get("route_id") != "scientific-single-gpu-2"
         or workflows_b[0].get("path") != PADATASET_SCIENTIFIC_DUAL_WORKFLOW_PATH
-        or workflows_b[0].get("blob_sha") != PADATASET_SCIENTIFIC_DUAL_WORKFLOW_BLOB
+        or workflows_b[0].get("blob_sha") != expected_b_blob
     ):
         raise ReconcileError("PADataset lane B workflow binding drift")
 
@@ -1623,6 +2427,38 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_override is not None
         else None
     )
+    scientific_workflow_refresh_v2 = (
+        _padataset_scientific_workflow_refresh_v2(
+            scientific_workflow_refresh
+        )
+        if scientific_override is not None
+        else None
+    )
+    scientific_workflow_refresh_v3 = (
+        _padataset_scientific_workflow_refresh_v3(
+            scientific_workflow_refresh_v2
+        )
+        if scientific_override is not None
+        else None
+    )
+    scientific_workflow_refresh_v4 = (
+        _padataset_scientific_workflow_refresh_v4(
+            scientific_workflow_refresh_v3
+        )
+        if scientific_override is not None
+        else None
+    )
+    scientific_workflow_effective_refresh = (
+        scientific_workflow_refresh_v3
+        if scientific_workflow_refresh_v3 is not None
+        else (
+            scientific_workflow_refresh_v2
+            if scientific_workflow_refresh_v2 is not None
+            else scientific_workflow_refresh
+        )
+    )
+    if scientific_workflow_refresh_v4 is not None:
+        scientific_workflow_effective_refresh = scientific_workflow_refresh_v4
     scientific_dual_lane = (
         _padataset_scientific_dual_lane_override(
             scientific_override,
@@ -1631,6 +2467,98 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_override is not None
         else None
     )
+    scientific_dual_workflow_refresh = (
+        _padataset_scientific_dual_lane_workflow_refresh(scientific_dual_lane)
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_workflow_refresh_v2 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v2(
+            scientific_dual_workflow_refresh
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_workflow_refresh_v3 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v3(
+            scientific_dual_workflow_refresh_v2
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_workflow_refresh_v4 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v4(
+            scientific_dual_workflow_refresh_v3
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_workflow_refresh_v5 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v5(
+            scientific_dual_workflow_refresh_v4
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_workflow_refresh_v6 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v6(
+            scientific_dual_workflow_refresh_v5
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_workflow_refresh_v7 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v7(
+            scientific_dual_workflow_refresh_v6
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_workflow_refresh_v8 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v8(
+            scientific_dual_workflow_refresh_v7
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_workflow_refresh_v9 = (
+        _padataset_scientific_dual_lane_workflow_refresh_v9(
+            scientific_dual_workflow_refresh_v8
+        )
+        if scientific_dual_lane is not None
+        else None
+    )
+    scientific_dual_effective_refresh = (
+        scientific_dual_workflow_refresh_v8
+        if scientific_dual_workflow_refresh_v8 is not None
+        else (
+            scientific_dual_workflow_refresh_v7
+            if scientific_dual_workflow_refresh_v7 is not None
+            else (
+                scientific_dual_workflow_refresh_v6
+                if scientific_dual_workflow_refresh_v6 is not None
+                else (
+                    scientific_dual_workflow_refresh_v5
+                    if scientific_dual_workflow_refresh_v5 is not None
+                    else (
+                        scientific_dual_workflow_refresh_v4
+                        if scientific_dual_workflow_refresh_v4 is not None
+                        else (
+                            scientific_dual_workflow_refresh_v3
+                            if scientific_dual_workflow_refresh_v3 is not None
+                            else (
+                                scientific_dual_workflow_refresh_v2
+                                if scientific_dual_workflow_refresh_v2 is not None
+                                else scientific_dual_workflow_refresh
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+    if scientific_dual_workflow_refresh_v9 is not None:
+        scientific_dual_effective_refresh = scientific_dual_workflow_refresh_v9
     scientific_overrides = (
         scientific_override["managed_artifact_overrides"]
         if scientific_override is not None
@@ -1801,7 +2729,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             )
         expected_addition_sha = binding["sha256"]
         if (
-            scientific_workflow_refresh is not None
+            scientific_workflow_effective_refresh is not None
             and destination
             == str(
                 V3_CONFIG_ROOT
@@ -1809,7 +2737,7 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
                 / f"{PADATASET_SCIENTIFIC_TARGET_CLASS}.json"
             )
         ):
-            expected_addition_sha = scientific_workflow_refresh[
+            expected_addition_sha = scientific_workflow_effective_refresh[
                 "controller_policy_file_sha256"
             ]
         if _sha256(path.read_bytes()) != expected_addition_sha:
@@ -1827,7 +2755,20 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
             raise ReconcileError(
                 f"PADataset scientific dual-lane managed addition mode drift: {path}"
             )
-        if _sha256(path.read_bytes()) != binding["sha256"]:
+        expected_addition_sha = binding["sha256"]
+        if (
+            scientific_dual_effective_refresh is not None
+            and destination
+            == str(
+                V3_CONFIG_ROOT
+                / "controllers"
+                / f"{PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS}.json"
+            )
+        ):
+            expected_addition_sha = scientific_dual_effective_refresh[
+                "controller_policy_file_sha256"
+            ]
+        if _sha256(path.read_bytes()) != expected_addition_sha:
             raise ReconcileError(
                 f"PADataset scientific dual-lane managed addition digest drift: {path}"
             )
@@ -1954,14 +2895,17 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_dual_lane is not None:
             _verify_padataset_scientific_dual_lane_effective_state(
                 scientific_override,
-                scientific_workflow_refresh,
+                scientific_workflow_effective_refresh,
                 scientific_dual_lane,
+                scientific_dual_effective_refresh,
             )
         else:
             _verify_padataset_scientific_effective_state(
                 scientific_override,
-                scientific_workflow_refresh,
+                scientific_workflow_effective_refresh,
             )
+
+
 
     if workspace_codex_route is not None:
         _verify_workspace_control_codex_route_effective_state(
