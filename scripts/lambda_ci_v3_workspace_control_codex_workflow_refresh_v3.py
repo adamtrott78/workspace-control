@@ -31,8 +31,8 @@ TARGET_CLASS = candidate.WORKSPACE_CONTROL_CODEX_TARGET_CLASS
 TARGET_UNIT = f"workspace-ci-v3-controller@{TARGET_CLASS}.service"
 TARGET_POLICY = pathlib.Path(candidate.WORKSPACE_CONTROL_CODEX_CONTROLLER_DESTINATION)
 ACTIVE_ROUTE = candidate.WORKSPACE_CONTROL_CODEX_ROUTE_ACTIVE_RECEIPT
-PRIOR_REFRESH_ACTIVE = candidate.WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT
-REFRESH_ACTIVE = candidate.WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT
+PRIOR_REFRESH_ACTIVE = candidate.WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT
+REFRESH_ACTIVE = candidate.WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT
 INSTALLED_RECONCILER = candidate.RECONCILER_SCRIPT
 RECONCILER_OVERRIDE = candidate.RECONCILER_OVERRIDE_ACTIVE_RECEIPT
 PROVISIONER_UNIT = "workspace-ci-v3-provisioner.service"
@@ -523,7 +523,7 @@ def require_predecessor_unchanged(
     if ACTIVE_ROUTE.read_bytes() != active_route_raw:
         raise RefreshError("active Codex route receipt changed before mutation")
     if PRIOR_REFRESH_ACTIVE.read_bytes() != prior_refresh_raw:
-        raise RefreshError("Codex workflow refresh v1 receipt changed before mutation")
+        raise RefreshError("Codex workflow refresh v2 receipt changed before mutation")
     if TARGET_POLICY.read_bytes() != policy_raw:
         raise RefreshError("target controller policy changed before mutation")
     if INSTALLED_RECONCILER.read_bytes() != reconciler_raw:
@@ -579,7 +579,7 @@ def verify_predecessor_restored(
     if ACTIVE_ROUTE.read_bytes() != active_route_raw:
         raise RefreshError("rollback active-route receipt mismatch")
     if PRIOR_REFRESH_ACTIVE.read_bytes() != prior_refresh_raw:
-        raise RefreshError("rollback prior refresh receipt mismatch")
+        raise RefreshError("rollback v2 refresh receipt mismatch")
     if TARGET_POLICY.read_bytes() != policy_raw:
         raise RefreshError("rollback target policy bytes mismatch")
     if INSTALLED_RECONCILER.read_bytes() != reconciler_raw:
@@ -667,7 +667,7 @@ def rollback_after_mutation(
     if ACTIVE_ROUTE.read_bytes() != active_route_raw:
         raise RefreshError("rollback active-route receipt changed")
     if PRIOR_REFRESH_ACTIVE.read_bytes() != prior_refresh_raw:
-        raise RefreshError("rollback prior refresh receipt changed")
+        raise RefreshError("rollback v2 refresh receipt changed")
 
     candidate.verify_installed(BASE_MANIFEST)
     run_systemctl("start", TARGET_UNIT)
@@ -743,7 +743,7 @@ def main() -> int:
         or current_policy.get("controller_policy_sha256")
         != prior.get("controller_policy_sha256")
     ):
-        raise RefreshError("live target policy does not match refresh v1 receipt")
+        raise RefreshError("live target policy does not match refresh v2 receipt")
     refreshed_policy = build_refreshed_policy(current_policy)
     refreshed_policy_raw = canonical(refreshed_policy)
 
