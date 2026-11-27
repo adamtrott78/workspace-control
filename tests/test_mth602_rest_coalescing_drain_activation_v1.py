@@ -31,6 +31,14 @@ def test_resume_prequiesced_drain_requires_explicit_restore_set():
 
     assert "--resume-prequiesced-active-controller" in boot
     assert "DRAIN_RESUME_PREQUIESCED" in boot
-    assert "resume-prequiesced requires every controller unit inactive" in boot
+    assert "resume topology mismatch" in boot
     assert "PADataset scientific lane A is not in restore set" in boot
     assert '"active_controller_set_before": active_before' in boot
+
+
+def test_prequiesced_restart_counter_is_not_continuity_checked():
+    repair = REPAIR.read_text()
+
+    assert 'if state.get("ActiveState")=="active":' in repair
+    assert "restart-counter continuity is not meaningful here" in repair
+    assert "controller restart counter regressed" in repair
