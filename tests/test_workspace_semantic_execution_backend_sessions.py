@@ -70,6 +70,8 @@ class PersistentExecutorSessionBrokerTests(unittest.TestCase):
         self.assertEqual(binding.session_id, "chat-session-a")
         acknowledged = broker.acknowledge(slot_id="instant-slot-1", expected_session_generation=0, process_id="P1", process_generation=0, ack_id="ack:P1")
         self.assertEqual(acknowledged.state, ExecutorSessionState.READY)
+        self.assertEqual(acknowledged.last_ack_packet_sha256, packet_hash("P1"))
+        self.assertEqual(acknowledged.last_ack_session_generation, 0)
         rebound = broker.bind(profile=profile, slot_id="instant-slot-1", expected_session_generation=0, process_id="P2", process_generation=0, packet_sha256=packet_hash("P2"))
         self.assertEqual(rebound.session_id, "chat-session-a")
         self.assertEqual(rebound.session_generation, 0)
@@ -85,6 +87,8 @@ class PersistentExecutorSessionBrokerTests(unittest.TestCase):
             broker.acknowledge(slot_id="slot", expected_session_generation=0, process_id="P1", process_generation=0, ack_id="late-old-ack")
         replacement=broker.replace(slot_id="slot", expected_session_generation=1, session_id="session-new")
         self.assertEqual(replacement.state, ExecutorSessionState.READY)
+        self.assertIsNone(replacement.last_ack_packet_sha256)
+        self.assertIsNone(replacement.last_ack_session_generation)
         rebound=broker.bind(profile=profile, slot_id="slot", expected_session_generation=1, process_id="P1", process_generation=0, packet_sha256=packet_hash("P1"))
         self.assertEqual(rebound.session_id, "session-new")
 

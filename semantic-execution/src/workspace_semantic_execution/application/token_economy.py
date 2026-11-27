@@ -20,6 +20,7 @@ class TokenEconomyRequest:
     optional_refs: tuple[str, ...] = ()
     delta_refs: tuple[str, ...] = ()
     base_checkpoint: str | None = None
+    base_packet_sha256: str | None = None
     session_has_base_checkpoint: bool = False
     recovery_required: bool = False
     broad_context_required: bool = False
@@ -68,6 +69,7 @@ class TokenEconomyPlanner:
                 context=ContextPlan(
                     context_mode=ContextMode.REF_ONLY,
                     base_checkpoint=request.base_checkpoint,
+                    base_packet_sha256=request.base_packet_sha256,
                     required_refs=request.required_refs,
                     optional_refs=(),
                     omitted_optional_refs=request.optional_refs,
@@ -91,6 +93,7 @@ class TokenEconomyPlanner:
                 context=ContextPlan(
                     context_mode=ContextMode.REF_ONLY,
                     base_checkpoint=request.base_checkpoint,
+                    base_packet_sha256=request.base_packet_sha256,
                     required_refs=request.required_refs,
                     optional_refs=(),
                     omitted_optional_refs=request.optional_refs,
@@ -156,6 +159,7 @@ class TokenEconomyPlanner:
             context=ContextPlan(
                 context_mode=context_mode,
                 base_checkpoint=request.base_checkpoint,
+                base_packet_sha256=request.base_packet_sha256,
                 required_refs=request.required_refs,
                 optional_refs=selected_optional,
                 delta_refs=delta_refs,
@@ -175,6 +179,7 @@ class TokenEconomyPlanner:
             }
             and request.session_has_base_checkpoint
             and request.base_checkpoint
+            and request.base_packet_sha256
         ):
             return ContextMode.DELTA
         if request.broad_context_required:

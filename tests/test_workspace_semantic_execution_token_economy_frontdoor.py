@@ -78,12 +78,14 @@ class TokenEconomyPlannerTests(unittest.TestCase):
             TokenEconomyRequest(
                 session_mode=SessionMode.PERSISTENT_CHAT,
                 base_checkpoint="checkpoint:C42",
+                base_packet_sha256="a" * 64,
                 session_has_base_checkpoint=True,
                 delta_refs=("evidence://new-1",),
                 optional_refs=("evidence://old-bulk",),
             )
         )
         self.assertEqual(result.context.context_mode, ContextMode.DELTA)
+        self.assertEqual(result.context.base_packet_sha256, "a" * 64)
         self.assertEqual(result.context.delta_refs, ("evidence://new-1",))
         self.assertEqual(
             result.context.omitted_optional_refs,
@@ -93,6 +95,17 @@ class TokenEconomyPlannerTests(unittest.TestCase):
             result.budget.communication_mode,
             CommunicationMode.MACHINE_MINIMAL,
         )
+
+    def test_persistent_session_without_exact_base_packet_stays_ref_only(self) -> None:
+        result = self.planner.plan(
+            TokenEconomyRequest(
+                session_mode=SessionMode.PERSISTENT_CHAT,
+                base_checkpoint="checkpoint:C42",
+                session_has_base_checkpoint=True,
+                delta_refs=("evidence://new-1",),
+            )
+        )
+        self.assertEqual(result.context.context_mode, ContextMode.REF_ONLY)
 
     def test_recovery_requires_full_reconstructable_context(self) -> None:
         result = self.planner.plan(

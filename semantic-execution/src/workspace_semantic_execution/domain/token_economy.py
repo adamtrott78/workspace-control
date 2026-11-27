@@ -61,6 +61,7 @@ class TokenBudget:
 class ContextPlan:
     context_mode: ContextMode
     base_checkpoint: str | None = None
+    base_packet_sha256: str | None = None
     required_refs: tuple[str, ...] = ()
     optional_refs: tuple[str, ...] = ()
     delta_refs: tuple[str, ...] = ()
