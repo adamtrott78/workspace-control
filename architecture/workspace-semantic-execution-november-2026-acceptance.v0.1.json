@@ -1,0 +1,520 @@
+{
+  "schema_version": 1,
+  "plan_id": "workspace-semantic-execution-november-2026-integrated-v0",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "deadline": "2026-11-30",
+  "objective": "By 2026-11-30, Workspace Control can accept a substantial high-level task, recursively decompose it, route bounded work to deterministic tools, ChatGPT Instant, and subscription Codex as appropriate, execute and recover durably, validate consequential results, synthesize a final result, and account for scarce model usage without paid API fallback or weakened authority.",
+  "milestone": {
+    "internal_vertical_slice_deadline": "2026-11-23",
+    "final_acceptance_date": "2026-11-30",
+    "proving_workflow": "Research Engine / research-iterate"
+  },
+  "lanes": [
+    {
+      "id": "A",
+      "name": "Reasoning Economy / Codex",
+      "goal": "Subscription-only Codex execution, telemetry, economics accounting, calibration, and weekly allowance governor."
+    },
+    {
+      "id": "B",
+      "name": "Semantic orchestration kernel",
+      "goal": "Durable recursive task-tree execution, routing, waits, validation, recovery, and synthesis."
+    },
+    {
+      "id": "C",
+      "name": "Instant Chat execution",
+      "goal": "Production semantic work dispatched to persistent ChatGPT Instant sessions through the accepted low-attention Operator Bridge, with a persistent Instant front door as the primary human task/status/decision interface."
+    },
+    {
+      "id": "D",
+      "name": "Integrated acceptance",
+      "goal": "Research Engine workload proves the complete mixed-executor stack under faults and budget constraints."
+    }
+  ],
+  "status_values": [
+    "PENDING",
+    "PARTIAL",
+    "PASS",
+    "BLOCKED"
+  ],
+  "requirements": [
+    {
+      "id": "ORCH-01",
+      "status": "PASS",
+      "requirement": "Durable domain kernel covers WorkItem/ReasoningProcess/Attempt/Lease/Event/WaitCondition/RoutingDecision/ExecutorSession/ValidationResult semantics and fails closed on unknown transitions.",
+      "evidence": [
+        "Production domain kernel and state-machine tests already exist; integrated real-workflow proof remains.",
+        "E3-A10 supplies the previously missing integrated real-workflow proof: the production durable kernel carried the live research-iterate graph through decomposition, routing, executor-session replacement, durable events, validation and terminal completion, with unknown/stale transitions still fail-closed by the validated kernel contracts."
+      ]
+    },
+    {
+      "id": "ORCH-02",
+      "status": "PASS",
+      "requirement": "Recursive TOO_LARGE decomposition creates child work while preserving inherited constraints, provenance, validator contracts, authority refs, and dependency edges.",
+      "evidence": [
+        "Production WorkContract persists objective plus mandatory constraints, provenance refs, authority refs, validator contracts and output-schema refs.",
+        "Semantic Execution #129 proves two-level TOO_LARGE decomposition and deterministic inheritance/merge of all non-droppable parent obligations.",
+        "Direct tampering that drops inherited obligations fails global DomainKernel validation.",
+        "Independent leaves complete and fan-in resumes only after every child is COMPLETED from passing validation."
+      ]
+    },
+    {
+      "id": "ORCH-03",
+      "status": "PASS",
+      "requirement": "TOO_LARGE/decomposable and INTRINSICALLY_DIFFICULT/escalation-required work are distinct durable outcomes.",
+      "evidence": [
+        "WorkDisposition is durable and distinguishes UNCLASSIFIED, EXECUTABLE, TOO_LARGE and INTRINSICALLY_DIFFICULT.",
+        "TOO_LARGE permits recursive decomposition; INTRINSICALLY_DIFFICULT releases the current lease and forbids decomposition.",
+        "A stronger executor may reclaim intrinsically difficult work but contracted effects remain impossible until explicit EXECUTABLE reclassification.",
+        "Semantic Execution #129 explicitly validates the distinction."
+      ]
+    },
+    {
+      "id": "ORCH-04",
+      "status": "PASS",
+      "requirement": "CAS/generation fencing, leases, stale-worker rejection, retry/idempotency and multi-worker recovery work under the production kernel.",
+      "evidence": [
+        "Existing runtime/fault tests cover stale generations, executor loss, duplicate events, crash boundaries and waits.",
+        "Recursive dependency-wait recovery preserves generation-fenced WorkContract and waits until both validated leaves complete.",
+        "Semantic #152 proves manual Instant dispatch atomically owns the process lease and stale recovered worker-result publications cannot mutate current generations; exact duplicate publication is idempotent.",
+        "Semantic #160 forces process/session recovery after Instant local-prepared: old generation action becomes STALE, late old candidate is rejected pre-mutation, replacement generation completes from durable state.",
+        "Semantic #163 adds durable generation-bound scheduler specs, duplicate-plan rejection, PostgreSQL scheduler restart, duplicate candidate idempotency and pre-mutation observation mismatch rejection.",
+        "Semantic #167 proves production scheduler recovery cannot reuse a stale generation plan; old candidate delivery is non-mutating and explicit replacement session/generation is required.",
+        "E3-A10 live fault injection proves the production kernel's generation fencing and recovery path end-to-end: generation-0 worker/process/session was fenced, stale candidate adcb82b2... was rejected without mutation, PostgreSQL state was rehydrated, and generation-1 replacement completed. Existing production tests already cover leases, duplicate/idempotent delivery, retries and multi-worker/CAS behavior."
+      ]
+    },
+    {
+      "id": "ORCH-05",
+      "status": "PASS",
+      "requirement": "WAITING_EXTERNAL consumes zero model reasoning and resumes from durable events rather than LLM polling.",
+      "evidence": [
+        "RuntimeCoordinator event-ledger wait/wake semantics exist and are tested.",
+        "Semantic #152 proves a durable worker WAIT_EXTERNAL result releases the process lease and enters the event wait without a reasoning poll.",
+        "Semantic #163 ProductionSchedulerTests prove WAITING_EXTERNAL is never selected for dispatch; repeated scheduler cycles leave its wait key/reasoning_quanta unchanged and perform no scheduler state mutation. Candidate/dependency wakeups are event-driven."
+      ]
+    },
+    {
+      "id": "ORCH-06",
+      "status": "PASS",
+      "requirement": "Worker packets are deterministically compiled from typed durable state; routine packet construction requires no LLM.",
+      "evidence": [
+        "SemanticPacketCompiler canonical hashing was previously validated in isolation.",
+        "Coordinated Research Engine read-only slice at workspace-control@34028182aaf1dc56d40cc607f8561c2337e16bf8 used the deterministic packet compiler inside the actual router -> authority -> effect -> validator flow.",
+        "Semantic Execution #100 explicitly passed deterministic packet-hash reproducibility in CoordinatedResearchEngineReadOnlySliceTests."
+      ]
+    },
+    {
+      "id": "ORCH-07",
+      "status": "PARTIAL",
+      "requirement": "Executor registry is model/surface agnostic and supports deterministic, persistent-chat, machine, batch, Codex, frontier, and human profiles.",
+      "evidence": [
+        "Executor profile/router model exists; integrated Instant/Codex adapters remain.",
+        "Coordinated slice selected a deterministic repository executor through generic ExecutionRequirement/ExecutorRegistry routing rather than a Research-Engine-specific scheduler branch.",
+        "Semantic #158 proves the same generic ExecutorDispatchCoordinator selects persistent Instant or deterministic exact-source execution from typed requirements; no model-name scheduler branch is used.",
+        "ProductionSchedulerService now consumes durable ExecutionRequirement and delegates to generic ExecutorDispatchCoordinator; it contains no model-name branch."
+      ]
+    },
+    {
+      "id": "ORCH-08",
+      "status": "PASS",
+      "requirement": "Persistent session broker safely reuses/rotates sessions and resumes from durable state after session loss.",
+      "evidence": [
+        "ExecutorSession is durable control state with independent slot/session generation and no authority fields.",
+        "Semantic Execution #132 proves healthy persistent reuse, explicit loss/context replacement, stale session-generation rejection, automatic process-recovery fencing and deterministic packet reconstruction into replacement sessions.",
+        "Stateless machine executors allocate no session.",
+        "PostgreSQL integration proves bound session state survives adapter recreation and is fenced durably on process recovery.",
+        "Semantic #160 end-to-end replacement test proves stale pre-loss action fencing plus deterministic packet reconstruction into session_generation=1 and normal completion."
+      ]
+    },
+    {
+      "id": "SAFE-01",
+      "status": "PASS",
+      "requirement": "Model output may create CandidateAction but cannot mint or widen execution authority; only authority-owned policy may produce executable ActionSpec.",
+      "evidence": [
+        "DomainKernel.compile_action_spec requires exact AuthorityDecision=ALLOW bound to action/process/generation/target.",
+        "Coordinated Research Engine slice proved UNKNOWN authority produces no state transition and no repository effect.",
+        "Injected generation change after routing/packet planning was fenced before effect execution."
+      ]
+    },
+    {
+      "id": "SAFE-02",
+      "status": "PASS",
+      "requirement": "Every real effect is idempotent, receipt-bound, independently postcondition-validated, and repairable without duplicate effects.",
+      "evidence": [
+        "EffectReceipt, independent validation, duplicate-effect and crash-after-effect tests exist.",
+        "Coordinated slice records EffectReceipt before terminal proposal, independently rereads the exact source, completes only on validator PASS, returns repair-ready on changed bytes, and preserves a single effect for exact duplicate receipt.",
+        "Worker RESULT does not complete work directly: intake records a durable effect/reference, proposes terminal state, and requires an independent validator PASS; validator failure returns repair-ready.",
+        "E3-A10 live execution traversed the production deterministic effect and worker-result intake paths without duplicate effects: exact-source evidence was independently validated, stale generation-0 result was non-mutating, replacement result was accepted once, and the workflow completed only after validated durable intake."
+      ]
+    },
+    {
+      "id": "CODEX-01",
+      "status": "PASS",
+      "requirement": "Workspace Control Codex runtime is live through an approved v3 control-small route while preserving PR #627 reserved-capacity invariants.",
+      "evidence": [
+        "Inert bootstrap workflow and static contracts are validated; promotion is gated on PR #627 lineage.",
+        "Historical PR #627 exact head acd420758eb0124646988ee8776939572c88a82d passed authoritative self-hosted validation and its separate Phase-B root/operator activation completed live: host max=3, PADataset max=2, Workspace Control max=1, one reserved CPU-only Workspace Control slot, dual GPU lanes isolated, DUAL_SCIENCE_PLUS_CONTROL_READY=1.",
+        "Historical PR #630 exact head 9d206a8f608ed86b416473e0ff66fabd99fea884 passed Workspace Control Validation #2790 with inert Codex bootstrap/static contracts; it performed no live model inference or root-policy mutation.",
+        "A fresh current-main composition c5605192fac09d50ea8f4012670c83741dd26239 overlaid the exact validated #627/#630 lineage onto main without touching the four non-overlapping main-only commits. Workspace Control #3329 SUCCESS; promotion PR #698 merged as main 5cf2821c2aac415cba72ff3798f89afa01052cbf.",
+        "CODEX-01 remains PARTIAL only until the now-default-branch lambda-ci-workspace-control-codex-bootstrap workflow is run in zero-inference mode and the live control-small runtime/receipt is verified.",
+        "First live activation attempt against main@1836ff501afc158cdfc1c7684100ffbe7b8ca4ab failed during preflight verify_installed with active PADataset scientific dual-lane trusted_workflow_blob_sha mismatch. Failure occurred before operator authority creation/consumption and before any controller/policy/runtime mutation.",
+        "The mismatch was traced to a legitimate newer accepted PADataset scientific workflow-refresh lineage rather than corruption or unauthorized drift.",
+        "Repair PR #703 rebased the Codex route activation verifier on the accepted scientific refresh lineage while preserving exact scientific workflow attestation; exact head fb14873f4bd2818cad6fc2f73402dc76ce76dee6 passed Workspace Control Validation #3347.",
+        "PR #703 merged as main cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277. Live workspace-control-control-small-v1 controller was subsequently inspected read-only and remains active/running; no failed-attempt mutation is present.",
+        "Remaining CODEX-01 live gate is now exactly one fresh root/operator activation against main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277, followed by a fresh zero-inference bootstrap receipt. The stale pre-repair authority/head must not be reused.",
+        "A second live activation retry against repaired main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277 failed during candidate.verify_installed() with `PADataset scientific dual-lane managed artifact digest drift: /etc/workspace-ci/v3/compatibility-matrix.json`. Because verify_installed runs before authority creation/consumption, the retry again performed no controller stop, policy mutation, or route activation.",
+        "Root cause was a missing accepted runtime390 precedence layer: live runtime390 owns shared managed root-policy/executor-actions/compatibility-matrix/deployment-overlay artifacts after the original dual-lane receipt, while lane-A v4/lane-B v9 are later controller-workflow trust successors.",
+        "Historical PR #656 head 6172553a389fee392cc30b215f9380ba2725bae8 already encoded the correct precedence: runtime390 receipt bound to frozen lane-A v3 + lane-B v8 predecessors, with runtime390 overrides above dual/scientific/production managed-artifact digests.",
+        "Repair PR #706 restored that accepted runtime390 precedence into current main and additionally composes Workspace Control Codex overlay ownership above runtime390. Exact head 861503d5776fc53714c52f5cae9d22fb4ee9f31f passed Workspace Control Validation #3354.",
+        "PR #706 merged as main fe0283578789a5de64a4a2404a4927711ac35132. Read-only post-failure inspection shows workspace-control-control-small-v1 and workspace-ci-v3-provisioner remain active/running with unchanged PIDs from the preceding inspection.",
+        "A third live activation retry against main@fe0283578789a5de64a4a2404a4927711ac35132 passed the repaired science/runtime390 preflight but failed later in build_candidate_policy() with `RouteActivationError: Codex route candidate changed root-policy authority`. This call occurs before authorization receipt creation/consumption and before any controller stop or policy mutation.",
+        "Root-cause analysis compared every root-policy-affecting repository input between accepted PR #627 head acd420758eb0124646988ee8776939572c88a82d and fe0283578789a5de64a4a2404a4927711ac35132. Host resource policy, upstream pins, execution contracts, systemd profiles, workload policy, project registry, and both project manifests were root-equivalent; only the Codex route entries were added, and routes are excluded from root_policy_sha256.",
+        "The digest mismatch therefore came from comparing the repo's pre-runtime390 base root to the accepted effective runtime390 live root. The runtime390 receipt explicitly changes only the two PADataset scientific root envelopes while preserving Workspace Control control-small authority.",
+        "Repair PR #709 replaced broken whole-digest equality with exact runtime390 lineage proof: candidate root must equal receipt predecessor; installed root must equal receipt successor; host resources/upstream pins must match; changed envelope set must be exactly scientific lane A+B; workspace-control-control-small-v1 envelope must remain identical. No ignore/accept-any-digest path exists.",
+        "PR #709 exact head 99fba1c908377596de19062fca48befb7c8d406e passed Workspace Control Validation #3359 and merged as main 17345570329cfa31022d58ab8110c4df743c4ca9.",
+        "Read-only post-failure inspection confirms workspace-ci-v3-controller@workspace-control-control-small-v1.service remains loaded, active and running (MainPID 2411495); the failed retry did not mutate live route/controller state.",
+        "A fourth live activation retry against main@17345570329cfa31022d58ab8110c4df743c4ca9 passed the repaired science/runtime390 managed-artifact preflight but failed while constructing the route candidate with `RouteActivationError: runtime390 root authority binding mismatch: previous_root_policy_sha256`. The failure happened inside build_candidate_policy() before the inline launcher created/consumed an operator authority and before any controller stop or policy mutation.",
+        "Historical runtime390 activation at source a419a3caacec4c3c79091bc8dd2bf9f5d5c8ea12 records its previous_root_policy_sha256 from the live dual-lane predecessor at that historical transaction. Requiring today's compiled root digest to equal that historical predecessor was therefore invalid after later legitimate control-plane evolution.",
+        "Repair PR #712 makes Codex route activation controller-local: candidate.verify_installed() remains the full effective-generation/root attestation; the route candidate is derived from the installed workspace-control-control-small-v1 controller policy; only the exact compiled codex-bootstrap trusted-workflow row plus derived controller_policy_sha256 may change; the installed control_plane_generation_sha256 is preserved; root-policy.json is not in the mutation set.",
+        "The controller-local candidate separately re-proves installed control-small root bindings, max_runners=1, project_max_active_runners=1 and zero exclusive-resource claims, and fails closed on any control-small root/controller structural drift.",
+        "Focused hostile-worker receipt job-18c14452-8d75-4738-adeb-a9d1d74e2c49 passed 34/34 activation/runtime390/reconciler tests; exact PR #712 head ad294631746f2b1b9eba9cb2d2b8424a51fc999b passed Workspace Control Validation #3363 and merged as main 57831303912b899fd48ee54b0738283acc9c8303.",
+        "Read-only post-failure inspection still shows workspace-ci-v3-controller@workspace-control-control-small-v1.service loaded, active/running with MainPID 2411495. No failed-attempt mutation is present.",
+        "A fifth live activation attempt against main@57831303912b899fd48ee54b0738283acc9c8303 progressed past preflight and candidate construction, created one-shot authority 7cdff1d6-cdd8-4e07-8bb1-353dab45aa09, consumed it, stopped the target controller, staged candidate controller/overlay/active-route/reconciler artifacts, then failed during candidate.verify_installed() with `Workspace Control Codex route root-policy digest mismatch`.",
+        "The failure exposed a receipt-binding defect: controller-local candidate construction correctly stopped reconstructing historical runtime390 root authority, but expected_authority/active-route transaction metadata still bound `root_policy_sha256` to the base install-manifest digest rather than the already-attested effective installed root digest.",
+        "The activation helper's BaseException rollback restores the previous controller policy, deployment overlay, reconciler override, installed reconciler, removes the active route receipt, restarts the target controller, marks the transaction ROLLED_BACK_PREVIOUS_ROUTE_STATE, then re-raises. Read-only post-failure inspection shows workspace-control-control-small-v1 active/running (MainPID 4010013), consistent with completed rollback.",
+        "Repair PR #715 separates base and effective root identities: `base_root_policy_sha256` remains bound to the install manifest, while authority/active route/transaction `root_policy_sha256` binds the effective installed root already accepted by verify_installed(). The reconciler requires base provenance separately and still compares the effective receipt root digest against `/etc/workspace-ci/v3/root-policy.json`.",
+        "PR #715 exact head 9a6554a93681a423f358f0ae7efa461f1d23c836 passed Workspace Control Validation #3368 and merged as main de3d0642b3b300859c2508f829d5d7ca44eca77c.",
+        "Because the fifth attempt consumed its authority, authorization 7cdff1d6-cdd8-4e07-8bb1-353dab45aa09 is non-reusable. The next retry requires a fresh one-shot authority against exact main@de3d0642b3b300859c2508f829d5d7ca44eca77c.",
+        "Live Workspace Control Codex bootstrap-route activation completed successfully against exact main@de3d0642b3b300859c2508f829d5d7ca44eca77c.",
+        "The one-shot operator authority b95c06d2-f43a-4871-acf5-d128b22d656c was created for ACTIVATE_WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_V1 and consumed by the reviewed activation transaction; it is non-reusable.",
+        "Activation emitted WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_ACTIVATION=PASS and transaction receipt /var/lib/workspace-ci/v3/workspace-control/codex-bootstrap-route/transactions/activation-657a60ba-aa7f-4805-89a1-2f59ff26bdcf/receipt.json.",
+        "This is the first accepted live activation of the additive /workspace-codex-bootstrap route on the existing workspace-control-control-small-v1 controller; the activation transaction preserves existing root/GPU/capacity authority and the control-validation route.",
+        "CODEX-01 remains PARTIAL only until a fresh zero-inference bootstrap proves the live control-small route plus ChatGPT-subscription authentication/no-API-fallback receipt.",
+        "Fresh zero-inference bootstrap trigger was posted exactly once on PR #590 as issue comment 7223734551 for exact head bff5bf875cb6688b81744701aa375875d265d9a1.",
+        "Lambda CI Workspace Control Codex Bootstrap run 46036997293 / job 140634802844 completed SUCCESS; exact same-repository PR-head verification, bounded workspace-control-control-small isolation, exact checkout, checksum-pinned Codex 0.155.1 install, ChatGPT login, receipt generation and artifact upload all passed.",
+        "The redacted receipt records expected_sha=actual_sha=bff5bf875cb6688b81744701aa375875d265d9a1, runner_class=workspace-control-control-small-v1, runner_name=lambda-workspace-control-control-small-e77d9ad0a64c, runner_user=ci-workspace-control, auth_mode=chatgpt, api_key_present=false, model_inference_performed=false and gpu_visible=false.",
+        "Durable GitHub artifact 15217972982 (workspace-control-codex-bootstrap-receipt) has zip digest sha256:8704e750c20e35101e337da9b2dac87238428633267c4c639768c40d1878c8cd and expires 2027-02-25.",
+        "The workflow config forces login method chatgpt and explicitly unsets OPENAI_API_KEY before install/login/receipt; no model inference occurred, so no API-billing fallback was used."
+      ]
+    },
+    {
+      "id": "CODEX-02",
+      "status": "PARTIAL",
+      "requirement": "Live authentication proves account.type=chatgpt and planType=plus with OPENAI_API_KEY absent and no paid API fallback.",
+      "evidence": [
+        "Bootstrap run 46036997293 completed ChatGPT device authorization successfully and its redacted receipt records auth_mode=chatgpt and api_key_present=false.",
+        "The bootstrap workflow forces forced_login_method=chatgpt and unsets OPENAI_API_KEY; zero inference was performed, so no API-billing fallback was used during bootstrap.",
+        "Live account/read was not invoked by the bootstrap workflow, so account.type and planType are not yet independently observed and remain UNKNOWN for CODEX-02.",
+        "Trusted /workspace-control-validate preflight attempt used issue comment 7223978182 against exact PR #590 head 1cce63b0fe34cabc71e17dfceb288ac4bf417bde.",
+        "Lambda CI Workspace Control Validation run 46038749199 reached the reserved control-small runner and passed exact-head and isolation gates.",
+        "The zero-inference live Codex preflight failed before account/read because shutil.which('codex') returned None; bootstrap had installed Codex under the persistent Workspace Control project home, but control-validation does not expose that executable on PATH.",
+        "The failed validation also encountered unrelated shallow-checkout history-bound test errors, so the generic control-validation workflow is not a valid substitute for a dedicated account/read/calibration route.",
+        "No model inference occurred, account.type and planType were not observed, and no allowance relationship is inferred."
+      ]
+    },
+    {
+      "id": "CODEX-03",
+      "status": "PARTIAL",
+      "requirement": "Subscription-only Codex executor performs bounded jobs and returns structured JSONL-derived thread/token/tool/error telemetry.",
+      "evidence": [
+        "Codex subscription adapter and trace tests exist; Workspace Control live runtime binding remains.",
+        "Workspace #2844 full unit regression proves subscription executor auth/command/execution fixtures: ChatGPT Plus accepted; API-key, non-Plus, other-provider, signed-out and unknown auth fail closed; OPENAI_API_KEY is stripped and usage snapshots bracket execution. Live reserved-runner preflight remains pending.",
+        "Token-budgeted subscription-Codex execution path is now merged at 21ab03b57ffa0865f7a37817ba484a0d7bf49ee1. Tests prove explicit budget admission, reasoning-effort mapping, structured MACHINE_MINIMAL output, output-overrun telemetry/fail-closed behavior, subscription-only auth, API-key stripping, and usage snapshots. Live bounded execution remains the final CODEX-03 gate."
+      ]
+    },
+    {
+      "id": "CODEX-04",
+      "status": "PENDING",
+      "requirement": "Controlled actions calibrate account/usage/read and rate-limit deltas; unknown allowance mappings remain explicitly unknown.",
+      "evidence": [
+        "Calibration harness exists at 59d69e0f… and conservatively treats zero movement as below-resolution/UNKNOWN; live controlled Codex/Instant actions remain required.",
+        "Live calibration remains blocked before the first inference because the reserved-runner account/read preflight cannot currently resolve the bootstrap-installed Codex executable in the trusted control-validation execution surface. UNKNOWN remains UNKNOWN."
+      ]
+    },
+    {
+      "id": "ECON-01",
+      "status": "PARTIAL",
+      "requirement": "Every model attempt can produce a stable economics record with executor, usage, result, validator outcome, and known allowance delta.",
+      "evidence": [
+        "Usage collector and economics ledger are validated.",
+        "Frozen policy-trace adapter fadadcc0… binds exact fixture/oracle/run identity and objective validator evidence to ExecutionEconomics; allowance remains UNKNOWN unless exact comparable meter evidence exists.",
+        "Shared allowance calibration harness 59d69e0f… binds isolated actions to ordered official usage snapshots without deriving allowance from raw tokens."
+      ]
+    },
+    {
+      "id": "ECON-02",
+      "status": "PARTIAL",
+      "requirement": "Weekly burn governor projects allowance use, reserves headroom, and routes/rejects expensive work without buying credits or using API billing.",
+      "evidence": [
+        "workspace-control@65709645… implements a deterministic weekly burn governor with same-reset projection, reserved headroom, max single-action cap, explicit API-billing rejection and fail-closed unknown telemetry/calibration.",
+        "PASS requires feeding it calibrated live account allowance observations and enforcing the resulting decisions in the live proving workflow.",
+        "Dispatch admission 41d32010… enforces governor budget/missing-meter denial before process/session/action mutation and cannot widen the base executor eligibility set."
+      ]
+    },
+    {
+      "id": "ECON-03",
+      "status": "PARTIAL",
+      "requirement": "Routing promotes cheaper executors only when objective validation meets the required quality floor.",
+      "evidence": [
+        "Governor tests prove least-scarce executor selection only after validator-backed minimum sample count/quality floor; a cheaper executor below quality floor is rejected.",
+        "Holdout promotion requires matched tasks, no candidate failures, no disallowed quality regression and strictly lower scarce allowance. Real Research Engine policy traces/holdout promotion remain pending.",
+        "Claim-bearing runset gate 31f138a8… blocks policy promotion until completed protocol screening, claim-bearing scored replicates, exact source/run-set identity and hard-gate manifest exist.",
+        "Evaluator sealed-store primitive 8470957f… is 3/3 green and scored-plan head 74958b5d… fail-closes all 54 claim-bearing runs until live evaluator worker-denial/readback acceptance; no unisolated run may enter promotion evidence."
+      ]
+    },
+    {
+      "id": "ECON-04",
+      "status": "PASS",
+      "requirement": "Every model-backed attempt is admitted through a deterministic token-economy plan that constrains input context, reasoning effort class and visible output; deterministic work and WAITING_EXTERNAL consume zero model calls, and context expands only when durable evidence justifies REF_ONLY -> DELTA/SELECTED/FULL_RECOVERY.",
+      "evidence": [
+        "Candidate implementation on workspace-token-economy-frontdoor-v1 adds TokenBudget, ContextPlan, TokenEconomyObservation and TokenEconomyPlanner with REF_ONLY/DELTA/SELECTED/FULL_RECOVERY context modes, NO_MODEL/ECONOMY/STANDARD/DEEP reasoning profiles and bounded communication modes.",
+        "Planner contract assigns exactly zero model/input/output budget to WAITING_EXTERNAL and deterministic execution; persistent sessions use DELTA only when an exact durable base checkpoint is declared bound.",
+        "PASS still requires integration with actual packet materialization/executor invocation plus replay/live evidence that budgets are enforced rather than descriptive.",
+        "E4-0 exact-session DELTA/compact materialization was cleanly integrated at df04a62903899fae08af1c799c68eb9a54f35b0b after exact-head Workspace #3316 / Semantic #614 / Operator #881 SUCCESS. Durable session ACK identity gates DELTA; otherwise model packets fail closed to REF_ONLY/FULL_RECOVERY behavior.",
+        "Offline full-vs-compact replay preserves canonical packet SHA/payload identity while measuring worker-text reduction with model_calls=0; deterministic execution and WAITING_EXTERNAL retain exact zero-model budgets.",
+        "PROGRAMMATIC model dispatch and subscription Codex enforcement merged at 21ab03b57ffa0865f7a37817ba484a0d7bf49ee1 after Workspace #3323 / Semantic #622 / Operator #888 SUCCESS. Programmatic calls now require a deterministic TokenEconomyDecision; NO_MODEL cannot launch Codex; ECONOMY/STANDARD/DEEP map to Codex reasoning effort low/medium/high; MACHINE_MINIMAL uses structured output; observed output-budget overrun is retained and fails closed.",
+        "Human-assisted Instant and programmatic model invocation paths therefore both pass through Token Economy before model work; unprovisioned programmatic executors have no runnable port and fail closed."
+      ]
+    },
+    {
+      "id": "INST-01",
+      "status": "PASS",
+      "requirement": "Production semantic scheduler action/status transport replaces NoWorkOperatorActionPort and the empty workload-status provider.",
+      "evidence": [
+        "Durable OperatorAction lifecycle and Ready/SentUnconfirmed projection are validated in semantic control state.",
+        "Loopback-only backend HTTP contract and outbound HTTPS Windows IOperatorActionPort/status client are implemented and validated.",
+        "Exact action/process/session generations are fail-closed and packet text is returned only at claim time.",
+        "Default no-URL Windows mode intentionally retains NoWorkOperatorActionPort as a safe rollback/fail-closed baseline.",
+        "PENDING for PASS: activate reviewed Tailscale Serve/private identity path on the real hosts and prove one fake-worker action/status round trip end-to-end.",
+        "Durable packet-source/materialization layer now proves Windows-bound packet text is reconstructed on claim from typed Postgres-backed state, not stored transcript/clipboard text.",
+        "Production Postgres-backed Operator Bridge server composition is repository-validated; live host activation is explicitly authority-gated because semantic feature-branch task IDs are absent from Workspace Shell trusted authority root.",
+        "Backend return path is now durable: worker-authored typed results are ingested from authoritative durable state rather than consumer-UI output, and exact process/action/session/packet identity is fenced.",
+        "Repository-side Instant execution is now complete end-to-end: production action transport plus immutable candidate return/intake/validation is proven through PostgreSQL restart. Remaining PARTIAL item is exact-host private-tailnet activation.",
+        "Production scheduler/action/candidate transport is repository-complete and restart-safe at 0afd7837…; remaining PARTIAL item is exact-host private-tailnet activation, still blocked by Workspace Shell TASK_NOT_FOUND.",
+        "Workspace Shell semantic authority enrollment first activation rolled back safely on a false-negative MCP stdout assertion. Receipt-based semantic enrollment repair ccdde5c9… passed Workspace #2896 and owning authority-state ee586acf… passed #2898; live root retry remains required before exact-host transport proof.",
+        "workspace-control@7c20097c5f177f23c16a765b95ce94d7161f0d29 passed Workspace #2904 / Semantic #226 / Operator #504 and adds a standalone account-free exact-host fake-worker transport harness over the production Postgres-backed Operator Bridge stack.",
+        "The harness requires exact status/claim/revalidate/local-prepared/candidate-intake/independent-validation/final-status behavior and verifies durable process COMPLETED, action COMPLETED and session READY.",
+        "Private-route mode does not set Tailscale-User-Login client-side and cannot configure Tailscale, so PASS requires the reviewed private reverse proxy to inject authenticated identity. Live exact-host execution is still required before INST-01 can PASS.",
+        "E3-A10 live authority cc36a689e690ca0e90ac58b5715029fb69cd826c was 3/3 green before execution (Workspace #3258, Semantic #557, Operator #826); the live Windows frontend used the reviewed private-tailnet HTTPS route and production Postgres-backed scheduler/action/status transport.",
+        "E3-A10 exact-host execution reached E3_BINDING_CLOSURE=PASS, E3_A10_CANDIDATE_BASELINE=PASS, TAILSCALE_E3_A10_ROUTE_EXACT_BINDING=PASS and E3_A10_WRAPPER_PREFLIGHT=PASS before the live worker loop; the integrated E2 workflow completed with four COMPLETED actions, zero queued or awaiting-durable-ack actions, and session READY@1.",
+        "The immutable candidate branch advanced append-only from 968db080... through root 07724337..., stale generation-0 analysis adcb82b2..., replacement generation-1 analysis 4ddd49f6..., Workspace Shell f5dfb848..., and synthesis dfe79d8e.... Tailscale/Jupyter state and Windows runtime/workdir were restored cleanly."
+      ]
+    },
+    {
+      "id": "INST-02",
+      "status": "PASS",
+      "requirement": "Normal Instant service requires only Ctrl+Space -> Ctrl+V -> Enter with no tab search, packet editing, or manual state relay.",
+      "evidence": [
+        "UT-10 Ctrl+Space trial completed 20/20 intended actions and 20/20 acknowledgments with exactly 20 hotkey presses, zero wrong-worker/wrong-packet/rejected-state/dispatch failures, friction 1/7, worker-selection confidence 7/7 and physical comfort 7/7.",
+        "UT-02/UT-03/UT-04 validated READY=0 minimize, repeated pending-action refocus/block behavior, multi-worker routing and no manual tab search.",
+        "Semantic #155 proves the backend packet includes the exact candidate result target/schema, eliminating manual result relay/state interpretation after Ctrl+Space -> Ctrl+V -> Enter.",
+        "Stage-10 final disposition RETAIN Ctrl+Space is validated; real-account Stage-12 remains a separate INST-06 gate."
+      ]
+    },
+    {
+      "id": "INST-03",
+      "status": "PASS",
+      "requirement": "Repeated scheduler presses remain fail-closed: before human Enter confirmation they refocus/block the prepared worker; after confirmed Enter but before durable acknowledgment they must not dispatch another packet, must report the pending acknowledgment, and must leave the worker Firefox minimized unless an explicit recovery/inspection path is invoked.",
+      "evidence": [
+        "UT-03 and prior repaired UT-01 recovery evidence passed.",
+        "2026-11-25 operator UX decision supersedes the earlier always-refocus interpretation after Enter: plain Enter should hide the worker immediately, READY should notify without focus steal, and Ctrl+Space remains a manual service/check gesture.",
+        "Safety semantics are unchanged: durable acknowledgment remains authoritative and a scheduler press while SentUnconfirmed>0 may not dispatch or advance another packet.",
+        "Successor review workspace-operator-enter-minimize-ready-notify-v1 is under exact-head validation; INST-03 returns to PASS only after that source is green and bounded Windows acceptance confirms the revised focus/minimize behavior.",
+        "Operator UX successor head 33ef885354ada6522e7f2e482dd164c78e01c2ff passed Workspace #3279, Semantic #575 and Operator #844.",
+        "Bounded Windows physical acceptance passed: Ctrl+Space foregrounded the existing managed ChatGPT Firefox worker; manual Ctrl+V then Enter caused the prepared worker to minimize; a subsequent Ctrl+Space while SentUnconfirmed=1 reported pending durable acknowledgment and did not reopen/refocus Firefox.",
+        "The accepted successor is durably bound by architecture/workspace-operator-ux-successor-acceptance-binding.v0.1.json for future live frontend staging; historical A8 evidence remains immutable."
+      ]
+    },
+    {
+      "id": "INST-04",
+      "status": "PASS",
+      "requirement": "First extra Ctrl+Space at READY=0 minimizes only the dedicated WorkspaceWorkers Firefox window.",
+      "evidence": [
+        "UT-02 minimize-on-empty accepted by operator and structured counters.",
+        "UT-12 corrected off-foreground acceptance run #492 proved READY=0 minimizes the already trusted WorkspaceWorkers Firefox HWND even while another app is foreground, without focus steal or arbitrary Firefox enumeration."
+      ]
+    },
+    {
+      "id": "INST-05",
+      "status": "PASS",
+      "requirement": "Remaining Stage-10 trials UT-05 through UT-08, UT-12, Bridge-OFF UT-11, and representative-work UT-09 pass.",
+      "evidence": [
+        "UT-05 judgment popup accepted on #466; UT-06 managed-tab-loss recovery accepted on #467; UT-07 auth-refresh foreground recovery accepted on #480; UT-08 cold restart recovery accepted on #481.",
+        "UT-12 focus-independent trusted-window minimize accepted at corrected head 866e2805… with #2885/#214/#491 green and off-foreground run #492 OBJECTIVE_PASS.",
+        "UT-11 Bridge-OFF accepted from direct operator observation on validated head b84f69cf…; canceled timer run #494 is not misrepresented as objective pass.",
+        "UT-09 representative-work collision gate passed from accumulated real use; identified VS Code Ctrl+Space behavior is not a required operator workflow function.",
+        "Final Stage-10 closeout retained Ctrl+Space; aa3c3e39… passed #2887/#216/#495 and schema-valid 5b169e66… passed #2889/#218/#497."
+      ]
+    },
+    {
+      "id": "INST-06",
+      "status": "PASS",
+      "requirement": "Bounded real-account Stage-12 calibration passes without expanding browser permissions, DOM/content automation, or security boundaries.",
+      "evidence": [
+        "Bounded real-account E3-A10/Stage-12 successor run completed PASS through the accepted human-assisted Instant loop. The live report records automatic_typing_or_submission=false, browser_page_content_scraping=false, paid_api_fallback=false, workspace_shell_authority_widened=false, and no Workspace Shell exec/reviewed-helper use.",
+        "The operator interaction remained Ctrl+Space -> Ctrl+V -> Enter with the reviewed A8 frontend; browser permissions/security boundaries were not expanded, and post-run private-route plus Windows cleanup passed."
+      ]
+    },
+    {
+      "id": "INST-07",
+      "status": "PARTIAL",
+      "requirement": "A persistent ChatGPT Instant front door is the primary human Workspace Control interface for natural-language task submission, durable status queries, explicit human decisions and cancellation/revision requests; conversation state is non-authoritative and every operation resolves through durable Workspace Control state.",
+      "evidence": [
+        "Candidate implementation on workspace-token-economy-frontdoor-v1 adds typed FrontDoorMessage/FrontDoorIntent and InstantFrontDoorIntake contracts.",
+        "Task submissions deterministically become TaskIntakeCandidate records with authorization_state=UNDECIDED; the front door cannot mint executable authority.",
+        "Status/decision/cancel intents require durable existing-task lookup rather than conversation-memory interpretation.",
+        "PASS still requires durable persistence/task creation-resume integration and bounded live front-door acceptance.",
+        "Durable Instant front-door control is now implemented: SUBMIT_TASK persists UNDECIDED intake candidates; QUERY_STATUS reads authoritative active task capsules; resume/decision/cancel persist UNDECIDED task-control candidates against an explicit durable task identity.",
+        "Private ChatGPT front-door plugin was created from exact repository source at workspace-control@21ab03b57ffa0865f7a37817ba484a0d7bf49ee1: plugin_id plugins_6b08cf5ea1548191b543faab9952bd26, release pluginrel_6b08cf5f385c8191a51997a2a124e5e6, scope USER, discoverability PRIVATE.",
+        "INST-07 remains PARTIAL only for bounded live acceptance through the created plugin: one new-task candidate, one durable status query, and one explicit decision/cancel-revise candidate must be observed without chat-created authority."
+      ]
+    },
+    {
+      "id": "REL-01",
+      "status": "PARTIAL",
+      "requirement": "Crash/fault campaign covers durable/effect boundaries, duplicate/delayed/out-of-order events, DB disconnect, stale generations, validator timeout, and executor/session loss.",
+      "evidence": [
+        "Production fault tests already cover several dangerous boundaries; database/session/full vertical-slice injection remains.",
+        "Semantic Execution #100 passes stale-generation race fencing after routing/packet compilation in addition to existing crash/event/validator fault coverage.",
+        "Semantic #160 adds an end-to-end persistent-chat continuity-loss fault after local-prepared, stale result rejection, explicit replacement, and successful resumed completion.",
+        "Semantic #163 validates scheduler restart, duplicate candidate delivery, exact observation mismatch rejection and wait no-poll behavior through the production scheduler.",
+        "Semantic #167 adds scheduler-level stale-generation recovery, late immutable candidate rejection and replacement-session completion.",
+        "Integrated live fault evidence is now stronger: E3-A10 proves worker/process/session loss, stale-generation publication, stale-result rejection, PostgreSQL rehydration, replacement session completion and final synthesis under the real workflow.",
+        "REL-01 remains PARTIAL because the full campaign requirement also names DB disconnect, validator timeout, and delayed/out-of-order event cases; those must be reconciled as an integrated campaign rather than inferred from the A10 session-loss proof alone."
+      ]
+    },
+    {
+      "id": "REL-02",
+      "status": "PARTIAL",
+      "requirement": "Control plane is GPU-blind and meets CPU/RAM/task budgets under the first real workflow.",
+      "evidence": [
+        "Semantic #158/#160 control-plane probes remained GPU blind; recovery head max RSS was 18.5546875 MiB at ~1 observed CPU core. Live-host/soak budget proof remains.",
+        "Semantic #163 production scheduler resource probe remained GPU blind at max RSS 18.51171875 MiB and ~1 CPU core; live-host/soak evidence remains.",
+        "Semantic #167 runs a 1,000-cycle WAITING_EXTERNAL scheduler soak with zero durable mutation/reasoning; control-plane probe stayed GPU blind at max RSS 18.46875 MiB and ~1 CPU core.",
+        "E3-A10 collected 166 live-host resource samples with zero sampling gaps while the first real workflow completed; GPU telemetry was explicitly FORBIDDEN_NOT_COLLECTED and PADataset access FORBIDDEN_NOT_USED.",
+        "REL-02 remains PARTIAL pending an explicit target-budget comparison/representative soak closeout rather than inferring PASS solely from the bounded A10 resource trace."
+      ]
+    },
+    {
+      "id": "E2E-01",
+      "status": "PASS",
+      "requirement": "A real Research Engine / research-iterate workflow completes decomposition -> routing -> executor -> validated result -> authorized low-consequence effect -> synthesis.",
+      "evidence": [
+        "PRECURSOR PASS: exact Research Engine objective now traverses generic routing -> deterministic packet -> authority -> RuntimeCoordinator -> exact read effect -> independent postcondition validation -> COMPLETED.",
+        "Still PENDING: full research-iterate E2E-01 additionally requires recursive decomposition, fan-in, and synthesis.",
+        "Recursive decomposition/fan-in semantics required by the full research-iterate path are now production-validated at f104361f…, but the real mixed-executor research-iterate synthesis remains pending.",
+        "PRECURSOR PASS: full persistent-Instant leaf transport and durable result cycle is now production-validated; mixed Research Engine fan-out/fan-in remains pending.",
+        "STRONG PRECURSOR PASS: Semantic #158 runs a complete mixed research-iterate production-component tree over exact frozen Research Engine provenance: Instant decomposition -> deterministic exact-source validated effect -> Instant analysis -> fan-in -> Instant synthesis -> COMPLETED. Live account/host proving run remains required for PASS.",
+        "E3-A10 live Research Engine/research-iterate completed the full path on the real account/host: root decomposition -> Supervisor rehydration -> child-contract inheritance -> deterministic exact-source read -> Instant analysis -> fan-in -> Instant synthesis -> COMPLETED. E2_RESEARCH_ITERATE result=PASS and the final Supervisor projection had four COMPLETED processes and zero unresolved processes.",
+        "The deterministic exact-source step supplied the authorized low-consequence effect/read path while all Instant worker results returned through immutable candidate commits and independent durable intake."
+      ]
+    },
+    {
+      "id": "E2E-02",
+      "status": "PASS",
+      "requirement": "The proving workflow uses mixed executor classes based on routing decisions, including deterministic execution plus Instant and/or Codex.",
+      "evidence": [
+        "Instant is now a validated production executor path; the next stage composes it with the already-validated deterministic exact-source executor in one research-iterate tree.",
+        "STRONG PRECURSOR PASS: Semantic #158 routing trace selected persistent Instant, deterministic exact-source, Instant, Instant from typed requirements/scarcity only. Live proving workflow remains required for PASS.",
+        "E3-A10 live routing trace used mixed executor classes in one proving workflow: openai-chat-instant-current for decomposition/analysis/synthesis and research-engine-exact-source-read for deterministic source execution. The final report records paid_api_fallback=false."
+      ]
+    },
+    {
+      "id": "E2E-03",
+      "status": "PASS",
+      "requirement": "The real workflow survives at least one worker/session/process loss without manual task-state reconstruction.",
+      "evidence": [
+        "Session-loss/process-recovery primitives now resume from durable typed state without transcript reconstruction; real integrated research-iterate fault injection remains required.",
+        "Semantic #152 proves a late worker publication after process recovery is rejected fail-closed and the exact result-intake state survives PostgreSQL adapter recreation.",
+        "Semantic #160 proves persistent Instant session/process continuity loss after local-prepared is recovered from durable state with stale candidate rejection and replacement session completion; inject the same loss into the live proving workflow for PASS.",
+        "E3-A10 deliberately fenced the generation-0 worker process/session after local submission, rehydrated runtime/orchestration state from PostgreSQL, observed stale candidate adcb82b2597908bb505ecbd9a40e399b7caf7817, rejected it without durable mutation, created a generation-1 replacement session, and completed replacement analysis at 4ddd49f643d72b224817bdf21d1e58799abc1679.",
+        "No manual task-state reconstruction or transcript relay was required; the final Supervisor projection was COMPLETED with session READY@1."
+      ]
+    },
+    {
+      "id": "E2E-04",
+      "status": "PENDING",
+      "requirement": "Final evidence compares scarce-allowance consumption and validated progress against an all-strong/frontier control policy.",
+      "evidence": []
+    },
+    {
+      "id": "PROD-01",
+      "status": "PENDING",
+      "requirement": "Authoritative Operator Bridge UX-09 target performance budgets pass on the target Windows machine.",
+      "evidence": []
+    },
+    {
+      "id": "PROD-02",
+      "status": "PARTIAL",
+      "requirement": "Exact SHA/blob/route provenance, authority boundaries, and rollback paths are mechanically checked with no unresolved violations.",
+      "evidence": [
+        "Existing task/provenance/root-policy contracts provide the baseline; integrated promotion proof remains.",
+        "Production transport code preserves ownership boundaries: backend loopback-only HTTP, outbound-only Windows client, no app bearer credential, no authority endpoint, and explicit opt-in activation.",
+        "Candidate target/revision/source bytes, process/action/session generations, packet hash, and independent validator are mechanically bound end-to-end at d3f6e283….",
+        "Mixed-executor routing and recovery provenance is exact at workspace-control@a3f660806cfd8caa243fe9dfb4e3c25b2d451ac7; stale session/action generations cannot be reused.",
+        "Production scheduler provenance is generation-bound and candidate evidence binds exact repository/ref/path/commit/content at workspace-control@0afd7837f15ccc573d9dba8ce0422aa5a2d0b061; live route provenance remains authority-gated.",
+        "workspace-control@41d32010… is 3/3 green (#2849/#178/#437) and integrates scarcity admission without allowing the governor to widen executor capability/privacy/session eligibility.",
+        "Workspace Shell bundled activation runtime 6d47e3ec… passed #2902 and transactionally prepares semantic authority plus evaluator sealed-store control-readback/hostile-worker-denial acceptance without adding generic shell/helper authority.",
+        "Semantic execution head 7c20097c… is 3/3 green (#2904/#226/#504) and provides an account-free exact-host private-route harness binding packet SHA, action/process/session generations, immutable candidate revision and independent validator outcome.",
+        "E3-A10 added and enforced a canonical live binding manifest plus cross-artifact closure before authority consumption; exact candidate head, semantic blobs, frontend review/tree/dev-harness, route/bootstrap/launcher blobs, authority and rollback were mechanically bound and the live run/cleanup passed.",
+        "PROD-02 remains PARTIAL because the emitted A10 resource report retained the stale artifact_id workspace-semantic-execution-e3-a9-live-resource-v1. The closeout classifies this as a non-authority metadata-label defect; correct/normalize that provenance label before declaring zero unresolved violations."
+      ]
+    },
+    {
+      "id": "PROD-03",
+      "status": "PENDING",
+      "requirement": "Integrated production-readiness review returns explicit PROMOTE_V0; otherwise November Integrated v0 is not complete.",
+      "evidence": []
+    }
+  ],
+  "schedule": [
+    {
+      "window": "2026-11-15..2026-11-17",
+      "exit_gate": "Freeze integrated acceptance matrix; clear Codex lineage and Operator Bridge production-transport blockers; bind current code reality."
+    },
+    {
+      "window": "2026-11-18..2026-11-20",
+      "exit_gate": "Complete orchestration integration spine: recursive task tree, session broker, event/validator services, production packet routing."
+    },
+    {
+      "window": "2026-11-18..2026-11-21",
+      "exit_gate": "Complete Workspace Control subscription Codex live runtime/auth/executor path."
+    },
+    {
+      "window": "2026-11-18..2026-11-22",
+      "exit_gate": "Bind real backend action/status transport to Operator Bridge and finish short Stage-10 gates."
+    },
+    {
+      "window": "2026-11-21..2026-11-23",
+      "exit_gate": "First real Research Engine vertical slice completes end-to-end."
+    },
+    {
+      "window": "2026-11-24..2026-11-26",
+      "exit_gate": "Recursive decomposition, mixed Instant/Codex routing, allowance calibration and weekly governor operational."
+    },
+    {
+      "window": "2026-11-26..2026-11-27",
+      "exit_gate": "Token Economy E4-0 passes: compact/delta/recovery packet enforcement, zero-model waits, bounded worker output, and durable Instant front-door intake/status contracts are integrated before meaningful Codex benchmarking."
+    },
+    {
+      "window": "2026-11-25..2026-11-27",
+      "exit_gate": "Reliability/fault-injection campaign passes on integrated stack."
+    },
+    {
+      "window": "2026-11-27..2026-11-28",
+      "exit_gate": "Real-account Instant calibration and remaining Stage-10 acceptance pass."
+    },
+    {
+      "window": "2026-11-28..2026-11-29",
+      "exit_gate": "Operator Bridge target performance plus representative soak/resource measurements pass."
+    },
+    {
+      "window": "2026-11-30",
+      "exit_gate": "Run full acceptance matrix and issue explicit PROMOTE_V0 or HOLD/REVISE; no scope-expanding features."
+    }
+  ],
+  "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
+  "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
+  "last_updated": "2026-11-27",
+  "latest_validated_checkpoint": "PR #590 zero-inference bootstrap run 46036997293 SUCCESS / CODEX-01 PASS; follow-up account/read preflight run 46038749199 reached control-small but failed before telemetry because Codex executable was not on control-validation PATH; CODEX-02 remains PARTIAL"
+}

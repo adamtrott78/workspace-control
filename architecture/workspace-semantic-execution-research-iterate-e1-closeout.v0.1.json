@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e1-closeout-v0.1",
+  "status": "CONSUMED_FAILED_HARNESS_COMPILER_ENVELOPE_MISMATCH",
+  "authority_head": "8a767072e1edb5f54c561dcaf4a02cb70ef323d8",
+  "candidate_baseline_before_attempt": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+  "candidate_head_after_attempt": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+  "durable_partial_results": {
+    "root_decomposition": "f065ec8c274575b6b86e296e2784c1e126c69bdc",
+    "analysis": "705ac86d8a95e210ada81747bcc7fc22983928c3"
+  },
+  "proven_before_failure": [
+    "real Instant root decomposition",
+    "Supervisor S1 durable rehydration",
+    "child contract inheritance",
+    "deterministic exact-source read",
+    "real Instant analysis candidate publication"
+  ],
+  "not_tested_because_harness_failed_first": [
+    "live @Workspace Shell invocation",
+    "Workspace Shell read-only evidence validation",
+    "fan-in after all three leaves",
+    "final Instant synthesis"
+  ],
+  "root_cause": "The deterministic packet compiler prepended its envelope before the objective, while E1 required the literal connected-tool mentions to be raw leading clipboard lines.",
+  "repair_contract": {
+    "mechanism": "derive raw leading @-mention prefix deterministically from the already-hashed objective",
+    "packet_hash_semantics_changed": false,
+    "durable_packet_source_schema_changed": false,
+    "expected_worker_prefix": "@Workspace Shell\\n@github\\n\\nWORKSPACE_REASONING_PACKET_V1\\n",
+    "fresh_review_validation_authority_required": true
+  },
+  "candidate_history_rewrite": false,
+  "silent_retry": false
+}

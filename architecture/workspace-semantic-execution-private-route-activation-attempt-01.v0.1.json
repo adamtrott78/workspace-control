@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-private-route-activation-attempt-01-v0.1",
+  "status": "FAILED_CLOSED_PREEXISTING_SERVE_CONFIG",
+  "attempted_authority_commit": "53a8e3544e59d66e94a02220dad5403e55524159",
+  "attempted_activation_candidate_commit": "8116662727003e9fe0904fa88ff7836608aeac00",
+  "attempted_script_blob_sha": "765c846e7b6c1297f4a0a8871c2fdd34b453b5c2",
+  "host": "gokhan-lambda-vector",
+  "observed_evidence": [
+    "AUTHORIZED_TRANSACTION_SHA=8116662727003e9fe0904fa88ff7836608aeac00",
+    "AUTHORIZED_SCRIPT_BLOB=765c846e7b6c1297f4a0a8871c2fdd34b453b5c2",
+    "EXACT_AUTHORIZED_MATERIALIZATION=PASS",
+    "TAILSCALE_HOST_BINDING=PASS",
+    "TAILSCALE_OPERATOR_PEER_BINDING=PASS",
+    "TAILSCALE_LOGIN_BINDING=PASS",
+    "PREEXISTING_SERVE_CONFIG:TCP"
+  ],
+  "control_flow_conclusion": {
+    "serve_mutation_attempted": false,
+    "ephemeral_postgres_started": false,
+    "fake_worker_harness_started": false,
+    "reason": "The candidate checks existing Serve/Funnel status before creating the virtualenv/PostgreSQL runtime and before setting SERVE_ATTEMPTED or invoking tailscale serve."
+  },
+  "authority_after_attempt": "CONSUMED_FOR_ATTEMPT_01_REVIEW_REQUIRED",
+  "next_safe_action": "Read-only inspect the existing Serve/Funnel mapping. Preserve it. Revise only the conflict-detection/coexistence logic if the intended HTTPS 443 endpoint is free; otherwise choose a separately reviewed non-conflicting endpoint."
+}

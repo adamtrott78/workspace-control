@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "evaluator_id": "resumable-reasoning-screening-control-v1",
+  "scope": "protocol_screening_only",
+  "claim_bearing": false,
+  "purpose": "Deterministically service clean-worker experiment requests and terminal candidates for the non-claim-bearing screening stage without exposing evaluator-only oracle files to workers.",
+  "repository": "adamtrott78/workspace-control",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "control_rules": [
+    "The control evaluator may read the assigned run-state file and the exact evaluator oracle bound to its fixture.",
+    "The control evaluator never copies the oracle document, expected hypothesis, interpretation hints, or unused experiment results into worker-visible state.",
+    "For WAITING_EXTERNAL, publish only the exact requested experiment result payload plus its content hash into the assigned run-state file, append a CONTROL_EXTERNAL_RESULT event, clear pending_external, and set READY_TO_RESUME.",
+    "For TERMINAL_CANDIDATE, score with the deterministic objective evaluator and publish only validator_id, pass/fail, normalized score, violation codes, and a commitment/evidence reference. Do not publish the expected answer.",
+    "If the candidate fails, set READY_TO_RESUME with exact violation codes and no hidden-answer disclosure; the worker may continue if its arm/protocol permits.",
+    "If the candidate passes, set COMPLETED and record completion metadata.",
+    "Never repair worker reasoning or choose experiments on the worker's behalf.",
+    "Never service a request for an experiment absent from the worker-visible catalog.",
+    "Never service a run whose source checkpoint, fixture blob SHA, arm, or generation no longer matches durable state.",
+    "Control-side oracle access creates no execution authority and authorizes no production mutation."
+  ],
+  "fixture_oracle_bindings": {
+    "research-iterate-timeout-control-p0-v1": {
+      "oracle_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p0_oracle_v1.json",
+      "evaluator": "evaluate_research_iterate"
+    },
+    "research-iterate-shard-rollout-p1-v1": {
+      "oracle_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_oracle_v1.json",
+      "evaluator": "evaluate_research_iterate"
+    },
+    "research-iterate-retry-pooling-v1": {
+      "oracle_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+      "evaluator": "evaluate_research_iterate"
+    },
+    "research-iterate-cross-region-feedback-p3-v1": {
+      "oracle_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_oracle_v1.json",
+      "evaluator": "evaluate_research_iterate"
+    }
+  },
+  "worker_visible_publication": {
+    "external_result_fields": [
+      "experiment_id",
+      "result",
+      "result_hash"
+    ],
+    "validator_fields": [
+      "validator_id",
+      "passed",
+      "score",
+      "violations",
+      "evidence_ref"
+    ],
+    "forbidden_publication": [
+      "expected_hypothesis",
+      "unused experiment results",
+      "interpretation_hint beyond the exact requested result payload if present",
+      "oracle path contents",
+      "seed",
+      "seal nonce"
+    ]
+  },
+  "screening_claim_boundary": "A successful screening run establishes protocol/harness operability only. It does not count toward executor-quality conclusions."
+}

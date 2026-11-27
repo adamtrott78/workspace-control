@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-live-authority-v0.1",
+  "status": "CONSUMED_FAIL_SENT_UNCONFIRMED_WORKSPACE_SHELL",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Authorize exactly one live E3 resource/accounting mission over the already-accepted E2 Research-Iterate recovery topology with the frozen E3 read-only observer attached.",
+  "approval_basis": {
+    "source": "fresh explicit operator approval in the current ChatGPT conversation",
+    "original_statement": "GOOOO",
+    "observed_date": "2026-11-25",
+    "original_scope": "EXACTLY_ONE_LIVE_E3_RESOURCE_SOAK_ATTEMPT",
+    "attempts_granted": 1,
+    "standing_or_future_authority_inferred": false,
+    "prior_d4_e1_e2_authority_reused": false
+  },
+  "reviewed_source": {
+    "review_head": "6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424",
+    "review_path": "architecture/workspace-semantic-execution-research-iterate-e3-live-review.v0.1.json",
+    "review_blob": "9c0623d8616cf266957dd210419ecc3e3a2a93ac",
+    "procedure_path": "architecture/workspace-semantic-execution-research-iterate-e3-live-procedure.v0.1.md",
+    "procedure_blob": "81a9f0fd6ce338eff35700d2ccf207d68019779a",
+    "validation": {
+      "workspace_control_run": 3216,
+      "semantic_execution_run": 518,
+      "operator_bridge_run": 787,
+      "result": "SUCCESS"
+    }
+  },
+  "execution_bindings": {
+    "source_parent_head": "b052c05a769bafb6f88bdbbe867131fc4268758f",
+    "validated_c2_source_head": "e14e71d1981a4aedbe9af75a54087683fe4718e1",
+    "candidate_baseline": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+    "e3_wrapper_blob": "51e471886a4911c9f00d824316c600bf8f8fae19",
+    "e2_harness_blob": "d6acd6a4266641813deecb900b877b7250b02530",
+    "observer_blob": "458a869252f108bea52952e12852961bc3158d1f",
+    "linux_transaction_blob": "6333552dc13998f47a9ea5b5255bfa8f38af801d",
+    "remote_bootstrap_blob": "c4c84cbc6e93e39c44f168ea10675981954f879c",
+    "wop_blob": "d1a34fcfb7f9c53233aae39f0018558b02506122",
+    "installer_blob": "3b22bb79f1cad9b8bd050633e542e241f0da1c2a",
+    "accepted_a7_dev_blob": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "accepted_a7_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "accepted_a7_baseline_sha": "a9532ca8b86b7839822939a970e16af1d4a41864",
+    "live_semantic_sha": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "live_packet_compiler_blob": "cf6200aa4b5a669dd023bc3c6478770bf4658528"
+  },
+  "preconsumption_guards": {
+    "candidate_baseline_must_equal": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+    "review_head_must_equal": "6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424",
+    "semantic_sha_must_equal": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "e3_wrapper_blob_must_equal": "51e471886a4911c9f00d824316c600bf8f8fae19",
+    "e2_harness_blob_must_equal": "d6acd6a4266641813deecb900b877b7250b02530",
+    "observer_blob_must_equal": "458a869252f108bea52952e12852961bc3158d1f",
+    "exact_blob_guards_before_consumption": true
+  },
+  "live_contract": {
+    "accepted_topology": "E2_RESEARCH_ITERATE_DURABLE_RECOVERY",
+    "manual_service_points": 5,
+    "service_order": [
+      "root decomposition",
+      "analysis generation 0",
+      "analysis generation 1 replacement",
+      "Workspace Shell read-only probe",
+      "final synthesis"
+    ],
+    "resource_sample_interval_seconds": 1,
+    "required_process_generation_transition": "0->1",
+    "required_session_generation_transition": "0->1",
+    "old_action_required_state": "STALE",
+    "stale_candidate_required_outcome": "REJECTED_WITHOUT_DURABLE_MUTATION",
+    "runtime_rehydration_source": "PostgreSQL",
+    "manual_durable_state_relay": false,
+    "automatic_typing_or_submission": false,
+    "browser_page_content_scraping": false,
+    "paid_api_fallback": false,
+    "gpu_telemetry": false,
+    "padataset_access": false
+  },
+  "workspace_shell_boundary": {
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "prohibited_tools": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper"
+    ],
+    "repository_mutation": false,
+    "service_mutation": false,
+    "authority_widening": false
+  },
+  "attempt_contract": {
+    "attempts_authorized": 1,
+    "consumed": true,
+    "reusable": false,
+    "no_silent_retry": true,
+    "live_consumption_marker": "E3_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "consumed_on_success_or_failure_after_marker": true,
+    "required_pre_consumption_order": [
+      "E3_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_E3_ROUTE_ABSENT=PASS",
+      "E3_SEMANTIC_LIVE_BINDING=PASS",
+      "E3_WINDOWS_READY_GATE=PASS",
+      "E3_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS"
+    ],
+    "required_mission_markers": [
+      "E2_ROOT_DECOMPOSE=PASS",
+      "E2_SUPERVISOR_S1_REHYDRATION=PASS",
+      "E2_CHILD_CONTRACT_INHERITANCE=PASS",
+      "E2_EXACT_SOURCE=PASS",
+      "E2_FAULT_INJECTION_ARMED=PASS",
+      "E2_WORKER_PROCESS_SESSION_FENCE=PASS",
+      "E2_RUNTIME_REHYDRATION_FROM_POSTGRES=PASS",
+      "E2_SUPERVISOR_REHYDRATION_AFTER_LOSS=PASS",
+      "E2_STALE_RESULT_REJECTED_WITHOUT_MUTATION=PASS",
+      "E2_SESSION_REPLACEMENT=PASS",
+      "E2_ANALYSIS_RECOVERY=PASS",
+      "E2_WORKSPACE_SHELL_READ_ONLY_PROBE=PASS",
+      "E2_FAN_IN=PASS",
+      "E3_LIVE_RESOURCE_REPORT={...\"result\":\"PASS\"...}",
+      "PRIVATE_ROUTE_RESEARCH_ITERATE_E3_V1=PASS"
+    ]
+  },
+  "accepted_frontend": {
+    "operator_loop": "Ctrl+Space -> Ctrl+V -> Enter",
+    "automatic_typing": false,
+    "automatic_submission": false,
+    "page_content_scraping": false
+  },
+  "launch_contract": {
+    "action": "wop e3",
+    "exact_authority_sha_required": true,
+    "installer_refresh_required_once": true,
+    "branch_must_contain_authority_commit": true
+  },
+  "postcondition": "Exactly one E3-LIVE attempt. After E3_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS, success or failure consumes this authority. No silent retry.",
+  "live_closeout": {
+    "observed_date": "2026-11-25",
+    "result": "FAIL",
+    "authority_consumed": true,
+    "no_retry_authorized": true,
+    "failure_boundary": "WORKSPACE_SHELL_SENT_UNCONFIRMED_NO_CANDIDATE_PUBLICATION",
+    "exact_exception": "UNAVAILABLE_IN_PROVIDED_TERMINAL_EXCERPT",
+    "candidate_chain": {
+      "baseline": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+      "root_decompose": "ec0e49308692ced00e65c0b0e41bfebb63a5cfdd",
+      "analysis_stale_g0": "2cf2e5ec886bcde07531b5dc4de9566c25bd082b",
+      "analysis_replacement_g1": "fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f",
+      "workspace_shell": null,
+      "synthesis": null,
+      "append_only": true
+    },
+    "observed_pass_markers": [
+      "E3_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+      "E2_ROOT_DECOMPOSE=PASS",
+      "E2_SUPERVISOR_S1_REHYDRATION=PASS",
+      "E2_CHILD_CONTRACT_INHERITANCE=PASS",
+      "E2_EXACT_SOURCE=PASS",
+      "E2_FAULT_INJECTION_ARMED=PASS",
+      "E2_WORKER_PROCESS_SESSION_FENCE=PASS",
+      "E2_RUNTIME_REHYDRATION_FROM_POSTGRES=PASS",
+      "E2_SUPERVISOR_REHYDRATION_AFTER_LOSS=PASS",
+      "E2_STALE_RESULT_REJECTED_WITHOUT_MUTATION=PASS",
+      "E2_SESSION_REPLACEMENT=PASS",
+      "E2_ANALYSIS_RECOVERY=PASS"
+    ],
+    "final_durable_projection": {
+      "graph_version": 36,
+      "process_states": [
+        "COMPLETED@0",
+        "COMPLETED@1",
+        "RUNNING@0",
+        "WAITING_DEPENDENCIES@0"
+      ],
+      "session_states": [
+        "BOUND@1"
+      ],
+      "operator_action_states": [
+        "AWAITING_DURABLE_ACK",
+        "COMPLETED",
+        "COMPLETED",
+        "STALE"
+      ],
+      "queued_actions": 0,
+      "awaiting_durable_ack_actions": 1,
+      "ready_manual_cycles": 0,
+      "sent_unconfirmed_current_binding": 1,
+      "operator_actions_total": 4,
+      "expected_operator_actions": 5
+    },
+    "resource_observation": {
+      "sample_count": 782,
+      "gap_count": 0,
+      "estimated_missing_sample_count": 0,
+      "final_phase": "workspace_shell",
+      "sample_errors": []
+    },
+    "cleanup": {
+      "tailscale_existing_config_exactly_restored": true,
+      "jupyter_root_rollback_preserved": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true,
+      "e3_wop_windows_cleanup": true
+    },
+    "diagnosis": {
+      "proven": [
+        "Workspace Shell action reached AWAITING_DURABLE_ACK and remained current-bound.",
+        "Remote workload state was readyManualCycles=0 and sent_unconfirmed_current_binding=1.",
+        "No Workspace Shell worker-result candidate was published before termination.",
+        "A subsequent Ctrl+Space surfaced the frontend no-action/minimize path despite durable sent-unconfirmed work.",
+        "Private route and Windows Operator cleanup completed."
+      ],
+      "not_proven": [
+        "Whether the human Enter confirmation was lost, consumed before publication, or the frontend process lost local confirmation state.",
+        "The exact Python exception string because the provided terminal excerpt begins after that field."
+      ]
+    },
+    "repair_dependency": "Operator Bridge pending sent-unconfirmed recovery must fail closed and refocus/warn rather than label the state as empty/no-work; repair must be reviewed under workspace-operator-bridge-implementation-v1 authority before any new E3 live authority."
+  }
+}

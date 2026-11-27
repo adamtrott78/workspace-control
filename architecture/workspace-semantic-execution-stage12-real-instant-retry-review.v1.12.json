@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.12",
+  "status": "VALIDATED_REPAIR_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.11.json",
+    "result": "ABORTED_PRECONSUMPTION_CANDIDATE_BASELINE_STALE_SUPERSEDED",
+    "consumed": false
+  },
+  "diagnosis": {
+    "defect_class": "STALE_REVIEWED_CANDIDATE_BASELINE",
+    "expected_by_v111": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "actual_candidate_head": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "actual_candidate_commit": "candidate(stage12): publish q1 real Instant calibration result",
+    "actual_candidate_change": "worker-results/stage12/5dda87c416484e45ae5a22f0bccf97f4/q1.json",
+    "conclusion": "The candidate branch advanced legitimately by one immutable Q1 RESULT commit. Resetting it would violate the candidate-history contract; the live preflight must instead bind the reviewed current head."
+  },
+  "repair": {
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "initial_namespace": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "behavior": [
+      "Stage12 activation requires the remote worker-result-candidates-v1 branch to equal the reviewed current head before starting.",
+      "The existing CandidateWatcher continues to capture the live baseline for each quantum and accepts only one-commit advances with exactly the expected path.",
+      "No candidate history is reset, force-pushed, deleted, or rewritten.",
+      "The v1.11 repaired semantic backend binding and unchanged A7 frontend are retained."
+    ],
+    "candidate_head": "60fd1e3f2bfcbbd92ba2a75d0208cbdf1bd00f4e",
+    "linux_transaction_blob": "51b9a475497568422fb526ba41d7379a3ab5761e",
+    "regression_blob": "c0359bd5552594a456ffa50b31e9d08295a47778"
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_validation_required": true,
+    "fresh_operator_approval_required": true
+  },
+  "postcondition": "v1.12 candidate-baseline repair is exact-head candidate-validated 3/3 and preserves immutable candidate history, the v1.11 semantic live-binding repair, and unchanged A7. This review grants zero live authority. Freeze and exact-head validate this review before any new one-shot authority.",
+  "candidate_validation": {
+    "workspace_control_run": 3144,
+    "semantic_execution_run": 446,
+    "operator_bridge_run": 717,
+    "result": "SUCCESS"
+  },
+  "exact_candidate_bindings": {
+    "source_head": "60fd1e3f2bfcbbd92ba2a75d0208cbdf1bd00f4e",
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "51b9a475497568422fb526ba41d7379a3ab5761e",
+    "tests/test_workspace_semantic_execution_stage12_v112.py": "c0359bd5552594a456ffa50b31e9d08295a47778",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/tools/run-stage12-wop.ps1": "87e2b22d010adcefde075089156ec4c8d3974964",
+    "operator-bridge/tools/run-stage12-remote-bootstrap.sh": "905d1f8e21c45c78fd244f1192a420ff457f221c"
+  }
+}

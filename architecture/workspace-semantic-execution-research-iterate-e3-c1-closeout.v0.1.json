@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-c1-closeout-v0.1",
+  "status": "PASS",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "source_head": "0f1db2cb1c1c958af2784a7b47882c1f242a3489",
+  "objective": "Implement and validate a read-only, versioned resource/accounting observer before any E3 soak or live-model run.",
+  "implementation": {
+    "observer": "benchmarks/workspace-semantic-execution/resource_observer_v1.py",
+    "acceptance_tests": "tests/test_workspace_semantic_execution_e3_resource_observer.py",
+    "dependencies_added": [],
+    "root_required": false,
+    "gpu_telemetry": false,
+    "padataset_access": false
+  },
+  "acceptance": {
+    "phase_timestamps_and_durations": true,
+    "managed_process_cpu_user_system_deltas": true,
+    "rss_and_peak_rss": true,
+    "pss_best_effort_explicit_unavailable": true,
+    "thread_fd_child_counts": true,
+    "reasoning_process_counts_by_state_generation": true,
+    "executor_session_counts_by_state_generation": true,
+    "operator_action_counts_by_state_generation": true,
+    "ready_manual_and_sent_unconfirmed_counts": true,
+    "durable_graph_version_and_expected_object_counts": true,
+    "sampling_interval_and_gap_counts": true,
+    "observer_on_off_semantically_identical": true,
+    "versioned_deterministic_json": true,
+    "unknown_metrics_explicit_not_invented": true,
+    "observation_only": true
+  },
+  "validation": {
+    "workspace_control": {"run_number": 3213, "result": "SUCCESS"},
+    "semantic_execution": {"run_number": 515, "result": "SUCCESS"},
+    "operator_bridge": {"run_number": 784, "result": "SUCCESS"},
+    "workspace_control_tests": [
+      "test_durable_accounting_counts_state_generation_and_operator_work",
+      "test_observer_does_not_mutate_runtime_or_graph_version",
+      "test_sampling_gap_phase_timing_and_canonical_json",
+      "test_unavailable_proc_metrics_are_explicit_not_fabricated"
+    ]
+  },
+  "next_gate": "E3-C2 bounded no-model soak under a review frozen before execution. No E3 live authority exists."
+}

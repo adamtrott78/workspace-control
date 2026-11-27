@@ -1,0 +1,617 @@
+{
+  "schema_version": 1,
+  "design_id": "workspace-semantic-execution-operator-simulator-fixture-catalog-v0.1",
+  "status": "UX_10_SIMULATOR_FIXTURE_CONTRACT_CANDIDATE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "simulator_ref": "architecture/workspace-semantic-execution-operator-simulator.v0.1.md",
+  "shared_invariants": [
+    "No scenario grants authority from browser/model state.",
+    "No scenario uses ChatGPT DOM/content automation.",
+    "No worker-service action is completed merely by SIM_HUMAN_SUBMIT.",
+    "Durable completion requires matching fake durable evidence.",
+    "Old-generation evidence never advances current state.",
+    "Retry creates a replacement action rather than resetting a terminal action.",
+    "Raw browser binding IDs are non-authoritative."
+  ],
+  "fixture_defaults": {
+    "task_id": "sim-task-1",
+    "executor_requirement_ref": "sim-executor-instant-v1",
+    "payload_sha_policy": "SHA256_OF_SYNTHETIC_FIXTURE_PACKET",
+    "claim_ttl_virtual_ms": 30000,
+    "ack_delay_virtual_ms": 1000,
+    "default_browser_adapter": "IN_MEMORY",
+    "default_clock": "VIRTUAL"
+  },
+  "fixtures": [
+    {
+      "id": "SIM-001",
+      "name": "reuse_existing_happy_path",
+      "category": "normal",
+      "initial": "trusted ACTIVE slot g0 + SERVICE_EXISTING",
+      "stimulus": [
+        "dispatch",
+        "human_submit",
+        "worker_transition"
+      ],
+      "expected": [
+        "one claim",
+        "one activate",
+        "one clipboard write",
+        "matching durable ack",
+        "action COMPLETED",
+        "session remains TRUSTED g0"
+      ]
+    },
+    {
+      "id": "SIM-002",
+      "name": "create_worker_happy_path",
+      "category": "normal",
+      "initial": "new slot g0 NOT_ESTABLISHED + CREATE_AND_SERVICE",
+      "stimulus": [
+        "dispatch",
+        "human_submit",
+        "worker_transition"
+      ],
+      "expected": [
+        "one create binding",
+        "one clipboard write",
+        "first durable ack",
+        "continuity TRUSTED",
+        "action COMPLETED"
+      ]
+    },
+    {
+      "id": "SIM-003",
+      "name": "restore_discarded_happy_path",
+      "category": "normal",
+      "initial": "trusted DISCARDED slot g0 + RESTORE_AND_SERVICE",
+      "stimulus": [
+        "dispatch",
+        "human_submit",
+        "worker_transition"
+      ],
+      "expected": [
+        "one restore",
+        "one focus",
+        "one clipboard write",
+        "action COMPLETED"
+      ]
+    },
+    {
+      "id": "SIM-004",
+      "name": "local_retire_then_service",
+      "category": "normal",
+      "initial": "RETIRE_SESSION priority before independent SERVICE_EXISTING",
+      "stimulus": [
+        "single dispatch",
+        "human_submit",
+        "worker_transition"
+      ],
+      "expected": [
+        "retire completes",
+        "fresh requery",
+        "service claimed",
+        "exactly one clipboard write",
+        "one manual cycle"
+      ]
+    },
+    {
+      "id": "SIM-005",
+      "name": "two_independent_ready_workers",
+      "category": "concurrency",
+      "initial": "two trusted slots with ready service actions",
+      "stimulus": [
+        "dispatch action A",
+        "dispatch action B before ack A",
+        "human submits both",
+        "acks out of order"
+      ],
+      "expected": [
+        "distinct claims",
+        "distinct slots",
+        "no cross-ack",
+        "both complete",
+        "A ack ordering irrelevant to B"
+      ]
+    },
+    {
+      "id": "SIM-006",
+      "name": "no_work",
+      "category": "normal",
+      "initial": "ready count 0",
+      "stimulus": [
+        "dispatch"
+      ],
+      "expected": [
+        "no claim",
+        "no browser start",
+        "clipboard unchanged",
+        "focus unchanged"
+      ]
+    },
+    {
+      "id": "SIM-007",
+      "name": "judgment_gate",
+      "category": "authority",
+      "initial": "OPEN_JUDGMENT_GATE highest priority",
+      "stimulus": [
+        "dispatch"
+      ],
+      "expected": [
+        "operator console opened",
+        "no worker focus",
+        "no clipboard write",
+        "no fabricated authority decision"
+      ]
+    },
+    {
+      "id": "SIM-008",
+      "name": "recovery_gate",
+      "category": "recovery",
+      "initial": "OPEN_RECOVERY highest priority",
+      "stimulus": [
+        "dispatch"
+      ],
+      "expected": [
+        "recovery surface opened",
+        "no arbitrary worker focus",
+        "no clipboard write"
+      ]
+    },
+    {
+      "id": "SIM-009",
+      "name": "slow_ack",
+      "category": "ack",
+      "initial": "service action",
+      "stimulus": [
+        "dispatch",
+        "human_submit",
+        "delay durable event"
+      ],
+      "expected": [
+        "AWAITING_DURABLE_ACK retained",
+        "no auto resend",
+        "background ack eventually completes",
+        "no focus steal on ack"
+      ]
+    },
+    {
+      "id": "SIM-010",
+      "name": "no_ack_unconfirmed",
+      "category": "ack",
+      "initial": "service action",
+      "stimulus": [
+        "dispatch",
+        "human_submit",
+        "drop durable event",
+        "advance virtual time"
+      ],
+      "expected": [
+        "remains AWAITING_DURABLE_ACK/SENT_UNCONFIRMED",
+        "timeout informational only",
+        "no auto resend",
+        "no generation advance"
+      ]
+    },
+    {
+      "id": "SIM-011",
+      "name": "operator_never_submits",
+      "category": "human_boundary",
+      "initial": "service action",
+      "stimulus": [
+        "dispatch",
+        "no human_submit",
+        "advance virtual time"
+      ],
+      "expected": [
+        "LOCAL_PREPARED/AWAITING_DURABLE_ACK",
+        "no durable event",
+        "no resend"
+      ]
+    },
+    {
+      "id": "SIM-012",
+      "name": "clipboard_overwritten_before_submit",
+      "category": "human_boundary",
+      "initial": "service action locally prepared",
+      "stimulus": [
+        "external synthetic clipboard overwrite",
+        "no valid submit"
+      ],
+      "expected": [
+        "no durable ack",
+        "action remains unconfirmed",
+        "bridge does not infer failure or resend"
+      ]
+    },
+    {
+      "id": "SIM-013",
+      "name": "clipboard_write_failure",
+      "category": "local_failure",
+      "initial": "service target prepared",
+      "stimulus": [
+        "fault clipboard write"
+      ],
+      "expected": [
+        "FAILED_LOCAL or replacement-eligible exact failure",
+        "no final focus",
+        "no durable delivery inference"
+      ]
+    },
+    {
+      "id": "SIM-014",
+      "name": "stale_before_clipboard",
+      "category": "stale",
+      "initial": "claimed service action",
+      "stimulus": [
+        "browser prepare",
+        "mark action stale",
+        "attempt pre-write revalidation"
+      ],
+      "expected": [
+        "clipboard unchanged",
+        "no final focus",
+        "stale outcome recorded"
+      ]
+    },
+    {
+      "id": "SIM-015",
+      "name": "held_hotkey_repeat",
+      "category": "input",
+      "initial": "one ready action",
+      "stimulus": [
+        "single keydown with repeat events"
+      ],
+      "expected": [
+        "one dispatch",
+        "one claim maximum",
+        "one clipboard write maximum"
+      ]
+    },
+    {
+      "id": "SIM-016",
+      "name": "second_press_while_preparing",
+      "category": "input",
+      "initial": "slow browser prepare",
+      "stimulus": [
+        "dispatch",
+        "second deliberate dispatch before first returns"
+      ],
+      "expected": [
+        "second coalesced/ignored busy",
+        "one claim",
+        "clipboard not overwritten by second"
+      ]
+    },
+    {
+      "id": "SIM-017",
+      "name": "second_press_after_ready",
+      "category": "input",
+      "initial": "A unconfirmed + independent B ready",
+      "stimulus": [
+        "dispatch A",
+        "dispatch B after A local return"
+      ],
+      "expected": [
+        "B may be claimed",
+        "A stays unconfirmed",
+        "clipboard may become B",
+        "no inference A submitted"
+      ]
+    },
+    {
+      "id": "SIM-018",
+      "name": "tab_closed_before_submit",
+      "category": "browser_failure",
+      "initial": "service action prepared",
+      "stimulus": [
+        "managed binding closed before human submit"
+      ],
+      "expected": [
+        "binding MISSING",
+        "durable ack recheck",
+        "session continuity UNKNOWN/rotation path",
+        "no blind resend"
+      ]
+    },
+    {
+      "id": "SIM-019",
+      "name": "browser_crash",
+      "category": "browser_failure",
+      "initial": "multiple managed sessions",
+      "stimulus": [
+        "browser connection loss",
+        "restart/inventory"
+      ],
+      "expected": [
+        "new browser-dependent claims frozen while unavailable",
+        "only provable bindings preserved",
+        "ambiguous continuity UNKNOWN"
+      ]
+    },
+    {
+      "id": "SIM-020",
+      "name": "adapter_disconnect_browser_survives",
+      "category": "browser_failure",
+      "initial": "browser running",
+      "stimulus": [
+        "adapter/native-channel disconnect",
+        "reconnect"
+      ],
+      "expected": [
+        "new browser claims blocked during disconnect",
+        "reinventory/revalidate on reconnect",
+        "no authority from stale cache"
+      ]
+    },
+    {
+      "id": "SIM-021",
+      "name": "helper_crash_before_local_effect",
+      "category": "helper_failure",
+      "initial": "claimed action",
+      "stimulus": [
+        "crash BEFORE_BROWSER_STEP",
+        "restart/reconcile"
+      ],
+      "expected": [
+        "effects NONE_CONFIRMED",
+        "no duplicate existing claim",
+        "replacement only after reconciliation"
+      ]
+    },
+    {
+      "id": "SIM-022",
+      "name": "helper_crash_after_unknown_create",
+      "category": "helper_failure",
+      "initial": "CREATE_AND_SERVICE",
+      "stimulus": [
+        "create effect",
+        "crash AFTER_BROWSER_EFFECT_BEFORE_RECEIPT",
+        "restart"
+      ],
+      "expected": [
+        "outcome UNKNOWN",
+        "fail closed BLOCKED/recovery",
+        "no second create until identity reconciled"
+      ]
+    },
+    {
+      "id": "SIM-023",
+      "name": "helper_crash_after_clipboard",
+      "category": "helper_failure",
+      "initial": "service action",
+      "stimulus": [
+        "clipboard applied",
+        "crash before LOCAL_PREPARED receipt",
+        "restart"
+      ],
+      "expected": [
+        "no assumption submit occurred",
+        "reconcile local effect",
+        "no automatic resend"
+      ]
+    },
+    {
+      "id": "SIM-024",
+      "name": "orchestrator_unreachable",
+      "category": "control_plane",
+      "initial": "bridge ON",
+      "stimulus": [
+        "OperatorBridgePort unavailable",
+        "dispatch"
+      ],
+      "expected": [
+        "no claim",
+        "no browser operation",
+        "no clipboard write",
+        "fail closed"
+      ]
+    },
+    {
+      "id": "SIM-025",
+      "name": "wrong_profile_or_unmanaged_tabs",
+      "category": "identity",
+      "initial": "unmanaged worker-looking tabs exist",
+      "stimulus": [
+        "dispatch create/reuse"
+      ],
+      "expected": [
+        "unmanaged tabs ignored",
+        "managed profile/surface targeted",
+        "no title/DOM adoption"
+      ]
+    },
+    {
+      "id": "SIM-026",
+      "name": "binding_ambiguous",
+      "category": "identity",
+      "initial": "two local bindings claim same slot/generation or metadata insufficient",
+      "stimulus": [
+        "inventory"
+      ],
+      "expected": [
+        "continuity UNKNOWN",
+        "no reuse",
+        "recovery/rotation"
+      ]
+    },
+    {
+      "id": "SIM-027",
+      "name": "executor_identity_unproven",
+      "category": "identity",
+      "initial": "session otherwise reusable",
+      "stimulus": [
+        "compatibility proof unavailable"
+      ],
+      "expected": [
+        "reuse frozen",
+        "rotate/setup recovery",
+        "no guess from page"
+      ]
+    },
+    {
+      "id": "SIM-028",
+      "name": "auth_navigation_single_entry",
+      "category": "auth_recovery",
+      "initial": "two trusted sessions in auth domain",
+      "stimulus": [
+        "managed origin -> OFF_WORKER_ORIGIN"
+      ],
+      "expected": [
+        "auth-domain incident",
+        "affected reuse frozen",
+        "continuity UNKNOWN",
+        "manual auth boundary required"
+      ]
+    },
+    {
+      "id": "SIM-029",
+      "name": "auth_refresh_all_tabs",
+      "category": "auth_recovery",
+      "initial": "two sessions; one outstanding action each",
+      "stimulus": [
+        "profile-wide auth invalidation",
+        "reconcile",
+        "manual auth return"
+      ],
+      "expected": [
+        "acks reconciled once",
+        "unresolved old actions superseded",
+        "generation advances once",
+        "replacement sessions from checkpoints",
+        "origin return not continuity proof"
+      ]
+    },
+    {
+      "id": "SIM-030",
+      "name": "late_old_generation_ack",
+      "category": "generation_fencing",
+      "initial": "old g0 superseded; g1 current",
+      "stimulus": [
+        "emit g0 durable event after g1 exists"
+      ],
+      "expected": [
+        "event preserved as stale evidence",
+        "g1 control state unchanged",
+        "no double completion"
+      ]
+    },
+    {
+      "id": "SIM-031",
+      "name": "duplicate_durable_ack",
+      "category": "ack",
+      "initial": "action awaiting ack",
+      "stimulus": [
+        "emit identical event twice"
+      ],
+      "expected": [
+        "first ack advances",
+        "second deduplicated/evidence only",
+        "terminal state immutable"
+      ]
+    },
+    {
+      "id": "SIM-032",
+      "name": "wrong_generation_ack",
+      "category": "generation_fencing",
+      "initial": "action g1 awaiting ack",
+      "stimulus": [
+        "emit event for g0"
+      ],
+      "expected": [
+        "no action advancement",
+        "mismatch trace recorded"
+      ]
+    },
+    {
+      "id": "SIM-033",
+      "name": "sleep_or_reboot",
+      "category": "recovery",
+      "initial": "mixed idle and unconfirmed sessions",
+      "stimulus": [
+        "helper cold-start event",
+        "browser inventory"
+      ],
+      "expected": [
+        "claim reconciliation",
+        "safe reinit",
+        "continuity reclassification",
+        "no stale local replay"
+      ]
+    },
+    {
+      "id": "SIM-034",
+      "name": "recovery_reentered",
+      "category": "recovery",
+      "initial": "recovery incident active",
+      "stimulus": [
+        "repeat Ctrl+B",
+        "helper restart mid-recovery"
+      ],
+      "expected": [
+        "same recovery_id resumes idempotently",
+        "generation does not advance twice",
+        "no worker packet staged during blocking recovery"
+      ]
+    },
+    {
+      "id": "SIM-035",
+      "name": "four_worker_burst_and_discard",
+      "category": "performance_policy",
+      "initial": "four trusted live managed sessions",
+      "stimulus": [
+        "policy reduces live count to default",
+        "discard three except active as applicable",
+        "restore one"
+      ],
+      "expected": [
+        "logical generations preserved",
+        "discard not retire",
+        "resource/restore timers emitted"
+      ]
+    },
+    {
+      "id": "SIM-036",
+      "name": "browser_adapter_parity",
+      "category": "adapter_neutrality",
+      "initial": "same synthetic workload",
+      "stimulus": [
+        "run with IN_MEMORY",
+        "run with FIREFOX_EXTENSION when available",
+        "run with CUSTOM_SHELL when available"
+      ],
+      "expected": [
+        "same durable terminal predicates",
+        "adapter-specific local IDs absent from authoritative state"
+      ]
+    },
+    {
+      "id": "SIM-037",
+      "name": "simulator_endpoint_absent_in_production",
+      "category": "security",
+      "initial": "production packaging/config",
+      "stimulus": [
+        "probe for SIM_HUMAN_SUBMIT/fault-control endpoints"
+      ],
+      "expected": [
+        "simulator controls unavailable",
+        "production BrowserPort unchanged"
+      ]
+    },
+    {
+      "id": "SIM-038",
+      "name": "payload_hash_mismatch",
+      "category": "integrity",
+      "initial": "current action expects payload hash A",
+      "stimulus": [
+        "submit synthetic payload hash B"
+      ],
+      "expected": [
+        "no valid durable worker transition",
+        "no ack",
+        "diagnostic only",
+        "control state not advanced"
+      ]
+    }
+  ]
+}

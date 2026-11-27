@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-authority-v1.2",
+  "status": "CONSUMED_FAILED_STAGE12_Q1_HOTKEY_NO_EFFECT_WOP_UX_REGRESSION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Fresh exact authority for exactly one D4 v1.2 real-account Stage-12 calibration using the validated v1.2 repaired Windows preparation command, accepted Windows Operator source, unchanged Linux v3 transaction/harness, and isolated immutable worker-result candidate path.",
+  "approval_basis": {
+    "authority_owner": "operator",
+    "approval_date": "2026-11-22",
+    "approval_form": "EXPLICIT_FRESH_CHAT_APPROVAL_FOR_EXACTLY_ONE_D4_V12_LIVE_ATTEMPT",
+    "approval_utterance": "approval greanted",
+    "approved_review_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v1.2.json",
+    "approved_review_blob_sha": "a0979447a7409ea524c0392c056f51f5c398722b",
+    "approved_review_final_state_head": "8487f1974ef9b35a0becd498dbbfb19c87700466",
+    "approved_procedure_path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.2.md",
+    "approved_procedure_blob_sha": "9aedf7fd38d97696d8ae922de44fec45893ed3a7",
+    "approved_windows_source_head": "2f32513f97834da76287d2f948891b758d5194f5",
+    "approved_candidate_baseline": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+    "final_gate_validation": {
+      "workspace_control_run": 3095,
+      "semantic_execution_run": 395,
+      "operator_bridge_run": 668,
+      "result": "SUCCESS",
+      "exact_head": true
+    },
+    "approval_scope_exact": true
+  },
+  "operator_wop_approval_policy": {
+    "path": "architecture/workspace-semantic-execution-operator-wop-approval-policy.v0.1.json",
+    "blob_sha": "cfede468d3004d1267fc4bd9656107368e6b58d0",
+    "note": "Recorded for future tests; current v1.2 attempt is authorized by the explicit approval in the same operator message."
+  },
+  "predecessor_authority": {
+    "path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.1.json",
+    "prior_status": "ABORTED_PRECONSUMPTION_WINDOWS_TOOL_DISCOVERY_DEFECT_UNCONSUMED",
+    "consumed": false,
+    "reusable": false
+  },
+  "exact_authorized_execution": {
+    "windows_source_head": "2f32513f97834da76287d2f948891b758d5194f5",
+    "semantic_execution_sha": "7c20097c5f177f23c16a765b95ce94d7161f0d29",
+    "private_base_url": "https://gokhan-lambda-vector.tailca6171.ts.net",
+    "linux_host": "gokhan-lambda-vector",
+    "windows_operator_host": "desktop-ub9p70p",
+    "windows_launcher": {
+      "path": "operator-bridge/tools/run-stage12-real-instant.ps1",
+      "blob_sha": "a4619bcc8f4177878ddf0f40bec402e1b211aeb6"
+    },
+    "windows_tray_hotkey": {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/TrayApplicationContext.cs",
+      "blob_sha": "b86e04065b354b8aa54ee2a9ca3e71ab555cde7c"
+    },
+    "human_submit_confirmation": {
+      "path": "operator-bridge/src/WorkspaceOperator/Windows/Hotkey/HumanSubmitConfirmationGate.cs",
+      "blob_sha": "8a4f8ac4ad5cbce10d71e4b59f24aaabaee382e3"
+    },
+    "firefox_adapter": {
+      "path": "operator-bridge/src/FirefoxAdapter/adapter_core.js",
+      "blob_sha": "ba67137e92844a9205a36241d6299ce1cfad80a7"
+    },
+    "linux_transaction": {
+      "path": "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v3.sh",
+      "blob_sha": "3eb352f456d84de565514e2a7046e847ea0d25ea"
+    },
+    "real_instant_harness": {
+      "path": "benchmarks/workspace-semantic-execution/live_real_instant_calibration_v1.py",
+      "blob_sha": "7b1feb8fa13cf0ea46883b07831e829fd9e7e75d"
+    },
+    "operator_procedure": {
+      "path": "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.2.md",
+      "blob_sha": "9aedf7fd38d97696d8ae922de44fec45893ed3a7"
+    },
+    "candidate_result_branch": {
+      "repository": "adamtrott78/workspace-control",
+      "branch": "worker-result-candidates-v1",
+      "required_baseline_head": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+      "namespace": "worker-results/stage12/<run-token>/",
+      "source_or_authority_branch": false
+    }
+  },
+  "windows_prelive_repair_contract": {
+    "bounded_dotnet10_discovery": true,
+    "bounded_node24_discovery": true,
+    "package_installation": false,
+    "persistent_path_change": false,
+    "persistent_execution_policy_change": false,
+    "frozen_source_checkout_after_branch_history_fetch": true,
+    "exact_source_and_launcher_blob_reverification": true
+  },
+  "authorized_human_interaction": {
+    "worker_service_sequence": "Ctrl+Space -> Ctrl+V -> Enter",
+    "manual_actions_only_when_linux_prints_stage12_ready": true,
+    "q1_marker": "STAGE12_Q1_READY",
+    "q2_marker": "STAGE12_Q2_REUSE_READY",
+    "q3_marker": "STAGE12_Q3_REPLACEMENT_READY",
+    "manual_worker_result_relay": false
+  },
+  "authority_consumption": {
+    "attempts_authorized": 1,
+    "live_authority_consumption_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "consumed_only_when_marker_prints": true,
+    "abort_before_marker_does_not_consume_live_attempt": true,
+    "consumed_on_success_or_failure_after_marker": true,
+    "retry_after_consumption_requires_fresh_review_validation_and_operator_approval_signal": true,
+    "observed_marker": "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+    "observed_on": "2026-11-22",
+    "consumed": true,
+    "live_attempt_state": "FAILED_Q1",
+    "observed_runtime_evidence": [
+      "STAGE12_CANDIDATE_BASELINE=PASS",
+      "TAILSCALE_HOST_BINDING=PASS",
+      "TAILSCALE_OPERATOR_PEER_BINDING=PASS",
+      "TAILSCALE_LOGIN_BINDING=PASS",
+      "TAILSCALE_EXISTING_JUPYTER_ROOT_BINDING=PASS",
+      "TAILSCALE_STAGE12_ROUTE_ABSENT=PASS",
+      "TAILSCALE_FUNNEL_DISABLED=PASS",
+      "STAGE12_WINDOWS_READY_GATE=PASS",
+      "STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS",
+      "PSYCOPG_DEPENDENCY_PIN=PASS",
+      "TAILSCALE_JUPYTER_ROOT_PRESERVED=PASS",
+      "TAILSCALE_STAGE12_ROUTE_EXACT_BINDING=PASS",
+      "STAGE12_Q1_READY"
+    ],
+    "failure_evidence": {
+      "marker_before_failure": "STAGE12_Q1_READY",
+      "operator_observation": "Ctrl+Space produced no observable worker action.",
+      "classification": "POST_CONSUMPTION_FAILURE",
+      "retry_authorized": false,
+      "cleanup_state": "OPERATOR_CLEANUP_REQUESTED_NOT_YET_OBSERVED"
+    }
+  },
+  "retained_prohibitions": {
+    "credential_automation": false,
+    "dom_or_page_content_scraping": false,
+    "automatic_typing": false,
+    "automatic_paste": false,
+    "automatic_enter": false,
+    "automatic_submission": false,
+    "browser_permission_widening": false,
+    "host_permission_widening": false,
+    "api_key_or_paid_api_fallback": false,
+    "tailscale_funnel": false,
+    "public_listener": false,
+    "non_loopback_backend": false,
+    "production_postgres_mutation": false,
+    "gpu_use": false,
+    "padataset_mutation": false,
+    "workspace_shell_network_widening": false,
+    "workspace_shell_helper_widening": false,
+    "generic_shell_authority": false,
+    "stale_generation_result_acceptance": false,
+    "source_or_authority_branch_result_writes": false
+  },
+  "failure_policy": "FAIL_CLOSED_AND_CLEAN_UP. Abort before STAGE12_LIVE_AUTHORITY_CONSUMPTION_POINT=PASS is non-consuming. After that marker, success or failure consumes the one attempt. No silent retry.",
+  "postcondition": "D4 v1.2 is consumed and failed at Q1. No retry is authorized. Repair must restore the validated WOP operator lifecycle, validate the repair, and establish fresh one-shot authority before another live attempt.",
+  "failure_diagnosis": {
+    "primary_process_regression": "D4 v1.2 bypassed the previously validated persistent WOP lifecycle and instead used a duplicate Stage-12-specific Windows launcher plus separate Linux activation path.",
+    "required_repair": "Restore D4 to the validated WOP lifecycle, make launch one-line, and make hotkey/remote-dispatch failures visible rather than silent.",
+    "preserved_evidence": [
+      "Stage-10 Ctrl+Space UT-10 objective pass: 20/20 actions, exactly 20 presses, zero dispatch failures.",
+      "Persistent WOP commands and dev runtime were implemented and validated before D4 v1.2."
+    ]
+  }
+}

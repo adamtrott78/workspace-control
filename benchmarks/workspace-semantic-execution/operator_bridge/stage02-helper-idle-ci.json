@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "measurement": "stage02_helper_idle_ci_sample",
+  "source": {
+    "repository": "adamtrott78/workspace-control",
+    "commit_sha": "82e5463587efcaaf8471f352a3ad3eb5a3b70537",
+    "workflow": "Operator Bridge Validation",
+    "run_id": 42759788865,
+    "run_number": 6,
+    "runner": "windows-latest"
+  },
+  "procedure": {
+    "helper_argument": "--idle-probe-ms=7000",
+    "duration_seconds": 7.305,
+    "interpretation": "Short CI smoke measurement only. It is not the frozen UX-09 target-machine performance run and must not be used as production-promotion evidence."
+  },
+  "result": {
+    "max_working_set_mib": 43.293,
+    "cpu_percent_one_logical_cpu_mean": 1.4973
+  },
+  "ux09_reference": {
+    "helper_working_set_mib_p95_max": 100,
+    "helper_idle_cpu_one_logical_cpu_percent_mean_max": 1,
+    "disposition": "NOT_EVALUATED_FROM_CI_SMOKE"
+  }
+}

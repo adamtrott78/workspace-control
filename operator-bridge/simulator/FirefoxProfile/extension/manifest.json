@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Workspace Control Operator Simulator Adapter",
+  "version": "0.1.0",
+  "permissions": [
+    "nativeMessaging",
+    "tabs",
+    "sessions"
+  ],
+  "background": {
+    "scripts": [
+      "adapter_core.js",
+      "background.js"
+    ],
+    "persistent": false
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "workspace-control-operator@adamtrott78.local",
+      "strict_min_version": "153.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  }
+}

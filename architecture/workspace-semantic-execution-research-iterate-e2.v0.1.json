@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e2-v0.1",
+  "status": "E2_LIVE_PASS_COMPLETE",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "e1_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.4.json",
+    "e1_head": "78385f17c67cd32b99bd36bb5f84032f8dd730b9",
+    "e1_result": "PASS"
+  },
+  "objective": "Prove an integrated research-iterate mission can survive deliberate worker ownership loss, persistent-session loss, and orchestrator process loss by reconstructing execution solely from durable typed state, while fencing stale generations and requiring no manual state reconstruction.",
+  "invariant": "Conversation/session/process memory is a replaceable cache. Durable typed state, provenance, generation fencing, and validator evidence remain authoritative.",
+  "phases": [
+    {
+      "id": "E2-C1",
+      "name": "deterministic recovery canary",
+      "fault_injection": [
+        "recover active process generation while an operator action is locally prepared",
+        "fence the bound persistent Instant session generation",
+        "attempt a late result from the retired generation",
+        "discard and recreate RuntimeCoordinator/broker/dispatcher objects"
+      ],
+      "required_proofs": [
+        "old operator action becomes STALE",
+        "session generation advances and requires replacement",
+        "late old candidate is rejected with zero durable mutation",
+        "new coordinator rehydrates process/session/action state from durable store",
+        "replacement packet is deterministically recompiled with new process/session generations",
+        "replacement worker result completes",
+        "a second fresh coordinator observes COMPLETED state",
+        "no chat transcript is persisted in the durable graph"
+      ],
+      "status": "PASS",
+      "validation": {
+        "head": "ff50eb53433b34e848a944a9ac976a173301cabb",
+        "workspace_control_run": 3195,
+        "semantic_execution_run": 498,
+        "operator_bridge_run": 768,
+        "result": "SUCCESS"
+      },
+      "observed": {
+        "process_generation_advanced": "0->1",
+        "session_generation_advanced": "0->1",
+        "old_operator_action_staled": true,
+        "late_old_candidate_rejected_without_mutation": true,
+        "orchestrator_runtime_reinstantiated": true,
+        "durable_state_rehydrated_without_chat_memory": true,
+        "replacement_session_completed": true,
+        "final_fresh_rehydration_completed": true,
+        "manual_state_relay": false
+      }
+    },
+    {
+      "id": "E2-C2",
+      "name": "PostgreSQL restart canary",
+      "status": "PASS",
+      "objective": "Repeat the same recovery sequence across fresh PostgreSQL-backed application instances so recovery is proven across process boundaries rather than only object replacement.",
+      "implementation": {
+        "test_path": "tests/test_workspace_semantic_execution_backend_dbos_postgres.py",
+        "test_name": "E2PostgresRecoveryIntegrationTests.test_worker_session_and_runtime_loss_recovers_from_postgres",
+        "durable_store": "PostgresStateStore",
+        "event_ledger": "PostgresEventLedger"
+      },
+      "required_proofs": [
+        "process recovery advances generation and stales old operator action",
+        "bound session generation is fenced and requires replacement",
+        "fresh PostgreSQL-backed RuntimeCoordinator rehydrates the fenced state",
+        "late old candidate is rejected with zero state-version change",
+        "replacement session and generation-bound packet complete",
+        "third fresh RuntimeCoordinator observes COMPLETED terminal state"
+      ],
+      "validation": {
+        "head": "7d26d9d7fb31916fec80ebfc7bdc355cb77aa25d",
+        "workspace_control_run": 3197,
+        "semantic_execution_run": 501,
+        "operator_bridge_run": 770,
+        "integration_log": "test_worker_session_and_runtime_loss_recovers_from_postgres ... ok",
+        "result": "SUCCESS"
+      },
+      "observed": {
+        "postgres_durable_state_survives_fresh_application_instances": true,
+        "stale_generation_candidate_rejected_without_mutation": true,
+        "replacement_session_generation_completed": true,
+        "third_runtime_observed_terminal_completion": true,
+        "manual_state_relay": false
+      }
+    },
+    {
+      "id": "E2-LIVE",
+      "name": "real Instant recovery mission",
+      "status": "PASS",
+      "objective": "Inject real managed-worker/session/process loss during a research-iterate mission, replace the session, reject stale worker output, rehydrate Supervisor state, and complete fan-in/synthesis without manual state relay.",
+      "implementation": {
+        "harness_path": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
+        "static_test_path": "tests/test_workspace_semantic_execution_research_iterate_e2_live.py",
+        "fault_point": "analysis action after local submission / before durable result intake",
+        "stale_candidate_path": "analysis-g0-stale.json",
+        "replacement_process_generation": 1,
+        "replacement_session_generation": 1
+      },
+      "recovery_sequence": [
+        "service analysis generation 0 through the accepted manual operator loop",
+        "observe AWAITING_DURABLE_ACK then recover ReasoningProcess generation 0",
+        "fence bound session generation 0 and stale the old operator action",
+        "discard RuntimeCoordinator/dispatcher/broker/tree/validator objects",
+        "rehydrate authoritative mission state from PostgreSQL",
+        "observe old worker candidate and reject it with zero durable mutation",
+        "replace persistent session at generation 1",
+        "recompile and service analysis replacement packet at process/session generation 1",
+        "complete Workspace Shell leaf, fan-in, synthesis, Supervisor final projection"
+      ],
+      "authority_required": true,
+      "review": {
+        "implementation_head": "508b1e5df7a79a064c1ee2ae00cef0e486efae46",
+        "workspace_control_run": 3200,
+        "semantic_execution_run": 504,
+        "operator_bridge_run": 773,
+        "result": "SUCCESS"
+      },
+      "executable_validation": {
+        "head": "d04d06cee576a21e77286f7f6efe66485ec34375",
+        "workspace_control_run": 3202,
+        "semantic_execution_run": 506,
+        "operator_bridge_run": 775,
+        "result": "SUCCESS",
+        "candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb"
+      },
+      "accepted_live_result": {
+        "authority_head": "2970c9ab635a338826b66847d8deb51ad8769e3a",
+        "mission_id": "research-iterate-e2:853bb07fa6a245739331a11ed5fd4224",
+        "candidate_head": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+        "process_generation": "0->1",
+        "session_generation": "0->1",
+        "stale_candidate_rejected_without_mutation": true,
+        "runtime_rehydration_source": "PostgreSQL",
+        "final_result": "PASS",
+        "cleanup": "PASS"
+      }
+    }
+  ],
+  "authority_boundaries": {
+    "canaries": "non-authoritative test execution only",
+    "live_attempt": "requires separately reviewed one-shot live authority",
+    "stale_generation_acceptance": false,
+    "authority_widening": false,
+    "manual_state_relay": false,
+    "workspace_shell_mutation": false
+  },
+  "acceptance": {
+    "c1_required_before_c2": true,
+    "c2_required_before_live": true,
+    "live_success_requires": [
+      "worker loss injection observed",
+      "session generation replacement observed",
+      "orchestrator restart observed",
+      "stale result rejected without mutation",
+      "fresh durable rehydration succeeds",
+      "mission reaches validated terminal synthesis",
+      "zero manual durable-state reconstruction"
+    ]
+  }
+}

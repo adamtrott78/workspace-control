@@ -1,0 +1,376 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P2-A-002",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P2_reasoning_heavy_coupled",
+  "arm": "A_frontier_long_horizon",
+  "replicate_id": "screen-002",
+  "fixture_id": "research-iterate-retry-pooling-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.json",
+    "fixture_blob_sha": "389fd2ecd5bfe78e8258ecccb03dea759c043296",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_research_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "4416013ea8f553d3a971f592ce0fbf7faf30c59e",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_research_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "COMPLETED",
+  "owner": null,
+  "executor_identity": {
+    "provider": "OpenAI",
+    "reported_model": "GPT-5.6 Sol",
+    "chat_configuration": "High",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "identity_source": "user_attestation",
+    "attestation_text": [
+      "This is a brand-new regular ChatGPT conversation.",
+      "Memory was disabled before this conversation was opened.",
+      "GPT-5.6 Sol High was selected for this conversation."
+    ]
+  },
+  "continuity_regime": "persistent_chat",
+  "treatment_contract": {
+    "mode": "frontier_long_horizon_control",
+    "quantum_policy": "A single clean persistent GPT-5.6 Sol / High chat may carry reasoning across quanta, but all external waits and terminal candidates must be durably checkpointed.",
+    "resume_policy": "Resume the same persistent chat after control-published external results.",
+    "decomposition_policy": "No decomposition is required by treatment; the frontier control may reason over the integrated task directly.",
+    "escalation_policy": "Not applicable; this arm is already the matched-surface stronger-reasoning control."
+  },
+  "treatment_state": {
+    "phase": "PRIMARY",
+    "persistent_chat": true
+  },
+  "started_at": "2026-11-05T23:56:06.824Z",
+  "completed_at": null,
+  "invocations": [
+    {
+      "invocation_id": "screening-v1-P2-A-002-inv-001",
+      "generation": 0,
+      "owner": "chatgpt-worker-screening-v1-P2-A-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat"
+      },
+      "context_bytes": 2451,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "E_force_retry_reset"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-A-002-inv-002",
+      "generation": 0,
+      "owner": "chatgpt-worker-screening-v1-P2-A-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat"
+      },
+      "context_bytes": 3074,
+      "outcome": "WAITING_EXTERNAL",
+      "evidence_refs": [
+        "control-result:E_force_retry_reset#6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_queue_4x"
+      ]
+    },
+    {
+      "invocation_id": "screening-v1-P2-A-002-inv-003",
+      "generation": 0,
+      "owner": "chatgpt-worker-screening-v1-P2-A-002",
+      "executor": {
+        "provider": "OpenAI",
+        "reported_model": "GPT-5.6 Sol",
+        "chat_configuration": "High",
+        "surface": "ChatGPT chat"
+      },
+      "context_bytes": 4747,
+      "outcome": "TERMINAL_CANDIDATE",
+      "evidence_refs": [
+        "control-result:E_force_retry_reset#6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "control-result:E_queue_4x#fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "052cf8224ec5a725e09207bde0bef8e43cefe8cb",
+      "note": "Fresh provenance-refrozen P2 A_frontier_long_horizon replacement slot. Prior unlaunched screen-001 is superseded."
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-worker-screening-v1-P2-A-002"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 4
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-A-002-exp-001",
+      "generation": 0,
+      "payload_ref": "E_force_retry_reset"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-A-002-exp-001",
+      "generation": 0,
+      "experiment_id": "E_force_retry_reset",
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-worker-screening-v1-P2-A-002",
+      "resume_from": "READY_TO_RESUME"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 6
+    },
+    {
+      "kind": "EXTERNAL_REQUEST",
+      "request_id": "screening-v1-P2-A-002-exp-002",
+      "generation": 0,
+      "payload_ref": "E_queue_4x"
+    },
+    {
+      "kind": "CONTROL_EXTERNAL_RESULT",
+      "request_id": "screening-v1-P2-A-002-exp-002",
+      "generation": 0,
+      "experiment_id": "E_queue_4x",
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    {
+      "kind": "CLAIM",
+      "generation": 0,
+      "worker_id": "chatgpt-worker-screening-v1-P2-A-002",
+      "resume_from": "READY_TO_RESUME"
+    },
+    {
+      "kind": "SEMANTIC_CHECKPOINT",
+      "generation": 0,
+      "evidence_ref_count": 7
+    },
+    {
+      "kind": "TERMINAL_CANDIDATE",
+      "generation": 0,
+      "invocation_id": "screening-v1-P2-A-002-inv-003",
+      "observed_result_hashes": {
+        "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+        "E_queue_4x": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+      }
+    },
+    {
+      "kind": "CONTROL_VALIDATOR_RESULT",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    },
+    {
+      "kind": "SCREENING_COMPLETED",
+      "generation": 0,
+      "validator_id": "research_iterate_objective_v1",
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {
+    "E_force_retry_reset": {
+      "request_id": "screening-v1-P2-A-002-exp-001",
+      "experiment_id": "E_force_retry_reset",
+      "result": {
+        "p95_latency_ms": 219,
+        "mean_retries": 1
+      },
+      "result_hash": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "publication_scope": "requested experiment only"
+    },
+    "E_queue_4x": {
+      "request_id": "screening-v1-P2-A-002-exp-002",
+      "experiment_id": "E_queue_4x",
+      "result": {
+        "p95_latency_ms": 405,
+        "mean_retries": 3
+      },
+      "result_hash": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92",
+      "publication_scope": "requested experiment only"
+    }
+  },
+  "established_findings": [
+    {
+      "id": "F1",
+      "statement": "O2 shows that halving concurrency lowers p95 latency, but the fixture explicitly marks this as potentially non-discriminating; load relief alone does not identify the causal mechanism.",
+      "evidence": [
+        "O2"
+      ]
+    },
+    {
+      "id": "F2",
+      "statement": "CPU remains below 48% and queue occupancy never exceeds 62%, which weakens queue-capacity saturation as the primary explanation under the observed load.",
+      "evidence": [
+        "O3"
+      ]
+    },
+    {
+      "id": "F3",
+      "statement": "With pool reuse still enabled, explicit retry-state reset at each request boundary reduced p95 latency from 412 ms to 219 ms and mean retries from 3.1 to 1.0. This directly supports H_retry_state and is not merely the O2 concurrency-relief correlation.",
+      "evidence": [
+        "E_force_retry_reset",
+        "result_hash:6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820"
+      ]
+    },
+    {
+      "id": "F4",
+      "statement": "Increasing queue capacity by 4x while holding concurrency and retry policy fixed left p95 latency at 405 ms and mean retries at 3.0, essentially unchanged from baseline 412 ms and 3.1. This directly rejects queue-capacity saturation as the primary mechanism.",
+      "evidence": [
+        "E_queue_4x",
+        "result_hash:fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+      ]
+    }
+  ],
+  "open_hypotheses": [
+    {
+      "id": "H_retry_state",
+      "status": "PRIMARY_SUPPORTED",
+      "rationale": "Resetting retry state at request boundaries while leaving pool reuse enabled reduced p95 from 412 ms to 219 ms and mean retries from 3.1 to 1.0."
+    },
+    {
+      "id": "H_queue",
+      "status": "REJECTED_AS_PRIMARY",
+      "rationale": "A 4x queue-capacity increase produced essentially no improvement: p95 405 ms and mean retries 3.0."
+    },
+    {
+      "id": "H_clock_bucket",
+      "status": "REJECTED_AS_PRIMARY",
+      "rationale": "The retry-state reset intervention materially corrected latency and retries without changing timeout timestamp quantization, so clock quantization is not needed to explain the primary regression."
+    }
+  ],
+  "unresolved_questions": [],
+  "evidence_refs": [
+    "fixture:research-iterate-retry-pooling-v1#O1",
+    "fixture:research-iterate-retry-pooling-v1#O2",
+    "fixture:research-iterate-retry-pooling-v1#O3",
+    "fixture:research-iterate-retry-pooling-v1#E_force_retry_reset",
+    "control-result:E_force_retry_reset#6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+    "fixture:research-iterate-retry-pooling-v1#E_queue_4x",
+    "control-result:E_queue_4x#fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+  ],
+  "candidate_actions": [],
+  "next_safe_action": "Screening run complete. Preserve this P2 A run as non-claim-bearing protocol-screening evidence; do not reinterpret it as capability-equivalence evidence.",
+  "terminal_submission": {
+    "final_hypothesis": "H_retry_state",
+    "rejected_hypotheses": [
+      "H_queue",
+      "H_clock_bucket"
+    ],
+    "observed_results": {
+      "E_force_retry_reset": "6973b14a40f19f51affa6a066311bedf5f1a1f129cc0d2fd1e8fc10b98dbe820",
+      "E_queue_4x": "fb6af57aeec4db1e3b6d7e7722848f54ee537a8dba73ec57b3db43d80f039c92"
+    },
+    "addressed_observations": [
+      "O1",
+      "O2",
+      "O3"
+    ],
+    "rationale": "The primary mechanism is retained retry state across pooled request lifecycles. Baseline O1 couples high p95 latency (412 ms) with elevated retries (3.1/request). O2 shows that halving concurrency reduces p95 to 286 ms, but that load-relief correlation is non-discriminating and does not identify queue saturation. O3 further weakens queue saturation because CPU stays below 48% and queue occupancy below 62%. The first causal intervention, E_force_retry_reset, leaves pool reuse enabled but resets retry state at each request boundary; it reduces p95 to 219 ms and mean retries to 1.0, directly supporting H_retry_state. The second causal intervention, E_queue_4x, increases queue capacity fourfold while holding concurrency and retry policy fixed; p95 remains 405 ms and retries 3.0, directly rejecting H_queue as the primary cause. H_clock_bucket is also rejected as the primary mechanism because the retry-reset intervention fixes the regression without changing timeout timestamp quantization. Thus the concurrency effect in O2 is load relief, not the causal mechanism."
+  },
+  "validator_results": [
+    {
+      "validator_id": "research_iterate_objective_v1",
+      "passed": true,
+      "score": 1,
+      "violations": [],
+      "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683"
+    }
+  ],
+  "metrics": {
+    "reasoning_invocations": 3,
+    "experiment_requests": 2,
+    "retries": 0,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 1
+  },
+  "control_evaluator": {
+    "status": "TERMINAL_VALIDATED_PASS",
+    "validator_id": "research_iterate_objective_v1",
+    "passed": true,
+    "score": 1,
+    "violations": [],
+    "evidence_ref": "b42fb64622b6c9c3a5f1551e009fd1b63b393c90c110828f58b11a67874f2683",
+    "note": "Objective validator result only. Hidden evaluator answer remains undisclosed."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P2/A_frontier_long_horizon/screen-002.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "High",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "FRONTIER_MATCHED_SURFACE"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": false,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol High was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e1-closeout-v0.4",
+  "status": "PASS",
+  "authority_head": "20b8b5e43889f0aab870c571c94bee58dbc8a2e7",
+  "mission_id": "research-iterate-e1:c6c0a0e54d9e4a8fa57259910c610579",
+  "candidate_chain": [
+    "5bcd6df3aac855a181c02effa2189b3b5706a1c7",
+    "38c396d4b65b179a131a9c03e10c25c85dd893df",
+    "e33b855c790a0fd2be807fe48d19c8bdd46e5fd1",
+    "d9132e55741f89eaa84ea5a659126ebc89fcf802",
+    "fdb801d895068c78b2e2e11e6984173812884deb"
+  ],
+  "verdicts": {
+    "recursive_decomposition": "PASS",
+    "supervisor_s1_fresh_rehydration": "PASS",
+    "child_contract_inheritance": "PASS",
+    "deterministic_exact_source": "PASS",
+    "real_instant_analysis": "PASS",
+    "workspace_shell_literal_connected_tool": "PASS",
+    "workspace_shell_read_only_probe": "PASS",
+    "fan_in": "PASS",
+    "real_instant_synthesis": "PASS",
+    "private_route_rollback": "PASS",
+    "windows_cleanup": "PASS",
+    "wrapper_exit_status": "FALSE_NEGATIVE_POSTSUCCESS_SSH_EXITCODE_OBSERVATION_RACE"
+  },
+  "critical_safety": {
+    "automatic_typing_or_submission": false,
+    "browser_page_content_scraping": false,
+    "manual_durable_state_relay": false,
+    "paid_api_fallback": false,
+    "workspace_shell_exec_used": false,
+    "workspace_shell_reviewed_helper_used": false,
+    "supervisor_authority_mutations": 0
+  },
+  "next_stage": "E2 deliberate worker/session/process loss and durable recovery"
+}

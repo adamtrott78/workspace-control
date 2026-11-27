@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.13",
+  "status": "VALIDATED_REPAIR_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v1.12.json",
+    "result": "ABORTED_PRECONSUMPTION_STALE_TAILSCALE_ROUTE_SUPERSEDED",
+    "consumed": false
+  },
+  "diagnosis": {
+    "defect_class": "STALE_STAGE12_TAILSCALE_ROUTE_PREFLIGHT_ORDERING",
+    "observed_handlers": {
+      "/": {
+        "Proxy": "http://127.0.0.1:8888"
+      },
+      "/operator-bridge/v1": {
+        "Proxy": "http://127.0.0.1:8765/operator-bridge/v1"
+      }
+    },
+    "conclusion": "The existing extra handler is the exact Stage12 route/proxy. The preflight incorrectly compared the whole handler map to root-only before classifying that route. A dead exact Stage12-owned route can be safely normalized only after proving no backend listener remains; arbitrary route drift must still fail closed."
+  },
+  "repair": {
+    "behavior": [
+      "Capture observed Serve/Funnel state before the clean baseline snapshot.",
+      "Permit only root Jupyter plus zero or one exact /operator-bridge/v1 handler with the expected proxy.",
+      "If the exact Stage12 route is present, prove TCP port 8765 has no listener before removing that route.",
+      "Reject any unexpected handler, ambiguous route, wrong route proxy, listener on 8765, Funnel exposure, service config, host-shape drift, or Serve/Funnel mismatch.",
+      "After optional stale-route normalization, recapture the clean root-only Serve/Funnel snapshot used by the existing exact rollback verifier.",
+      "Retain candidate baseline 7bab6ff…, semantic repair 020d35156… / 3b6893c1…, and unchanged A7."
+    ],
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "candidate_head": "534ff64254643346551a9d17a402f8cc4ff84b07",
+    "linux_transaction_blob": "18291bd808788ffb26ab34d29a90246861a0baac",
+    "regression_blob": "d2c87001fc5561d7d41995e1ebbdfe36d50c8e1d"
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "exact_head_validation_required": true,
+    "fresh_operator_approval_required": true
+  },
+  "postcondition": "v1.13 exact stale-route normalization is candidate-validated 3/3. It preserves the reviewed candidate baseline, live semantic repair, exact rollback semantics, and unchanged A7. This review grants zero live authority; freeze and exact-head validate before any fresh one-shot approval.",
+  "candidate_validation": {
+    "workspace_control_run": 3148,
+    "semantic_execution_run": 450,
+    "operator_bridge_run": 721,
+    "result": "SUCCESS"
+  },
+  "exact_candidate_bindings": {
+    "source_head": "534ff64254643346551a9d17a402f8cc4ff84b07",
+    "candidate_baseline": "7bab6ff51202b3d0c3190d1351e8578d22c4f2f1",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "18291bd808788ffb26ab34d29a90246861a0baac",
+    "tests/test_workspace_semantic_execution_stage12_v113.py": "d2c87001fc5561d7d41995e1ebbdfe36d50c8e1d",
+    "live_semantic_sha": "020d35156d90e8268fb560a10e67098a146880de",
+    "live_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207",
+    "operator-bridge/tools/run-stage12-wop.ps1": "87e2b22d010adcefde075089156ec4c8d3974964",
+    "operator-bridge/tools/run-stage12-remote-bootstrap.sh": "905d1f8e21c45c78fd244f1192a420ff457f221c"
+  }
+}

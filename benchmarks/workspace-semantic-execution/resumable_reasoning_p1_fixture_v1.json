@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-iterate-shard-rollout-p1-v1",
+  "family": "research_iterate",
+  "visibility": "worker_visible",
+  "phenotype": "P1_horizon_heavy_decomposable",
+  "objective": "Determine the primary mechanism behind a six-shard synthetic latency regression. The task is intentionally horizon-heavy: collect discriminating evidence across all six independently testable shards plus at least one shared-infrastructure control before making a terminal claim.",
+  "starting_observations": [
+    {
+      "id": "O1",
+      "observation": "All six shards regressed within the same deployment window; each shows p95 latency near 390-430 ms while CPU and queue occupancy remain moderate."
+    },
+    {
+      "id": "O2",
+      "observation": "Rolling back the new request-policy configuration on shard 1 lowers only shard 1 p95 latency to 205 ms; the other five shards remain degraded.",
+      "warning": "This observation is strong local evidence but does not by itself exclude a shared dependency."
+    },
+    {
+      "id": "O3",
+      "observation": "Shared database saturation, network fabric loss, and host CPU saturation are not directly observed in baseline telemetry."
+    }
+  ],
+  "candidate_hypotheses": [
+    {
+      "id": "H_shared_db",
+      "statement": "A shared database bottleneck is independently slowing all six shards."
+    },
+    {
+      "id": "H_network_fabric",
+      "statement": "A shared network-fabric regression is independently slowing all six shards."
+    },
+    {
+      "id": "H_shard_policy",
+      "statement": "The same newly deployed request-policy configuration causes a local latency regression on each shard."
+    }
+  ],
+  "experiment_catalog": [
+    {
+      "id": "E_revert_s1",
+      "intervention": "Revert only shard 1 request-policy configuration.",
+      "cost": 1,
+      "leaf": "shard-1"
+    },
+    {
+      "id": "E_revert_s2",
+      "intervention": "Revert only shard 2 request-policy configuration.",
+      "cost": 1,
+      "leaf": "shard-2"
+    },
+    {
+      "id": "E_revert_s3",
+      "intervention": "Revert only shard 3 request-policy configuration.",
+      "cost": 1,
+      "leaf": "shard-3"
+    },
+    {
+      "id": "E_revert_s4",
+      "intervention": "Revert only shard 4 request-policy configuration.",
+      "cost": 1,
+      "leaf": "shard-4"
+    },
+    {
+      "id": "E_revert_s5",
+      "intervention": "Revert only shard 5 request-policy configuration.",
+      "cost": 1,
+      "leaf": "shard-5"
+    },
+    {
+      "id": "E_revert_s6",
+      "intervention": "Revert only shard 6 request-policy configuration.",
+      "cost": 1,
+      "leaf": "shard-6"
+    },
+    {
+      "id": "E_scale_shared_db",
+      "intervention": "Double shared database capacity while leaving every shard policy unchanged.",
+      "cost": 1,
+      "leaf": "shared-control"
+    },
+    {
+      "id": "E_network_bypass",
+      "intervention": "Move all six shards to an alternate clean network fabric while leaving policy and database capacity unchanged.",
+      "cost": 1,
+      "leaf": "shared-control"
+    }
+  ],
+  "worker_contract": {
+    "minimum_experiment_cycles_before_terminal_claim": 7,
+    "decomposition_hint": "The six shard-local interventions are independently executable and independently validatable leaves; shared-infrastructure controls are separate leaves.",
+    "must_reject_at_least_one_competing_hypothesis": true,
+    "must_address_observation": "O2",
+    "terminal_output_fields": [
+      "final_hypothesis",
+      "rejected_hypotheses",
+      "observed_results",
+      "addressed_observations",
+      "rationale"
+    ],
+    "oracle_path_is_not_worker_input": "benchmarks/workspace-semantic-execution/resumable_reasoning_p1_oracle_v1.json",
+    "terminal_output_schema": {
+      "final_hypothesis": "hypothesis_id string",
+      "rejected_hypotheses": "array of hypothesis_id strings",
+      "observed_results": "object mapping experiment_id to the exact control-published result_hash string; each value MUST be the raw 64-character SHA-256 hash string, not a result object",
+      "addressed_observations": "array of observation_id strings",
+      "rationale": "non-empty reasoning string grounded in published evidence"
+    }
+  },
+  "authority": {
+    "execution_authority": false,
+    "production_mutation": false,
+    "external_submission": false,
+    "fixture_only": true
+  }
+}

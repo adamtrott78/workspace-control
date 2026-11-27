@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "run_id": "screening-v1-P3-B-001",
+  "runset_id": "workspace-resumable-reasoning-matrix-v1",
+  "screening_stage": "protocol_screening",
+  "claim_bearing": false,
+  "phenotype": "P3_mixed_long_hard",
+  "arm": "B_instant_persistent_chat",
+  "replicate_id": "screen-001",
+  "fixture_id": "research-iterate-cross-region-feedback-p3-v1",
+  "branch": "workspace-semantic-execution-migration-v1",
+  "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+  "public_inputs": {
+    "bootstrap_path": "benchmarks/workspace-semantic-execution/screening_worker_bootstrap_v1.json",
+    "fixture_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.json",
+    "fixture_blob_sha": "2dbaa3b0b35b8c01b66d05b45cfcd6126a1f6958",
+    "taxonomy_profile_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_fixture_v1.taxonomy.json",
+    "taxonomy_profile_blob_sha": "5383954a222508131e383b7c816f9d66ef66298d",
+    "harness_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_pilot_v1.py",
+    "harness_blob_sha": "ff55438e933e91dad3057167c2243f0ef4933df2",
+    "runset_path": "benchmarks/workspace-semantic-execution/resumable_reasoning_matrix_runset_v1.json"
+  },
+  "forbidden_inputs": [
+    "benchmarks/workspace-semantic-execution/resumable_reasoning_p3_oracle_v1.json",
+    "any path containing oracle",
+    "any evaluator-only secret material",
+    "other screening run-state files",
+    "control-chat transcript or memory",
+    "PR comments containing evaluator results"
+  ],
+  "generation": 0,
+  "status": "SUPERSEDED",
+  "owner": null,
+  "executor_identity": null,
+  "continuity_regime": "persistent_chat",
+  "treatment_contract": {
+    "mode": "instant_persistent_chat",
+    "quantum_policy": "Use the same clean GPT-5.6 Sol / Instant chat across bounded reasoning quanta.",
+    "resume_policy": "Resume the same persistent chat after control-published external results.",
+    "decomposition_policy": "Not forced by treatment; record decomposition only if the task itself requires it.",
+    "escalation_policy": "No frontier escalation in this arm."
+  },
+  "treatment_state": {
+    "phase": "PRIMARY",
+    "persistent_chat": true
+  },
+  "started_at": null,
+  "completed_at": null,
+  "invocations": [],
+  "events": [
+    {
+      "kind": "SCREENING_SLOT_CREATED",
+      "source_checkpoint_sha": "6b0ada4e0a9e9f29cd281d82e1fc786df8895982",
+      "note": "Primary B_instant_persistent_chat P3_mixed_long_hard protocol-screening slot. Non-claim-bearing."
+    },
+    {
+      "kind": "CONTROL_SLOT_SUPERSEDED",
+      "reason": "PUBLIC_INPUT_PROVENANCE_REFREEZE",
+      "replacement_replicate": "screen-002"
+    }
+  ],
+  "pending_external": null,
+  "external_results": {},
+  "established_findings": [],
+  "open_hypotheses": [],
+  "unresolved_questions": [],
+  "evidence_refs": [],
+  "candidate_actions": [],
+  "next_safe_action": "Do not launch this slot. It was created under the stale taxonomy->fixture provenance binding; use screen-002.",
+  "terminal_submission": null,
+  "validator_results": [],
+  "metrics": {
+    "reasoning_invocations": 0,
+    "experiment_requests": 0,
+    "retries": 0,
+    "decomposition_count": 0,
+    "decomposition_depth": 0,
+    "failed_leaves": 0,
+    "recovered_leaves": 0,
+    "frontier_escalations": 0,
+    "manual_state_relay_count": 0,
+    "model_poll_invocations": 0,
+    "authority_provenance_violations": 0,
+    "deterministic_compute_operations": 0
+  },
+  "control_evaluator": {
+    "status": "SUPERSEDED_BY_PUBLIC_INPUT_PROVENANCE_REFREEZE",
+    "note": "No worker invocation occurred. Replacement screen-002 carries the corrected source checkpoint and taxonomy-profile blob."
+  },
+  "allowed_mutation_paths": [
+    "benchmarks/workspace-semantic-execution/runs/screening-v1/P3/B_instant_persistent_chat/screen-001.json"
+  ],
+  "expected_executor": {
+    "provider": "OpenAI",
+    "model_family": "GPT-5.6 Sol",
+    "chat_configuration": "Instant",
+    "surface": "ChatGPT chat",
+    "toolset": [
+      "GitHub"
+    ],
+    "memory_mode": "disabled_regular_chat",
+    "continuity": "persistent_chat",
+    "tier": "INSTANT"
+  },
+  "contamination_policy": {
+    "current_slot_must_be_new_session": true,
+    "required_chat_type": "brand_new_regular_chat",
+    "required_memory_setting": "disabled_before_chat_start",
+    "required_plugins": [
+      "GitHub"
+    ],
+    "invalid_modes": [
+      "Unpersonalized Temporary Chat: plugins unavailable",
+      "Personalized Temporary Chat: existing memory may be available",
+      "branched or reused benchmark/control chat"
+    ],
+    "per_quantum_or_role_new_session_required": false,
+    "user_attestation_contract": {
+      "required_statements": [
+        "this is a brand-new regular ChatGPT conversation, not branched from or continuing another benchmark/control chat",
+        "Memory was disabled before this conversation was opened",
+        "GPT-5.6 Sol Instant was selected for this conversation"
+      ],
+      "acceptance": "Explicit user attestation is sufficient for UI/session properties the worker cannot independently verify.",
+      "conflict_rule": "If actual conversation content contains prior benchmark/control context or the surface reports a conflicting model/configuration identity, fail closed despite attestation."
+    }
+  }
+}

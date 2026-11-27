@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e2-live-review-v0.1",
+  "status": "VALIDATED_IMPLEMENTATION_REVIEW_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "e1_closeout_head": "78385f17c67cd32b99bd36bb5f84032f8dd730b9",
+    "e1_result": "PASS",
+    "e2_c1_head": "ff50eb53433b34e848a944a9ac976a173301cabb",
+    "e2_c1_result": "PASS",
+    "e2_c2_head": "7d26d9d7fb31916fec80ebfc7bdc355cb77aa25d",
+    "e2_c2_result": "PASS"
+  },
+  "implementation": {
+    "head": "508b1e5df7a79a064c1ee2ae00cef0e486efae46",
+    "harness_path": "benchmarks/workspace-semantic-execution/live_research_iterate_e2.py",
+    "harness_blob": "d6acd6a4266641813deecb900b877b7250b02530",
+    "test_path": "tests/test_workspace_semantic_execution_research_iterate_e2_live.py",
+    "test_blob": "2c24e68ceb35a9e442ecd4febdf942cfd12f8f69",
+    "candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
+    "validation": {
+      "workspace_control_run": 3200,
+      "semantic_execution_run": 504,
+      "operator_bridge_run": 773,
+      "result": "SUCCESS"
+    }
+  },
+  "live_recovery_contract": {
+    "serviced_generation_0_fault_point": "analysis action after local submission reaches AWAITING_DURABLE_ACK",
+    "process_generation_transition": "0->1",
+    "session_generation_transition": "0->1",
+    "old_action_must_be": "STALE",
+    "stale_candidate_must_be_observed": true,
+    "stale_candidate_must_be_rejected_without_mutation": true,
+    "runtime_rehydration_source": "PostgreSQL",
+    "replacement_chat_must_not_rely_on_retired_generation": true,
+    "final_required_markers": [
+      "E2_WORKER_PROCESS_SESSION_FENCE=PASS",
+      "E2_RUNTIME_REHYDRATION_FROM_POSTGRES=PASS",
+      "E2_SUPERVISOR_REHYDRATION_AFTER_LOSS=PASS",
+      "E2_STALE_RESULT_REJECTED_WITHOUT_MUTATION=PASS",
+      "E2_SESSION_REPLACEMENT=PASS",
+      "E2_ANALYSIS_RECOVERY=PASS",
+      "E2_WORKSPACE_SHELL_READ_ONLY_PROBE=PASS",
+      "E2_FAN_IN=PASS",
+      "E2_RESEARCH_ITERATE={...\"result\":\"PASS\"...}"
+    ]
+  },
+  "safety": {
+    "automatic_typing_or_submission": false,
+    "browser_page_content_scraping": false,
+    "manual_durable_state_relay": false,
+    "paid_api_fallback": false,
+    "workspace_shell_exec_used": false,
+    "workspace_shell_reviewed_helper_used": false,
+    "stale_generation_acceptance": false,
+    "authority_widening": false
+  },
+  "authority_gate": {
+    "live_attempt_authorized": false,
+    "fresh_explicit_operator_approval_required": true,
+    "fresh_one_shot_authority_required": true,
+    "no_silent_live_retry": true
+  },
+  "next_gate": "Fresh explicit operator approval is required before creating any one-shot live E2 authority."
+}

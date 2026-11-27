@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-c2-review-v0.1",
+  "status": "FROZEN_BEFORE_EXECUTION",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "c1_closeout": "architecture/workspace-semantic-execution-research-iterate-e3-c1-closeout.v0.1.json",
+  "validated_c1_source_head": "0f1db2cb1c1c958af2784a7b47882c1f242a3489",
+  "observer": "benchmarks/workspace-semantic-execution/resource_observer_v1.py",
+  "accepted_cycle_kernel": "benchmarks/workspace-semantic-execution/research_iterate_e2_recovery_canary_v1.py",
+  "soak_harness": "benchmarks/workspace-semantic-execution/research_iterate_e3_c2_soak_v1.py",
+  "claim_bearing_test": "tests/test_workspace_semantic_execution_research_iterate_e3_c2.py",
+  "bounds": {
+    "cycle_count": 1000,
+    "sample_every_cycles": 10,
+    "warmup_cycles": 100,
+    "sampling_interval_seconds": 10.0,
+    "model_calls": 0,
+    "human_service_cycles": 0,
+    "gpu_use": false,
+    "padataset_access": false,
+    "generation_recovery_cycles": 1000
+  },
+  "bound_rationale": "Use the existing validated control-plane convention of 1000 bounded iterations. Sample every 10 cycles and exclude only the first 100 cycles from steady-state leak evaluation.",
+  "execution_contract": [
+    "Each cycle is the already-accepted deterministic E2 recovery canary.",
+    "Each cycle must fence generation 0, advance process and session generation 0->1, reject the late stale result without durable mutation, and complete on the replacement generation.",
+    "The soak may observe only the current process tree and in-memory durable test graph; it must not call a model, browser, GPU/NVIDIA interface, PADataset, Workspace Shell privileged helper, or candidate-history mutation surface.",
+    "Resource sampling is read-only and may not alter semantic workflow state."
+  ],
+  "precommitted_acceptance_rules": {
+    "cycle_correctness": "All 1000 cycles PASS the accepted E2 recovery assertions; any exception or semantic mismatch fails C2.",
+    "terminal_durable_state": {
+      "reasoning_process_by_state_generation": {"COMPLETED@1": 1},
+      "executor_session_by_state_generation": {"READY@1": 1},
+      "operator_action_by_state": {"COMPLETED": 1, "STALE": 1},
+      "ready_manual_cycles": 0,
+      "sent_unconfirmed_current_binding": 0,
+      "awaiting_durable_ack_total": 0
+    },
+    "discrete_resource_rule": "After warmup, process count, thread count, file-descriptor count, and managed child-process count must each remain invariant across available samples; the post-soak cleanup sample may not exceed that steady-state maximum.",
+    "rss_pss_growth_rule": "After warmup, split available RSS and PSS samples into three chronological windows. Fail a metric only when both the window medians and window minima strictly increase across all three windows. RSS is required; PSS may be explicitly UNAVAILABLE.",
+    "required_metrics": "CPU user/system deltas, RSS, peak RSS, thread count, file-descriptor count and managed-child count must be available for steady-state evaluation. Missing data fails required metrics; optional PSS remains explicit.",
+    "sampling_gaps": "Gap and estimated-missing-sample counts must be reported. Gaps are evidence, not silently discarded.",
+    "cleanup": "No unresolved manual-ready, sent-unconfirmed, awaiting-ack, nonterminal process, unreaped managed child, or resource-count increase may remain at cleanup."
+  },
+  "authority": {
+    "repository_canary_authorized": true,
+    "live_e3_authority": false,
+    "e3_live_authority_created": false
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e1-retry-review-v0.5",
+  "status": "VALIDATED_IMPLEMENTATION_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "purpose": "Freeze the corrected E1 retry after the v0.2 authority aborted before consumption because the private-route launcher retained the pre-v0.1 candidate baseline.",
+  "predecessor": {
+    "authority": "architecture/workspace-semantic-execution-research-iterate-e1-authority.v0.2.json",
+    "result": "ABORTED_PRECONSUMPTION_STALE_CANDIDATE_BASELINE_BINDING",
+    "live_consumption_marker_reached": false,
+    "live_attempt_consumed": false,
+    "candidate_history_mutated": false
+  },
+  "implementation": {
+    "head": "4fbc3bf695d9ffa2b8533a26b8ee20946f14fb59",
+    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "validation": {
+      "workspace_control_run": 3188,
+      "semantic_execution_run": 491,
+      "operator_bridge_run": 761,
+      "result": "SUCCESS"
+    },
+    "exact_bindings": {
+      "benchmarks/workspace-semantic-execution/private_route_research_iterate_e1_v1.sh": "24d02a9e7242da08a57478d847ffb8149c73907f",
+      "semantic-execution/src/workspace_semantic_execution/application/packet_compiler.py": "cf6200aa4b5a669dd023bc3c6478770bf4658528",
+      "benchmarks/workspace-semantic-execution/live_research_iterate_e1.py": "055c692cc6b321a8e74906a30d0c8752346064ba",
+      "operator-bridge/tools/run-research-iterate-e1-wop.ps1": "612b53b8c7703265aeb89d57040ddc3b52045fca",
+      "operator-bridge/tools/run-research-iterate-e1-remote-bootstrap.sh": "65816def4f45c3b25a642b8375a98dd2ceb91e67",
+      "operator-bridge/tools/install-wop-commands.ps1": "5624145e51ffd36af8d16ab7d3df7d595d59e8f2",
+      "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207"
+    },
+    "accepted_a7_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417"
+  },
+  "repaired_preconsumption_abort": {
+    "stale_expected_baseline": "8aacc7eebbbafabcb20b372aa53b88350a44e633",
+    "corrected_expected_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "transport_regression_assertion_updated": true,
+    "no_candidate_history_rewrite": true
+  },
+  "approval_continuity": {
+    "original_approved_scope": "EXACTLY_ONE_CORRECTED_E1_RETRY_ATTEMPT",
+    "prior_authority_consumed": false,
+    "prior_contract_explicitly_states_abort_before_marker_does_not_consume_live_attempt": true,
+    "replacement_authority_is_rebinding_of_same_unconsumed_attempt": true,
+    "additional_live_attempts_granted": 0
+  },
+  "workspace_shell_boundary": {
+    "literal_mentions": [
+      "@Workspace Shell",
+      "@github"
+    ],
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "prohibited": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper",
+      "authority widening",
+      "repository mutation",
+      "service mutation"
+    ]
+  },
+  "authority_gate": {
+    "live_attempt_authorized": false,
+    "fresh_exact_authority_required": true,
+    "may_rebind_same_unconsumed_operator_approval": true,
+    "no_silent_retry_after_consumption": true
+  },
+  "next_gate": "After this exact review head passes inherited Workspace/Semantic/Operator validation and the candidate baseline remains unchanged, persist one replacement authority for the same still-unconsumed live E1 attempt."
+}

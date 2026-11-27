@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-operator-bridge-a7-frontend-baseline-v0.1",
+  "status": "FROZEN_ACCEPTED_FRONTEND_BASELINE",
+  "accepted_checkpoint": "a9532ca8b86b7839822939a970e16af1d4a41864",
+  "accepted_checkpoint_message": "state(operator): accept persistent convenience shims",
+  "functional_fast_loop_checkpoint": "e1e4778ad3583c817e25d0836964181b88cdd62a",
+  "task_capsule": "tasks/active/workspace-operator-bridge-implementation-v1.json",
+  "invariant": "D4 may attach semantic execution behind this frontend but must not redesign, replace, or mutate its runtime UX.",
+  "exact_runtime_bindings": {
+    "operator-bridge/src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-token-economy-instant-frontdoor-v0.1",
+  "status": "E4_0_ENFORCED_FRONTDOOR_LIVE_ACCEPTANCE_PENDING",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "deadline": "2026-11-30",
+  "objective": "Make the persistent ChatGPT Instant front door the primary human interface while minimizing scarce model input, reasoning, and visible-output consumption without weakening durable authority, provenance, validation, or recovery.",
+  "principles": [
+    "Workspace Control understands Workspace Control; leaf executors receive the smallest sufficient execution contract.",
+    "Choose the smallest capable executor and the smallest sufficient context/reasoning/output envelope.",
+    "WAITING is a control-plane state, not a reasoning activity; model budget is exactly zero while waiting.",
+    "Front-door chat prose is input/candidate state only and cannot mint or widen execution authority.",
+    "Durable state remains authoritative; persistent conversation context is only an optimization/cache.",
+    "Economy settings may reduce resource use but may never weaken safety, authority, validator, provenance, or recovery requirements."
+  ],
+  "context_modes": {
+    "REF_ONLY": "Inline only the irreducible leaf contract and content-addressed references; retrieve evidence on demand.",
+    "DELTA": "Reuse an explicitly bound durable base checkpoint and send only new/changed evidence and instructions.",
+    "SELECTED": "Inline/retrieve a bounded selected evidence set when the leaf cannot be solved from references alone.",
+    "FULL_RECOVERY": "Supply reconstructable durable state after session loss, unknown context, or explicit recovery requirement."
+  },
+  "reasoning_profiles": {
+    "NO_MODEL": "No model invocation. Required for deterministic actions and external waits.",
+    "ECONOMY": "Default bounded reasoning for objective, validator-backed leaf work.",
+    "STANDARD": "Escalation after structured evidence demonstrates economy reasoning is insufficient.",
+    "DEEP": "Scarce/high-cost reasoning reserved for intrinsically difficult residual work and budget-permitted escalation."
+  },
+  "communication_modes": {
+    "MACHINE_MINIMAL": "Structured result/evidence only; no preamble, play-by-play, waiting narration, or routine prose.",
+    "CONCISE": "Short operational explanation when a human must understand a result.",
+    "NORMAL": "General-purpose explanation when useful.",
+    "USER_FACING": "Front-door synthesis/status/decision presentation for the human operator."
+  },
+  "frontdoor_contract": {
+    "surface": "persistent ChatGPT Instant conversation",
+    "primary_actions": [
+      "submit high-level tasks in natural language",
+      "query durable task/workflow status",
+      "provide explicit human decisions when requested",
+      "request cancellation/revision through the durable control path"
+    ],
+    "authority_boundary": "Front-door messages produce typed non-authoritative intake/decision candidates. Existing authority-owned policy remains the only source of executable authority.",
+    "persistence": "The front-door conversation should normally persist for usability, but any session may be replaced and reconstructed from durable task state.",
+    "output_policy": "User-facing concise progress is permitted; worker/internal narration is not.",
+    "waiting_policy": "The front door may present deterministic status from durable state, but must not burn model reasoning merely because an external job is still running."
+  },
+  "implementation_slices": [
+    {
+      "id": "E4-0A",
+      "status": "PASS",
+      "scope": "TokenBudget, ContextPlan, TokenEconomyObservation, deterministic planner, zero-model waits/deterministic execution are merged and validated."
+    },
+    {
+      "id": "E4-0B",
+      "status": "PASS",
+      "scope": "Instant front-door typed message plus durable non-authoritative intake/control/status contracts are merged and validated."
+    },
+    {
+      "id": "E4-0C",
+      "status": "PASS",
+      "scope": "Token-economy decisions are bound to actual human-assisted packet planning/materialization; exact durable per-session ACK gates DELTA and compact worker projections preserve canonical identity."
+    },
+    {
+      "id": "E4-0D",
+      "status": "PASS_CODE_LIVE_ACCEPTANCE_PENDING",
+      "scope": "Front-door SUBMIT/STATUS/RESUME/DECISION/CANCEL operations persist/read durable Workspace Control candidate/task state without chat-created authority. Private ChatGPT plugin created; bounded live acceptance remains."
+    },
+    {
+      "id": "E4-0E",
+      "status": "PASS",
+      "scope": "Zero-model full-vs-compact replay is merged; canonical packet identity is preserved and input-size reduction is measured offline before live provider-token calibration."
+    },
+    {
+      "id": "E4-1",
+      "status": "READY",
+      "scope": "E4-0 conservation gate is cleared. Run bounded subscription-Codex auth/live calibration through planner-enforced programmatic dispatch, then feed observed token/allowance telemetry into economics."
+    }
+  ],
+  "conservation_rule": {
+    "codex_before_e4_0_complete": "E4-0 is complete. Live Codex may proceed only through deterministic Token Economy admission and subscription-only billing/auth gates; December operating policy may apply stricter scarcity thresholds.",
+    "output": "Default worker communication is MACHINE_MINIMAL. No model-generated waiting/status chatter.",
+    "context": "Default leaf model work starts REF_ONLY; context expands only from structured need.",
+    "reasoning": "Default leaf model work starts ECONOMY; escalation requires objective failure/structured difficulty evidence and budget admission."
+  },
+  "acceptance": [
+    "No model call occurs for WAITING_EXTERNAL or deterministic executor work.",
+    "Worker leaf packet can be materially smaller than full recovery packet while preserving all non-droppable constraints/authority/validator/provenance obligations.",
+    "Persistent session uses DELTA only when an exact durable base checkpoint is bound; otherwise recovery fails closed to FULL_RECOVERY.",
+    "Front-door task submission creates non-authoritative durable intake and cannot create executable authority.",
+    "Front-door status/decision/cancel requests resolve against durable task identity/state rather than conversation memory.",
+    "Machine worker output can be bounded/structured without weakening validator evidence.",
+    "Real Codex calibration records input/reasoning/output/allowance fields when observable and leaves unknown mappings explicitly UNKNOWN."
+  ],
+  "acceptance_status": {
+    "token_economy_core": "PASS",
+    "exact_session_delta": "PASS",
+    "zero_model_wait_and_deterministic": "PASS",
+    "compact_replay": "PASS",
+    "programmatic_codex_budget_enforcement": "PASS",
+    "private_frontdoor_plugin": "CREATED_LIVE_ACCEPTANCE_PENDING",
+    "live_codex_calibration": "PENDING_E4_1"
+  }
+}

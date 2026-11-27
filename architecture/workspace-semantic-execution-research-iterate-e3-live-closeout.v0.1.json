@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-live-closeout-v0.1",
+  "status": "CONSUMED_FAIL_REPAIR_REQUIRED",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "authority_head": "1f6d3639ade8469ca2a7caeab4a9fbdc1fba881d",
+  "validated_review_head": "6b1f0e9354ce4a7a266d8dbdbdcb285057f2a424",
+  "candidate_baseline": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+  "terminal_candidate_head": "fedc3277b12f83e7e5e2cbdb8ca6b19205ba4f2f",
+  "result": "FAIL",
+  "authority_consumed": true,
+  "retry_authorized": false,
+  "failure_boundary": "WORKSPACE_SHELL_SENT_UNCONFIRMED_NO_CANDIDATE_PUBLICATION",
+  "evidence": {
+    "recovery_through_generation1": "PASS",
+    "stale_generation0_rejected_without_mutation": "PASS",
+    "workspace_shell_candidate_published": false,
+    "synthesis_reached": false,
+    "final_durable_projection": {
+      "graph_version": 36,
+      "process_states": [
+        "COMPLETED@0",
+        "COMPLETED@1",
+        "RUNNING@0",
+        "WAITING_DEPENDENCIES@0"
+      ],
+      "session_states": [
+        "BOUND@1"
+      ],
+      "operator_action_states": [
+        "AWAITING_DURABLE_ACK",
+        "COMPLETED",
+        "COMPLETED",
+        "STALE"
+      ],
+      "queued_actions": 0,
+      "awaiting_durable_ack_actions": 1,
+      "ready_manual_cycles": 0,
+      "sent_unconfirmed_current_binding": 1,
+      "operator_actions_total": 4,
+      "expected_operator_actions": 5
+    },
+    "sampling": {
+      "sample_count": 782,
+      "gap_count": 0,
+      "estimated_missing_sample_count": 0,
+      "final_phase": "workspace_shell",
+      "sample_errors": []
+    },
+    "cleanup": {
+      "tailscale_existing_config_exactly_restored": true,
+      "jupyter_root_rollback_preserved": true,
+      "windows_runtime_process_cleanup": true,
+      "windows_runtime_workdir_cleanup": true,
+      "operator_dev_offline": true,
+      "e3_wop_windows_cleanup": true
+    },
+    "exact_exception": "UNAVAILABLE_IN_PROVIDED_TERMINAL_EXCERPT"
+  },
+  "interpretation": {
+    "classification": "OPERATOR_FRONTEND_PENDING_ACTION_RECOVERY_DEFECT",
+    "rationale": [
+      "The action was not stale: it was AWAITING_DURABLE_ACK with the generation-1 session BOUND.",
+      "No queued action existed, so /actions/claim correctly had nothing new to claim.",
+      "The frontend nevertheless presented the durable pending state as 'Nothing needs service' and minimized the worker, violating the accepted pending-action UX invariant.",
+      "Repair belongs to the dedicated workspace-operator-bridge-implementation-v1 authority; E3 may not widen its own mutation scope."
+    ]
+  },
+  "next_safe_action": "Create and validate an isolated Operator Bridge repair candidate that treats SentUnconfirmed>0 as pending work on the no-action path: never minimize or label it empty; refocus the prepared/sole trusted Firefox worker and warn that durable acknowledgement is pending. Do not create another E3 live authority."
+}

@@ -1,0 +1,129 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-validation-inheritance-receipt-e1-implementation-v1",
+  "status": "VALIDATED_E2_PREFLIGHT_BINDING_REPAIR",
+  "validated_head": "1ae99627c70eeccc3a6864b0b56a91ddc1c9707c",
+  "validation_runs": {
+    "semantic_execution": {
+      "workflow_name": "Semantic Execution Validation",
+      "run_id": 45511804732,
+      "run_number": 509,
+      "conclusion": "success"
+    },
+    "operator_bridge": {
+      "workflow_name": "Operator Bridge Validation",
+      "run_id": 45511804738,
+      "run_number": 778,
+      "conclusion": "success"
+    },
+    "workspace_control": {
+      "workflow_name": "Workspace Control Validation",
+      "run_id": 45511806020,
+      "run_number": 3207,
+      "conclusion": "success"
+    }
+  },
+  "domains": {
+    "semantic_execution": {
+      "validation_run": "semantic_execution",
+      "implementation_patterns": [
+        "semantic-execution/**",
+        "tests/test_workspace_semantic_execution_backend_*.py",
+        "benchmarks/workspace-semantic-execution/backend/**",
+        "benchmarks/workspace-semantic-execution/research_engine_kernel_canary_v1.json",
+        ".github/workflows/semantic-execution-validation.yml",
+        "scripts/validation_inheritance.py",
+        "tests/test_validation_inheritance.py"
+      ]
+    },
+    "operator_bridge": {
+      "validation_run": "operator_bridge",
+      "implementation_patterns": [
+        "operator-bridge/**",
+        "tests/test_workspace_semantic_execution_operator_bridge*.py",
+        "benchmarks/workspace-semantic-execution/operator_bridge/**",
+        "tasks/active/workspace-operator-bridge-implementation-v1.json",
+        "tasks/active/workspace-operator-bridge-implementation-v1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-program.v0.1.md",
+        "architecture/workspace-semantic-execution-operator-implementation-stage-plan.v0.1.json",
+        "architecture/workspace-semantic-execution-operator-implementation-traceability.v0.1.json",
+        ".github/workflows/operator-bridge-validation.yml",
+        "scripts/validation_inheritance.py",
+        "tests/test_validation_inheritance.py"
+      ]
+    },
+    "workspace_control": {
+      "validation_run": "workspace_control",
+      "implementation_patterns": [
+        "scripts/**",
+        "controller/**",
+        "adapters/**",
+        ".agents/**",
+        "AGENTS.md",
+        "repos.json",
+        "policies/**",
+        "procedures/**",
+        "schemas/**",
+        "tests/**",
+        "tasks/**",
+        ".github/workflows/workspace-control-validation.yml",
+        "scripts/validation_inheritance.py",
+        "operator-bridge/**",
+        "semantic-execution/**",
+        "benchmarks/**"
+      ]
+    }
+  },
+  "security": {
+    "validated_run_must_match_exact_head": true,
+    "validated_run_must_be_success": true,
+    "validated_head_must_be_ancestor": true,
+    "implementation_path_change_forces_full_validation": true,
+    "api_lookup_failure_falls_back_to_full_validation": true,
+    "receipt_or_script_parse_failure_falls_back_to_full_validation": true
+  },
+  "proof": {
+    "a7_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "prefix_repair_present": true,
+    "foreground_patch_reverted": true,
+    "cross_domain_inheritance_hardened": true,
+    "workspace_control_run": 3207,
+    "semantic_execution_run": 509,
+    "operator_bridge_run": 778,
+    "candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
+    "baseline_binding_repair_head": "4fbc3bf695d9ffa2b8533a26b8ee20946f14fb59",
+    "launcher_candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "private_route_blob": "24d02a9e7242da08a57478d847ffb8149c73907f",
+    "candidate_branch_observed": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "runtime_semantic_staging_repair_head": "e6fdd3527506f13b1181201a80a0b1f170dced74",
+    "runtime_semantic_sha": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "runtime_packet_compiler_blob": "cf6200aa4b5a669dd023bc3c6478770bf4658528",
+    "next_candidate_baseline": "5bcd6df3aac855a181c02effa2189b3b5706a1c7",
+    "e2_c1_head": "ff50eb53433b34e848a944a9ac976a173301cabb",
+    "e2_c1_workspace_control_run": 3195,
+    "e2_c1_semantic_execution_run": 498,
+    "e2_c1_operator_bridge_run": 768,
+    "e2_c1_result": "PASS",
+    "e2_c1_canary_blob": "c00a9fb2b9aee94b7efec714798ffcb000346683",
+    "e2_c1_test_blob": "5585b6cf3d1bf378b5e1288515e6ef8e36850747",
+    "e2_c2_head": "7d26d9d7fb31916fec80ebfc7bdc355cb77aa25d",
+    "e2_c2_workspace_control_run": 3197,
+    "e2_c2_semantic_execution_run": 501,
+    "e2_c2_operator_bridge_run": 770,
+    "e2_c2_result": "PASS",
+    "e2_c2_test_blob": "69502302c4541fd17bd628e1418f51f0435724c6",
+    "e2_live_executable_head": "d04d06cee576a21e77286f7f6efe66485ec34375",
+    "e2_live_candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
+    "e2_live_workspace_control_run": 3202,
+    "e2_live_semantic_execution_run": 506,
+    "e2_live_operator_bridge_run": 775,
+    "e2_live_harness_blob": "d6acd6a4266641813deecb900b877b7250b02530",
+    "e2_live_wop_blob": "40f47ff0b41b2ec274d98d1d6e341794e7aee5b5",
+    "e2_live_bootstrap_blob": "15ea060adc61c0bc427612601c086d220630c21c",
+    "e2_live_linux_blob": "be7b358a558b950caa22ebe1996dc3fdf3daeca7",
+    "e2_live_installer_blob": "9742373ca84df33fdb883577c827636a7883c28e",
+    "e2_preflight_binding_repair_head": "1ae99627c70eeccc3a6864b0b56a91ddc1c9707c",
+    "e2_operator_http_blob": "3b6893c157c9f567c837aa70c110012eb96ee18c",
+    "e2_frontend_baseline_display": "a9532ca8b86b7839822939a970e16af1d4a41864"
+  }
+}

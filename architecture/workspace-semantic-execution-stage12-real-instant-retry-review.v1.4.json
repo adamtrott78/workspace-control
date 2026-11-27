@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "review_id": "workspace-semantic-execution-stage12-real-instant-retry-review-v1.4",
+  "status": "VALIDATED_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "version": "v1.3",
+    "status": "PRELIVE_BOOTSTRAP_FAILED_POWERSHELL_PARSE",
+    "consumed": false,
+    "reusable": false,
+    "observed_error": "PowerShell parser rejected $SOURCE_SHA:$LINUX_REL in the D4 wrapper before runtime launch."
+  },
+  "delta": {
+    "scope": "one Bash variable-delimiting repair inside the PowerShell single-quoted remote-template plus parser regression coverage",
+    "before": "\"$SOURCE_SHA:$LINUX_REL\"",
+    "after": "\"${SOURCE_SHA}:$LINUX_REL\"",
+    "semantic_intent": "Preserve exact Bash git revision syntax while making the containing PowerShell source parse unambiguously.",
+    "live_runtime_semantics_changed": false,
+    "security_boundary_changed": false
+  },
+  "authority_gate": {
+    "live_retry_authorized": false,
+    "separate_chat_approval_required": false,
+    "approval_signal": "execution of exact reviewed `wop d4` after validation"
+  },
+  "validation": {
+    "candidate_head": "ec34271925fe096522dc7676bf0b45682e2a9579",
+    "workspace_control_run": 3103,
+    "semantic_execution_run": 403,
+    "operator_bridge_run": 676,
+    "result": "SUCCESS",
+    "powershell_parser_regression": "PASS"
+  },
+  "exact_candidate_bindings": {
+    "source_head": "ec34271925fe096522dc7676bf0b45682e2a9579",
+    "operator-bridge/tools/run-stage12-wop.ps1": "d06079b61f68ad26502e759a520fbd8dca03445c",
+    "operator-bridge/tools/workspace-operator-dev.ps1": "6b9c2c0e10804c563e344618360bb4ef27849b23",
+    "operator-bridge/tools/install-wop-commands.ps1": "0c469fb2bc0d9ca5027bda7c77869bba8dd1e76a",
+    "benchmarks/workspace-semantic-execution/private_route_stage12_real_instant_v4.sh": "367fea22f867e30defe17afb8abe7fc68680de69",
+    "architecture/workspace-semantic-execution-stage12-real-instant-retry-procedure.v1.4.md": "3306fdac7ed0120c83662da9a84748bc10756eba"
+  },
+  "postcondition": "The v1.4 parser repair is exact-head 3/3 validated. The review itself grants zero live authority. Next safe action is conditional one-shot authority whose approval signal is execution of exact `wop d4`."
+}

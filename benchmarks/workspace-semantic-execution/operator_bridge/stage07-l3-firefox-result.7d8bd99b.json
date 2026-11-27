@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "stage": "impl_07_recovery_and_fault_closure",
+  "layer": "L3_FIREFOX_EXTENSION_RECOVERY_FAKE_WORKER",
+  "source_sha": "7d8bd99bbd23eafa834a0a676d86156382ad8c1e",
+  "workflow": {
+    "name": "Operator Bridge Validation",
+    "run_id": 42770472988,
+    "run_number": 29,
+    "conclusion": "SUCCESS"
+  },
+  "environment": {
+    "firefox_version": "159.0.1",
+    "web_ext_version": "10.8.0"
+  },
+  "result": "PASS",
+  "predicates": {
+    "native_messaging_connected": true,
+    "SIM-018_tab_closed_before_submit": true,
+    "SIM-019_browser_crash": true,
+    "SIM-020_adapter_disconnect_reinventory": true,
+    "SIM-022_unknown_create_no_duplicate": true,
+    "SIM-028_metadata_only_auth_entry": true,
+    "SIM-029_auth_refresh_all_tabs": true,
+    "SIM-033_cold_restart_no_stale_replay": true,
+    "no_background_clipboard_mutation": true,
+    "no_background_helper_browser_effect": true
+  },
+  "details": {
+    "authority_reconcile_once_each": true,
+    "auth_generation_advances": 2,
+    "cold_restart_claim_count": 1,
+    "trace_sha256": "4653cf6c099ce05fb8259b2211df5bfb1b65d623fb1258d4b8b9ab27463fb477"
+  },
+  "content_policy": "CONTENT_FREE"
+}

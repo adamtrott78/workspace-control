@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e3-v0.1",
+  "status": "C1_C2_PASS_LIVE_REVIEW_FROZEN_ZERO_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "e1_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.4.json",
+    "e1_result": "PASS",
+    "e2_closeout": "architecture/workspace-semantic-execution-research-iterate-e2-live-closeout.v0.2.json",
+    "e2_closeout_head": "090155abc1c943e629d2a9fa1e74c6cf2c8927f4",
+    "e2_result": "PASS",
+    "e2_candidate_head": "6115b48dfdf4a4954b3b1626598f897e4e71eeec"
+  },
+  "objective": "Capture trustworthy CPU/RAM/task/resource and bounded-soak evidence for the integrated semantic-execution stack without touching PADataset GPUs, widening authority, or conflating measurement with performance claims.",
+  "invariant": "Resource observation is read-only evidence. It must not alter executor selection, authority, task state, browser behavior, candidate history, or system services except through separately reviewed test harnesses.",
+  "phases": [
+    {
+      "id": "E3-C1",
+      "name": "resource observer and accounting canary",
+      "status": "PASS",
+      "implementation_goal": "Add a deterministic machine-readable observer for the Linux semantic backend/harness and durable task state, with unit tests proving observation-only behavior.",
+      "required_metrics": [
+        "wall-clock phase timestamps and durations",
+        "process CPU user/system deltas for the managed E3 process tree",
+        "RSS and peak RSS; PSS when available without privilege",
+        "thread count and file-descriptor count",
+        "managed child-process count",
+        "operator action counts by durable state",
+        "executor session counts by durable state and generation",
+        "ReasoningProcess counts by durable state and generation",
+        "readyManualCycles and sentUnconfirmed/awaiting-ack counts where exposed",
+        "PostgreSQL-backed durable graph version and expected object counts",
+        "sampling interval/gap count so missing telemetry is visible"
+      ],
+      "constraints": [
+        "No GPU/NVIDIA telemetry and no PADataset access.",
+        "No root/helper authority required for measurement.",
+        "No network/public listener changes.",
+        "No browser-page content inspection.",
+        "Do not introduce psutil or another dependency unless justified; prefer stable platform/runtime primitives already present."
+      ],
+      "acceptance": [
+        "same workload state with observer enabled vs disabled is semantically identical",
+        "observer cannot mutate task/process/session/action state",
+        "metrics serialize deterministically to a versioned JSON report",
+        "unknown/unavailable metrics are explicit rather than fabricated"
+      ],
+      "closeout": "architecture/workspace-semantic-execution-research-iterate-e3-c1-closeout.v0.1.json",
+      "source_head": "0f1db2cb1c1c958af2784a7b47882c1f242a3489"
+    },
+    {
+      "id": "E3-C2",
+      "name": "bounded no-model soak",
+      "status": "PASS",
+      "implementation_goal": "Run the integrated scheduler/runtime through repeated deterministic/fake-worker cycles with the E3 observer attached, including normal cleanup and at least one generation-recovery cycle.",
+      "bounds": {
+        "model_calls": 0,
+        "gpu_use": false,
+        "human_service_cycles": 0,
+        "cycle_count": 1000,
+        "sample_every_cycles": 10,
+        "warmup_cycles": 100
+      },
+      "required_evidence": [
+        "peak and steady-state CPU/RAM/resource envelope",
+        "no unexplained monotonic growth in threads, FDs, managed child processes, sessions, actions, or unresolved processes",
+        "all intentionally created stale generations remain fenced",
+        "all cycles reach expected terminal/cleanup states",
+        "sampling gaps and failed observations are counted"
+      ],
+      "closeout": "architecture/workspace-semantic-execution-research-iterate-e3-c2-closeout.v0.1.json",
+      "source_head": "e14e71d1981a4aedbe9af75a54087683fe4718e1"
+    },
+    {
+      "id": "E3-LIVE",
+      "name": "bounded live resource/soak evidence",
+      "status": "REVIEW_FROZEN_VALIDATION_REQUIRED_THEN_AUTHORITY_GATE",
+      "implementation_goal": "Instrument a representative accepted Research-Iterate live mission, preferably the E2 recovery topology because it exercises the hardest validated path, and capture the same resource/accounting evidence through cleanup.",
+      "authority_required": true,
+      "required_evidence": [
+        "live CPU/RAM/task/resource report bound to exact source/authority/candidate heads",
+        "phase timings for decomposition, exact-source read, generation-0 service/fence, PostgreSQL rehydration, replacement generation, Workspace Shell probe, fan-in, synthesis, rollback",
+        "final durable task/action/session counts consistent with mission completion",
+        "Windows Operator offline and Linux private-route rollback after completion",
+        "no GPU/PADataset mutation",
+        "no automatic typing/submission, browser scraping, paid API fallback, or authority widening"
+      ],
+      "review": "architecture/workspace-semantic-execution-research-iterate-e3-live-review.v0.1.json",
+      "procedure": "architecture/workspace-semantic-execution-research-iterate-e3-live-procedure.v0.1.md",
+      "live_authority_exists": false
+    }
+  ],
+  "after_e3": [
+    "E4 calibrated economics comparison versus all-strong/frontier control.",
+    "E5 authoritative target-machine UX-09 performance benchmark.",
+    "E6 exact SHA/blob/route provenance, authority, rollback and unresolved-violation audit.",
+    "E7 reconcile every November acceptance-matrix requirement to PASS or explicit promotion blocker.",
+    "E8 integrated PROMOTE_V0 / HOLD / REVISE decision."
+  ],
+  "authority_gate": {
+    "repository_canaries_authorized_by_existing_task_scope": true,
+    "live_e3_authorized": false,
+    "fresh_explicit_operator_approval_required_before_live": true,
+    "no_silent_live_attempt": true,
+    "live_e3_authority_exists": false,
+    "next_action": "Validate the frozen E3-LIVE review/procedure exact head, then STOP for fresh explicit operator approval."
+  }
+}

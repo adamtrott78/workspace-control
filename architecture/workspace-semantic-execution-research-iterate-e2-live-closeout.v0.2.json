@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e2-live-closeout-v0.2",
+  "status": "PASS",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "authority_head": "2970c9ab635a338826b66847d8deb51ad8769e3a",
+  "mission_id": "research-iterate-e2:853bb07fa6a245739331a11ed5fd4224",
+  "objective": "Prove a live integrated research-iterate mission can survive deliberate worker/process/session loss and complete from durable PostgreSQL state without manual reconstruction.",
+  "result": "PASS",
+  "candidate_baseline": "fdb801d895068c78b2e2e11e6984173812884deb",
+  "candidate_head": "6115b48dfdf4a4954b3b1626598f897e4e71eeec",
+  "candidate_chain": [
+    "a64deffc54a7f39b38169068549673c3434fdb9b",
+    "8d3648e16929d5397dd16f34bdf0cb1837f10fa9",
+    "4f96d5c3a99414b1ff825c2668915b42fe1e50df",
+    "f5a42fffde6d654b02631e576cd6378ac8939eb7",
+    "6115b48dfdf4a4954b3b1626598f897e4e71eeec"
+  ],
+  "acceptance": {
+    "worker_loss_injected": true,
+    "session_loss_injected": true,
+    "process_generation_advanced": true,
+    "session_generation_advanced": true,
+    "old_action_staled": true,
+    "late_stale_result_rejected_without_mutation": true,
+    "runtime_objects_discarded": true,
+    "postgres_rehydration": true,
+    "replacement_session_completed": true,
+    "workspace_shell_read_only_probe": true,
+    "fan_in": true,
+    "synthesis": true,
+    "mission_completed": true,
+    "manual_state_relay": false,
+    "stale_generation_acceptance": false,
+    "authority_mutations": 0
+  },
+  "safety": {
+    "no_automatic_typing_or_submission": true,
+    "no_browser_page_content_scraping": true,
+    "no_paid_api_fallback": true,
+    "no_workspace_shell_exec": true,
+    "no_workspace_shell_reviewed_helper": true,
+    "no_candidate_history_rewrite": true
+  },
+  "cleanup": {
+    "tailscale_restored": true,
+    "jupyter_root_preserved": true,
+    "private_route_pass": true,
+    "firefox_shutdown_graceful": true,
+    "runtime_cleanup": true,
+    "operator_offline": true
+  },
+  "next_gate": "E3 live CPU/RAM/task/resource accounting and bounded soak evidence. Do not redo D4, E1, or E2 absent a demonstrated regression."
+}

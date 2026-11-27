@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-stage12-real-instant-prelive-setup-02-v0.1",
+  "status": "PRELIVE_SETUP_FAILED_NON_CONSUMING",
+  "date": "2026-11-17",
+  "authority_path": "architecture/workspace-semantic-execution-stage12-real-instant-authority.v0.3.json",
+  "authority_blob": "2321adc67bcccd8c42726c0a4dd16b61dd98bde3",
+  "authority_consumed": false,
+  "live_consumption_marker_observed": false,
+  "windows_launcher_started": true,
+  "isolated_firefox_started": false,
+  "failure": "Exact pinned launcher reached STAGE 12 WINDOWS BUILD but child PowerShell could not resolve dotnet; launcher exited 1 before Firefox/runtime readiness.",
+  "candidate_branch_head_after_failure": "0bc1bc0e9e6859bac6fd4feba82dae5b8c6f28de",
+  "linux_transaction_started": false,
+  "repair_candidate_review": "architecture/workspace-semantic-execution-stage12-real-instant-retry-review.v0.4.json"
+}

@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "fixture_id": "research-iterate-cross-region-feedback-p3-v1",
+  "visibility": "evaluator_only_do_not_supply_to_reasoning_worker",
+  "experiment_results": {
+    "E_isolate_r1": {
+      "region": "r1",
+      "p95_latency_ms": 315,
+      "mean_retries": 1.9,
+      "other_regions_materially_changed": false,
+      "interpretation_hint": "Isolation partially improves the region but does not remove the global abnormal retry pattern."
+    },
+    "E_isolate_r2": {
+      "region": "r2",
+      "p95_latency_ms": 322,
+      "mean_retries": 2,
+      "other_regions_materially_changed": false,
+      "interpretation_hint": "Isolation partially improves the region but does not remove the global abnormal retry pattern."
+    },
+    "E_isolate_r3": {
+      "region": "r3",
+      "p95_latency_ms": 318,
+      "mean_retries": 1.8,
+      "other_regions_materially_changed": false,
+      "interpretation_hint": "Isolation partially improves the region but does not remove the global abnormal retry pattern."
+    },
+    "E_isolate_r4": {
+      "region": "r4",
+      "p95_latency_ms": 326,
+      "mean_retries": 2,
+      "other_regions_materially_changed": false,
+      "interpretation_hint": "Isolation partially improves the region but does not remove the global abnormal retry pattern."
+    },
+    "E_global_retry_reset": {
+      "all_regions_p95_ms_range": [
+        215,
+        235
+      ],
+      "mean_retries_range": [
+        0.9,
+        1.1
+      ],
+      "interpretation_hint": "Boundary retry-state reset removes the cross-region amplification while preserving failover."
+    },
+    "E_desynchronize_timers": {
+      "all_regions_p95_ms_range": [
+        425,
+        462
+      ],
+      "mean_retries_range": [
+        2.7,
+        3.2
+      ],
+      "interpretation_hint": "Timer desynchronization changes burst shape but not the regression magnitude."
+    },
+    "E_capacity_2x": {
+      "all_regions_p95_ms_range": [
+        420,
+        455
+      ],
+      "mean_retries_range": [
+        2.7,
+        3.1
+      ],
+      "interpretation_hint": "Substantial extra capacity has little effect on retry amplification."
+    },
+    "E_half_concurrency_all": {
+      "all_regions_p95_ms_range": [
+        330,
+        365
+      ],
+      "mean_retries_range": [
+        2.6,
+        3
+      ],
+      "interpretation_hint": "Load relief lowers latency but abnormal retries persist."
+    }
+  },
+  "terminal_criteria": {
+    "expected_hypothesis": "H_retry_feedback",
+    "minimum_unique_experiments": 6,
+    "required_experiment_groups": [
+      [
+        "E_isolate_r1"
+      ],
+      [
+        "E_isolate_r2"
+      ],
+      [
+        "E_isolate_r3"
+      ],
+      [
+        "E_isolate_r4"
+      ],
+      [
+        "E_global_retry_reset"
+      ],
+      [
+        "E_desynchronize_timers",
+        "E_capacity_2x"
+      ]
+    ],
+    "required_rejected_hypotheses": [
+      "H_capacity"
+    ],
+    "required_addressed_observations": [
+      "O2"
+    ]
+  },
+  "seal_note": "Static hidden oracle for mixed long+hard taxonomy fixture. Scored workers must not receive this file."
+}

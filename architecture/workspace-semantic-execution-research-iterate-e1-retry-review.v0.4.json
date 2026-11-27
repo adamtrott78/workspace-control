@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-semantic-execution-research-iterate-e1-retry-review-v0.4",
+  "status": "VALIDATED_RETRY_REVIEW_CANDIDATE_NOT_AUTHORITY",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "predecessor": {
+    "consumed_authority": "architecture/workspace-semantic-execution-research-iterate-e1-authority.v0.1.json",
+    "consumed_closeout": "architecture/workspace-semantic-execution-research-iterate-e1-closeout.v0.1.json",
+    "invalidated_review": "architecture/workspace-semantic-execution-research-iterate-e1-retry-review.v0.3.json"
+  },
+  "implementation": {
+    "head": "2e2d6ec5bcd4ba7476baafa30780f05695043bf9",
+    "candidate_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "validation": {
+      "workspace_control_run": 3184,
+      "semantic_execution_run": 487,
+      "operator_bridge_run": 757,
+      "result": "SUCCESS"
+    },
+    "exact_bindings": {
+      "semantic-execution/src/workspace_semantic_execution/application/packet_compiler.py": "cf6200aa4b5a669dd023bc3c6478770bf4658528",
+      "benchmarks/workspace-semantic-execution/live_research_iterate_e1.py": "055c692cc6b321a8e74906a30d0c8752346064ba",
+      "operator-bridge/tools/run-research-iterate-e1-wop.ps1": "612b53b8c7703265aeb89d57040ddc3b52045fca",
+      "operator-bridge/tools/run-research-iterate-e1-remote-bootstrap.sh": "65816def4f45c3b25a642b8375a98dd2ceb91e67",
+      "benchmarks/workspace-semantic-execution/private_route_research_iterate_e1_v1.sh": "60113edde80323e0fcbfb0c5aeac835c61091dd1",
+      "operator-bridge/tools/install-wop-commands.ps1": "5624145e51ffd36af8d16ab7d3df7d595d59e8f2",
+      "operator-bridge/tools/workspace-operator-dev.ps1": "ac035d2fc898274c32cad43954ce44c15b198207"
+    },
+    "accepted_a7_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417"
+  },
+  "repaired_failure": {
+    "original_exception": "RuntimeError: e1_shell_literal_plugin_prefix_mismatch",
+    "root_cause": "Compiler envelope preceded the objective, so a raw connected-tool prefix assertion was unsatisfiable.",
+    "repair": "Leading @-mention lines are deterministically lifted from the hashed durable objective into raw clipboard prefix lines.",
+    "expected_shell_prefix": "@Workspace Shell\n@github\n\nWORKSPACE_REASONING_PACKET_V1\n",
+    "packet_hash_semantics_changed": false,
+    "durable_schema_changed": false
+  },
+  "retained_partial_evidence": {
+    "first_attempt_root_candidate": "f065ec8c274575b6b86e296e2784c1e126c69bdc",
+    "first_attempt_analysis_candidate": "705ac86d8a95e210ada81747bcc7fc22983928c3",
+    "candidate_history_rewrite": false,
+    "retry_baseline": "705ac86d8a95e210ada81747bcc7fc22983928c3"
+  },
+  "a7_frontend": {
+    "changed": false,
+    "exact_src_tree": "51480cc44f62d661421e975e67af127ecd0b0417",
+    "observed_first_attempt_focus_warning": true,
+    "warning_causal_to_prefix_failure": false,
+    "disposition": "TRACK_SEPARATELY; do not alter frozen A7 bytes inside this E1 retry.",
+    "retry_rule": "If exact Ctrl+Space -> Ctrl+V -> Enter cannot be completed because the managed worker fails to foreground, stop and report rather than silently widening the loop."
+  },
+  "workspace_shell_boundary": {
+    "literal_mentions": [
+      "@Workspace Shell",
+      "@github"
+    ],
+    "allowed_tool": "workspace_shell_inspect",
+    "exact_args": {
+      "task_id": "workspace-semantic-execution-migration-v1",
+      "target": "workspace-shell",
+      "operation": "runtime_inventory"
+    },
+    "prohibited": [
+      "workspace_shell_exec",
+      "workspace_shell_run_reviewed_helper",
+      "authority widening",
+      "repository mutation",
+      "service mutation"
+    ],
+    "expected_values_worker_hidden": true
+  },
+  "authority_gate": {
+    "live_attempt_authorized": false,
+    "prior_attempt_consumed": true,
+    "fresh_explicit_operator_approval_required": true,
+    "no_silent_retry": true,
+    "fresh_one_shot_authority_required": true
+  },
+  "next_gate": "After this exact review commit validates, wait for a fresh explicit operator instruction to run E1 again before minting authority."
+}
