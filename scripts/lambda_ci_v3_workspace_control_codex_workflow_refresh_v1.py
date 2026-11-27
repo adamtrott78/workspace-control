@@ -531,7 +531,7 @@ def require_predecessor_unchanged(
     require_snapshot_same(others_before, controller_snapshots())
 
 
-def stop_target_and_close_quiescence_window(
+def stop_target_close_quiescence_and_write_first_policy(
     *,
     root_policy_raw: bytes,
     active_route_raw: bytes,
@@ -539,10 +539,11 @@ def stop_target_and_close_quiescence_window(
     reconciler_raw: bytes,
     reconciler_override_raw: bytes,
     others_before: dict[str, dict[str, str]],
+    refreshed_policy_raw: bytes,
+    mutation_state: dict[str, bool],
 ) -> None:
     run_systemctl("stop", TARGET_UNIT)
     require_target_inactive()
-    require_target_quiescent()
     require_predecessor_unchanged(
         root_policy_raw=root_policy_raw,
         active_route_raw=active_route_raw,
@@ -551,6 +552,9 @@ def stop_target_and_close_quiescence_window(
         reconciler_override_raw=reconciler_override_raw,
         others_before=others_before,
     )
+    require_target_quiescent()
+    mutation_state["started"] = True
+    atomic_file(TARGET_POLICY, refreshed_policy_raw, 0o644)
 
 
 def verify_predecessor_restored(
@@ -816,20 +820,20 @@ def main() -> int:
     atomic_json(tx_path, tx)
     consume_authority(authority, authority_raw)
 
-    mutation_started = False
+    mutation_state = {"started": False}
     reconciler_mode = int(str(reconciler_entry.get("mode")), 8)
     try:
-        stop_target_and_close_quiescence_window(
+        stop_target_close_quiescence_and_write_first_policy(
             root_policy_raw=root_policy_raw,
             active_route_raw=active_raw,
             policy_raw=current_policy_raw,
             reconciler_raw=old_reconciler,
             reconciler_override_raw=old_reconciler_override_raw,
             others_before=others_before,
+            refreshed_policy_raw=refreshed_policy_raw,
+            mutation_state=mutation_state,
         )
 
-        mutation_started = True
-        atomic_file(TARGET_POLICY, refreshed_policy_raw, 0o644)
         atomic_json(REFRESH_ACTIVE, refresh)
         atomic_json(RECONCILER_OVERRIDE, new_reconciler_override)
         atomic_file(
@@ -871,7 +875,7 @@ def main() -> int:
 
         tx.update({
             "phase": "COMMITTED_ACTIVE_CODEX_WORKFLOW_REFRESH",
-            "mutation_performed": True,
+            "mutation_performed": mutation_state["started"],
             "refresh_receipt_sha256": sha(REFRESH_ACTIVE.read_bytes()),
             "controller_policy_file_sha256": sha(TARGET_POLICY.read_bytes()),
             "reconciler_sha256": sha(INSTALLED_RECONCILER.read_bytes()),
@@ -886,7 +890,7 @@ def main() -> int:
     except BaseException as exc:
         rollback_error: BaseException | None = None
         try:
-            if mutation_started:
+            if mutation_state["started"]:
                 target_restored, others_restored = rollback_after_mutation(
                     root_policy_raw=root_policy_raw,
                     active_route_raw=active_raw,
@@ -908,14 +912,14 @@ def main() -> int:
                 )
                 tx["phase"] = "FAILED_PRE_MUTATION_RESTORED"
             tx["rollback_completed"] = True
-            tx["mutation_performed"] = mutation_started
+            tx["mutation_performed"] = mutation_state["started"]
             tx["target_controller_after_rollback"] = target_restored
             tx["existing_controller_snapshot_after_rollback"] = others_restored
         except BaseException as rollback_exc:
             rollback_error = rollback_exc
             tx["phase"] = "ROLLBACK_INCOMPLETE"
             tx["rollback_completed"] = False
-            tx["mutation_performed"] = mutation_started
+            tx["mutation_performed"] = mutation_state["started"]
             tx["rollback_error"] = str(rollback_exc)
         tx["failure"] = str(exc)
         tx["failed_at"] = datetime.now(timezone.utc).isoformat()
