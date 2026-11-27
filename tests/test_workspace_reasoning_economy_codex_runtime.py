@@ -228,7 +228,7 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
             "- name: Bind existing Workspace Control Codex runtime"
         )
         preflight_guard = text.index(
-            "if: steps.gate.outputs.mode == 'preflight'",
+            "if: steps.gate.outputs.mode == 'preflight' || steps.gate.outputs.mode == 'calibrate'",
             preflight_index,
         )
         self.assertGreater(preflight_guard, preflight_index)
@@ -243,6 +243,46 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
             '"threadUsage"',
         ):
             self.assertNotIn(forbidden, text)
+
+    def test_codex_calibration_is_one_bounded_redacted_inference(self):
+        text = _workflow()
+
+        self.assertIn("/workspace-codex-calibrate ", text)
+        self.assertIn('/workspace-codex-calibrate) mode="calibrate"', text)
+        self.assertIn(
+            "steps.gate.outputs.mode == 'preflight' || steps.gate.outputs.mode == 'calibrate'",
+            text,
+        )
+        self.assertIn(
+            "- name: Run one bounded Codex allowance calibration quantum",
+            text,
+        )
+        self.assertIn('"mode": "WORKSPACE_CONTROL_CODEX_CALIBRATION_V1"', text)
+        self.assertIn('"surface": "CODEX"', text)
+        self.assertIn('"isolation_verified": True', text)
+        self.assertIn('"model_actions": 1', text)
+        self.assertIn('"model_inference_performed": True', text)
+        self.assertIn('"api_key_present": False', text)
+        self.assertIn('"credential_material_in_receipt": False', text)
+        self.assertIn('"prompt_material_in_receipt": False', text)
+        self.assertIn('"model_output_material_in_receipt": False', text)
+        self.assertIn('"usage_before": clean_snapshot(before)', text)
+        self.assertIn('"usage_after": clean_snapshot(after)', text)
+        self.assertIn('"--ephemeral"', text)
+        self.assertIn('"read-only"', text)
+        self.assertIn('"model_reasoning_effort=low"', text)
+        self.assertIn("trace.turns_started == 1", text)
+        self.assertIn("trace.turns_completed == 1", text)
+        self.assertIn("trace.turns_failed == 0", text)
+        self.assertIn("trace.tool_calls == 0", text)
+        self.assertIn("trace.web_searches == 0", text)
+        self.assertIn("trace.file_changes == 0", text)
+        self.assertIn("workspace-control-codex-calibration-receipt.json", text)
+        self.assertIn("workspace-control-codex-calibration-receipt", text)
+        self.assertNotIn("completed.stderr", text)
+        self.assertNotIn('"final_agent_message"', text)
+        self.assertNotIn("scored_replicate_plan_v1", text)
+        self.assertNotIn("matrix-v1/", text)
 
 
 if __name__ == "__main__":
