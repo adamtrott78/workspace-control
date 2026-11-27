@@ -545,7 +545,7 @@ class WorkspaceControlCodexWorkflowRefreshTests(unittest.TestCase):
             refresh.OLD_BLOB,
         )
         self.assertEqual(
-            reconciler.WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
+            reconciler.WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_BLOB,
             refresh.NEW_BLOB,
         )
 
