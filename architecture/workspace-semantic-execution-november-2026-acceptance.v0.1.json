@@ -161,7 +161,12 @@
         "The mismatch was traced to a legitimate newer accepted PADataset scientific workflow-refresh lineage rather than corruption or unauthorized drift.",
         "Repair PR #703 rebased the Codex route activation verifier on the accepted scientific refresh lineage while preserving exact scientific workflow attestation; exact head fb14873f4bd2818cad6fc2f73402dc76ce76dee6 passed Workspace Control Validation #3347.",
         "PR #703 merged as main cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277. Live workspace-control-control-small-v1 controller was subsequently inspected read-only and remains active/running; no failed-attempt mutation is present.",
-        "Remaining CODEX-01 live gate is now exactly one fresh root/operator activation against main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277, followed by a fresh zero-inference bootstrap receipt. The stale pre-repair authority/head must not be reused."
+        "Remaining CODEX-01 live gate is now exactly one fresh root/operator activation against main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277, followed by a fresh zero-inference bootstrap receipt. The stale pre-repair authority/head must not be reused.",
+        "A second live activation retry against repaired main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277 failed during candidate.verify_installed() with `PADataset scientific dual-lane managed artifact digest drift: /etc/workspace-ci/v3/compatibility-matrix.json`. Because verify_installed runs before authority creation/consumption, the retry again performed no controller stop, policy mutation, or route activation.",
+        "Root cause was a missing accepted runtime390 precedence layer: live runtime390 owns shared managed root-policy/executor-actions/compatibility-matrix/deployment-overlay artifacts after the original dual-lane receipt, while lane-A v4/lane-B v9 are later controller-workflow trust successors.",
+        "Historical PR #656 head 6172553a389fee392cc30b215f9380ba2725bae8 already encoded the correct precedence: runtime390 receipt bound to frozen lane-A v3 + lane-B v8 predecessors, with runtime390 overrides above dual/scientific/production managed-artifact digests.",
+        "Repair PR #706 restored that accepted runtime390 precedence into current main and additionally composes Workspace Control Codex overlay ownership above runtime390. Exact head 861503d5776fc53714c52f5cae9d22fb4ee9f31f passed Workspace Control Validation #3354.",
+        "PR #706 merged as main fe0283578789a5de64a4a2404a4927711ac35132. Read-only post-failure inspection shows workspace-control-control-small-v1 and workspace-ci-v3-provisioner remain active/running with unchanged PIDs from the preceding inspection."
       ]
     },
     {
@@ -473,5 +478,5 @@
   "critical_path_rule": "Every implementation item must close or materially advance at least one requirement ID in this matrix. Work that does not map to a requirement is out of the November critical path unless it removes a demonstrated blocker.",
   "completion_rule": "November Integrated v0 is complete only when every mandatory requirement is PASS and PROD-03 records PROMOTE_V0.",
   "last_updated": "2026-11-27",
-  "latest_validated_checkpoint": "main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277 (Codex route activation verifier rebased on accepted PADataset scientific refresh lineage; live activation retry pending)"
+  "latest_validated_checkpoint": "main@fe0283578789a5de64a4a2404a4927711ac35132 (Codex route verifier restored accepted runtime390 managed-artifact precedence; fresh live activation pending)"
 }
