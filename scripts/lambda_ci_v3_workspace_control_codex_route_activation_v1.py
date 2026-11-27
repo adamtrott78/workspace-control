@@ -315,117 +315,18 @@ def current_reconciler_override(
     return value, raw
 
 
-def _root_envelope_map(root: dict[str, Any], label: str) -> dict[str, str]:
-    classes = root.get("runner_classes")
-    if not isinstance(classes, dict):
-        raise RouteActivationError(f"{label} runner classes missing")
-    result: dict[str, str] = {}
-    for class_id, value in classes.items():
-        if not isinstance(class_id, str) or not isinstance(value, dict):
-            raise RouteActivationError(f"{label} runner class binding invalid")
-        digest = value.get("root_envelope_sha256")
-        if not isinstance(digest, str) or SHA64.fullmatch(digest) is None:
-            raise RouteActivationError(
-                f"{label} root envelope digest invalid: {class_id}"
-            )
-        result[class_id] = digest
-    return result
-
-
-def _require_root_authority_equivalent(
-    *,
-    candidate_root: dict[str, Any],
-    installed_root: dict[str, Any],
-) -> None:
-    candidate_digest = candidate_root.get("root_policy_sha256")
-    installed_digest = installed_root.get("root_policy_sha256")
-    if candidate_digest == installed_digest:
-        return
-
-    receipt_path = (
-        candidate.PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH_ACTIVE_RECEIPT
+def _controller_policy_digest(policy: dict[str, Any]) -> str:
+    return compiler.sha256_object(
+        {
+            key: value
+            for key, value in policy.items()
+            if key
+            not in {
+                "control_plane_generation_sha256",
+                "controller_policy_sha256",
+            }
+        }
     )
-    try:
-        refresh_raw = require_root_private(receipt_path)
-    except FileNotFoundError as exc:
-        raise RouteActivationError(
-            "Codex route candidate root-policy mismatch without accepted "
-            "runtime390 successor"
-        ) from exc
-    refresh = json.loads(refresh_raw)
-    if not isinstance(refresh, dict):
-        raise RouteActivationError("runtime390 root receipt invalid")
-    required_identity = {
-        "schema_version": 1,
-        "mode": "V3_PADATASET_SCIENTIFIC_RUNTIME_CEILING_REFRESH",
-        "phase": "ACTIVE",
-        "previous_root_policy_sha256": candidate_digest,
-        "root_policy_sha256": installed_digest,
-    }
-    for key, expected in required_identity.items():
-        if refresh.get(key) != expected:
-            raise RouteActivationError(
-                f"runtime390 root authority binding mismatch: {key}"
-            )
-
-    if (
-        candidate_root.get("host_resource_policy")
-        != installed_root.get("host_resource_policy")
-    ):
-        raise RouteActivationError(
-            "runtime390 root successor changed host-resource authority"
-        )
-    if candidate_root.get("upstream_pins") != installed_root.get("upstream_pins"):
-        raise RouteActivationError(
-            "runtime390 root successor changed upstream-pin authority"
-        )
-
-    predecessor = refresh.get("previous_root_envelope_sha256")
-    successor = refresh.get("root_envelope_sha256")
-    if not isinstance(predecessor, dict) or not isinstance(successor, dict):
-        raise RouteActivationError("runtime390 root envelope maps missing")
-    candidate_envelopes = _root_envelope_map(
-        candidate_root,
-        "Codex route candidate",
-    )
-    installed_envelopes = _root_envelope_map(
-        installed_root,
-        "installed runtime390 root",
-    )
-    if candidate_envelopes != predecessor:
-        raise RouteActivationError(
-            "Codex route candidate is not the runtime390 root predecessor"
-        )
-    if installed_envelopes != successor:
-        raise RouteActivationError(
-            "installed root is not the accepted runtime390 successor"
-        )
-
-    changed = {
-        class_id
-        for class_id in predecessor
-        if predecessor[class_id] != successor[class_id]
-    }
-    expected_changed = {
-        candidate.PADATASET_SCIENTIFIC_TARGET_CLASS,
-        candidate.PADATASET_SCIENTIFIC_DUAL_TARGET_CLASS,
-    }
-    if changed != expected_changed:
-        raise RouteActivationError(
-            "runtime390 root successor changed unexpected root envelopes"
-        )
-
-    target_candidate = candidate_envelopes.get(TARGET_CLASS)
-    target_installed = installed_envelopes.get(TARGET_CLASS)
-    if (
-        target_candidate is None
-        or target_candidate != target_installed
-        or TARGET_CLASS in changed
-    ):
-        raise RouteActivationError(
-            "runtime390 root successor changed Workspace Control control-small "
-            "authority"
-        )
 
 
 def build_candidate_policy(
@@ -434,26 +335,53 @@ def build_candidate_policy(
     installed_root: dict[str, Any],
     current_policy: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    compiled = compiler.compile_policy(repo)
-    candidate_root = compiled["root_projection"]
-    _require_root_authority_equivalent(
-        candidate_root=candidate_root,
-        installed_root=installed_root,
-    )
-    candidate_policy = compiled["controller_projections"][TARGET_CLASS]
+    """Add only the Codex trusted workflow to the installed controller policy.
 
-    structural_keys = {
-        "schema_version",
-        "runner_class_id",
-        "repository",
-        "scale_set_name",
-        "runner_prefix",
-        "max_runners",
+    Root authority is not reconstructed from current repository inputs here.
+    The reconciler has already attested the complete installed effective
+    generation, including scientific/runtime390 successors. This transaction
+    does not write root-policy.json, so the route candidate is built from the
+    installed control-small controller policy and changes only its trusted
+    workflow set plus the derived controller-policy digest.
+    """
+    classes = installed_root.get("runner_classes")
+    if not isinstance(classes, dict):
+        raise RouteActivationError("installed root runner classes missing")
+    target_root = classes.get(TARGET_CLASS)
+    if not isinstance(target_root, dict):
+        raise RouteActivationError(
+            "installed Workspace Control control-small root class missing"
+        )
+
+    root_bindings = {
+        "runner_class_id": TARGET_CLASS,
+        "project_id": "workspace-control",
+        "repository": "adamtrott78/workspace-control",
+        "scale_set_name": candidate.WORKSPACE_CONTROL_CODEX_TARGET_SCALE_SET,
+        "max_runners": 1,
+        "project_max_active_runners": 1,
     }
-    for key in structural_keys:
-        if current_policy.get(key) != candidate_policy.get(key):
+    for key, expected in root_bindings.items():
+        if target_root.get(key) != expected:
             raise RouteActivationError(
-                f"Codex route candidate changed controller structure: {key}"
+                f"installed control-small root binding drift: {key}"
+            )
+    if target_root.get("exclusive_resource_claims") != []:
+        raise RouteActivationError(
+            "installed control-small unexpectedly owns exclusive resources"
+        )
+
+    policy_root_bindings = {
+        "runner_class_id": target_root["runner_class_id"],
+        "repository": target_root["repository"],
+        "scale_set_name": target_root["scale_set_name"],
+        "runner_prefix": target_root["runner_prefix"],
+        "max_runners": target_root["max_runners"],
+    }
+    for key, expected in policy_root_bindings.items():
+        if current_policy.get(key) != expected:
+            raise RouteActivationError(
+                f"installed control-small controller/root mismatch: {key}"
             )
 
     current_workflows = current_policy.get("trusted_workflows")
@@ -463,7 +391,8 @@ def build_candidate_policy(
         )
     current = current_workflows[0]
     if (
-        current.get("route_id") != "control-validation"
+        not isinstance(current, dict)
+        or current.get("route_id") != "control-validation"
         or current.get("path")
         != candidate.WORKSPACE_CONTROL_VALIDATION_WORKFLOW_PATH
         or current.get("blob_sha")
@@ -473,23 +402,42 @@ def build_candidate_policy(
             "current Workspace Control workflow binding drift"
         )
 
-    candidate_workflows = candidate_policy.get("trusted_workflows")
-    if not isinstance(candidate_workflows, list) or len(candidate_workflows) != 2:
+    compiled = compiler.compile_policy(repo)
+    compiled_policy = compiled["controller_projections"].get(TARGET_CLASS)
+    if not isinstance(compiled_policy, dict):
         raise RouteActivationError(
-            "Codex route candidate workflow set invalid"
+            "compiled Workspace Control control-small policy missing"
+        )
+    for key in (
+        "schema_version",
+        "runner_class_id",
+        "repository",
+        "scale_set_name",
+        "runner_prefix",
+        "max_runners",
+    ):
+        if compiled_policy.get(key) != current_policy.get(key):
+            raise RouteActivationError(
+                f"compiled Codex route changed controller structure: {key}"
+            )
+
+    compiled_workflows = compiled_policy.get("trusted_workflows")
+    if not isinstance(compiled_workflows, list) or len(compiled_workflows) != 2:
+        raise RouteActivationError(
+            "compiled Codex route workflow set invalid"
         )
     by_route = {
         row.get("route_id"): row
-        for row in candidate_workflows
+        for row in compiled_workflows
         if isinstance(row, dict)
     }
     if set(by_route) != {"control-validation", "codex-bootstrap"}:
         raise RouteActivationError(
-            "Codex route candidate workflow identities invalid"
+            "compiled Codex route workflow identities invalid"
         )
     if by_route["control-validation"] != current:
         raise RouteActivationError(
-            "Codex route candidate changed control-validation binding"
+            "compiled Codex route changed control-validation binding"
         )
     codex = by_route["codex-bootstrap"]
     if (
@@ -500,8 +448,28 @@ def build_candidate_policy(
         raise RouteActivationError(
             "Codex bootstrap trusted-workflow binding invalid"
         )
-    return candidate_policy, candidate_root
 
+    refreshed = copy.deepcopy(current_policy)
+    refreshed["trusted_workflows"] = [
+        copy.deepcopy(by_route[route_id])
+        for route_id in sorted(by_route)
+    ]
+    # Preserve the installed control-plane generation. Only the trusted
+    # workflow set and its derived controller-policy digest change.
+    refreshed["controller_policy_sha256"] = _controller_policy_digest(
+        refreshed
+    )
+
+    changed_keys = {
+        key
+        for key in set(current_policy) | set(refreshed)
+        if current_policy.get(key) != refreshed.get(key)
+    }
+    if changed_keys != {"trusted_workflows", "controller_policy_sha256"}:
+        raise RouteActivationError(
+            "Codex bootstrap candidate changed non-controller-local fields"
+        )
+    return refreshed, installed_root
 
 def build_overlay(current: dict[str, Any]) -> dict[str, Any]:
     refreshed = copy.deepcopy(current)
