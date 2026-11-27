@@ -1651,9 +1651,57 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_dual_lane is not None
         else {}
     )
+
+    manifest_entries = {
+        str(entry.get("destination", "")): entry
+        for entry in manifest.get("entries", [])
+        if isinstance(entry, dict)
+    }
+    overlay_entry = manifest_entries.get(
+        WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+    )
+    if overlay_entry is None:
+        raise ReconcileError(
+            "deployment overlay absent from installed manifest"
+        )
+    predecessor_overlay_sha256 = str(overlay_entry.get("sha256", ""))
+    production_overlay = production_overrides.get(
+        WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+    )
+    if production_overlay is not None:
+        predecessor_overlay_sha256 = production_overlay
+    scientific_overlay = scientific_overrides.get(
+        WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+    )
+    if scientific_overlay is not None:
+        predecessor_overlay_sha256 = scientific_overlay["sha256"]
+    dual_overlay = dual_overrides.get(
+        WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+    )
+    if dual_overlay is not None:
+        predecessor_overlay_sha256 = dual_overlay["sha256"]
+
+    workspace_codex_route = _workspace_control_codex_route_override(
+        manifest_raw,
+        manifest,
+        production_overrides,
+        predecessor_overlay_sha256=predecessor_overlay_sha256,
+    )
+    workspace_codex_overrides = (
+        {
+            WORKSPACE_CONTROL_CODEX_CONTROLLER_DESTINATION:
+                workspace_codex_route["controller_policy_file_sha256"],
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION:
+                workspace_codex_route["overlay_file_sha256"],
+        }
+        if workspace_codex_route is not None
+        else {}
+    )
+
     production_overrides_seen: set[str] = set()
     scientific_overrides_seen: set[str] = set()
     dual_overrides_seen: set[str] = set()
+    workspace_codex_overrides_seen: set[str] = set()
 
     for entry in manifest.get("entries", []):
         if not isinstance(entry, dict):
@@ -1676,7 +1724,20 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         scientific_binding = scientific_overrides.get(destination)
         dual_binding = dual_overrides.get(destination)
         production_digest = production_overrides.get(destination)
-        if dual_binding is not None:
+        workspace_codex_digest = workspace_codex_overrides.get(destination)
+        if workspace_codex_digest is not None:
+            if actual_sha != workspace_codex_digest:
+                raise ReconcileError(
+                    f"Workspace Control Codex route managed artifact digest drift: {path}"
+                )
+            workspace_codex_overrides_seen.add(destination)
+            if dual_binding is not None:
+                dual_overrides_seen.add(destination)
+            if scientific_binding is not None:
+                scientific_overrides_seen.add(destination)
+            if production_digest is not None:
+                production_overrides_seen.add(destination)
+        elif dual_binding is not None:
             if actual_sha != dual_binding["sha256"]:
                 raise ReconcileError(
                     f"PADataset scientific dual-lane managed artifact digest drift: {path}"
@@ -1715,6 +1776,14 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         missing = sorted(set(dual_overrides) - dual_overrides_seen)
         raise ReconcileError(
             f"PADataset scientific dual-lane override artifacts were not observed: {missing}"
+        )
+    if workspace_codex_overrides_seen != set(workspace_codex_overrides):
+        missing = sorted(
+            set(workspace_codex_overrides) - workspace_codex_overrides_seen
+        )
+        raise ReconcileError(
+            "Workspace Control Codex route override artifacts were not observed: "
+            f"{missing}"
         )
     for destination, binding in scientific_additions.items():
         path = pathlib.Path(destination)
@@ -1889,6 +1958,11 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
                 scientific_override,
                 scientific_workflow_refresh,
             )
+
+    if workspace_codex_route is not None:
+        _verify_workspace_control_codex_route_effective_state(
+            workspace_codex_route
+        )
 
 
 def _git_exact_head(repo_root: pathlib.Path, expected: str) -> None:
