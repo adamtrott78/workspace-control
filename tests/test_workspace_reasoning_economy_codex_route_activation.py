@@ -114,8 +114,8 @@ class WorkspaceControlCodexRouteActivationTests(unittest.TestCase):
             current_policy=current,
         )
         self.assertEqual(
-            candidate_policy["trusted_workflows"][1]["route_id"],
-            "codex-bootstrap",
+            {row["route_id"] for row in candidate_policy["trusted_workflows"]},
+            {"control-validation", "codex-bootstrap"},
         )
 
     def test_installed_control_small_root_binding_drift_fails_closed(self):
