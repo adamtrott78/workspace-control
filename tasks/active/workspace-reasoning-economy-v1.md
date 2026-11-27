@@ -49,7 +49,7 @@ Do not rerun route activation. Trigger a fresh zero-inference control-small Code
 
 ## Blockers / gates
 
-- LIVE CODEX ZERO-INFERENCE BOOTSTRAP: live /workspace-codex-bootstrap activation PASSED at main@de3d0642b3b300859c2508f829d5d7ca44eca77c under one-shot authority b95c06d2-f43a-4871-acf5-d128b22d656c; transaction activation-657a60ba-aa7f-4805-89a1-2f59ff26bdcf is the accepted route-activation checkpoint. Authority is consumed/non-reusable. Next prove the live control-small bootstrap/auth environment with zero inference.
+- LIVE CODEX ZERO-INFERENCE BOOTSTRAP: route activation is complete and accepted at main@de3d0642b3b300859c2508f829d5d7ca44eca77c; consumed authority b95c06d2-f43a-4871-acf5-d128b22d656c is non-reusable. Next prove the live control-small bootstrap/auth environment with zero inference before any Codex calibration.
 - CLAIM-BEARING EXECUTION GATE: protocol screening is complete and the exact 54-run scored plan is frozen, but launch remains blocked on three independent gates: reviewed live Instant/operator authority, live evaluator sealed-store worker-denial/readback acceptance, and calibrated shared ChatGPT/Codex weekly allowance telemetry. Do not spend 54 manual clean-chat runs or treat UNKNOWN meter cost as free.
 
 ## Fresh-chat initialization
