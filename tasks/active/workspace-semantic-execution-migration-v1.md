@@ -70,12 +70,12 @@ Design, benchmark, and incrementally migrate Workspace Control to an open-world 
 
 ## Next safe action
 
-Run one fresh root/operator Codex bootstrap-route activation against exact main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277 using the reviewed one-shot activation helper. After WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_ACTIVATION=PASS, trigger a fresh zero-inference bootstrap against an open same-repository PR head and verify the control-small receipt/auth runtime. Then run only the first minimal planner-enforced subscription-Codex calibration action.
+Run one fresh root/operator Codex bootstrap-route activation against exact main@fe0283578789a5de64a4a2404a4927711ac35132. The verifier now composes accepted runtime390 shared managed-artifact ownership underneath the Codex route. After WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_ACTIVATION=PASS, trigger a fresh zero-inference bootstrap against an open same-repository PR head and verify the control-small receipt/auth runtime; then run only the first minimal planner-enforced subscription-Codex calibration action.
 
 ## Remaining work
 
 - Instant front door: perform bounded live acceptance through private plugin plugins_6b08cf5ea1548191b543faab9952bd26 (new-task candidate, durable status query, explicit decision/cancel-revise candidate), then close INST-07 if no chat-created authority occurs.
-- E4/CODEX: activate the additive bootstrap route once against repaired main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277, then run a fresh zero-inference control-small bootstrap and the minimum planner-enforced subscription-Codex live calibration jobs with controlled before/after usage snapshots.
+- E4/CODEX: activate the additive bootstrap route once against runtime390-aware main@fe0283578789a5de64a4a2404a4927711ac35132, then run a fresh zero-inference control-small bootstrap and the minimum planner-enforced subscription-Codex live calibration jobs with controlled before/after usage snapshots.
 - E4 quality/economics: complete claim-bearing matched reasoning-quality/holdout evidence and compare validated progress plus scarce-allowance consumption against the all-strong/frontier control.
 - REL-01: close the remaining integrated fault-campaign cases named by the matrix, especially DB disconnect, validator timeout and delayed/out-of-order event handling.
 - REL-02 / PROD-01: run explicit target-budget comparison, representative soak/resource measurements and authoritative UX-09 target performance on the Windows machine.
@@ -85,7 +85,7 @@ Run one fresh root/operator Codex bootstrap-route activation against exact main@
 
 ## Blockers / gates
 
-- CODEX-01 LIVE ACTIVATION: repo-side additive route + one-shot activation transaction + accepted-science-lineage verifier repair are merged at main@cf8141aa44a5c66fa2ecdcd0f35bc89d6c95b277. The prior activation failed before authority creation/consumption or mutation. A fresh root/operator activation against this exact head is required; never reuse the stale 1836ff50… authority/head. After PASS, trigger a fresh zero-inference bootstrap and verify the receipt/auth runtime.
+- CODEX-01 LIVE ACTIVATION: additive route + one-shot activation + accepted science workflow lineage + runtime390 shared-managed-artifact precedence are now merged at main@fe0283578789a5de64a4a2404a4927711ac35132. Both prior activation attempts failed before authority creation/consumption or mutation. Use only a fresh one-shot root/operator authority against this exact head; never reuse 1836ff50… or cf8141aa… authority/head. On PASS, trigger a fresh zero-inference bootstrap.
 - E4 ECONOMICS / CODEX: claim-bearing comparison remains gated on calibrated comparable allowance telemetry plus live subscription-only Codex bounded-job evidence; do not substitute raw token estimates or uncalibrated UI observations.
 - REL-01 / REL-02: A10 proves integrated session/process loss and live bounded resource behavior, but the remaining fault-campaign cases plus explicit target-budget/representative-soak closeout are not yet reconciled to PASS.
 - PROD-02: A10 binding/provenance closure passed, but the emitted resource report retained stale artifact_id workspace-semantic-execution-e3-a9-live-resource-v1; normalize that non-authority metadata defect before claiming zero unresolved provenance violations.
