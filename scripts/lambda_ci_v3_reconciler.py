@@ -78,6 +78,36 @@ PRODUCTION_ROUTE_KEYS = {
     "padataset:gpu-ci",
 }
 
+WORKSPACE_CONTROL_CODEX_ROUTE_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "workspace-control"
+    / "codex-bootstrap-route"
+    / "active.json"
+)
+WORKSPACE_CONTROL_CODEX_TARGET_CLASS = "workspace-control-control-small-v1"
+WORKSPACE_CONTROL_CODEX_TARGET_ROUTE = "workspace-control:codex-bootstrap"
+WORKSPACE_CONTROL_CODEX_TARGET_SCALE_SET = "lambda-workspace-control-control-small"
+WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH = (
+    ".github/workflows/lambda-ci-workspace-control-codex-bootstrap.yml"
+)
+WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB = (
+    "520da69cfb9b28c81fb1121a16c12d3715892cc7"
+)
+WORKSPACE_CONTROL_VALIDATION_WORKFLOW_PATH = (
+    ".github/workflows/lambda-ci-workspace-control-validation.yml"
+)
+WORKSPACE_CONTROL_VALIDATION_WORKFLOW_BLOB = (
+    "7e361db3a8ead667c047e9dc3fe12908c10eb96a"
+)
+WORKSPACE_CONTROL_CODEX_CONTROLLER_DESTINATION = str(
+    V3_CONFIG_ROOT
+    / "controllers"
+    / f"{WORKSPACE_CONTROL_CODEX_TARGET_CLASS}.json"
+)
+WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION = str(
+    V3_CONFIG_ROOT / "deployment-overlay.json"
+)
+
 PADATASET_SCIENTIFIC_ACTIVE_RECEIPT = (
     V3_RUNTIME_STATE_ROOT / "padataset-scientific" / "active.json"
 )
@@ -292,6 +322,250 @@ def _production_cutover_overrides(
                 f"active production cutover digest invalid: {destination}"
             )
     return dict(overrides)
+
+
+def _workspace_control_codex_route_override(
+    manifest_raw: bytes,
+    manifest: dict[str, Any],
+    production_overrides: dict[str, str],
+    *,
+    predecessor_overlay_sha256: str,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        WORKSPACE_CONTROL_CODEX_ROUTE_ACTIVE_RECEIPT
+    ):
+        return None
+
+    active = _load_override_receipt(
+        WORKSPACE_CONTROL_CODEX_ROUTE_ACTIVE_RECEIPT,
+        "active Workspace Control Codex bootstrap route override",
+    )
+    previous_controller_file = production_overrides.get(
+        WORKSPACE_CONTROL_CODEX_CONTROLLER_DESTINATION
+    )
+    if previous_controller_file is None:
+        raise ReconcileError(
+            "Workspace Control Codex route requires production controller predecessor"
+        )
+    required = {
+        "schema_version": 1,
+        "mode": "V3_WORKSPACE_CONTROL_CODEX_BOOTSTRAP_ROUTE_OVERRIDE",
+        "phase": "ACTIVE",
+        "base_source_head": manifest.get("source_head"),
+        "base_install_manifest_sha256": _sha256(manifest_raw),
+        "root_policy_sha256": manifest.get("root_policy_sha256"),
+        "target_class_id": WORKSPACE_CONTROL_CODEX_TARGET_CLASS,
+        "target_route_key": WORKSPACE_CONTROL_CODEX_TARGET_ROUTE,
+        "target_scale_set_name": WORKSPACE_CONTROL_CODEX_TARGET_SCALE_SET,
+        "workflow_path": WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH,
+        "workflow_blob_sha": WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
+        "control_validation_workflow_path":
+            WORKSPACE_CONTROL_VALIDATION_WORKFLOW_PATH,
+        "control_validation_workflow_blob_sha":
+            WORKSPACE_CONTROL_VALIDATION_WORKFLOW_BLOB,
+        "previous_controller_policy_file_sha256": previous_controller_file,
+        "previous_overlay_file_sha256": predecessor_overlay_sha256,
+    }
+    for key, expected in required.items():
+        if active.get(key) != expected:
+            raise ReconcileError(
+                f"active Workspace Control Codex route binding mismatch: {key}"
+            )
+    _require_source_head(
+        active.get("source_head"),
+        "Workspace Control Codex route override",
+    )
+    authorization_id = active.get("authorization_id")
+    if (
+        not isinstance(authorization_id, str)
+        or re.fullmatch(
+            r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+            authorization_id,
+        )
+        is None
+    ):
+        raise ReconcileError(
+            "Workspace Control Codex route authorization id invalid"
+        )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+        "overlay_file_sha256",
+    ):
+        value = active.get(key)
+        if (
+            not isinstance(value, str)
+            or re.fullmatch(r"[0-9a-f]{64}", value) is None
+        ):
+            raise ReconcileError(
+                f"active Workspace Control Codex route {key} invalid"
+            )
+    return active
+
+
+def _verify_workspace_control_codex_route_effective_state(
+    active: dict[str, Any],
+) -> None:
+    root_policy = _json(V3_CONFIG_ROOT / "root-policy.json")
+    if root_policy.get("root_policy_sha256") != active["root_policy_sha256"]:
+        raise ReconcileError(
+            "Workspace Control Codex route root-policy digest mismatch"
+        )
+    host = root_policy.get("host_resource_policy")
+    if not isinstance(host, dict):
+        raise ReconcileError(
+            "Workspace Control Codex route host resource policy missing"
+        )
+    if host.get("migration_mode", {}).get("host_max_active_runners") != 3:
+        raise ReconcileError(
+            "Workspace Control Codex route host concurrency ceiling mismatch"
+        )
+    limits = host.get("project_limits")
+    if not isinstance(limits, dict):
+        raise ReconcileError(
+            "Workspace Control Codex route project limits missing"
+        )
+    if limits.get("workspace-control", {}).get("max_active_runners") != 1:
+        raise ReconcileError(
+            "Workspace Control Codex route project concurrency widened"
+        )
+    if limits.get("padataset", {}).get("max_active_runners") != 2:
+        raise ReconcileError(
+            "Workspace Control Codex route PADataset capacity drift"
+        )
+    reserved = host.get("reservation_policy", {}).get(
+        "reserved_project_slots"
+    )
+    if reserved != {"workspace-control": 1}:
+        raise ReconcileError(
+            "Workspace Control Codex route reservation drift"
+        )
+
+    classes = root_policy.get("runner_classes")
+    if not isinstance(classes, dict):
+        raise ReconcileError(
+            "Workspace Control Codex route runner classes missing"
+        )
+    target = classes.get(WORKSPACE_CONTROL_CODEX_TARGET_CLASS)
+    if not isinstance(target, dict):
+        raise ReconcileError(
+            "Workspace Control Codex route target class missing"
+        )
+    exact = {
+        "runner_class_id": WORKSPACE_CONTROL_CODEX_TARGET_CLASS,
+        "project_id": "workspace-control",
+        "repository": "adamtrott78/workspace-control",
+        "scale_set_name": WORKSPACE_CONTROL_CODEX_TARGET_SCALE_SET,
+        "execution_contract_id": "control-small-ci-v1",
+        "max_runners": 1,
+        "project_max_active_runners": 1,
+    }
+    for key, expected in exact.items():
+        if target.get(key) != expected:
+            raise ReconcileError(
+                f"Workspace Control Codex route target binding drift: {key}"
+            )
+    if target.get("exclusive_resource_claims") != []:
+        raise ReconcileError(
+            "Workspace Control Codex route unexpectedly gained resources"
+        )
+
+    controller_path = pathlib.Path(
+        WORKSPACE_CONTROL_CODEX_CONTROLLER_DESTINATION
+    )
+    controller_raw = controller_path.read_bytes()
+    if (
+        _sha256(controller_raw)
+        != active["controller_policy_file_sha256"]
+    ):
+        raise ReconcileError(
+            "Workspace Control Codex route controller file digest mismatch"
+        )
+    controller = json.loads(controller_raw)
+    if (
+        controller.get("controller_policy_sha256")
+        != active["controller_policy_sha256"]
+    ):
+        raise ReconcileError(
+            "Workspace Control Codex route controller policy digest mismatch"
+        )
+    if controller.get("runner_class_id") != WORKSPACE_CONTROL_CODEX_TARGET_CLASS:
+        raise ReconcileError(
+            "Workspace Control Codex route controller class mismatch"
+        )
+    workflows = controller.get("trusted_workflows")
+    if not isinstance(workflows, list) or len(workflows) != 2:
+        raise ReconcileError(
+            "Workspace Control Codex route workflow set invalid"
+        )
+    by_route = {
+        row.get("route_id"): row
+        for row in workflows
+        if isinstance(row, dict)
+    }
+    if set(by_route) != {"control-validation", "codex-bootstrap"}:
+        raise ReconcileError(
+            "Workspace Control Codex route workflow identities drift"
+        )
+    validation = by_route["control-validation"]
+    codex = by_route["codex-bootstrap"]
+    if (
+        validation.get("path") != WORKSPACE_CONTROL_VALIDATION_WORKFLOW_PATH
+        or validation.get("blob_sha")
+        != WORKSPACE_CONTROL_VALIDATION_WORKFLOW_BLOB
+    ):
+        raise ReconcileError(
+            "Workspace Control validation workflow predecessor drift"
+        )
+    if (
+        codex.get("path") != WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH
+        or codex.get("blob_sha") != WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB
+    ):
+        raise ReconcileError(
+            "Workspace Control Codex bootstrap workflow binding drift"
+        )
+
+    overlay_path = pathlib.Path(WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION)
+    overlay_raw = overlay_path.read_bytes()
+    if _sha256(overlay_raw) != active["overlay_file_sha256"]:
+        raise ReconcileError(
+            "Workspace Control Codex route overlay digest mismatch"
+        )
+    overlay = json.loads(overlay_raw)
+    target_state = overlay.get("classes", {}).get(
+        WORKSPACE_CONTROL_CODEX_TARGET_CLASS
+    )
+    if not isinstance(target_state, dict):
+        raise ReconcileError(
+            "Workspace Control Codex route overlay class missing"
+        )
+    if target_state.get("controller_state") != "ACTIVE":
+        raise ReconcileError(
+            "Workspace Control Codex route target controller not active"
+        )
+    routes = overlay.get("routes")
+    if not isinstance(routes, dict):
+        raise ReconcileError(
+            "Workspace Control Codex route overlay routes missing"
+        )
+    if (
+        routes.get("workspace-control:control-validation", {}).get(
+            "admission_state"
+        )
+        != "ENABLED"
+    ):
+        raise ReconcileError(
+            "Workspace Control validation route regressed"
+        )
+    if (
+        routes.get(WORKSPACE_CONTROL_CODEX_TARGET_ROUTE, {}).get(
+            "admission_state"
+        )
+        != "ENABLED"
+    ):
+        raise ReconcileError(
+            "Workspace Control Codex bootstrap route not enabled"
+        )
 
 
 def _padataset_scientific_additive_override(
@@ -1377,9 +1651,61 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if scientific_dual_lane is not None
         else {}
     )
+
+    workspace_codex_route = None
+    if _optional_root_receipt_is_file(
+        WORKSPACE_CONTROL_CODEX_ROUTE_ACTIVE_RECEIPT
+    ):
+        manifest_entries = {
+            str(entry.get("destination", "")): entry
+            for entry in manifest.get("entries", [])
+            if isinstance(entry, dict)
+        }
+        overlay_entry = manifest_entries.get(
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+        )
+        if overlay_entry is None:
+            raise ReconcileError(
+                "deployment overlay absent from installed manifest"
+            )
+        predecessor_overlay_sha256 = str(overlay_entry.get("sha256", ""))
+        production_overlay = production_overrides.get(
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+        )
+        if production_overlay is not None:
+            predecessor_overlay_sha256 = production_overlay
+        scientific_overlay = scientific_overrides.get(
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+        )
+        if scientific_overlay is not None:
+            predecessor_overlay_sha256 = scientific_overlay["sha256"]
+        dual_overlay = dual_overrides.get(
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+        )
+        if dual_overlay is not None:
+            predecessor_overlay_sha256 = dual_overlay["sha256"]
+
+        workspace_codex_route = _workspace_control_codex_route_override(
+            manifest_raw,
+            manifest,
+            production_overrides,
+            predecessor_overlay_sha256=predecessor_overlay_sha256,
+        )
+    workspace_codex_overrides = (
+        {
+            WORKSPACE_CONTROL_CODEX_CONTROLLER_DESTINATION:
+                workspace_codex_route["controller_policy_file_sha256"],
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION:
+                workspace_codex_route["overlay_file_sha256"],
+        }
+        if workspace_codex_route is not None
+        else {}
+    )
+
     production_overrides_seen: set[str] = set()
     scientific_overrides_seen: set[str] = set()
     dual_overrides_seen: set[str] = set()
+    workspace_codex_overrides_seen: set[str] = set()
 
     for entry in manifest.get("entries", []):
         if not isinstance(entry, dict):
@@ -1402,7 +1728,20 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         scientific_binding = scientific_overrides.get(destination)
         dual_binding = dual_overrides.get(destination)
         production_digest = production_overrides.get(destination)
-        if dual_binding is not None:
+        workspace_codex_digest = workspace_codex_overrides.get(destination)
+        if workspace_codex_digest is not None:
+            if actual_sha != workspace_codex_digest:
+                raise ReconcileError(
+                    f"Workspace Control Codex route managed artifact digest drift: {path}"
+                )
+            workspace_codex_overrides_seen.add(destination)
+            if dual_binding is not None:
+                dual_overrides_seen.add(destination)
+            if scientific_binding is not None:
+                scientific_overrides_seen.add(destination)
+            if production_digest is not None:
+                production_overrides_seen.add(destination)
+        elif dual_binding is not None:
             if actual_sha != dual_binding["sha256"]:
                 raise ReconcileError(
                     f"PADataset scientific dual-lane managed artifact digest drift: {path}"
@@ -1441,6 +1780,14 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         missing = sorted(set(dual_overrides) - dual_overrides_seen)
         raise ReconcileError(
             f"PADataset scientific dual-lane override artifacts were not observed: {missing}"
+        )
+    if workspace_codex_overrides_seen != set(workspace_codex_overrides):
+        missing = sorted(
+            set(workspace_codex_overrides) - workspace_codex_overrides_seen
+        )
+        raise ReconcileError(
+            "Workspace Control Codex route override artifacts were not observed: "
+            f"{missing}"
         )
     for destination, binding in scientific_additions.items():
         path = pathlib.Path(destination)
@@ -1615,6 +1962,11 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
                 scientific_override,
                 scientific_workflow_refresh,
             )
+
+    if workspace_codex_route is not None:
+        _verify_workspace_control_codex_route_effective_state(
+            workspace_codex_route
+        )
 
 
 def _git_exact_head(repo_root: pathlib.Path, expected: str) -> None:
