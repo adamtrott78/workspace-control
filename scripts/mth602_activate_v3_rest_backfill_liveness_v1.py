@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import uuid
 
 
@@ -141,7 +142,11 @@ def verify_equivalent_active_source(
 
 
 
-def root_phase(repo_root: pathlib.Path, expected_head: str) -> None:
+def root_phase(
+    repo_root: pathlib.Path,
+    expected_head: str,
+    drain_timeout_seconds: int,
+) -> None:
     if os.geteuid() != 0:
         raise RuntimeError("root phase requires uid 0")
     root = exact_repo(repo_root, expected_head)
@@ -211,6 +216,47 @@ def root_phase(repo_root: pathlib.Path, expected_head: str) -> None:
     if not isinstance(root_policy_sha, str) or repair.SHA64.fullmatch(root_policy_sha) is None:
         raise RuntimeError("root policy digest invalid")
 
+    if drain_timeout_seconds < 0 or drain_timeout_seconds > 43200:
+        raise RuntimeError("drain timeout must be between 0 and 43200 seconds")
+
+    prequiesced = False
+    if drain_timeout_seconds > 0:
+        print("DRAIN_QUIESCE_BEGIN controllers=" + ",".join(active_before), flush=True)
+        for cid in active_before:
+            repair.ctl("stop", units[cid])
+            repair.wait_state(units[cid], "inactive")
+        prequiesced = True
+        deadline = time.monotonic() + drain_timeout_seconds
+        last_notice = 0.0
+        try:
+            while True:
+                repair.require_root_services()
+                try:
+                    repair.require_no_live_provisioner_records()
+                    repair.require_no_transients(units)
+                    break
+                except repair.ControllerRepairError as exc:
+                    now_mono = time.monotonic()
+                    if now_mono >= deadline:
+                        raise RuntimeError(
+                            "drain timeout expired before live work cleared: " + str(exc)
+                        ) from exc
+                    if now_mono - last_notice >= 30:
+                        remaining = max(0, int(deadline - now_mono))
+                        print(
+                            f"DRAIN_WAIT remaining_seconds={remaining} blocker={exc}",
+                            flush=True,
+                        )
+                        last_notice = now_mono
+                    time.sleep(5)
+            print("DRAIN_COMPLETE live_work=0", flush=True)
+        except BaseException:
+            for cid in active_before:
+                if repair.systemd(units[cid]).get("ActiveState") != "active":
+                    subprocess.run(["systemctl", "start", units[cid]], check=False)
+                    repair.wait_state(units[cid], "active")
+            raise
+
     expected = {
         "source_head": expected_head,
         "base_source_head": base_head,
@@ -220,6 +266,7 @@ def root_phase(repo_root: pathlib.Path, expected_head: str) -> None:
         "candidate_controller_sha256": candidate_sha,
         "previous_controller_refresh_sha256": repair.sha(previous_refresh_raw),
         "previous_controller_source_head": previous_refresh.get("controller_source_head"),
+        "active_controller_set_before": active_before,
     }
 
     work = pathlib.Path(tempfile.mkdtemp(prefix="mth602-v3-rest-backfill-", dir="/run"))
@@ -248,8 +295,17 @@ def root_phase(repo_root: pathlib.Path, expected_head: str) -> None:
         "--go-bin",
         go_bin,
     ]
+    if prequiesced:
+        for cid in active_before:
+            cmd.extend(["--prequiesced-active-controller", cid])
+
     proc = subprocess.run(cmd, text=True, check=False)
     if proc.returncode:
+        if prequiesced:
+            for cid in active_before:
+                if repair.systemd(units[cid]).get("ActiveState") != "active":
+                    subprocess.run(["systemctl", "start", units[cid]], check=False)
+                    repair.wait_state(units[cid], "active")
         raise RuntimeError(f"controller repair helper failed with exit {proc.returncode}")
 
     active, _ = repair.load(repair.CONTROLLER_REFRESH)
@@ -279,12 +335,17 @@ def main() -> int:
     parser.add_argument("--repo-root", type=pathlib.Path, required=True)
     parser.add_argument("--expected-head", required=True)
     parser.add_argument("--root-phase", action="store_true")
+    parser.add_argument("--drain-timeout-seconds", type=int, default=0)
     args = parser.parse_args()
 
     exact_repo(args.repo_root, args.expected_head)
 
     if args.root_phase:
-        root_phase(args.repo_root, args.expected_head)
+        root_phase(
+            args.repo_root,
+            args.expected_head,
+            args.drain_timeout_seconds,
+        )
         return 0
 
     if os.geteuid() == 0:
@@ -300,6 +361,8 @@ def main() -> int:
             "--expected-head",
             args.expected_head,
             "--root-phase",
+            "--drain-timeout-seconds",
+            str(args.drain_timeout_seconds),
         ],
         check=False,
     )
