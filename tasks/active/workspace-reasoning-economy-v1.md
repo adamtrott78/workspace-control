@@ -36,20 +36,20 @@ Build and empirically tune a subscription-aware reasoning economy layer for Work
 
 ## Next safe action
 
-Run the fresh one-shot root/operator Codex bootstrap-route activation against main@17345570329cfa31022d58ab8110c4df743c4ca9. On PASS, run a fresh zero-inference control-small bootstrap and verify ChatGPT-subscription auth/no-API-fallback receipt. Only then run the minimum controlled Codex/Instant allowance calibration; the frozen 54 scored runs remain fail-closed.
+Run the fresh one-shot root/operator Codex bootstrap-route activation against main@57831303912b899fd48ee54b0738283acc9c8303. On PASS, run a fresh zero-inference control-small bootstrap and verify ChatGPT-subscription auth/no-API-fallback receipt. Only then run the minimum controlled Codex/Instant allowance calibration; the frozen 54 scored runs remain fail-closed.
 
 ## Remaining work
 
 - Execute the frozen 54-run claim-bearing scored-replicate plan only after live executor authority, live evaluator-isolation acceptance, and a calibrated comparable allowance relationship all exist; materialize run-state files lazily at admission time.
 - Preserve UNKNOWN allowance for traces without controlled comparable meter deltas; never infer shared allowance from raw tokens.
-- Run one fresh root/operator route activation against root-equivalence-aware main@17345570329cfa31022d58ab8110c4df743c4ca9, then a fresh zero-inference Workspace Control Codex bootstrap; prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, and no API billing/fallback before any live inference.
+- Run one fresh root/operator route activation against controller-local main@57831303912b899fd48ee54b0738283acc9c8303, then a fresh zero-inference Workspace Control Codex bootstrap; prove account.type=chatgpt, planType=plus, OPENAI_API_KEY absent, and no API billing/fallback before any live inference.
 - Run isolated controlled Codex and Instant actions bracketed by official account/rate-limit/usage snapshots; determine which meter actually moves and keep unresolved mappings unknown.
 - Feed calibrated traces into weekly governor + matched holdout protocol and compare validated progress per scarce allowance against all-strong/frontier control.
 - Promote a routing policy only with claim-bearing comparable evidence, quality-floor PASS and strictly lower scarce allowance.
 
 ## Blockers / gates
 
-- LIVE CODEX ROUTE ACTIVATION: helper is now runtime390 root-equivalence aware at main@17345570329cfa31022d58ab8110c4df743c4ca9. The third retry on fe028357… failed before authority creation/consumption or mutation because the helper compared the pre-runtime390 compiled root digest to the accepted runtime390 successor digest. Fresh one-shot root/operator activation against 17345570… remains required before zero-inference bootstrap.
+- LIVE CODEX ROUTE ACTIVATION: the historical runtime390 predecessor is no longer reconstructed during Codex route activation. Controller-local repair is merged/validated at main@57831303912b899fd48ee54b0738283acc9c8303; prior four retries all failed before authority creation/consumption or mutation. Fresh one-shot root/operator activation against 57831303… remains required before zero-inference bootstrap.
 - CLAIM-BEARING EXECUTION GATE: protocol screening is complete and the exact 54-run scored plan is frozen, but launch remains blocked on three independent gates: reviewed live Instant/operator authority, live evaluator sealed-store worker-denial/readback acceptance, and calibrated shared ChatGPT/Codex weekly allowance telemetry. Do not spend 54 manual clean-chat runs or treat UNKNOWN meter cost as free.
 
 ## Fresh-chat initialization
