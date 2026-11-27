@@ -71,7 +71,7 @@ class CodexRouteScientificLineageCompatibilityTests(unittest.TestCase):
         )
         self.assertEqual(
             reconciler.WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
-            "21f1615b859496fa1919103b153374da85345c3e",
+            "7e4efd33389d27a67d71fe91661bfbcb2a7a9b9e",
         )
         self.assertTrue(
             hasattr(reconciler, "_workspace_control_codex_workflow_refresh")
