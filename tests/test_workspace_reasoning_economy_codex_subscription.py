@@ -22,6 +22,12 @@ from workspace_semantic_execution.adapters import (  # noqa: E402
     build_read_only_exec_command,
     parse_account_read_response,
 )
+from workspace_semantic_execution.domain import (  # noqa: E402
+    CommunicationMode,
+    ContextMode,
+    ReasoningProfile,
+    TokenBudget,
+)
 from workspace_semantic_execution.ports import (  # noqa: E402
     AccountTokenUsageSummary,
     UsageSnapshot,
@@ -92,7 +98,17 @@ SUCCESS_JSONL = "\n".join(
         json.dumps(
             {
                 "type": "item.completed",
-                "item": {"type": "agent_message", "text": "validated answer"},
+                "item": {
+                    "type": "agent_message",
+                    "text": json.dumps(
+                        {
+                            "result_kind": "RESULT",
+                            "summary": "validated answer",
+                            "evidence_refs": ["test://evidence"],
+                        },
+                        sort_keys=True,
+                    ),
+                },
             }
         ),
         json.dumps(
@@ -109,6 +125,30 @@ SUCCESS_JSONL = "\n".join(
         ),
     ]
 )
+
+
+def economy_budget(*, max_output_tokens: int = 300) -> TokenBudget:
+    return TokenBudget(
+        context_mode=ContextMode.REF_ONLY,
+        reasoning_profile=ReasoningProfile.ECONOMY,
+        communication_mode=CommunicationMode.MACHINE_MINIMAL,
+        max_inline_tokens=3000,
+        max_retrieved_tokens=12000,
+        max_output_tokens=max_output_tokens,
+        allow_model_call=True,
+    )
+
+
+def no_model_budget() -> TokenBudget:
+    return TokenBudget(
+        context_mode=ContextMode.REF_ONLY,
+        reasoning_profile=ReasoningProfile.NO_MODEL,
+        communication_mode=CommunicationMode.MACHINE_MINIMAL,
+        max_inline_tokens=0,
+        max_retrieved_tokens=0,
+        max_output_tokens=0,
+        allow_model_call=False,
+    )
 
 
 class AuthTests(unittest.TestCase):
@@ -218,21 +258,46 @@ class CommandTests(unittest.TestCase):
         command = build_read_only_exec_command(
             executable="/usr/bin/codex",
             model_id="gpt-6-luna",
+            reasoning_profile=ReasoningProfile.ECONOMY,
         )
-        self.assertEqual(
-            command,
-            (
-                "/usr/bin/codex",
-                "exec",
-                "--json",
-                "--ephemeral",
-                "--sandbox",
-                "read-only",
-                "-m",
-                "gpt-6-luna",
-                "-",
-            ),
+        self.assertEqual(command[:8], (
+            "/usr/bin/codex",
+            "exec",
+            "--json",
+            "--ephemeral",
+            "--sandbox",
+            "read-only",
+            "-m",
+            "gpt-6-luna",
+        ))
+        self.assertIn("--config", command)
+        self.assertIn("model_reasoning_effort=low", command)
+        self.assertEqual(command[-1], "-")
+
+    def test_standard_and_deep_map_to_real_codex_reasoning_effort(self):
+        standard = build_read_only_exec_command(
+            executable="/usr/bin/codex",
+            model_id="gpt-6-luna",
+            reasoning_profile=ReasoningProfile.STANDARD,
         )
+        deep = build_read_only_exec_command(
+            executable="/usr/bin/codex",
+            model_id="gpt-6-luna",
+            reasoning_profile=ReasoningProfile.DEEP,
+        )
+        self.assertIn("model_reasoning_effort=medium", standard)
+        self.assertIn("model_reasoning_effort=high", deep)
+
+    def test_no_model_profile_cannot_build_codex_command(self):
+        with self.assertRaisesRegex(
+            CodexSubscriptionError,
+            "codex_no_model_budget_forbids_execution",
+        ):
+            build_read_only_exec_command(
+                executable="/usr/bin/codex",
+                model_id="gpt-6-luna",
+                reasoning_profile=ReasoningProfile.NO_MODEL,
+            )
 
 
 class ExecutorTests(unittest.TestCase):
@@ -291,6 +356,7 @@ class ExecutorTests(unittest.TestCase):
                 prompt="inspect this repository",
                 model_id="gpt-6-luna",
                 cwd=Path(tmp),
+                budget=economy_budget(),
             )
 
         self.assertEqual(usage.calls, 2)
@@ -303,7 +369,17 @@ class ExecutorTests(unittest.TestCase):
         self.assertEqual(observation.trace.token_usage.input_tokens, 100)
         self.assertEqual(observation.trace.token_usage.reasoning_output_tokens, 7)
         self.assertEqual(observation.trace.command_executions, 1)
-        self.assertEqual(observation.final_agent_message, "validated answer")
+        self.assertEqual(
+            json.loads(observation.final_agent_message)["summary"],
+            "validated answer",
+        )
+        self.assertEqual(
+            observation.token_budget.reasoning_profile,
+            ReasoningProfile.ECONOMY,
+        )
+        self.assertEqual(observation.budget_violations, ())
+        self.assertIn("model_reasoning_effort=low", call["command"])
+        self.assertIn("--output-schema", call["command"])
 
     def test_auth_failure_occurs_before_usage_snapshot_or_process(self):
         fake = FakeSession(
@@ -332,9 +408,67 @@ class ExecutorTests(unittest.TestCase):
                     prompt="do not run",
                     model_id="gpt-6-luna",
                     cwd=Path(tmp),
+                    budget=economy_budget(),
                 )
         self.assertEqual(usage.calls, 0)
         self.assertEqual(runner.calls, [])
+
+    def test_no_model_budget_fails_before_auth_usage_or_process(self):
+        usage = FakeUsage([])
+        runner = FakeRunner(
+            CodexProcessResult(returncode=0, stdout=SUCCESS_JSONL, stderr="")
+        )
+        executor = CodexSubscriptionExecutor(
+            usage=usage,
+            auth_guard=self._guard(),
+            process_runner=runner,
+            executable="/usr/bin/codex",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(
+                CodexSubscriptionError,
+                "codex_no_model_budget_forbids_execution",
+            ):
+                executor.run_read_only(
+                    prompt="must not run",
+                    model_id="gpt-6-luna",
+                    cwd=Path(tmp),
+                    budget=no_model_budget(),
+                )
+        self.assertEqual(usage.calls, 0)
+        self.assertEqual(runner.calls, [])
+
+    def test_observed_output_overrun_is_preserved_and_fails_closed(self):
+        usage = FakeUsage(
+            [
+                usage_snapshot("2026-11-15T12:00:00+00:00", 1000),
+                usage_snapshot("2026-11-15T12:01:00+00:00", 1120),
+            ]
+        )
+        runner = FakeRunner(
+            CodexProcessResult(returncode=0, stdout=SUCCESS_JSONL, stderr="")
+        )
+        executor = CodexSubscriptionExecutor(
+            usage=usage,
+            auth_guard=self._guard(),
+            process_runner=runner,
+            executable="/usr/bin/codex",
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            with self.assertRaisesRegex(
+                CodexSubscriptionExecutionFailed,
+                "codex_token_budget_violation",
+            ) as caught:
+                executor.run_read_only(
+                    prompt="bounded task",
+                    model_id="gpt-6-luna",
+                    cwd=Path(tmp),
+                    budget=economy_budget(max_output_tokens=10),
+                )
+        self.assertIn(
+            "visible_output_tokens_exceeded:20>10",
+            caught.exception.observation.budget_violations,
+        )
 
     def test_failed_turn_preserves_measurable_observation(self):
         failed_jsonl = "\n".join(
@@ -376,6 +510,7 @@ class ExecutorTests(unittest.TestCase):
                     prompt="bounded task",
                     model_id="gpt-6-luna",
                     cwd=Path(tmp),
+                    budget=economy_budget(),
                 )
         observation = caught.exception.observation
         self.assertEqual(observation.returncode, 1)
