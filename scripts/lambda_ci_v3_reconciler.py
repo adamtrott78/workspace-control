@@ -96,8 +96,11 @@ WORKSPACE_CONTROL_CODEX_WORKFLOW_INITIAL_BLOB = (
 WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_BLOB = (
     "b17526353acb531010fce019337f7b3080ba235b"
 )
-WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB = (
+WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2_BLOB = (
     "683d2aa85ec455f853ef2a99dd07d8fe5242cc65"
+)
+WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB = (
+    "21f1615b859496fa1919103b153374da85345c3e"
 )
 WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_ACTIVE_RECEIPT = (
     V3_RUNTIME_STATE_ROOT
@@ -111,6 +114,13 @@ WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT = (
     / "workspace-control"
     / "codex-bootstrap-route"
     / "workflow-refresh-v2"
+    / "active.json"
+)
+WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT = (
+    V3_RUNTIME_STATE_ROOT
+    / "workspace-control"
+    / "codex-bootstrap-route"
+    / "workflow-refresh-v3"
     / "active.json"
 )
 WORKSPACE_CONTROL_VALIDATION_WORKFLOW_PATH = (
@@ -564,6 +574,7 @@ def _workspace_control_codex_route_override(
     if active_workflow_blob not in {
         WORKSPACE_CONTROL_CODEX_WORKFLOW_INITIAL_BLOB,
         WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_BLOB,
+        WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2_BLOB,
         WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
     }:
         raise ReconcileError(
@@ -699,7 +710,7 @@ def _workspace_control_codex_workflow_refresh_v2(
         "target_class_id": WORKSPACE_CONTROL_CODEX_TARGET_CLASS,
         "workflow_path": WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH,
         "previous_workflow_blob_sha": prior.get("workflow_blob_sha"),
-        "workflow_blob_sha": WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
+        "workflow_blob_sha": WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2_BLOB,
         "previous_controller_policy_sha256": prior.get(
             "controller_policy_sha256"
         ),
@@ -743,6 +754,83 @@ def _workspace_control_codex_workflow_refresh_v2(
         ):
             raise ReconcileError(
                 f"Workspace Control Codex workflow refresh v2 {key} invalid"
+            )
+    return refresh
+
+
+def _workspace_control_codex_workflow_refresh_v3(
+    active: dict[str, Any],
+    prior_v1: dict[str, Any] | None,
+    prior_v2: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not _optional_root_receipt_is_file(
+        WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT
+    ):
+        return None
+    if prior_v1 is None or prior_v2 is None:
+        raise ReconcileError(
+            "Workspace Control Codex workflow refresh v3 requires v1+v2 predecessors"
+        )
+
+    refresh = _load_override_receipt(
+        WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V3_ACTIVE_RECEIPT,
+        "active Workspace Control Codex workflow refresh v3",
+    )
+    active_raw = WORKSPACE_CONTROL_CODEX_ROUTE_ACTIVE_RECEIPT.read_bytes()
+    prior_raw = WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V2_ACTIVE_RECEIPT.read_bytes()
+    required = {
+        "schema_version": 1,
+        "mode": "V3_WORKSPACE_CONTROL_CODEX_WORKFLOW_REFRESH_V3",
+        "phase": "ACTIVE",
+        "active_route_receipt_sha256": _sha256(active_raw),
+        "previous_refresh_receipt_sha256": _sha256(prior_raw),
+        "target_class_id": WORKSPACE_CONTROL_CODEX_TARGET_CLASS,
+        "workflow_path": WORKSPACE_CONTROL_CODEX_WORKFLOW_PATH,
+        "previous_workflow_blob_sha": prior_v2.get("workflow_blob_sha"),
+        "workflow_blob_sha": WORKSPACE_CONTROL_CODEX_WORKFLOW_BLOB,
+        "previous_controller_policy_sha256": prior_v2.get(
+            "controller_policy_sha256"
+        ),
+        "previous_controller_policy_file_sha256": prior_v2.get(
+            "controller_policy_file_sha256"
+        ),
+    }
+    for key, expected in required.items():
+        if refresh.get(key) != expected:
+            raise ReconcileError(
+                f"Workspace Control Codex workflow refresh v3 binding mismatch: {key}"
+            )
+    if refresh["previous_workflow_blob_sha"] == refresh["workflow_blob_sha"]:
+        raise ReconcileError(
+            "Workspace Control Codex workflow refresh v3 did not change blob"
+        )
+    _require_source_head(
+        refresh.get("source_head"),
+        "Workspace Control Codex workflow refresh v3",
+    )
+    authorization_id = refresh.get("authorization_id")
+    if (
+        not isinstance(authorization_id, str)
+        or re.fullmatch(
+            r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+            authorization_id,
+        )
+        is None
+    ):
+        raise ReconcileError(
+            "Workspace Control Codex workflow refresh v3 authorization id invalid"
+        )
+    for key in (
+        "controller_policy_sha256",
+        "controller_policy_file_sha256",
+    ):
+        value = refresh.get(key)
+        if (
+            not isinstance(value, str)
+            or re.fullmatch(r"[0-9a-f]{64}", value) is None
+        ):
+            raise ReconcileError(
+                f"Workspace Control Codex workflow refresh v3 {key} invalid"
             )
     return refresh
 
@@ -2973,13 +3061,26 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         if workspace_codex_route is not None
         else None
     )
+    workspace_codex_refresh_v3 = (
+        _workspace_control_codex_workflow_refresh_v3(
+            workspace_codex_route,
+            workspace_codex_refresh,
+            workspace_codex_refresh_v2,
+        )
+        if workspace_codex_route is not None
+        else None
+    )
     workspace_codex_effective = (
-        workspace_codex_refresh_v2
-        if workspace_codex_refresh_v2 is not None
+        workspace_codex_refresh_v3
+        if workspace_codex_refresh_v3 is not None
         else (
-            workspace_codex_refresh
-            if workspace_codex_refresh is not None
-            else workspace_codex_route
+            workspace_codex_refresh_v2
+            if workspace_codex_refresh_v2 is not None
+            else (
+                workspace_codex_refresh
+                if workspace_codex_refresh is not None
+                else workspace_codex_route
+            )
         )
     )
     workspace_codex_overrides = (
