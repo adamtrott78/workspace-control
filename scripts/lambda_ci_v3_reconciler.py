@@ -1652,41 +1652,45 @@ def verify_installed(manifest_path: pathlib.Path) -> None:
         else {}
     )
 
-    manifest_entries = {
-        str(entry.get("destination", "")): entry
-        for entry in manifest.get("entries", [])
-        if isinstance(entry, dict)
-    }
-    overlay_entry = manifest_entries.get(
-        WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
-    )
-    if overlay_entry is None:
-        raise ReconcileError(
-            "deployment overlay absent from installed manifest"
+    workspace_codex_route = None
+    if _optional_root_receipt_is_file(
+        WORKSPACE_CONTROL_CODEX_ROUTE_ACTIVE_RECEIPT
+    ):
+        manifest_entries = {
+            str(entry.get("destination", "")): entry
+            for entry in manifest.get("entries", [])
+            if isinstance(entry, dict)
+        }
+        overlay_entry = manifest_entries.get(
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
         )
-    predecessor_overlay_sha256 = str(overlay_entry.get("sha256", ""))
-    production_overlay = production_overrides.get(
-        WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
-    )
-    if production_overlay is not None:
-        predecessor_overlay_sha256 = production_overlay
-    scientific_overlay = scientific_overrides.get(
-        WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
-    )
-    if scientific_overlay is not None:
-        predecessor_overlay_sha256 = scientific_overlay["sha256"]
-    dual_overlay = dual_overrides.get(
-        WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
-    )
-    if dual_overlay is not None:
-        predecessor_overlay_sha256 = dual_overlay["sha256"]
+        if overlay_entry is None:
+            raise ReconcileError(
+                "deployment overlay absent from installed manifest"
+            )
+        predecessor_overlay_sha256 = str(overlay_entry.get("sha256", ""))
+        production_overlay = production_overrides.get(
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+        )
+        if production_overlay is not None:
+            predecessor_overlay_sha256 = production_overlay
+        scientific_overlay = scientific_overrides.get(
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+        )
+        if scientific_overlay is not None:
+            predecessor_overlay_sha256 = scientific_overlay["sha256"]
+        dual_overlay = dual_overrides.get(
+            WORKSPACE_CONTROL_CODEX_OVERLAY_DESTINATION
+        )
+        if dual_overlay is not None:
+            predecessor_overlay_sha256 = dual_overlay["sha256"]
 
-    workspace_codex_route = _workspace_control_codex_route_override(
-        manifest_raw,
-        manifest,
-        production_overrides,
-        predecessor_overlay_sha256=predecessor_overlay_sha256,
-    )
+        workspace_codex_route = _workspace_control_codex_route_override(
+            manifest_raw,
+            manifest,
+            production_overrides,
+            predecessor_overlay_sha256=predecessor_overlay_sha256,
+        )
     workspace_codex_overrides = (
         {
             WORKSPACE_CONTROL_CODEX_CONTROLLER_DESTINATION:
