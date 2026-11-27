@@ -17,7 +17,8 @@ jobs:
       github.event.comment.author_association == 'OWNER' &&
       (
         startsWith(github.event.comment.body, '/workspace-codex-bootstrap ') ||
-        startsWith(github.event.comment.body, '/workspace-codex-preflight ')
+        startsWith(github.event.comment.body, '/workspace-codex-preflight ') ||
+        startsWith(github.event.comment.body, '/workspace-codex-calibrate ')
       )
     runs-on: lambda-workspace-control-control-small
     timeout-minutes: 10
@@ -42,6 +43,7 @@ jobs:
           case "$command" in
             /workspace-codex-bootstrap) mode="bootstrap" ;;
             /workspace-codex-preflight) mode="preflight" ;;
+            /workspace-codex-calibrate) mode="calibrate" ;;
             *)
               echo "Unsupported Workspace Control Codex command" >&2
               exit 19
@@ -200,7 +202,7 @@ jobs:
 
 
       - name: Bind existing Workspace Control Codex runtime
-        if: steps.gate.outputs.mode == 'preflight'
+        if: steps.gate.outputs.mode == 'preflight' || steps.gate.outputs.mode == 'calibrate'
         env:
           CODEX_VERSION: "0.155.1"
           PROJECT_HOME: "/srv/workspace-ci/workspace-control/home"
@@ -526,6 +528,288 @@ jobs:
         with:
           name: workspace-control-codex-preflight-receipt
           path: ${{ runner.temp }}/workspace-control-codex-preflight-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Run one bounded Codex allowance calibration quantum
+        if: steps.gate.outputs.mode == 'calibrate'
+        env:
+          EXPECTED_SHA: ${{ steps.gate.outputs.expected_sha }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+          PROJECT_HOME: "/srv/workspace-ci/workspace-control/home"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY
+          export CODEX_HOME
+
+          actual_sha="$(git rev-parse HEAD)"
+          [[ "$actual_sha" == "$EXPECTED_SHA" ]]
+          receipt="$RUNNER_TEMP/workspace-control-codex-calibration-receipt.json"
+          export RECEIPT_PATH="$receipt" ACTUAL_SHA="$actual_sha"
+
+          python3 - <<'PY'
+          from __future__ import annotations
+
+          import json
+          import os
+          import pathlib
+          import subprocess
+          import sys
+
+          repo = pathlib.Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          sys.path.insert(0, str(repo / "semantic-execution" / "src"))
+
+          from workspace_semantic_execution.adapters.codex_subscription import (
+              CodexSubscriptionAuthGuard,
+              extract_last_agent_message,
+          )
+          from workspace_semantic_execution.adapters.codex_usage import (
+              CodexAppServerStdioSession,
+              CodexUsageCollector,
+              sanitized_codex_environment,
+          )
+          from workspace_semantic_execution.economics.codex_trace import (
+              parse_codex_exec_jsonl,
+          )
+
+          if "OPENAI_API_KEY" in os.environ:
+              raise SystemExit("OPENAI_API_KEY must be absent")
+
+          child_env = sanitized_codex_environment(os.environ)
+          command = (
+              os.environ["CODEX_BIN"],
+              "app-server",
+              "--listen",
+              "stdio://",
+          )
+
+          def auth_session():
+              return CodexAppServerStdioSession(
+                  command=command,
+                  environment=child_env,
+                  allowed_methods=frozenset({"account/read"}),
+              )
+
+          def usage_session():
+              return CodexAppServerStdioSession(
+                  command=command,
+                  environment=child_env,
+              )
+
+          auth = CodexSubscriptionAuthGuard(
+              session_factory=auth_session,
+          ).require_authorized()
+          usage = CodexUsageCollector(session_factory=usage_session)
+
+          def clean_snapshot(snapshot):
+              return {
+                  "captured_at": snapshot.captured_at,
+                  "ordinary_usage_allowed": snapshot.ordinary_usage_allowed,
+                  "rate_limits": [
+                      {
+                          "limit_id": bucket.limit_id,
+                          "limit_name": bucket.limit_name,
+                          "normal_model_slug": bucket.normal_model_slug,
+                          "plan_type": bucket.plan_type,
+                          "windows": [
+                              {
+                                  "source_role": window.source_role,
+                                  "used_percent": window.used_percent,
+                                  "window_duration_mins": window.window_duration_mins,
+                                  "resets_at": window.resets_at,
+                                  "window_class": window.window_class.value,
+                              }
+                              for window in bucket.windows
+                          ],
+                      }
+                      for bucket in snapshot.rate_limit_buckets
+                  ],
+                  "token_summary": {
+                      "lifetime_tokens": snapshot.token_summary.lifetime_tokens,
+                      "peak_daily_tokens": snapshot.token_summary.peak_daily_tokens,
+                      "longest_running_turn_sec": snapshot.token_summary.longest_running_turn_sec,
+                      "current_streak_days": snapshot.token_summary.current_streak_days,
+                      "longest_streak_days": snapshot.token_summary.longest_streak_days,
+                  },
+                  "daily_usage_bucket_count": (
+                      len(snapshot.daily_usage_buckets)
+                      if snapshot.daily_usage_buckets is not None
+                      else None
+                  ),
+              }
+
+          before = usage.read_snapshot()
+
+          work = pathlib.Path(os.environ["RUNNER_TEMP"]) / "codex-calibration-empty"
+          work.mkdir(mode=0o700, parents=True, exist_ok=True)
+          subprocess.run(
+              ["git", "init", "-q", str(work)],
+              check=True,
+              stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL,
+          )
+
+          schema_path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "codex-calibration.schema.json"
+          schema_path.write_text(
+              json.dumps(
+                  {
+                      "type": "object",
+                      "additionalProperties": False,
+                      "required": ["result_kind", "summary", "evidence_refs"],
+                      "properties": {
+                          "result_kind": {"type": "string", "enum": ["RESULT"]},
+                          "summary": {"type": "string", "enum": ["CALIBRATION_OK"]},
+                          "evidence_refs": {
+                              "type": "array",
+                              "maxItems": 0,
+                              "items": {"type": "string"},
+                          },
+                      },
+                  },
+                  sort_keys=True,
+              ),
+              encoding="utf-8",
+          )
+
+          prompt = (
+              "Perform exactly one bounded calibration response. "
+              "Do not inspect files, run commands, browse, call tools, or modify state. "
+              "Return only the requested machine-minimal JSON with summary CALIBRATION_OK."
+          )
+          exec_command = [
+              os.environ["CODEX_BIN"],
+              "exec",
+              "--json",
+              "--ephemeral",
+              "--sandbox",
+              "read-only",
+              "--config",
+              "model_reasoning_effort=low",
+              "--output-schema",
+              str(schema_path),
+              "-",
+          ]
+          completed = subprocess.run(
+              exec_command,
+              input=prompt,
+              text=True,
+              stdout=subprocess.PIPE,
+              stderr=subprocess.PIPE,
+              cwd=work,
+              env=child_env,
+              timeout=180,
+              check=False,
+          )
+
+          after = usage.read_snapshot()
+
+          trace_error = None
+          final_error = None
+          trace = None
+          final_payload = None
+          try:
+              trace = parse_codex_exec_jsonl(completed.stdout)
+          except Exception as exc:
+              trace_error = type(exc).__name__
+          try:
+              final_text = extract_last_agent_message(completed.stdout)
+              if final_text is not None:
+                  final_payload = json.loads(final_text)
+          except Exception as exc:
+              final_error = type(exc).__name__
+
+          output_contract_passed = (
+              final_payload
+              == {
+                  "result_kind": "RESULT",
+                  "summary": "CALIBRATION_OK",
+                  "evidence_refs": [],
+              }
+          )
+          trace_passed = (
+              trace is not None
+              and trace.turns_started == 1
+              and trace.turns_completed == 1
+              and trace.turns_failed == 0
+              and trace.fatal_errors == 0
+              and trace.tool_calls == 0
+              and trace.web_searches == 0
+              and trace.file_changes == 0
+          )
+          decision = (
+              "PASS"
+              if completed.returncode == 0
+              and trace_passed
+              and output_contract_passed
+              else "FAIL"
+          )
+
+          token_usage = None
+          if trace is not None:
+              token_usage = {
+                  "input_tokens": trace.token_usage.input_tokens,
+                  "cached_input_tokens": trace.token_usage.cached_input_tokens,
+                  "cache_write_input_tokens": trace.token_usage.cache_write_input_tokens,
+                  "output_tokens": trace.token_usage.output_tokens,
+                  "reasoning_output_tokens": trace.token_usage.reasoning_output_tokens,
+                  "total_tokens": trace.token_usage.total_tokens,
+              }
+
+          receipt = {
+              "schema_version": 1,
+              "mode": "WORKSPACE_CONTROL_CODEX_CALIBRATION_V1",
+              "decision": decision,
+              "expected_sha": os.environ["EXPECTED_SHA"],
+              "actual_sha": os.environ["ACTUAL_SHA"],
+              "pr_number": int(os.environ["PR_NUMBER"]),
+              "actor": os.environ["ACTOR"],
+              "runner_name": os.environ.get("RUNNER_NAME"),
+              "runner_user": os.environ.get("USER"),
+              "runner_class": "workspace-control-control-small-v1",
+              "project_home": os.environ["PROJECT_HOME"],
+              "codex_home": os.environ["CODEX_HOME"],
+              "codex_version": os.environ["CODEX_VERSION"],
+              "surface": "CODEX",
+              "isolation_verified": True,
+              "model_actions": 1,
+              "model_selector": "codex_cli_default",
+              "reasoning_effort": "low",
+              "sandbox": "read-only",
+              "ephemeral": True,
+              "account_type": auth.account_type,
+              "plan_type": auth.plan_type,
+              "requires_openai_auth": auth.requires_openai_auth,
+              "api_key_present": False,
+              "model_inference_performed": True,
+              "credential_material_in_receipt": False,
+              "prompt_material_in_receipt": False,
+              "model_output_material_in_receipt": False,
+              "returncode": completed.returncode,
+              "trace_passed": trace_passed,
+              "output_contract_passed": output_contract_passed,
+              "trace_error_kind": trace_error,
+              "final_output_error_kind": final_error,
+              "token_usage": token_usage,
+              "usage_before": clean_snapshot(before),
+              "usage_after": clean_snapshot(after),
+          }
+          pathlib.Path(os.environ["RECEIPT_PATH"]).write_text(
+              json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(receipt, indent=2, sort_keys=True))
+          if decision != "PASS":
+              raise SystemExit("Codex calibration quantum failed")
+          PY
+
+      - name: Upload redacted calibration receipt
+        if: always() && steps.gate.outputs.mode == 'calibrate'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: workspace-control-codex-calibration-receipt
+          path: ${{ runner.temp }}/workspace-control-codex-calibration-receipt.json
           if-no-files-found: error
           retention-days: 90
 
