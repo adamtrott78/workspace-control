@@ -146,6 +146,7 @@ def root_phase(
     repo_root: pathlib.Path,
     expected_head: str,
     drain_timeout_seconds: int,
+    resume_prequiesced_active_controllers: list[str],
 ) -> None:
     if os.geteuid() != 0:
         raise RuntimeError("root phase requires uid 0")
@@ -161,12 +162,30 @@ def root_phase(
     root_policy, _ = repair.load(repair.ROOT_POLICY)
     units = repair.controller_units(root_policy)
     before = repair.snapshot_controllers(units)
-    active_before = [
-        cid for cid, state in before.items()
-        if state.get("ActiveState") == "active"
-    ]
+    resume_restore_set = sorted(set(resume_prequiesced_active_controllers))
+    if resume_restore_set:
+        unknown = [cid for cid in resume_restore_set if cid not in units]
+        if unknown:
+            raise RuntimeError(
+                "unknown resume controller ids: " + ",".join(unknown)
+            )
+        active_now = [
+            cid for cid, state in before.items()
+            if state.get("ActiveState") == "active"
+        ]
+        if active_now:
+            raise RuntimeError(
+                "resume-prequiesced requires every controller unit inactive; active="
+                + ",".join(active_now)
+            )
+        active_before = resume_restore_set
+    else:
+        active_before = [
+            cid for cid, state in before.items()
+            if state.get("ActiveState") == "active"
+        ]
     if repair.TARGET_CLASS not in active_before:
-        raise RuntimeError("PADataset scientific lane A is not active before bootstrap")
+        raise RuntimeError("PADataset scientific lane A is not in restore set")
     repair.require_root_services()
 
     current_binary = repair.CONTROLLER_BINARY.read_bytes()
@@ -219,13 +238,21 @@ def root_phase(
     if drain_timeout_seconds < 0 or drain_timeout_seconds > 43200:
         raise RuntimeError("drain timeout must be between 0 and 43200 seconds")
 
-    prequiesced = False
+    prequiesced = bool(resume_restore_set)
+    quiesced_here = False
     if drain_timeout_seconds > 0:
-        print("DRAIN_QUIESCE_BEGIN controllers=" + ",".join(active_before), flush=True)
-        for cid in active_before:
-            repair.ctl("stop", units[cid])
-            repair.wait_state(units[cid], "inactive")
-        prequiesced = True
+        if resume_restore_set:
+            print(
+                "DRAIN_RESUME_PREQUIESCED controllers=" + ",".join(active_before),
+                flush=True,
+            )
+        else:
+            print("DRAIN_QUIESCE_BEGIN controllers=" + ",".join(active_before), flush=True)
+            for cid in active_before:
+                repair.ctl("stop", units[cid])
+                repair.wait_state(units[cid], "inactive")
+            prequiesced = True
+            quiesced_here = True
         deadline = time.monotonic() + drain_timeout_seconds
         last_notice = 0.0
         try:
@@ -251,10 +278,11 @@ def root_phase(
                     time.sleep(5)
             print("DRAIN_COMPLETE live_work=0", flush=True)
         except BaseException:
-            for cid in active_before:
-                if repair.systemd(units[cid]).get("ActiveState") != "active":
-                    subprocess.run(["systemctl", "start", units[cid]], check=False)
-                    repair.wait_state(units[cid], "active")
+            if quiesced_here:
+                for cid in active_before:
+                    if repair.systemd(units[cid]).get("ActiveState") != "active":
+                        subprocess.run(["systemctl", "start", units[cid]], check=False)
+                        repair.wait_state(units[cid], "active")
             raise
 
     expected = {
@@ -336,6 +364,11 @@ def main() -> int:
     parser.add_argument("--expected-head", required=True)
     parser.add_argument("--root-phase", action="store_true")
     parser.add_argument("--drain-timeout-seconds", type=int, default=0)
+    parser.add_argument(
+        "--resume-prequiesced-active-controller",
+        action="append",
+        default=[],
+    )
     args = parser.parse_args()
 
     exact_repo(args.repo_root, args.expected_head)
@@ -345,6 +378,7 @@ def main() -> int:
             args.repo_root,
             args.expected_head,
             args.drain_timeout_seconds,
+            args.resume_prequiesced_active_controller,
         )
         return 0
 
@@ -363,6 +397,13 @@ def main() -> int:
             "--root-phase",
             "--drain-timeout-seconds",
             str(args.drain_timeout_seconds),
+            *sum(
+                [
+                    ["--resume-prequiesced-active-controller", cid]
+                    for cid in args.resume_prequiesced_active_controller
+                ],
+                [],
+            ),
         ],
         check=False,
     )
