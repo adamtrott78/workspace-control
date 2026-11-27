@@ -161,7 +161,7 @@ class AuthTests(unittest.TestCase):
                     "planType": "plus",
                     "workspaceName": None,
                 },
-                "requiresOpenAIAuth": True,
+                "requiresOpenaiAuth": True,
                 "userId": "must-not-be-retained",
             }
         }
@@ -185,7 +185,7 @@ class AuthTests(unittest.TestCase):
             {
                 "result": {
                     "account": {"type": "apiKey"},
-                    "requiresOpenAIAuth": False,
+                    "requiresOpenaiAuth": False,
                 }
             }
         )
@@ -208,7 +208,7 @@ class AuthTests(unittest.TestCase):
                     {
                         "result": {
                             "account": account,
-                            "requiresOpenAIAuth": False,
+                            "requiresOpenaiAuth": False,
                         }
                     }
                 )
@@ -224,7 +224,7 @@ class AuthTests(unittest.TestCase):
                 {
                     "result": {
                         "account": None,
-                        "requiresOpenAIAuth": True,
+                        "requiresOpenaiAuth": True,
                     }
                 }
             )
@@ -239,7 +239,7 @@ class AuthTests(unittest.TestCase):
                         "planType": "pro",
                         "workspaceName": None,
                     },
-                    "requiresOpenAIAuth": True,
+                    "requiresOpenaiAuth": True,
                 }
             }
         )
@@ -311,7 +311,7 @@ class ExecutorTests(unittest.TestCase):
                         "planType": "plus",
                         "workspaceName": None,
                     },
-                    "requiresOpenAIAuth": True,
+                    "requiresOpenaiAuth": True,
                 }
             }
         )
@@ -386,7 +386,7 @@ class ExecutorTests(unittest.TestCase):
             {
                 "result": {
                     "account": {"type": "apiKey"},
-                    "requiresOpenAIAuth": False,
+                    "requiresOpenaiAuth": False,
                 }
             }
         )
