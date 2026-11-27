@@ -93,10 +93,10 @@ def parse_account_read_response(
     if not isinstance(result, Mapping):
         raise CodexSubscriptionError("account_read:missing_result")
 
-    requires = result.get("requiresOpenAIAuth")
+    requires = result.get("requiresOpenaiAuth")
     if not isinstance(requires, bool):
         raise CodexSubscriptionError(
-            "account_read.requiresOpenAIAuth:expected_boolean"
+            "account_read.requiresOpenaiAuth:expected_boolean"
         )
 
     account = result.get("account")
@@ -157,7 +157,7 @@ class CodexSubscriptionAuthGuard:
 
     def require_authorized(self) -> CodexSubscriptionAuthInfo:
         info = self.inspect()
-        # requiresOpenAIAuth describes the active provider's credential
+        # requiresOpenaiAuth describes the active provider's credential
         # requirement; it is normally true for ChatGPT-backed providers.
         # Actual signed-in subscription identity is established by account.type.
         if info.account_type != "chatgpt":
