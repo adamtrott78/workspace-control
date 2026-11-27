@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "artifact_id": "workspace-instant-frontdoor-private-plugin-v0.1",
+  "status": "CREATED_PRIVATE_LIVE_ACCEPTANCE_PENDING",
+  "parent_task": "workspace-semantic-execution-migration-v1",
+  "source": {
+    "workspace_control_head": "21ab03b57ffa0865f7a37817ba484a0d7bf49ee1",
+    "plugin_manifest_blob": "23a03a52c2640b0e7e394e92ce96e2da93b60f09",
+    "skill_blob": "fd3befea8e4ed1d050b4fd452cbec2ca73107b4d",
+    "agent_interface_blob": "562c0dfcd50026d3aac45589288febde2605dafa"
+  },
+  "chatgpt_plugin": {
+    "plugin_id": "plugins_6b08cf5ea1548191b543faab9952bd26",
+    "release_id": "pluginrel_6b08cf5f385c8191a51997a2a124e5e6",
+    "current_release_id": "pluginrel_6b08cf5f385c8191a51997a2a124e5e6",
+    "version": "0.1.0",
+    "scope": "USER",
+    "discoverability": "PRIVATE",
+    "plugin_url": "https://chatgpt.com/plugins/plugins_6b08cf5ea1548191b543faab9952bd26",
+    "creation_status": "created"
+  },
+  "authority_boundary": {
+    "executable_authority_created": false,
+    "frontdoor_candidates_authoritative": false,
+    "durable_task_state_authoritative": true,
+    "live_acceptance_required_for_INST_07_PASS": true
+  },
+  "next_acceptance": [
+    "Open/use the private Workspace Control plugin in a persistent ChatGPT Instant conversation.",
+    "Submit one bounded new-task candidate and prove authorization_state remains UNDECIDED.",
+    "Query one existing durable task and prove status is derived from the task capsule rather than conversation memory.",
+    "Exercise one explicit decision or cancel/revise candidate without widening authority."
+  ]
+}
