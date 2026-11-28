@@ -262,6 +262,12 @@ jobs:
           [agents]
           enabled = false
 
+          [orchestrator.mcp]
+          enabled = false
+
+          [orchestrator.skills]
+          enabled = false
+
           [features]
           apps = false
           plugins = false
@@ -282,6 +288,12 @@ jobs:
           web_search_cached = false
           request_permissions_tool = false
           token_budget = false
+          goals = false
+          skill_search = false
+          executor_capability_discovery = false
+          skip_host_skill_discovery = true
+          deferred_executor = false
+          current_time_reminder = false
 
           [tools.update_plan]
           enabled = false
@@ -597,6 +609,45 @@ jobs:
           path: ${{ runner.temp }}/workspace-control-codex-preflight-receipt.json
           if-no-files-found: error
           retention-days: 90
+
+      - name: Prove zero model-visible Codex tools with pinned runtime
+        if: steps.gate.outputs.mode == 'calibrate'
+        env:
+          TRUSTED_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          TRUSTED_HELPER_BLOB: "9076fc7598671b17546a6df60f7091d15e851bb4"
+          TRUSTED_PROBE_BLOB: "57df76db70a4e2d6d8ad68d298177db85750e0be"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY CODEX_API_KEY PYTHONPATH PYTHONHOME
+          export CODEX_HOME
+
+          trusted_repo="$GITHUB_WORKSPACE/.trusted-calibration"
+          helper_rel="scripts/lambda_ci_v3_workspace_control_codex_calibration_v1.py"
+          probe_rel="scripts/lambda_ci_v3_workspace_control_codex_zero_tool_probe_v1.py"
+          helper="$trusted_repo/$helper_rel"
+          probe="$trusted_repo/$probe_rel"
+          [[ "$(git -C "$trusted_repo" rev-parse HEAD)" == "$TRUSTED_WORKFLOW_SHA" ]] || {
+            echo "Trusted calibration checkout SHA mismatch before zero-tool probe" >&2
+            exit 52
+          }
+          helper_blob="$(git -C "$trusted_repo" rev-parse "HEAD:$helper_rel")"
+          [[ "$helper_blob" == "$TRUSTED_HELPER_BLOB" ]] || {
+            echo "Trusted calibration helper blob mismatch before zero-tool probe" >&2
+            exit 53
+          }
+          probe_blob="$(git -C "$trusted_repo" rev-parse "HEAD:$probe_rel")"
+          [[ "$probe_blob" == "$TRUSTED_PROBE_BLOB" ]] || {
+            echo "Trusted zero-tool probe blob mismatch" >&2
+            exit 54
+          }
+          [[ -f "$helper" && -f "$probe" ]]
+          [[ ! -v OPENAI_API_KEY ]]
+          [[ ! -v CODEX_API_KEY ]]
+          [[ ! -v PYTHONPATH ]]
+          [[ ! -v PYTHONHOME ]]
+          cd "$RUNNER_TEMP"
+          /usr/bin/python3 -I "$probe" --helper "$helper"
 
       - name: Run one bounded Codex allowance calibration quantum
         if: steps.gate.outputs.mode == 'calibrate'

@@ -70,7 +70,7 @@
       "trusted_workflow": {
         "path": ".github/workflows/lambda-ci-workspace-control-codex-bootstrap.yml",
         "default_branch": "main",
-        "blob_sha": "80da66083ec77e0d542caf97c11a3fe55f13b3dd"
+        "blob_sha": "afda3762847a467f8c240feb54099ad76e560719"
       },
       "trigger": {
         "event_name": "issue_comment",

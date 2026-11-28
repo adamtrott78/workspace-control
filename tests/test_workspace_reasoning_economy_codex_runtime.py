@@ -226,6 +226,8 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
         )
         self.assertIn('web_search = "disabled"', text)
         self.assertIn("[agents]\n          enabled = false", text)
+        self.assertIn("[orchestrator.mcp]\\n          enabled = false", text)
+        self.assertIn("[orchestrator.skills]\\n          enabled = false", text)
         for disabled_feature in (
             "apps = false",
             "plugins = false",
@@ -238,6 +240,12 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
             "image_generation = false",
             "code_mode = false",
             "memories = false",
+            "goals = false",
+            "skill_search = false",
+            "executor_capability_discovery = false",
+            "skip_host_skill_discovery = true",
+            "deferred_executor = false",
+            "current_time_reminder = false",
         ):
             self.assertIn(disabled_feature, text)
         self.assertIn("[tools.update_plan]", text)
@@ -357,6 +365,41 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
         self.assertNotIn("sys.path.insert", text)
         self.assertNotIn("scored_replicate_plan_v1", text)
         self.assertNotIn("matrix-v1/", text)
+
+
+    def test_codex_calibration_gates_inference_on_exact_bound_zero_tool_probe(self):
+        text = _workflow()
+
+        probe = text.index(
+            "- name: Prove zero model-visible Codex tools with pinned runtime"
+        )
+        calibration = text.index(
+            "- name: Run one bounded Codex allowance calibration quantum"
+        )
+        self.assertLess(probe, calibration)
+        self.assertIn(
+            'TRUSTED_PROBE_BLOB: "57df76db70a4e2d6d8ad68d298177db85750e0be"',
+            text,
+        )
+        self.assertIn(
+            'probe_rel="scripts/lambda_ci_v3_workspace_control_codex_zero_tool_probe_v1.py"',
+            text,
+        )
+        self.assertIn(
+            'git -C "$trusted_repo" rev-parse "HEAD:$probe_rel"',
+            text,
+        )
+        self.assertIn(
+            '[[ "$probe_blob" == "$TRUSTED_PROBE_BLOB" ]]',
+            text,
+        )
+        self.assertIn(
+            '/usr/bin/python3 -I "$probe" --helper "$helper"',
+            text,
+        )
+        probe_block = text[probe:calibration]
+        self.assertNotIn('"$CODEX_BIN" exec', probe_block)
+        self.assertNotIn("codex exec", probe_block)
 
 
 if __name__ == "__main__":
