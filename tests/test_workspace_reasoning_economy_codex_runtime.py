@@ -226,8 +226,8 @@ class WorkspaceReasoningEconomyCodexRuntimeTests(unittest.TestCase):
         )
         self.assertIn('web_search = "disabled"', text)
         self.assertIn("[agents]\n          enabled = false", text)
-        self.assertIn("[orchestrator.mcp]\\n          enabled = false", text)
-        self.assertIn("[orchestrator.skills]\\n          enabled = false", text)
+        self.assertIn("[orchestrator.mcp]\n          enabled = false", text)
+        self.assertIn("[orchestrator.skills]\n          enabled = false", text)
         for disabled_feature in (
             "apps = false",
             "plugins = false",
