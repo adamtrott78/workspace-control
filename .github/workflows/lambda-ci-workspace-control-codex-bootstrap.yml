@@ -17,7 +17,8 @@ jobs:
       github.event.comment.author_association == 'OWNER' &&
       (
         startsWith(github.event.comment.body, '/workspace-codex-bootstrap ') ||
-        startsWith(github.event.comment.body, '/workspace-codex-preflight ')
+        startsWith(github.event.comment.body, '/workspace-codex-preflight ') ||
+        startsWith(github.event.comment.body, '/workspace-codex-calibrate ')
       )
     runs-on: lambda-workspace-control-control-small
     timeout-minutes: 10
@@ -42,6 +43,7 @@ jobs:
           case "$command" in
             /workspace-codex-bootstrap) mode="bootstrap" ;;
             /workspace-codex-preflight) mode="preflight" ;;
+            /workspace-codex-calibrate) mode="calibrate" ;;
             *)
               echo "Unsupported Workspace Control Codex command" >&2
               exit 19
@@ -60,7 +62,7 @@ jobs:
               "https://api.github.com/repos/$REPOSITORY/pulls/$PR_NUMBER"
           )"
           readarray -t values < <(
-            python3 -c 'import json,sys; p=json.load(sys.stdin); print(p["head"]["sha"]); print(p["head"]["repo"]["full_name"]); print(p["state"])' <<<"$pr_json"
+            /usr/bin/python3 -I -c 'import json,sys; p=json.load(sys.stdin); print(p["head"]["sha"]); print(p["head"]["repo"]["full_name"]); print(p["state"])' <<<"$pr_json"
           )
           [[ "${values[0]}" == "$expected_sha" ]] || {
             echo "Requested SHA does not match current PR head" >&2
@@ -117,11 +119,13 @@ jobs:
             exit 32
           fi
 
-      - name: Checkout exact candidate SHA
+      - name: Checkout trusted calibration source
+        if: steps.gate.outputs.mode == 'calibrate'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: ${{ github.repository }}
-          ref: ${{ steps.gate.outputs.expected_sha }}
+          ref: ${{ github.workflow_sha }}
+          path: .trusted-calibration
           fetch-depth: 1
           persist-credentials: false
           clean: true
@@ -137,7 +141,9 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          unset OPENAI_API_KEY
+          umask 077
+          unset OPENAI_API_KEY PYTHONPATH PYTHONHOME
+          cd "$RUNNER_TEMP"
 
           runtime_root="$PROJECT_HOME/.local/share/workspace-reasoning-economy/codex"
           install_dir="$runtime_root/$CODEX_VERSION"
@@ -147,15 +153,13 @@ jobs:
 
           install -d -m 0700 "$runtime_root" "$install_dir" "$bin_dir" "$codex_home"
 
-          if [[ ! -x "$install_dir/codex" ]]; then
-            curl -fsSL --retry 3 -o "$archive" "$CODEX_ARCHIVE_URL"
-            printf '%s  %s\n' "$CODEX_ARCHIVE_SHA256" "$archive" | sha256sum -c -
-            extract_dir="$(mktemp -d "$RUNNER_TEMP/codex-extract.XXXXXX")"
-            tar -C "$extract_dir" -xzf "$archive"
-            source_binary="$extract_dir/codex-x86_64-unknown-linux-musl"
-            [[ -f "$source_binary" ]]
-            install -m 0755 "$source_binary" "$install_dir/codex"
-          fi
+          curl -fsSL --retry 3 -o "$archive" "$CODEX_ARCHIVE_URL"
+          printf '%s  %s\n' "$CODEX_ARCHIVE_SHA256" "$archive" | sha256sum -c -
+          extract_dir="$(mktemp -d "$RUNNER_TEMP/codex-extract.XXXXXX")"
+          tar -C "$extract_dir" -xzf "$archive"
+          source_binary="$extract_dir/codex-x86_64-unknown-linux-musl"
+          [[ -f "$source_binary" && ! -L "$source_binary" ]]
+          install -m 0755 "$source_binary" "$install_dir/codex"
 
           ln -sfn "$install_dir/codex" "$bin_dir/codex"
           actual_version="$("$install_dir/codex" --version)"
@@ -181,8 +185,9 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          unset OPENAI_API_KEY
+          unset OPENAI_API_KEY PYTHONPATH PYTHONHOME
           export CODEX_HOME
+          cd "$RUNNER_TEMP"
 
           if "$CODEX_BIN" login status 2>&1 | grep -Fq "Logged in using ChatGPT"; then
             echo "Codex ChatGPT login already present."
@@ -199,45 +204,120 @@ jobs:
           chmod 0600 "$CODEX_HOME/auth.json"
 
 
-      - name: Bind existing Workspace Control Codex runtime
-        if: steps.gate.outputs.mode == 'preflight'
+      - name: Bind fresh checksum-pinned Codex runtime to persistent ChatGPT auth
+        if: steps.gate.outputs.mode == 'preflight' || steps.gate.outputs.mode == 'calibrate'
         env:
           CODEX_VERSION: "0.155.1"
+          CODEX_ARCHIVE_SHA256: "a0ef8b2debc3bf747e07b1a039354de31300ac0dcc2276498ba281470b5d9115"
+          CODEX_ARCHIVE_URL: "https://github.com/openai/codex/releases/download/rust-v0.155.1/codex-x86_64-unknown-linux-musl.tar.gz"
           PROJECT_HOME: "/srv/workspace-ci/workspace-control/home"
         shell: bash
         run: |
           set -Eeuo pipefail
-          unset OPENAI_API_KEY
+          umask 077
+          unset OPENAI_API_KEY PYTHONPATH PYTHONHOME
+          cd "$RUNNER_TEMP"
 
-          install_dir="$PROJECT_HOME/.local/share/workspace-reasoning-economy/codex/$CODEX_VERSION"
-          codex_home="$PROJECT_HOME/.codex-reasoning-economy"
-          codex_bin="$install_dir/codex"
-
-          [[ -x "$codex_bin" ]] || {
-            echo "Persistent Workspace Control Codex runtime is absent" >&2
+          persistent_codex_home="$PROJECT_HOME/.codex-reasoning-economy"
+          persistent_auth="$persistent_codex_home/auth.json"
+          [[ -d "$persistent_codex_home" && ! -L "$persistent_codex_home" ]] || {
+            echo "Persistent Workspace Control Codex auth directory is invalid" >&2
             exit 41
           }
-          [[ -d "$codex_home" && -f "$codex_home/config.toml" && -f "$codex_home/auth.json" ]] || {
-            echo "Persistent Workspace Control Codex auth state is incomplete" >&2
+          [[ -f "$persistent_auth" && ! -L "$persistent_auth" ]] || {
+            echo "Persistent Workspace Control Codex auth file is invalid" >&2
             exit 42
           }
-          [[ "$(stat -c '%a' "$codex_home/auth.json")" == "600" ]] || {
+          [[ "$(stat -c '%a' "$persistent_auth")" == "600" ]] || {
             echo "Persistent Workspace Control Codex auth file mode drift" >&2
             exit 43
           }
+          [[ "$(stat -c '%u' "$persistent_auth")" == "$(id -u)" ]] || {
+            echo "Persistent Workspace Control Codex auth file ownership drift" >&2
+            exit 44
+          }
 
-          actual_version="$("$codex_bin" --version)"
+          archive="$RUNNER_TEMP/codex-$CODEX_VERSION-trusted.tar.gz"
+          curl -fsSL --retry 3 -o "$archive" "$CODEX_ARCHIVE_URL"
+          printf '%s  %s\n' "$CODEX_ARCHIVE_SHA256" "$archive" | sha256sum -c -
+          extract_dir="$(mktemp -d "$RUNNER_TEMP/codex-trusted-extract.XXXXXX")"
+          tar -C "$extract_dir" -xzf "$archive"
+          source_binary="$extract_dir/codex-x86_64-unknown-linux-musl"
+          [[ -f "$source_binary" && ! -L "$source_binary" ]] || {
+            echo "Checksum-pinned Codex archive missing expected binary" >&2
+            exit 45
+          }
+          runtime_dir="$(mktemp -d "$RUNNER_TEMP/codex-trusted-runtime.XXXXXX")"
+          install -m 0555 "$source_binary" "$runtime_dir/codex"
+          codex_bin="$runtime_dir/codex"
+
+          codex_home="$(mktemp -d "$RUNNER_TEMP/codex-trusted-home.XXXXXX")"
+          chmod 0700 "$codex_home"
+          install -m 0600 "$persistent_auth" "$codex_home/auth.json"
+          cat > "$codex_home/config.toml" <<'CFG'
+          forced_login_method = "chatgpt"
+          cli_auth_credentials_store = "file"
+          web_search = "disabled"
+
+          [agents]
+          enabled = false
+
+          [orchestrator.mcp]
+          enabled = false
+
+          [orchestrator.skills]
+          enabled = false
+
+          [features]
+          apps = false
+          plugins = false
+          tool_suggest = false
+          shell_tool = false
+          unified_exec = false
+          unified_exec_tty = false
+          view_image = false
+          sleep_tool = false
+          multi_agent = false
+          multi_agent_v2 = false
+          image_generation = false
+          code_mode = false
+          code_mode_host = false
+          memories = false
+          standalone_web_search = false
+          web_search_request = false
+          web_search_cached = false
+          request_permissions_tool = false
+          token_budget = false
+          goals = false
+          skill_search = false
+          executor_capability_discovery = false
+          skip_host_skill_discovery = true
+          deferred_executor = false
+          current_time_reminder = false
+
+          [tools.update_plan]
+          enabled = false
+
+          [tools.experimental_request_user_input]
+          enabled = false
+          CFG
+          chmod 0600 "$codex_home/config.toml"
+
+          actual_version="$(CODEX_HOME="$codex_home" "$codex_bin" --version)"
           [[ "$actual_version" == *"$CODEX_VERSION"* ]] || {
             echo "Unexpected Codex version: $actual_version" >&2
-            exit 44
+            exit 46
           }
           status="$(CODEX_HOME="$codex_home" "$codex_bin" login status 2>&1)"
           printf '%s\n' "$status" | grep -Fq "Logged in using ChatGPT"
           [[ ! -v OPENAI_API_KEY ]]
+          [[ ! -v PYTHONPATH ]]
+          [[ ! -v PYTHONHOME ]]
 
           echo "CODEX_BIN=$codex_bin" >> "$GITHUB_ENV"
           echo "CODEX_HOME=$codex_home" >> "$GITHUB_ENV"
           echo "CODEX_VERSION=$CODEX_VERSION" >> "$GITHUB_ENV"
+          echo "CODEX_ARCHIVE_SHA256=$CODEX_ARCHIVE_SHA256" >> "$GITHUB_ENV"
 
       - name: Read redacted ChatGPT account and usage telemetry
         if: steps.gate.outputs.mode == 'preflight'
@@ -249,15 +329,16 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          unset OPENAI_API_KEY
+          unset OPENAI_API_KEY PYTHONPATH PYTHONHOME
           export CODEX_HOME
+          cd "$RUNNER_TEMP"
 
-          actual_sha="$(git rev-parse HEAD)"
-          [[ "$actual_sha" == "$EXPECTED_SHA" ]]
+          actual_sha="$EXPECTED_SHA"
+          [[ "$actual_sha" =~ ^[0-9a-f]{40}$ ]]
           receipt="$RUNNER_TEMP/workspace-control-codex-preflight-receipt.json"
           export RECEIPT_PATH="$receipt" ACTUAL_SHA="$actual_sha"
 
-          python3 - <<'PY'
+          /usr/bin/python3 -I - <<'PY'
           from __future__ import annotations
 
           from datetime import datetime, timezone
@@ -529,6 +610,96 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      - name: Prove zero model-visible Codex tools with pinned runtime
+        if: steps.gate.outputs.mode == 'calibrate'
+        env:
+          TRUSTED_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          TRUSTED_HELPER_BLOB: "9076fc7598671b17546a6df60f7091d15e851bb4"
+          TRUSTED_PROBE_BLOB: "57df76db70a4e2d6d8ad68d298177db85750e0be"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY CODEX_API_KEY PYTHONPATH PYTHONHOME
+          export CODEX_HOME
+
+          trusted_repo="$GITHUB_WORKSPACE/.trusted-calibration"
+          helper_rel="scripts/lambda_ci_v3_workspace_control_codex_calibration_v1.py"
+          probe_rel="scripts/lambda_ci_v3_workspace_control_codex_zero_tool_probe_v1.py"
+          helper="$trusted_repo/$helper_rel"
+          probe="$trusted_repo/$probe_rel"
+          [[ "$(git -C "$trusted_repo" rev-parse HEAD)" == "$TRUSTED_WORKFLOW_SHA" ]] || {
+            echo "Trusted calibration checkout SHA mismatch before zero-tool probe" >&2
+            exit 52
+          }
+          helper_blob="$(git -C "$trusted_repo" rev-parse "HEAD:$helper_rel")"
+          [[ "$helper_blob" == "$TRUSTED_HELPER_BLOB" ]] || {
+            echo "Trusted calibration helper blob mismatch before zero-tool probe" >&2
+            exit 53
+          }
+          probe_blob="$(git -C "$trusted_repo" rev-parse "HEAD:$probe_rel")"
+          [[ "$probe_blob" == "$TRUSTED_PROBE_BLOB" ]] || {
+            echo "Trusted zero-tool probe blob mismatch" >&2
+            exit 54
+          }
+          [[ -f "$helper" && -f "$probe" ]]
+          [[ ! -v OPENAI_API_KEY ]]
+          [[ ! -v CODEX_API_KEY ]]
+          [[ ! -v PYTHONPATH ]]
+          [[ ! -v PYTHONHOME ]]
+          cd "$RUNNER_TEMP"
+          /usr/bin/python3 -I "$probe" --helper "$helper"
+
+      - name: Run one bounded Codex allowance calibration quantum
+        if: steps.gate.outputs.mode == 'calibrate'
+        env:
+          EXPECTED_SHA: ${{ steps.gate.outputs.expected_sha }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.actor }}
+          PROJECT_HOME: "/srv/workspace-ci/workspace-control/home"
+          TRUSTED_WORKFLOW_SHA: ${{ github.workflow_sha }}
+          TRUSTED_HELPER_BLOB: "9076fc7598671b17546a6df60f7091d15e851bb4"
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          unset OPENAI_API_KEY PYTHONPATH PYTHONHOME
+          export CODEX_HOME
+
+          trusted_repo="$GITHUB_WORKSPACE/.trusted-calibration"
+          helper_rel="scripts/lambda_ci_v3_workspace_control_codex_calibration_v1.py"
+          helper="$trusted_repo/$helper_rel"
+          [[ "$(git -C "$trusted_repo" rev-parse HEAD)" == "$TRUSTED_WORKFLOW_SHA" ]] || {
+            echo "Trusted calibration checkout SHA mismatch" >&2
+            exit 50
+          }
+          helper_blob="$(git -C "$trusted_repo" rev-parse "HEAD:$helper_rel")"
+          [[ "$helper_blob" == "$TRUSTED_HELPER_BLOB" ]] || {
+            echo "Trusted calibration helper blob mismatch" >&2
+            exit 51
+          }
+          [[ -f "$helper" ]]
+          [[ ! -v OPENAI_API_KEY ]]
+          [[ ! -v PYTHONPATH ]]
+          [[ ! -v PYTHONHOME ]]
+
+          receipt="$RUNNER_TEMP/workspace-control-codex-calibration-receipt.json"
+          cd "$RUNNER_TEMP"
+          /usr/bin/python3 -I "$helper" \
+            --expected-sha "$EXPECTED_SHA" \
+            --trusted-workflow-sha "$TRUSTED_WORKFLOW_SHA" \
+            --trusted-helper-blob "$TRUSTED_HELPER_BLOB" \
+            --pr-number "$PR_NUMBER" \
+            --actor "$ACTOR" \
+            --receipt-path "$receipt"
+
+      - name: Upload redacted calibration receipt
+        if: always() && steps.gate.outputs.mode == 'calibrate'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: workspace-control-codex-calibration-receipt
+          path: ${{ runner.temp }}/workspace-control-codex-calibration-receipt.json
+          if-no-files-found: error
+          retention-days: 90
+
       - name: Write redacted bootstrap receipt
         if: steps.gate.outputs.mode == 'bootstrap'
         env:
@@ -539,12 +710,13 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          unset OPENAI_API_KEY
-          actual_sha="$(git rev-parse HEAD)"
-          [[ "$actual_sha" == "$EXPECTED_SHA" ]]
+          unset OPENAI_API_KEY PYTHONPATH PYTHONHOME
+          cd "$RUNNER_TEMP"
+          actual_sha="$EXPECTED_SHA"
+          [[ "$actual_sha" =~ ^[0-9a-f]{40}$ ]]
           receipt="$RUNNER_TEMP/workspace-control-codex-bootstrap-receipt.json"
           export RECEIPT_PATH="$receipt" ACTUAL_SHA="$actual_sha"
-          python3 - <<'PY'
+          /usr/bin/python3 -I - <<'PY'
           import json, os, pathlib
           payload = {
               "schema_version": 1,
